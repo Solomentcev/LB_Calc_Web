@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <title>LB_Calc_WEB</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+          integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
+          crossorigin="anonymous">
+</head>
+<body>
+<div class="container my-2">
+    <h1>Модуль управления</h1>
+    <form action="#" th:action="@{/lcs/save}" th:object="${lc}" method="post">
+    <button type="submit" class="btn btn-primary btn-sm mb-3">Сохранить Модуль управления</button>
+        <a th:href="@{'/lcs'}" class="btn btn-primary btn-sm mb-3">Back </a>
+    <br/><br/>
+    <table border="1" class="table table-striped table-responsive-md">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Height</th>
+            <th>Width</th>
+            <th>Depth</th>
+            <th>ColorBody</th>
+            <th>Display</th>
+            <th>Payment</th>
+            <th>Printer</th>
+            <th>BarReader</th>
+            <th>RfidReader</th>
+
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>
+                <label>
+                    <input type="text" size="3" th:field="*{id}" readonly="readonly">
+                </label>
+            </td>
+            <td th:text="${lc.getName()}">Name</td>
+            <td th:text="${lc.getDescription()}">Description</td>
+            <td>
+                <label>
+                    <input type="text" size="4" th:field="*{height}">
+                </label>
+            </td>
+            <td>
+                <label>
+                    <input type="text" size="4" th:field="*{width}">
+                </label>
+            </td>
+            <td>
+                <label>
+                    <input type="text" size="4" th:field="*{depth}">
+                </label>
+            </td>
+            <td>
+                <label>
+                    <select th:field="*{colorBody}">
+                        <option th:each="color:${colorsList}" th:value="${color}" th:text="${color}">
+                        </option>
+                    </select>
+                </label>
+            </td>
+            <td>
+                <label>
+                    <select th:field="*{display}">
+                        <option th:each="display:${displayList}" th:value="${display}" th:text="${display}">
+                        </option>
+                    </select>
+                </label>
+            </td>
+            <td>
+                <label>
+                    <select th:field="*{payment}">
+                        <option th:each="payment:${paymentList}" th:value="${payment}" th:text="${payment}">
+                        </option>
+                    </select>
+                </label>
+            </td>
+            <td>
+                <label>
+                    <input type="checkbox" size="4" th:field="*{printer}">
+                </label>
+            </td>
+            <td>
+                <label>
+                <select th:field="*{barReader}">
+                    <option th:each="barReader:${barReaderList}" th:value="${barReader}" th:text="${barReader}">
+                    </option>
+                </select>
+                </label>
+            </td>
+            <td>
+                <label>
+                    <input type="checkbox" size="4" th:field="*{rfidReader}">
+                </label></td>
+
+        </tr>
+        </tbody>
+    </table>
+</form>
+</div>
+</body>
+</html>

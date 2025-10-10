@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <title>LB_Calc_WEB</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+          integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
+          crossorigin="anonymous">
+</head>
+<body>
+<div class="container my-2">
+    <h1>Автоматические камеры хранения</h1>
+    <a href="/alss/create" class="btn btn-primary btn-sm mb-3">Создать АКХ </a>
+    <a th:href="@{'/'}" class="btn btn-primary btn-sm mb-3">Back </a>
+    <br/><br/>
+    <table border="1" class="table table-striped table-responsive-md">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Description</th>
+            <th>CountCells</th>
+            <th>Height</th>
+            <th>Width</th>
+            <th>Depth</th>
+            <th>ColorBody</th>
+            <th>ColorDoor</th>
+
+            <th>Action</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="als: ${alss}">
+            <td th:text="${als.getId()}">ID</td>
+            <td th:text="${als.getName()}">Name</td>
+            <td th:text="${als.getDescription()}">Description</td>
+            <td th:text="${als.getCountCells()}">CountCells</td>
+            <td th:text="${als.getHeight()}">Height</td>
+            <td th:text="${als.getWidth()}">Width</td>
+            <td th:text="${als.getDepth()}">Depth</td>
+            <td th:text="${als.getColorBody()}">ColorBody</td>
+            <td th:text="${als.getColorDoor()}">ColorDoor</td>
+
+            <td>
+                <a th:href="@{/alss/{id}(id=${als.getId()})}" class="btn btn-primary">Edit</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>

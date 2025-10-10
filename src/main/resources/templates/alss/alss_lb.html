@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <title>LB_Calc_WEB</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+          integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
+          crossorigin="anonymous">
+</head>
+<body>
+<div class="container my-2">
+    <h1>Модуль хранения</h1>
+    <form action="#" th:action="@{/alss/{alsId}/lbs/{lbId}/save (alsId=${als.getId()},lbId=${lb.getId})}"
+          th:object="${lb}" method="post">
+        <button type="submit" class="btn btn-primary btn-sm mb-3">Сохранить Модуль хранения</button>
+        <a th:href="@{/alss/{alsId} (alsId=${als.getId()})}" class="btn btn-primary btn-sm mb-3">Back </a>
+    <br/><br/>
+    <table border="1" class="table table-striped table-responsive-md">
+        <thead>
+        <tr>
+              <th>ID</th>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Type</th>
+            <th>CountCells</th>
+
+            <th>Height</th>
+            <th>Width</th>
+            <th>Depth</th>
+            <th>UpperFrame</th>
+            <th>BottomFrame</th>
+
+            <th>HeightCell</th>
+            <th>WidthCell</th>
+            <th>DepthCell</th>
+            <th>DirectionDoorOpening</th>
+            <th>ColorBody</th>
+            <th>ColorDoor</th>
+
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>
+                <label>
+                    <input type="text" size="3" th:field="*{id}" readonly="readonly">
+                </label>
+            </td>
+            <td th:text="${lb.getName()}">Name</td>
+            <td th:text="${lb.getDescription()}">Description</td>
+
+            <td>
+                <label>
+                    <select th:field="*{type}">
+                        <option th:each="type:${typeLbList}" th:value="${type}" th:text="${type}">
+                        </option>
+                    </select>
+                </label>
+            </td>
+            <td>
+                <label>
+                    <input type="text" size="3" th:field="*{countCells}">
+                </label>
+            </td>
+            <td>
+                <label>
+                    <input type="text" size="4" th:field="*{height}">
+                </label>
+            </td>
+            <td>
+                <label>
+                    <input type="text" size="4" th:field="*{width}">
+                </label>
+            </td>
+            <td>
+                <label>
+                    <input type="text" size="4" th:field="*{depth}">
+                </label>
+            </td>
+            <td>
+                <label>
+                    <input type="text" size="4" th:field="*{upperFrame}">
+                </label>
+            </td>
+            <td>
+                <label>
+                    <input type="text" size="4" th:field="*{bottomFrame}">
+                </label>
+            </td>
+            <td th:text="${lb.getHeightCell()}">HeightCell</td>
+            <td th:text="${lb.getWidthCell()}">WidthCell</td>
+            <td th:text="${lb.getDepthCell()}">DepthCell</td>
+            <td>
+                <label>
+                <select th:field="*{directionDoorOpening}">
+                    <option th:each="directionDoorOpening:${directionDoorOpeningList}" th:value="${directionDoorOpening}"
+                            th:text="${directionDoorOpening}">
+                    </option>
+                </select>
+                </label>
+            </td>
+            <td>
+                <label>
+                    <select th:field="*{colorBody}">
+                        <option th:each="color:${colorsList}" th:value="${color}" th:text="${color}">
+                        </option>
+                    </select>
+                </label>
+            </td>
+            <td>
+                <label>
+                    <select th:field="*{colorDoor}">
+                        <option th:each="color:${colorsList}" th:value="${color}" th:text="${color}">
+                        </option>
+                    </select>
+                </label>
+            </td>
+
+        </tr>
+        </tbody>
+    </table>
+    </form>
+</div>
+</body>
+</html>

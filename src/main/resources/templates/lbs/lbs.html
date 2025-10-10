@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <title>LB_Calc_WEB</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+          integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
+          crossorigin="anonymous">
+</head>
+<body>
+<div class="container my-2">
+    <h1>Модули хранения</h1>
+    <a href="/lbs/create" class="btn btn-primary btn-sm mb-3">Создать Модуль Хранения </a>
+    <a th:href="@{'/'}" class="btn btn-primary btn-sm mb-3">Back </a>
+    <br/><br/>
+    <table border="1" class="table table-striped table-responsive-md">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Type</th>
+            <th>CountCells</th>
+
+            <th>Height</th>
+            <th>Width</th>
+            <th>Depth</th>
+            <th>HeightCell</th>
+            <th>WidthCell</th>
+            <th>DepthCell</th>
+            <th>DirectionDoorOpening</th>
+            <th>ColorBody</th>
+            <th>ColorDoor</th>
+
+            <th>Action</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="lb: ${lbs}">
+            <td th:text="${lb.getId()}">ID</td>
+            <td th:text="${lb.getName()}">Name</td>
+            <td th:text="${lb.getDescription()}">Description</td>
+            <td th:text="${lb.getType()}">Type</td>
+            <td th:text="${lb.getCountCells()}">CountCells</td>
+            <td th:text="${lb.getHeight()}">Height</td>
+            <td th:text="${lb.getWidth()}">Width</td>
+            <td th:text="${lb.getDepth()}">Depth</td>
+            <td th:text="${lb.getHeightCell()}">HeightCell</td>
+            <td th:text="${lb.getWidthCell()}">WidthCell</td>
+            <td th:text="${lb.getDepthCell()}">DepthCell</td>
+            <td th:text="${lb.getDirectionDoorOpening()}">DirectionDoorOpening</td>
+            <td th:text="${lb.getColorBody()}">ColorBody</td>
+            <td th:text="${lb.getColorDoor()}">ColorDoor</td>
+
+            <td>
+                <a th:href="@{/lbs/{id}(id=${lb.getId()})}" class="btn btn-primary">Edit</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>

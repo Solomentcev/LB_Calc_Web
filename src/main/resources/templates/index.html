@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <title>LB_Calc_WEB</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+          integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
+          crossorigin="anonymous">
+</head>
+<body>
+<div class="container my-2">
+    <h1>LB_Calc_WEB</h1>
+
+    <br/><br/>
+    <table border="1" class="table table-striped table-responsive-md">
+
+        <tbody>
+        <tr>
+            <td>
+                <a th:href="@{/projects}" class="btn btn-primary">Проекты</a>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <a th:href="@{/alss}" class="btn btn-primary">АКХ</a>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <a th:href="@{/lbs}" class="btn btn-primary">Модули хранения</a>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <a th:href="@{/lcs}" class="btn btn-primary">Модули управления</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>
