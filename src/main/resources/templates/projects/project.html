@@ -9,7 +9,7 @@
           crossorigin="anonymous">
 </head>
 <body>
-<div class="container my-2">
+<div class="container-fluid">
     <h1>Проект</h1>
     <form action="#" th:action="@{/projects/{id}/save (id=${project.getId()})}"
           th:object="${project}" method="POST">

@@ -9,7 +9,7 @@
           crossorigin="anonymous">
 </head>
 <body>
-<div class="container my-2">
+<div class="container-fluid">
     <h1>Модуль управления</h1>
     <form action="#" th:action="@{/alss/{alsId}/lcs/{lcId}/save (alsId=${als.getId()},lcId=${als.getLc().getId})}"
           th:object="${lc}" method="post">

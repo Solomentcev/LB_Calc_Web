@@ -9,7 +9,7 @@
           crossorigin="anonymous">
 </head>
 <body>
-<div class="container my-2">
+<div class="container-fluid">
     <h1>Модуль хранения</h1>
     <form action="#" th:action="@{/lbs/save}" th:object="${lb}" method="post">
         <button type="submit" class="btn btn-primary btn-sm mb-3">Сохранить Модуль хранения</button>
@@ -18,7 +18,7 @@
     <table border="1" class="table table-striped table-responsive-md">
         <thead>
         <tr>
-              <th>ID</th>
+            <th>ID</th>
             <th>Name</th>
             <th>Description</th>
             <th>Type</th>
@@ -52,7 +52,9 @@
             <td>
                 <label>
                     <select th:field="*{type}">
-                        <option th:each="type:${typeLbList}" th:value="${type}" th:text="${type}">
+                        <option th:each="type:${typeLbList}"
+                                th:value="${type}"
+                                th:text="${type}">
                         </option>
                     </select>
                 </label>
