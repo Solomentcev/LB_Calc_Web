@@ -9,6 +9,7 @@
           crossorigin="anonymous">
 </head>
 <body>
+<div th:replace="~{header :: header}"></div>
 <div class="container-fluid">
     <h1>Автоматическая камера хранения</h1>
     <form action="#" th:action="@{/alss/save}"
@@ -306,5 +307,6 @@
         </table>
     </form>
 </div>
+<div th:replace="~{footer :: footer}"></div>
 </body>
 </html>

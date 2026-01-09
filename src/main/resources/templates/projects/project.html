@@ -9,6 +9,7 @@
           crossorigin="anonymous">
 </head>
 <body>
+<div th:replace="~{header :: header}"></div>
 <div class="container-fluid">
     <h1>Проект</h1>
     <form action="#" th:action="@{/projects/{id}/save (id=${project.getId()})}"
@@ -180,5 +181,6 @@
         </table>
     </form>
 </div>
+<div th:replace="~{footer :: footer}"></div>
 </body>
 </html>

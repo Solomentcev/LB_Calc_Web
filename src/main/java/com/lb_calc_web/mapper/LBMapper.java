@@ -8,7 +8,6 @@ import com.lb_calc_web.model.utils.DirectionDoorOpening;
 import com.lb_calc_web.model.utils.TypeLb;
 
 import java.util.*;
-
 public class LBMapper {
     public static LBDTO toLBDTO(LB lb){
         LBDTO lbDTO = new LBDTO();

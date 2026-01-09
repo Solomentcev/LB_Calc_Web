@@ -1,5 +1,6 @@
 package com.lb_calc_web.controller;
 
+import com.lb_calc_web.dto.LCDTO;
 import com.lb_calc_web.model.LC;
 import com.lb_calc_web.model.utils.BarReader;
 import com.lb_calc_web.model.utils.Colors;

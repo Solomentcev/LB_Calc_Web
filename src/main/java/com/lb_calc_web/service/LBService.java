@@ -1,12 +1,15 @@
 package com.lb_calc_web.service;
 
 import ch.qos.logback.classic.Logger;
+import com.lb_calc_web.dto.LBDTO;
+import com.lb_calc_web.mapper.LBMapper;
 import com.lb_calc_web.model.LB;
 import com.lb_calc_web.model.utils.Colors;
 import com.lb_calc_web.model.utils.DirectionDoorOpening;
 import com.lb_calc_web.model.utils.TypeLb;
 import com.lb_calc_web.repository.LBRepository;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.stereotype.Service;
@@ -46,6 +49,7 @@ public class LBService {
                 " ВхШхГ,мм: "+lb.getHeight()+"x"+ lb.getWidth() +"x"+lb.getDepth()+", "+
                 lb.getDirectionDoorOpening()+", "+
                 lb.getColorBody()+"/"+lb.getColorDoor());
+
         return save(lb);
     }
     public LB createLB(int height, int depth,int upperFrame, int bottomFrame, Colors colorBody, Colors colorDoor) {

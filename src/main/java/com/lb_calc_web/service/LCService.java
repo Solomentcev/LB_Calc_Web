@@ -1,5 +1,7 @@
 package com.lb_calc_web.service;
 
+import com.lb_calc_web.dto.LCDTO;
+import com.lb_calc_web.mapper.LCMapper;
 import com.lb_calc_web.model.LC;
 import com.lb_calc_web.model.utils.BarReader;
 import com.lb_calc_web.model.utils.Colors;
@@ -9,8 +11,8 @@ import com.lb_calc_web.repository.LCRepository;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -41,6 +43,7 @@ public class LCService {
                 "Сканер: "+lc.getBarReader()+";\n"+
                 "Считыватель: "+lc.isRfidReader()+";\n");
         lc.setName("Модуль управления " + lc.getDisplay().toString());
+
         return save(lc);
     }
     public LC createLC(int height, int depth, Colors colorBody) {

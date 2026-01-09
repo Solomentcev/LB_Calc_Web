@@ -9,6 +9,7 @@
           crossorigin="anonymous">
 </head>
 <body>
+<div th:replace="~{header :: header}"></div>
 <div class="container-fluid">
     <h1>Автоматические камеры хранения</h1>
     <a href="/alss/create" class="btn btn-primary btn-sm mb-3">Создать АКХ </a>
@@ -49,5 +50,6 @@
         </tbody>
     </table>
 </div>
+<div th:replace="~{footer :: footer}"></div>
 </body>
 </html>

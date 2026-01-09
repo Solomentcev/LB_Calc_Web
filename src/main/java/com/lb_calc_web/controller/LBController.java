@@ -1,5 +1,6 @@
 package com.lb_calc_web.controller;
 
+import com.lb_calc_web.dto.LBDTO;
 import com.lb_calc_web.model.LB;
 import com.lb_calc_web.model.utils.Colors;
 import com.lb_calc_web.model.utils.DirectionDoorOpening;
@@ -52,9 +53,6 @@ public class LBController {
     }
     @GetMapping("/create")
     private String createLB( Model model) {
-        List<TypeLb> typeLbList= Arrays.asList(TypeLb.values());
-        List<Colors> colorsList = Arrays.asList(Colors.values());
-        List<DirectionDoorOpening> directionDoorOpeningList = Arrays.asList(DirectionDoorOpening.values());
         LB lb =lbService.createLB();
         model.addAttribute("lb", lb);
         model.addAttribute("typeLbList", typeLbList);

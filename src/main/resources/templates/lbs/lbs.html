@@ -9,6 +9,7 @@
           crossorigin="anonymous">
 </head>
 <body>
+<div th:replace="~{header :: header}"></div>
 <div class="container-fluid">
     <h1>Модули хранения</h1>
     <a href="/lbs/create" class="btn btn-primary btn-sm mb-3">Создать Модуль Хранения </a>
@@ -60,5 +61,6 @@
         </tbody>
     </table>
 </div>
+<div th:replace="~{footer :: footer}"></div>
 </body>
 </html>
