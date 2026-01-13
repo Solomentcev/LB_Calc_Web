@@ -5,12 +5,16 @@ import com.lb_calc_web.model.LB;
 import com.lb_calc_web.model.utils.Colors;
 import com.lb_calc_web.model.utils.DirectionDoorOpening;
 import com.lb_calc_web.model.utils.TypeLb;
+import com.lb_calc_web.service.LBImageService;
 import com.lb_calc_web.service.LBService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 
@@ -34,7 +38,7 @@ public class LBController {
         return "lbs/lbs";
     }
     @GetMapping("/{id}")
-    private String editLB(@PathVariable(value = "id") Long id, Model model) {
+    private String editLB(@PathVariable(value = "id") Long id, Model model) throws IOException {
 
         Optional<LB> lbOptional = lbService.findById(id);
         LB lb = null;
@@ -44,7 +48,9 @@ public class LBController {
         model.addAttribute("typeLbList", typeLbList);
         model.addAttribute("colorsList", colorsList);
         model.addAttribute("directionDoorOpeningList", directionDoorOpeningList);
-
+        byte[] imageBytes=LBImageService.getBytesArrayLBImage(lb);
+        String imageString= Base64.getEncoder().encodeToString(imageBytes);
+        model.addAttribute("image", imageString);
         return "lbs/lb";
     }
     @PostMapping("/save")

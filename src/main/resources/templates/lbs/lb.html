@@ -96,7 +96,8 @@
             <td>
                 <label>
                 <select th:field="*{directionDoorOpening}">
-                    <option th:each="directionDoorOpening:${directionDoorOpeningList}" th:value="${directionDoorOpening}"
+                    <option th:each="directionDoorOpening:${directionDoorOpeningList}"
+                            th:value="${directionDoorOpening}"
                             th:text="${directionDoorOpening}">
                     </option>
                 </select>
@@ -123,6 +124,9 @@
         </tbody>
     </table>
     </form>
+</div>
+<div class="container-fluid">
+    <img class="img-thumbnail" th:src="'data:image/png;base64,'+${image}" alt="LB Image">
 </div>
 <div th:replace="~{footer :: footer}"></div>
 </body>

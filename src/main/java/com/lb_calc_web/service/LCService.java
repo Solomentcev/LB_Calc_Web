@@ -28,6 +28,8 @@ public class LCService {
         LC lc = new LC();
         lc.setHeight(1940);
         lc.setDepth(500);
+        lc.setBottomFrame(50);
+        lc.setUpperFrame(50);
         lc.setColorBody(Colors.Black);
         lc.setDisplay(DisplayLC.LC10);
         lc.setPrinter(false);
@@ -46,10 +48,12 @@ public class LCService {
 
         return save(lc);
     }
-    public LC createLC(int height, int depth, Colors colorBody) {
+    public LC createLC(int height, int depth, int upperFrame, int bottomFrame, Colors colorBody) {
         LC lc = new LC();
         lc.setHeight(height);
         lc.setDepth(depth);
+        lc.setBottomFrame(bottomFrame);
+        lc.setUpperFrame(upperFrame);
         lc.setColorBody(colorBody);
         lc.setDisplay(DisplayLC.LC10);
         lc.setPrinter(false);
@@ -84,6 +88,8 @@ public class LCService {
                 .withIgnorePaths("name")
                 .withIgnorePaths("description")
                 .withMatcher("height", ignoreCase())
+                .withMatcher("upperFrame", ignoreCase())
+                .withMatcher("bottomFrame", ignoreCase())
                 .withMatcher("depth", ignoreCase())
                 .withMatcher("colorBody", ignoreCase())
                 .withMatcher("display", ignoreCase())
@@ -117,6 +123,8 @@ public class LCService {
         LC lcNew = new LC();
         lcNew.setHeight(lc.getHeight());
         lcNew.setDepth(lc.getDepth());
+        lcNew.setBottomFrame(lc.getBottomFrame());
+        lcNew.setUpperFrame(lc.getUpperFrame());
         lcNew.setColorBody(lc.getColorBody());
         lcNew.setDisplay(lc.getDisplay());
         lcNew.setPrinter(lc.isPrinter());

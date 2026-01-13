@@ -21,6 +21,8 @@ public class LC {
     private int height;
     private int width;
     private int depth;
+    private int upperFrame;
+    private int bottomFrame;
     @Enumerated(EnumType.STRING)
     private DisplayLC display;
     @Enumerated(EnumType.STRING)
@@ -37,7 +39,9 @@ public class LC {
     public LC() {
     }
 
-    public LC(String name, String description, int height, int width, int depth, DisplayLC display, BarReader barReader, Payment payment, boolean printer, boolean rfidReader, Colors colorBody) {
+    public LC(String name, String description, int height, int width, int depth,
+              DisplayLC display, BarReader barReader, Payment payment, boolean printer, boolean rfidReader, Colors colorBody,
+              int upperFrame, int bottomFrame) {
         this.name = name;
         this.description = description;
         this.height = height;
@@ -49,6 +53,8 @@ public class LC {
         this.printer = printer;
         this.rfidReader = rfidReader;
         this.colorBody = colorBody;
+        this.upperFrame = upperFrame;
+        this.bottomFrame = bottomFrame;
     }
 
     public int getId() {
@@ -147,16 +153,35 @@ public class LC {
         this.colorBody = colorBody;
     }
 
+    public int getUpperFrame() {
+        return upperFrame;
+    }
+
+    public void setUpperFrame(int upperFrame) {
+        this.upperFrame = upperFrame;
+    }
+
+    public int getBottomFrame() {
+        return bottomFrame;
+    }
+
+    public void setBottomFrame(int bottomFrame) {
+        this.bottomFrame = bottomFrame;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         LC lc = (LC) o;
-        return height == lc.height && width == lc.width && depth == lc.depth && printer == lc.printer && rfidReader == lc.rfidReader && Objects.equals(name, lc.name) && display == lc.display && barReader == lc.barReader && payment == lc.payment && colorBody == lc.colorBody;
+        return height == lc.height && width == lc.width && depth == lc.depth && printer == lc.printer && rfidReader == lc.rfidReader
+                && Objects.equals(name, lc.name) && display == lc.display && barReader == lc.barReader && payment == lc.payment
+                && colorBody == lc.colorBody
+                && upperFrame == lc.upperFrame && bottomFrame == lc.bottomFrame;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(height, width, depth, display, barReader, payment, printer, rfidReader, colorBody);
+        return Objects.hash(height, width, depth, display, barReader, payment, printer, rfidReader, colorBody, upperFrame, bottomFrame);
     }
 
     @Override

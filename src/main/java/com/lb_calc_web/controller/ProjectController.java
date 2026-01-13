@@ -5,10 +5,7 @@ import com.lb_calc_web.model.LB;
 import com.lb_calc_web.model.LC;
 import com.lb_calc_web.model.Project;
 import com.lb_calc_web.model.utils.*;
-import com.lb_calc_web.service.ALSService;
-import com.lb_calc_web.service.LBService;
-import com.lb_calc_web.service.LCService;
-import com.lb_calc_web.service.ProjectService;
+import com.lb_calc_web.service.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -99,6 +96,9 @@ public class ProjectController {
         if (alsOptional.isPresent()) {als = alsOptional.get();}
         else {model.addAttribute("error","Als not found");}
         model.addAttribute("als", als);
+        byte[] imageBytes= ALSImageService.getBytesArrayALSImage(als);
+        String imageString= Base64.getEncoder().encodeToString(imageBytes);
+        model.addAttribute("image", imageString);
         return "projects/project_als";
     }
     @PostMapping("/{projectId}/alss/{alsId}/save")
@@ -154,6 +154,9 @@ public class ProjectController {
         model.addAttribute("typeLbList", typeLbList);
         model.addAttribute("colorsList", colorsList);
         model.addAttribute("directionDoorOpeningList", directionDoorOpeningList);
+        byte[] imageBytes= LBImageService.getBytesArrayLBImage(lb);
+        String imageString= Base64.getEncoder().encodeToString(imageBytes);
+        model.addAttribute("image", imageString);
         return "projects/project_lb";
     }
     @PostMapping("/{projectId}/alss/{alsId}/lbs/{lbId}/save")
@@ -205,6 +208,9 @@ public class ProjectController {
         model.addAttribute("paymentList", paymentList);
         model.addAttribute("displayList", displayList);
         model.addAttribute("barReaderList", barReaderList);
+        byte[] imageBytes= LCImageService.getBytesArrayLCImage(lc);
+        String imageString= Base64.getEncoder().encodeToString(imageBytes);
+        model.addAttribute("image", imageString);
         return "projects/project_lc";
     }
     @PostMapping("/{projectId}/alss/{alsId}/lcs/{lcId}/save")

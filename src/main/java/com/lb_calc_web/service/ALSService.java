@@ -49,7 +49,7 @@ public class ALSService {
         als.setColorBody(Colors.Black);
         als.setColorDoor(Colors.White);
         als.setPositionLC(PositionLC.CENTER);
-        LC lc=lcService.createLC(als.getHeight(),als.getDepth(),als.getColorBody());
+        LC lc=lcService.createLC(als.getHeight(),als.getDepth(),als.getUpperFrame(),als.getBottomFrame(), als.getColorBody());
         als.setLc(lc);
         LB lb=lbService.createLB(als.getHeight(),als.getDepth(), als.getUpperFrame(), als.getBottomFrame(),als.getColorBody(),als.getColorDoor());
         als.getLbList().add(lb);

@@ -1,17 +1,18 @@
 package com.lb_calc_web.controller;
 
-import com.lb_calc_web.dto.LCDTO;
 import com.lb_calc_web.model.LC;
 import com.lb_calc_web.model.utils.BarReader;
 import com.lb_calc_web.model.utils.Colors;
 import com.lb_calc_web.model.utils.DisplayLC;
 import com.lb_calc_web.model.utils.Payment;
+import com.lb_calc_web.service.LCImageService;
 import com.lb_calc_web.service.LCService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 
@@ -47,6 +48,9 @@ public class LCController {
         model.addAttribute("paymentList", paymentList);
         model.addAttribute("displayList", displayList);
         model.addAttribute("barReaderList", barReaderList);
+        byte[] imageBytes= LCImageService.getBytesArrayLCImage(lc);
+        String imageString= Base64.getEncoder().encodeToString(imageBytes);
+        model.addAttribute("image", imageString);
         return "lcs/lc";
     }
     @GetMapping("/create")

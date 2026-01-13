@@ -4,9 +4,7 @@ import com.lb_calc_web.model.ALS;
 import com.lb_calc_web.model.LB;
 import com.lb_calc_web.model.LC;
 import com.lb_calc_web.model.utils.*;
-import com.lb_calc_web.service.ALSService;
-import com.lb_calc_web.service.LBService;
-import com.lb_calc_web.service.LCService;
+import com.lb_calc_web.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -58,6 +56,9 @@ public class ALSController {
         model.addAttribute("als", als);
         model.addAttribute("colorsList", colorsList);
         model.addAttribute("positionLCList", positionLCList);
+        byte[] imageBytes= ALSImageService.getBytesArrayALSImage(als);
+        String imageString= Base64.getEncoder().encodeToString(imageBytes);
+        model.addAttribute("image", imageString);
         return "alss/als";
     }
 
@@ -113,6 +114,9 @@ public class ALSController {
         model.addAttribute("paymentList", paymentList);
         model.addAttribute("displayList", displayList);
         model.addAttribute("barReaderList", barReaderList);
+        byte[] imageBytes= LCImageService.getBytesArrayLCImage(lc);
+        String imageString= Base64.getEncoder().encodeToString(imageBytes);
+        model.addAttribute("image", imageString);
         return "alss/alss_lc";
     }
     @PostMapping("{alsId}/lcs/{lcId}/save")
@@ -143,6 +147,9 @@ public class ALSController {
         model.addAttribute("typeLbList", typeLbList);
         model.addAttribute("colorsList", colorsList);
         model.addAttribute("directionDoorOpeningList", directionDoorOpeningList);
+        byte[] imageBytes= LBImageService.getBytesArrayLBImage(lb);
+        String imageString= Base64.getEncoder().encodeToString(imageBytes);
+        model.addAttribute("image", imageString);
         System.out.println("ALScontroller/editLB "+lb);
         return "alss/alss_lb";
     }
