@@ -49,6 +49,7 @@ public class ProjectController {
         model.addAttribute("paymentList", paymentList);
         model.addAttribute("displayList", displayList);
         model.addAttribute("barReaderList", barReaderList);
+        model.addAttribute("typeList", typeLbList);
         return "/projects/project";
     }
     @PostMapping("/{id}/save")

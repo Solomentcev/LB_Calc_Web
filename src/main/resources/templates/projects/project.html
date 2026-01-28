@@ -477,7 +477,7 @@
                             </td>
                             <td>
                                 <label>
-                                    <select th:field="*{alsList[__${item.index}__].lbList[__${item.index}__].type}">
+                                    <select th:field="*{alsList[__${item.index}__].lbList[__${lbs.index}__].type}">
                                         <option th:each="type:${typeList}"
                                                 th:value="${type}"
                                                 th:text="${type}">
