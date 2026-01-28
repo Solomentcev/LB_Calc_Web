@@ -1,9 +1,6 @@
 package com.lb_calc_web.dto;
 
-import com.lb_calc_web.model.utils.Colors;
-import com.lb_calc_web.model.utils.DirectionDoorOpening;
-import com.lb_calc_web.model.utils.TypeLb;
-import jakarta.persistence.*;
+import java.util.Objects;
 
 public class LBDTO {
     private int id;
@@ -23,8 +20,17 @@ public class LBDTO {
     private String directionDoorOpening;
     private String colorDoor;
     private String colorBody;
+    private String stringLBImage;
 
     public LBDTO() {
+    }
+
+    public String getStringLBImage() {
+        return stringLBImage;
+    }
+
+    public void setStringLBImage(String stringLBImage) {
+        this.stringLBImage = stringLBImage;
     }
 
     public int getId() {
@@ -161,5 +167,48 @@ public class LBDTO {
 
     public void setColorBody(String colorBody) {
         this.colorBody = colorBody;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        LBDTO lbdto = (LBDTO) o;
+        return getHeight() == lbdto.getHeight() && getWidth() == lbdto.getWidth() && getDepth() == lbdto.getDepth()
+                && getUpperFrame() == lbdto.getUpperFrame() && getBottomFrame() == lbdto.getBottomFrame()
+                && getShelfThick() == lbdto.getShelfThick() && getCountCells() == lbdto.getCountCells()
+                && Double.compare(getHeightCell(), lbdto.getHeightCell()) == 0 && getWidthCell() == lbdto.getWidthCell()
+                && getDepthCell() == lbdto.getDepthCell() && Objects.equals(getType(), lbdto.getType())
+                && Objects.equals(getDirectionDoorOpening(), lbdto.getDirectionDoorOpening())
+                && Objects.equals(getColorDoor(), lbdto.getColorDoor()) && Objects.equals(getColorBody(), lbdto.getColorBody());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getType(), getHeight(), getWidth(), getDepth(), getUpperFrame(), getBottomFrame(),
+                getShelfThick(), getCountCells(), getHeightCell(), getWidthCell(), getDepthCell(),
+                getDirectionDoorOpening(), getColorDoor(), getColorBody());
+    }
+
+    @Override
+    public String toString() {
+        return "LBDTO{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", type='" + type + '\'' +
+                ", height=" + height +
+                ", width=" + width +
+                ", depth=" + depth +
+                ", upperFrame=" + upperFrame +
+                ", bottomFrame=" + bottomFrame +
+                ", shelfThick=" + shelfThick +
+                ", countCells=" + countCells +
+                ", heightCell=" + heightCell +
+                ", widthCell=" + widthCell +
+                ", depthCell=" + depthCell +
+                ", directionDoorOpening='" + directionDoorOpening + '\'' +
+                ", colorDoor='" + colorDoor + '\'' +
+                ", colorBody='" + colorBody + '\'' +
+                '}'+"\n";
     }
 }

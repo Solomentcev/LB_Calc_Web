@@ -13,6 +13,7 @@ import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,65 +25,86 @@ public class LCService {
     public LCService(LCRepository lcRepository) {
         this.lcRepository = lcRepository;
     }
-    public LC createLC() {
-        LC lc = new LC();
+    public LCDTO createLC() {
+        LCDTO lc = new LCDTO();
         lc.setHeight(1940);
         lc.setDepth(500);
         lc.setBottomFrame(50);
         lc.setUpperFrame(50);
-        lc.setColorBody(Colors.Black);
-        lc.setDisplay(DisplayLC.LC10);
+        lc.setColorBody(String.valueOf(Colors.Black));
+        lc.setDisplay(String.valueOf(DisplayLC.LC10));
         lc.setPrinter(false);
-        lc.setPayment(Payment.NONE);
-        lc.setBarReader(BarReader.NONE);
+        lc.setPayment(String.valueOf(Payment.NONE));
+        lc.setBarReader(String.valueOf(BarReader.NONE));
         lc.setRfidReader(true);
-        lc.setWidth(lc.getDisplay().getWidth());
-        lc.setDescription("Модуль управления " + lc.getDisplay().toString()+" "+
-                "Размеры(ВхШхГ,мм): "+lc.getHeight()+"х"+lc.getWidth()+"х"+lc.getDepth()+";\n"+
-                "Дисплей: "+lc.getDisplay()+";\n"+
-                "Принтер: "+lc.isPrinter()+";\n"+
-                "Оплата: "+lc.getPayment()+";\n"+
-                "Сканер: "+lc.getBarReader()+";\n"+
-                "Считыватель: "+lc.isRfidReader()+";\n");
-        lc.setName("Модуль управления " + lc.getDisplay().toString());
-
-        return save(lc);
+        updateLCsizeAndDescription(lc);
+        lc.setStringLCImage(LCImageService.getStringLCImage(lc));
+        return lc;
     }
-    public LC createLC(int height, int depth, int upperFrame, int bottomFrame, Colors colorBody) {
-        LC lc = new LC();
+    public LCDTO createLC(int height, int depth, int upperFrame, int bottomFrame, Colors colorBody) {
+        LCDTO lc = new LCDTO();
         lc.setHeight(height);
         lc.setDepth(depth);
         lc.setBottomFrame(bottomFrame);
         lc.setUpperFrame(upperFrame);
-        lc.setColorBody(colorBody);
-        lc.setDisplay(DisplayLC.LC10);
+        lc.setColorBody(String.valueOf(colorBody));
+        lc.setDisplay(String.valueOf(DisplayLC.LC10));
         lc.setPrinter(false);
-        lc.setPayment(Payment.NONE);
-        lc.setBarReader(BarReader.NONE);
+        lc.setPayment(String.valueOf(Payment.NONE));
+        lc.setBarReader(String.valueOf(BarReader.NONE));
         lc.setRfidReader(true);
-        lc.setWidth(lc.getDisplay().getWidth());
-        return save(lc);
+        updateLCsizeAndDescription(lc);
+        lc.setStringLCImage(LCImageService.getStringLCImage(lc));
+        return lc;
     }
 
-    public List<LC> findAll() {
-        return lcRepository.findAll();
+    public List<LCDTO> findAll() {
+        List<LC> lcs = lcRepository.findAll();
+        List<LCDTO> lcDTOs = new ArrayList<>();
+        for (LC lc : lcs) {
+            lcDTOs.add(LCMapper.toLCDTO(lc));
+        }
+        lcDTOs.sort(Comparator.comparing(LCDTO::getId));
+        return lcDTOs;
     }
 
-    public Optional<LC> findById(Long id) {
-        LC lc = lcRepository.findById(id).orElse(null);
-        lc.setDescription("Модуль управления " + lc.getDisplay().toString()+" "+
+    public Optional<LCDTO> findById(Long id) {
+        LC lc = lcRepository.findById(id).orElseThrow();
+        return Optional.of(LCMapper.toLCDTO(lc));
+    }
+    public LCDTO saveLC(LCDTO lcdto) {
+        updateLCsizeAndDescription(lcdto);
+        LC lc=LCMapper.toLC(lcdto);
+        Optional<LC> optional=getOptionalLC(lc);
+        if (optional.isEmpty()) {
+            System.out.println("МУ нет в бд");
+            lcdto.setId(0);
+            LC lcNew = LCMapper.toLC(lcdto);
+            lcNew = lcRepository.save(lcNew);
+            System.out.println(lcNew);
+            return LCMapper.toLCDTO(lcNew);
+        }
+        else {
+            System.out.println("МУ есть в бд");
+            lc = optional.get();
+            System.out.println(lc);
+            return LCMapper.toLCDTO(lc);
+        }
+    }
+
+    private void updateLCsizeAndDescription(LCDTO lc) {
+        lc.setWidth(DisplayLC.valueOf(lc.getDisplay()).getWidth());
+        lc.setDescription("Модуль управления " + lc.getDisplay() +" "+
                 "Размеры(ВхШхГ,мм): "+lc.getHeight()+"х"+lc.getWidth()+"х"+lc.getDepth()+";\n"+
                 "Дисплей: "+lc.getDisplay()+";\n"+
                 "Принтер: "+lc.isPrinter()+";\n"+
                 "Оплата: "+lc.getPayment()+";\n"+
                 "Сканер: "+lc.getBarReader()+";\n"+
                 "Считыватель: "+lc.isRfidReader()+";\n");
-        lc.setName("Модуль управления " + lc.getDisplay().toString());
-        return Optional.of(lc);
+        lc.setName("Модуль управления " + lc.getDisplay());
     }
 
-    public LC save(LC lc) {
-        LC lcNew = copyOfLC(lc);
+    public Optional<LC> getOptionalLC(LC lcNew) {
         ExampleMatcher modelMatcher = ExampleMatcher.matching()
                 .withIgnorePaths("id")
                 .withIgnorePaths("name")
@@ -98,49 +120,7 @@ public class LCService {
                 .withMatcher("barReader", ignoreCase())
                 .withMatcher("rfidReader", ignoreCase())
                 .withMatcher("width", ignoreCase());
-
         Example<LC> example = Example.of(lcNew, modelMatcher);
-        Optional<LC> optional = lcRepository.findOne(example);
-        if (optional.isPresent()) {
-            System.out.println("МУ есть в бд");
-            lcNew = optional.get();}
-        else {
-            System.out.println("МУ нет в бд");
-            lcNew= lcRepository.save(lcNew);
-        }
-        lcNew.setDescription("Модуль управления " + lcNew.getDisplay().toString()+" "+
-                "Размеры(ВхШхГ,мм): "+lcNew.getHeight()+"х"+lcNew.getWidth()+"х"+lcNew.getDepth()+";\n"+
-                "Дисплей: "+lcNew.getDisplay()+";\n"+
-                "Принтер: "+lcNew.isPrinter()+";\n"+
-                "Оплата: "+lcNew.getPayment()+";\n"+
-                "Сканер: "+lcNew.getBarReader()+";\n"+
-                "Считыватель: "+lcNew.isRfidReader()+";\n");
-        lcNew.setName("Модуль управления " + lcNew.getDisplay().toString());
-        return lcNew;
+        return lcRepository.findOne(example);
     }
-
-    private LC copyOfLC(LC lc) {
-        LC lcNew = new LC();
-        lcNew.setHeight(lc.getHeight());
-        lcNew.setDepth(lc.getDepth());
-        lcNew.setBottomFrame(lc.getBottomFrame());
-        lcNew.setUpperFrame(lc.getUpperFrame());
-        lcNew.setColorBody(lc.getColorBody());
-        lcNew.setDisplay(lc.getDisplay());
-        lcNew.setPrinter(lc.isPrinter());
-        lcNew.setPayment(lc.getPayment());
-        lcNew.setBarReader(lc.getBarReader());
-        lcNew.setRfidReader(lc.isRfidReader());
-        lcNew.setWidth(lc.getDisplay().getWidth());
-        lcNew.setDescription("Модуль управления " + lc.getDisplay().toString()+" "+
-                "Размеры(ВхШхГ,мм): "+lc.getHeight()+"х"+lc.getWidth()+"х"+lc.getDepth()+";\n"+
-                "Дисплей: "+lc.getDisplay()+";\n"+
-                "Принтер: "+lc.isPrinter()+";\n"+
-                "Оплата: "+lc.getPayment()+";\n"+
-                "Сканер: "+lc.getBarReader()+";\n"+
-                "Считыватель: "+lc.isRfidReader()+";\n");
-        lcNew.setName("Модуль управления " + lc.getDisplay().toString());
-        return lcNew;
-    }
-
 }

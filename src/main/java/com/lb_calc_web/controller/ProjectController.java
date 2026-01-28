@@ -1,9 +1,9 @@
 package com.lb_calc_web.controller;
 
-import com.lb_calc_web.model.ALS;
-import com.lb_calc_web.model.LB;
-import com.lb_calc_web.model.LC;
-import com.lb_calc_web.model.Project;
+import com.lb_calc_web.dto.ALSDTO;
+import com.lb_calc_web.dto.LBDTO;
+import com.lb_calc_web.dto.LCDTO;
+import com.lb_calc_web.dto.ProjectDTO;
 import com.lb_calc_web.model.utils.*;
 import com.lb_calc_web.service.*;
 import org.springframework.stereotype.Controller;
@@ -21,11 +21,11 @@ public class ProjectController {
     private final LCService lcService;
     private final List<Colors> colorsList;
     private final List<PositionLC> positionLCList;
-    private final List<TypeLb> typeLbList;
-    private final List<DirectionDoorOpening> directionDoorOpeningList;
     private final List<Payment> paymentList;
     private final List<DisplayLC> displayList;
     private final List<BarReader> barReaderList;
+    private final List<TypeLb> typeLbList;
+    private final List<DirectionDoorOpening> directionDoorOpeningList;
 
     public ProjectController(ProjectService projectService, ALSService aLSService, LBService lbService, LCService lcService) {
         this.projectService = projectService;
@@ -34,171 +34,106 @@ public class ProjectController {
         this.lcService = lcService;
         colorsList = Arrays.asList(Colors.values());
         positionLCList = Arrays.asList(PositionLC.values());
+        displayList = Arrays.asList(DisplayLC.values());
+        barReaderList = Arrays.asList(BarReader.values());
         typeLbList= Arrays.asList(TypeLb.values());
         directionDoorOpeningList = Arrays.asList(DirectionDoorOpening.values());
         paymentList = Arrays.asList(Payment.values());
-        displayList = Arrays.asList(DisplayLC.values());
-        barReaderList = Arrays.asList(BarReader.values());
-    }
-    @GetMapping
-    private String projects(Model model) {
-        model.addAttribute("projects",projectService.findAll());
-        return "projects/projects";
-    }
-
-    @GetMapping("/{id}")
-    private String editProject(@PathVariable(value = "id") Long id, Model model) {
-        Optional<Project> projectOptional = projectService.findById(id);
-        Project project = null;
-        if (projectOptional.isPresent()) {project = projectOptional.get();}
-        else {model.addAttribute("error","Project not found");}
-        model.addAttribute("project", project);
-        model.addAttribute("colorsList", colorsList);
-        model.addAttribute("positionLCList", positionLCList);
-        return "projects/project";
     }
     @GetMapping("/create")
     private String createProject(Model model) {
-        Project project = projectService.createProject();
+        ProjectDTO project = projectService.createProject();
         model.addAttribute("project", project);
-        return "redirect:/projects/"+project.getId();
+        model.addAttribute("colorsList", colorsList);
+        model.addAttribute("positionLCList", positionLCList);
+        model.addAttribute("paymentList", paymentList);
+        model.addAttribute("displayList", displayList);
+        model.addAttribute("barReaderList", barReaderList);
+        return "/projects/project";
     }
-
     @PostMapping("/{id}/save")
-    public String updateProject(@ModelAttribute("project") Project project) {
-        Project updatedProject = projectService.updateProject(project);
-        return "redirect:/projects/"+ updatedProject.getId();
+    public String saveProject(@ModelAttribute("project") ProjectDTO project) {
+        project=projectService.saveProject(project);
+        System.out.println(project);
+        return "redirect:/projects/"+project.getId();
     }
     @GetMapping("/{id}/addALS" )
     public String addALS(@PathVariable(value = "id") Long projectId, Model model) {
-        model.addAttribute("project",projectService.addALS(projectId));
+        ProjectDTO projectDTO=projectService.addNewALSandSaveProject(projectId);
+        model.addAttribute("project",projectDTO);
         return "redirect:/projects/"+projectId;
     }
     @GetMapping("/{id}/alss/{alsId}/delete" )
     public String deleteALS(@PathVariable(value = "id") Long id,
                             @PathVariable(value = "alsId") Long alsId,
                             Model model) {
-        model.addAttribute("project", projectService.deleteALS(id, alsId));
+        model.addAttribute("project", projectService.deleteALSandSaveProject(id, alsId));
         return "redirect:/projects/"+id;
     }
-    @GetMapping("/{projectId}/alss/{alsId}" )
-    public String editALS(@PathVariable(value = "projectId") Long projectId,
-                          @PathVariable(value = "alsId") Long alsId,
-                          Model model) {
+    @GetMapping("/{id}")
+    private String editProject(@PathVariable(value = "id") Long id, Model model) {
+        Optional<ProjectDTO> projectOptional = projectService.findById(id);
+        ProjectDTO project = null;
+        if (projectOptional.isPresent()) {project = projectOptional.get();}
+        else {model.addAttribute("error","Project not found");}
+        model.addAttribute("project", project);
         model.addAttribute("colorsList", colorsList);
         model.addAttribute("positionLCList", positionLCList);
-        Optional<Project> projectOptional =projectService.findById(projectId);
-        Project project = null;
+        model.addAttribute("paymentList", paymentList);
+        model.addAttribute("displayList", displayList);
+        model.addAttribute("barReaderList", barReaderList);
+        model.addAttribute("typeList", typeLbList);
+        return "projects/project";
+    }
+    @PostMapping("/{projectId}/alss/{alsId}/save")
+    public String saveALSatProject(
+            @PathVariable(value = "projectId") Long projectId,
+            @PathVariable(value = "alsId") Long alsId,
+            @ModelAttribute("als") ALSDTO als,
+            Model model) {
+        Optional<ProjectDTO> projectOptional =projectService.findById(projectId);
+        ProjectDTO project = null;
         if (projectOptional.isPresent()) {project = projectOptional.get();}
         model.addAttribute("project", project);
-        Optional<ALS> alsOptional = alsService.findById(alsId);
-        ALS als = null;
+        als=projectService.replaceALSandSaveProject(project,als,alsId);
+        return "redirect:/projects/"+projectId+"/alss/"+als.getId();
+    }
+
+    @GetMapping("/{projectId}/alss/{alsId}" )
+    public String editALSatProject(@PathVariable(value = "projectId") Long projectId,
+                                   @PathVariable(value = "alsId") Long alsId,
+                                   Model model) {
+
+        Optional<ProjectDTO> projectOptional =projectService.findById(projectId);
+        ProjectDTO project = null;
+        if (projectOptional.isPresent()) {project = projectOptional.get();}
+        model.addAttribute("project", project);
+        Optional<ALSDTO> alsOptional = alsService.findById(alsId);
+        ALSDTO als = null;
         if (alsOptional.isPresent()) {als = alsOptional.get();}
         else {model.addAttribute("error","Als not found");}
         model.addAttribute("als", als);
-        byte[] imageBytes= ALSImageService.getBytesArrayALSImage(als);
-        String imageString= Base64.getEncoder().encodeToString(imageBytes);
-        model.addAttribute("image", imageString);
+        model.addAttribute("typeList", typeLbList);
+        model.addAttribute("colorsList", colorsList);
+        model.addAttribute("positionLCList", positionLCList);
+        model.addAttribute("paymentList", paymentList);
+        model.addAttribute("displayList", displayList);
+        model.addAttribute("barReaderList", barReaderList);
         return "projects/project_als";
     }
-    @PostMapping("/{projectId}/alss/{alsId}/save")
-    public String saveALS(
-            @PathVariable(value = "projectId") Long projectId,
-            @PathVariable(value = "alsId") Long alsId,
-            @ModelAttribute("als") ALS als,
-            Model model) {
-        Optional<Project> projectOptional =projectService.findById(projectId);
-        Project project = null;
-        if (projectOptional.isPresent()) {project = projectOptional.get();}
-        model.addAttribute("project", project);
-
-        als=projectService.updateALS(project,als, alsId);
-        return "redirect:/projects/"+projectId+"/alss/"+als.getId();
-    }
-    @GetMapping("/{projectId}/alss/{alsId}/addLB" )
-    public String addLB(@PathVariable(value = "projectId") Long projectId,
-                            @PathVariable(value = "alsId") Long alsId,
-                            Model model) {
-        ALS als=projectService.addLB(projectId,alsId);
-        model.addAttribute("als", als);
-        return "redirect:/projects/"+projectId+"/alss/"+als.getId();
-    }
-    @GetMapping("/{projectId}/alss/{alsId}/lbs/{lbId}/delete" )
-    public String deleteLB(@PathVariable(value = "projectId") Long projectId,
-                            @PathVariable(value = "alsId") Long alsId,
-                           @PathVariable(value = "lbId") Long lbId,
-                        Model model) {
-        ALS als=projectService.deleteLB(projectId, alsId, lbId);
-        model.addAttribute("als", als);
-        return "redirect:/projects/"+projectId+"/alss/"+als.getId();
-    }
-
-    @GetMapping("/{projectId}/alss/{alsId}/lbs/{lbId}")
-    private String editLB(@PathVariable(value = "projectId") Long projectId,
-                          @PathVariable(value = "alsId") Long alsId,
-                          @PathVariable(value = "lbId") Long lbId,
-                          Model model) {
-        Optional<Project> projectOptional = projectService.findById(projectId);
-        Project project = null;
-        if (projectOptional.isPresent()) {project = projectOptional.get();}
-        Optional<ALS> alsOptional = alsService.findById(alsId);
-        ALS als = null;
-        if (alsOptional.isPresent()) {als = alsOptional.get();}
-        Optional<LB> lbOptional = lbService.findById(lbId);
-        LB lb = null;
-        if (lbOptional.isPresent()) {lb = lbOptional.get();}
-        else {model.addAttribute("error","LB not found");}
-        model.addAttribute("project", project);
-        model.addAttribute("als", als);
-        model.addAttribute("lb", lb);
-        model.addAttribute("typeLbList", typeLbList);
-        model.addAttribute("colorsList", colorsList);
-        model.addAttribute("directionDoorOpeningList", directionDoorOpeningList);
-        byte[] imageBytes= LBImageService.getBytesArrayLBImage(lb);
-        String imageString= Base64.getEncoder().encodeToString(imageBytes);
-        model.addAttribute("image", imageString);
-        return "projects/project_lb";
-    }
-    @PostMapping("/{projectId}/alss/{alsId}/lbs/{lbId}/save")
-    public String saveLB(@PathVariable(value = "projectId") Long projectId,
-                        @PathVariable(value = "alsId") Long alsId,
-                         @PathVariable(value = "lbId") Long lbId,
-                         @ModelAttribute("lb") LB lb,
-                         Model model) {
-        Optional<Project> projectOptional = projectService.findById(projectId);
-        Project project = null;
-        if (projectOptional.isPresent()) {project = projectOptional.get();}
-        Optional<ALS> alsOptional = alsService.findById(alsId);
-        ALS als = null;
-        if (alsOptional.isPresent()) {als = alsOptional.get();}
-        model.addAttribute("project", project);
-        model.addAttribute("als", als);
-        Optional<LB> lbOptional = lbService.findById(lbId);
-        LB lbOld = null;
-        if (lbOptional.isPresent()) {lbOld = lbOptional.get();}
-
-        als=projectService.updateLB(project,als,lb,lbOld);
-        for(LB lb1:als.getLbList()){
-            if(lb1.equals(lb)){
-                lbId= (long) lb1.getId();
-                break;
-            }
-        }
-        return "redirect:/projects/"+projectId+"/alss/"+als.getId()+"/lbs/"+lbId;
-    }
     @GetMapping("/{projectId}/alss/{alsId}/lcs/{lcId}")
-    private String editLC(@PathVariable(value = "projectId") Long projectId,
-                          @PathVariable(value = "alsId") Long alsId,
-                          @PathVariable(value = "lcId") Long lcId,
-                          Model model) {
-        Optional<Project> projectOptional = projectService.findById(projectId);
-        Project project = null;
+    private String editLCatProject(@PathVariable(value = "projectId") Long projectId,
+                                   @PathVariable(value = "alsId") Long alsId,
+                                   @PathVariable(value = "lcId") Long lcId,
+                                   Model model) {
+        Optional<ProjectDTO> projectOptional = projectService.findById(projectId);
+        ProjectDTO project = null;
         if (projectOptional.isPresent()) {project = projectOptional.get();}
-        Optional<ALS> alsOptional = alsService.findById(alsId);
-        ALS als = null;
+        Optional<ALSDTO> alsOptional = alsService.findById(alsId);
+        ALSDTO als = null;
         if (alsOptional.isPresent()) {als = alsOptional.get();}
-        Optional<LC> lcOptional = lcService.findById(lcId);
-        LC lc = null;
+        Optional<LCDTO> lcOptional = lcService.findById(lcId);
+        LCDTO lc = null;
         if (lcOptional.isPresent()) {lc = lcOptional.get();}
         else {model.addAttribute("error","LC not found");}
         model.addAttribute("project", project);
@@ -208,28 +143,85 @@ public class ProjectController {
         model.addAttribute("paymentList", paymentList);
         model.addAttribute("displayList", displayList);
         model.addAttribute("barReaderList", barReaderList);
-        byte[] imageBytes= LCImageService.getBytesArrayLCImage(lc);
-        String imageString= Base64.getEncoder().encodeToString(imageBytes);
-        model.addAttribute("image", imageString);
         return "projects/project_lc";
     }
     @PostMapping("/{projectId}/alss/{alsId}/lcs/{lcId}/save")
-    public String updateLC(
+    public String saveLCatProject(
             @PathVariable(value = "projectId") Long projectId,
             @PathVariable(value = "alsId") Long alsId,
             @PathVariable(value = "lcId") Long lcId,
-            @ModelAttribute("lc") LC lc,
+            @ModelAttribute("lc") LCDTO lc,
             Model model) {
-        Optional<Project> projectOptional = projectService.findById(projectId);
-        Project project = null;
+        Optional<ProjectDTO> projectOptional = projectService.findById(projectId);
+        ProjectDTO project = null;
         if (projectOptional.isPresent()) {project = projectOptional.get();}
-        Optional<ALS> alsOptional = alsService.findById(alsId);
-        ALS als = null;
+        Optional<ALSDTO> alsOptional = alsService.findById(alsId);
+        ALSDTO als = null;
         if (alsOptional.isPresent()) {als = alsOptional.get();}
+        als=projectService.replaceLCandSaveProject(project,als,alsId,lc);
+
         model.addAttribute("project", project);
         model.addAttribute("als", als);
 
-        als=projectService.updateLC(project,als,alsId,lc);
-        return "redirect:/projects/"+projectId+"/alss/"+ als.getId()+"/lcs/"+als.getLc().getId();
+        return "redirect:/projects/"+projectId+"/alss/"+ als.getId()+"/lcs/"+als.getLC().getId();
     }
+    @GetMapping("/{projectId}/alss/{alsId}/addLB" )
+    public String addLBatProject(@PathVariable(value = "projectId") Long projectId,
+                                 @PathVariable(value = "alsId") Long alsId,
+                                 Model model) {
+        ALSDTO als=projectService.addLBAtProject(projectId,alsId);
+        model.addAttribute("als", als);
+        return "redirect:/projects/"+projectId+"/alss/"+als.getId();
+    }
+    @GetMapping("/{projectId}/alss/{alsId}/lbs/{lbId}/delete" )
+    public String deleteLBatProject(@PathVariable(value = "projectId") Long projectId,
+                                    @PathVariable(value = "alsId") Long alsId,
+                                    @PathVariable(value = "lbId") Long lbId,
+                                    Model model) {
+        ALSDTO als=projectService.deleteLBatProject(projectId, alsId, lbId);
+        model.addAttribute("als", als);
+        return "redirect:/projects/"+projectId+"/alss/"+als.getId();
+    }
+    @GetMapping("/{projectId}/alss/{alsId}/lbs/{lbId}")
+    private String editLBatProject(@PathVariable(value = "projectId") Long projectId,
+                                   @PathVariable(value = "alsId") Long alsId,
+                                   @PathVariable(value = "lbId") Long lbId,
+                                   Model model) {
+        Optional<ProjectDTO> projectOptional = projectService.findById(projectId);
+        ProjectDTO project = null;
+        if (projectOptional.isPresent()) {project = projectOptional.get();}
+        Optional<ALSDTO> alsOptional = alsService.findById(alsId);
+        ALSDTO als = null;
+        if (alsOptional.isPresent()) {als = alsOptional.get();}
+        Optional<LBDTO> lbOptional = lbService.findById(lbId);
+        LBDTO lb = null;
+        if (lbOptional.isPresent()) {lb = lbOptional.get();}
+        else {model.addAttribute("error","LB not found");}
+        model.addAttribute("project", project);
+        model.addAttribute("als", als);
+        model.addAttribute("lb", lb);
+        model.addAttribute("typeLbList", typeLbList);
+        model.addAttribute("colorsList", colorsList);
+        model.addAttribute("directionDoorOpeningList", directionDoorOpeningList);
+        return "projects/project_lb";
+    }
+
+    @PostMapping("/{projectId}/alss/{alsId}/lbs/{lbId}/save")
+    public String saveLBatProject(@PathVariable(value = "projectId") Long projectId,
+                                  @PathVariable(value = "alsId") Long alsId,
+                                  @PathVariable(value = "lbId") Long lbId,
+                                  @ModelAttribute("lb") LBDTO lb,
+                                  Model model) {
+        Optional<ProjectDTO> projectOptional = projectService.findById(projectId);
+        ProjectDTO project = null;
+        if (projectOptional.isPresent()) {project = projectOptional.get();}
+        List<Object> ALSlbIdList=projectService.saveLBatProject(projectId,alsId,lbId,lb);
+        ALSDTO als= (ALSDTO) ALSlbIdList.get(0);
+        int newLbId= (int) ALSlbIdList.get(1);
+        model.addAttribute("project", project);
+        model.addAttribute("als", als);
+        return "redirect:/projects/"+projectId+"/alss/"+als.getId()+"/lbs/"+newLbId;
+    }
+
+
 }

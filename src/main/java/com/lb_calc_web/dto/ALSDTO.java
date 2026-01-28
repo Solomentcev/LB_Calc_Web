@@ -1,12 +1,5 @@
 package com.lb_calc_web.dto;
 
-import com.lb_calc_web.model.ALSLB;
-import com.lb_calc_web.model.LB;
-import com.lb_calc_web.model.LC;
-import com.lb_calc_web.model.utils.Colors;
-import com.lb_calc_web.model.utils.PositionLC;
-import jakarta.persistence.*;
-
 import java.util.*;
 
 public class ALSDTO {
@@ -21,12 +14,14 @@ public class ALSDTO {
     private int bottomFrame;
     private int depthCell;
     private int countCells;
-    private LCDTO lcDTO;
+    private LCDTO lc;
     private String positionLC;
     private String colorDoor;
     private String colorBody;
-    private List<LBDTO> lbDtoList=new ArrayList<>();
-    private Map<ALSDTO, Integer> quantityLB=new HashMap<>();
+    private List<LBDTO> lbList =new ArrayList<>();
+    private Map<LBDTO, Integer> quantityLB=new HashMap<>();
+    private String stringALSImage;
+
 
     public ALSDTO() {
     }
@@ -111,12 +106,12 @@ public class ALSDTO {
         this.countCells = countCells;
     }
 
-    public LCDTO getLcDTO() {
-        return lcDTO;
+    public LCDTO getLC() {
+        return lc;
     }
 
-    public void setLcDTO(LCDTO lcDTO) {
-        this.lcDTO = lcDTO;
+    public void setLC(LCDTO lc) {
+        this.lc = lc;
     }
 
     public String getPositionLC() {
@@ -143,19 +138,67 @@ public class ALSDTO {
         this.colorBody = colorBody;
     }
 
-    public List<LBDTO> getLbDtoList() {
-        return lbDtoList;
+    public List<LBDTO> getLbList() {
+        return lbList;
     }
 
-    public void setLbDtoList(List<LBDTO> lbDtoList) {
-        this.lbDtoList = lbDtoList;
+    public void setLbList(List<LBDTO> lbList) {
+        this.lbList = lbList;
     }
 
-    public Map<ALSDTO, Integer> getQuantityLB() {
+    public Map<LBDTO, Integer> getQuantityLB() {
         return quantityLB;
     }
 
-    public void setQuantityLB(Map<ALSDTO, Integer> quantityLB) {
+    public void setQuantityLB(Map<LBDTO, Integer> quantityLB) {
         this.quantityLB = quantityLB;
+    }
+
+    public String getStringALSImage() {
+        return stringALSImage;
+    }
+
+    public void setStringALSImage(String stringALSImage) {
+        this.stringALSImage = stringALSImage;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        ALSDTO alsdto = (ALSDTO) o;
+        return getHeight() == alsdto.getHeight() && getDepth() == alsdto.getDepth() && getWidth() == alsdto.getWidth()
+                && getUpperFrame() == alsdto.getUpperFrame() && getBottomFrame() == alsdto.getBottomFrame()
+                && getDepthCell() == alsdto.getDepthCell() && getCountCells() == alsdto.getCountCells()
+                && Objects.equals(lc, alsdto.lc) && Objects.equals(getPositionLC(), alsdto.getPositionLC())
+                && Objects.equals(getColorDoor(), alsdto.getColorDoor()) && Objects.equals(getColorBody(), alsdto.getColorBody())
+                && Objects.deepEquals(getQuantityLB(), alsdto.getQuantityLB());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getHeight(), getDepth(), getWidth(), getUpperFrame(), getBottomFrame(), getDepthCell(),
+                getCountCells(), lc, getPositionLC(), getColorDoor(), getColorBody());
+    }
+
+    @Override
+    public String toString() {
+        return "ALSDTO{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+//                ", description='" + description + '\'' +
+                ", height=" + height +
+                ", depth=" + depth +
+                ", width=" + width +
+                ", upperFrame=" + upperFrame +
+                ", bottomFrame=" + bottomFrame +
+                ", depthCell=" + depthCell +
+                ", countCells=" + countCells +"\n"+
+                ", lc=" + lc +
+                ", positionLC='" + positionLC + '\'' +
+                ", colorDoor='" + colorDoor + '\'' +
+                ", colorBody='" + colorBody + '\'' +"\n"+
+                ", lbList=" + lbList +"\n"+
+                ", quantityLB=" + quantityLB +"\n"+
+                '}';
     }
 }

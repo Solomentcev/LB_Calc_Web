@@ -1,10 +1,14 @@
 package com.lb_calc_web.mapper;
 
 import com.lb_calc_web.dto.ALSDTO;
+import com.lb_calc_web.dto.LBDTO;
+import com.lb_calc_web.dto.LCDTO;
 import com.lb_calc_web.model.ALS;
-import com.lb_calc_web.model.ProjectALS;
+import com.lb_calc_web.model.ALSLB;
+import com.lb_calc_web.model.LB;
 import com.lb_calc_web.model.utils.Colors;
 import com.lb_calc_web.model.utils.PositionLC;
+import com.lb_calc_web.service.ALSImageService;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -13,9 +17,15 @@ public class ALSMapper {
     public static ALSDTO toALSDTO(ALS als) {
         ALSDTO alsDTO = new ALSDTO();
         alsDTO.setId(als.getId());
-        alsDTO.setName(als.getName());
-        alsDTO.setDescription(als.getDescription());
+        LCDTO lc = LCMapper.toLCDTO(als.getLC());
+        alsDTO.setLC(lc);
 
+        alsDTO.setLbList(getLBDTOListFromALSLBSet(als.getQuantityLB()));
+        alsDTO.getLbList().sort(Comparator.comparing(LBDTO::getDirectionDoorOpening));
+        alsDTO.setName(als.getName());
+        alsDTO.setQuantityLB(getLBDTOMapFromALSLBSet(als.getQuantityLB()));
+
+        alsDTO.setDescription(als.getDescription());
         alsDTO.setBottomFrame(als.getBottomFrame());
         alsDTO.setUpperFrame(als.getUpperFrame());
 
@@ -28,17 +38,18 @@ public class ALSMapper {
         alsDTO.setColorBody(String.valueOf(als.getColorBody()));
         alsDTO.setColorDoor(String.valueOf(als.getColorDoor()));
         alsDTO.setPositionLC(String.valueOf(als.getPositionLC()));
-        alsDTO.setLcDTO(LCMapper.toLCDTO(als.getLc()));
-        alsDTO.setLbDtoList(LBMapper.toLBDTOList(als.getLbList()));
 
+        alsDTO.setStringALSImage(ALSImageService.getStringALSImage(alsDTO));
         return alsDTO;
     }
 
 
     public static ALS toALS(ALSDTO alsDto) {
         ALS als = new ALS();
-
-        als.setId(alsDto.getId());
+        if (alsDto.getId()!=0) {
+            als.setId(alsDto.getId());
+        }
+        als.setLC(LCMapper.toLC(alsDto.getLC()));
         als.setName(alsDto.getName());
         als.setDescription(alsDto.getDescription());
 
@@ -54,60 +65,89 @@ public class ALSMapper {
         als.setColorBody(Colors.valueOf(alsDto.getColorBody()));
         als.setColorDoor(Colors.valueOf(alsDto.getColorDoor()));
         als.setPositionLC(PositionLC.valueOf(alsDto.getPositionLC()));
-        als.setLc(LCMapper.toLC(alsDto.getLcDTO()));
-        als.setLbList(LBMapper.toLBList(alsDto.getLbDtoList()));
-
         return als;
     }
-    public static List<ALSDTO> toALSDTOList(List<ALS> alsList) {
+    public static Set<ALSLB> getALSLBSetFromLBDTOMap(Map<LBDTO,Integer> quantityLB, ALSDTO alsDto) {
+        Set<ALSLB> alslbSet = new HashSet<>();
+        for(Map.Entry<LBDTO, Integer> entry : quantityLB.entrySet()) {
+            ALSLB alslb = new ALSLB(toALS(alsDto),LBMapper.toLB(entry.getKey()), entry.getValue());
+            alslbSet.add(alslb);
+        }
+        return alslbSet;
+    }
+    public static List<ALSDTO> getALSDTOListFromALSList(List<ALS> alsList) {
         List<ALSDTO> alsDTOList = new ArrayList<>();
         for(ALS als : alsList) {
-            alsDTOList.add(toALSDTO(als));
+            ALSDTO alsDTO = new ALSDTO();
+            alsDTO.setId(als.getId());
+          //  alsDTO.setLC(LCMapper.toLCDTO(als.getLc()));
+            alsDTO.setName(als.getName());
+          //  alsDTO.setQuantityLB(getLBDTOMapFromALSLBSet(als.getQuantityLB()));
+           // alsDTO.setLbList(getLBDTOListFromALSLBSet(als.getQuantityLB()));
+            alsDTO.setDescription(als.getDescription());
+
+            alsDTO.setBottomFrame(als.getBottomFrame());
+            alsDTO.setUpperFrame(als.getUpperFrame());
+
+            alsDTO.setHeight(als.getHeight());
+            alsDTO.setWidth(als.getWidth());
+            alsDTO.setDepth(als.getDepth());
+
+            alsDTO.setDepthCell(als.getDepthCell());
+            alsDTO.setCountCells(als.getCountCells());
+            alsDTO.setColorBody(String.valueOf(als.getColorBody()));
+            alsDTO.setColorDoor(String.valueOf(als.getColorDoor()));
+            alsDTO.setPositionLC(String.valueOf(als.getPositionLC()));
+
+            alsDTOList.add(alsDTO);
         }
         return alsDTOList ;
     }
-    public static Map<ALSDTO,Integer> toALSDTOMap(List<ALS> lbList) {
-        Map<ALSDTO,Integer> quantityALSDTO = new HashMap<>();
-        for(ALS als:lbList){
-            if (quantityALSDTO.containsKey(toALSDTO(als))){
-                Integer i= quantityALSDTO.get(toALSDTO(als));
+    public static List<LBDTO> getLBDTOListFromALSLBSet(Set<ALSLB> quantityLB) {
+        // alsDTO.setStringALSImage(ALSImageService.getStringALSImage(alsDTO));
+        List<LBDTO> alsDTOList = new ArrayList<>();
+        for(ALSLB alsLB : quantityLB) {
+            for (int i = 0; i < alsLB.getQuantity(); i++) {
+                alsDTOList.add(LBMapper.toLBDTO(alsLB.getLb()));
+            }
+        }
+        return alsDTOList ;
+    }
+
+    public static Map<LB,Integer> getLBMapFromLBList(List<LB> lbList) {
+        Map<LB,Integer> quantityLB = new HashMap<>();
+        for(LB lb:lbList){
+            if (quantityLB.containsKey(lb)){
+                Integer i= quantityLB.get(lb);
                 i=i+1;
-                quantityALSDTO.put(toALSDTO(als),i);
-            } else quantityALSDTO.put(toALSDTO(als),1);
+                quantityLB.put(lb,i);
+            } else quantityLB.put(lb,1);
         }
-        return quantityALSDTO;
+        return quantityLB;
     }
-    public static Map<ALSDTO,Integer> toALSDTOMap(Set<ProjectALS> alsSet) {
-        Map<ALSDTO,Integer> quantityALSDTO = new HashMap<>();
-        for(ProjectALS projectAls :alsSet){
-            quantityALSDTO.put(toALSDTO(projectAls.getAls()), projectAls.getQuantity());
+    public static Map<LBDTO,Integer> getLBDTOMapFromLBDTOList(List<LBDTO> lbList) {
+        Map<LBDTO,Integer> quantityLB = new HashMap<>();
+        for(LBDTO lb:lbList){
+            if (quantityLB.containsKey(lb)){
+                Integer i= quantityLB.get(lb);
+                i=i+1;
+                quantityLB.put(lb,i);
+            } else quantityLB.put(lb,1);
         }
-        return quantityALSDTO;
+        return quantityLB;
     }
-    public static List<ALS> toALSList(List<ALSDTO> alsDTOList) {
+    public static Map<LBDTO,Integer> getLBDTOMapFromALSLBSet(Set<ALSLB> lbSet) {
+        Map<LBDTO,Integer> quantityLBDTO = new HashMap<>();
+        for(ALSLB alsLb :lbSet){
+            quantityLBDTO.put(LBMapper.toLBDTO(alsLb.getLb()), alsLb.getQuantity());
+        }
+        return quantityLBDTO;
+    }
+    public static List<ALS> getALSListFromALSDTOList(List<ALSDTO> alsDTOList) {
         List<ALS> alsList = new ArrayList<>();
         for(ALSDTO alsDTO : alsDTOList) {
             alsList.add(toALS(alsDTO));
         }
         return alsList ;
     }
-    public static Map<ALS,Integer> toALSMap(List<ALS> alsList) {
-        Map<ALS,Integer> quantityALS = new HashMap<>();
-        for(ALS als:alsList){
-            if (quantityALS.containsKey(als)){
-                Integer i= quantityALS.get(als);
-                i=i+1;
-                quantityALS.put(als,i);
-            } else quantityALS.put(als,1);
-        }
-        return quantityALS;
-    }
-    public static Map<ALS,Integer> toALSMap(Set<ProjectALS> alsSet) {
-        Map<ALS,Integer> quantityALS = new HashMap<>();
-        for(ProjectALS projectAls :alsSet){
-            quantityALS.put(projectAls.getAls(), projectAls.getQuantity());
-        }
-        return quantityALS;
-    }
-
 }

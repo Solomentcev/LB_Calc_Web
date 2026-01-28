@@ -14,8 +14,6 @@ public class Project {
     private String description;
     private String company;
     private LocalDate createdDate;
-    @Transient
-    private List<ALS> alsList = new ArrayList<>();
     @OneToMany(mappedBy = "project",
              orphanRemoval = true
            )
@@ -63,20 +61,12 @@ public class Project {
         this.createdDate = createdDate;
     }
 
-    public List<ALS> getAlsList() {
-        return alsList;
-    }
-
     public Set<ProjectALS> getQuantityALS() {
         return quantityALS;
     }
 
     public void setQuantityALS(Set<ProjectALS> quantityALS) {
         this.quantityALS = quantityALS;
-    }
-
-    public void setAlsList(List<ALS> alsList) {
-        this.alsList = alsList;
     }
 
     @Override
@@ -86,7 +76,8 @@ public class Project {
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
                 ", company='" + company + '\'' +
-                ", createdDate=" + createdDate +
+                ", createdDate=" + createdDate +"\n"+
+                ", quantityALS=" + quantityALS +
                 '}';
     }
 
@@ -94,7 +85,8 @@ public class Project {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         Project project = (Project) o;
-        return Objects.equals(getDescription(), project.getDescription()) && Objects.equals(getCompany(), project.getCompany()) && Objects.equals(getCreatedDate(), project.getCreatedDate());
+        return Objects.equals(getDescription(), project.getDescription()) && Objects.equals(getCompany(), project.getCompany())
+                && Objects.equals(getCreatedDate(), project.getCreatedDate());
     }
 
     @Override

@@ -5,9 +5,9 @@ public enum TypeLb {
     TYPE2(100,20,40),
     TYPE3(160,20,40),
     TYPE4(60,5,0);
-    private int deltaWidth;
-    private int shelfThick;
-    private int serviceZoneWidth;
+    private final int deltaWidth;
+    private final int shelfThick;
+    private final int serviceZoneWidth;
     TypeLb(int deltaWidth, int shelfThick, int serviceZoneWidth) {
         this.deltaWidth=deltaWidth;
         this.shelfThick=shelfThick;

@@ -9,7 +9,7 @@ import java.util.*;
 @Entity
 @Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "description","height","width","depth",
         "upper_frame","bottom_frame","count_cells","depth_cell",
-        "positionlc","color_body","color_door", "lc_id"}) })
+        "position_lc","color_body","color_door", "lc_id"}) })
 public class ALS {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,13 +26,12 @@ public class ALS {
     @ManyToOne
     @JoinColumn(name = "lc_id")
     private LC lc;
+    @Column(name = "position_lc")
     private PositionLC positionLC;
     @Enumerated(EnumType.STRING)
     private Colors colorDoor;
     @Enumerated(EnumType.STRING)
     private Colors colorBody;
-    @Transient
-    private List<LB> lbList=new ArrayList<>();
     @OneToMany(mappedBy = "als",
             orphanRemoval = true)
     private Set<ALSLB> quantityLB=new HashSet<>();
@@ -52,6 +51,8 @@ public class ALS {
     public String getName() {
         return name;
     }
+
+
 
     public void setName(String name) {
         this.name = name;
@@ -121,11 +122,11 @@ public class ALS {
         this.countCells = countCells;
     }
 
-    public LC getLc() {
+    public LC getLC() {
         return lc;
     }
 
-    public void setLc(LC lc) {
+    public void setLC(LC lc) {
         this.lc = lc;
     }
 
@@ -153,20 +154,12 @@ public class ALS {
         this.colorBody = colorBody;
     }
 
-    public List<LB> getLbList() {
-        return lbList;
-    }
-
     public Set<ALSLB> getQuantityLB() {
         return quantityLB;
     }
 
     public void setQuantityLB(Set<ALSLB> quantityLB) {
         this.quantityLB = quantityLB;
-    }
-
-    public void setLbList(List<LB> lbList) {
-        this.lbList = lbList;
     }
 
     public Set<ProjectALS> getQuantityALS() {
@@ -184,8 +177,7 @@ public class ALS {
         return height == als.height && depth == als.depth && width == als.width && upperFrame == als.upperFrame
                 && bottomFrame == als.bottomFrame && depthCell == als.depthCell && countCells == als.countCells
                 && Objects.equals(lc, als.lc) && positionLC == als.positionLC
-                && colorDoor == als.colorDoor && colorBody == als.colorBody
-                && description.equals(als.description);
+                && colorDoor == als.colorDoor && colorBody == als.colorBody;
     }
 
     @Override
@@ -198,18 +190,21 @@ public class ALS {
     public String toString() {
         return "ALS{" +
                 "id=" + id +
-                ", name='" + name +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
                 ", height=" + height +
                 ", depth=" + depth +
                 ", width=" + width +
-             //   ", upperFrame=" + upperFrame +
-             //   ", bottomFrame=" + bottomFrame +
-              //  ", depthCell=" + depthCell +
+                ", upperFrame=" + upperFrame +
+                ", bottomFrame=" + bottomFrame +
+                ", depthCell=" + depthCell +
                 ", countCells=" + countCells +"\n"+
+                ", lc=" + lc +
                 ", positionLC=" + positionLC +
                 ", colorDoor=" + colorDoor +
                 ", colorBody=" + colorBody +
-               // ", lc=" + lc.getId() +
+                ", quantityLB=" + quantityLB +
+                ", quantityALS=" + quantityALS +
                 '}';
     }
 }

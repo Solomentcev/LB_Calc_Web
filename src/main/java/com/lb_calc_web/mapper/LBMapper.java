@@ -6,18 +6,21 @@ import com.lb_calc_web.model.LB;
 import com.lb_calc_web.model.utils.Colors;
 import com.lb_calc_web.model.utils.DirectionDoorOpening;
 import com.lb_calc_web.model.utils.TypeLb;
+import com.lb_calc_web.service.LBImageService;
 
 import java.util.*;
 public class LBMapper {
     public static LBDTO toLBDTO(LB lb){
         LBDTO lbDTO = new LBDTO();
         lbDTO.setId(lb.getId());
+
         lbDTO.setName(lb.getName());
         lbDTO.setDescription(lb.getDescription());
+
+        lbDTO.setUpperFrame(lb.getUpperFrame());
         lbDTO.setBottomFrame(lb.getBottomFrame());
-        lbDTO.setBottomFrame(lb.getBottomFrame());
-        lbDTO.setColorBody(lb.getColorBody().toString());
-        lbDTO.setColorDoor(lb.getColorDoor().toString());
+        lbDTO.setColorBody(String.valueOf(lb.getColorBody()));
+        lbDTO.setColorDoor(String.valueOf(lb.getColorDoor()));
         lbDTO.setDepth(lb.getDepth());
         lbDTO.setHeight(lb.getHeight());
         lbDTO.setWidth(lb.getWidth());
@@ -25,34 +28,35 @@ public class LBMapper {
         lbDTO.setHeightCell(lb.getHeightCell());
         lbDTO.setDepthCell(lb.getDepthCell());
         lbDTO.setCountCells(lb.getCountCells());
-        lbDTO.setType(lb.getType().toString());
-        lbDTO.setShelfThick(lb.getShelfThick());
-        lbDTO.setDirectionDoorOpening(lbDTO.getDirectionDoorOpening());
-
+        lbDTO.setType(String.valueOf(lb.getType()));
+        lbDTO.setShelfThick(lb.getType().getShelfThick());
+        lbDTO.setDirectionDoorOpening(String.valueOf(lb.getDirectionDoorOpening()));
+        lbDTO.setStringLBImage(LBImageService.getStringLBImage(lbDTO));
         return lbDTO;
 
     }
     public static LB toLB(LBDTO lbDTO){
         LB lb = new LB();
-        lb.setId(lbDTO.getId());
-        lb.setName(lbDTO.getName());
-        lb.setDescription(lbDTO.getDescription());
+        if (lbDTO.getId()!=0) {
+            lb.setId(lbDTO.getId());
+        }
         lb.setBottomFrame(lbDTO.getBottomFrame());
         lb.setUpperFrame(lbDTO.getUpperFrame());
         lb.setHeight(lbDTO.getHeight());
         lb.setWidth(lbDTO.getWidth());
-        lb.setWidthCell(lbDTO.getWidthCell());
-        lb.setHeightCell(lbDTO.getHeightCell());
-        lb.setDepthCell(lbDTO.getDepthCell());
         lb.setDepth(lbDTO.getDepth());
-        lb.setCountCells(lbDTO.getCountCells());
         lb.setColorBody(Colors.valueOf(lbDTO.getColorBody()));
         lb.setColorDoor(Colors.valueOf(lbDTO.getColorDoor()));
         lb.setDirectionDoorOpening(DirectionDoorOpening.valueOf(lbDTO.getDirectionDoorOpening()));
         lb.setType(TypeLb.valueOf(lbDTO.getType()));
-        lb.setShelfThick(lbDTO.getShelfThick());
-
-        return lb;
+        lb.setShelfThick(TypeLb.valueOf(lbDTO.getType()).getShelfThick());
+        lb.setCountCells(lbDTO.getCountCells());
+        lb.setWidthCell(lbDTO.getWidthCell());
+        lb.setHeightCell(lbDTO.getHeightCell());
+        lb.setDepthCell(lbDTO.getDepthCell());
+        lb.setName(lbDTO.getName());
+        lb.setDescription(lbDTO.getDescription());
+             return lb;
     }
     public static List<LBDTO> toLBDTOList(List<LB> lbList) {
         List<LBDTO> lbDTOList = new ArrayList<>();

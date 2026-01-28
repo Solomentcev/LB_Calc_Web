@@ -10,7 +10,7 @@ public class ProjectDTO {
     private String company;
     private LocalDate createdDate;
     private List<ALSDTO> alsList = new ArrayList<>();
-    private Map<ALSDTO, Integer> uniqueALS=new HashMap<>();
+    private Map<ALSDTO, Integer> quantityALS =new HashMap<>();
 
     public ProjectDTO() {
     }
@@ -63,11 +63,37 @@ public class ProjectDTO {
         this.alsList = alsList;
     }
 
-    public Map<ALSDTO, Integer> getUniqueALS() {
-        return uniqueALS;
+    public Map<ALSDTO, Integer> getQuantityALS() {
+        return quantityALS;
     }
 
-    public void setUniqueALS(Map<ALSDTO, Integer> uniqueALS) {
-        this.uniqueALS = uniqueALS;
+    public void setQuantityALS(Map<ALSDTO, Integer> quantityALS) {
+        this.quantityALS = quantityALS;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        ProjectDTO that = (ProjectDTO) o;
+        return Objects.equals(getCompany(), that.getCompany()) && Objects.equals(getCreatedDate(), that.getCreatedDate())
+                && Objects.deepEquals(getQuantityALS(), that.getQuantityALS());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getCompany(), getCreatedDate(), getQuantityALS());
+    }
+
+    @Override
+    public String toString() {
+        return "ProjectDTO{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", company='" + company + '\'' +
+                ", createdDate=" + createdDate +"\n"+
+                ", alsList=" + alsList +"\n"+
+                ", quantityALS=" + quantityALS +
+                '}';
     }
 }

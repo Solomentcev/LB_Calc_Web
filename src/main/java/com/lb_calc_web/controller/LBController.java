@@ -1,20 +1,15 @@
 package com.lb_calc_web.controller;
 
 import com.lb_calc_web.dto.LBDTO;
-import com.lb_calc_web.model.LB;
 import com.lb_calc_web.model.utils.Colors;
 import com.lb_calc_web.model.utils.DirectionDoorOpening;
 import com.lb_calc_web.model.utils.TypeLb;
-import com.lb_calc_web.service.LBImageService;
 import com.lb_calc_web.service.LBService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.Arrays;
-import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 
@@ -32,39 +27,35 @@ public class LBController {
         colorsList = Arrays.asList(Colors.values());
         directionDoorOpeningList = Arrays.asList(DirectionDoorOpening.values());
     }
-    @GetMapping
-    private String lbs(Model model) {
-        model.addAttribute("lbs", lbService.findAll());
-        return "lbs/lbs";
+    @GetMapping("/create")
+    private String createLB( Model model) {
+        LBDTO lb =lbService.createLB();
+        model.addAttribute("lb", lb);
+        model.addAttribute("typeLbList", typeLbList);
+        model.addAttribute("colorsList", colorsList);
+        model.addAttribute("directionDoorOpeningList", directionDoorOpeningList);
+
+        return "/lbs/lb";
     }
     @GetMapping("/{id}")
-    private String editLB(@PathVariable(value = "id") Long id, Model model) throws IOException {
+    private String editLB(@PathVariable(value = "id") Long id, Model model){
 
-        Optional<LB> lbOptional = lbService.findById(id);
-        LB lb = null;
+        Optional<LBDTO> lbOptional = lbService.findById(id);
+        LBDTO lb = null;
         if (lbOptional.isPresent()) {lb = lbOptional.get();}
         else {model.addAttribute("error","LB not found");}
         model.addAttribute("lb", lb);
         model.addAttribute("typeLbList", typeLbList);
         model.addAttribute("colorsList", colorsList);
         model.addAttribute("directionDoorOpeningList", directionDoorOpeningList);
-        byte[] imageBytes=LBImageService.getBytesArrayLBImage(lb);
-        String imageString= Base64.getEncoder().encodeToString(imageBytes);
-        model.addAttribute("image", imageString);
         return "lbs/lb";
     }
     @PostMapping("/save")
-    public String saveLB(@ModelAttribute("lb") LB lb) {
-        return "redirect:/lbs/" + lbService.save(lb).getId();
+    public String saveLB(@ModelAttribute("lb") LBDTO lb) {
+        System.out.println(lb);
+        return "redirect:/lbs/" + lbService.saveLB(lb).getId();
     }
-    @GetMapping("/create")
-    private String createLB( Model model) {
-        LB lb =lbService.createLB();
-        model.addAttribute("lb", lb);
-        model.addAttribute("typeLbList", typeLbList);
-        model.addAttribute("colorsList", colorsList);
-        model.addAttribute("directionDoorOpeningList", directionDoorOpeningList);
 
-        return "redirect:/lbs/"+lb.getId();
-    }
+
+
 }

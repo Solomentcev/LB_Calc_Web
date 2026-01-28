@@ -10,7 +10,7 @@ import org.hibernate.type.YesNoConverter;
 import java.util.Objects;
 
 @Entity
-@Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "height","width","depth",
+@Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "height","width","depth","upper_frame","bottom_frame",
         "display","bar_reader","payment","printer","rfid_reader","color_body"}) })
 public class LC {
     @Id
@@ -198,6 +198,6 @@ public class LC {
                 ", printer=" + printer +
                 ", rfidReader=" + rfidReader +
                 ", colorBody=" + colorBody +
-                '}';
+                '}'+"\n";
     }
 }

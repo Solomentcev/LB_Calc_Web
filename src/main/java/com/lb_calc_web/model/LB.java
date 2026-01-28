@@ -227,13 +227,12 @@ public class LB {
                 ", depth=" + depth +
                 ", width=" + width +
                 ", height=" + height +
-              //  ", depthCell=" + depthCell +
-              //  ", widthCell=" + widthCell +
-              //  ", heightCell=" + heightCell +
-             //   ", shelfThick=" + shelfThick +
-
-             //   ", bottomFrame=" + bottomFrame +
-             //   ", upperFrame=" + upperFrame +
+                ", depthCell=" + depthCell +
+                ", widthCell=" + widthCell +
+                ", heightCell=" + heightCell +
+                ", shelfThick=" + shelfThick +
+                ", bottomFrame=" + bottomFrame +
+                ", upperFrame=" + upperFrame +
                 ", colorBody=" + colorBody +
                 ", colorDoor=" + colorDoor +
                 ", directionDoorOpening=" + directionDoorOpening +

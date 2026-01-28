@@ -1,14 +1,6 @@
 package com.lb_calc_web.dto;
 
-import com.lb_calc_web.model.utils.BarReader;
-import com.lb_calc_web.model.utils.Colors;
-import com.lb_calc_web.model.utils.DisplayLC;
-import com.lb_calc_web.model.utils.Payment;
-import jakarta.persistence.Convert;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.Transient;
-import org.hibernate.type.YesNoConverter;
+import java.util.Objects;
 
 public class LCDTO {
     private int id;
@@ -17,16 +9,18 @@ public class LCDTO {
     private int height;
     private int width;
     private int depth;
+    private int upperFrame;
+    private int bottomFrame;
     private String display;
     private String barReader;
     private String payment;
     private boolean printer;
     private boolean rfidReader;
     private String colorBody;
+    private String stringLCImage;
 
     public LCDTO() {
     }
-
     public int getId() {
         return id;
     }
@@ -121,5 +115,66 @@ public class LCDTO {
 
     public void setColorBody(String colorBody) {
         this.colorBody = colorBody;
+    }
+
+    public int getUpperFrame() {
+        return upperFrame;
+    }
+
+    public void setUpperFrame(int upperFrame) {
+        this.upperFrame = upperFrame;
+    }
+
+    public int getBottomFrame() {
+        return bottomFrame;
+    }
+
+    public void setBottomFrame(int bottomFrame) {
+        this.bottomFrame = bottomFrame;
+    }
+
+    public String getStringLCImage() {
+        return stringLCImage;
+    }
+
+    public void setStringLCImage(String stringLCImage) {
+        this.stringLCImage = stringLCImage;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        LCDTO lcdto = (LCDTO) o;
+        return getHeight() == lcdto.getHeight() && getWidth() == lcdto.getWidth() && getDepth() == lcdto.getDepth()
+                && getUpperFrame() == lcdto.getUpperFrame() && getBottomFrame() == lcdto.getBottomFrame()
+                && isPrinter() == lcdto.isPrinter() && isRfidReader() == lcdto.isRfidReader()
+                && Objects.equals(getDisplay(), lcdto.getDisplay()) && Objects.equals(getBarReader(), lcdto.getBarReader())
+                && Objects.equals(getPayment(), lcdto.getPayment()) && Objects.equals(getColorBody(), lcdto.getColorBody());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getHeight(), getWidth(), getDepth(), getUpperFrame(), getBottomFrame(), getDisplay(),
+                getBarReader(), getPayment(), isPrinter(), isRfidReader(), getColorBody());
+    }
+
+    @Override
+    public String toString() {
+        return "LCDTO{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+//                ", description='" + description + '\'' +
+                ", height=" + height +
+                ", width=" + width +
+                ", depth=" + depth +
+                ", upperFrame=" + upperFrame +
+                ", bottomFrame=" + bottomFrame +
+                ", display='" + display + '\'' +
+                ", barReader='" + barReader + '\'' +
+                ", payment='" + payment + '\'' +
+                ", printer=" + printer +
+                ", rfidReader=" + rfidReader +
+                ", colorBody='" + colorBody + '\'' +
+                '}'+'\n';
     }
 }
