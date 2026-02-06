@@ -22,6 +22,7 @@
             <th>Company</th>
             <th>Description</th>
             <th>Created Date</th>
+            <th>Updated Date</th>
             <th>Action</th>
         </tr>
         </thead>
@@ -31,6 +32,7 @@
             <td th:text="${project.getCompany()}">Company</td>
             <td th:text="${project.getDescription()}">Description</td>
             <td th:text="${project.getCreatedDate()}">CreatedAt</td>
+            <td th:text="${project.getUpdatedDate()}">UpdatedAt</td>
             <td>
                 <a th:href="@{/projects/{id}(id=${project.getId()})}" class="btn btn-primary">Edit</a>
             </td>

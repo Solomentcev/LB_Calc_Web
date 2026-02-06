@@ -17,7 +17,7 @@
 <div class="container-fluid">
     <br/>
     <form action="#" th:action="@{/projects/{projectId}/alss/{alsId}/save
-    (projectId=${project.getId()}, alsId=${als.getId()})}"
+    (projectId=${project.getId()}, alsId=${alsId})}"
                      th:object="${als}" method="POST">
         <button type="submit" class="btn btn-primary btn-sm mb-3">Сохранить АКХ</button>
         <a th:href="@{/projects/{projectId}
@@ -25,6 +25,8 @@
         th:text="'Back to #'+${project.id}+'-'+${project.name}">Back to Project </a>
         <br/>
         <h4 th:text="${als.description}">Автоматическая камера хранения</h4>
+        <p  th:if="${ALSErrors}!=null and !${ALSErrors.isEmpty()} " class="alert alert-danger"
+            th:text="${ALSErrors}"></p>
         <table border="1" class="table table-striped table-responsive-md">
             <thead>
             <tr>
@@ -71,37 +73,37 @@
                 </td>
                 <td>
                     <label>
-                        <input type="text" size="3" th:field="*{countCells}" readonly="readonly">
+                        <input type="number" size="3" th:field="*{countCells}" readonly="readonly">
                     </label>
                 </td>
                 <td>
                     <label>
-                        <input type="text" size="4" th:field="*{height}">
+                        <input type="number" size="4" th:field="*{height}">
                     </label>
                 </td>
                 <td>
                     <label>
-                        <input type="text" size="4" th:field="*{width}" readonly="readonly">
+                        <input type="number" size="4" th:field="*{width}" readonly="readonly">
                     </label>
                 </td>
                 <td>
                     <label>
-                        <input type="text" size="4" th:field="*{depth}">
+                        <input type="number" size="4" th:field="*{depth}">
                     </label>
                 </td>
                 <td>
                     <label>
-                        <input type="text" size="4" th:field="*{upperFrame}">
+                        <input type="number" size="4" th:field="*{upperFrame}">
                     </label>
                 </td>
                 <td>
                     <label>
-                        <input type="text" size="4" th:field="*{bottomFrame}">
+                        <input type="number" size="4" th:field="*{bottomFrame}">
                     </label>
                 </td>
                 <td>
                     <label>
-                        <input type="text" size="4" th:field="*{depthCell}" readonly="readonly">
+                        <input type="number" size="4" th:field="*{depthCell}" readonly="readonly">
                     </label>
                 </td>
                 <td>
@@ -132,6 +134,8 @@
         </table>
         <br/>
         <h4 th:text="*{LC.description}">Модуль управления</h4>
+        <p  th:if="${LCErrors}!=null and !${LCErrors.isEmpty()} " class="alert alert-danger"
+            th:text="${LCErrors}"></p>
         <table border="1" class="table table-striped table-responsive-md">
             <thead>
             <tr>
@@ -154,7 +158,7 @@
             <tr>
                 <td>
                     <label>
-                        <input type="text" size="3" th:field="*{LC.id}" readonly="readonly">
+                        <input type="number" size="3" th:field="*{LC.id}" readonly="readonly">
                     </label>
                 </td>
                 <td>
@@ -172,21 +176,21 @@
                     </td>
                 <td hidden="hidden">
                     <label>
-                        <input size="4"
+                        <input type="number" size="4"
                                th:field="*{LC.height}"
                                readonly="readonly"/>
                     </label>
                 </td>
                 <td>
                     <label>
-                        <input size="4"
+                        <input type="number" size="4"
                                th:field="*{LC.width}"
                                readonly="readonly"/>
                     </label>
                 </td>
                 <td hidden="hidden">
                     <label>
-                        <input size="4"
+                        <input type="number" size="4"
                                th:field="*{LC.depth}"
                                readonly="readonly"/>
                     </label>
@@ -238,14 +242,14 @@
                 </td>
                 <td hidden="hidden">
                     <label>
-                        <input size="3"
+                        <input type="number" size="3"
                                th:field="*{LC.upperFrame}"
                                readonly="readonly"/>
                     </label>
                 </td>
                 <td hidden="hidden">
                     <label>
-                        <input size="3"
+                        <input type="number" size="3"
                                th:field="*{LC.bottomFrame}"
                                readonly="readonly"/>
                     </label>
@@ -262,145 +266,159 @@
         </table>
         <br/>
         <h5>Модули хранения:</h5>
-        <table border="1" class="table table-striped table-responsive-md">
-            <thead>
-            <tr>
-                <th>ID</th>
-                <th>Name</th>
-                <th hidden="hidden">Description</th>
-                <th>Type</th>
-                <th>CountCells</th>
+        <div th:each="lb, item: ${als.lbList}">
+            <p th:if="${LBErrors}!=null and !${LBErrors[__${item.index}__].isEmpty()} " class="alert alert-danger"
+               th:text="${LBErrors[__${item.index}__]}"></p>
+            <table border="1" class="table table-striped table-responsive-md">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th hidden="hidden">Description</th>
+                    <th>Type</th>
+                    <th>CountCells</th>
 
-                <th>Height</th>
-                <th>Width</th>
-                <th>Depth</th>
-                <th hidden="hidden">UpperFrame</th>
-                <th hidden="hidden">BottomFrame</th>
-                <th>HeightCell</th>
-                <th hidden="hidden">WidthCell</th>
-                <th hidden="hidden">DepthCell</th>
-                <th>DirectionDoorOpening</th>
-                <th>ColorBody</th>
-                <th>ColorDoor</th>
-                <th>Quantity</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr th:each="lb, item: ${als.lbList}">
-                <td>
-                    <label>
-                        <input size="3" th:name="|lbList[${item.index}].id|" th:value="${lb.getId()}"
-                               readonly="readonly"/>
-                    </label>
-                </td>
-                <td>
-                    <label>
-                        <input th:name="|lbList[${item.index}].name|" th:value="${lb.getName()}"
-                               readonly="readonly"/>
-                    </label>
-                </td>
-                <td hidden="hidden">
-                    <label>
-                        <input th:name="|lbList[${item.index}].description|" th:value="${lb.getDescription()}"
-                               readonly="readonly"/>
-                    </label>
-                </td>
-                <td>
-                    <label>
-                        <select th:field="*{lbList[__${item.index}__].type}">
-                        <option th:each="type:${typeList}"
-                                th:value="${type}"
-                                th:text="${type}">
-                        </option>
-                    </select>
-                    </label>
-                </td>
-                <td>
-                    <label>
-                        <input size="3" th:name="|lbList[${item.index}].countCells|" th:value="${lb.getCountCells()}"/>
-                    </label>
-                </td>
+                    <th>Height</th>
+                    <th>Width</th>
+                    <th>Depth</th>
+                    <th hidden="hidden">UpperFrame</th>
+                    <th hidden="hidden">BottomFrame</th>
+                    <th>HeightCell</th>
+                    <th hidden="hidden">WidthCell</th>
+                    <th hidden="hidden">DepthCell</th>
+                    <th>DirectionDoorOpening</th>
+                    <th>ColorBody</th>
+                    <th>ColorDoor</th>
+                    <th>Quantity</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>
+                        <label>
+                            <input type="number" size="3" th:name="|lbList[${item.index}].id|" th:value="${lb.getId()}"
+                                   readonly="readonly"/>
+                        </label>
+                    </td>
+                    <td>
+                        <label>
+                            <input th:name="|lbList[${item.index}].name|" th:value="${lb.getName()}"
+                                   readonly="readonly"/>
+                        </label>
+                    </td>
+                    <td hidden="hidden">
+                        <label>
+                            <input th:name="|lbList[${item.index}].description|" th:value="${lb.getDescription()}"
+                                   readonly="readonly"/>
+                        </label>
+                    </td>
+                    <td>
+                        <label>
+                            <select th:field="*{lbList[__${item.index}__].type}">
+                                <option th:each="type:${typeList}"
+                                        th:value="${type}"
+                                        th:text="${type}">
+                                </option>
+                            </select>
+                        </label>
+                    </td>
+                    <td>
+                        <label>
+                            <input type="number" size="3" th:name="|lbList[${item.index}].countCells|"
+                                   th:value="${lb.getCountCells()}"/>
+                        </label>
+                    </td>
 
-                <td>
-                    <label>
-                        <input size="4" th:name="|lbList[${item.index}].height|" th:value="${lb.getHeight()}"
-                               readonly="readonly"/>
-                    </label>
-                </td>
-                <td>
-                    <label>
-                        <input size="4" th:name="|lbList[${item.index}].width|" th:value="${lb.getWidth()}"
-                               readonly="readonly"/>
-                    </label>
-                </td>
-                <td>
-                    <label>
-                        <input size="4" th:name="|lbList[${item.index}].depth|" th:value="${lb.getDepth()}"
-                               readonly="readonly"/>
-                    </label>
-                </td>
-                <td hidden="hidden">
-                    <label>
-                        <input size="3" th:name="|lbList[${item.index}].upperFrame|" th:value="${lb.getUpperFrame()}"
-                               readonly="readonly"/>
-                    </label>
-                </td>
-                <td hidden="hidden">
-                    <label>
-                        <input size="3" th:name="|lbList[${item.index}].bottomFrame|" th:value="${lb.getBottomFrame()}"
-                               readonly="readonly"/>
-                    </label>
-                </td>
-                <td>
-                    <label>
-                        <input size="4" th:name="|lbList[${item.index}].heightCell|" th:value="${lb.getHeightCell()}"
-                               readonly="readonly"/>
-                    </label>
-                </td>
-                <td hidden="hidden">
-                    <label>
-                        <input size="4" th:name="|lbList[${item.index}].widthCell|" th:value="${lb.getWidthCell()}"
-                               readonly="readonly"/>
-                    </label>
-                </td>
-                <td hidden="hidden">
-                    <label>
-                        <input size="4" th:name="|lbList[${item.index}].depthCell|" th:value="${lb.getDepthCell()}"
-                               readonly="readonly"/>
-                    </label>
-                </td>
-                <td>
-                    <label>
-                        <input size="5" th:name="|lbList[${item.index}].directionDoorOpening|" th:value="${lb.getDirectionDoorOpening()}"
-                               readonly="readonly"/>
-                    </label>
-                </td>
-                <td>
-                    <label>
-                        <input size="5" th:name="|lbList[${item.index}].colorBody|" th:value="${lb.getColorBody()}"
-                               readonly="readonly"/>
-                    </label>
-                </td>
-                <td>
-                <label>
-                    <input size="5" th:name="|lbList[${item.index}].colorDoor|" th:value="${lb.getColorDoor()}"
-                           readonly="readonly"/>
-                </label>
-                </td>
-                <td th:text="1">Quantity</td>
+                    <td>
+                        <label>
+                            <input type="number" size="4" th:name="|lbList[${item.index}].height|"
+                                   th:value="${lb.getHeight()}"
+                                   readonly="readonly"/>
+                        </label>
+                    </td>
+                    <td>
+                        <label>
+                            <input type="number" size="4" th:name="|lbList[${item.index}].width|"
+                                   th:value="${lb.getWidth()}"
+                            />
+                        </label>
+                    </td>
+                    <td>
+                        <label>
+                            <input type="number" size="4" th:name="|lbList[${item.index}].depth|"
+                                   th:value="${lb.getDepth()}"
+                                   readonly="readonly"/>
+                        </label>
+                    </td>
+                    <td hidden="hidden">
+                        <label>
+                            <input type="number" size="3" th:name="|lbList[${item.index}].upperFrame|"
+                                   th:value="${lb.getUpperFrame()}"
+                                   readonly="readonly"/>
+                        </label>
+                    </td>
+                    <td hidden="hidden">
+                        <label>
+                            <input type="number" size="3" th:name="|lbList[${item.index}].bottomFrame|"
+                                   th:value="${lb.getBottomFrame()}"
+                                   readonly="readonly"/>
+                        </label>
+                    </td>
+                    <td>
+                        <label>
+                            <input type="number" size="4" th:name="|lbList[${item.index}].heightCell|"
+                                   th:value="${lb.getHeightCell()}"
+                                   readonly="readonly"/>
+                        </label>
+                    </td>
+                    <td hidden="hidden">
+                        <label>
+                            <input type="number" size="4" th:name="|lbList[${item.index}].widthCell|"
+                                   th:value="${lb.getWidthCell()}"
+                                   readonly="readonly"/>
+                        </label>
+                    </td>
+                    <td hidden="hidden">
+                        <label>
+                            <input type="number" size="4" th:name="|lbList[${item.index}].depthCell|"
+                                   th:value="${lb.getDepthCell()}"
+                                   readonly="readonly"/>
+                        </label>
+                    </td>
+                    <td>
+                        <label>
+                            <input size="5" th:name="|lbList[${item.index}].directionDoorOpening|"
+                                   th:value="${lb.getDirectionDoorOpening()}"
+                                   readonly="readonly"/>
+                        </label>
+                    </td>
+                    <td>
+                        <label>
+                            <input size="5" th:name="|lbList[${item.index}].colorBody|" th:value="${lb.getColorBody()}"
+                                   readonly="readonly"/>
+                        </label>
+                    </td>
+                    <td>
+                        <label>
+                            <input size="5" th:name="|lbList[${item.index}].colorDoor|" th:value="${lb.getColorDoor()}"
+                                   readonly="readonly"/>
+                        </label>
+                    </td>
+                    <td th:text="1">Quantity</td>
 
-                <td>
-                    <a th:href="@{/projects/{projectId}/alss/{alsId}/lbs/{lbId}
+                    <td>
+                        <a th:href="@{/projects/{projectId}/alss/{alsId}/lbs/{lbId}
                     (projectId=${project.getId()},alsId=${als.getId()},lbId=${lb.getId()})}"
-                       class="btn btn-primary">Edit</a>
-                    &nbsp;&nbsp;&nbsp;
-                    <a th:href="@{/projects/{projectId}/alss/{alsId}/lbs/{lbId}/delete
+                           class="btn btn-primary">Edit</a>
+                        &nbsp;&nbsp;&nbsp;
+                        <a th:href="@{/projects/{projectId}/alss/{alsId}/lbs/{lbId}/delete
                     (projectId=${project.getId()},alsId=${als.getId()},lbId=${lb.getId()}) }"
-                       class="btn btn-danger">Delete</a>
-                </td>
-            </tr>
-            </tbody>
-        </table>
+                           class="btn btn-danger">Delete</a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
     </form>
 </div>
 <div class="container-fluid">

@@ -14,6 +14,8 @@
     <br/>
     <form action="#" th:action="@{/alss/{alsId}/lcs/{lcId}/save (alsId=${als.getId()},lcId=${als.getLC().getId})}"
           th:object="${lc}" method="post">
+        <p  th:each="erorr, item: ${errors}" class="alert alert-danger"
+            th:text="${item.current}"></p>
         <button type="submit" class="btn btn-primary btn-sm mb-3">Сохранить Модуль управления</button>
         <a th:href="@{/alss/{alsId} (alsId=${als.getId()})}"
            class="btn btn-primary btn-sm mb-3"

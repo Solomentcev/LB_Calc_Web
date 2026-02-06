@@ -8,19 +8,19 @@ import com.lb_calc_web.model.utils.Colors;
 import com.lb_calc_web.model.utils.DisplayLC;
 import com.lb_calc_web.model.utils.Payment;
 import com.lb_calc_web.repository.LCRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.springframework.data.domain.ExampleMatcher.GenericPropertyMatchers.ignoreCase;
 
 @Service
 public class LCService {
+    private static final Logger logger = LoggerFactory.getLogger(LCService.class);
     private final LCRepository lcRepository;
     public LCService(LCRepository lcRepository) {
         this.lcRepository = lcRepository;
@@ -69,7 +69,8 @@ public class LCService {
     }
 
     public Optional<LCDTO> findById(Long id) {
-        LC lc = lcRepository.findById(id).orElseThrow();
+        LC lc = lcRepository.findById(id).orElseThrow(()->
+                new NoSuchElementException("Модуль Управления id%d не найден".formatted(id)));
         return Optional.of(LCMapper.toLCDTO(lc));
     }
     public LCDTO saveLC(LCDTO lcdto) {
@@ -77,22 +78,22 @@ public class LCService {
         LC lc=LCMapper.toLC(lcdto);
         Optional<LC> optional=getOptionalLC(lc);
         if (optional.isEmpty()) {
-            System.out.println("МУ нет в бд");
+            logger.debug("МУ нет в бд");
             lcdto.setId(0);
             LC lcNew = LCMapper.toLC(lcdto);
             lcNew = lcRepository.save(lcNew);
-            System.out.println(lcNew);
+            logger.debug("Сохранен в БД: \n"+lcNew);
             return LCMapper.toLCDTO(lcNew);
         }
         else {
-            System.out.println("МУ есть в бд");
+            logger.debug("МУ есть в БД");
             lc = optional.get();
-            System.out.println(lc);
+            logger.debug(String.valueOf(lc));
             return LCMapper.toLCDTO(lc);
         }
     }
 
-    private void updateLCsizeAndDescription(LCDTO lc) {
+    public void updateLCsizeAndDescription(LCDTO lc) {
         lc.setWidth(DisplayLC.valueOf(lc.getDisplay()).getWidth());
         lc.setDescription("Модуль управления " + lc.getDisplay() +" "+
                 "Размеры(ВхШхГ,мм): "+lc.getHeight()+"х"+lc.getWidth()+"х"+lc.getDepth()+";\n"+

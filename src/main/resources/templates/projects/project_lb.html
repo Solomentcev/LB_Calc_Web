@@ -13,15 +13,17 @@
 <div class="container">
     <br/>
     <form action="#" th:action="@{/projects/{projectId}/alss/{alsId}/lbs/{lbId}/save
-         (projectId=${project.getId()}, alsId=${als.getId()},lbId=${lb.getId})}"
+         (projectId=${projectId}, alsId=${alsId},lbId=${lb.getId})}"
           th:object="${lb}" method="post">
+        <p  th:each="erorr, item: ${errors}" class="alert alert-danger"
+            th:text="${item.current}"></p>
         <button type="submit" class="btn btn-primary btn-sm mb-3">Сохранить Модуль хранения</button>
-        <a th:href="@{/projects/{projectId}/alss/{alsId} (projectId=${project.getId()},alsId=${als.getId()})}"
+        <a th:href="@{/projects/{projectId}/alss/{alsId} (projectId=${projectId},alsId=${alsId})}"
            class="btn btn-primary btn-sm mb-3"
-           th:text="'Back to #'+${als.id}+'-'+${als.name}">Back to ALS</a>
-        <a th:href="@{/projects/{projectId} (projectId=${project.getId()})}"
+           th:text="'Back to #'+${alsId}+'-'+${als.name}">Back to ALS</a>
+        <a th:href="@{/projects/{projectId} (projectId=${projectId})}"
            class="btn btn-primary btn-sm mb-3"
-           th:text="'Back to #'+${project.id}+'-'+${project.name}">Back to Project </a>
+           th:text="'Back to #'+${projectId}+'-'+${project.name}">Back to Project </a>
         <br/>
         <h4 th:text="*{description}">Модуль хранения</h4>
         <label hidden="hidden">
@@ -32,7 +34,7 @@
                 <th >ID</th>
                 <td>
                     <label>
-                        <input type="text" size="3" th:field="*{id}" readonly="readonly">
+                        <input type="number" size="3" th:field="*{id}" readonly="readonly">
                     </label>
                 </td>
                 <td rowspan="16">
@@ -66,7 +68,7 @@
                 <th>ShelfThick</th>
                 <td>
                     <label>
-                        <input type="text" size="3" th:field="*{shelfThick}" readonly="readonly">
+                        <input type="number" size="3" th:field="*{shelfThick}" readonly="readonly">
                     </label>
                 </td>
             </tr>
@@ -74,7 +76,7 @@
                 <th>CountCells</th>
                 <td>
                     <label>
-                        <input type="text" size="3" th:field="*{countCells}">
+                        <input type="number" size="3" th:field="*{countCells}">
                     </label>
                 </td>
             </tr>
@@ -82,7 +84,7 @@
                 <th>Height</th>
                 <td>
                     <label>
-                        <input type="text" size="4" th:field="*{height}" readonly="readonly">
+                        <input type="number" size="4" th:field="*{height}" readonly="readonly">
                     </label>
                 </td>
             </tr>
@@ -90,7 +92,7 @@
                 <th>Width</th>
                 <td>
                     <label>
-                        <input type="text" size="4" th:field="*{width}">
+                        <input type="number" size="4" th:field="*{width}">
                     </label>
                 </td>
             </tr>
@@ -98,7 +100,7 @@
                 <th>Depth</th>
                 <td>
                     <label>
-                        <input type="text" size="4" th:field="*{depth}" readonly="readonly">
+                        <input type="number" size="4" th:field="*{depth}" readonly="readonly">
                     </label>
                 </td>
             </tr>
@@ -106,7 +108,7 @@
                 <th>UpperFrame</th>
                 <td>
                     <label>
-                        <input type="text" size="4" th:field="*{upperFrame}" readonly="readonly">
+                        <input type="number" size="4" th:field="*{upperFrame}" readonly="readonly">
                     </label>
                 </td>
             </tr>
@@ -114,7 +116,7 @@
                 <th>BottomFrame</th>
                 <td>
                     <label>
-                        <input type="text" size="4" th:field="*{bottomFrame}" readonly="readonly">
+                        <input type="number" size="4" th:field="*{bottomFrame}" readonly="readonly">
                     </label>
                 </td>
             </tr>
@@ -122,7 +124,7 @@
                 <th>HeightCell</th>
                 <td>
                     <label>
-                        <input  type="text" size="4" th:field="*{heightCell}" readonly="readonly">
+                        <input  type="number" size="4" th:field="*{heightCell}" readonly="readonly">
                     </label>
                 </td>
             </tr>
@@ -130,7 +132,7 @@
                 <th>WidthCell</th>
                 <td>
                     <label>
-                        <input type="text" size="4" th:field="*{widthCell}" readonly="readonly">
+                        <input type="number" size="4" th:field="*{widthCell}" readonly="readonly">
                     </label>
                 </td>
             </tr>
@@ -138,7 +140,7 @@
                 <th>DepthCell</th>
                 <td>
                     <label>
-                        <input type="text" size="4" th:field="*{depthCell}" readonly="readonly">
+                        <input type="number" size="4" th:field="*{depthCell}" readonly="readonly">
                     </label>
                 </td>
             </tr>

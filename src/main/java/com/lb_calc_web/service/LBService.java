@@ -7,19 +7,24 @@ import com.lb_calc_web.model.utils.Colors;
 import com.lb_calc_web.model.utils.DirectionDoorOpening;
 import com.lb_calc_web.model.utils.TypeLb;
 import com.lb_calc_web.repository.LBRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import static org.springframework.data.domain.ExampleMatcher.GenericPropertyMatchers.ignoreCase;
 
 @Service
 public class LBService {
+    private static final Logger logger = LoggerFactory.getLogger(LBService.class);
     private final LBRepository lbRepository;
+
     public LBService(LBRepository repository) {
         this.lbRepository = repository;
     }
@@ -40,7 +45,7 @@ public class LBService {
         lb.setStringLBImage(LBImageService.getStringLBImage(lb));
         return lb;
     }
-    public LBDTO createLB(int height, int depth,int upperFrame, int bottomFrame, Colors colorBody, Colors colorDoor) {
+    public LBDTO createLB(int height, int depth,int upperFrame, int bottomFrame, Colors colorBody, Colors colorDoor){
         LBDTO lb = new LBDTO();
         lb.setHeight(height);
         lb.setWidth(500);
@@ -58,6 +63,7 @@ public class LBService {
         return lb;
     }
     protected void updateLBsizeAndDescription(LBDTO lb) {
+
         lb.setWidthCell(lb.getWidth()-TypeLb.valueOf(lb.getType()).getDeltaWidth());
         lb.setDepthCell(lb.getWidth()-20);
         lb.setHeightCell((double) (lb.getHeight() - lb.getUpperFrame() - lb.getBottomFrame()
@@ -75,26 +81,27 @@ public class LBService {
         return LBMapper.toLBDTOList(lbs);
     }
     public Optional<LBDTO> findById(Long id) {
-        LB lb = lbRepository.findById(id).orElseThrow();
+        LB lb = lbRepository.findById(id).orElseThrow(()->
+                new NoSuchElementException("Модуль Хранения с id%d не найден".formatted(id)));
         return Optional.of(LBMapper.toLBDTO(lb));
     }
-    public LBDTO saveLB(LBDTO lbDTO) {
-         updateLBsizeAndDescription(lbDTO);
-         LB lb =LBMapper.toLB(lbDTO);
-         Optional<LB> optional=getOptionalLB(lb);
-        if (optional.isEmpty()) {
-            System.out.println("МХ нет в бд");
-            lbDTO.setId(0);
-            LB lbNew = LBMapper.toLB(lbDTO);
-            lbNew=lbRepository.save(lbNew);
-            System.out.println(lbNew);
-            return LBMapper.toLBDTO(lbNew);
-        }else {
-            System.out.println("МХ есть в БД");
-            lb=optional.get();
-            System.out.println(lb);
-            return LBMapper.toLBDTO(lb);
-        }
+    public LBDTO saveLB(LBDTO lbDTO){
+            updateLBsizeAndDescription(lbDTO);
+            LB lb =LBMapper.toLB(lbDTO);
+            Optional<LB> optional=getOptionalLB(lb);
+            if (optional.isEmpty()) {
+                logger.debug("МХ нет в бд");
+                lbDTO.setId(0);
+                LB lbNew = LBMapper.toLB(lbDTO);
+                lbNew=lbRepository.save(lbNew);
+                logger.debug("Сохранен в БД: \n"+lbNew);
+                return LBMapper.toLBDTO(lbNew);
+            }else {
+                logger.debug("МХ есть в БД");
+                lb=optional.get();
+                logger.debug(String.valueOf(lb));
+                return LBMapper.toLBDTO(lb);
+            }
     }
     public Optional<LB> getOptionalLB(LB lbNew) {
         ExampleMatcher modelMatcher = ExampleMatcher.matching()

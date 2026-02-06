@@ -16,10 +16,7 @@ import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import static org.springframework.data.domain.ExampleMatcher.GenericPropertyMatchers.ignoreCase;
 
@@ -44,12 +41,13 @@ public class ALSService {
         return alsDTOList;
     }
     public Optional<ALSDTO> findById(Long id) {
-        ALS als=alsRepository.findById(id).orElseThrow();
+        ALS als=alsRepository.findById(id).orElseThrow(()->
+                new NoSuchElementException("АКХ с id%d не найдена".formatted(id)));
         ALSDTO alsDTO=ALSMapper.toALSDTO(als);
         return Optional.of(alsDTO);
     }
     @Transactional
-    public ALSDTO createALS(){
+    public ALSDTO createALS() {
         ALSDTO als = new ALSDTO();
         als.setBottomFrame(50);
         als.setUpperFrame(50);
@@ -71,10 +69,10 @@ public class ALSService {
         return als;
     }
     @Transactional
-    public ALSDTO saveALS(ALSDTO alsDTO) {
-        changeLC(alsDTO);
+    public ALSDTO saveALS(ALSDTO alsDTO)  {
+        resizeLC(alsDTO);
         alsDTO.setLC(lcService.saveLC(alsDTO.getLC()));
-        changeLBs(alsDTO);
+        resizeLBs(alsDTO);
         for (LBDTO lbDTO : alsDTO.getLbList()) {
               lbDTO.setId(lbService.saveLB(lbDTO).getId());
         }
@@ -82,50 +80,54 @@ public class ALSService {
         ALS als =ALSMapper.toALS(alsDTO);
         Optional<ALS> optional=getOptionalALS(als);
         if (optional.isPresent()) {
-            System.out.println("АКХ есть в базе");
+            logger.debug("АКХ есть в базе");
             als = optional.get();
-            System.out.println(als);
+            logger.debug(String.valueOf(als));
             return ALSMapper.toALSDTO(als);
         } else {
-            System.out.println("АКХ нет в базе");
+            logger.debug("АКХ нет в базе");
             alsDTO.setId(0);
             ALS alsNew=ALSMapper.toALS(alsDTO);
             alsNew=alsRepository.save(alsNew);
-            System.out.println(alsNew);
+            logger.debug("Сохранен в БД: \n{}", alsNew);
             alsDTO.setId(alsNew.getId());
             alsNew.getQuantityLB().addAll(ALSMapper.getALSLBSetFromLBDTOMap(alsDTO.getQuantityLB(),alsDTO));
             alslbService.saveAll(alsNew.getQuantityLB());
-
             return ALSMapper.toALSDTO(alsNew);
         }
     }
-    private void changeLC(ALSDTO alsDTO) {
+     public ALSDTO resizeLC(ALSDTO alsDTO) {
          LCDTO lc=alsDTO.getLC();
          lc.setHeight(alsDTO.getHeight());
          lc.setDepth(alsDTO.getDepth());
          lc.setUpperFrame(alsDTO.getUpperFrame());
          lc.setBottomFrame(alsDTO.getBottomFrame());
          lc.setColorBody(String.valueOf(Colors.valueOf(alsDTO.getColorBody())));
+         lcService.updateLCsizeAndDescription(lc);
+         alsDTO.setLC(lc);
+         return alsDTO;
     }
 
-    private void changeLBs(ALSDTO alsDTO) {
+    public ALSDTO resizeLBs(ALSDTO alsDTO)  {
         List<LBDTO> lbList=alsDTO.getLbList();
         PositionLC positionLC= PositionLC.valueOf(alsDTO.getPositionLC());
+
         for (int i = 1; i <= lbList.size(); i++) {
             LBDTO lbDTO=lbList.get(i-1);
-            lbService.updateLBsizeAndDescription(lbDTO);
-            if (positionLC.equals(PositionLC.RIGHT) || (positionLC.equals(PositionLC.CENTER)&& i<=lbList.size()/2)) {
-                lbDTO.setDirectionDoorOpening(String.valueOf(DirectionDoorOpening.LEFT));
-            } else if(positionLC.equals(PositionLC.LEFT)){
-                lbDTO.setDirectionDoorOpening(String.valueOf(DirectionDoorOpening.RIGHT));
-            }
             lbDTO.setHeight(alsDTO.getHeight());
             lbDTO.setDepth(alsDTO.getDepth());
             lbDTO.setUpperFrame(alsDTO.getUpperFrame());
             lbDTO.setBottomFrame(alsDTO.getBottomFrame());
             lbDTO.setColorBody(String.valueOf(Colors.valueOf(alsDTO.getColorBody())));
             lbDTO.setColorDoor(String.valueOf(Colors.valueOf(alsDTO.getColorDoor())));
+            lbService.updateLBsizeAndDescription(lbDTO);
+            if (positionLC.equals(PositionLC.RIGHT) || (positionLC.equals(PositionLC.CENTER)&& i<=lbList.size()/2)) {
+                lbDTO.setDirectionDoorOpening(String.valueOf(DirectionDoorOpening.LEFT));
+            } else if(positionLC.equals(PositionLC.LEFT)){
+                lbDTO.setDirectionDoorOpening(String.valueOf(DirectionDoorOpening.RIGHT));
+            }
         }
+        return alsDTO;
     }
    @Transactional
     public ALSDTO addNewLBandSaveALS(Long alsId) {
@@ -134,8 +136,8 @@ public class ALSService {
         if (alsOptional.isPresent()) {als = alsOptional.get();}
         LBDTO lb=lbService.createLB(als.getHeight(),als.getDepth(), als.getUpperFrame(), als.getBottomFrame(),
                 Colors.valueOf(als.getColorBody()),Colors.valueOf(als.getColorDoor()));
-        addLB(als,lb);
-        return saveALS(als);
+       addLB(als, lb);
+       return saveALS(als);
     }
     public static ALSDTO addLB(ALSDTO als, LBDTO lb) {
         if (als.getPositionLC().equals(String.valueOf(PositionLC.LEFT))) {
@@ -162,7 +164,7 @@ public class ALSService {
         return als;
     }
     @Transactional
-    public ALSDTO deleteLBandSaveALS(Long alsId, Long lbId) {
+    public ALSDTO deleteLBandSaveALS(Long alsId, Long lbId){
         ALSDTO als = deleteLBfromALS(alsId, lbId);
         return saveALS(als);
     }
@@ -194,9 +196,7 @@ public class ALSService {
     public List<Object> replaceLBandSaveALS(Long alsId , Long lbIlb, LBDTO lb) {
         Optional<ALSDTO> alsOptional = findById(alsId);
         ALSDTO als = null;
-        if (alsOptional.isPresent()) {
-            als = alsOptional.get();
-        }
+        if (alsOptional.isPresent()) als = alsOptional.get();
         lbService.updateLBsizeAndDescription(lb);
         int newLBId=0;
         for(LBDTO lbDto:als.getLbList()){
@@ -211,7 +211,6 @@ public class ALSService {
                 break;
             }
         }
-        System.out.println(als.getLbList());
         saveALS(als);
         List<Object> ALSlbIdList=new ArrayList<>();
         ALSlbIdList.add(als);

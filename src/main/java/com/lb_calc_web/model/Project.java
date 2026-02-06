@@ -14,6 +14,7 @@ public class Project {
     private String description;
     private String company;
     private LocalDate createdDate;
+    private LocalDate updatedDate;
     @OneToMany(mappedBy = "project",
              orphanRemoval = true
            )
@@ -67,6 +68,14 @@ public class Project {
 
     public void setQuantityALS(Set<ProjectALS> quantityALS) {
         this.quantityALS = quantityALS;
+    }
+
+    public LocalDate getUpdatedDate() {
+        return updatedDate;
+    }
+
+    public void setUpdatedDate(LocalDate updatedDate) {
+        this.updatedDate = updatedDate;
     }
 
     @Override

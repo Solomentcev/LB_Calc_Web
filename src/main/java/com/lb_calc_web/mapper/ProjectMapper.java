@@ -19,6 +19,7 @@ public class ProjectMapper {
         projectDTO.setName(project.getName());
         projectDTO.setDescription(project.getDescription());
         projectDTO.setCreatedDate(project.getCreatedDate());
+        projectDTO.setUpdatedDate(project.getUpdatedDate());
         projectDTO.setAlsList(getALSDTOListFromProjectALSSet(project.getQuantityALS()));
         projectDTO.setQuantityALS(getALSDTOMapFromProjectALSSet(project.getQuantityALS()));
 
@@ -31,6 +32,7 @@ public class ProjectMapper {
         project.setCompany(projectDTO.getCompany());
         project.setDescription(projectDTO.getDescription());
         project.setCreatedDate(projectDTO.getCreatedDate());
+        project.setUpdatedDate(projectDTO.getUpdatedDate());
         return project;
     }
     public static Set<ProjectALS> getProjectALSSetFromALSDTOMap(Map<ALSDTO, Integer> quantityALS, ProjectDTO projectDTO) {
@@ -50,6 +52,7 @@ public class ProjectMapper {
             projectDTO.setName(project.getName());
             projectDTO.setDescription(project.getDescription());
             projectDTO.setCreatedDate(project.getCreatedDate());
+            projectDTO.setUpdatedDate(project.getUpdatedDate());
             projectDTOList.add(projectDTO);
         }
         return projectDTOList;

@@ -7,7 +7,7 @@
 
 ## Цели
 Практическое освоение навыков работы с фреймворком Spring, шаблонизатором Thymeleaf, CRUD операциями с базой данных 
-MySQL c Hibernate, сериализация/десериализация объектов JSON, XML с Jackson API,
+MySQL  Spring Data JPA,
 с файлами Java IO, системой контроля версий GIT, обработкой исключений, применением принципов ООП,
 шаблоном проектирования MVC.
 
@@ -15,6 +15,5 @@ MySQL c Hibernate, сериализация/десериализация объ�
 * Spring Boot
 * Spring Data JPA
 * Thymeleaf
-* Hibernate
 * MySQL
 

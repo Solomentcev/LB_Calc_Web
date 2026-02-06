@@ -39,7 +39,8 @@ public class ProjectService {
     }
 
     public Optional<ProjectDTO> findById(Long id) {
-        Project project = projectRepository.findById(id).orElseThrow();
+        Project project = projectRepository.findById(id).orElseThrow(()->
+                new NoSuchElementException("Проект с id%d не найден".formatted(id)));
         ProjectDTO projectDTO = ProjectMapper.toProjectDTO(project);
         return Optional.of(projectDTO);
     }
@@ -47,10 +48,11 @@ public class ProjectService {
         projectRepository.deleteById(id);
     }
 
-    public ProjectDTO createProject() {
+    public ProjectDTO createProject(){
         ProjectDTO project = new ProjectDTO();
         project.setCompany("Company"+new AtomicInteger(0).getAndIncrement());
         project.setCreatedDate(LocalDate.now());
+        project.setUpdatedDate(LocalDate.now());
         project.setName(project.getCompany()+"_"+project.getCreatedDate());
         ALSDTO als=alsService.createALS();
         project.getAlsList().add(als);
@@ -66,6 +68,7 @@ public class ProjectService {
         updateProjectDescription(projectDTO);
         Project project=ProjectMapper.toProject(projectDTO);
         if(projectDTO.getId()==0){
+            project.setUpdatedDate(LocalDate.now());
             projectRepository.save(project);
             projectDTO.setId(project.getId());
             project.getQuantityALS().addAll(ProjectMapper.getProjectALSSetFromALSDTOMap(projectDTO.getQuantityALS(),projectDTO));
@@ -74,6 +77,7 @@ public class ProjectService {
         else{
             project.getQuantityALS().clear();
             project.getQuantityALS().addAll(ProjectMapper.getProjectALSSetFromALSDTOMap(projectDTO.getQuantityALS(),projectDTO));
+            project.setUpdatedDate(LocalDate.now());
             projectALSRepository.saveAll(project.getQuantityALS());
             projectRepository.save(project);
         }
@@ -81,7 +85,7 @@ public class ProjectService {
         return projectDTO;
     }
     @Transactional
-    public ProjectDTO addNewALSandSaveProject(Long projectId) {
+    public ProjectDTO addNewALSandSaveProject(Long projectId){
         Optional<ProjectDTO> projectOptional = findById(projectId);
         ProjectDTO project = null;
         if (projectOptional.isPresent()) {

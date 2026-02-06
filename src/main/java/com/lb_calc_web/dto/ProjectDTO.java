@@ -9,6 +9,7 @@ public class ProjectDTO {
     private String description;
     private String company;
     private LocalDate createdDate;
+    private LocalDate updatedDate;
     private List<ALSDTO> alsList = new ArrayList<>();
     private Map<ALSDTO, Integer> quantityALS =new HashMap<>();
 
@@ -53,6 +54,14 @@ public class ProjectDTO {
 
     public void setCreatedDate(LocalDate createdDate) {
         this.createdDate = createdDate;
+    }
+
+    public LocalDate getUpdatedDate() {
+        return updatedDate;
+    }
+
+    public void setUpdatedDate(LocalDate updatedDate) {
+        this.updatedDate = updatedDate;
     }
 
     public List<ALSDTO> getAlsList() {

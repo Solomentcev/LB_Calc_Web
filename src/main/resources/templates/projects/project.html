@@ -26,6 +26,7 @@
                     <th>Company</th>
                     <th>Description</th>
                     <th>Created Date</th>
+                    <th>Updated Date</th>
                     <th>Action</th>
                 </tr>
                 </thead>
@@ -33,7 +34,7 @@
                 <tr>
                     <td>
                         <label>
-                            <input size="3" type="text" th:field="*{id}" readonly="readonly">
+                            <input size="3" type="number" th:field="*{id}" readonly="readonly">
                         </label>
                     </td>
                     <td>
@@ -51,6 +52,11 @@
                             <input type="text" th:field="*{createdDate}" readonly="readonly">
                         </label>
                     </td>
+                    <td>
+                        <label>
+                            <input type="text" th:field="*{updatedDate}" readonly="readonly">
+                        </label>
+                    </td>
                     <td hidden>
                         <label>
                             <input type="hidden" th:field="*{name}" readonly="readonly">
@@ -65,519 +71,568 @@
             </table>
         </div>
         <div th:each="als, item: ${project.alsList}">
-            <div class="row">
-                <div class="col">
-                    <table border="1" class="table table-striped table-responsive-md">
-                        <tr>
-                            <th colspan="2">
-                                <h4 th:text="'#'+${item.index+1}+'-'+${als.name}">Автоматическая камера хранения</h4>
-                            </th>
-                        </tr>
-                        <tr>
-                            <th>ID</th>
-                            <td>
-                                <label>
-                                    <input size="3" th:name="|alsList[${item.index}].id|" th:value="${als.getId()}"
-                                           readonly="readonly"/>
-                                </label>
-                            </td>
-                            <!--
-                                <td rowspan="15">
-                                    <div class="container-fluid">
-                                        <img class="img-thumbnail"1940
-                                             th:src="'data:image/png;base64,'+${als.getStringALSImage()}"
-                                             alt="ALS Image">
-                                    </div>
+            <div>
+
+                <div class="row">
+                    <div class="col">
+                        <p class="alert alert-danger"
+                           th:if="${projectErrors}!=null
+                            and !${projectErrors[__${item.index}__].get(0).get(0).isEmpty()}"
+                           th:text="${projectErrors[__${item.index}__].get(0)}"></p>
+                        <table border="1" class="table table-striped table-responsive-md">
+                            <tr>
+                                <th colspan="2">
+                                    <h4 th:text="'#'+${item.index+1}+'-'+${als.name}">Автоматическая камера
+                                        хранения</h4>
+                                </th>
+                            </tr>
+                            <tr>
+                                <th>ID</th>
+                                <td>
+                                    <label>
+                                        <input type="number" size="3" th:name="|alsList[${item.index}].id|"
+                                               th:value="${als.getId()}"
+                                               readonly="readonly"/>
+                                    </label>
                                 </td>
-                            </!-->
-                        </tr>
-                        <tr>
-                            <th>Name</th>
-                            <td>
-                                <label>
-                                    <input th:size="30" th:name="|alsList[${item.index}].name|"
-                                           th:value="${als.getName()}"
-                                           readonly="readonly">
-                                </label>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th hidden="hidden">Description</th>
-                            <td hidden="hidden">
-                                <label>
-                                    <input th:name="|alsList[${item.index}].description|"
-                                           th:value="${als.getDescription()}"
-                                           readonly="readonly">
-                                </label>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>PositionLC</th>
-                            <td>
-                                <label>
-                                     <select th:field="*{alsList[__${item.index}__].positionLC}">
-                                        <option th:each="positionLC:${positionLCList}"
-                                                th:value="${positionLC}"
-                                                th:text="${positionLC}">
-                                        </option>
-                                    </select>
-                                </label>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>CountCells</th>
-                            <td>
-                                <label>
-                                    <input size="3" th:name="|alsList[${item.index}].countCells|"
-                                           th:value="${als.getCountCells()}"
-                                           readonly="readonly">
-                                </label>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>Height</th>
-                            <td>
-                                <label>
-                                    <input size="4" type="text" th:name="|alsList[${item.index}].height|"
-                                           th:value="${als.getHeight()}">
-                                </label>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>Width</th>
-                            <td>
-                                <label>
-                                    <input size="4" type="text" th:name="|alsList[${item.index}].width|"
-                                           th:value="${als.getWidth()}"
-                                           readonly="readonly">
-                                </label>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>Depth</th>
-                            <td>
-                                <label>
-                                    <input size="4" type="text" th:name="|alsList[${item.index}].depth|"
-                                           th:value="${als.getDepth()}">
-                                </label>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>UpperFrame</th>
-                            <td>
-                                <label>
-                                    <input size="4" type="text" th:name="|alsList[${item.index}].upperFrame|"
-                                           th:value="${als.getUpperFrame()}">
-                                </label>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>BottomFrame</th>
-                            <td>
-                                <label>
-                                    <input size="4" type="text" th:name="|alsList[${item.index}].bottomFrame|"
-                                           th:value="${als.getBottomFrame()}">
-                                </label>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>DepthCell</th>
-                            <td>
-                                <label>
-                                    <input size="4" type="text" th:name="|alsList[${item.index}].depthCell|"
-                                           th:value="${als.getDepthCell()}"
-                                           readonly="readonly">
-                                </label>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>ColorBody</th>
-                            <td>
-                                <label>
-                                      <select th:field="*{alsList[__${item.index}__].colorBody}">
-                                        <option th:each="color:${colorsList}"
-                                                th:text="${color}"
-                                                th:value="${color}">
-                                        </option>
-                                    </select>
-
-                                </label>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>ColorDoor</th>
-                            <td>
-                                <label>
-                                    <select th:field="*{alsList[__${item.index}__].colorDoor}">
-                                        <option th:each="color:${colorsList}"
-                                                th:value="${color}"
-                                                th:text="${color}">
-                                        </option>
-                                    </select>
-
-                                </label>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>Quantity</th>
-                            <td th:text="1">Quantity</td>
-                        </tr>
-                        <tr>
-                            <th>Action</th>
-                            <td>
-                                <a th:href="@{/projects/{id}/alss/{alsId} (id=${project.getId()}, alsId=${als.getId()})}"
-                                   class="btn btn-primary">Edit</a>
-                                &nbsp
-                                <a th:href="@{/projects/{id}/alss/{alsId}/delete (id=${project.getId()}, alsId=${als.getId()})}"
-                                   class="btn btn-danger">Delete</a>
-                            </td>
-                        </tr>
-                    </table>
-                </div>
-                <div class="col">
-
-                    <table border="1" class="table table-striped table-responsive-md">
-                        <tr>
-                            <th colspan="2">
-                                <h5 th:text="${als.LC.description}">Модуль управления</h5>
-                            </th>
-                        </tr>
-                        <tr>
-                            <th>ID</th>
-                            <td>
-                                <label>
-                                    <input type="text" size="3"
-                                           th:name="|alsList[${item.index}].LC.id|"
-                                           th:value="${als.getLC().id}"
-                                           readonly="readonly">
-                                </label>
-                            </td>
-                            <!--
-                                <td rowspan="13">
-                                    <div class="container-fluid">
-                                        <img class="img-thumbnail"
-                                             th:src="'data:image/png;base64,'+${als.LC.getStringLCImage()}"
-                                             alt="LC Image">
-                                    </div>
+                                <!--
+                                    <td rowspan="15">
+                                        <div class="container-fluid">
+                                            <img class="img-thumbnail"1940
+                                                 th:src="'data:image/png;base64,'+${als.getStringALSImage()}"
+                                                 alt="ALS Image">
+                                        </div>
+                                    </td>
+                                </!-->
+                            </tr>
+                            <tr>
+                                <th>Name</th>
+                                <td>
+                                    <label>
+                                        <input th:size="30" th:name="|alsList[${item.index}].name|"
+                                               th:value="${als.getName()}"
+                                               readonly="readonly">
+                                    </label>
                                 </td>
-                            </!-->
-                        </tr>
-                        <tr>
-                            <th>Name</th>
-                            <td>
-                                <label>
-                                    <input size="30" type="text"
-                                           th:name="|alsList[${item.index}].LC.name|"
-                                           th:value="${als.LC.name}"
-                                           readonly="readonly">
-                                </label>
-                            </td>
-                        </tr>
-                        <tr hidden="hidden">
-                            <th>Description</th>
-                            <td>
-                                <label>
-                                    <input size="30" type="text"
-                                           th:name="|alsList[${item.index}].LC.description|"
-                                           th:value="${als.LC.description}">
-                                </label>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>Height</th>
-                            <td>
-                                <label>
-                                    <input type="text" size="4"
-                                           th:name="|alsList[${item.index}].LC.height|"
-                                           th:value="${als.LC.height}"
-                                           readonly="readonly">
-                                </label>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>Width</th>
-                            <td>
-                                <label>
-                                    <input type="text" size="4"
-                                           th:name="|alsList[${item.index}].LC.width|"
-                                           th:value="${als.LC.width}" readonly="readonly">
-                                </label>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>Depth</th>
-                            <td>
-                                <label>
-                                    <input type="text" size="4"
-                                           th:name="|alsList[${item.index}].LC.depth|"
-                                           th:value="${als.LC.depth}" readonly="readonly">
-                                </label>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>UpperFrame</th>
-                            <td>
-                                <label>
-                                    <input type="text" size="4"
-                                           th:name="|alsList[${item.index}].LC.upperFrame|"
-                                           th:value="${als.LC.upperFrame}" readonly="readonly">
-                                </label>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>BottomFrame</th>
-                            <td>
-                                <label>
-                                    <input type="text" size="4"
-                                           th:name="|alsList[${item.index}].LC.bottomFrame|"
-                                           th:value="${als.LC.bottomFrame}" readonly="readonly">
-                                </label>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>ColorBody</th>
-                            <td>
-                                <label>
-                                    <input type="text"
-                                           th:name="|alsList[${item.index}].LC.colorBody|"
-                                           th:value="${als.LC.colorBody}"
-                                           readonly="readonly">
-                                </label>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>Display</th>
-                            <td>
-                                <label>
-                                    <select th:field="*{alsList[__${item.index}__].LC.display}">
-                                        <option th:each="display:${displayList}"
-                                                th:value="${display}" th:text="${display}">
-                                        </option>
-                                    </select>
+                            </tr>
+                            <tr>
+                                <th hidden="hidden">Description</th>
+                                <td hidden="hidden">
+                                    <label>
+                                        <input th:name="|alsList[${item.index}].description|"
+                                               th:value="${als.getDescription()}"
+                                               readonly="readonly">
+                                    </label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>PositionLC</th>
+                                <td>
+                                    <label>
+                                        <select th:field="*{alsList[__${item.index}__].positionLC}">
+                                            <option th:each="positionLC:${positionLCList}"
+                                                    th:value="${positionLC}"
+                                                    th:text="${positionLC}">
+                                            </option>
+                                        </select>
+                                    </label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>CountCells</th>
+                                <td>
+                                    <label>
+                                        <input type="number" size="3" th:name="|alsList[${item.index}].countCells|"
+                                               th:value="${als.getCountCells()}"
+                                               readonly="readonly">
+                                    </label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Height</th>
+                                <td>
+                                    <label>
+                                        <input size="4" type="number" th:name="|alsList[${item.index}].height|"
+                                               th:value="${als.getHeight()}">
+                                    </label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Width</th>
+                                <td>
+                                    <label>
+                                        <input size="4" type="number" th:name="|alsList[${item.index}].width|"
+                                               th:value="${als.getWidth()}"
+                                               readonly="readonly">
+                                    </label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Depth</th>
+                                <td>
+                                    <label>
+                                        <input size="4" type="number" th:name="|alsList[${item.index}].depth|"
+                                               th:value="${als.getDepth()}">
+                                    </label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>UpperFrame</th>
+                                <td>
+                                    <label>
+                                        <input size="4" type="number" th:name="|alsList[${item.index}].upperFrame|"
+                                               th:value="${als.getUpperFrame()}">
+                                    </label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>BottomFrame</th>
+                                <td>
+                                    <label>
+                                        <input size="4" type="number" th:name="|alsList[${item.index}].bottomFrame|"
+                                               th:value="${als.getBottomFrame()}">
+                                    </label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>DepthCell</th>
+                                <td>
+                                    <label>
+                                        <input size="4" type="number" th:name="|alsList[${item.index}].depthCell|"
+                                               th:value="${als.getDepthCell()}"
+                                               readonly="readonly">
+                                    </label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>ColorBody</th>
+                                <td>
+                                    <label>
+                                        <select th:field="*{alsList[__${item.index}__].colorBody}">
+                                            <option th:each="color:${colorsList}"
+                                                    th:text="${color}"
+                                                    th:value="${color}">
+                                            </option>
+                                        </select>
 
-                                </label>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>Payment</th>
-                            <td>
-                                <label>
-                                  <select th:field="*{alsList[__${item.index}__].LC.payment}">
-                                        <option th:each="payment:${paymentList}"
-                                                th:value="${payment}" th:text="${payment}">
-                                        </option>
-                                    </select>
+                                    </label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>ColorDoor</th>
+                                <td>
+                                    <label>
+                                        <select th:field="*{alsList[__${item.index}__].colorDoor}">
+                                            <option th:each="color:${colorsList}"
+                                                    th:value="${color}"
+                                                    th:text="${color}">
+                                            </option>
+                                        </select>
 
-                                </label>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>Printer</th>
-                            <td>
-                                <label>
-                                    <input type="checkbox"
-                                           th:id="${als.LC.printer}"
-                                           th:name="|alsList[${item.index}].LC.printer|"
-                                           th:field="*{alsList[__${item.index}__].LC.printer}">
+                                    </label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Quantity</th>
+                                <td th:text="1">Quantity</td>
+                            </tr>
+                            <tr>
+                                <th>Action</th>
+                                <td>
+                                    <a th:href="@{/projects/{id}/alss/{alsId} (id=${project.getId()}, alsId=${als.getId()})}"
+                                       class="btn btn-primary">Edit</a>
+                                    &nbsp
+                                    <a th:href="@{/projects/{id}/alss/{alsId}/delete (id=${project.getId()}, alsId=${als.getId()})}"
+                                       class="btn btn-danger">Delete</a>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col">
+                        <p class="alert alert-danger"
+                           th:if="${projectErrors}!=null
+                                and !${projectErrors[__${item.index}__].get(1).get(0).isEmpty()}"
+                           th:text="${projectErrors[__${item.index}__].get(1)}">
+
+                        </p>
+                        <table border="1" class="table table-striped table-responsive-md">
+                            <tr>
+                                <th colspan="2">
+                                    <h5 th:text="${als.LC.description}">Модуль управления</h5>
+                                </th>
+                            </tr>
+                            <tr>
+                                <th>ID</th>
+                                <td>
+                                    <label>
+                                        <input type="number" size="3"
+                                               th:name="|alsList[${item.index}].LC.id|"
+                                               th:value="${als.getLC().id}"
+                                               readonly="readonly">
+                                    </label>
+                                </td>
+                                <!--
+                                    <td rowspan="13">
+                                        <div class="container-fluid">
+                                            <img class="img-thumbnail"
+                                                 th:src="'data:image/png;base64,'+${als.LC.getStringLCImage()}"
+                                                 alt="LC Image">
+                                        </div>
+                                    </td>
+                                </!-->
+                            </tr>
+                            <tr>
+                                <th>Name</th>
+                                <td>
+                                    <label>
+                                        <input size="30" type="text"
+                                               th:name="|alsList[${item.index}].LC.name|"
+                                               th:value="${als.LC.name}"
+                                               readonly="readonly">
+                                    </label>
+                                </td>
+                            </tr>
+                            <tr hidden="hidden">
+                                <th>Description</th>
+                                <td>
+                                    <label>
+                                        <input size="30" type="text"
+                                               th:name="|alsList[${item.index}].LC.description|"
+                                               th:value="${als.LC.description}">
+                                    </label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Height</th>
+                                <td>
+                                    <label>
+                                        <input type="number" size="4"
+                                               th:name="|alsList[${item.index}].LC.height|"
+                                               th:value="${als.LC.height}"
+                                               readonly="readonly">
+                                    </label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Width</th>
+                                <td>
+                                    <label>
+                                        <input type="number" size="4"
+                                               th:name="|alsList[${item.index}].LC.width|"
+                                               th:value="${als.LC.width}" readonly="readonly">
+                                    </label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Depth</th>
+                                <td>
+                                    <label>
+                                        <input type="number" size="4"
+                                               th:name="|alsList[${item.index}].LC.depth|"
+                                               th:value="${als.LC.depth}" readonly="readonly">
+                                    </label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>UpperFrame</th>
+                                <td>
+                                    <label>
+                                        <input type="number" size="4"
+                                               th:name="|alsList[${item.index}].LC.upperFrame|"
+                                               th:value="${als.LC.upperFrame}" readonly="readonly">
+                                    </label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>BottomFrame</th>
+                                <td>
+                                    <label>
+                                        <input type="number" size="4"
+                                               th:name="|alsList[${item.index}].LC.bottomFrame|"
+                                               th:value="${als.LC.bottomFrame}" readonly="readonly">
+                                    </label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>ColorBody</th>
+                                <td>
+                                    <label>
+                                        <input type="text"
+                                               th:name="|alsList[${item.index}].LC.colorBody|"
+                                               th:value="${als.LC.colorBody}"
+                                               readonly="readonly">
+                                    </label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Display</th>
+                                <td>
+                                    <label>
+                                        <select th:field="*{alsList[__${item.index}__].LC.display}">
+                                            <option th:each="display:${displayList}"
+                                                    th:value="${display}" th:text="${display}">
+                                            </option>
+                                        </select>
+
+                                    </label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Payment</th>
+                                <td>
+                                    <label>
+                                        <select th:field="*{alsList[__${item.index}__].LC.payment}">
+                                            <option th:each="payment:${paymentList}"
+                                                    th:value="${payment}" th:text="${payment}">
+                                            </option>
+                                        </select>
+
+                                    </label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Printer</th>
+                                <td>
+                                    <label>
+                                        <input type="checkbox"
+                                               th:id="${als.LC.printer}"
+                                               th:name="|alsList[${item.index}].LC.printer|"
+                                               th:field="*{alsList[__${item.index}__].LC.printer}">
 
 
-                                </label>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>BarReader</th>
-                            <td>
-                                <label>
-                                    <select th:field="*{alsList[__${item.index}__].LC.barReader}">
-                                        <option th:each="barReader:${barReaderList}" th:value="${barReader}"
-                                                th:text="${barReader}">
-                                        </option>
-                                    </select>
-                                </label>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>RfidReader</th>
-                            <td>
-                                <label>
-                                    <input type="checkbox"
-                                           th:id="${als.LC.rfidReader}"
-                                           th:name="|alsList[${item.index}].LC.rfidReader|"
-                                           th:field="*{alsList[__${item.index}__].LC.rfidReader}"
-                                           th:value="${als.LC.rfidReader}"
-                                           th:checked="${als.LC.rfidReader}">
-                                </label>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <a th:href="@{/projects/{projectId}/alss/{alsId}/lcs/{lcId}
+                                    </label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>BarReader</th>
+                                <td>
+                                    <label>
+                                        <select th:field="*{alsList[__${item.index}__].LC.barReader}">
+                                            <option th:each="barReader:${barReaderList}" th:value="${barReader}"
+                                                    th:text="${barReader}">
+                                            </option>
+                                        </select>
+                                    </label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>RfidReader</th>
+                                <td>
+                                    <label>
+                                        <input type="checkbox"
+                                               th:id="${als.LC.rfidReader}"
+                                               th:name="|alsList[${item.index}].LC.rfidReader|"
+                                               th:field="*{alsList[__${item.index}__].LC.rfidReader}"
+                                               th:value="${als.LC.rfidReader}"
+                                               th:checked="${als.LC.rfidReader}">
+                                    </label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <a th:href="@{/projects/{projectId}/alss/{alsId}/lcs/{lcId}
                                 (projectId=${project.getId()},alsId=${als.getId()},
                                 lcId=${als.getLC().getId()})}"
-                                   class="btn btn-primary">Edit LC</a>
-                            </td>
-                        </tr>
-                    </table>
-                </div>
-                <div class="col">
-                    <div class="container-fluid">
-                        <img class="img-thumbnail"
-                             th:src="'data:image/png;base64,'+${als.getStringALSImage()}"
-                             alt="ALS Image">
+                                       class="btn btn-primary">Edit LC</a>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col">
+                        <div class="container-fluid">
+                            <img class="img-thumbnail"
+                                 th:src="'data:image/png;base64,'+${als.getStringALSImage()}"
+                                 alt="ALS Image">
+                        </div>
                     </div>
                 </div>
-            </div>
-            <br/>
-            <div>
-                <div class="container-fluid">
+                <br/>
+                <div>
                     <h3>Модули хранения:</h3>
-                    <table border="1" class="table table-striped table-responsive-md">
-                        <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Name</th>
-                            <th hidden="hidden">Description</th>
-                            <th>Type</th>
-                            <th hidden="hidden">ShelfThick</th>
-                            <th>CountCells</th>
+                    <div class="container-fluid"  th:each="lb, lbs:${als.lbList}">
+                        <div >
+                            <p class="alert alert-danger"
+                               th:if="${projectErrors}!=null and !${projectErrors[__${item.index}__].get(2).isEmpty()}
+                               and !${projectErrors[__${item.index}__].get(2)[__${lbs.index}__].isEmpty()}"
+                               th:text="${projectErrors[__${item.index}__].get(2)[__${lbs.index}__]}">
 
-                            <th hidden="hidden">Height</th>
-                            <th>Width</th>
-                            <th hidden="hidden">Depth</th>
-                            <th hidden="hidden">UpperFrame</th>
-                            <th hidden="hidden">BottomFrame</th>
-                            <th>HeightCell</th>
-                            <th>WidthCell</th>
-                            <th>DepthCell</th>
-                            <th>DirectionDoorOpening</th>
-                            <th>ColorBody</th>
-                            <th>ColorDoor</th>
-                            <th>Quantity</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr th:each="lb, lbs:${als.lbList}">
-                            <td>
-                                <label>
-                                    <input size="3" th:name="|alsList[${item.index}].lbList[${lbs.index}].id|" th:value="${lb.id}"
-                                           readonly="readonly"/>
-                                </label>
-                            </td>
-                            <td>
-                                <label>
-                                    <input size="30" th:name="|alsList[${item.index}].lbList[${lbs.index}].name|" th:value="${lb.name}"
-                                           readonly="readonly"/>
-                                </label>
-                            </td>
-                            <td hidden="hidden">
-                                <label>
-                                    <input size="50" th:name="|alsList[${item.index}].lbList[${lbs.index}].description|" th:value="${lb.getDescription()}"
-                                           readonly="readonly"/>
-                                </label>
-                            </td>
-                            <td>
-                                <label>
-                                    <select th:field="*{alsList[__${item.index}__].lbList[__${lbs.index}__].type}">
-                                        <option th:each="type:${typeList}"
-                                                th:value="${type}"
-                                                th:text="${type}">
-                                        </option>
-                                    </select>
+                            </p>
+                            <table border="1" class="table table-striped table-responsive-md">
+                                <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th hidden="hidden">Description</th>
+                                    <th>Type</th>
+                                    <th hidden="hidden">ShelfThick</th>
+                                    <th>CountCells</th>
 
-                                </label>
-                            </td>
-                            <td hidden="hidden">
-                                <label>
-                                    <input size="5" th:name="|alsList[${item.index}].lbList[${lbs.index}].shelfThick|" th:value="${lb.getShelfThick()}"/>
-                                </label>
-                            </td>
-                            <td>
-                                <label>
-                                    <input size="2" th:name="|alsList[${item.index}].lbList[${lbs.index}].countCells|" th:value="${lb.getCountCells()}"/>
-                                </label>
-                            </td>
+                                    <th hidden="hidden">Height</th>
+                                    <th>Width</th>
+                                    <th hidden="hidden">Depth</th>
+                                    <th hidden="hidden">UpperFrame</th>
+                                    <th hidden="hidden">BottomFrame</th>
+                                    <th>HeightCell</th>
+                                    <th>WidthCell</th>
+                                    <th>DepthCell</th>
+                                    <th>DirectionDoorOpening</th>
+                                    <th>ColorBody</th>
+                                    <th>ColorDoor</th>
+                                    <th>Quantity</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr>
+                                    <td>
+                                        <label>
+                                            <input type="number" size="3"
+                                                   th:name="|alsList[${item.index}].lbList[${lbs.index}].id|"
+                                                   th:value="${lb.id}"
+                                                   readonly="readonly"/>
+                                        </label>
+                                    </td>
+                                    <td>
+                                        <label>
+                                            <input size="30"
+                                                   th:name="|alsList[${item.index}].lbList[${lbs.index}].name|"
+                                                   th:value="${lb.name}"
+                                                   readonly="readonly"/>
+                                        </label>
+                                    </td>
+                                    <td hidden="hidden">
+                                        <label>
+                                            <input size="50"
+                                                   th:name="|alsList[${item.index}].lbList[${lbs.index}].description|"
+                                                   th:value="${lb.getDescription()}"
+                                                   readonly="readonly"/>
+                                        </label>
+                                    </td>
+                                    <td>
+                                        <label>
+                                            <select th:field="*{alsList[__${item.index}__].lbList[__${lbs.index}__].type}">
+                                                <option th:each="type:${typeList}"
+                                                        th:value="${type}"
+                                                        th:text="${type}">
+                                                </option>
+                                            </select>
 
-                            <td hidden="hidden">
-                                <label>
-                                    <input size="4" th:name="|alsList[${item.index}].lbList[${lbs.index}].height|" th:value="${lb.getHeight()}"
-                                           readonly="readonly"/>
-                                </label>
-                            </td>
-                            <td>
-                                <label>
-                                    <input size="4" th:name="|alsList[${item.index}].lbList[${lbs.index}].width|"
-                                           th:value="${lb.getWidth()}"/>
-                                </label>
-                            </td>
-                            <td hidden="hidden">
-                                <label>
-                                    <input size="4" th:name="|alsList[${item.index}].lbList[${lbs.index}].depth|" th:value="${lb.getDepth()}"
-                                           readonly="readonly"/>
-                                </label>
-                            </td>
-                            <td hidden="hidden">
-                                <label>
-                                    <input size="3" th:name="|alsList[${item.index}].lbList[${lbs.index}].upperFrame|" th:value="${lb.getUpperFrame()}"
-                                           readonly="readonly"/>
-                                </label>
-                            </td>
-                            <td hidden="hidden">
-                                <label>
-                                    <input size="3" th:name="|alsList[${item.index}].lbList[${lbs.index}].bottomFrame|" th:value="${lb.getBottomFrame()}"
-                                           readonly="readonly"/>
-                                </label>
-                            </td>
-                            <td>
-                                <label>
-                                    <input size="4" th:name="|alsList[${item.index}].lbList[${lbs.index}].heightCell|" th:value="${lb.getHeightCell()}"
-                                           readonly="readonly"/>
-                                </label>
-                            </td>
-                            <td>
-                                <label>
-                                    <input size="4" th:name="|alsList[${item.index}].lbList[${lbs.index}].widthCell|" th:value="${lb.getWidthCell()}"
-                                           readonly="readonly"/>
-                                </label>
-                            </td>
-                            <td>
-                                <label>
-                                    <input size="4" th:name="|alsList[${item.index}].lbList[${lbs.index}].depthCell|" th:value="${lb.getDepthCell()}"
-                                           readonly="readonly"/>
-                                </label>
-                            </td>
-                            <td>
-                                <label>
-                                    <input th:name="|alsList[${item.index}].lbList[${lbs.index}].directionDoorOpening|"
-                                           th:value="${lb.getDirectionDoorOpening()}"
-                                           readonly="readonly"/>
-                                </label>
-                            </td>
-                            <td>
-                                <label>
-                                    <input th:name="|alsList[${item.index}].lbList[${lbs.index}].colorBody|" th:value="${lb.getColorBody()}"
-                                           readonly="readonly"/>
-                                </label>
-                            </td>
-                            <td>
-                                <label>
-                                    <input th:name="|alsList[${item.index}].lbList[${lbs.index}].colorDoor|"
-                                           th:value="${lb.getColorDoor()}"
-                                           readonly="readonly"/>
-                                </label>
-                            </td>
-                            <td th:text="1">Quantity</td>
-                            <td>
-                                <a th:href="@{/projects/{projectId}/alss/{alsId}/lbs/{lbId} (alsId=${als.getId()},
+                                        </label>
+                                    </td>
+                                    <td hidden="hidden">
+                                        <label>
+                                            <input type="number" size="5"
+                                                   th:name="|alsList[${item.index}].lbList[${lbs.index}].shelfThick|"
+                                                   th:value="${lb.getShelfThick()}"/>
+                                        </label>
+                                    </td>
+                                    <td>
+                                        <label>
+                                            <input type="number" size="2"
+                                                   th:name="|alsList[${item.index}].lbList[${lbs.index}].countCells|"
+                                                   th:value="${lb.getCountCells()}"/>
+                                        </label>
+                                    </td>
+
+                                    <td hidden="hidden">
+                                        <label>
+                                            <input type="number" size="4"
+                                                   th:name="|alsList[${item.index}].lbList[${lbs.index}].height|"
+                                                   th:value="${lb.getHeight()}"
+                                                   readonly="readonly"/>
+                                        </label>
+                                    </td>
+                                    <td>
+                                        <label>
+                                            <input type="number" size="4"
+                                                   th:name="|alsList[${item.index}].lbList[${lbs.index}].width|"
+                                                   th:value="${lb.getWidth()}"/>
+                                        </label>
+                                    </td>
+                                    <td hidden="hidden">
+                                        <label>
+                                            <input type="number" size="4"
+                                                   th:name="|alsList[${item.index}].lbList[${lbs.index}].depth|"
+                                                   th:value="${lb.getDepth()}"
+                                                   readonly="readonly"/>
+                                        </label>
+                                    </td>
+                                    <td hidden="hidden">
+                                        <label>
+                                            <input type="number" size="3"
+                                                   th:name="|alsList[${item.index}].lbList[${lbs.index}].upperFrame|"
+                                                   th:value="${lb.getUpperFrame()}"
+                                                   readonly="readonly"/>
+                                        </label>
+                                    </td>
+                                    <td hidden="hidden">
+                                        <label>
+                                            <input type="number" size="3"
+                                                   th:name="|alsList[${item.index}].lbList[${lbs.index}].bottomFrame|"
+                                                   th:value="${lb.getBottomFrame()}"
+                                                   readonly="readonly"/>
+                                        </label>
+                                    </td>
+                                    <td>
+                                        <label>
+                                            <input type="number" size="4"
+                                                   th:name="|alsList[${item.index}].lbList[${lbs.index}].heightCell|"
+                                                   th:value="${lb.getHeightCell()}"
+                                                   readonly="readonly"/>
+                                        </label>
+                                    </td>
+                                    <td>
+                                        <label>
+                                            <input type="number" size="4"
+                                                   th:name="|alsList[${item.index}].lbList[${lbs.index}].widthCell|"
+                                                   th:value="${lb.getWidthCell()}"
+                                                   readonly="readonly"/>
+                                        </label>
+                                    </td>
+                                    <td>
+                                        <label>
+                                            <input type="number" size="4"
+                                                   th:name="|alsList[${item.index}].lbList[${lbs.index}].depthCell|"
+                                                   th:value="${lb.getDepthCell()}"
+                                                   readonly="readonly"/>
+                                        </label>
+                                    </td>
+                                    <td>
+                                        <label>
+                                            <input th:name="|alsList[${item.index}].lbList[${lbs.index}].directionDoorOpening|"
+                                                   th:value="${lb.getDirectionDoorOpening()}"
+                                                   readonly="readonly"/>
+                                        </label>
+                                    </td>
+                                    <td>
+                                        <label>
+                                            <input th:name="|alsList[${item.index}].lbList[${lbs.index}].colorBody|"
+                                                   th:value="${lb.getColorBody()}"
+                                                   readonly="readonly"/>
+                                        </label>
+                                    </td>
+                                    <td>
+                                        <label>
+                                            <input th:name="|alsList[${item.index}].lbList[${lbs.index}].colorDoor|"
+                                                   th:value="${lb.getColorDoor()}"
+                                                   readonly="readonly"/>
+                                        </label>
+                                    </td>
+                                    <td th:text="1">Quantity</td>
+                                    <td>
+                                        <a th:href="@{/projects/{projectId}/alss/{alsId}/lbs/{lbId} (alsId=${als.getId()},
                                 lbId=${lb.getId()}, projectId=${project.getId()})}"
-                                   class="btn btn-primary">Edit</a>
-                                &nbsp;&nbsp;&nbsp;
-                                <a th:href="@{/projects/{projectId}/alss/{alsId}/lbs/{lbId}/delete (alsId=${als.getId()},lbId=${lb.getId()},
+                                           class="btn btn-primary">Edit</a>
+                                        &nbsp;&nbsp;&nbsp;
+                                        <a th:href="@{/projects/{projectId}/alss/{alsId}/lbs/{lbId}/delete (alsId=${als.getId()},lbId=${lb.getId()},
                                 projectId=${project.getId()}) }"
-                                   class="btn btn-danger">Delete</a>
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
+                                           class="btn btn-danger">Delete</a>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <br/>
                 </div>
             </div>
         </div>

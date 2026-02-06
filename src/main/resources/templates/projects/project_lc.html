@@ -15,6 +15,8 @@
     <form action="#" th:action="@{/projects/{projectId}/alss/{alsId}/lcs/{lcId}/save
     (projectId=${project.getId()},alsId=${als.getId()},lcId=${als.getLC().getId()})}"
           th:object="${lc}" method="post">
+        <p  th:each="erorr, item: ${errors}" class="alert alert-danger"
+            th:text="${item.current}"></p>
          <button type="submit" class="btn btn-primary btn-sm mb-3">Сохранить Модуль управления</button>
         <a th:href="@{/projects/{projectId}/alss/{alsId} (projectId=${project.getId()},alsId=${als.getId()})}"
            class="btn btn-primary btn-sm mb-3"
@@ -33,7 +35,7 @@
                 <th>ID</th>
                 <td>
                     <label>
-                        <input type="text" size="3" th:field="*{id}" readonly="readonly">
+                        <input type="number" size="3" th:field="*{id}" readonly="readonly">
                     </label>
                 </td>
                 <td rowspan="13">
@@ -56,7 +58,7 @@
                 <th>Height</th>
                 <td>
                     <label>
-                        <input type="text" size="4" th:field="*{height}" readonly>
+                        <input type="number" size="4" th:field="*{height}" readonly>
                     </label>
                 </td>
             </tr>
@@ -64,7 +66,7 @@
                 <th>Width</th>
                 <td>
                     <label>
-                        <input type="text" size="4" th:field="*{width}" readonly="readonly">
+                        <input type="number" size="4" th:field="*{width}" readonly="readonly">
                     </label>
                 </td>
             </tr>
@@ -72,7 +74,7 @@
                 <th>Depth</th>
                 <td>
                     <label>
-                        <input type="text" size="4" th:field="*{depth}" readonly="readonly">
+                        <input type="number" size="4" th:field="*{depth}" readonly="readonly">
                     </label>
                 </td>
             </tr>
@@ -80,7 +82,7 @@
                 <th>UpperFrame</th>
                 <td>
                     <label>
-                        <input type="text" size="4" th:field="*{upperFrame}" readonly="readonly">
+                        <input type="number" size="4" th:field="*{upperFrame}" readonly="readonly">
                     </label>
                 </td>
             </tr>
@@ -88,7 +90,7 @@
                 <th>BottomFrame</th>
                 <td>
                     <label>
-                        <input type="text" size="4" th:field="*{bottomFrame}" readonly="readonly">
+                        <input type="number" size="4" th:field="*{bottomFrame}" readonly="readonly">
                     </label>
                 </td>
             </tr>

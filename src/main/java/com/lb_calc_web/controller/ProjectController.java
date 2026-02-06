@@ -6,6 +6,8 @@ import com.lb_calc_web.dto.LCDTO;
 import com.lb_calc_web.dto.ProjectDTO;
 import com.lb_calc_web.model.utils.*;
 import com.lb_calc_web.service.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -15,6 +17,7 @@ import java.util.*;
 @Controller
 @RequestMapping("/projects")
 public class ProjectController {
+    private static final Logger logger = LoggerFactory.getLogger(ProjectController.class);
     private final ProjectService projectService;
     private final ALSService alsService;
     private final LBService lbService;
@@ -53,15 +56,41 @@ public class ProjectController {
         return "/projects/project";
     }
     @PostMapping("/{id}/save")
-    public String saveProject(@ModelAttribute("project") ProjectDTO project) {
-        project=projectService.saveProject(project);
-        System.out.println(project);
+    public String saveProject(@ModelAttribute("project") ProjectDTO project,Model model) {
+        logger.debug("Saving Project...");
+        for(ALSDTO als:project.getAlsList()){
+            als=alsService.resizeLC(als);
+            als=alsService.resizeLBs(als);
+        }
+        List<List<List<List<String>>>>  errorProjectList=SizeValidator.getErrorValidateProjectSizeList(project);
+        if (errorProjectList.isEmpty()) {
+            project=projectService.saveProject(project);
+        }else{
+            logger.warn("Saving Project Error");
+            for(List<List<List<String>>> alsError: errorProjectList) {
+                logger.warn("[Ошибки размеров АКХ]:"+ alsError.get(0));
+                logger.warn("[Ошибки размеров МХ]:"+ alsError.get(1));
+                logger.warn("[Ошибки размеров МУ]:"+ alsError.get(2));
+            }
+            model.addAttribute("projectErrors", errorProjectList);
+
+            model.addAttribute("project", project);
+            model.addAttribute("colorsList", colorsList);
+            model.addAttribute("positionLCList", positionLCList);
+            model.addAttribute("paymentList", paymentList);
+            model.addAttribute("displayList", displayList);
+            model.addAttribute("barReaderList", barReaderList);
+            model.addAttribute("typeList", typeLbList);
+            return "/projects/project";
+        }
+
         return "redirect:/projects/"+project.getId();
     }
     @GetMapping("/{id}/addALS" )
     public String addALS(@PathVariable(value = "id") Long projectId, Model model) {
-        ProjectDTO projectDTO=projectService.addNewALSandSaveProject(projectId);
+        ProjectDTO projectDTO = projectService.addNewALSandSaveProject(projectId);
         model.addAttribute("project",projectDTO);
+
         return "redirect:/projects/"+projectId;
     }
     @GetMapping("/{id}/alss/{alsId}/delete" )
@@ -76,8 +105,9 @@ public class ProjectController {
         Optional<ProjectDTO> projectOptional = projectService.findById(id);
         ProjectDTO project = null;
         if (projectOptional.isPresent()) {project = projectOptional.get();}
-        else {model.addAttribute("error","Project not found");}
+
         model.addAttribute("project", project);
+
         model.addAttribute("colorsList", colorsList);
         model.addAttribute("positionLCList", positionLCList);
         model.addAttribute("paymentList", paymentList);
@@ -96,7 +126,30 @@ public class ProjectController {
         ProjectDTO project = null;
         if (projectOptional.isPresent()) {project = projectOptional.get();}
         model.addAttribute("project", project);
-        als=projectService.replaceALSandSaveProject(project,als,alsId);
+        List<String> errorALSList=SizeValidator.getErrorValidateALSSizesList(als);
+        als = alsService.resizeLC(als);
+        List<String> errorLCList= SizeValidator.getErrorValidateLCSizesList(als.getLC());
+        als = alsService.resizeLBs(als);
+        List<List<String>> errorLBLists=SizeValidator.getErrorValidateLBSizesLists(als);
+        if (errorALSList.isEmpty() && errorLCList.isEmpty() && errorLBLists.isEmpty()) {
+           als=projectService.replaceALSandSaveProject(project,als,alsId);
+        }
+        else {
+            logger.warn(String.valueOf(errorALSList));
+            logger.warn(String.valueOf(errorLCList));
+            logger.warn(String.valueOf(errorLBLists));
+            model.addAttribute("ALSErrors", errorALSList);
+            model.addAttribute("LCErrors", errorLCList);
+            model.addAttribute("LBErrors", errorLBLists);
+            model.addAttribute("als", als);
+            model.addAttribute("colorsList", colorsList);
+            model.addAttribute("positionLCList", positionLCList);
+            model.addAttribute("paymentList", paymentList);
+            model.addAttribute("typeList", typeLbList);
+            model.addAttribute("displayList", displayList);
+            model.addAttribute("barReaderList", barReaderList);
+            return "projects/project_als";
+        }
         return "redirect:/projects/"+projectId+"/alss/"+als.getId();
     }
 
@@ -109,10 +162,10 @@ public class ProjectController {
         ProjectDTO project = null;
         if (projectOptional.isPresent()) {project = projectOptional.get();}
         model.addAttribute("project", project);
+
         Optional<ALSDTO> alsOptional = alsService.findById(alsId);
         ALSDTO als = null;
         if (alsOptional.isPresent()) {als = alsOptional.get();}
-        else {model.addAttribute("error","Als not found");}
         model.addAttribute("als", als);
         model.addAttribute("typeList", typeLbList);
         model.addAttribute("colorsList", colorsList);
@@ -136,7 +189,6 @@ public class ProjectController {
         Optional<LCDTO> lcOptional = lcService.findById(lcId);
         LCDTO lc = null;
         if (lcOptional.isPresent()) {lc = lcOptional.get();}
-        else {model.addAttribute("error","LC not found");}
         model.addAttribute("project", project);
         model.addAttribute("als", als);
         model.addAttribute("lc", lc);
@@ -159,8 +211,20 @@ public class ProjectController {
         Optional<ALSDTO> alsOptional = alsService.findById(alsId);
         ALSDTO als = null;
         if (alsOptional.isPresent()) {als = alsOptional.get();}
-        als=projectService.replaceLCandSaveProject(project,als,alsId,lc);
-
+        List<String> errorList =SizeValidator.getErrorValidateLCSizesList(lc);
+        if (errorList.isEmpty()) {
+            als=projectService.replaceLCandSaveProject(project,als,alsId,lc);
+        }
+        else {
+            logger.warn(errorList.toString());
+            model.addAttribute("lc", lc);
+            model.addAttribute("errors", errorList);
+            model.addAttribute("colorsList", colorsList);
+            model.addAttribute("paymentList", paymentList);
+            model.addAttribute("displayList", displayList);
+            model.addAttribute("barReaderList", barReaderList);
+            return "projects/project_lc";
+        }
         model.addAttribute("project", project);
         model.addAttribute("als", als);
 
@@ -197,7 +261,7 @@ public class ProjectController {
         Optional<LBDTO> lbOptional = lbService.findById(lbId);
         LBDTO lb = null;
         if (lbOptional.isPresent()) {lb = lbOptional.get();}
-        else {model.addAttribute("error","LB not found");}
+
         model.addAttribute("project", project);
         model.addAttribute("als", als);
         model.addAttribute("lb", lb);
@@ -216,11 +280,31 @@ public class ProjectController {
         Optional<ProjectDTO> projectOptional = projectService.findById(projectId);
         ProjectDTO project = null;
         if (projectOptional.isPresent()) {project = projectOptional.get();}
-        List<Object> ALSlbIdList=projectService.saveLBatProject(projectId,alsId,lbId,lb);
-        ALSDTO als= (ALSDTO) ALSlbIdList.get(0);
-        int newLbId= (int) ALSlbIdList.get(1);
         model.addAttribute("project", project);
+        List<Object> ALSlbIdList= null;
+        int newLbId;
+        Optional<ALSDTO> alsOptional = alsService.findById(alsId);
+        ALSDTO als = null;
+        if (alsOptional.isPresent()) {als = alsOptional.get();}
+        model.addAttribute("projectId", projectId);
+        model.addAttribute("alsId", alsId);
         model.addAttribute("als", als);
+        List<String> errorList= SizeValidator.getErrorValidateLBSizesList(lb);
+        if (errorList.isEmpty()) {
+             ALSlbIdList = projectService.saveLBatProject(projectId,alsId,lbId,lb);
+             als=(ALSDTO) ALSlbIdList.get(0);
+             newLbId = (int) ALSlbIdList.get(1);
+
+        } else {
+            logger.warn(errorList.toString());
+            model.addAttribute("errors",errorList);
+            model.addAttribute("lb", lb);
+            model.addAttribute("typeLbList", typeLbList);
+            model.addAttribute("colorsList", colorsList);
+            model.addAttribute("directionDoorOpeningList", directionDoorOpeningList);
+            return "projects/project_lb";
+        }
+
         return "redirect:/projects/"+projectId+"/alss/"+als.getId()+"/lbs/"+newLbId;
     }
 

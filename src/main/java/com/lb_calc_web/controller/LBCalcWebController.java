@@ -43,6 +43,7 @@ public class LBCalcWebController {
     }
     @GetMapping("/lbs")
     private String lbs(Model model) {
+
         model.addAttribute("lbs", lbService.findAll());
         return "lbs/lbs";
     }
