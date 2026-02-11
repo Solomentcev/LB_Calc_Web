@@ -2,7 +2,7 @@ package com.lb_calc_web.service;
 
 import com.lb_calc_web.dto.ALSDTO;
 import com.lb_calc_web.dto.LBDTO;
-import com.lb_calc_web.model.utils.PositionLC;
+import com.lb_calc_web.model.attributes.PositionLC;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -58,10 +58,8 @@ public class ALSImageService {
         try {
             file.createNewFile();
             ImageIO.write(img, "png", file);
-
         } catch (IOException e) {
-            System.out.println("Error creating file");
-            throw new RuntimeException(e);
+            throw new RuntimeException("Error creating file"+e.getMessage());
         }
         return file;
     }
@@ -72,8 +70,7 @@ public class ALSImageService {
             ImageIO.write(img, "png", baos);
 
         } catch (IOException e) {
-            System.out.println("Error creating");
-            throw new RuntimeException(e);
+            throw new RuntimeException("Error creating"+e.getMessage());
         }
         return baos.toByteArray();
     }

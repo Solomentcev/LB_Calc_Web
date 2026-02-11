@@ -1,8 +1,8 @@
 package com.lb_calc_web.service;
 
 import com.lb_calc_web.dto.LCDTO;
-import com.lb_calc_web.model.utils.Colors;
-import com.lb_calc_web.model.utils.DisplayLC;
+import com.lb_calc_web.model.attributes.Colors;
+import com.lb_calc_web.model.attributes.DisplayLC;
 
 import javax.imageio.ImageIO;
 import java.awt.*;

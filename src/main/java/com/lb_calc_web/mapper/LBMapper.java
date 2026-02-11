@@ -3,9 +3,9 @@ package com.lb_calc_web.mapper;
 import com.lb_calc_web.dto.LBDTO;
 import com.lb_calc_web.model.ALSLB;
 import com.lb_calc_web.model.LB;
-import com.lb_calc_web.model.utils.Colors;
-import com.lb_calc_web.model.utils.DirectionDoorOpening;
-import com.lb_calc_web.model.utils.TypeLb;
+import com.lb_calc_web.model.attributes.Colors;
+import com.lb_calc_web.model.attributes.DirectionDoorOpening;
+import com.lb_calc_web.model.attributes.TypeLb;
 import com.lb_calc_web.service.LBImageService;
 
 import java.util.*;
@@ -91,25 +91,5 @@ public class LBMapper {
         }
         return lbList;
     }
-    public static Map<LB,Integer> toLBMap(List<LB> lbList) {
-        Map<LB,Integer> quantityLB = new HashMap<>();
-        for(LB lb:lbList){
-            if (quantityLB.containsKey(lb)){
-                Integer i= quantityLB.get(lb);
-                i=i+1;
-                quantityLB.put(lb,i);
-            } else quantityLB.put(lb,1);
-        }
-        return quantityLB;
-    }
-    public static Map<LB,Integer> toLBMap(Set<ALSLB> lbSet) {
-        Map<LB,Integer> quantityLB = new HashMap<>();
-        for(ALSLB alsLlb :lbSet){
-            quantityLB.put(alsLlb.getLb(), alsLlb.getQuantity());
-        }
-        return quantityLB;
-    }
-
-    
 
 }

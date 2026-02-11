@@ -4,10 +4,15 @@ import com.lb_calc_web.dto.ALSDTO;
 import com.lb_calc_web.dto.LBDTO;
 import com.lb_calc_web.dto.LCDTO;
 import com.lb_calc_web.dto.ProjectDTO;
-import com.lb_calc_web.model.utils.*;
+import com.lb_calc_web.model.attributes.*;
 import com.lb_calc_web.service.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -307,6 +312,17 @@ public class ProjectController {
 
         return "redirect:/projects/"+projectId+"/alss/"+als.getId()+"/lbs/"+newLbId;
     }
-
+    @GetMapping("/{id}/savetoexcel")
+    private ResponseEntity<Resource> saveProjectToExcel(@PathVariable(value = "id") Long id) {
+        Optional<ProjectDTO> projectOptional = projectService.findById(id);
+        ProjectDTO project = null;
+        if (projectOptional.isPresent()) {project = projectOptional.get();}
+        String filename = project.getName()+".xlsx";
+        InputStreamResource file = new InputStreamResource(projectService.exportToExcel(project));
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename)
+                .contentType(MediaType.parseMediaType("application/vnd.ms-excel"))
+                .body(file);
+    }
 
 }

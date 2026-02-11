@@ -1,4 +1,4 @@
-package com.lb_calc_web.model.utils;
+package com.lb_calc_web.model.attributes;
 
 import java.awt.*;
 

@@ -6,7 +6,6 @@ import com.lb_calc_web.model.LB;
 import com.lb_calc_web.repository.ALSLBRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Set;
 @Service
 public class ALSLBService {

@@ -276,6 +276,7 @@
                     <th>Name</th>
                     <th hidden="hidden">Description</th>
                     <th>Type</th>
+                    <th>ShelfThick</th>
                     <th>CountCells</th>
 
                     <th>Height</th>
@@ -320,6 +321,13 @@
                                         th:text="${type}">
                                 </option>
                             </select>
+                        </label>
+                    </td>
+                    <td>
+                        <label>
+                            <input type="number" size="3" th:name="|lbList[${item.index}].shelfThick|"
+                                   th:value="${lb.getShelfThick()}"
+                            readonly="readonly"/>
                         </label>
                     </td>
                     <td>

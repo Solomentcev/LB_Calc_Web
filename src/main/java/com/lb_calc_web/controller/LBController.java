@@ -1,9 +1,9 @@
 package com.lb_calc_web.controller;
 
 import com.lb_calc_web.dto.LBDTO;
-import com.lb_calc_web.model.utils.Colors;
-import com.lb_calc_web.model.utils.DirectionDoorOpening;
-import com.lb_calc_web.model.utils.TypeLb;
+import com.lb_calc_web.model.attributes.Colors;
+import com.lb_calc_web.model.attributes.DirectionDoorOpening;
+import com.lb_calc_web.model.attributes.TypeLb;
 import com.lb_calc_web.service.LBService;
 import com.lb_calc_web.service.SizeValidator;
 import org.slf4j.Logger;

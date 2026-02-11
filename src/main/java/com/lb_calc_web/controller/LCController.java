@@ -1,10 +1,10 @@
 package com.lb_calc_web.controller;
 
 import com.lb_calc_web.dto.LCDTO;
-import com.lb_calc_web.model.utils.BarReader;
-import com.lb_calc_web.model.utils.Colors;
-import com.lb_calc_web.model.utils.DisplayLC;
-import com.lb_calc_web.model.utils.Payment;
+import com.lb_calc_web.model.attributes.BarReader;
+import com.lb_calc_web.model.attributes.Colors;
+import com.lb_calc_web.model.attributes.DisplayLC;
+import com.lb_calc_web.model.attributes.Payment;
 import com.lb_calc_web.service.LCService;
 import com.lb_calc_web.service.SizeValidator;
 import org.slf4j.Logger;

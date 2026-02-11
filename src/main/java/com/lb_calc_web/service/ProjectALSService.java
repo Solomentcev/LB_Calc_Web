@@ -3,16 +3,12 @@ package com.lb_calc_web.service;
 import com.lb_calc_web.model.ALS;
 import com.lb_calc_web.model.Project;
 import com.lb_calc_web.model.ProjectALS;
-import com.lb_calc_web.model.ProjectALSKey;
 import com.lb_calc_web.repository.ProjectALSRepository;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
-import java.util.Set;
-
-import static org.springframework.data.domain.ExampleMatcher.GenericPropertyMatchers.ignoreCase;
 
 @Service
 public class ProjectALSService {

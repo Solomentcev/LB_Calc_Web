@@ -1,8 +1,8 @@
 package com.lb_calc_web.model;
 
-import com.lb_calc_web.model.utils.Colors;
-import com.lb_calc_web.model.utils.DirectionDoorOpening;
-import com.lb_calc_web.model.utils.TypeLb;
+import com.lb_calc_web.model.attributes.Colors;
+import com.lb_calc_web.model.attributes.DirectionDoorOpening;
+import com.lb_calc_web.model.attributes.TypeLb;
 import jakarta.persistence.*;
 
 import java.util.HashSet;

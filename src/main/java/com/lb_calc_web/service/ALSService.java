@@ -5,9 +5,9 @@ import com.lb_calc_web.dto.LBDTO;
 import com.lb_calc_web.dto.LCDTO;
 import com.lb_calc_web.mapper.ALSMapper;
 import com.lb_calc_web.model.ALS;
-import com.lb_calc_web.model.utils.Colors;
-import com.lb_calc_web.model.utils.DirectionDoorOpening;
-import com.lb_calc_web.model.utils.PositionLC;
+import com.lb_calc_web.model.attributes.Colors;
+import com.lb_calc_web.model.attributes.DirectionDoorOpening;
+import com.lb_calc_web.model.attributes.PositionLC;
 import com.lb_calc_web.repository.ALSRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -120,6 +120,7 @@ public class ALSService {
             lbDTO.setBottomFrame(alsDTO.getBottomFrame());
             lbDTO.setColorBody(String.valueOf(Colors.valueOf(alsDTO.getColorBody())));
             lbDTO.setColorDoor(String.valueOf(Colors.valueOf(alsDTO.getColorDoor())));
+            logger.debug("resize"+String.valueOf(lbDTO));
             lbService.updateLBsizeAndDescription(lbDTO);
             if (positionLC.equals(PositionLC.RIGHT) || (positionLC.equals(PositionLC.CENTER)&& i<=lbList.size()/2)) {
                 lbDTO.setDirectionDoorOpening(String.valueOf(DirectionDoorOpening.LEFT));

@@ -3,7 +3,7 @@ package com.lb_calc_web.controller;
 import com.lb_calc_web.dto.ALSDTO;
 import com.lb_calc_web.dto.LBDTO;
 import com.lb_calc_web.dto.LCDTO;
-import com.lb_calc_web.model.utils.*;
+import com.lb_calc_web.model.attributes.*;
 import com.lb_calc_web.service.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

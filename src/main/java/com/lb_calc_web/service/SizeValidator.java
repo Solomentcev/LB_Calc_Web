@@ -4,7 +4,7 @@ import com.lb_calc_web.dto.ALSDTO;
 import com.lb_calc_web.dto.LBDTO;
 import com.lb_calc_web.dto.LCDTO;
 import com.lb_calc_web.dto.ProjectDTO;
-import com.lb_calc_web.model.utils.TypeLb;
+import com.lb_calc_web.model.attributes.TypeLb;
 
 import java.util.ArrayList;
 import java.util.List;

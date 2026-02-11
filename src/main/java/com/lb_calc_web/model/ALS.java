@@ -1,7 +1,7 @@
 package com.lb_calc_web.model;
 
-import com.lb_calc_web.model.utils.Colors;
-import com.lb_calc_web.model.utils.PositionLC;
+import com.lb_calc_web.model.attributes.Colors;
+import com.lb_calc_web.model.attributes.PositionLC;
 import jakarta.persistence.*;
 
 import java.util.*;

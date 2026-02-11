@@ -3,9 +3,9 @@ package com.lb_calc_web.service;
 import com.lb_calc_web.dto.LBDTO;
 import com.lb_calc_web.mapper.LBMapper;
 import com.lb_calc_web.model.LB;
-import com.lb_calc_web.model.utils.Colors;
-import com.lb_calc_web.model.utils.DirectionDoorOpening;
-import com.lb_calc_web.model.utils.TypeLb;
+import com.lb_calc_web.model.attributes.Colors;
+import com.lb_calc_web.model.attributes.DirectionDoorOpening;
+import com.lb_calc_web.model.attributes.TypeLb;
 import com.lb_calc_web.repository.LBRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,7 +63,8 @@ public class LBService {
         return lb;
     }
     protected void updateLBsizeAndDescription(LBDTO lb) {
-
+        lb.setShelfThick(TypeLb.valueOf(lb.getType()).getShelfThick());
+        System.out.println(lb.getShelfThick());
         lb.setWidthCell(lb.getWidth()-TypeLb.valueOf(lb.getType()).getDeltaWidth());
         lb.setDepthCell(lb.getWidth()-20);
         lb.setHeightCell((double) (lb.getHeight() - lb.getUpperFrame() - lb.getBottomFrame()
@@ -74,6 +75,7 @@ public class LBService {
                 " ВхШхГ,мм: "+lb.getHeight()+"x"+ lb.getWidth() +"x"+lb.getDepth()+", "+
                 lb.getDirectionDoorOpening()+", "+
                 lb.getColorBody()+"/"+lb.getColorDoor());
+        logger.warn("update"+lb.toString());
     }
     public List<LBDTO> findAll() {
         List<LB> lbs = lbRepository.findAll();

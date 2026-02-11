@@ -1,4 +1,4 @@
-package com.lb_calc_web.model.utils;
+package com.lb_calc_web.model.attributes;
 
 public enum TypeLb {
     TYPE1(100,5,40),

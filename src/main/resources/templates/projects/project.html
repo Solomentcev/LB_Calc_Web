@@ -16,6 +16,7 @@
           th:object="${project}" method="POST">
         <button type="submit" class="btn btn-primary btn-sm mb-3">Сохранить проект</button>
         <a th:href="@{'/projects'}" class="btn btn-primary btn-sm mb-3">Back to Project list </a>
+        <a th:href="@{/projects/{id}/savetoexcel (id=${project.getId()})}" class="btn btn-primary btn-sm mb-3">Save to Excel</a>
         <br/>
         <div>
             <h2 th:text="*{name}">Проект</h2>
