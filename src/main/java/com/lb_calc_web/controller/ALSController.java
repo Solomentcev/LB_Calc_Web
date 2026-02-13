@@ -5,6 +5,7 @@ import com.lb_calc_web.dto.LBDTO;
 import com.lb_calc_web.dto.LCDTO;
 import com.lb_calc_web.model.attributes.*;
 import com.lb_calc_web.service.*;
+import com.lb_calc_web.service.util.SizeValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,8 +56,7 @@ public class ALSController {
     }
     @PostMapping("/save")
     public String saveALS(@ModelAttribute("als") ALSDTO als,Model model) {
-        logger.debug("Saving ALS...");
-        List<String> errorALSList=SizeValidator.getErrorValidateALSSizesList(als);
+        List<String> errorALSList= SizeValidator.getErrorValidateALSSizesList(als);
         als = alsService.resizeLC(als);
         List<String> errorLCList= SizeValidator.getErrorValidateLCSizesList(als.getLC());
         als = alsService.resizeLBs(als);
@@ -65,9 +65,9 @@ public class ALSController {
                 als = alsService.saveALS(als);
         }
         else {
-            logger.warn(String.valueOf(errorALSList));
-            logger.warn(String.valueOf(errorLCList));
-            logger.warn(String.valueOf(errorLBLists));
+            logger.warn("[Ошибки размеров АКХ]:"+ errorALSList);
+            logger.warn("[Ошибки размеров МХ]:"+ errorLCList);
+            logger.warn("[Ошибки размеров МУ]:"+errorLBLists);
             model.addAttribute("ALSErrors", errorALSList);
             model.addAttribute("LCErrors", errorLCList);
             model.addAttribute("LBErrors", errorLBLists);
@@ -84,9 +84,7 @@ public class ALSController {
     }
     @GetMapping("/{id}")
     private String editALS(@PathVariable(value = "id") Long id, Model model) {
-        Optional<ALSDTO> alsOptional = alsService.findById(id);
-        if (alsOptional.isPresent()) {
-            ALSDTO als = alsOptional.get();
+            ALSDTO als = alsService.findById(id);
             model.addAttribute("als", als);
             model.addAttribute("colorsList", colorsList);
             model.addAttribute("positionLCList", positionLCList);
@@ -94,7 +92,6 @@ public class ALSController {
             model.addAttribute("paymentList", paymentList);
             model.addAttribute("displayList", displayList);
             model.addAttribute("barReaderList", barReaderList);
-        }
         return "alss/als";
     }
     @PostMapping("/{alsId}/lbs/{lbId}/save")
@@ -102,16 +99,13 @@ public class ALSController {
                               @PathVariable(value = "lbId") Long lbId,
                               @ModelAttribute("lb") LBDTO lb,
                               Model model){
-        logger.debug("Saving LB at ALS...");
         List<String> errorList= SizeValidator.getErrorValidateLBSizesList(lb);
         List<Object> ALSlbIdList;
         if (errorList.isEmpty()) {
             ALSlbIdList = alsService.replaceLBandSaveALS(alsId, lbId, lb);
         } else {
             logger.warn(errorList.toString());
-            Optional<ALSDTO> alsOptional = alsService.findById(alsId);
-            ALSDTO als = null;
-            if (alsOptional.isPresent()) {als = alsOptional.get();}
+            ALSDTO als = alsService.findById(alsId);
             model.addAttribute("als", als);
             model.addAttribute("errors",errorList);
             model.addAttribute("lb", lb);
@@ -129,8 +123,6 @@ public class ALSController {
     @GetMapping("/{alsId}/addLB")
     public String addLBatALS(@PathVariable(value = "alsId") Long alsId,
                         Model model) {
-        logger.debug("Adding LB at ALS...");
-
         ALSDTO als = alsService.addNewLBandSaveALS(alsId);
         model.addAttribute("als", als);
         return "redirect:/alss/" + als.getId();
@@ -140,16 +132,10 @@ public class ALSController {
     private String editLBatALS(@PathVariable(value = "alsId") Long alsId,
                           @PathVariable(value = "lbId") Long lbId,
                           Model model) {
-
-        Optional<ALSDTO> alsOptional = alsService.findById(alsId);
-        ALSDTO als = null;
-        if (alsOptional.isPresent()) {als = alsOptional.get();}
-        model.addAttribute("als", als);
-        Optional<LBDTO> lbOptional = lbService.findById(lbId);
-        LBDTO lb = null;
-        if (lbOptional.isPresent()) {lb = lbOptional.get();}
+        ALSDTO als = alsService.findById(alsId);
+              model.addAttribute("als", als);
+        LBDTO lb = lbService.findById(lbId);
         model.addAttribute("lb", lb);
-
         model.addAttribute("typeLbList", typeLbList);
         model.addAttribute("colorsList", colorsList);
         model.addAttribute("directionDoorOpeningList", directionDoorOpeningList);
@@ -169,14 +155,9 @@ public class ALSController {
     private String editLCatALS(@PathVariable(value = "alsId") Long alsId,
                           @PathVariable(value = "lcId") Long lcId,
                           Model model) {
-
-        Optional<ALSDTO> alsOptional = alsService.findById(alsId);
-        ALSDTO als = null;
-        if (alsOptional.isPresent()) {als = alsOptional.get();}
+        ALSDTO als = alsService.findById(alsId);
         model.addAttribute("als", als);
-        Optional<LCDTO> lcOptional = lcService.findById(lcId);
-        LCDTO lc = null;
-        if (lcOptional.isPresent()) {lc = lcOptional.get();}
+        LCDTO lc = lcService.findById(lcId);
         model.addAttribute("lc", lc);
         model.addAttribute("colorsList", colorsList);
         model.addAttribute("paymentList", paymentList);
@@ -192,9 +173,7 @@ public class ALSController {
             Model model)  {
         logger.debug("Saving LC at ALS...");
         List<String> errorList =SizeValidator.getErrorValidateLCSizesList(lc);
-        Optional<ALSDTO> alsOptional = alsService.findById(alsId);
-        ALSDTO als = null;
-        if (alsOptional.isPresent()) {als = alsOptional.get();}
+        ALSDTO als = alsService.findById(alsId);
         if (errorList.isEmpty()) {
             als=alsService.replaceLCandSaveALS(als,lc);
         }

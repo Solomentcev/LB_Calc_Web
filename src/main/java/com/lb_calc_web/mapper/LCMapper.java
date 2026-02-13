@@ -6,7 +6,7 @@ import com.lb_calc_web.model.attributes.BarReader;
 import com.lb_calc_web.model.attributes.Colors;
 import com.lb_calc_web.model.attributes.DisplayLC;
 import com.lb_calc_web.model.attributes.Payment;
-import com.lb_calc_web.service.LCImageService;
+import com.lb_calc_web.service.util.LCImageService;
 
 public class LCMapper {
 

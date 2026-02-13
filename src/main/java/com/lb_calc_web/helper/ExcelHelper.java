@@ -2,7 +2,7 @@ package com.lb_calc_web.helper;
 
 import com.lb_calc_web.dto.ALSDTO;
 import com.lb_calc_web.dto.ProjectDTO;
-import com.lb_calc_web.service.ALSImageService;
+import com.lb_calc_web.service.util.ALSImageService;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.*;
 

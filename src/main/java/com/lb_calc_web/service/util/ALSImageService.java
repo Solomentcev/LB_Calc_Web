@@ -1,4 +1,4 @@
-package com.lb_calc_web.service;
+package com.lb_calc_web.service.util;
 
 import com.lb_calc_web.dto.ALSDTO;
 import com.lb_calc_web.dto.LBDTO;

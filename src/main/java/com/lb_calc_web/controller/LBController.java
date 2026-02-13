@@ -5,7 +5,7 @@ import com.lb_calc_web.model.attributes.Colors;
 import com.lb_calc_web.model.attributes.DirectionDoorOpening;
 import com.lb_calc_web.model.attributes.TypeLb;
 import com.lb_calc_web.service.LBService;
-import com.lb_calc_web.service.SizeValidator;
+import com.lb_calc_web.service.util.SizeValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -43,31 +43,28 @@ public class LBController {
     }
     @GetMapping("/{id}")
     private String editLB(@PathVariable(value = "id") Long id, Model model){
-            Optional<LBDTO> lbOptional = lbService.findById(id);
-            if (lbOptional.isPresent()) {
-                LBDTO lb = lbOptional.get();
+                LBDTO lb =lbService.findById(id);
                 model.addAttribute("lb", lb);
                 model.addAttribute("typeLbList", typeLbList);
                 model.addAttribute("colorsList", colorsList);
                 model.addAttribute("directionDoorOpeningList", directionDoorOpeningList);
-            }
         return "lbs/lb";
     }
     @PostMapping("/save")
     public String saveLB(@ModelAttribute("lb") LBDTO lb, Model model){
-          logger.debug(String.valueOf(lb));
-          List<String> errorList= SizeValidator.getErrorValidateLBSizesList(lb);
-        if (errorList.isEmpty()) {
-            lb=lbService.saveLB(lb);
-        } else {
-            logger.warn(errorList.toString());
-            model.addAttribute("errors",errorList);
-            model.addAttribute("lb", lb);
-            model.addAttribute("typeLbList", typeLbList);
-            model.addAttribute("colorsList", colorsList);
-            model.addAttribute("directionDoorOpeningList", directionDoorOpeningList);
-            return "lbs/lb";
-        }
+            logger.debug(String.valueOf(lb));
+            List<String> errorList= SizeValidator.getErrorValidateLBSizesList(lb);
+            if (errorList.isEmpty()) {
+                lb=lbService.saveLB(lb);
+            } else {
+                logger.warn(errorList.toString());
+                model.addAttribute("errors",errorList);
+                model.addAttribute("lb", lb);
+                model.addAttribute("typeLbList", typeLbList);
+                model.addAttribute("colorsList", colorsList);
+                model.addAttribute("directionDoorOpeningList", directionDoorOpeningList);
+                return "lbs/lb";
+            }
         return "redirect:/lbs/" +lb.getId();
     }
 

@@ -6,7 +6,7 @@ import com.lb_calc_web.model.LB;
 import com.lb_calc_web.model.attributes.Colors;
 import com.lb_calc_web.model.attributes.DirectionDoorOpening;
 import com.lb_calc_web.model.attributes.TypeLb;
-import com.lb_calc_web.service.LBImageService;
+import com.lb_calc_web.service.util.LBImageService;
 
 import java.util.*;
 public class LBMapper {

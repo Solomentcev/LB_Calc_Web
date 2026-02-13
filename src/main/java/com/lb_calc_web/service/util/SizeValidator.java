@@ -1,15 +1,18 @@
-package com.lb_calc_web.service;
+package com.lb_calc_web.service.util;
 
 import com.lb_calc_web.dto.ALSDTO;
 import com.lb_calc_web.dto.LBDTO;
 import com.lb_calc_web.dto.LCDTO;
 import com.lb_calc_web.dto.ProjectDTO;
 import com.lb_calc_web.model.attributes.TypeLb;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class SizeValidator {
+    private final static Logger logger = LoggerFactory.getLogger(SizeValidator.class);
     private final static int UPPER_FRAME_MIN=20;
     private final static int UPPER_FRAME_MAX=300;
 
@@ -36,6 +39,7 @@ public class SizeValidator {
     private final static int DEPTH_CELL_MAX=DEPTH_MAX-20;
 
     public static List<String> getErrorValidateLCSizesList(LCDTO lc){
+        logger.info("Валидация размеров МУ(id%d-%s)...".formatted(lc.getId(), lc.getName()));
         List<String> errorList=new ArrayList<>();
         if (lc.getUpperFrame()>UPPER_FRAME_MAX) {errorList.add("Верхняя рама(%d) больше допустимой(%d-%d)".formatted(lc.getUpperFrame(),UPPER_FRAME_MIN,UPPER_FRAME_MAX));}
         if (lc.getUpperFrame()<UPPER_FRAME_MIN) {errorList.add("Верхняя рама(%d) меньше допустимой(%d-%d)".formatted(lc.getUpperFrame(),UPPER_FRAME_MIN,UPPER_FRAME_MAX));}
@@ -45,9 +49,12 @@ public class SizeValidator {
         if (lc.getHeight()<HEIGHT_LC_MIN){errorList.add("Высота модуля(%d) меньше допустимой(%d-%d)".formatted(lc.getHeight(),HEIGHT_LC_MIN,HEIGHT_MAX));}
         if (lc.getDepth()>DEPTH_MAX){errorList.add("Глубина модуля(%d) больше допустимой(%d-%d)".formatted(lc.getDepth(),DEPTH_MIN,DEPTH_MAX));}
         if (lc.getDepth()<DEPTH_MIN) errorList.add("Глубина модуля(%d) меньше допустимой(%d-%d)".formatted(lc.getDepth(),DEPTH_MIN,DEPTH_MAX));
+        if (errorList.isEmpty()){logger.info("Ошибок в размерах МУ(id%d-%s) не найдено.".formatted(lc.getId(), lc.getName()));}
+        else logger.info("Найдены ошибки в размерах МУ(id%d-%s):".formatted(lc.getId(), lc.getName())+"\n"+errorList);
         return errorList;
     }
     public static List<String> getErrorValidateALSSizesList(ALSDTO als)  {
+        logger.info("Валидация размеров АКХ(id%d-%s)...".formatted(als.getId(), als.getName()));
         List<String> errorList=new ArrayList<>();
         if (als.getUpperFrame()>UPPER_FRAME_MAX) {errorList.add("Верхняя рама(%d) больше допустимой(%d-%d)".formatted(als.getUpperFrame(),UPPER_FRAME_MIN,UPPER_FRAME_MAX));}
         if (als.getUpperFrame()<UPPER_FRAME_MIN) {errorList.add("Верхняя рама(%d) меньше допустимой(%d-%d)".formatted(als.getUpperFrame(),UPPER_FRAME_MIN,UPPER_FRAME_MAX));}
@@ -58,6 +65,8 @@ public class SizeValidator {
 
         if (als.getDepth()>DEPTH_MAX){errorList.add("Глубина модуля(%d) больше допустимой(%d-%d)".formatted(als.getDepth(),DEPTH_MIN,DEPTH_MAX));}
         if (als.getDepth()<DEPTH_MIN) errorList.add("Глубина модуля(%d) меньше допустимой(%d-%d)".formatted(als.getDepth(),DEPTH_MIN,DEPTH_MAX));
+        if (errorList.isEmpty()){logger.info("Ошибок в размерах АКХ(id%d-%s) не найдено.".formatted(als.getId(), als.getName()));}
+        else logger.info("Найдены ошибки в размерах АКХ(id%d-%s):".formatted(als.getId(), als.getName())+"\n"+errorList);
         return errorList;
     }
     public static List<List<String>> getErrorValidateLBSizesLists(ALSDTO als)  {
@@ -74,6 +83,7 @@ public class SizeValidator {
         return errorLBLists;
     }
     public static List<String> getErrorValidateLBSizesList(LBDTO lb)  {
+        logger.info("Валидация размеров МХ(id%d-%s)...".formatted(lb.getId(), lb.getName()));
         List<String> errorList=new ArrayList<>();
         if (lb.getUpperFrame()>UPPER_FRAME_MAX) {errorList.add("Верхняя рама(%d) больше допустимой(%d-%d)".formatted(lb.getUpperFrame(),UPPER_FRAME_MIN,UPPER_FRAME_MAX));}
         if (lb.getUpperFrame()<UPPER_FRAME_MIN) {errorList.add("Верхняя рама(%d) меньше допустимой(%d-%d)".formatted(lb.getUpperFrame(),UPPER_FRAME_MIN,UPPER_FRAME_MAX));}
@@ -108,6 +118,8 @@ public class SizeValidator {
         int widthCellMax=WIDTH_MAX-TypeLb.valueOf(lb.getType()).getDeltaWidth();
         if (widthCell<WIDTH_CELL_MIN) errorList.add("Ширина ячейки(%d) меньше допустимой(%d-%d)".formatted(widthCell,WIDTH_CELL_MIN,widthCellMax));
         if (widthCell>widthCellMax) errorList.add("Ширина ячейки(%d) больше допустимой(%d-%d)".formatted(widthCell,WIDTH_CELL_MIN,widthCellMax));
+        if (errorList.isEmpty()){logger.info("Ошибок в размерах МХ(id%d-%s) не найдено.".formatted(lb.getId(), lb.getName()));}
+        else logger.info("Найдены ошибки в размерах МХ(id%d-%s):".formatted(lb.getId(), lb.getName())+"\n"+errorList);
         return errorList;
     }
     public static List<List<List<List<String>>>> getErrorValidateProjectSizeList(ProjectDTO projectDTO){

@@ -23,10 +23,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 public class ProjectService {
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+    private final static Logger logger = LoggerFactory.getLogger(ProjectService.class);
     private final ProjectRepository projectRepository;
     private final ALSService alsService;
     private final ProjectALSRepository projectALSRepository;
+    private  int projectCounter = 0;
 
 
     @Autowired
@@ -36,27 +37,32 @@ public class ProjectService {
         this.projectALSRepository = projectALSRepository;
     }
     public List<ProjectDTO> findAll() {
+        logger.info("Получение списка Проектов...");
         List<Project> projects = projectRepository.findAll();
         projects.sort(Comparator.comparing(Project::getCreatedDate).reversed());
         return ProjectMapper.getProjectDTOListFromProjectList(projects);
     }
 
-    public Optional<ProjectDTO> findById(Long id) {
+    public ProjectDTO findById(Long id) {
+        logger.info("Поиск Проекта(id%d)...".formatted(id));
         Project project = projectRepository.findById(id).orElseThrow(()->
                 new NoSuchElementException("Проект с id%d не найден".formatted(id)));
         ProjectDTO projectDTO = ProjectMapper.toProjectDTO(project);
-        return Optional.of(projectDTO);
+        return projectDTO;
     }
     public void deleteById(Long id) {
         projectRepository.deleteById(id);
     }
     public ByteArrayInputStream exportToExcel(ProjectDTO projectDTO) {
+        logger.info("Сохранение Проекта в Excel ...");
         return ExcelHelper.projectToExcel(projectDTO);
     }
 
     public ProjectDTO createProject(){
+        logger.info("Создание Проекта...");
         ProjectDTO project = new ProjectDTO();
-        project.setCompany("Company"+new AtomicInteger(0).getAndIncrement());
+        projectCounter=projectCounter+1;
+        project.setCompany("Заказчик"+projectCounter);
         project.setCreatedDate(LocalDate.now());
         project.setUpdatedDate(LocalDate.now());
         project.setName(project.getCompany()+"_"+project.getCreatedDate());
@@ -64,10 +70,13 @@ public class ProjectService {
         project.getAlsList().add(als);
         project.getQuantityALS().put(als,1);
         updateProjectDescription(project);
+        logger.info("Создан Проект(%s)".formatted(project.getName()));
         return project;
     }
     @Transactional
     public ProjectDTO saveProject(ProjectDTO projectDTO) {
+        logger.info("Сохранение Проекта(id%d-%s)..."
+                .formatted(projectDTO.getId(), projectDTO.getName()));
         for(ALSDTO als:projectDTO.getAlsList()){
             als.setId(alsService.saveALS(als).getId());
         }
@@ -79,6 +88,8 @@ public class ProjectService {
             projectDTO.setId(project.getId());
             project.getQuantityALS().addAll(ProjectMapper.getProjectALSSetFromALSDTOMap(projectDTO.getQuantityALS(),projectDTO));
             projectALSRepository.saveAll(project.getQuantityALS());
+            logger.info("Проект(id%d-%s) сохранен в БД..."
+                    .formatted(project.getId(), project.getName()));
         }
         else{
             project.getQuantityALS().clear();
@@ -86,21 +97,24 @@ public class ProjectService {
             project.setUpdatedDate(LocalDate.now());
             projectALSRepository.saveAll(project.getQuantityALS());
             projectRepository.save(project);
+            logger.info("Проект(id%d-%s) обновлен в БД..."
+                    .formatted(project.getId(), project.getName()));
         }
         projectDTO=ProjectMapper.toProjectDTO(project);
         return projectDTO;
     }
     @Transactional
     public ProjectDTO addNewALSandSaveProject(Long projectId){
-        Optional<ProjectDTO> projectOptional = findById(projectId);
-        ProjectDTO project = null;
-        if (projectOptional.isPresent()) {
-            project = projectOptional.get();}
+        logger.info("Добавление новой АКХ в Проект(id%d) и сохранение..."
+                .formatted(projectId));
+        ProjectDTO project = findById(projectId);
         ALSDTO alsNew = alsService.createALS();
         addALS(project,alsNew);
         return saveProject(project);
     }
     private static void addALS(ProjectDTO project, ALSDTO alsNew) {
+        logger.info("Добавление АКХ(id%d-%s) в Проект(id%d-%s)..."
+                .formatted(alsNew.getId(),alsNew.getName(),project.getId(),project.getName()));
         project.getAlsList().add(alsNew);
         int count=0;
         for (Map.Entry<ALSDTO,Integer> entry:project.getQuantityALS().entrySet()){
@@ -115,9 +129,9 @@ public class ProjectService {
         updateProjectDescription(project);
     }
     private ProjectDTO deleteALSfromProject(ProjectDTO project, Long alsId) {
-        Optional<ALSDTO> alsOptional = alsService.findById(alsId);
-        ALSDTO als = null;
-        if (alsOptional.isPresent()) {als = alsOptional.get();}
+        logger.info("Удаление АКХ(id%d) из Проекта(id%d)..."
+                .formatted(alsId,project.getId()));
+        ALSDTO als = alsService.findById(alsId);
         for (ALSDTO als1: project.getAlsList()){
             if (als1.getId()== als.getId()){
                 project.getAlsList().remove(als1);
@@ -140,16 +154,16 @@ public class ProjectService {
 
     @Transactional
     public ProjectDTO deleteALSandSaveProject(Long projectId, Long alsId) {
-        Optional<ProjectDTO> projectOptional = findById(projectId);
-        ProjectDTO project = null;
-        if (projectOptional.isPresent()) {
-            project = projectOptional.get();}
-
+        logger.info("Удаление АКХ(id%d) из Проекта(id%d) и сохранение..."
+                .formatted(alsId,projectId));
+        ProjectDTO project =findById(projectId);
         project=deleteALSfromProject(project, alsId);
         saveProject(project);
         return project;
     }
     private static void updateProjectDescription(ProjectDTO project) {
+        logger.info("Корректировка описания Проекта(id%d-%s)..."
+                .formatted(project.getId(),project.getName()));
                 project.setQuantityALS(ProjectMapper.getALSDTOMapFromALSDTOList(project.getAlsList()));
                 StringBuilder builder=new StringBuilder();
                 for(Map.Entry<ALSDTO,Integer> entry : project.getQuantityALS().entrySet()) {
@@ -160,6 +174,8 @@ public class ProjectService {
 
     @Transactional
     public ALSDTO replaceALSandSaveProject(ProjectDTO project, ALSDTO als, Long alsId) {
+        logger.info("Замена АКХ(id%d) на АКХ(id%d-%s) в Проекте(id%d) и сохранение..."
+                .formatted(alsId,als.getId(),als.getName(), project.getId()));
         deleteALSfromProject(project,alsId);
         addALS(project,als);
         saveProject(project);
@@ -167,6 +183,8 @@ public class ProjectService {
     }
     @Transactional
     public ALSDTO replaceLCandSaveProject(ProjectDTO project, ALSDTO als, Long alsId, LCDTO lc) {
+        logger.info("Замена МУ на МУ(id%d) в АКХ(id%d) Проекта(id%d)и сохранение..."
+                .formatted(lc.getId(),alsId,project.getId()));
         ALSDTO alsNew=alsService.replaceLCandSaveALS(als,lc);
         deleteALSandSaveProject((long) project.getId(),alsId);
         ProjectService.addALS(project,alsNew);
@@ -175,6 +193,8 @@ public class ProjectService {
     }
     @Transactional
     public ALSDTO addLBAtProject(Long projectId, Long alsId) {
+        logger.info("Добавление нового МХ в АКХ(id%d) в Проекте(%d)..."
+                .formatted(alsId,projectId));
         ProjectDTO project = deleteALSandSaveProject(projectId,alsId);
         ALSDTO alsNew =alsService.addNewLBandSaveALS(alsId);
         ProjectService.addALS(project,alsNew);
@@ -182,6 +202,8 @@ public class ProjectService {
     }
     @Transactional
     public ALSDTO deleteLBatProject(Long projectId, Long alsId, Long lbId) {
+        logger.info("Удаление МХ(%d) в АКХ(id%d) в Проекте(%d)..."
+                .formatted(lbId,alsId,projectId));
         ProjectDTO project = deleteALSandSaveProject(projectId,alsId);
         ALSDTO alsNew =alsService.deleteLBandSaveALS(alsId, lbId);
         addALS(project,alsNew);
@@ -189,12 +211,20 @@ public class ProjectService {
     }
     @Transactional
     public List<Object> saveLBatProject(Long projectId, Long alsId, Long lbId, LBDTO lb) {
-        Optional<ProjectDTO> projectOptional = findById(projectId);
-        ProjectDTO project = null;
-        if (projectOptional.isPresent()) {project = projectOptional.get();}
+        logger.info("Сохранение МХ(id%d-%s) в АКХ(%d) в Проекте(%d)..."
+                .formatted(lb.getId(),lb.getName(),alsId,projectId));
+        ProjectDTO project = findById(projectId);
         List<Object> ALSlbIdList=alsService.replaceLBandSaveALS(alsId,lbId,lb);
         ALSDTO alsNew= (ALSDTO) ALSlbIdList.get(0);
         replaceALSandSaveProject(project,alsNew,alsId);
         return ALSlbIdList;
+    }
+
+    public int getProjectCounter() {
+        return projectCounter;
+    }
+
+    public void setProjectCounter(int projectCounter) {
+        this.projectCounter = projectCounter;
     }
 }

@@ -6,6 +6,7 @@ import com.lb_calc_web.dto.LCDTO;
 import com.lb_calc_web.dto.ProjectDTO;
 import com.lb_calc_web.model.attributes.*;
 import com.lb_calc_web.service.*;
+import com.lb_calc_web.service.util.SizeValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.InputStreamResource;
@@ -62,16 +63,14 @@ public class ProjectController {
     }
     @PostMapping("/{id}/save")
     public String saveProject(@ModelAttribute("project") ProjectDTO project,Model model) {
-        logger.debug("Saving Project...");
         for(ALSDTO als:project.getAlsList()){
             als=alsService.resizeLC(als);
             als=alsService.resizeLBs(als);
         }
-        List<List<List<List<String>>>>  errorProjectList=SizeValidator.getErrorValidateProjectSizeList(project);
+        List<List<List<List<String>>>>  errorProjectList= SizeValidator.getErrorValidateProjectSizeList(project);
         if (errorProjectList.isEmpty()) {
             project=projectService.saveProject(project);
         }else{
-            logger.warn("Saving Project Error");
             for(List<List<List<String>>> alsError: errorProjectList) {
                 logger.warn("[Ошибки размеров АКХ]:"+ alsError.get(0));
                 logger.warn("[Ошибки размеров МХ]:"+ alsError.get(1));
@@ -107,12 +106,8 @@ public class ProjectController {
     }
     @GetMapping("/{id}")
     private String editProject(@PathVariable(value = "id") Long id, Model model) {
-        Optional<ProjectDTO> projectOptional = projectService.findById(id);
-        ProjectDTO project = null;
-        if (projectOptional.isPresent()) {project = projectOptional.get();}
-
+        ProjectDTO project =projectService.findById(id);
         model.addAttribute("project", project);
-
         model.addAttribute("colorsList", colorsList);
         model.addAttribute("positionLCList", positionLCList);
         model.addAttribute("paymentList", paymentList);
@@ -127,9 +122,7 @@ public class ProjectController {
             @PathVariable(value = "alsId") Long alsId,
             @ModelAttribute("als") ALSDTO als,
             Model model) {
-        Optional<ProjectDTO> projectOptional =projectService.findById(projectId);
-        ProjectDTO project = null;
-        if (projectOptional.isPresent()) {project = projectOptional.get();}
+        ProjectDTO project = projectService.findById(projectId);
         model.addAttribute("project", project);
         List<String> errorALSList=SizeValidator.getErrorValidateALSSizesList(als);
         als = alsService.resizeLC(als);
@@ -140,9 +133,9 @@ public class ProjectController {
            als=projectService.replaceALSandSaveProject(project,als,alsId);
         }
         else {
-            logger.warn(String.valueOf(errorALSList));
-            logger.warn(String.valueOf(errorLCList));
-            logger.warn(String.valueOf(errorLBLists));
+            logger.warn("[Ошибки размеров АКХ]:"+ errorALSList);
+            logger.warn("[Ошибки размеров МХ]:"+ errorLCList);
+            logger.warn("[Ошибки размеров МУ]:"+errorLBLists);
             model.addAttribute("ALSErrors", errorALSList);
             model.addAttribute("LCErrors", errorLCList);
             model.addAttribute("LBErrors", errorLBLists);
@@ -162,15 +155,9 @@ public class ProjectController {
     public String editALSatProject(@PathVariable(value = "projectId") Long projectId,
                                    @PathVariable(value = "alsId") Long alsId,
                                    Model model) {
-
-        Optional<ProjectDTO> projectOptional =projectService.findById(projectId);
-        ProjectDTO project = null;
-        if (projectOptional.isPresent()) {project = projectOptional.get();}
+        ProjectDTO project =projectService.findById(projectId);
         model.addAttribute("project", project);
-
-        Optional<ALSDTO> alsOptional = alsService.findById(alsId);
-        ALSDTO als = null;
-        if (alsOptional.isPresent()) {als = alsOptional.get();}
+        ALSDTO als = alsService.findById(alsId);
         model.addAttribute("als", als);
         model.addAttribute("typeList", typeLbList);
         model.addAttribute("colorsList", colorsList);
@@ -185,15 +172,9 @@ public class ProjectController {
                                    @PathVariable(value = "alsId") Long alsId,
                                    @PathVariable(value = "lcId") Long lcId,
                                    Model model) {
-        Optional<ProjectDTO> projectOptional = projectService.findById(projectId);
-        ProjectDTO project = null;
-        if (projectOptional.isPresent()) {project = projectOptional.get();}
-        Optional<ALSDTO> alsOptional = alsService.findById(alsId);
-        ALSDTO als = null;
-        if (alsOptional.isPresent()) {als = alsOptional.get();}
-        Optional<LCDTO> lcOptional = lcService.findById(lcId);
-        LCDTO lc = null;
-        if (lcOptional.isPresent()) {lc = lcOptional.get();}
+        ProjectDTO project = projectService.findById(projectId);
+        ALSDTO als =alsService.findById(alsId);
+        LCDTO lc = lcService.findById(lcId);
         model.addAttribute("project", project);
         model.addAttribute("als", als);
         model.addAttribute("lc", lc);
@@ -210,12 +191,8 @@ public class ProjectController {
             @PathVariable(value = "lcId") Long lcId,
             @ModelAttribute("lc") LCDTO lc,
             Model model) {
-        Optional<ProjectDTO> projectOptional = projectService.findById(projectId);
-        ProjectDTO project = null;
-        if (projectOptional.isPresent()) {project = projectOptional.get();}
-        Optional<ALSDTO> alsOptional = alsService.findById(alsId);
-        ALSDTO als = null;
-        if (alsOptional.isPresent()) {als = alsOptional.get();}
+        ProjectDTO project =projectService.findById(projectId);
+        ALSDTO als = alsService.findById(alsId);
         List<String> errorList =SizeValidator.getErrorValidateLCSizesList(lc);
         if (errorList.isEmpty()) {
             als=projectService.replaceLCandSaveProject(project,als,alsId,lc);
@@ -257,16 +234,9 @@ public class ProjectController {
                                    @PathVariable(value = "alsId") Long alsId,
                                    @PathVariable(value = "lbId") Long lbId,
                                    Model model) {
-        Optional<ProjectDTO> projectOptional = projectService.findById(projectId);
-        ProjectDTO project = null;
-        if (projectOptional.isPresent()) {project = projectOptional.get();}
-        Optional<ALSDTO> alsOptional = alsService.findById(alsId);
-        ALSDTO als = null;
-        if (alsOptional.isPresent()) {als = alsOptional.get();}
-        Optional<LBDTO> lbOptional = lbService.findById(lbId);
-        LBDTO lb = null;
-        if (lbOptional.isPresent()) {lb = lbOptional.get();}
-
+        ProjectDTO project = projectService.findById(projectId);
+        ALSDTO als = alsService.findById(alsId);
+        LBDTO lb =lbService.findById(lbId);
         model.addAttribute("project", project);
         model.addAttribute("als", als);
         model.addAttribute("lb", lb);
@@ -282,15 +252,11 @@ public class ProjectController {
                                   @PathVariable(value = "lbId") Long lbId,
                                   @ModelAttribute("lb") LBDTO lb,
                                   Model model) {
-        Optional<ProjectDTO> projectOptional = projectService.findById(projectId);
-        ProjectDTO project = null;
-        if (projectOptional.isPresent()) {project = projectOptional.get();}
+        ProjectDTO project =projectService.findById(projectId);
         model.addAttribute("project", project);
         List<Object> ALSlbIdList= null;
         int newLbId;
-        Optional<ALSDTO> alsOptional = alsService.findById(alsId);
-        ALSDTO als = null;
-        if (alsOptional.isPresent()) {als = alsOptional.get();}
+        ALSDTO als = alsService.findById(alsId);
         model.addAttribute("projectId", projectId);
         model.addAttribute("alsId", alsId);
         model.addAttribute("als", als);
@@ -314,9 +280,7 @@ public class ProjectController {
     }
     @GetMapping("/{id}/savetoexcel")
     private ResponseEntity<Resource> saveProjectToExcel(@PathVariable(value = "id") Long id) {
-        Optional<ProjectDTO> projectOptional = projectService.findById(id);
-        ProjectDTO project = null;
-        if (projectOptional.isPresent()) {project = projectOptional.get();}
+        ProjectDTO project = projectService.findById(id);
         String filename = project.getName()+".xlsx";
         InputStreamResource file = new InputStreamResource(projectService.exportToExcel(project));
         return ResponseEntity.ok()

@@ -7,6 +7,7 @@ import com.lb_calc_web.model.attributes.Colors;
 import com.lb_calc_web.model.attributes.DirectionDoorOpening;
 import com.lb_calc_web.model.attributes.TypeLb;
 import com.lb_calc_web.repository.LBRepository;
+import com.lb_calc_web.service.util.LBImageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Example;
@@ -29,6 +30,7 @@ public class LBService {
         this.lbRepository = repository;
     }
     public LBDTO createLB() {
+        logger.info("Создание МХ...");
         LBDTO lb = new LBDTO();
         lb.setHeight(1940);
         lb.setWidth(500);
@@ -43,9 +45,11 @@ public class LBService {
         lb.setColorDoor(String.valueOf(Colors.White));
         updateLBsizeAndDescription(lb);
         lb.setStringLBImage(LBImageService.getStringLBImage(lb));
+        logger.info("Создан МХ(%s)".formatted(lb.getName()));
         return lb;
     }
     public LBDTO createLB(int height, int depth,int upperFrame, int bottomFrame, Colors colorBody, Colors colorDoor){
+        logger.info("Создание МХ...");
         LBDTO lb = new LBDTO();
         lb.setHeight(height);
         lb.setWidth(500);
@@ -60,11 +64,12 @@ public class LBService {
         lb.setColorDoor(String.valueOf(colorDoor));
         updateLBsizeAndDescription(lb);
         lb.setStringLBImage(LBImageService.getStringLBImage(lb));
+        logger.info("Создан МХ(%s)".formatted(lb.getName()));
         return lb;
     }
     protected void updateLBsizeAndDescription(LBDTO lb) {
+        logger.info("Корректировка размеров ячеек и описания МХ(id%d-%s)...".formatted(lb.getId(),lb.getName()));
         lb.setShelfThick(TypeLb.valueOf(lb.getType()).getShelfThick());
-        System.out.println(lb.getShelfThick());
         lb.setWidthCell(lb.getWidth()-TypeLb.valueOf(lb.getType()).getDeltaWidth());
         lb.setDepthCell(lb.getWidth()-20);
         lb.setHeightCell((double) (lb.getHeight() - lb.getUpperFrame() - lb.getBottomFrame()
@@ -75,37 +80,40 @@ public class LBService {
                 " ВхШхГ,мм: "+lb.getHeight()+"x"+ lb.getWidth() +"x"+lb.getDepth()+", "+
                 lb.getDirectionDoorOpening()+", "+
                 lb.getColorBody()+"/"+lb.getColorDoor());
-        logger.warn("update"+lb.toString());
     }
     public List<LBDTO> findAll() {
+        logger.info("Получение списка МХ...");
         List<LB> lbs = lbRepository.findAll();
         lbs.sort(Comparator.comparing(LB::getId));
         return LBMapper.toLBDTOList(lbs);
     }
-    public Optional<LBDTO> findById(Long id) {
+    public LBDTO findById(Long id) {
+        logger.info("Поиск МХ(id%d)...".formatted(id));
         LB lb = lbRepository.findById(id).orElseThrow(()->
                 new NoSuchElementException("Модуль Хранения с id%d не найден".formatted(id)));
-        return Optional.of(LBMapper.toLBDTO(lb));
+        return LBMapper.toLBDTO(lb);
     }
     public LBDTO saveLB(LBDTO lbDTO){
+            logger.info("Сохранение МХ(id%d-%s)...".formatted(lbDTO.getId(), lbDTO.getName()));
             updateLBsizeAndDescription(lbDTO);
             LB lb =LBMapper.toLB(lbDTO);
             Optional<LB> optional=getOptionalLB(lb);
             if (optional.isEmpty()) {
-                logger.debug("МХ нет в бд");
+                logger.info("МХ не найден в БД.");
                 lbDTO.setId(0);
                 LB lbNew = LBMapper.toLB(lbDTO);
+                logger.info("Сохранение МХ в БД...");
                 lbNew=lbRepository.save(lbNew);
-                logger.debug("Сохранен в БД: \n"+lbNew);
+                logger.info("МХ(id%d-%s) cохранён в БД.".formatted(lbNew.getId(), lbNew.getName()));
                 return LBMapper.toLBDTO(lbNew);
             }else {
-                logger.debug("МХ есть в БД");
                 lb=optional.get();
-                logger.debug(String.valueOf(lb));
+                logger.info("МХ(id(%d-%s) найден в БД.".formatted(lb.getId(), lb.getName()));
                 return LBMapper.toLBDTO(lb);
             }
     }
     public Optional<LB> getOptionalLB(LB lbNew) {
+        logger.info("Поиск МХ по характеристикам...");
         ExampleMatcher modelMatcher = ExampleMatcher.matching()
                 .withIgnorePaths("id")
                 .withIgnorePaths("name")

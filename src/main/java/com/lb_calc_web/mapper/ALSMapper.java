@@ -8,7 +8,7 @@ import com.lb_calc_web.model.ALSLB;
 import com.lb_calc_web.model.LB;
 import com.lb_calc_web.model.attributes.Colors;
 import com.lb_calc_web.model.attributes.PositionLC;
-import com.lb_calc_web.service.ALSImageService;
+import com.lb_calc_web.service.util.ALSImageService;
 import org.springframework.stereotype.Component;
 
 import java.util.*;

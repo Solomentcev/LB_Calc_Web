@@ -6,7 +6,7 @@ import com.lb_calc_web.model.attributes.Colors;
 import com.lb_calc_web.model.attributes.DisplayLC;
 import com.lb_calc_web.model.attributes.Payment;
 import com.lb_calc_web.service.LCService;
-import com.lb_calc_web.service.SizeValidator;
+import com.lb_calc_web.service.util.SizeValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -47,7 +47,6 @@ public class LCController {
     }
     @PostMapping("/save")
     public String saveLC(@ModelAttribute("lc") LCDTO lc, Model model) {
-        logger.debug(String.valueOf(lc));
         List<String> errorList= SizeValidator.getErrorValidateLCSizesList(lc);
         if (errorList.isEmpty()) {
             lc=lcService.saveLC(lc);
@@ -66,14 +65,12 @@ public class LCController {
 
     @GetMapping("/{id}")
     private String editLC(@PathVariable(value = "id") Long id, Model model) {
-        Optional<LCDTO> lcOptional = lcService.findById(id);
-        LCDTO lc = null;
-        if (lcOptional.isPresent()) {lc = lcOptional.get();
+        LCDTO lc = lcService.findById(id);
         model.addAttribute("lc", lc);
         model.addAttribute("colorsList", colorsList);
         model.addAttribute("paymentList", paymentList);
         model.addAttribute("displayList", displayList);
-        model.addAttribute("barReaderList", barReaderList);}
+        model.addAttribute("barReaderList", barReaderList);
         return "/lcs/lc";
     }
 }
