@@ -14,7 +14,6 @@ import java.util.Map;
 
 
 public class ExcelHelper {
-    public static String TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 
     public static ByteArrayInputStream projectToExcel(ProjectDTO project) {
 
