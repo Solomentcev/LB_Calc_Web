@@ -1,5 +1,7 @@
 package com.lb_calc_web.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.util.Objects;
 
 public class LCDTO {
@@ -17,6 +19,7 @@ public class LCDTO {
     private boolean printer;
     private boolean rfidReader;
     private String colorBody;
+    @JsonIgnore
     private String stringLCImage;
 
     public LCDTO() {

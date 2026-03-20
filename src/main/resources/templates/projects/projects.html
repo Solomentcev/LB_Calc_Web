@@ -21,18 +21,22 @@
             <th>ID</th>
             <th>Company</th>
             <th>Description</th>
-            <th>Created Date</th>
-            <th>Updated Date</th>
+            <th>CreatedBy</th>
+            <th>CreatedAt</th>
+            <th>UpdateBy</th>
+            <th>UpdatedAt</th>
             <th>Action</th>
         </tr>
         </thead>
         <tbody>
-        <tr th:each="project : ${projects}">
+        <tr th:each="project: ${projects}">
             <td th:text="${project.getId()}">ID</td>
             <td th:text="${project.getCompany()}">Company</td>
             <td th:text="${project.getDescription()}">Description</td>
-            <td th:text="${project.getCreatedDate()}">CreatedAt</td>
-            <td th:text="${project.getUpdatedDate()}">UpdatedAt</td>
+            <td th:text="${project.createdBy.getUsername()}">CreatedBy</td>
+            <td th:text="${project.getCreatedAt()}">CreatedAt</td>
+            <td th:text="*{project.updatedBy.getUsername()}">UpdateBy</td>
+            <td th:text="${project.getUpdatedAt()}">UpdatedAt</td>
             <td>
                 <a th:href="@{/projects/{id}(id=${project.getId()})}" class="btn btn-primary">Edit</a>
             </td>

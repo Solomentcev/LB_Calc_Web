@@ -18,21 +18,27 @@ public class ProjectMapper {
         projectDTO.setCompany(project.getCompany());
         projectDTO.setName(project.getName());
         projectDTO.setDescription(project.getDescription());
-        projectDTO.setCreatedDate(project.getCreatedDate());
-        projectDTO.setUpdatedDate(project.getUpdatedDate());
+        projectDTO.setCreatedBy(EmployeeMapper.toEmployeeDTO(project.getCreatedBy()));
+        projectDTO.setCreatedAt(project.getCreatedAt());
+        projectDTO.setUpdatedBy(EmployeeMapper.toEmployeeDTO(project.getUpdatedBy()));
+        projectDTO.setUpdatedAt(project.getUpdatedAt());
         projectDTO.setAlsList(getALSDTOListFromProjectALSSet(project.getQuantityALS()));
         projectDTO.setQuantityALS(getALSDTOMapFromProjectALSSet(project.getQuantityALS()));
 
        return projectDTO;
     }
     public static Project toProject(ProjectDTO projectDTO) {
+        System.out.println(projectDTO);
         Project project = new Project();
         if (!(projectDTO.getId()==0)) project.setId(projectDTO.getId());
         project.setName(projectDTO.getName());
         project.setCompany(projectDTO.getCompany());
         project.setDescription(projectDTO.getDescription());
-        project.setCreatedDate(projectDTO.getCreatedDate());
-        project.setUpdatedDate(projectDTO.getUpdatedDate());
+        project.setCreatedBy(EmployeeMapper.toEmployee(projectDTO.getCreatedBy()));
+        project.setCreatedAt(projectDTO.getCreatedAt());
+        project.setUpdatedBy(EmployeeMapper.toEmployee(projectDTO.getUpdatedBy()));
+        project.setUpdatedAt(projectDTO.getUpdatedAt());
+        System.out.println(project);
         return project;
     }
     public static Set<ProjectALS> getProjectALSSetFromALSDTOMap(Map<ALSDTO, Integer> quantityALS, ProjectDTO projectDTO) {
@@ -51,8 +57,10 @@ public class ProjectMapper {
             projectDTO.setCompany(project.getCompany());
             projectDTO.setName(project.getName());
             projectDTO.setDescription(project.getDescription());
-            projectDTO.setCreatedDate(project.getCreatedDate());
-            projectDTO.setUpdatedDate(project.getUpdatedDate());
+            projectDTO.setCreatedBy(EmployeeMapper.toEmployeeDTO(project.getCreatedBy()));
+            projectDTO.setCreatedAt(project.getCreatedAt());
+            projectDTO.setUpdatedBy(EmployeeMapper.toEmployeeDTO(project.getUpdatedBy()));
+            projectDTO.setUpdatedAt(project.getUpdatedAt());
             projectDTOList.add(projectDTO);
         }
         return projectDTOList;

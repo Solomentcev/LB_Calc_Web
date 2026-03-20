@@ -1,5 +1,7 @@
 package com.lb_calc_web.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.util.*;
 
 public class ALSDTO {
@@ -19,7 +21,9 @@ public class ALSDTO {
     private String colorDoor;
     private String colorBody;
     private List<LBDTO> lbList =new ArrayList<>();
+    @JsonIgnore
     private Map<LBDTO, Integer> quantityLB=new HashMap<>();
+    @JsonIgnore
     private String stringALSImage;
 
 

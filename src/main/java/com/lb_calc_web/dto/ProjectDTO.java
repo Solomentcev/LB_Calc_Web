@@ -1,5 +1,7 @@
 package com.lb_calc_web.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.time.LocalDate;
 import java.util.*;
 
@@ -8,9 +10,12 @@ public class ProjectDTO {
     private String name;
     private String description;
     private String company;
-    private LocalDate createdDate;
-    private LocalDate updatedDate;
+    private EmployeeDTO createdBy;
+    private LocalDate createdAt;
+    private EmployeeDTO updatedBy;
+    private LocalDate updatedAt;
     private List<ALSDTO> alsList = new ArrayList<>();
+    @JsonIgnore
     private Map<ALSDTO, Integer> quantityALS =new HashMap<>();
 
     public ProjectDTO() {
@@ -48,20 +53,20 @@ public class ProjectDTO {
         this.company = company;
     }
 
-    public LocalDate getCreatedDate() {
-        return createdDate;
+    public LocalDate getCreatedAt() {
+        return createdAt;
     }
 
-    public void setCreatedDate(LocalDate createdDate) {
-        this.createdDate = createdDate;
+    public void setCreatedAt(LocalDate createdAt) {
+        this.createdAt = createdAt;
     }
 
-    public LocalDate getUpdatedDate() {
-        return updatedDate;
+    public LocalDate getUpdatedAt() {
+        return updatedAt;
     }
 
-    public void setUpdatedDate(LocalDate updatedDate) {
-        this.updatedDate = updatedDate;
+    public void setUpdatedAt(LocalDate updatedAt) {
+        this.updatedAt = updatedAt;
     }
 
     public List<ALSDTO> getAlsList() {
@@ -84,13 +89,13 @@ public class ProjectDTO {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         ProjectDTO that = (ProjectDTO) o;
-        return Objects.equals(getCompany(), that.getCompany()) && Objects.equals(getCreatedDate(), that.getCreatedDate())
+        return Objects.equals(getCompany(), that.getCompany()) && Objects.equals(getCreatedAt(), that.getCreatedAt())
                 && Objects.deepEquals(getQuantityALS(), that.getQuantityALS());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getCompany(), getCreatedDate(), getQuantityALS());
+        return Objects.hash(getCompany(), getCreatedAt(), getQuantityALS());
     }
 
     @Override
@@ -100,9 +105,28 @@ public class ProjectDTO {
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
                 ", company='" + company + '\'' +
-                ", createdDate=" + createdDate +"\n"+
+                ", createdBy=" + createdBy +
+                ", createdAt=" + createdAt +"\n"+
+                ", updatedBy=" + updatedBy +
+                ", updatedAt=" + updatedAt +"\n"+
                 ", alsList=" + alsList +"\n"+
                 ", quantityALS=" + quantityALS +
                 '}';
+    }
+
+    public EmployeeDTO getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(EmployeeDTO owner) {
+        this.createdBy = owner;
+    }
+
+    public EmployeeDTO getUpdatedBy() {
+        return updatedBy;
+    }
+
+    public void setUpdatedBy(EmployeeDTO updatedBy) {
+        this.updatedBy = updatedBy;
     }
 }

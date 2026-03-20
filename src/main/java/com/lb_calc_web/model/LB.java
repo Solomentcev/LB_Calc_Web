@@ -10,7 +10,8 @@ import java.util.Objects;
 import java.util.Set;
 
 @Entity
-@Table(uniqueConstraints = { @UniqueConstraint(columnNames = {"type","height","width","depth",
+@Table(uniqueConstraints = { @UniqueConstraint(columnNames =
+        {"type","height","width","depth",
 "upper_frame","bottom_frame","shelf_thick","count_cells","height_cell","width_cell","depth_cell",
 "direction_door_opening","color_body","color_door"}) })
 public class LB {

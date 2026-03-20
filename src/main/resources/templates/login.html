@@ -8,22 +8,66 @@
           crossorigin="anonymous">
 </head>
 <body>
-<form>
-    <fieldset>
-        <legend>LogIn</legend>
-        <div class="form-group">
-            <label for="inputLogin">Логин</label>
-            <input id="inputLogin" placeholder="Введите логин" class="form-control">
+<div class="container">
+    <div class="row">
+        <div class="col-md-6 offset-md-3">
+            <div th:if="${error}" style="background:#ffdddd;padding:10px;margin-bottom:10px;border:1px solid red;">
+                <span th:text="${error}"></span>
+            </div>
+
+            <div th:if="${success}" style="background:#ddffdd;padding:10px;margin-bottom:10px;border:1px solid green;">
+                <span th:text="${success}"></span>
+            </div>
+            <div th:if="${param.error}">
+                <div class="alert alert-danger" th:text="${param.error}">Invalid Email or Password</div>
+            </div>
+            <div th:if="${param.logout}">
+                <div class="alert alert-success"> You have been logged out.</div>
+            </div>
+
+            <div class="card">
+                <div class="card-header text-center">
+                    <h2 class="text-center">Вход</h2>
+                    <a class="text-center" th:href="@{/registration}">Зарегистрироваться</a>
+                </div>
+                <div class="card-body">
+                    <form method="post" th:object="${loginRequest}" role="form" th:action="@{/login}" class="form-horizontal">
+                        <div class="form-group mb-3">
+                            <label class="control-label" for="email"> Email</label>
+                            <input
+                                    type="email"
+                                    id="email"
+                                    name="email"
+                                    class="form-control"
+                                    placeholder="Enter email address"
+                            />
+                            <div th:if="${#fields.hasErrors('email')}" style="color:red">
+                                <p th:each="e : ${#fields.errors('email')}" th:text="${e}"></p>
+                            </div>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label class="control-label" for="password"> Password</label>
+                            <input
+                                    type="password"
+                                    id="password"
+                                    name="password"
+                                    class="form-control"
+                                    placeholder="Enter password"
+                            />
+                            <div th:if="${#fields.hasErrors('password')}" style="color:red">
+                                <p th:each="e : ${#fields.errors('password')}" th:text="${e}"></p>
+                            </div>
+                        </div>
+                        <div class="form-group mb-3">
+                            <button type="submit" class="btn btn-primary">Подтвердить</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
-        <div class="form-group">
-            <label for="inputPassword">Пароль</label>
-            <input type="password" id="inputPassword" placeholder="Введите пароль" class="form-control">
-        </div>
-        <div class="checkbox">
-            <label><input type="checkbox"> Запомнить меня</label>
-        </div>
-        <button type="submit" class="btn btn-default">Войти</button>
-    </fieldset>
-</form>
+    </div>
+</div>
+<div th:replace="~{footer :: footer}"></div>
 </body>
 </html>

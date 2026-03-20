@@ -1,10 +1,8 @@
 package com.lb_calc_web.service;
 
-import com.lb_calc_web.dto.ALSDTO;
-import com.lb_calc_web.dto.LBDTO;
-import com.lb_calc_web.dto.LCDTO;
-import com.lb_calc_web.dto.ProjectDTO;
+import com.lb_calc_web.dto.*;
 import com.lb_calc_web.helper.ExcelHelper;
+import com.lb_calc_web.mapper.EmployeeMapper;
 import com.lb_calc_web.mapper.ProjectMapper;
 import com.lb_calc_web.model.Project;
 import com.lb_calc_web.repository.ProjectALSRepository;
@@ -12,6 +10,8 @@ import com.lb_calc_web.repository.ProjectRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,7 +40,7 @@ public class ProjectService {
     public List<ProjectDTO> findAll() {
         logger.info("Получение списка Проектов...");
         List<Project> projects = projectRepository.findAll();
-        projects.sort(Comparator.comparing(Project::getCreatedDate).reversed());
+        projects.sort(Comparator.comparing(Project::getUpdatedAt).thenComparing(Project::getId).reversed());
         return ProjectMapper.getProjectDTOListFromProjectList(projects);
     }
 
@@ -52,6 +52,7 @@ public class ProjectService {
         return projectDTO;
     }
     public void deleteById(Long id) {
+        logger.info("Удаление проекта (id%d)...".formatted(id));
         projectRepository.deleteById(id);
     }
     public ByteArrayInputStream exportToExcel(ProjectDTO projectDTO) {
@@ -61,17 +62,25 @@ public class ProjectService {
 
     public ProjectDTO createProject(){
         logger.info("Создание Проекта...");
-        ProjectDTO project = new ProjectDTO();
-        projectCounter=projectCounter+1;
-        project.setCompany("Заказчик"+projectCounter);
-        project.setCreatedDate(LocalDate.now());
-        project.setUpdatedDate(LocalDate.now());
-        project.setName(project.getCompany()+"_"+project.getCreatedDate());
+        ProjectDTO project = initProject("Заказчик");
         ALSDTO als=alsService.createALS();
         project.getAlsList().add(als);
         project.getQuantityALS().put(als,1);
         updateProjectDescription(project);
         logger.info("Создан Проект(%s)".formatted(project.getName()));
+        return project;
+    }
+    public ProjectDTO initProject(String company){
+        ProjectDTO project = new ProjectDTO();
+        projectCounter=projectCounter+1;
+        project.setCompany(company +projectCounter);
+        project.setCreatedAt(LocalDate.now());
+        project.setUpdatedAt(LocalDate.now());
+        project.setName(project.getCompany()+"_"+project.getCreatedAt());
+        Authentication auth= SecurityContextHolder.getContext().getAuthentication();
+        EmployeeDTO employee= (EmployeeDTO) auth.getPrincipal();
+        project.setCreatedBy(employee);
+        project.setUpdatedBy(employee);
         return project;
     }
     @Transactional
@@ -81,10 +90,18 @@ public class ProjectService {
         for(ALSDTO als:projectDTO.getAlsList()){
             als.setId(alsService.saveALS(als).getId());
         }
+        Authentication auth= SecurityContextHolder.getContext().getAuthentication();
+        EmployeeDTO employee= (EmployeeDTO) auth.getPrincipal();
+
+        projectDTO.setUpdatedBy(employee);
+        projectDTO.setUpdatedAt(LocalDate.now());
+        projectDTO.setName(projectDTO.getCompany()+"_"+projectDTO.getCreatedAt());
         updateProjectDescription(projectDTO);
         Project project=ProjectMapper.toProject(projectDTO);
         if(projectDTO.getId()==0){
-            project.setUpdatedDate(LocalDate.now());
+            project.setCreatedAt(LocalDate.now());
+            projectDTO.setCreatedBy(employee);
+            project.setCreatedBy(EmployeeMapper.toEmployee(employee));
             projectRepository.save(project);
             projectDTO.setId(project.getId());
             project.getQuantityALS().addAll(ProjectMapper.getProjectALSSetFromALSDTOMap(projectDTO.getQuantityALS(),projectDTO));
@@ -95,7 +112,6 @@ public class ProjectService {
         else{
             project.getQuantityALS().clear();
             project.getQuantityALS().addAll(ProjectMapper.getProjectALSSetFromALSDTOMap(projectDTO.getQuantityALS(),projectDTO));
-            project.setUpdatedDate(LocalDate.now());
             projectALSRepository.saveAll(project.getQuantityALS());
             projectRepository.save(project);
             logger.info("Проект(id%d-%s) обновлен в БД..."

@@ -66,11 +66,11 @@ public class ExcelHelper {
             headerCell.setCellStyle(headerStyle);
 
             headerCell = row.createCell(1);
-            headerCell.setCellValue(project.getCreatedDate().format(DateTimeFormatter.ofPattern("dd.MM.yyyy")));
+            headerCell.setCellValue(project.getCreatedAt().format(DateTimeFormatter.ofPattern("dd.MM.yyyy")));
             headerCell.setCellStyle(headerStyle);
 
             headerCell = row.createCell(2);
-            headerCell.setCellValue(project.getUpdatedDate().format(DateTimeFormatter.ofPattern("dd.MM.yyyy")));
+            headerCell.setCellValue(project.getUpdatedAt().format(DateTimeFormatter.ofPattern("dd.MM.yyyy")));
             headerCell.setCellStyle(headerStyle);
 
             CellStyle style = workbook.createCellStyle();

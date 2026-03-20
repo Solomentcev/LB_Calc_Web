@@ -12,7 +12,7 @@
 <header th:replace="~{header :: header}"></header>
 <div class="container-fluid">
     <br/>
-    <form action="#" th:action="@{/projects/{id}/save (id=${project.getId()})}"
+    <form  th:action="@{/projects/{id}/save (id=${project.getId()})}"
           th:object="${project}" method="POST">
         <button type="submit" class="btn btn-primary btn-sm mb-3">Сохранить проект</button>
         <a th:href="@{'/projects'}" class="btn btn-primary btn-sm mb-3">Back to Project list </a>
@@ -26,8 +26,10 @@
                     <th>ID</th>
                     <th>Company</th>
                     <th>Description</th>
-                    <th>Created Date</th>
-                    <th>Updated Date</th>
+                    <th>CreatedBy</th>
+                    <th>CreatedAt</th>
+                    <th>UpdateBy</th>
+                    <th>UpdatedAt</th>
                     <th>Action</th>
                 </tr>
                 </thead>
@@ -50,12 +52,46 @@
                     </td>
                     <td>
                         <label>
-                            <input type="text" th:field="*{createdDate}" readonly="readonly">
+                            <a th:text="*{createdBy.getUsername()}" th:href="@{'/employees/'+*{createdBy.getId()}}" ></a>
+                        </label>
+                        <label hidden="hidden">
+                            <input type="number" th:field="*{createdBy.id}" readonly="readonly">
+                        </label>
+                        <label hidden="hidden">
+                            <input type="text" th:field="*{createdBy.lastName}" readonly="readonly">
+                        </label>
+                        <label hidden="hidden">
+                            <input type="text" th:field="*{createdBy.firstName}" readonly="readonly">
+                        </label>
+                        <label hidden="hidden">
+                            <input type="email" th:field="*{createdBy.email}" readonly="readonly">
                         </label>
                     </td>
                     <td>
                         <label>
-                            <input type="text" th:field="*{updatedDate}" readonly="readonly">
+                            <input type="text" th:field="*{createdAt}" readonly="readonly">
+                        </label>
+                    </td>
+                    <td>
+                        <label>
+                            <a th:text="*{updatedBy.username}" th:href="@{'/employees/'+*{updatedBy.getId()}}" ></a>
+                        </label>
+                        <label hidden="hidden">
+                            <input type="number" th:field="*{updatedBy.id}" readonly="readonly">
+                        </label>
+                        <label hidden="hidden">
+                            <input type="text" th:field="*{updatedBy.lastName}" readonly="readonly">
+                        </label>
+                        <label hidden="hidden">
+                            <input type="text" th:field="*{updatedBy.firstName}" readonly="readonly">
+                        </label>
+                        <label hidden="hidden">
+                            <input type="email" th:field="*{updatedBy.email}" readonly="readonly">
+                        </label>
+                    </td>
+                    <td>
+                        <label>
+                            <input type="text" th:field="*{updatedAt}" readonly="readonly">
                         </label>
                     </td>
                     <td hidden>

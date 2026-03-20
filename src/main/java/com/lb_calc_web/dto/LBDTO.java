@@ -1,5 +1,7 @@
 package com.lb_calc_web.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.util.Objects;
 
 public class LBDTO {
@@ -20,6 +22,7 @@ public class LBDTO {
     private String directionDoorOpening;
     private String colorDoor;
     private String colorBody;
+    @JsonIgnore
     private String stringLBImage;
 
     public LBDTO() {

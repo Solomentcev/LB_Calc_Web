@@ -1,5 +1,6 @@
 package com.lb_calc_web.model;
 
+import com.lb_calc_web.model.user.Employee;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
@@ -13,13 +14,36 @@ public class Project {
     private String name;
     private String description;
     private String company;
-    private LocalDate createdDate;
-    private LocalDate updatedDate;
+    private LocalDate createdAt;
+    @ManyToOne
+    @JoinColumn(name = "created_by_id")
+    private Employee createdBy;
+    private LocalDate updatedAt;
+    @ManyToOne
+    @JoinColumn(name = "updated_by_id")
+    private Employee updatedBy;
     @OneToMany(mappedBy = "project",
              orphanRemoval = true
            )
     private Set<ProjectALS> quantityALS = new HashSet<>();
-       public Project() {
+
+    public Employee getUpdatedBy() {
+        return updatedBy;
+    }
+
+    public void setUpdatedBy(Employee updatedBy) {
+        this.updatedBy = updatedBy;
+    }
+
+    public Employee getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(Employee createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public Project() {
     }
 
     public int getId() {
@@ -54,12 +78,12 @@ public class Project {
         this.company = company;
     }
 
-    public LocalDate getCreatedDate() {
-        return createdDate;
+    public LocalDate getCreatedAt() {
+        return createdAt;
     }
 
-    public void setCreatedDate(LocalDate createdDate) {
-        this.createdDate = createdDate;
+    public void setCreatedAt(LocalDate createdAt) {
+        this.createdAt = createdAt;
     }
 
     public Set<ProjectALS> getQuantityALS() {
@@ -70,12 +94,12 @@ public class Project {
         this.quantityALS = quantityALS;
     }
 
-    public LocalDate getUpdatedDate() {
-        return updatedDate;
+    public LocalDate getUpdatedAt() {
+        return updatedAt;
     }
 
-    public void setUpdatedDate(LocalDate updatedDate) {
-        this.updatedDate = updatedDate;
+    public void setUpdatedAt(LocalDate updatedAt) {
+        this.updatedAt = updatedAt;
     }
 
     @Override
@@ -85,7 +109,10 @@ public class Project {
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
                 ", company='" + company + '\'' +
-                ", createdDate=" + createdDate +"\n"+
+                ", createdBy=" + createdBy +
+                ", createdAt=" + createdAt +"\n"+
+                ", updatedBy=" + updatedBy +
+                ", updatedAt=" + updatedAt +
                 ", quantityALS=" + quantityALS +
                 '}';
     }
@@ -95,11 +122,11 @@ public class Project {
         if (o == null || getClass() != o.getClass()) return false;
         Project project = (Project) o;
         return Objects.equals(getDescription(), project.getDescription()) && Objects.equals(getCompany(), project.getCompany())
-                && Objects.equals(getCreatedDate(), project.getCreatedDate());
+                && Objects.equals(getCreatedAt(), project.getCreatedAt());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getDescription(), getCompany(), getCreatedDate());
+        return Objects.hash(getDescription(), getCompany(), getCreatedAt());
     }
 }

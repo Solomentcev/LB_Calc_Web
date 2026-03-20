@@ -52,7 +52,7 @@ public class LBController {
     }
     @PostMapping("/save")
     public String saveLB(@ModelAttribute("lb") LBDTO lb, Model model){
-            logger.debug(String.valueOf(lb));
+
             List<String> errorList= SizeValidator.getErrorValidateLBSizesList(lb);
             if (errorList.isEmpty()) {
                 lb=lbService.saveLB(lb);

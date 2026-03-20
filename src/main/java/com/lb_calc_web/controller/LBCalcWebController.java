@@ -1,9 +1,6 @@
 package com.lb_calc_web.controller;
 
-import com.lb_calc_web.service.ALSService;
-import com.lb_calc_web.service.LBService;
-import com.lb_calc_web.service.LCService;
-import com.lb_calc_web.service.ProjectService;
+import com.lb_calc_web.service.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,15 +13,17 @@ public class LBCalcWebController {
     private final ALSService alsService;
     private final LCService lcService;
     private final LBService lbService;
+    private final EmployeeService employeeService;
 
-    public LBCalcWebController(ProjectService projectService, ALSService alsService, LCService lcService, LBService lbService) {
+    public LBCalcWebController(ProjectService projectService, ALSService alsService, LCService lcService, LBService lbService, EmployeeService employeeService) {
         this.projectService = projectService;
         this.alsService = alsService;
         this.lcService = lcService;
         this.lbService = lbService;
+        this.employeeService = employeeService;
     }
     @GetMapping
-    private String init() {return "index";}
+    private String init() {return "/profile";}
 
     @GetMapping("/projects")
     private String projects(Model model) {
@@ -47,4 +46,10 @@ public class LBCalcWebController {
         model.addAttribute("lbs", lbService.findAll());
         return "lbs/lbs";
     }
+    @GetMapping("/employees")
+    private String employees(Model model) {
+        model.addAttribute("employees", employeeService.findAll());
+        return "employees/employees";
+    }
+
 }

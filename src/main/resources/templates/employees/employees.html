@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <title>LB_Calc_WEB</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+          integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
+          crossorigin="anonymous">
+</head>
+<body>
+<div th:replace="~{header :: header}"></div>
+    <div class="container mt-4">
+        <h2>Сотрудники</h2>
+        <a th:href="@{/employees/create}" class="btn btn-success mb-3">Add New Employee</a>
+
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="employee : ${employees}">
+                <td th:text="${employee.id}"></td>
+                <td th:text="${employee.firstName}"></td>
+                <td th:text="${employee.lastName}"></td>
+                <td th:text="${employee.email}"></td>
+                <td th:text="${employee.role}"></td>
+                <td>
+                    <a th:href="@{'/employees/' + ${employee.id}}" class="btn btn-sm btn-primary">Edit</a>
+                    <a th:href="@{'/employees/' + ${employee.id}+'/delete'}"
+                       class="btn btn-sm btn-danger"
+                       onclick="return confirm('Are you sure you want to delete this employee?')">Delete</a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <div th:replace="~{footer :: footer}"></div>
+</body>
+</html>
