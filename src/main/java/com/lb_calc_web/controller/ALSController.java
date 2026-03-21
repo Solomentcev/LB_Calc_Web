@@ -17,41 +17,21 @@ import java.util.*;
 
 @Controller
 @RequestMapping("/alss")
-public class ALSController {
+public class ALSController extends BaseCatalogController {
     private static final Logger logger = LoggerFactory.getLogger(ALSController.class);
     private final ALSService alsService;
     private final LCService lcService;
     private final LBService lbService;
-    private final List<Colors> colorsList;
-    private final List<PositionLC> positionLCList;
-    private final List<Payment> paymentList;
-    private final List<DisplayLC> displayList;
-    private final List<BarReader> barReaderList;
-    private final List<TypeLb> typeLbList;
-    private final List<DirectionDoorOpening> directionDoorOpeningList;
     @Autowired
     public ALSController(ALSService alsService, LCService lcService, LBService lbService) {
         this.alsService = alsService;
         this.lcService = lcService;
         this.lbService = lbService;
-        colorsList = Arrays.asList(Colors.values());
-        positionLCList = Arrays.asList(PositionLC.values());
-        paymentList = Arrays.asList(Payment.values());
-        displayList = Arrays.asList(DisplayLC.values());
-        barReaderList = Arrays.asList(BarReader.values());
-        typeLbList= Arrays.asList(TypeLb.values());
-        directionDoorOpeningList = Arrays.asList(DirectionDoorOpening.values());
     }
     @GetMapping("/create")
     private String createALS(Model model) {
         ALSDTO als = alsService.createALS();
         model.addAttribute("als", als);
-        model.addAttribute("colorsList", colorsList);
-        model.addAttribute("positionLCList", positionLCList);
-        model.addAttribute("paymentList", paymentList);
-        model.addAttribute("typeList", typeLbList);
-        model.addAttribute("displayList", displayList);
-        model.addAttribute("barReaderList", barReaderList);
         return "/alss/als";
     }
     @PostMapping("/save")
@@ -72,12 +52,6 @@ public class ALSController {
             model.addAttribute("LCErrors", errorLCList);
             model.addAttribute("LBErrors", errorLBLists);
             model.addAttribute("als", als);
-            model.addAttribute("colorsList", colorsList);
-            model.addAttribute("positionLCList", positionLCList);
-            model.addAttribute("paymentList", paymentList);
-            model.addAttribute("typeList", typeLbList);
-            model.addAttribute("displayList", displayList);
-            model.addAttribute("barReaderList", barReaderList);
             return "/alss/als";
         }
         return "redirect:/alss/" + als.getId();
@@ -86,12 +60,7 @@ public class ALSController {
     private String editALS(@PathVariable(value = "id") Long id, Model model) {
             ALSDTO als = alsService.findById(id);
             model.addAttribute("als", als);
-            model.addAttribute("colorsList", colorsList);
-            model.addAttribute("positionLCList", positionLCList);
-            model.addAttribute("typeList", typeLbList);
-            model.addAttribute("paymentList", paymentList);
-            model.addAttribute("displayList", displayList);
-            model.addAttribute("barReaderList", barReaderList);
+
         return "alss/als";
     }
     @PostMapping("/{alsId}/lbs/{lbId}/save")
@@ -109,9 +78,6 @@ public class ALSController {
             model.addAttribute("als", als);
             model.addAttribute("errors",errorList);
             model.addAttribute("lb", lb);
-            model.addAttribute("typeLbList", typeLbList);
-            model.addAttribute("colorsList", colorsList);
-            model.addAttribute("directionDoorOpeningList", directionDoorOpeningList);
             return "alss/alss_lb";
         }
 
@@ -120,7 +86,7 @@ public class ALSController {
          model.addAttribute("als", als);
         return "redirect:/alss/" + als.getId()+"/lbs/"+newLbId;
     }
-    @GetMapping("/{alsId}/addLB")
+    @PostMapping("/{alsId}/addLB")
     public String addLBatALS(@PathVariable(value = "alsId") Long alsId,
                         Model model) {
         ALSDTO als = alsService.addNewLBandSaveALS(alsId);
@@ -136,13 +102,10 @@ public class ALSController {
               model.addAttribute("als", als);
         LBDTO lb = lbService.findById(lbId);
         model.addAttribute("lb", lb);
-        model.addAttribute("typeLbList", typeLbList);
-        model.addAttribute("colorsList", colorsList);
-        model.addAttribute("directionDoorOpeningList", directionDoorOpeningList);
         return "alss/alss_lb";
     }
 
-    @GetMapping("/{alsId}/lbs/{lbId}/delete")
+    @PostMapping("/{alsId}/lbs/{lbId}/delete")
     public String deleteLBatALS(@PathVariable(value = "alsId") Long alsId,
                            @PathVariable(value = "lbId") Long lbId,
                            Model model)  {
@@ -159,10 +122,6 @@ public class ALSController {
         model.addAttribute("als", als);
         LCDTO lc = lcService.findById(lcId);
         model.addAttribute("lc", lc);
-        model.addAttribute("colorsList", colorsList);
-        model.addAttribute("paymentList", paymentList);
-        model.addAttribute("displayList", displayList);
-        model.addAttribute("barReaderList", barReaderList);
         return "alss/alss_lc";
     }
     @PostMapping("/{alsId}/lcs/{lcId}/save")
@@ -181,10 +140,6 @@ public class ALSController {
             logger.warn(errorList.toString());
             model.addAttribute("lc", lc);
             model.addAttribute("errors", errorList);
-            model.addAttribute("colorsList", colorsList);
-            model.addAttribute("paymentList", paymentList);
-            model.addAttribute("displayList", displayList);
-            model.addAttribute("barReaderList", barReaderList);
             return "alss/alss_lc";
         }
         return "redirect:/alss/" + als.getId()+"/lcs/"+als.getLC().getId();

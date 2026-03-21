@@ -22,43 +22,25 @@ import java.util.*;
 
 @Controller
 @RequestMapping("/projects")
-public class ProjectController {
+public class ProjectController extends BaseCatalogController{
     private static final Logger logger = LoggerFactory.getLogger(ProjectController.class);
     private final ProjectService projectService;
     private final ALSService alsService;
     private final LBService lbService;
     private final LCService lcService;
-    private final List<Colors> colorsList;
-    private final List<PositionLC> positionLCList;
-    private final List<Payment> paymentList;
-    private final List<DisplayLC> displayList;
-    private final List<BarReader> barReaderList;
-    private final List<TypeLb> typeLbList;
-    private final List<DirectionDoorOpening> directionDoorOpeningList;
+
 
     public ProjectController(ProjectService projectService, ALSService aLSService, LBService lbService, LCService lcService) {
         this.projectService = projectService;
         this.alsService = aLSService;
         this.lbService = lbService;
         this.lcService = lcService;
-        colorsList = Arrays.asList(Colors.values());
-        positionLCList = Arrays.asList(PositionLC.values());
-        displayList = Arrays.asList(DisplayLC.values());
-        barReaderList = Arrays.asList(BarReader.values());
-        typeLbList= Arrays.asList(TypeLb.values());
-        directionDoorOpeningList = Arrays.asList(DirectionDoorOpening.values());
-        paymentList = Arrays.asList(Payment.values());
+
     }
     @GetMapping("/create")
     private String createProject(Model model) {
         ProjectDTO project = projectService.createProject();
         model.addAttribute("project", project);
-        model.addAttribute("colorsList", colorsList);
-        model.addAttribute("positionLCList", positionLCList);
-        model.addAttribute("paymentList", paymentList);
-        model.addAttribute("displayList", displayList);
-        model.addAttribute("barReaderList", barReaderList);
-        model.addAttribute("typeList", typeLbList);
         return "/projects/project";
     }
     @PostMapping("/{id}/save")
@@ -79,25 +61,20 @@ public class ProjectController {
             model.addAttribute("projectErrors", errorProjectList);
 
             model.addAttribute("project", project);
-            model.addAttribute("colorsList", colorsList);
-            model.addAttribute("positionLCList", positionLCList);
-            model.addAttribute("paymentList", paymentList);
-            model.addAttribute("displayList", displayList);
-            model.addAttribute("barReaderList", barReaderList);
-            model.addAttribute("typeList", typeLbList);
+
             return "/projects/project";
         }
 
         return "redirect:/projects/"+project.getId();
     }
-    @GetMapping("/{id}/addALS" )
+    @PostMapping("/{id}/addALS" )
     public String addALS(@PathVariable(value = "id") Long projectId, Model model) {
         ProjectDTO projectDTO = projectService.addNewALSandSaveProject(projectId);
         model.addAttribute("project",projectDTO);
 
         return "redirect:/projects/"+projectId;
     }
-    @GetMapping("/{id}/alss/{alsId}/delete" )
+    @PostMapping("/{id}/alss/{alsId}/delete" )
     public String deleteALS(@PathVariable(value = "id") Long id,
                             @PathVariable(value = "alsId") Long alsId,
                             Model model) {
@@ -108,12 +85,6 @@ public class ProjectController {
     private String editProject(@PathVariable(value = "id") Long id, Model model) {
         ProjectDTO project =projectService.findById(id);
         model.addAttribute("project", project);
-        model.addAttribute("colorsList", colorsList);
-        model.addAttribute("positionLCList", positionLCList);
-        model.addAttribute("paymentList", paymentList);
-        model.addAttribute("displayList", displayList);
-        model.addAttribute("barReaderList", barReaderList);
-        model.addAttribute("typeList", typeLbList);
         return "projects/project";
     }
     @PostMapping("/{projectId}/alss/{alsId}/save")
@@ -140,12 +111,6 @@ public class ProjectController {
             model.addAttribute("LCErrors", errorLCList);
             model.addAttribute("LBErrors", errorLBLists);
             model.addAttribute("als", als);
-            model.addAttribute("colorsList", colorsList);
-            model.addAttribute("positionLCList", positionLCList);
-            model.addAttribute("paymentList", paymentList);
-            model.addAttribute("typeList", typeLbList);
-            model.addAttribute("displayList", displayList);
-            model.addAttribute("barReaderList", barReaderList);
             return "projects/project_als";
         }
         return "redirect:/projects/"+projectId+"/alss/"+als.getId();
@@ -159,12 +124,6 @@ public class ProjectController {
         model.addAttribute("project", project);
         ALSDTO als = alsService.findById(alsId);
         model.addAttribute("als", als);
-        model.addAttribute("typeList", typeLbList);
-        model.addAttribute("colorsList", colorsList);
-        model.addAttribute("positionLCList", positionLCList);
-        model.addAttribute("paymentList", paymentList);
-        model.addAttribute("displayList", displayList);
-        model.addAttribute("barReaderList", barReaderList);
         return "projects/project_als";
     }
     @GetMapping("/{projectId}/alss/{alsId}/lcs/{lcId}")
@@ -178,10 +137,6 @@ public class ProjectController {
         model.addAttribute("project", project);
         model.addAttribute("als", als);
         model.addAttribute("lc", lc);
-        model.addAttribute("colorsList", colorsList);
-        model.addAttribute("paymentList", paymentList);
-        model.addAttribute("displayList", displayList);
-        model.addAttribute("barReaderList", barReaderList);
         return "projects/project_lc";
     }
     @PostMapping("/{projectId}/alss/{alsId}/lcs/{lcId}/save")
@@ -201,10 +156,6 @@ public class ProjectController {
             logger.warn(errorList.toString());
             model.addAttribute("lc", lc);
             model.addAttribute("errors", errorList);
-            model.addAttribute("colorsList", colorsList);
-            model.addAttribute("paymentList", paymentList);
-            model.addAttribute("displayList", displayList);
-            model.addAttribute("barReaderList", barReaderList);
             return "projects/project_lc";
         }
         model.addAttribute("project", project);
@@ -212,7 +163,7 @@ public class ProjectController {
 
         return "redirect:/projects/"+projectId+"/alss/"+ als.getId()+"/lcs/"+als.getLC().getId();
     }
-    @GetMapping("/{projectId}/alss/{alsId}/addLB" )
+    @PostMapping("/{projectId}/alss/{alsId}/addLB" )
     public String addLBatProject(@PathVariable(value = "projectId") Long projectId,
                                  @PathVariable(value = "alsId") Long alsId,
                                  Model model) {
@@ -229,7 +180,7 @@ public class ProjectController {
         model.addAttribute("als", als);
         return "redirect:/projects/"+projectId+"/alss/"+als.getId();
     }
-    @GetMapping("/{projectId}/alss/{alsId}/lbs/{lbId}")
+    @PostMapping("/{projectId}/alss/{alsId}/lbs/{lbId}")
     private String editLBatProject(@PathVariable(value = "projectId") Long projectId,
                                    @PathVariable(value = "alsId") Long alsId,
                                    @PathVariable(value = "lbId") Long lbId,
@@ -240,9 +191,7 @@ public class ProjectController {
         model.addAttribute("project", project);
         model.addAttribute("als", als);
         model.addAttribute("lb", lb);
-        model.addAttribute("typeLbList", typeLbList);
-        model.addAttribute("colorsList", colorsList);
-        model.addAttribute("directionDoorOpeningList", directionDoorOpeningList);
+
         return "projects/project_lb";
     }
 
@@ -270,9 +219,6 @@ public class ProjectController {
             logger.warn(errorList.toString());
             model.addAttribute("errors",errorList);
             model.addAttribute("lb", lb);
-            model.addAttribute("typeLbList", typeLbList);
-            model.addAttribute("colorsList", colorsList);
-            model.addAttribute("directionDoorOpeningList", directionDoorOpeningList);
             return "projects/project_lb";
         }
 

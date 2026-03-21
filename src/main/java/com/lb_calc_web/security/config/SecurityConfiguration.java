@@ -1,8 +1,6 @@
 package com.lb_calc_web.security.config;
 
 import com.lb_calc_web.security.jwt.JwtAuthentificationFilter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -19,7 +17,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @EnableWebSecurity
 public class SecurityConfiguration {
-    private static final Logger log = LoggerFactory.getLogger(SecurityConfiguration.class);
     private final JwtAuthentificationFilter jwtAuthentificationFilterAuthFilter;
 
     public SecurityConfiguration(JwtAuthentificationFilter jwtAuthentificationFilterAuthFilter) {
@@ -34,7 +31,7 @@ public class SecurityConfiguration {
         http.authorizeHttpRequests(auth -> {
                     auth.requestMatchers("/login/**", "/registration/**","/error")
                             .permitAll();
-                    auth.requestMatchers("api/v1/login","api/v1/register","api/v1/logout","api/v1/refresh")
+                    auth.requestMatchers("/api/v1/login","/api/v1/register","api/v1/logout","api/v1/refresh")
                                     .permitAll();
                     auth.anyRequest().authenticated();
                 })

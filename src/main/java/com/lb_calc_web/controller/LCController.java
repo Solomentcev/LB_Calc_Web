@@ -1,10 +1,7 @@
 package com.lb_calc_web.controller;
 
 import com.lb_calc_web.dto.LCDTO;
-import com.lb_calc_web.model.attributes.BarReader;
-import com.lb_calc_web.model.attributes.Colors;
-import com.lb_calc_web.model.attributes.DisplayLC;
-import com.lb_calc_web.model.attributes.Payment;
+import com.lb_calc_web.model.attributes.*;
 import com.lb_calc_web.service.LCService;
 import com.lb_calc_web.service.util.SizeValidator;
 import org.slf4j.Logger;
@@ -22,27 +19,20 @@ import java.util.Optional;
 public class LCController {
     private static final Logger logger = LoggerFactory.getLogger(LCController.class);
     private final LCService lcService;
-    private final List<Colors> colorsList;
-    private final List<Payment> paymentList;
-    private final List<DisplayLC> displayList;
-    private final List<BarReader> barReaderList;
-
+    protected final List<Colors> colorsList = Arrays.asList(Colors.values());
+    protected final List<Payment> paymentList = Arrays.asList(Payment.values());
+    protected final List<DisplayLC> displayList = Arrays.asList(DisplayLC.values());
+    protected final List<BarReader> barReaderList = Arrays.asList(BarReader.values());
 
     public LCController(LCService lcService) {
         this.lcService = lcService;
-        colorsList = Arrays.asList(Colors.values());
-        paymentList = Arrays.asList(Payment.values());
-        displayList = Arrays.asList(DisplayLC.values());
-        barReaderList = Arrays.asList(BarReader.values());
+
     }
     @GetMapping("/create")
     private String createLC(Model model) {
         LCDTO lc = lcService.createLC();
         model.addAttribute("lc", lc);
-        model.addAttribute("colorsList", colorsList);
-        model.addAttribute("paymentList", paymentList);
-        model.addAttribute("displayList", displayList);
-        model.addAttribute("barReaderList", barReaderList);
+
         return "/lcs/lc";
     }
     @PostMapping("/save")
@@ -54,10 +44,7 @@ public class LCController {
             logger.warn(errorList.toString());
             model.addAttribute("errors",errorList);
             model.addAttribute("lc", lc);
-            model.addAttribute("colorsList", colorsList);
-            model.addAttribute("paymentList", paymentList);
-            model.addAttribute("displayList", displayList);
-            model.addAttribute("barReaderList", barReaderList);
+
             return "/lcs/lc";
         }
         return "redirect:/lcs/" + lc.getId();
@@ -67,10 +54,18 @@ public class LCController {
     private String editLC(@PathVariable(value = "id") Long id, Model model) {
         LCDTO lc = lcService.findById(id);
         model.addAttribute("lc", lc);
-        model.addAttribute("colorsList", colorsList);
-        model.addAttribute("paymentList", paymentList);
-        model.addAttribute("displayList", displayList);
-        model.addAttribute("barReaderList", barReaderList);
+
         return "/lcs/lc";
     }
+    @ModelAttribute("colorsList")
+    public List<Colors> colorsList() { return colorsList; }
+
+    @ModelAttribute("paymentList")
+    public List<Payment> paymentList() { return paymentList; }
+
+    @ModelAttribute("displayList")
+    public List<DisplayLC> displayList() { return displayList; }
+
+    @ModelAttribute("barReaderList")
+    public List<BarReader> barReaderList() { return barReaderList; }
 }

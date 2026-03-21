@@ -124,9 +124,11 @@
                 </td>
 
                 <td>
-                    <a th:href="@{/projects/{projectId}/alss/{alsId}/addLB (projectId=${project.getId()},alsId=${als.getId()})}"
-                       class="btn btn-primary">Add LB</a>
-
+                    <<form th:action="@{/projects/{projectId}/alss/{alsId}/addLB(projectId=${project.id}, alsId=${als.id})}"
+                           method="post"
+                           style="display:inline;">
+                    <button type="submit" class="btn btn-primary">Add LB</button>
+                </form>
                 </td>
 
             </tr>

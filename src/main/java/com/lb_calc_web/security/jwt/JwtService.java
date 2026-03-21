@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import java.security.Key;
 import java.util.Date;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class JwtService {
@@ -123,7 +124,7 @@ public class JwtService {
         Cookie cookie = new Cookie("jwtAccess", token);
         cookie.setHttpOnly(true);
         cookie.setPath("/");
-        cookie.setMaxAge((int) accessExpiration);
+        cookie.setMaxAge((int) TimeUnit.MILLISECONDS.toSeconds( accessExpiration));
 
         return cookie;
     }
@@ -131,7 +132,7 @@ public class JwtService {
         Cookie cookie = new Cookie("jwtRefresh", token);
         cookie.setHttpOnly(true);
         cookie.setPath("/");
-        cookie.setMaxAge((int) refreshExpiration);
+        cookie.setMaxAge((int) TimeUnit.MILLISECONDS.toSeconds(refreshExpiration));
         return cookie;
     }
 }

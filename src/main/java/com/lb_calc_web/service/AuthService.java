@@ -37,7 +37,6 @@ public class AuthService {
         this.jwtService = jwtService;
     }
     public JwtResponse login(LoginRequest loginRequest) throws AuthException {
-        logger.info("Login request: {}", loginRequest);
         EmployeeDTO user= null;
         try {
             user = employeeService.loadUserByEmail(loginRequest.getEmail());
@@ -45,11 +44,6 @@ public class AuthService {
             logger.error("User not found");
             throw new AuthException("User not found");
         }
-
-        String encryptedPassword = passwordEncoder.encode(loginRequest.getPassword());
-        logger.debug(loginRequest.getPassword()+" "+encryptedPassword);
-        logger.debug(user.getPassword()+" "+user.getEncryptedPassword());
-
         if (passwordEncoder.matches(loginRequest.getPassword(), user.getEncryptedPassword())) {
             logger.info("Password verified");
             Authentication auth = new UsernamePasswordAuthenticationToken(user.getEmail(), user.getEncryptedPassword(), user.getAuthorities());

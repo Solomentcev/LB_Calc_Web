@@ -41,8 +41,15 @@ public class ProjectRestController {
     }
 
     @PostMapping("/{id}/update")
-    public ResponseEntity<ProjectDTO> updateProject(@RequestBody ProjectDTO project) {
+    public ResponseEntity<ProjectDTO> updateProject(@PathVariable Long id, @RequestBody ProjectDTO project) {
         logger.debug("Updating project {}", project);
+        if (project.getId() == 0) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        if (project.getId() != id.intValue()) {
+            return ResponseEntity.badRequest().build();
+        }
         for(ALSDTO als:project.getAlsList()){
             als=alsService.resizeLC(als);
             als=alsService.resizeLBs(als);

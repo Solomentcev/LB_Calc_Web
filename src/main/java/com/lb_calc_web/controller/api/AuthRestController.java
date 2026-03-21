@@ -26,16 +26,16 @@ public class AuthRestController {
         this.authService = authService;
     }
     @PostMapping("/login")
-    public String login(@RequestBody @Valid LoginRequest loginRequest,
+    public ResponseEntity<?> login(@RequestBody @Valid LoginRequest loginRequest,
                          HttpServletResponse response) throws AuthException {
         JwtResponse tokens = authService.login(loginRequest);
-        return String.valueOf(new ResponseEntity<>(tokens, HttpStatus.OK));
+        return new ResponseEntity<>(tokens, HttpStatus.OK);
     }
     @PostMapping("/refresh")
-    public String refresh(@RequestHeader("Refresh-Token") String header,
+    public ResponseEntity<?> refresh(@RequestHeader("Refresh-Token") String header,
                           HttpServletRequest request) throws AuthException {
         JwtResponse tokens=authService.refresh(header);
-        return String.valueOf(new ResponseEntity<>(tokens, HttpStatus.OK));
+        return new ResponseEntity<>(tokens, HttpStatus.OK);
     }
 
 }

@@ -139,8 +139,11 @@
 
             <tr>
                 <td>
-                    <a th:href="@{/alss/{alsId}/addLB (alsId=${als.getId()})}"
-                       class="btn btn-primary">Add LB</a>
+                    <form th:action="@{/alss/{alsId}/addLB(alsId=${als.id})}"
+                          method="post"
+                          style="display:inline;">
+                        <button type="submit" class="btn btn-primary">Add LB</button>
+                    </form>
                 </td>
             </tr>
 
@@ -433,8 +436,11 @@
                             <a th:href="@{/alss/{alsId}/lbs/{lbId} (alsId=${als.getId()},lbId=${lb.getId()})}"
                                class="btn btn-primary">Edit</a>
                             &nbsp;&nbsp;&nbsp;
-                            <a th:href="@{/alss/{alsId}/lbs/{lbId}/delete (alsId=${als.getId()},lbId=${lb.getId()}) }"
-                               class="btn btn-danger">Delete</a>
+                            <form th:action="@{/alss/{alsId}/lbs/{lbId}/delete(alsId=${als.id}, lbId=${lb.id})}"
+                                  method="post"
+                                  style="display:inline;">
+                                <button type="submit" class="btn btn-danger">Delete</button>
+                            </form>
                         </td>
                     </tr>
                     </tbody>

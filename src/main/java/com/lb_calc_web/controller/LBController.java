@@ -21,23 +21,18 @@ import java.util.Optional;
 public class LBController {
     private static final Logger logger = LoggerFactory.getLogger(LBController.class);
     private final LBService lbService;
-    private final List<TypeLb> typeLbList;
-    private final List<Colors> colorsList;
-    private final List<DirectionDoorOpening> directionDoorOpeningList;
+    protected final List<Colors> colorsList = Arrays.asList(Colors.values());
+    protected final List<TypeLb> typeLbList = Arrays.asList(TypeLb.values());
+    protected final List<DirectionDoorOpening> directionDoorOpeningList = Arrays.asList(DirectionDoorOpening.values());
 
     public LBController(LBService lbService) {
         this.lbService = lbService;
-        typeLbList= Arrays.asList(TypeLb.values());
-        colorsList = Arrays.asList(Colors.values());
-        directionDoorOpeningList = Arrays.asList(DirectionDoorOpening.values());
+
     }
     @GetMapping("/create")
     private String createLB( Model model) {
         LBDTO lb =lbService.createLB();
         model.addAttribute("lb", lb);
-        model.addAttribute("typeLbList", typeLbList);
-        model.addAttribute("colorsList", colorsList);
-        model.addAttribute("directionDoorOpeningList", directionDoorOpeningList);
 
         return "/lbs/lb";
     }
@@ -45,9 +40,6 @@ public class LBController {
     private String editLB(@PathVariable(value = "id") Long id, Model model){
                 LBDTO lb =lbService.findById(id);
                 model.addAttribute("lb", lb);
-                model.addAttribute("typeLbList", typeLbList);
-                model.addAttribute("colorsList", colorsList);
-                model.addAttribute("directionDoorOpeningList", directionDoorOpeningList);
         return "lbs/lb";
     }
     @PostMapping("/save")
@@ -60,14 +52,19 @@ public class LBController {
                 logger.warn(errorList.toString());
                 model.addAttribute("errors",errorList);
                 model.addAttribute("lb", lb);
-                model.addAttribute("typeLbList", typeLbList);
-                model.addAttribute("colorsList", colorsList);
-                model.addAttribute("directionDoorOpeningList", directionDoorOpeningList);
+
                 return "lbs/lb";
             }
         return "redirect:/lbs/" +lb.getId();
     }
-
+    @ModelAttribute("typeList")
+    public List<TypeLb> typeList() { return typeLbList; }
+    @ModelAttribute("typeLbList")
+    public List<TypeLb> typeLbList() { return typeLbList; }
+    @ModelAttribute("directionDoorOpeningList")
+    public List<DirectionDoorOpening> directionDoorOpeningList() { return directionDoorOpeningList; }
+    @ModelAttribute("colorsList")
+    public List<Colors> colorsList() { return colorsList; }
 
 
 }
