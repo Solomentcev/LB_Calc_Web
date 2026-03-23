@@ -6,7 +6,7 @@ import java.util.*;
 
 public class ALSDTO {
 
-    private int id;
+    private Long id;
     private String name;
     private String description;
     private int height;
@@ -30,11 +30,11 @@ public class ALSDTO {
     public ALSDTO() {
     }
 
-    public int getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

@@ -8,32 +8,33 @@ import java.util.Objects;
 @Embeddable
 public class ALSLBKey implements Serializable {
     @Column(name = "als_id")
-    private Integer alsId;
+    private Long alsId;
 
     @Column(name = "lb_id")
-    private Integer lbId;
+    private Long lbId;
 
-    public ALSLBKey() {
-    }
-
-    public ALSLBKey(Integer alsId, Integer lbId) {
+    public ALSLBKey(Long alsId, Long lbId) {
         this.alsId = alsId;
         this.lbId = lbId;
     }
 
-    public Integer getAlsId() {
+    public ALSLBKey() {
+
+    }
+
+    public Long getAlsId() {
         return alsId;
     }
 
-    public void setAlsId(Integer alsId) {
+    public void setAlsId(Long alsId) {
         this.alsId = alsId;
     }
 
-    public Integer getLbId() {
+    public Long getLbId() {
         return lbId;
     }
 
-    public void setLbId(Integer lbId) {
+    public void setLbId(Long lbId) {
         this.lbId = lbId;
     }
 

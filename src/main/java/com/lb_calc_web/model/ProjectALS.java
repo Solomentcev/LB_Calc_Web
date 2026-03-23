@@ -75,7 +75,7 @@ public class ProjectALS {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         ProjectALS that = (ProjectALS) o;
-        return getQuantity() == that.getQuantity() && getProject().getId()==that.getProject().getId() && getAls().getId()==that.getAls().getId();
+        return getQuantity() == that.getQuantity() && Objects.equals(getProject().getId(), that.getProject().getId()) && getAls().getId().equals(that.getAls().getId());
     }
 
     @Override

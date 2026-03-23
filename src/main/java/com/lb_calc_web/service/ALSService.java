@@ -43,7 +43,7 @@ public class ALSService {
         return alsDTOList;
     }
     public ALSDTO findById(Long id) {
-        logger.info("Поиск АКХ(id%d)...".formatted(id));
+        logger.info("Поиск АКХ (id%d)...".formatted(id));
         ALS als=alsRepository.findById(id).orElseThrow(()->
                 new NoSuchElementException("АКХ с id%d не найдена".formatted(id)));
         ALSDTO alsDTO=ALSMapper.toALSDTO(als);
@@ -91,7 +91,7 @@ public class ALSService {
             return ALSMapper.toALSDTO(als);
         } else {
             logger.info("АКХ(id%d-%s) не найдена в БД.".formatted(alsDTO.getId(), alsDTO.getName()));
-            alsDTO.setId(0);
+            alsDTO.setId(0L);
             ALS alsNew=ALSMapper.toALS(alsDTO);
             logger.info("Сохранение АКХ в БД...");
             alsNew=alsRepository.save(alsNew);
@@ -207,15 +207,15 @@ public class ALSService {
                 .formatted(lbID,lb.getId(),lb.getName(), alsId));
         ALSDTO als = findById(alsId);
         lbService.updateLBsizeAndDescription(lb);
-        int newLBId=0;
+        Long newLBId= 0L;
         for(LBDTO lbDto:als.getLbList()){
-            if (lbDto.getId()==lbID) {
+            if (Objects.equals(lbDto.getId(), lbID)) {
                 if(!lbDto.equals(lb)) {
                     lbDto.setCountCells(lb.getCountCells());
                     lbDto.setType(lb.getType());
                     lbDto.setWidth(lb.getWidth());
                     lbDto.setHeight(lb.getHeight());
-                    lbDto.setId(0);
+                    lbDto.setId(0L);
                 }
                 break;
             }

@@ -10,7 +10,7 @@ import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
 
 public class ProfileDTO {
-    private int id;
+    private Long id;
     @NotBlank
     private String firstName;
     @NotBlank
@@ -24,11 +24,11 @@ public class ProfileDTO {
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    public int getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

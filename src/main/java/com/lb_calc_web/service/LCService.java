@@ -87,7 +87,7 @@ public class LCService {
         Optional<LC> optional=getOptionalLC(lc);
         if (optional.isEmpty()) {
             logger.info("МУ не найден в БД.");
-            lcdto.setId(0);
+            lcdto.setId(0L);
             LC lcNew = LCMapper.toLC(lcdto);
             logger.info("Сохранение МУ в БД...");
             lcNew = lcRepository.save(lcNew);

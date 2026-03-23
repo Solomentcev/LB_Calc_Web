@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Objects;
 
 public class EmployeeDTO implements UserDetails  {
-    private int id;
+    private Long id;
     @NotBlank
     private String firstName;
     @NotBlank
@@ -54,11 +54,11 @@ public class EmployeeDTO implements UserDetails  {
         this.registrationDate = registrationDate;
     }
 
-    public int getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

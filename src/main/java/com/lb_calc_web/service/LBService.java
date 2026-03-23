@@ -100,7 +100,7 @@ public class LBService {
             Optional<LB> optional=getOptionalLB(lb);
             if (optional.isEmpty()) {
                 logger.info("МХ не найден в БД.");
-                lbDTO.setId(0);
+                lbDTO.setId(0L);
                 LB lbNew = LBMapper.toLB(lbDTO);
                 logger.info("Сохранение МХ в БД...");
                 lbNew=lbRepository.save(lbNew);

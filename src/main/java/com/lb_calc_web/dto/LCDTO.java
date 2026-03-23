@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.Objects;
 
 public class LCDTO {
-    private int id;
+    private Long id;
     private String name;
     private String description;
     private int height;
@@ -24,11 +24,11 @@ public class LCDTO {
 
     public LCDTO() {
     }
-    public int getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

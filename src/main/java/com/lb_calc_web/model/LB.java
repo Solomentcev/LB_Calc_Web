@@ -17,7 +17,7 @@ import java.util.Set;
 public class LB {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
     private String name;
     private String description;
     @Enumerated(EnumType.STRING)
@@ -61,11 +61,11 @@ public class LB {
         this.colorBody = colorBody;
     }
 
-    public int getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

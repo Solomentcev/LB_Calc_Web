@@ -31,7 +31,7 @@ public class SecurityConfiguration {
         http.authorizeHttpRequests(auth -> {
                     auth.requestMatchers("/login/**", "/registration/**","/error")
                             .permitAll();
-                    auth.requestMatchers("/api/v1/login","/api/v1/register","api/v1/logout","api/v1/refresh")
+                    auth.requestMatchers("/api/v1/login","/api/v1/register","/api/v1/logout","/api/v1/refresh")
                                     .permitAll();
                     auth.anyRequest().authenticated();
                 })

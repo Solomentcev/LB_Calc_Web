@@ -31,13 +31,13 @@
                     <a class="text-center" th:href="@{/registration}">Зарегистрироваться</a>
                 </div>
                 <div class="card-body">
-                    <form method="post" th:object="${loginRequest}" role="form" th:action="@{/login}" class="form-horizontal">
+                    <form method="post" th:object="${loginRequest}" th:action="@{/login}" class="form-horizontal">
                         <div class="form-group mb-3">
                             <label class="control-label" for="email"> Email</label>
                             <input
                                     type="email"
                                     id="email"
-                                    name="email"
+                                    th:field="*{email}"
                                     class="form-control"
                                     placeholder="Enter email address"
                             />
@@ -51,7 +51,7 @@
                             <input
                                     type="password"
                                     id="password"
-                                    name="password"
+                                    th:field="*{password}"
                                     class="form-control"
                                     placeholder="Enter password"
                             />

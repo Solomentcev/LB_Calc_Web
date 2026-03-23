@@ -9,31 +9,31 @@ import java.util.Objects;
 @Embeddable
 public class ProjectALSKey implements Serializable {
     @Column(name = "project_id")
-    private Integer projectId;
+    private Long projectId;
     @Column(name = "als_id")
-    private Integer alsId;
+    private Long alsId;
 
     public ProjectALSKey() {
     }
 
-    public ProjectALSKey(Integer projectId, Integer alsId) {
+    public ProjectALSKey(Long projectId, Long alsId) {
         this.projectId = projectId;
         this.alsId = alsId;
     }
 
-    public Integer getProjectId() {
+    public Long getProjectId() {
         return projectId;
     }
 
-    public void setProjectId(Integer projectId) {
+    public void setProjectId(Long projectId) {
         this.projectId = projectId;
     }
 
-    public Integer getAlsId() {
+    public Long getAlsId() {
         return alsId;
     }
 
-    public void setAlsId(Integer alsId) {
+    public void setAlsId(Long alsId) {
         this.alsId = alsId;
     }
 
