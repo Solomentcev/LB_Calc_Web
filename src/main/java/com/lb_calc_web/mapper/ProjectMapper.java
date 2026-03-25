@@ -28,17 +28,25 @@ public class ProjectMapper {
        return projectDTO;
     }
     public static Project toProject(ProjectDTO projectDTO) {
-        System.out.println(projectDTO);
         Project project = new Project();
-        if (!(projectDTO.getId()==0)) project.setId(projectDTO.getId());
+        if (projectDTO.getId() != null && projectDTO.getId() > 0) {
+            project.setId(projectDTO.getId());
+        }
         project.setName(projectDTO.getName());
         project.setCompany(projectDTO.getCompany());
         project.setDescription(projectDTO.getDescription());
-        project.setCreatedBy(EmployeeMapper.toEmployee(projectDTO.getCreatedBy()));
+        if (projectDTO.getCreatedBy() != null
+                && projectDTO.getCreatedBy().getId() != null
+                && projectDTO.getCreatedBy().getId() > 0) {
+            project.setCreatedBy(EmployeeMapper.toEmployee(projectDTO.getCreatedBy()));
+        }
         project.setCreatedAt(projectDTO.getCreatedAt());
-        project.setUpdatedBy(EmployeeMapper.toEmployee(projectDTO.getUpdatedBy()));
+        if (projectDTO.getUpdatedBy() != null
+                && projectDTO.getUpdatedBy().getId() != null
+                && projectDTO.getUpdatedBy().getId() > 0) {
+            project.setUpdatedBy(EmployeeMapper.toEmployee(projectDTO.getUpdatedBy()));
+        }
         project.setUpdatedAt(projectDTO.getUpdatedAt());
-        System.out.println(project);
         return project;
     }
     public static Set<ProjectALS> getProjectALSSetFromALSDTOMap(Map<ALSDTO, Integer> quantityALS, ProjectDTO projectDTO) {

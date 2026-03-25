@@ -17,10 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.ByteArrayInputStream;
 import java.time.LocalDate;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 @Service
 public class ProjectService {
@@ -28,14 +25,16 @@ public class ProjectService {
     private final ProjectRepository projectRepository;
     private final ALSService alsService;
     private final ProjectALSRepository projectALSRepository;
+    private final EmployeeService employeeService;
     private  int projectCounter = 0;
 
 
     @Autowired
-    public ProjectService(ProjectRepository projectRepository, ALSService alsService, ProjectALSRepository projectALSRepository) {
+    public ProjectService(ProjectRepository projectRepository, ALSService alsService, ProjectALSRepository projectALSRepository, EmployeeService employeeService) {
         this.projectRepository = projectRepository;
         this.alsService = alsService;
         this.projectALSRepository = projectALSRepository;
+        this.employeeService = employeeService;
     }
     public List<ProjectDTO> findAll() {
         logger.info("Получение списка Проектов...");
@@ -73,12 +72,13 @@ public class ProjectService {
     public ProjectDTO initProject(String company){
         ProjectDTO project = new ProjectDTO();
         projectCounter=projectCounter+1;
+        project.setId(0L);
         project.setCompany(company +projectCounter);
         project.setCreatedAt(LocalDate.now());
         project.setUpdatedAt(LocalDate.now());
         project.setName(project.getCompany()+"_"+project.getCreatedAt());
-        Authentication auth= SecurityContextHolder.getContext().getAuthentication();
-        EmployeeDTO employee= (EmployeeDTO) auth.getPrincipal();
+        EmployeeDTO employee = getCurrentEmployee();
+
         project.setCreatedBy(employee);
         project.setUpdatedBy(employee);
         return project;
@@ -90,9 +90,7 @@ public class ProjectService {
         for(ALSDTO als:projectDTO.getAlsList()){
             als.setId(alsService.saveALS(als).getId());
         }
-        Authentication auth= SecurityContextHolder.getContext().getAuthentication();
-        EmployeeDTO employee= (EmployeeDTO) auth.getPrincipal();
-
+        EmployeeDTO employee = getCurrentEmployee();
         projectDTO.setUpdatedBy(employee);
         projectDTO.setUpdatedAt(LocalDate.now());
         projectDTO.setName(projectDTO.getCompany()+"_"+projectDTO.getCreatedAt());
@@ -149,9 +147,11 @@ public class ProjectService {
         logger.info("Удаление АКХ(id%d) из Проекта(id%d)..."
                 .formatted(alsId,project.getId()));
         ALSDTO als = alsService.findById(alsId);
-        for (ALSDTO als1: project.getAlsList()){
-            if (als1.getId()== als.getId()){
-                project.getAlsList().remove(als1);
+        Iterator<ALSDTO> alsIterator = project.getAlsList().iterator();
+        while (alsIterator.hasNext()) {
+            ALSDTO alsFromProject = alsIterator.next();
+            if (als.getId() != null && als.getId().equals(alsFromProject.getId())) {
+                alsIterator.remove();
                 break;
             }
         }
@@ -243,5 +243,16 @@ public class ProjectService {
 
     public void setProjectCounter(int projectCounter) {
         this.projectCounter = projectCounter;
+    }
+    private EmployeeDTO getCurrentEmployee() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null) {
+            throw new NoSuchElementException("Пользователь не аутентифицирован");
+        }
+        Object principal = auth.getPrincipal();
+        if (principal instanceof EmployeeDTO employeeDTO) {
+            return employeeService.loadUserByEmail(employeeDTO.getEmail());
+        }
+        return employeeService.loadUserByEmail(auth.getName());
     }
 }

@@ -14,6 +14,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -56,19 +57,18 @@ public class EmployeeService implements UserDetailsService {
 
 
     // @PreAuthorize("hasRole('ADMIN')")
+    @Transactional
     public EmployeeDTO save(EmployeeDTO employeeDTO) {
-        if (employeeDTO.getId() == 0) {
+        if (employeeDTO.getId()==null || employeeDTO.getId() <= 0) {
             logger.info("Сохранение пользователя (%s)...".formatted(employeeDTO.getEmail()));
             employeeDTO.setRegistrationDate(LocalDate.now());
         }
         else {
             logger.info("Обновление пользователя (%s)...".formatted(employeeDTO.getEmail()));
         }
-        logger.debug(employeeDTO.toString());
-        logger.debug(employeeDTO.getPassword() + " " + employeeDTO.getEncryptedPassword());
+
         Employee employee = EmployeeMapper.toEmployee(employeeDTO);
         employeeRepository.save(employee);
-        logger.debug(employee.getPassword());
         return EmployeeMapper.toEmployeeDTO(employee);
     }
 
@@ -85,7 +85,7 @@ public class EmployeeService implements UserDetailsService {
         employeeRepository.delete(employee);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public List<EmployeeDTO> findAll() {
         logger.info("Получение списка пользователей...");
         List<Employee> employees = employeeRepository.findAll();

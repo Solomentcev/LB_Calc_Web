@@ -14,7 +14,7 @@ public class LBCalcExceptionHandler {
             LBCalcExceptionHandler.class);
     @ExceptionHandler()
     public String handleException(Throwable e, Model model){
-        LOGGER.warn(e.getMessage()+" "+e.getCause()+" "+e.getClass().getName());
+        LOGGER.warn("%s %s %s".formatted(e.getMessage(), e.getCause(), e.getClass().getName()));
         model.addAttribute("error",e.getMessage()+"\n"+
                 e.getCause()+"\n"+
                 e.getClass().getName()+"\n"

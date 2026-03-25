@@ -34,7 +34,7 @@ public class EmployeeController {
     }
 
     @PostMapping("/employees/save")
-    private String save(@ModelAttribute("employee") @Valid EmployeeDTO employeeDTO,
+    public String save(@ModelAttribute("employee") @Valid EmployeeDTO employeeDTO,
                         BindingResult bindingResult,
                         Model model) {
         model.addAttribute("roles",roles);
@@ -56,12 +56,11 @@ public class EmployeeController {
         return "redirect:/employees/"+employeeDTO.getId();
     }
     @PostMapping("/employees/{id}/update")
-    private String update(@PathVariable(value = "id") int id,
+    public String update(@PathVariable(value = "id") int id,
                           @ModelAttribute("employee")  @Valid EmployeeDTO employeeUpd,
                           BindingResult bindingResult,
                           Model model) {
         model.addAttribute("roles",roles);
-        System.out.println("uuupppddddd");
         EmployeeDTO employeeDTO=employeeService.loadUserById(id);
         if (!employeeDTO.getEmail().equals(employeeUpd.getEmail())) {
             if (employeeService.existsByEmail(employeeUpd.getEmail())) {
@@ -74,7 +73,6 @@ public class EmployeeController {
             }
         }
         if (bindingResult.hasErrors()) {
-          //  System.out.println(bindingResult);
             return "employees/employee";
         }
         employeeDTO.setRole(employeeUpd.getRole());
@@ -87,7 +85,7 @@ public class EmployeeController {
         return "redirect:/employees/"+employeeUpd.getId();
     }
     @GetMapping("/employees/{id}")
-    private String edit(@PathVariable(value = "id") int id, Model model) {
+    public String edit(@PathVariable(value = "id") int id, Model model) {
         EmployeeDTO user= employeeService.loadUserById(id);
         model.addAttribute("employee",user);
         model.addAttribute("roles",roles);
@@ -95,7 +93,7 @@ public class EmployeeController {
         return "employees/employee";
     }
     @GetMapping("/profile")
-    private String profile(Model model) {
+    public String profile(Model model) {
         Authentication auth=SecurityContextHolder.getContext().getAuthentication();
         EmployeeDTO employee= (EmployeeDTO) auth.getPrincipal();
         model.addAttribute("employee",employee);

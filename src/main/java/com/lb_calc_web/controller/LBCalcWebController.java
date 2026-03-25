@@ -1,6 +1,7 @@
 package com.lb_calc_web.controller;
 
 import com.lb_calc_web.service.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -46,8 +47,9 @@ public class LBCalcWebController {
         model.addAttribute("lbs", lbService.findAll());
         return "lbs/lbs";
     }
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/employees")
-    private String employees(Model model) {
+    public String employees(Model model) {
         model.addAttribute("employees", employeeService.findAll());
         return "employees/employees";
     }

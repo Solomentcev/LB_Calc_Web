@@ -1,7 +1,5 @@
 package com.lb_calc_web.controller.api;
 
-import com.lb_calc_web.controller.AuthController;
-import com.lb_calc_web.dto.EmployeeDTO;
 import com.lb_calc_web.dto.JwtResponse;
 import com.lb_calc_web.dto.LoginRequest;
 import com.lb_calc_web.security.jwt.JwtService;
@@ -33,7 +31,7 @@ public class AuthRestController {
     }
     @PostMapping("/refresh")
     public ResponseEntity<?> refresh(@RequestHeader("Refresh-Token") String header,
-                          HttpServletRequest request) throws AuthException {
+                          HttpServletRequest request) {
         JwtResponse tokens=authService.refresh(header);
         return new ResponseEntity<>(tokens, HttpStatus.OK);
     }

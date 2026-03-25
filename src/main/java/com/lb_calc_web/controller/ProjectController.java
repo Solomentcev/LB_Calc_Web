@@ -38,13 +38,13 @@ public class ProjectController extends BaseCatalogController{
 
     }
     @GetMapping("/create")
-    private String createProject(Model model) {
+    public String createProject(Model model) {
         ProjectDTO project = projectService.createProject();
         model.addAttribute("project", project);
         return "/projects/project";
     }
     @PostMapping("/{id}/save")
-    public String saveProject(@ModelAttribute("project") ProjectDTO project,Model model) {
+    public String saveProject( @ModelAttribute("project") ProjectDTO project, Model model) {
         for(ALSDTO als:project.getAlsList()){
             als=alsService.resizeLC(als);
             als=alsService.resizeLBs(als);
@@ -82,7 +82,7 @@ public class ProjectController extends BaseCatalogController{
         return "redirect:/projects/"+id;
     }
     @GetMapping("/{id}")
-    private String editProject(@PathVariable(value = "id") Long id, Model model) {
+    public String editProject(@PathVariable(value = "id") Long id, Model model) {
         ProjectDTO project =projectService.findById(id);
         model.addAttribute("project", project);
         return "projects/project";
@@ -127,7 +127,7 @@ public class ProjectController extends BaseCatalogController{
         return "projects/project_als";
     }
     @GetMapping("/{projectId}/alss/{alsId}/lcs/{lcId}")
-    private String editLCatProject(@PathVariable(value = "projectId") Long projectId,
+    public String editLCatProject(@PathVariable(value = "projectId") Long projectId,
                                    @PathVariable(value = "alsId") Long alsId,
                                    @PathVariable(value = "lcId") Long lcId,
                                    Model model) {
@@ -171,7 +171,7 @@ public class ProjectController extends BaseCatalogController{
         model.addAttribute("als", als);
         return "redirect:/projects/"+projectId+"/alss/"+als.getId();
     }
-    @GetMapping("/{projectId}/alss/{alsId}/lbs/{lbId}/delete" )
+    @PostMapping("/{projectId}/alss/{alsId}/lbs/{lbId}/delete" )
     public String deleteLBatProject(@PathVariable(value = "projectId") Long projectId,
                                     @PathVariable(value = "alsId") Long alsId,
                                     @PathVariable(value = "lbId") Long lbId,

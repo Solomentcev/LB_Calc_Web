@@ -29,6 +29,7 @@ public class LCService {
     public LCDTO createLC() {
         logger.info("Создание МУ...");
         LCDTO lc = new LCDTO();
+        lc.setId(0L);
         lc.setHeight(1940);
         lc.setDepth(500);
         lc.setBottomFrame(50);
@@ -47,6 +48,7 @@ public class LCService {
     public LCDTO createLC(int height, int depth, int upperFrame, int bottomFrame, Colors colorBody) {
         logger.info("Создание МУ...");
         LCDTO lc = new LCDTO();
+        lc.setId(0L);
         lc.setHeight(height);
         lc.setDepth(depth);
         lc.setBottomFrame(bottomFrame);

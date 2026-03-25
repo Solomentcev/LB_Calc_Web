@@ -35,38 +35,21 @@ public class AuthController {
 
     }
     @GetMapping("/registration")
-    private String registration(Model model) {
+    public String registration(Model model) {
         model.addAttribute("employee", new RegistrationDTO());
 
         return "registration";
     }
     @PostMapping("/registration")
-    private String registration(@Valid RegistrationDTO registrationDTO,
+    public String registration(@Valid RegistrationDTO registrationDTO,
                                 BindingResult bindingResult,
                                 Model model, RedirectAttributes redirectAttributes) {
         model.addAttribute("employee", registrationDTO);
-        if (!registrationDTO.getPassword().equals(registrationDTO.getConfirmPassword())) {
-            bindingResult.addError(new FieldError(
-                    "employee", "confirmPassword", "Пароли не совпадают"
-            ));
-        }
-        if (authService.existsByEmail(registrationDTO.getEmail())){
-            model.addAttribute("employeeExists", true);
-            return "registration";
-        }
         if (bindingResult.hasErrors()) {
             return "registration";
         }
-        EmployeeDTO employeeDTO = new EmployeeDTO();
-        employeeDTO.setFirstName(registrationDTO.getFirstName());
-        employeeDTO.setLastName(registrationDTO.getLastName());
-        employeeDTO.setEmail(registrationDTO.getEmail());
-        employeeDTO.setPassword(registrationDTO.getPassword());
-        employeeDTO.setEncryptedPassword(passwordEncoder.encode(registrationDTO.getPassword()));
-        employeeDTO.setRegistrationDate(LocalDate.now());
-        employeeDTO.setRole(Role.ROLE_MANAGER);
         try {
-            authService.registration(employeeDTO);
+            authService.registration(registrationDTO);
             redirectAttributes.addFlashAttribute("successMessage", "Вы успешно зарегистрировались");
             return "redirect:/login";
         } catch (Exception e) {
@@ -80,7 +63,7 @@ public class AuthController {
         return "login";
     }
     @PostMapping("/login")
-    private String logIn( @ModelAttribute @Valid LoginRequest loginRequest,
+    public String logIn( @ModelAttribute @Valid LoginRequest loginRequest,
                          HttpServletResponse response,
                          BindingResult bindingResult,
                          RedirectAttributes redirectAttributes) throws AuthException {

@@ -53,6 +53,7 @@ public class ALSService {
     public ALSDTO createALS() {
         logger.info("Создание АКХ...");
         ALSDTO als = new ALSDTO();
+        als.setId(0L);
         als.setBottomFrame(50);
         als.setUpperFrame(50);
         als.setHeight(1940);

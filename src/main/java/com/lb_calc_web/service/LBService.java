@@ -32,6 +32,7 @@ public class LBService {
     public LBDTO createLB() {
         logger.info("Создание МХ...");
         LBDTO lb = new LBDTO();
+        lb.setId(0L);
         lb.setHeight(1940);
         lb.setWidth(500);
         lb.setDepth(500);
@@ -51,6 +52,7 @@ public class LBService {
     public LBDTO createLB(int height, int depth,int upperFrame, int bottomFrame, Colors colorBody, Colors colorDoor){
         logger.info("Создание МХ...");
         LBDTO lb = new LBDTO();
+        lb.setId(0L);
         lb.setHeight(height);
         lb.setWidth(500);
         lb.setDepth(depth);
@@ -71,7 +73,7 @@ public class LBService {
         logger.info("Корректировка размеров ячеек и описания МХ(id%d-%s)...".formatted(lb.getId(),lb.getName()));
         lb.setShelfThick(TypeLb.valueOf(lb.getType()).getShelfThick());
         lb.setWidthCell(lb.getWidth()-TypeLb.valueOf(lb.getType()).getDeltaWidth());
-        lb.setDepthCell(lb.getWidth()-20);
+        lb.setDepthCell(lb.getDepth()-20);
         lb.setHeightCell((double) (lb.getHeight() - lb.getUpperFrame() - lb.getBottomFrame()
                 - ((lb.getCountCells() - 1) * lb.getShelfThick())) / lb.getCountCells());
         lb.setName("Модуль хранения на "+lb.getCountCells()+" ячеек");

@@ -1,7 +1,7 @@
-<header th:fragment="header" xmlns:sec="http://www.w3.org/1999/xhtml">
+<header sec:authorize="isAuthenticated()" th:fragment="header" xmlns:sec="http://www.w3.org/1999/xhtml">
     <nav class="navbar navbar-expand-md bg-dark navbar-dark">
         <a class="navbar-brand" th:href="@{/profile}">
-          Профиль
+          Мой Профиль
         </a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#topNavbar">
             <span class="navbar-toggler-icon"></span>
@@ -27,7 +27,8 @@
                     <a class="nav-link active" aria-current="page" th:href="@{/logout}">Выйти</a>
                 </li>
                 <li class="nav-item" sec:authorize="isAuthenticated()">
-                    <p class="nav-link">Сотрудник: <span sec:authentication="name"></span></p>
+                    <p class="nav-link">Сотрудник: <span sec:authentication="name"></span>
+                    </p>
                 </li>
             </ul>
         </div>

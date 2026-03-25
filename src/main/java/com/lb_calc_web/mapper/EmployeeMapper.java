@@ -8,20 +8,17 @@ import java.util.List;
 
 public class EmployeeMapper {
     public static Employee toEmployee(EmployeeDTO employeeDTO) {
-        if (employeeDTO == null) {
-            return null;
-        }
         Employee employee = new Employee();
-        if (employeeDTO.getId() != 0) {
+        if (employeeDTO.getId() !=0) {
             employee.setId(employeeDTO.getId());
         }
-
         employee.setFirstName(employeeDTO.getFirstName());
         employee.setLastName(employeeDTO.getLastName());
         employee.setEmail(employeeDTO.getEmail());
         employee.setPassword(employeeDTO.getEncryptedPassword());
         employee.setRole(employeeDTO.getRole());
         employee.setRegistrationDate(employeeDTO.getRegistrationDate());
+
         return employee;
     }
     public static EmployeeDTO toEmployeeDTO(Employee employee) {
