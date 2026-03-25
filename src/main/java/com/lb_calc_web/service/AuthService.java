@@ -110,7 +110,4 @@ public class AuthService {
         Employee employee=employeeRepository.save(EmployeeMapper.toEmployee(employeeDTO));
         return EmployeeMapper.toEmployeeDTO(employee);
     }
-    public EmployeeDTO getAuthInfo() {
-        return (EmployeeDTO) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    }
 }

@@ -10,6 +10,8 @@ import jakarta.validation.constraints.Size;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -98,6 +100,17 @@ public class EmployeeService implements UserDetailsService {
         logger.info(isExist? "Пользователь (%s) уже существует".formatted(email)
                     : "Пользователь (%s) не существует".formatted(email));
         return isExist;
+    }
+    public EmployeeDTO getCurrentEmployee() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null) {
+            throw new NoSuchElementException("Пользователь не аутентифицирован");
+        }
+        Object principal = auth.getPrincipal();
+        if (principal instanceof EmployeeDTO employeeDTO) {
+            return loadUserByEmail(employeeDTO.getEmail());
+        }
+        return loadUserByEmail(auth.getName());
     }
 }
 

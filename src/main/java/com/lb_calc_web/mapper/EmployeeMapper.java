@@ -1,6 +1,7 @@
 package com.lb_calc_web.mapper;
 
 import com.lb_calc_web.dto.EmployeeDTO;
+import com.lb_calc_web.dto.ProfileDTO;
 import com.lb_calc_web.model.user.Employee;
 
 import java.util.ArrayList;
@@ -9,7 +10,7 @@ import java.util.List;
 public class EmployeeMapper {
     public static Employee toEmployee(EmployeeDTO employeeDTO) {
         Employee employee = new Employee();
-        if (employeeDTO.getId() !=0) {
+        if (employeeDTO.getId() != null && employeeDTO.getId() > 0) {
             employee.setId(employeeDTO.getId());
         }
         employee.setFirstName(employeeDTO.getFirstName());
@@ -40,5 +41,25 @@ public class EmployeeMapper {
             employeeDTOS.add(toEmployeeDTO(employee));
         }
         return employeeDTOS;
+    }
+    public static ProfileDTO toProfileDTOfromEmployee(Employee employee) {
+        ProfileDTO profileDTO = new ProfileDTO();
+        profileDTO.setId(employee.getId());
+        profileDTO.setFirstName(employee.getFirstName());
+        profileDTO.setLastName(employee.getLastName());
+        profileDTO.setEmail(employee.getEmail());
+        profileDTO.setRole(employee.getRole());
+        profileDTO.setRegistrationDate(employee.getRegistrationDate());
+        return profileDTO;
+    }
+    public static ProfileDTO toProfileDTOfromEmployeeDTO(EmployeeDTO employeeDTO) {
+        ProfileDTO profileDTO = new ProfileDTO();
+        profileDTO.setId(employeeDTO.getId());
+        profileDTO.setFirstName(employeeDTO.getFirstName());
+        profileDTO.setLastName(employeeDTO.getLastName());
+        profileDTO.setEmail(employeeDTO.getEmail());
+        profileDTO.setRole(employeeDTO.getRole());
+        profileDTO.setRegistrationDate(employeeDTO.getRegistrationDate());
+        return profileDTO;
     }
 }

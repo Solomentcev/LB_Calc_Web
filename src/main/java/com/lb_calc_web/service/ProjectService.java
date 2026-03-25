@@ -10,8 +10,6 @@ import com.lb_calc_web.repository.ProjectRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -77,7 +75,7 @@ public class ProjectService {
         project.setCreatedAt(LocalDate.now());
         project.setUpdatedAt(LocalDate.now());
         project.setName(project.getCompany()+"_"+project.getCreatedAt());
-        EmployeeDTO employee = getCurrentEmployee();
+        EmployeeDTO employee =employeeService.getCurrentEmployee();
 
         project.setCreatedBy(employee);
         project.setUpdatedBy(employee);
@@ -90,7 +88,7 @@ public class ProjectService {
         for(ALSDTO als:projectDTO.getAlsList()){
             als.setId(alsService.saveALS(als).getId());
         }
-        EmployeeDTO employee = getCurrentEmployee();
+        EmployeeDTO employee = employeeService.getCurrentEmployee();
         projectDTO.setUpdatedBy(employee);
         projectDTO.setUpdatedAt(LocalDate.now());
         projectDTO.setName(projectDTO.getCompany()+"_"+projectDTO.getCreatedAt());
@@ -244,15 +242,5 @@ public class ProjectService {
     public void setProjectCounter(int projectCounter) {
         this.projectCounter = projectCounter;
     }
-    private EmployeeDTO getCurrentEmployee() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null) {
-            throw new NoSuchElementException("Пользователь не аутентифицирован");
-        }
-        Object principal = auth.getPrincipal();
-        if (principal instanceof EmployeeDTO employeeDTO) {
-            return employeeService.loadUserByEmail(employeeDTO.getEmail());
-        }
-        return employeeService.loadUserByEmail(auth.getName());
-    }
+
 }

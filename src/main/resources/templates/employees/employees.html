@@ -12,7 +12,7 @@
 <div th:replace="~{header :: header}"></div>
     <div class="container mt-4">
         <h2>Сотрудники</h2>
-        <a th:href="@{/employees/create}" class="btn btn-success mb-3">Add New Employee</a>
+        <a th:href="@{/employees/create}" class="btn btn-success mb-3">Добавить нового сотрудника</a>
 
         <table class="table table-striped">
             <thead>
@@ -22,6 +22,7 @@
                 <th>Last Name</th>
                 <th>Email</th>
                 <th>Role</th>
+                <th>RegistrationDate</th>
                 <th>Actions</th>
             </tr>
             </thead>
@@ -32,6 +33,7 @@
                 <td th:text="${employee.lastName}"></td>
                 <td th:text="${employee.email}"></td>
                 <td th:text="${employee.role}"></td>
+                <td th:text="${employee.registrationDate}"></td>
                 <td>
                     <a th:href="@{'/employees/' + ${employee.id}}" class="btn btn-sm btn-primary">Edit</a>
                     <a th:href="@{'/employees/' + ${employee.id}+'/delete'}"

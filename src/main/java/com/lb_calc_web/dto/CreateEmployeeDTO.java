@@ -1,16 +1,12 @@
 package com.lb_calc_web.dto;
 
 import com.lb_calc_web.model.user.Role;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
-import java.time.LocalDate;
-
-public class ProfileDTO {
-    private Long id;
+public class CreateEmployeeDTO {
     @NotBlank
     private String firstName;
     @NotBlank
@@ -20,17 +16,14 @@ public class ProfileDTO {
     @Size(max = 50)
     @Email
     private String email;
-    private LocalDate registrationDate;
-
+    @NotNull
     private Role role;
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
+    @NotBlank
+    @Size(max = 120)
+    private String password;
+    @NotBlank
+    @Size(max = 120)
+    private String confirmPassword;
 
     public @NotBlank String getFirstName() {
         return firstName;
@@ -56,12 +49,20 @@ public class ProfileDTO {
         this.email = email;
     }
 
-    public LocalDate getRegistrationDate() {
-        return registrationDate;
+    public @NotBlank @Size(max = 120) String getPassword() {
+        return password;
     }
 
-    public void setRegistrationDate(LocalDate registrationDate) {
-        this.registrationDate = registrationDate;
+    public void setPassword(@NotBlank @Size(max = 120) String password) {
+        this.password = password;
+    }
+
+    public @NotBlank @Size(max = 120) String getConfirmPassword() {
+        return confirmPassword;
+    }
+
+    public void setConfirmPassword(@NotBlank @Size(max = 120) String confirmPassword) {
+        this.confirmPassword = confirmPassword;
     }
 
     public Role getRole() {
@@ -70,17 +71,5 @@ public class ProfileDTO {
 
     public void setRole(Role role) {
         this.role = role;
-    }
-
-    @Override
-    public String toString() {
-        return "ProfileDTO{" +
-                "id=" + id +
-                ", firstName='" + firstName + '\'' +
-                ", lastName='" + lastName + '\'' +
-                ", email='" + email + '\'' +
-                ", registrationDate=" + registrationDate +
-                ", role=" + role +
-                '}';
     }
 }

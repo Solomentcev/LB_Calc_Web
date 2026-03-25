@@ -10,19 +10,14 @@
 </head>
 <body>
 <div th:replace="~{header :: header}"></div>
-
 <div class="container mt-4">
-    <h2 th:text="Сотрудник"></h2>
-    <div th:if="${successMessage}!=null" style="background:#ddffdd;padding:10px;margin-bottom:10px;border:1px solid green;">
-        <span th:text="${successMessage}"></span>
-    </div>
-    <form  th:action="@{/employees/{id}/update (id=${id})}"
+    <h2>Добавление нового сотрудника</h2>
 
+    <div th:if="${errorMessage}!=null" class="text-danger"
+         th:text="${errorMessage}">
+    </div>
+    <form th:action="${'/employees/save'}"
           th:object="${employee}" method="post">
-        <div th:if="${id!=null}" class="form-group">
-            <label>id</label>
-            <input type="text" class="form-control" th:field="*{id}"  readonly="readonly"/>
-        </div>
         <div class="form-group">
             <label>First Name</label>
             <input type="text" class="form-control" th:field="*{firstName}" required>
@@ -39,27 +34,32 @@
             <label>Email</label>
             <input type="email" class="form-control" th:field="*{email}" required>
             <span class="text-danger" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></span>
+            <span class="text-danger" th:if="${employeeExists}">Пользователь с таким email уже зарегистрирован</span>
         </div>
 
+        <div class="form-group" >
+            <label>Password</label>
+            <input type="password" class="form-control" th:field="*{password}" required>
+            <span class="text-danger" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></span>
+        </div>
         <div class="form-group">
-            <label>RegistrationDate</label>
-            <input type="text" class="form-control" th:field="*{registrationDate}" required readonly="readonly"/>
-            <span class="text-danger" th:if="${#fields.hasErrors('registrationDate')}" th:errors="*{registrationDate}"></span>
+            <label>Password</label>
+            <input type="password" class="form-control" th:field="*{confirmPassword}" required>
+            <span class="text-danger" th:if="${#fields.hasErrors('confirmPassword')}" th:errors="*{confirmPassword}"></span>
         </div>
-
         <div class="form-group">
-            <label>Role</label>
-            <select class="form-control" th:field="*{role}" required>
-                <option th:each="role : ${roles}"
-                        th:value="${role}"
-                        th:text="${role}"
-                        th:selected="${role == employee.role}"></option>
-            </select>
+                <label>Role</label>
+                <select class="form-control" th:field="*{role}" required>
+                    <option th:each="role : ${roles}"
+                            th:value="${role}"
+                            th:text="${role}"
+                            th:selected="${role == employee.role}"></option>
+                </select>
         </div>
 
-        <button type="submit" class="btn btn-primary"
-                th:text="${'Update'}"></button>
-        <a th:href="@{/employees}" class="btn btn-secondary">Cancel</a>
+
+        <button type="submit" class="btn btn-primary">Создать</button>
+        <a th:href="@{/employees}" class="btn btn-secondary">Отмена</a>
     </form>
 </div>
 

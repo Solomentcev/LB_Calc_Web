@@ -31,7 +31,6 @@ public class EmployeeDTO implements UserDetails  {
     private String password;
     private String encryptedPassword;
     private LocalDate registrationDate;
-    @Enumerated(EnumType.STRING)
     private Role role;
 
     public String getEncryptedPassword() {

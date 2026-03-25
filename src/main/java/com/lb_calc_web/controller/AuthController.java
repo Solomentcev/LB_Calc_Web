@@ -1,10 +1,8 @@
 package com.lb_calc_web.controller;
 
-import com.lb_calc_web.dto.EmployeeDTO;
 import com.lb_calc_web.dto.JwtResponse;
 import com.lb_calc_web.dto.LoginRequest;
 import com.lb_calc_web.dto.RegistrationDTO;
-import com.lb_calc_web.model.user.Role;
 import com.lb_calc_web.service.AuthService;
 import jakarta.security.auth.message.AuthException;
 import jakarta.servlet.http.HttpServletResponse;
@@ -15,23 +13,17 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.time.LocalDate;
-
 @Controller
 public class AuthController {
     private final AuthService authService;
-    private final PasswordEncoder passwordEncoder;
-    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
-    public AuthController(AuthService authService, PasswordEncoder passwordEncoder) {
+    public AuthController(AuthService authService) {
         this.authService = authService;
-        this.passwordEncoder = passwordEncoder;
 
     }
     @GetMapping("/registration")
@@ -79,7 +71,7 @@ public class AuthController {
                 redirectAttributes.addFlashAttribute("loginRequest", loginRequest);
                 return "redirect:/login";
         }
-        return "redirect:/profile";
+        return "redirect:/myprofile";
     }
 
 //    @GetMapping("/logout")
