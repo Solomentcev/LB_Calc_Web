@@ -56,7 +56,11 @@
                         th:selected="${role == employee.role}"></option>
             </select>
         </div>
-
+        <div>
+            <label>
+                <a th:href="@{/employees/{id}/changepassword (id=${id})}" class="btn btn-primary">Сменить пароль</a>
+            </label>
+        </div>
         <button type="submit" class="btn btn-primary"
                 th:text="${'Update'}"></button>
         <a th:href="@{/employees}" class="btn btn-secondary">Cancel</a>

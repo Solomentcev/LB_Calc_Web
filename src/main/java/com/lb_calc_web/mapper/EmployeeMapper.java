@@ -42,6 +42,13 @@ public class EmployeeMapper {
         }
         return employeeDTOS;
     }
+    public static List<ProfileDTO> toProfileDTOList(List<Employee> employees) {
+        List<ProfileDTO> profileDTOS = new ArrayList<>();
+        for (Employee employee : employees) {
+            profileDTOS.add(toProfileDTOfromEmployee(employee));
+        }
+        return profileDTOS;
+    }
     public static ProfileDTO toProfileDTOfromEmployee(Employee employee) {
         ProfileDTO profileDTO = new ProfileDTO();
         profileDTO.setId(employee.getId());

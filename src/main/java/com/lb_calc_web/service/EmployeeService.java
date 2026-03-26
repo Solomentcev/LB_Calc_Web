@@ -1,6 +1,7 @@
 package com.lb_calc_web.service;
 
 import com.lb_calc_web.dto.EmployeeDTO;
+import com.lb_calc_web.dto.ProfileDTO;
 import com.lb_calc_web.mapper.EmployeeMapper;
 import com.lb_calc_web.model.user.Employee;
 import com.lb_calc_web.repository.EmployeeRepository;
@@ -56,7 +57,12 @@ public class EmployeeService implements UserDetailsService {
                 new NoSuchElementException("Пользователь с id%d не найден".formatted(id)));
         return EmployeeMapper.toEmployeeDTO(employee);
     }
-
+    public ProfileDTO getProfileById(int id) {
+        logger.info("Поиск профиля(id%d)...".formatted(id));
+        Employee employee = employeeRepository.findById((long) id).orElseThrow(() ->
+                new NoSuchElementException("Пользователь с id%d не найден".formatted(id)));
+        return EmployeeMapper.toProfileDTOfromEmployee(employee);
+    }
 
     // @PreAuthorize("hasRole('ADMIN')")
     @Transactional
@@ -93,6 +99,12 @@ public class EmployeeService implements UserDetailsService {
         List<Employee> employees = employeeRepository.findAll();
         employees.sort(Comparator.comparing(Employee::getId));
         return EmployeeMapper.toEmployeeDTOList(employees);
+    }
+    public List<ProfileDTO> getAllProfiles() {
+        logger.info("Получение списка профилей...");
+        List<Employee> employees = employeeRepository.findAll();
+        employees.sort(Comparator.comparing(Employee::getId));
+        return EmployeeMapper.toProfileDTOList(employees);
     }
 
     public boolean existsByEmail(@NotBlank @Size(max = 50) @Email String email) {

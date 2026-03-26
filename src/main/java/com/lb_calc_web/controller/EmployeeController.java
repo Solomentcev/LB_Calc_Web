@@ -1,5 +1,6 @@
 package com.lb_calc_web.controller;
 
+import com.lb_calc_web.dto.ChangePasswordDTO;
 import com.lb_calc_web.dto.CreateEmployeeDTO;
 import com.lb_calc_web.dto.EmployeeDTO;
 import com.lb_calc_web.dto.ProfileDTO;
@@ -12,10 +13,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.Arrays;
@@ -39,12 +37,97 @@ public class EmployeeController {
         model.addAttribute("employee",employee);
         return "myprofile";
     }
+    @GetMapping("/myprofile/changepassword")
+    public String changePasswordForm(Model model) {
+        model.addAttribute("changePassword", new ChangePasswordDTO());
+        model.addAttribute("action","myprofile/changepassword");
+        return "change_password";
+    }
+    @PostMapping("/myprofile/changepassword")
+    public String changePassword(@ModelAttribute("changePassword") @Valid ChangePasswordDTO changePasswordDTO,
+                                 BindingResult bindingResult, RedirectAttributes redirectAttributes,
+                                 Model model) {
+        model.addAttribute("changePassword", changePasswordDTO);
+        model.addAttribute("action","myprofile/changepassword");
+        if (!changePasswordDTO.getPassword().equals(changePasswordDTO.getConfirmPassword())) {
+            bindingResult.addError(new FieldError(
+                    "changePassword",
+                    "confirmPassword",
+                    "пароли не совпадают"
+            ));
+        }
+        if (bindingResult.hasErrors()) {
+            return "change_password";
+        }
+        try {
+            EmployeeDTO employee= employeeService.getCurrentEmployee();
+            employee.setPassword(changePasswordDTO.getPassword());
+            employee.setEncryptedPassword(passwordEncoder.encode(changePasswordDTO.getPassword()));
+            employee=employeeService.save(employee);
+            redirectAttributes.addFlashAttribute("successMessage", "Пароль успешно заменен");
+            return "redirect:/myprofile";
+        } catch (Exception e) {
+            model.addAttribute("errorMessage", "Ошибка смены пароля: " + e.getMessage());
+            return "change_password";
+        }
+    }
+    @GetMapping("/employees/{id}/changepassword")
+    public String changeEmployeePasswordForm(@PathVariable(value = "id") int id,
+                                            Model model) {
+        model.addAttribute("changePassword", new ChangePasswordDTO());
+        model.addAttribute("id", id);
+        model.addAttribute("action","/employees/{id}/changepassword (id=${id})");
+        return "change_passwordEmployee";
+    }
+    @PostMapping("/employees/{id}/changepassword")
+    public String changeEmployeePassword(@PathVariable(value = "id") int id,
+                                @ModelAttribute("changePassword") @Valid ChangePasswordDTO changePasswordDTO,
+                                 BindingResult bindingResult, RedirectAttributes redirectAttributes,
+                                 Model model) {
+        model.addAttribute("changePassword", changePasswordDTO);
+        if (!changePasswordDTO.getPassword().equals(changePasswordDTO.getConfirmPassword())) {
+            bindingResult.addError(new FieldError(
+                    "changePassword",
+                    "confirmPassword",
+                    "пароли не совпадают"
+            ));
+        }
+        if (bindingResult.hasErrors()) {
+            return "change_passwordEmployee";
+        }
+        try {
+            EmployeeDTO employee= employeeService.loadUserById(id);
+            employee.setPassword(changePasswordDTO.getPassword());
+            employee.setEncryptedPassword(passwordEncoder.encode(changePasswordDTO.getPassword()));
+            employee=employeeService.save(employee);
+            redirectAttributes.addFlashAttribute("successMessage", "Пароль успешно заменен");
+            return "redirect:/employees/"+employee.getId();
+        } catch (Exception e) {
+            model.addAttribute("errorMessage", "Ошибка смены пароля: " + e.getMessage());
+            return "change_password";
+        }
+    }
+    @GetMapping("/profiles")
+    public String profiles(Model model) {
+        model.addAttribute("employees", employeeService.getAllProfiles());
+        return "profiles/profiles";
+    }
+    @GetMapping("/profiles/{id}")
+    public String getProfile(@PathVariable(value = "id") int id, Model model) {
+        ProfileDTO user= employeeService.getProfileById(id);
+        model.addAttribute("employee",user);
+        model.addAttribute("roles",roles);
+        model.addAttribute("id",user.getId());
+        return "profiles/profile";
+    }
+
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/employees")
     public String employees(Model model) {
-        model.addAttribute("employees", employeeService.findAll());
+        model.addAttribute("employees", employeeService.getAllProfiles());
         return "employees/employees";
     }
+
     @GetMapping("/employees/create")
     public String registration(Model model) {
         model.addAttribute("employee", new CreateEmployeeDTO());
@@ -93,7 +176,7 @@ public class EmployeeController {
     }
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/employees/{id}")
-    public String edit(@PathVariable(value = "id") int id, Model model) {
+    public String editEmployee(@PathVariable(value = "id") int id, Model model) {
         EmployeeDTO user= employeeService.loadUserById(id);
         model.addAttribute("employee",user);
         model.addAttribute("roles",roles);
@@ -121,7 +204,6 @@ public class EmployeeController {
                         "email",
                         "Пользователь с таким email уже существует"
                 ));
-            System.out.println("error");
             return "employees/employee";
             }
         employeeDTO.setFirstName(employeeUpd.getFirstName());
@@ -132,6 +214,4 @@ public class EmployeeController {
 
         return "redirect:/employees/"+employeeDTO.getId();
     }
-
-
 }

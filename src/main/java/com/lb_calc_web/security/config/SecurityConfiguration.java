@@ -35,7 +35,8 @@ public class SecurityConfiguration {
                             .permitAll();
                     auth.requestMatchers("/api/v1/login","/api/v1/register","/api/v1/logout","/api/v1/refresh")
                                     .permitAll();
-                    auth.anyRequest().authenticated();
+
+                    auth.requestMatchers("/employees/**").hasAuthority("ROLE_ADMIN").anyRequest().authenticated();
                 })
 //                .formLogin(form -> form
 //                        .loginPage("/login")

@@ -21,6 +21,9 @@
                     <a class="nav-link" th:href="@{/lcs}">Модули Управления</a>
                 </li>
                 <li class="nav-item">
+                    <a class="nav-link" th:href="@{/profiles}">Профили сотрудников</a>
+                </li>
+                <li class="nav-item" sec:authorize="hasRole('ROLE_ADMIN')">
                     <a class="nav-link" th:href="@{/employees}">Сотрудники</a>
                 </li>
                 <li class="nav-item">

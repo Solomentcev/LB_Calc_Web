@@ -52,7 +52,7 @@
                     </td>
                     <td>
                         <label>
-                            <a th:text="*{createdBy.getUsername()}" th:href="@{'/employees/'+*{createdBy.getId()}}" ></a>
+                            <a th:text="*{createdBy.getUsername()}" th:href="@{'/profiles/'+*{createdBy.getId()}}" ></a>
                         </label>
                         <label hidden="hidden">
                             <input type="number" th:field="*{createdBy.id}" readonly="readonly">
@@ -74,7 +74,7 @@
                     </td>
                     <td>
                         <label>
-                            <a th:text="*{updatedBy.username}" th:href="@{'/employees/'+*{updatedBy.getId()}}" ></a>
+                            <a th:text="*{updatedBy.username}" th:href="@{'/profiles/'+*{updatedBy.getId()}}" ></a>
                         </label>
                         <label hidden="hidden">
                             <input type="number" th:field="*{updatedBy.id}" readonly="readonly">
