@@ -53,6 +53,7 @@ public class JwtAuthentificationFilter extends OncePerRequestFilter {
             } else logger.debug("JWT Token is null or User is authentificated");
         } catch (Exception e) {
             logger.warn(e.getMessage());
+            SecurityContextHolder.clearContext();
         }
         filterChain.doFilter(request, response);
     }
@@ -73,19 +74,23 @@ public class JwtAuthentificationFilter extends OncePerRequestFilter {
             if (!isRest) {
                 res.addCookie(jwtService.generateAccessTokenCookie(newAccessToken));
                 res.addCookie(jwtService.generateRefreshTokenCookie(newRefreshToken));
+                logger.debug("Sent new tokens in cookies for web client");
             } else {
                 res.setHeader("Authorization", "Bearer " + newAccessToken);
                 res.setHeader("Refresh-Token", newRefreshToken);
+                logger.debug("Sent new tokens in response headers for REST client");
             }
             authenticate(userEmail);
+            logger.info("User {} re-authenticated with refreshed access token"+ userEmail);
         }catch (ExpiredJwtException e) {
             logger.info("Refresh token expired → user needs re-login"+e.getMessage());
-
+            clearAuthentication(res);
         } catch (JwtException e) {
             logger.warn("Invalid refresh token → possible attack"+e.getMessage());
-
+            clearAuthentication(res);
         } catch (Exception e) {
             logger.error("Unexpected refresh error", e);
+            clearAuthentication(res);
         }
 
     }
@@ -153,5 +158,21 @@ public class JwtAuthentificationFilter extends OncePerRequestFilter {
         );
         SecurityContextHolder.getContext().setAuthentication(authToken);
         logger.debug("Authentication Success "+authToken);
+    }
+    private void clearAuthentication(HttpServletResponse response) {
+        SecurityContextHolder.clearContext();
+
+        // Удаляем cookies
+        Cookie accessCookie = new Cookie("jwtAccess", null);
+        accessCookie.setMaxAge(0);
+        accessCookie.setPath("/");
+        response.addCookie(accessCookie);
+
+        Cookie refreshCookie = new Cookie("jwtRefresh", null);
+        refreshCookie.setMaxAge(0);
+        refreshCookie.setPath("/");
+        response.addCookie(refreshCookie);
+
+        logger.debug("Authentication cleared and cookies deleted");
     }
 }

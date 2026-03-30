@@ -62,7 +62,7 @@ public class LCImageService {
             ImageIO.write(img, "png", file);
 
         } catch (IOException e) {
-            System.out.println("Error creating file");
+
             throw new RuntimeException(e);
         }
         return file;
@@ -74,8 +74,7 @@ public class LCImageService {
             ImageIO.write(img, "png", baos);
 
         } catch (IOException e) {
-            System.out.println("Error creating");
-            throw new RuntimeException(e);
+            throw new RuntimeException("Error creating"+e.getMessage());
         }
         return baos.toByteArray();
     }

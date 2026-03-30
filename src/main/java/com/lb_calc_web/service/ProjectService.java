@@ -19,13 +19,11 @@ import java.util.*;
 
 @Service
 public class ProjectService {
-    private final static Logger logger = LoggerFactory.getLogger(ProjectService.class);
+    private static final Logger logger = LoggerFactory.getLogger(ProjectService.class);
     private final ProjectRepository projectRepository;
     private final ALSService alsService;
     private final ProjectALSRepository projectALSRepository;
     private final EmployeeService employeeService;
-    private  int projectCounter = 0;
-
 
     @Autowired
     public ProjectService(ProjectRepository projectRepository, ALSService alsService, ProjectALSRepository projectALSRepository, EmployeeService employeeService) {
@@ -36,8 +34,7 @@ public class ProjectService {
     }
     public List<ProjectDTO> findAll() {
         logger.info("Получение списка Проектов...");
-        List<Project> projects = projectRepository.findAll();
-        projects.sort(Comparator.comparing(Project::getUpdatedAt).thenComparing(Project::getId).reversed());
+        List<Project> projects = projectRepository.findAllWithUsers();
         return ProjectMapper.getProjectDTOListFromProjectList(projects);
     }
 
@@ -69,9 +66,9 @@ public class ProjectService {
     }
     public ProjectDTO initProject(String company){
         ProjectDTO project = new ProjectDTO();
-        projectCounter=projectCounter+1;
+        String uniqueId = UUID.randomUUID().toString().substring(0, 8).toUpperCase();
         project.setId(0L);
-        project.setCompany(company +projectCounter);
+        project.setCompany(company+"_"+uniqueId);
         project.setCreatedAt(LocalDate.now());
         project.setUpdatedAt(LocalDate.now());
         project.setName(project.getCompany()+"_"+project.getCreatedAt());
@@ -234,13 +231,4 @@ public class ProjectService {
         replaceALSandSaveProject(project,alsNew,alsId);
         return ALSlbIdList;
     }
-
-    public int getProjectCounter() {
-        return projectCounter;
-    }
-
-    public void setProjectCounter(int projectCounter) {
-        this.projectCounter = projectCounter;
-    }
-
 }

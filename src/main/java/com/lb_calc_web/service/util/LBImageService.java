@@ -91,8 +91,7 @@ public class LBImageService {
             ImageIO.write(img, "png", file);
 
         } catch (IOException e) {
-            System.out.println("Error creating file");
-            throw new RuntimeException(e);
+            throw new RuntimeException("Error creating file"+e.getMessage());
         }
         return file;
     }
@@ -103,8 +102,7 @@ public class LBImageService {
             ImageIO.write(img, "png", baos);
 
         } catch (IOException e) {
-            System.out.println("Error creating");
-            throw new RuntimeException(e);
+            throw new RuntimeException("Error creating"+e.getMessage());
         }
         return baos.toByteArray();
     }

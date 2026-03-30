@@ -53,15 +53,8 @@ public class ProjectController extends BaseCatalogController{
         if (errorProjectList.isEmpty()) {
             project=projectService.saveProject(project);
         }else{
-            for(List<List<List<String>>> alsError: errorProjectList) {
-                logger.warn("[Ошибки размеров АКХ]:"+ alsError.get(0));
-                logger.warn("[Ошибки размеров МХ]:"+ alsError.get(1));
-                logger.warn("[Ошибки размеров МУ]:"+ alsError.get(2));
-            }
             model.addAttribute("projectErrors", errorProjectList);
-
             model.addAttribute("project", project);
-
             return "/projects/project";
         }
 
@@ -104,9 +97,6 @@ public class ProjectController extends BaseCatalogController{
            als=projectService.replaceALSandSaveProject(project,als,alsId);
         }
         else {
-            logger.warn("[Ошибки размеров АКХ]:"+ errorALSList);
-            logger.warn("[Ошибки размеров МХ]:"+ errorLCList);
-            logger.warn("[Ошибки размеров МУ]:"+errorLBLists);
             model.addAttribute("ALSErrors", errorALSList);
             model.addAttribute("LCErrors", errorLCList);
             model.addAttribute("LBErrors", errorLBLists);
@@ -153,7 +143,6 @@ public class ProjectController extends BaseCatalogController{
             als=projectService.replaceLCandSaveProject(project,als,alsId,lc);
         }
         else {
-            logger.warn(errorList.toString());
             model.addAttribute("lc", lc);
             model.addAttribute("errors", errorList);
             return "projects/project_lc";
@@ -216,7 +205,6 @@ public class ProjectController extends BaseCatalogController{
              newLbId = (int) ALSlbIdList.get(1);
 
         } else {
-            logger.warn(errorList.toString());
             model.addAttribute("errors",errorList);
             model.addAttribute("lb", lb);
             return "projects/project_lb";
