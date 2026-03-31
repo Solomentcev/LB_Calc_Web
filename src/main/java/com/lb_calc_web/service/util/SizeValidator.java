@@ -387,6 +387,30 @@ public class SizeValidator {
 
         return allResults;
     }
+    public static List<ValidationResult> deepValidateALS(ALSDTO als){
+        logger.info("Глубокая валидация размеров АКХ (id:{})", als.getId());
+        List<ValidationResult> allResults = new ArrayList<>();
+        // Валидация ALS
+        ValidationResult alsResult = validateALS(als);
+        allResults.add(alsResult);
+
+        // Валидация LC
+        if (als.getLC() != null) {
+            ValidationResult lcResult = validateLC(als.getLC());
+            allResults.add(lcResult);
+        }
+
+        // Валидация LB
+        for (LBDTO lb : als.getLbList()) {
+            ValidationResult lbResult = validateLB(lb);
+            allResults.add(lbResult);
+        }
+        logger.info("Глубокая валидация АКХ завершена. Всего результатов: {}. Ошибок: {}",
+                allResults.size(),
+                allResults.stream().filter(r -> !r.isValid()).count());
+
+        return allResults;
+    }
     public static List<String> getErrorValidateALSSizesList(ALSDTO als)  {
         ValidationResult result = validateALS(als);
         return convertValidationResultToStrings(result);

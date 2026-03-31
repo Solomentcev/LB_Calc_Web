@@ -7,7 +7,6 @@ import com.lb_calc_web.dto.LoginRequest;
 import com.lb_calc_web.dto.RegistrationDTO;
 import com.lb_calc_web.service.AuthService;
 import io.jsonwebtoken.JwtException;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
@@ -15,9 +14,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -61,28 +57,12 @@ public class AuthRestController {
         try {
             EmployeeDTO employee = authService.registration(registrationDTO);
             logger.info("User {} successfully registered", registrationDTO.getEmail());
-
-            Map<String, Object> response = new HashMap<>();
-            response.put("status", "success");
-            response.put("message", "Registration successful");
-            response.put("data", new EmployeeDTO()); // Не отправляем все данные
-            response.put("timestamp", System.currentTimeMillis());
-
+            ApiResponse<EmployeeDTO> response = ApiResponse.success("Registration successful", employee);
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
 
         } catch (RuntimeException e) {
             logger.warn("Registration failed for {}: {}", registrationDTO.getEmail(), e.getMessage());
-
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("status", "error");
-            errorResponse.put("message", e.getMessage());
-            errorResponse.put("timestamp", System.currentTimeMillis());
-
-            // 409 Conflict - если пользователь уже существует
-            if (e.getMessage().contains("Email")) {
-                return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
-            }
-
+            ApiResponse<String> errorResponse= ApiResponse.error("Не удалось создать пользователя",e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         }
     }
@@ -97,13 +77,8 @@ public class AuthRestController {
 
         if (refreshToken == null || refreshToken.trim().isEmpty()) {
             logger.warn("Refresh token is missing");
-
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("status", "error");
-            errorResponse.put("message", "Refresh token is required");
-            errorResponse.put("timestamp", System.currentTimeMillis());
-
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+            ApiResponse<Void> errorResponse = ApiResponse.error("Refresh token is missing");
+                       return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         }
 
         try {

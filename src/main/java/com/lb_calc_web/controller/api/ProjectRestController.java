@@ -8,8 +8,6 @@ import com.lb_calc_web.dto.LCDTO;
 import com.lb_calc_web.dto.ProjectDTO;
 import com.lb_calc_web.dto.validation.ValidationResult;
 import com.lb_calc_web.service.ALSService;
-import com.lb_calc_web.service.LBService;
-import com.lb_calc_web.service.LCService;
 import com.lb_calc_web.service.ProjectService;
 import com.lb_calc_web.service.util.SizeValidator;
 import org.slf4j.Logger;
@@ -23,9 +21,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.ByteArrayInputStream;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/projects")
@@ -34,14 +30,10 @@ public class ProjectRestController {
     private static final Logger logger = LoggerFactory.getLogger(ProjectController.class);
     private final ProjectService projectService;
     private final ALSService alsService;
-    private final LBService lbService;
-    private final LCService lcService;
 
-    public ProjectRestController(ProjectService projectService, ALSService alsService, LBService lbService, LCService lcService) {
+    public ProjectRestController(ProjectService projectService, ALSService alsService) {
         this.projectService = projectService;
         this.alsService = alsService;
-        this.lbService = lbService;
-        this.lcService = lcService;
     }
     /**
      * GET /api/v1/projects
@@ -53,12 +45,12 @@ public class ProjectRestController {
 
         try {
             List<ProjectDTO> projects = projectService.findAll();
-            ApiResponse response= ApiResponse.success(projects);
+            ApiResponse<List<ProjectDTO>> response= ApiResponse.success(projects);
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
             logger.error("Error fetching projects", e);
-            ApiResponse response= ApiResponse.error(e.getMessage());
+            ApiResponse<String> response= ApiResponse.error("Error fetching projects",e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
@@ -137,7 +129,7 @@ public class ProjectRestController {
             return ResponseEntity.status(HttpStatus.OK).body(response);
         } catch (Exception e) {
             logger.warn("Project not found with id: {}", id);
-            ApiResponse<Void> response = ApiResponse.error(e.getMessage());
+            ApiResponse<String> response = ApiResponse.error("Project not found with id:"+id,e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
     }
@@ -151,13 +143,13 @@ public class ProjectRestController {
 
         try {
             projectService.deleteById(id);
-            ApiResponse response =ApiResponse.success("Project deleted successfully");
+            ApiResponse<Object> response =ApiResponse.success("Project deleted successfully");
 
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
             logger.error("Error deleting project", e);
-            ApiResponse<Void> response = ApiResponse.error(e.getMessage());
+            ApiResponse<String> response = ApiResponse.error("Error deleting project", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
@@ -188,37 +180,32 @@ public class ProjectRestController {
 
         } catch (Exception e) {
             logger.error("Error exporting project", e);
-            ApiResponse<Void> response = ApiResponse.error(e.getMessage());
+            ApiResponse<String> response = ApiResponse.error("Error exporting project",e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
     /**
-     * POST /api/v1/projects/{id}/als/add
+     * POST /api/v1/projects/{id}/add-als
      * Добавить новый ALS к проекту
      */
-    @PostMapping("/{id}/als/add")
+    @PostMapping("/{id}/add-als")
 
     public ResponseEntity<?> addALSToProject(@PathVariable Long id) {
         logger.info("Adding new ALS to project id: {}", id);
 
         try {
             ProjectDTO project = projectService.addNewALSandSaveProject(id);
-
-            Map<String, Object> response = new HashMap<>();
-            response.put("status", "success");
-            response.put("message", "ALS added successfully");
-            response.put("data", project);
-            response.put("timestamp", System.currentTimeMillis());
-
+            ApiResponse<Object> response =ApiResponse.success("ALS added in Project successfully", project);
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
 
         } catch (Exception e) {
             logger.error("Error adding ALS to project", e);
-            return buildErrorResponse("Failed to add ALS: " + e.getMessage(), HttpStatus.BAD_REQUEST);
+            ApiResponse<String> response = ApiResponse.error("Error adding ALS to project", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
     /**
-     * DELETE /api/v1/projects/{projectId}/als/{alsId}/delete
+     * DELETE /api/v1/projects/{projectId}/alss/{alsId}/delete
      * Удалить ALS из проекта
      */
     @DeleteMapping("/{projectId}/als/{alsId}/delete")
@@ -230,26 +217,21 @@ public class ProjectRestController {
 
         try {
             ProjectDTO project = projectService.deleteALSandSaveProject(projectId, alsId);
-
-            Map<String, Object> response = new HashMap<>();
-            response.put("status", "success");
-            response.put("message", "ALS deleted successfully");
-            response.put("data", project);
-            response.put("timestamp", System.currentTimeMillis());
-
+            ApiResponse<Object> response =ApiResponse.success("ALS deleted from Project successfully",project);
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
             logger.error("Error deleting ALS from project", e);
-            return buildErrorResponse("Failed to delete ALS: " + e.getMessage(), HttpStatus.BAD_REQUEST);
+            ApiResponse<String> response = ApiResponse.error("Error deleting ALS from project", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
 
     /**
-     * POST /api/v1/projects/{projectId}/als/{alsId}/save
+     * POST /api/v1/projects/{projectId}/alss/{alsId}/save
      * Сохранить ALS в проекте с валидацией
      */
-    @PostMapping("/{projectId}/als/{alsId}/save")
+    @PostMapping("/{projectId}/alss/{alsId}/save")
 
     public ResponseEntity<?> saveALSInProject(
             @PathVariable Long projectId,
@@ -259,47 +241,27 @@ public class ProjectRestController {
 
         try {
             ProjectDTO project = projectService.findById(projectId);
-
-            // Валидация размеров ALS
-            List<String> errorALSList = SizeValidator.getErrorValidateALSSizesList(als);
-            als = alsService.resizeLC(als);
-
-            List<String> errorLCList = SizeValidator.getErrorValidateLCSizesList(als.getLC());
-            als = alsService.resizeLBs(als);
-
-            List<List<String>> errorLBLists = SizeValidator.getErrorValidateLBSizesLists(als);
-
-            if (!errorALSList.isEmpty() || !errorLCList.isEmpty() || !errorLBLists.isEmpty()) {
-                Map<String, Object> errorResponse = new HashMap<>();
-                errorResponse.put("status", "error");
-                errorResponse.put("message", "Validation errors found");
-                errorResponse.put("alsErrors", errorALSList);
-                errorResponse.put("lcErrors", errorLCList);
-                errorResponse.put("lbErrors", errorLBLists);
-                errorResponse.put("timestamp", System.currentTimeMillis());
-                return ResponseEntity.badRequest().body(errorResponse);
+            List<ValidationResult> errorAlsList=SizeValidator.deepValidateALS(als);
+             if (!errorAlsList.isEmpty()) {
+                ApiResponse<List<ValidationResult>> response = ApiResponse.error("ALS validation failed", errorAlsList);
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
             }
-
             ALSDTO saved = projectService.replaceALSandSaveProject(project, als, alsId);
-
-            Map<String, Object> response = new HashMap<>();
-            response.put("status", "success");
-            response.put("message", "ALS saved successfully");
-            response.put("data", saved);
-            response.put("timestamp", System.currentTimeMillis());
+            ApiResponse<Object> response =ApiResponse.success("ALS saved in Project successfully", saved);
 
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
             logger.error("Error saving ALS in project", e);
-            return buildErrorResponse("Failed to save ALS: " + e.getMessage(), HttpStatus.BAD_REQUEST);
+            ApiResponse<String> response = ApiResponse.error("Error saving ALS in project", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
     /**
      * POST /api/v1/projects/{projectId}/als/{alsId}/lcs/{lcId}/save
      * Сохранить LC для ALS в проекте с валидацией
      */
-    @PostMapping("/{projectId}/als/{alsId}/lcs/{lcId}/save")
+    @PostMapping("/{projectId}/alss/{alsId}/lcs/{lcId}/save")
 
     public ResponseEntity<?> saveLCInProject(
             @PathVariable Long projectId,
@@ -316,32 +278,24 @@ public class ProjectRestController {
             List<String> errorList = SizeValidator.getErrorValidateLCSizesList(lc);
 
             if (!errorList.isEmpty()) {
-                Map<String, Object> errorResponse = new HashMap<>();
-                errorResponse.put("status", "error");
-                errorResponse.put("message", "Validation errors found");
-                errorResponse.put("errors", errorList);
-                errorResponse.put("timestamp", System.currentTimeMillis());
+               ApiResponse<Void> errorResponse = ApiResponse.error("LC validation failed", errorList);
                 return ResponseEntity.badRequest().body(errorResponse);
             }
 
             ALSDTO saved = projectService.replaceLCandSaveProject(project, als, alsId, lc);
-
-            Map<String, Object> response = new HashMap<>();
-            response.put("status", "success");
-            response.put("message", "LC saved successfully");
-            response.put("data", saved);
-            response.put("timestamp", System.currentTimeMillis());
+            ApiResponse<Object> response =ApiResponse.success("LC saved in Project successfully", saved);
 
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
             logger.error("Error saving LC in project", e);
-            return buildErrorResponse("Failed to save LC: " + e.getMessage(), HttpStatus.BAD_REQUEST);
+            ApiResponse<String> response = ApiResponse.error("Error saving LC in project", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
 
     /**
-     * POST /api/v1/projects/{projectId}/als/{alsId}/lbs/add
+     * POST /api/v1/projects/{projectId}/alss/{alsId}/lbs/add
      * Добавить новый LB к ALS в проекте
      */
     @PostMapping("/{projectId}/als/{alsId}/lbs/add")
@@ -353,18 +307,13 @@ public class ProjectRestController {
 
         try {
             ALSDTO als = projectService.addLBAtProject(projectId, alsId);
-
-            Map<String, Object> response = new HashMap<>();
-            response.put("status", "success");
-            response.put("message", "LB added successfully");
-            response.put("data", als);
-            response.put("timestamp", System.currentTimeMillis());
-
+            ApiResponse<ALSDTO> response =ApiResponse.success("ALS added in Project successfully", als);
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
 
         } catch (Exception e) {
             logger.error("Error adding LB to ALS", e);
-            return buildErrorResponse("Failed to add LB: " + e.getMessage(), HttpStatus.BAD_REQUEST);
+            ApiResponse<String> response = ApiResponse.error("Error adding LB to ALS", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
 
@@ -382,22 +331,17 @@ public class ProjectRestController {
 
         try {
             ALSDTO als = projectService.deleteLBatProject(projectId, alsId, lbId);
-
-            Map<String, Object> response = new HashMap<>();
-            response.put("status", "success");
-            response.put("message", "LB deleted successfully");
-            response.put("data", als);
-            response.put("timestamp", System.currentTimeMillis());
-
+            ApiResponse<ALSDTO> response =ApiResponse.success("ALS deleted from Project successfully", als);
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
             logger.error("Error deleting LB from ALS", e);
-            return buildErrorResponse("Failed to delete LB: " + e.getMessage(), HttpStatus.BAD_REQUEST);
+            ApiResponse<String> response = ApiResponse.error("Error deleting LB from ALS", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
     /**
-     * POST /api/v1/projects/{projectId}/als/{alsId}/lbs/{lbId}/save
+     * POST /api/v1/projects/{projectId}/alss/{alsId}/lbs/{lbId}/save
      * Сохранить LB для ALS в проекте с валидацией
      */
     @PostMapping("/{projectId}/als/{alsId}/lbs/{lbId}/save")
@@ -416,44 +360,21 @@ public class ProjectRestController {
             List<String> errorList = SizeValidator.getErrorValidateLBSizesList(lb);
 
             if (!errorList.isEmpty()) {
-                Map<String, Object> errorResponse = new HashMap<>();
-                errorResponse.put("status", "error");
-                errorResponse.put("message", "Validation errors found");
-                errorResponse.put("errors", errorList);
-                errorResponse.put("timestamp", System.currentTimeMillis());
+                ApiResponse<Void> errorResponse = ApiResponse.error("LB validation failed", errorList);
                 return ResponseEntity.badRequest().body(errorResponse);
             }
 
             List<Object> result = projectService.saveLBatProject(projectId, alsId, lbId, lb);
             ALSDTO savedALS = (ALSDTO) result.get(0);
             Integer newLbId = (Integer) result.get(1);
-
-            Map<String, Object> response = new HashMap<>();
-            response.put("status", "success");
-            response.put("message", "LB saved successfully");
-            response.put("als", savedALS);
-            response.put("lbId", newLbId);
-            response.put("timestamp", System.currentTimeMillis());
-
+            ApiResponse<ALSDTO> response =ApiResponse.success("LB saved in Project successfully", savedALS);
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
             logger.error("Error saving LB in project", e);
-            return buildErrorResponse("Failed to save LB: " + e.getMessage(), HttpStatus.BAD_REQUEST);
+            ApiResponse<String> response = ApiResponse.error("Error saving LB in project", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+
         }
     }
-
-    /**
-     * Вспомогательный метод для построения ошибки
-     */
-    private ResponseEntity<?> buildErrorResponse(String message, HttpStatus status) {
-        Map<String, Object> errorResponse = new HashMap<>();
-        errorResponse.put("status", "error");
-        errorResponse.put("message", message);
-        errorResponse.put("timestamp", System.currentTimeMillis());
-
-        return ResponseEntity.status(status).body(errorResponse);
-    }
-
-
 }

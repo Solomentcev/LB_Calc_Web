@@ -152,7 +152,7 @@ public class EmployeeController {
             bindingResult.addError(new FieldError(
                     "employee",
                     "confirmPassword",
-                    "пароли не совпадают"
+                    "Пароли не совпадают"
             ));
         }
         if (bindingResult.hasErrors()) {

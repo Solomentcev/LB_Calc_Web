@@ -1,5 +1,6 @@
 package com.lb_calc_web.controller.api;
 
+import com.lb_calc_web.controller.api.response.ApiResponse;
 import com.lb_calc_web.dto.CreateEmployeeDTO;
 import com.lb_calc_web.dto.EmployeeDTO;
 import com.lb_calc_web.dto.ProfileDTO;
@@ -10,11 +11,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * REST API для управления Сотрудниками
@@ -26,9 +26,10 @@ import java.util.Map;
 public class EmployeeRestController {
     private static final Logger logger = LoggerFactory.getLogger(EmployeeRestController.class);
     private final EmployeeService employeeService;
-
-    public EmployeeRestController(EmployeeService employeeService) {
+    private final PasswordEncoder passwordEncoder;
+    public EmployeeRestController(EmployeeService employeeService, PasswordEncoder passwordEncoder) {
         this.employeeService = employeeService;
+        this.passwordEncoder = passwordEncoder;
     }
 
     /**
@@ -41,18 +42,13 @@ public class EmployeeRestController {
 
         try {
             List<EmployeeDTO> employees = employeeService.findAll();
-
-            Map<String, Object> response = new HashMap<>();
-            response.put("status", "success");
-            response.put("data", employees);
-            response.put("count", employees.size());
-            response.put("timestamp", System.currentTimeMillis());
-
-            return ResponseEntity.ok(response);
+            ApiResponse<List<EmployeeDTO>> response=ApiResponse.success(employees);
+                      return ResponseEntity.ok(response);
 
         } catch (Exception e) {
             logger.error("Error fetching employees", e);
-            return buildErrorResponse("Failed to fetch employees", HttpStatus.INTERNAL_SERVER_ERROR);
+            ApiResponse<String> response=ApiResponse.error("Error fetching employees",e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
 
@@ -66,17 +62,13 @@ public class EmployeeRestController {
 
         try {
             EmployeeDTO employee = employeeService.loadUserById(id.intValue());
-
-            Map<String, Object> response = new HashMap<>();
-            response.put("status", "success");
-            response.put("data", employee);
-            response.put("timestamp", System.currentTimeMillis());
-
-            return ResponseEntity.ok(response);
+            ApiResponse<EmployeeDTO> response=ApiResponse.success(employee);
+                       return ResponseEntity.ok(response);
 
         } catch (Exception e) {
             logger.warn("Employee not found with id: {}", id);
-            return buildErrorResponse("Employee not found", HttpStatus.NOT_FOUND);
+            ApiResponse<String> response=ApiResponse.error("Employee not found with id"+id,e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
     }
 
@@ -89,26 +81,29 @@ public class EmployeeRestController {
         logger.info("Creating new employee: {}", createEmployeeDTO.getEmail());
 
         try {
-            EmployeeDTO employeeDTO = new EmployeeDTO();
-            employeeDTO.setEmail(createEmployeeDTO.getEmail());
+            if (employeeService.existsByEmail(createEmployeeDTO.getEmail())){
+                ApiResponse<Void> apiResponse=ApiResponse.error("Пользователь с таким email уже существует");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(apiResponse);
+            }
+            if (!createEmployeeDTO.getPassword().equals(createEmployeeDTO.getConfirmPassword())){
+                ApiResponse<Void> apiResponse=ApiResponse.error("Пароли не совпадают");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(apiResponse);
+            }
+            EmployeeDTO employeeDTO=new EmployeeDTO();
             employeeDTO.setFirstName(createEmployeeDTO.getFirstName());
             employeeDTO.setLastName(createEmployeeDTO.getLastName());
+            employeeDTO.setEmail(createEmployeeDTO.getEmail());
             employeeDTO.setRole(createEmployeeDTO.getRole());
-
-            EmployeeDTO createdEmployee = employeeService.save(employeeDTO);
-
-            Map<String, Object> response = new HashMap<>();
-            response.put("status", "success");
-            response.put("message", "Employee created successfully");
-            response.put("data", createdEmployee);
-            response.put("timestamp", System.currentTimeMillis());
-
+            employeeDTO.setPassword(createEmployeeDTO.getPassword());
+            employeeDTO.setEncryptedPassword(passwordEncoder.encode(createEmployeeDTO.getPassword()));
+            employeeDTO=employeeService.save(employeeDTO);
+            ApiResponse<EmployeeDTO> response=ApiResponse.success(employeeDTO);
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
 
         } catch (Exception e) {
             logger.error("Error creating employee", e);
-            return buildErrorResponse("Failed to create employee: " + e.getMessage(),
-                    HttpStatus.BAD_REQUEST);
+            ApiResponse<String> response=ApiResponse.error("Error creating employee",e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
 
@@ -118,25 +113,29 @@ public class EmployeeRestController {
      */
     @PutMapping("/{id}")
     public ResponseEntity<?> updateEmployee(
-            @PathVariable Long id,
-            @RequestBody @Valid EmployeeDTO employeeDTO) {
+            @PathVariable int id,
+            @RequestBody @Valid ProfileDTO employeeUpd) {
         logger.info("Updating employee with id: {}", id);
-
+        EmployeeDTO employeeDTO=employeeService.loadUserById(id);
+        if (!employeeDTO.getEmail().equals(employeeUpd.getEmail())
+                && employeeService.existsByEmail(employeeUpd.getEmail())){
+            ApiResponse<Void> apiResponse=ApiResponse.error("Пользователь с таким email уже существует");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(apiResponse);
+        }
         try {
-            employeeDTO.setId(id);
-            EmployeeDTO updatedEmployee = employeeService.save(employeeDTO);
-
-            Map<String, Object> response = new HashMap<>();
-            response.put("status", "success");
-            response.put("message", "Employee updated successfully");
-            response.put("data", updatedEmployee);
-            response.put("timestamp", System.currentTimeMillis());
-
+            employeeDTO.setFirstName(employeeUpd.getFirstName());
+            employeeDTO.setLastName(employeeUpd.getLastName());
+            employeeDTO.setEmail(employeeUpd.getEmail());
+            employeeDTO.setRole(employeeUpd.getRole());
+            employeeDTO=employeeService.save(employeeDTO);
+            ApiResponse<EmployeeDTO> response=ApiResponse.success(employeeDTO);
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
             logger.error("Error updating employee", e);
-            return buildErrorResponse("Failed to update employee", HttpStatus.BAD_REQUEST);
+            ApiResponse<String> response=ApiResponse.error("Error updating employee",e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+
         }
     }
 
@@ -150,29 +149,13 @@ public class EmployeeRestController {
 
         try {
             employeeService.deleteById(id);
-
-            Map<String, Object> response = new HashMap<>();
-            response.put("status", "success");
-            response.put("message", "Employee deleted successfully");
-            response.put("timestamp", System.currentTimeMillis());
-
+            ApiResponse<Object> response=ApiResponse.success("Employee deleted successfully");
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
             logger.error("Error deleting employee", e);
-            return buildErrorResponse("Failed to delete employee", HttpStatus.INTERNAL_SERVER_ERROR);
+            ApiResponse<String> response=ApiResponse.error("Error deleting employee",e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
-    }
-
-    /**
-     * Вспомогательный метод для построения ошибки
-     */
-    private ResponseEntity<?> buildErrorResponse(String message, HttpStatus status) {
-        Map<String, Object> errorResponse = new HashMap<>();
-        errorResponse.put("status", "error");
-        errorResponse.put("message", message);
-        errorResponse.put("timestamp", System.currentTimeMillis());
-
-        return ResponseEntity.status(status).body(errorResponse);
     }
 }
