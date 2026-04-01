@@ -1,8 +1,6 @@
 package com.lb_calc_web.security.jwt;
 
 import com.lb_calc_web.dto.EmployeeDTO;
-import com.lb_calc_web.dto.JwtResponse;
-import com.lb_calc_web.service.AuthService;
 import com.lb_calc_web.service.EmployeeService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -33,6 +31,7 @@ public class JwtAuthentificationFilter extends OncePerRequestFilter {
         logger.debug("JWT Authentication Filtering...");
         try {
             String accessToken= getAccessToken(request);
+            logger.debug("JWT Authentication Filter Access Token: " + accessToken);
             if(accessToken != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 try {
                     try {
@@ -42,6 +41,7 @@ public class JwtAuthentificationFilter extends OncePerRequestFilter {
                             authenticate(userEmail);
                         }
                     } catch (ExpiredJwtException e) {
+                        logger.debug("Access token expired, trying refresh..."+e.getMessage());
                        Claims claims=e.getClaims();
                         if(jwtService.isAccess(claims)) {
                             tryRefresh(request, response);
@@ -112,13 +112,10 @@ public class JwtAuthentificationFilter extends OncePerRequestFilter {
         }
 
         // 3. JSON requests (Accept / Content-Type)
-        if ((accept != null && accept.contains("application/json")) ||
-                (contentType != null && contentType.contains("application/json"))) {
-            return true;
-        }
+        return (accept != null && accept.contains("application/json")) ||
+                (contentType != null && contentType.contains("application/json"));
 
         // fallback → считаем UI
-        return false;
     }
 
     private String getAccessToken(HttpServletRequest req) {

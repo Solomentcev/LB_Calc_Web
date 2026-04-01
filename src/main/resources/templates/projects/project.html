@@ -101,11 +101,11 @@
                     </td>
 
                     <td>
-                        <form th:action="@{/projects/{id}/addALS(id=${project.id})}"
-                              method="post"
-                              style="display:inline;">
-                            <button type="submit" class="btn btn-primary">Add ALS</button>
-                        </form>
+                        <button type="submit"
+                                class="btn btn-primary"
+                                th:formaction="@{/projects/{id}/addALS (id=${project.id})}">
+                            Add ALS
+                        </button>
                     </td>
                 </tr>
                 </tbody>
@@ -275,11 +275,12 @@
                                     <a th:href="@{/projects/{id}/alss/{alsId} (id=${project.getId()}, alsId=${als.getId()})}"
                                        class="btn btn-primary">Edit</a>
                                     &nbsp
-                                    <form th:action="@{/projects/{id}/alss/{alsId}/delete(id=${project.id}, alsId=${als.id})}"
-                                          method="post"
-                                          style="display:inline;">
-                                        <button type="submit" class="btn btn-danger">Delete</button>
-                                    </form>
+                                    <a
+                                            class="btn btn-danger"
+                                            th:href="@{/projects/{id}/alss/{alsId}/delete (
+                                                                id=${project.getId()},
+                                                                alsId=${als.getId()})}">Delete
+                                    </a>
                                 </td>
                             </tr>
                         </table>
@@ -649,10 +650,6 @@
                                         <a th:href="@{/projects/{projectId}/alss/{alsId}/lbs/{lbId} (alsId=${als.getId()},
                                 lbId=${lb.getId()}, projectId=${project.getId()})}"
                                            class="btn btn-primary">Edit</a>
-                                        &nbsp;&nbsp;&nbsp;
-                                        <a th:href="@{/projects/{projectId}/alss/{alsId}/lbs/{lbId}/delete (alsId=${als.getId()},lbId=${lb.getId()},
-                                projectId=${project.getId()}) }"
-                                           class="btn btn-danger">Delete</a>
                                     </td>
                                 </tr>
                                 </tbody>

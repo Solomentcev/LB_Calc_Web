@@ -124,11 +124,11 @@
                 </td>
 
                 <td>
-                    <<form th:action="@{/projects/{projectId}/alss/{alsId}/addLB(projectId=${project.id}, alsId=${als.id})}"
-                           method="post"
-                           style="display:inline;">
-                    <button type="submit" class="btn btn-primary">Add LB</button>
-                </form>
+                    <button type="submit"
+                            class="btn btn-primary"
+                            th:formaction="@{/projects/{projectId}/alss/{alsId}/addLB
+                            (projectId=${project.id}, alsId=${als.id})}"> Add LB
+                    </button>
                 </td>
 
             </tr>

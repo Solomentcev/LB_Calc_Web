@@ -4,12 +4,10 @@ import com.lb_calc_web.dto.JwtResponse;
 import com.lb_calc_web.dto.LoginRequest;
 import com.lb_calc_web.dto.RegistrationDTO;
 import com.lb_calc_web.service.AuthService;
-import jakarta.security.auth.message.AuthException;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -20,6 +18,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 public class AuthController {
+    private final Logger logger = LoggerFactory.getLogger(AuthController.class);
     private final AuthService authService;
 
     public AuthController(AuthService authService) {
@@ -58,7 +57,7 @@ public class AuthController {
     public String logIn( @ModelAttribute @Valid LoginRequest loginRequest,
                          HttpServletResponse response,
                          BindingResult bindingResult,
-                         RedirectAttributes redirectAttributes) throws AuthException {
+                         RedirectAttributes redirectAttributes) {
         if (bindingResult.hasErrors()) {
             return "login";
         }
@@ -66,6 +65,7 @@ public class AuthController {
             JwtResponse tokens =authService.login(loginRequest);
             response.addCookie(authService.generateAccessTokenCookie(tokens.getAccessToken()));
             response.addCookie(authService.generateRefreshTokenCookie(tokens.getRefreshToken()));
+            logger.info("Login Success");
         } catch (Exception e) {
                 redirectAttributes.addFlashAttribute("error", e.getMessage());
                 redirectAttributes.addFlashAttribute("loginRequest", loginRequest);

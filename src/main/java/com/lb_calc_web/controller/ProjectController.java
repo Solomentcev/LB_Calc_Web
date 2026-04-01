@@ -4,11 +4,11 @@ import com.lb_calc_web.dto.ALSDTO;
 import com.lb_calc_web.dto.LBDTO;
 import com.lb_calc_web.dto.LCDTO;
 import com.lb_calc_web.dto.ProjectDTO;
-import com.lb_calc_web.model.attributes.*;
-import com.lb_calc_web.service.*;
+import com.lb_calc_web.service.ALSService;
+import com.lb_calc_web.service.LBService;
+import com.lb_calc_web.service.LCService;
+import com.lb_calc_web.service.ProjectService;
 import com.lb_calc_web.service.util.SizeValidator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -18,12 +18,11 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.*;
+import java.util.List;
 
 @Controller
 @RequestMapping("/projects")
 public class ProjectController extends BaseCatalogController{
-    private static final Logger logger = LoggerFactory.getLogger(ProjectController.class);
     private final ProjectService projectService;
     private final ALSService alsService;
     private final LBService lbService;
@@ -67,11 +66,12 @@ public class ProjectController extends BaseCatalogController{
 
         return "redirect:/projects/"+projectId;
     }
-    @PostMapping("/{id}/alss/{alsId}/delete" )
+    @GetMapping("/{id}/alss/{alsId}/delete" )
     public String deleteALS(@PathVariable(value = "id") Long id,
                             @PathVariable(value = "alsId") Long alsId,
                             Model model) {
-        model.addAttribute("project", projectService.deleteALSandSaveProject(id, alsId));
+        ProjectDTO projectDTO=projectService.deleteALSandSaveProject(id, alsId);
+        model.addAttribute("project", projectDTO);
         return "redirect:/projects/"+id;
     }
     @GetMapping("/{id}")
@@ -160,7 +160,7 @@ public class ProjectController extends BaseCatalogController{
         model.addAttribute("als", als);
         return "redirect:/projects/"+projectId+"/alss/"+als.getId();
     }
-    @PostMapping("/{projectId}/alss/{alsId}/lbs/{lbId}/delete" )
+    @GetMapping("/{projectId}/alss/{alsId}/lbs/{lbId}/delete" )
     public String deleteLBatProject(@PathVariable(value = "projectId") Long projectId,
                                     @PathVariable(value = "alsId") Long alsId,
                                     @PathVariable(value = "lbId") Long lbId,
@@ -169,7 +169,7 @@ public class ProjectController extends BaseCatalogController{
         model.addAttribute("als", als);
         return "redirect:/projects/"+projectId+"/alss/"+als.getId();
     }
-    @PostMapping("/{projectId}/alss/{alsId}/lbs/{lbId}")
+    @GetMapping("/{projectId}/alss/{alsId}/lbs/{lbId}")
     private String editLBatProject(@PathVariable(value = "projectId") Long projectId,
                                    @PathVariable(value = "alsId") Long alsId,
                                    @PathVariable(value = "lbId") Long lbId,
@@ -192,7 +192,7 @@ public class ProjectController extends BaseCatalogController{
                                   Model model) {
         ProjectDTO project =projectService.findById(projectId);
         model.addAttribute("project", project);
-        List<Object> ALSlbIdList= null;
+        List<Object> ALSlbIdList;
         int newLbId;
         ALSDTO als = alsService.findById(alsId);
         model.addAttribute("projectId", projectId);

@@ -29,7 +29,7 @@ import java.time.LocalDate;
 
 @Service
 public class AuthService {
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+    private final Logger logger = LoggerFactory.getLogger(AuthService.class);
     private final EmployeeService employeeService;
     private final EmployeeRepository employeeRepository;
     private final PasswordEncoder passwordEncoder;
@@ -42,7 +42,8 @@ public class AuthService {
         this.jwtService = jwtService;
     }
     public JwtResponse login(LoginRequest loginRequest) throws AuthException {
-        EmployeeDTO user= null;
+        logger.info("Login attempt for email: {}", loginRequest.getEmail());
+        EmployeeDTO user;
         try {
             user = employeeService.loadUserByEmail(loginRequest.getEmail());
         } catch (UsernameNotFoundException e) {
@@ -53,8 +54,10 @@ public class AuthService {
             logger.info("Password verified");
             Authentication auth = new UsernamePasswordAuthenticationToken(user.getEmail(), user.getEncryptedPassword(), user.getAuthorities());
             SecurityContextHolder.getContext().setAuthentication(auth);
+            logger.info("Authentication successful");
             String access = jwtService.generateAccessToken(user);
             String refresh = jwtService.generateRefreshToken(user);
+
             return new JwtResponse(access, refresh);
 
         } else {

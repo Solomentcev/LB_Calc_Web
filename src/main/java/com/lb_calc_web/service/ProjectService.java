@@ -1,7 +1,7 @@
 package com.lb_calc_web.service;
 
 import com.lb_calc_web.dto.*;
-import com.lb_calc_web.helper.ExcelHelper;
+import com.lb_calc_web.helper.ExcellHelper;
 import com.lb_calc_web.mapper.EmployeeMapper;
 import com.lb_calc_web.mapper.ProjectMapper;
 import com.lb_calc_web.model.Project;
@@ -51,7 +51,7 @@ public class ProjectService {
     }
     public ByteArrayInputStream exportToExcel(ProjectDTO projectDTO) {
         logger.info("Сохранение Проекта в Excel ...");
-        return ExcelHelper.projectToExcel(projectDTO);
+        return ExcellHelper.projectToExcel(projectDTO);
     }
 
     public ProjectDTO createProject(){
@@ -198,7 +198,7 @@ public class ProjectService {
         logger.info("Замена МУ на МУ(id%d) в АКХ(id%d) Проекта(id%d)и сохранение..."
                 .formatted(lc.getId(),alsId,project.getId()));
         ALSDTO alsNew=alsService.replaceLCandSaveALS(als,lc);
-        deleteALSandSaveProject((long) project.getId(),alsId);
+        deleteALSandSaveProject(project.getId(),alsId);
         ProjectService.addALS(project,alsNew);
         saveProject(project);
         return alsNew;
