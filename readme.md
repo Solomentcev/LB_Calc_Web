@@ -8,13 +8,14 @@
 ## Цели
 Практическое освоение навыков работы с фреймворком Spring, шаблонизатором Thymeleaf, CRUD операциями с базой данных 
 MySQL Spring Data JPA, Rest API, регистрация, авторизация сотрудников Spring Security на основе JWT, 
-с файлами Java IO, Apache POI, системой контроля версий GIT, обработкой исключений, применением принципов ООП,
+с файлами Java IO, Apache POI, системой контроля версий GIT, обработкой исключений, тестированием Junit, Mockito, применением принципов ООП,
 шаблоном проектирования MVC, запуск БД в Docker.
 
 ## Технологии
 * Spring Boot
 * Spring Data JPA
 * Spring Security
+* JUnit, Mockito
 * Thymeleaf
 * MySQL
 * Docker

@@ -30,6 +30,7 @@ public class SizeValidator {
     private static int HEIGHT_MAX;
     private static int HEIGHT_MIN;
     private static int HEIGHT_LC_MIN;
+    private static int HEIGHT_LC_PANEL_MIN;
     private static int COUNT_CELLS_MIN;
 
     private static int WIDTH_CELL_MIN;
@@ -64,6 +65,9 @@ public class SizeValidator {
     @Value("${size.height.lc.min:600}")
     private int heightLcMin;
 
+    @Value("${size.height.lc.panel.min:300}")
+    private int heightLcPanelMin;
+
     @Value("${size.count.cells.min:1}")
     private int countCellsMin;
 
@@ -96,6 +100,7 @@ public class SizeValidator {
         HEIGHT_MAX = heightMax;
         HEIGHT_MIN = heightMin;
         HEIGHT_LC_MIN = heightLcMin;
+        HEIGHT_LC_PANEL_MIN = heightLcPanelMin;
         COUNT_CELLS_MIN = countCellsMin;
 
         WIDTH_CELL_MIN = widthCellMin;
@@ -108,46 +113,139 @@ public class SizeValidator {
         logger.info("SizeValidator config loaded");
     }
 
-    public static List<String> getErrorValidateLCSizesList(LCDTO lc){
-        logger.info("Валидация размеров МУ(id%d-%s)...".formatted(lc.getId(), lc.getName()));
-        ValidationResult result=validateLC(lc);
-        return convertValidationResultToStrings(result);
+    public static int getHeightLcPanelMin() {
+        return HEIGHT_LC_PANEL_MIN;
     }
-    public static ValidationResult validateLC(LCDTO lc) {
-        logger.info("Валидация размеров МУ (id:{}})", lc.getId());
 
-        ValidationResult result = new ValidationResult("LC", lc.getId());
-
-        // Проверка верхней рамы
-        validateRange(result, "upperFrame", lc.getUpperFrame(),
-                UPPER_FRAME_MIN, UPPER_FRAME_MAX,
-                "Верхняя рама");
-
-        // Проверка нижней рамы
-        validateRange(result, "bottomFrame", lc.getBottomFrame(),
-                BOTTOM_FRAME_MIN, BOTTOM_FRAME_MAX,
-                "Нижняя рама");
-
-        // Проверка высоты
-        validateRange(result, "height", lc.getHeight(),
-                HEIGHT_LC_MIN, HEIGHT_MAX,
-                "Высота модуля");
-
-        // Проверка глубины
-        validateRange(result, "depth", lc.getDepth(),
-                DEPTH_MIN, DEPTH_MAX,
-                "Глубина модуля");
-
-        // Проверка консистентности размеров
-        validateLCConsistency(result, lc);
-
-        logValidationResult(result);
-        return result;
+    public static void setHeightLcPanelMin(int heightLcPanelMin) {
+        HEIGHT_LC_PANEL_MIN = heightLcPanelMin;
     }
+
+    public static void setDepthCellMax(int depthCellMax) {
+        DEPTH_CELL_MAX = depthCellMax;
+    }
+
+    public static void setDepthMax(int depthMax) {
+        DEPTH_MAX = depthMax;
+    }
+
+    public static void setDepthMin(int depthMin) {
+        DEPTH_MIN = depthMin;
+    }
+
+    public static void setDepthCellMin(int depthCellMin) {
+        DEPTH_CELL_MIN = depthCellMin;
+    }
+
+    public static void setWidthMax(int widthMax) {
+        WIDTH_MAX = widthMax;
+    }
+
+    public static void setWidthCellMin(int widthCellMin) {
+        WIDTH_CELL_MIN = widthCellMin;
+    }
+
+    public static void setCountCellsMin(int countCellsMin) {
+        COUNT_CELLS_MIN = countCellsMin;
+    }
+
+    public static void setHeightLcMin(int heightLcMin) {
+        HEIGHT_LC_MIN = heightLcMin;
+    }
+
+    public static void setHeightMin(int heightMin) {
+        HEIGHT_MIN = heightMin;
+    }
+
+    public static void setHeightMax(int heightMax) {
+        HEIGHT_MAX = heightMax;
+    }
+
+    public static void setHeightCellMin(int heightCellMin) {
+        HEIGHT_CELL_MIN = heightCellMin;
+    }
+
+    public static void setBottomFrameMax(int bottomFrameMax) {
+        BOTTOM_FRAME_MAX = bottomFrameMax;
+    }
+
+    public static void setBottomFrameMin(int bottomFrameMin) {
+        BOTTOM_FRAME_MIN = bottomFrameMin;
+    }
+
+    public static void setUpperFrameMax(int upperFrameMax) {
+        UPPER_FRAME_MAX = upperFrameMax;
+    }
+
+    public static void setUpperFrameMin(int upperFrameMin) {
+        UPPER_FRAME_MIN = upperFrameMin;
+    }
+
+    public static int getUpperFrameMin() {
+        return UPPER_FRAME_MIN;
+    }
+
+    public static int getUpperFrameMax() {
+        return UPPER_FRAME_MAX;
+    }
+
+    public static int getBottomFrameMin() {
+        return BOTTOM_FRAME_MIN;
+    }
+
+    public static int getBottomFrameMax() {
+        return BOTTOM_FRAME_MAX;
+    }
+
+    public static int getHeightCellMin() {
+        return HEIGHT_CELL_MIN;
+    }
+
+    public static int getHeightMax() {
+        return HEIGHT_MAX;
+    }
+
+    public static int getHeightMin() {
+        return HEIGHT_MIN;
+    }
+
+    public static int getHeightLcMin() {
+        return HEIGHT_LC_MIN;
+    }
+
+    public static int getCountCellsMin() {
+        return COUNT_CELLS_MIN;
+    }
+
+    public static int getWidthCellMin() {
+        return WIDTH_CELL_MIN;
+    }
+
+    public static int getWidthMax() {
+        return WIDTH_MAX;
+    }
+
+    public static int getDepthCellMin() {
+        return DEPTH_CELL_MIN;
+    }
+
+    public static int getDepthMin() {
+        return DEPTH_MIN;
+    }
+
+    public static int getDepthMax() {
+        return DEPTH_MAX;
+    }
+
+    public static int getDepthCellMax() {
+        return DEPTH_CELL_MAX;
+    }
+
+
     /**
      * Валидация значения в диапазоне
      */
-    private static void validateRange(ValidationResult result, String fieldName,
+    static void validateRange(ValidationResult result, String fieldName,
                                       int value, int min, int max, String fieldLabel) {
         if (value < min) {
             result.addError(fieldName,
@@ -162,13 +260,13 @@ public class SizeValidator {
     /**
      * Дополнительные проверки консистентности LC
      */
-    private static void validateLCConsistency(ValidationResult result, LCDTO lc) {
+    static void validateLCConsistency(ValidationResult result, LCDTO lc) {
         int usableHeight = lc.getHeight() - lc.getUpperFrame() - lc.getBottomFrame();
 
-        if (usableHeight < HEIGHT_CELL_MIN) {
+        if (usableHeight < HEIGHT_LC_PANEL_MIN) {
             result.addError("heightConsistency",
-                    "Полезная высота слишком мала (рамы занимают слишком много)",
-                    usableHeight, HEIGHT_CELL_MIN, HEIGHT_MAX - UPPER_FRAME_MAX - BOTTOM_FRAME_MAX);
+                    "Полезная высота слишком мала для панели управления",
+                    usableHeight, HEIGHT_LC_PANEL_MIN, HEIGHT_MAX - UPPER_FRAME_MAX - BOTTOM_FRAME_MAX);
         }
     }
     /**
@@ -188,6 +286,137 @@ public class SizeValidator {
         List<String> strings = new ArrayList<>();
         result.getErrors().forEach(e -> strings.add(e.toString()));
         return strings;
+    }
+
+    /**
+     * Дополнительные проверки консистентности ALS
+     */
+    static void validateALSConsistency(ValidationResult result, ALSDTO als) {
+        if (als.getLC() == null) {
+            result.addError("lc", "МУ отсутствует", null, null, null);
+        }
+        if (als.getLbList() == null || als.getLbList().isEmpty()) {
+            result.addError("lbList", "Список МХ пустой", null, null, null);
+        }
+        int usableHeight = als.getHeight() - als.getUpperFrame() - als.getBottomFrame();
+        if (usableHeight < HEIGHT_CELL_MIN) {
+            result.addError("heightConsistency",
+                    "Полезная высота слишком мала для ячейки",
+                    usableHeight, HEIGHT_CELL_MIN, HEIGHT_MAX - UPPER_FRAME_MAX - BOTTOM_FRAME_MAX);
+        }
+
+        if (usableHeight < HEIGHT_LC_PANEL_MIN) {
+            result.addError("heightConsistency",
+                    "Полезная высота слишком мала для панели управления",
+                    usableHeight, HEIGHT_LC_PANEL_MIN, HEIGHT_MAX - UPPER_FRAME_MAX - BOTTOM_FRAME_MAX);
+        }
+    }
+
+
+    /**
+     * Валидация количества ячеек в LB
+     */
+    static void validateLBCellCount(ValidationResult result, LBDTO lb, TypeLb typeLb) {
+        int heightCellMax = lb.getHeight() - lb.getUpperFrame() - lb.getBottomFrame();
+        int countCellsMax = (heightCellMax + typeLb.getShelfThick()) /
+                (HEIGHT_CELL_MIN+typeLb.getShelfThick());
+        int countCells= lb.getCountCells();
+        if (countCells < COUNT_CELLS_MIN) {
+            result.addError("countCells",
+                    "Количество ячеек меньше допустимого",
+                    countCells, COUNT_CELLS_MIN, countCellsMax);
+        } else if (countCells > countCellsMax) {
+            result.addError("countCells",
+                    "Количество ячеек больше допустимого",
+                    countCells, COUNT_CELLS_MIN, countCellsMax);
+        }
+    }
+
+    /**
+     * Валидация размеров ячеек в LB
+     */
+    static void validateLBCellDimensions(ValidationResult result, LBDTO lb, TypeLb typeLb) {
+        // Высота ячейки
+        double heightCell = (double) (lb.getHeight() - lb.getUpperFrame() - lb.getBottomFrame() -
+                (lb.getCountCells() - 1) * typeLb.getShelfThick()) / lb.getCountCells();
+
+        if (heightCell < HEIGHT_CELL_MIN) {
+            result.addError("heightCell",
+                    "Высота ячейки меньше допустимой",
+                    String.format("%.2f", heightCell),
+                    HEIGHT_CELL_MIN,
+                    lb.getHeight() - lb.getUpperFrame() - lb.getBottomFrame());
+        }
+
+        // Глубина ячейки
+        int depthCell = lb.getDepth() - 20;
+        if (depthCell < DEPTH_CELL_MIN) {
+            result.addError("depthCell",
+                    "Глубина ячейки меньше допустимой",
+                    depthCell, DEPTH_CELL_MIN, DEPTH_CELL_MAX);
+        } else if (depthCell > DEPTH_CELL_MAX) {
+            result.addError("depthCell",
+                    "Глубина ячейки больше допустимой",
+                    depthCell, DEPTH_CELL_MIN, DEPTH_CELL_MAX);
+        }
+
+        // Ширина ячейки
+        int widthCell = lb.getWidth() - typeLb.getDeltaWidth();
+        int widthCellMax = WIDTH_MAX - typeLb.getDeltaWidth();
+
+        if (widthCell < WIDTH_CELL_MIN) {
+            result.addError("widthCell",
+                    "Ширина ячейки меньше допустимой",
+                    widthCell, WIDTH_CELL_MIN, widthCellMax);
+        } else if (widthCell > widthCellMax) {
+            result.addError("widthCell",
+                    "Ширина ячейки больше допустимой",
+                    widthCell, WIDTH_CELL_MIN, widthCellMax);
+        }
+    }
+    /**
+     * Валидация всего проекта
+     */
+    public static List<ValidationResult> validateProject(ProjectDTO projectDTO) {
+        logger.info("Валидация проекта (id:{} ALS count:{})", projectDTO.getId(), projectDTO.getAlsList().size());
+
+        List<ValidationResult> allResults = new ArrayList<>();
+
+        for (ALSDTO als : projectDTO.getAlsList()) {
+            List<ValidationResult> alsResult = deepValidateALS(als);
+            allResults.addAll(alsResult);
+        }
+
+        logger.info("Валидация проекта завершена. Всего результатов: {}. Ошибок: {}",
+                allResults.size(),
+                allResults.stream().filter(r -> !r.isValid()).count());
+
+        return allResults;
+    }
+    public static List<ValidationResult> deepValidateALS(ALSDTO als){
+        logger.info("Глубокая валидация размеров АКХ (id:{})", als.getId());
+        List<ValidationResult> allResults = new ArrayList<>();
+        // Валидация ALS
+        ValidationResult alsResult = validateALS(als);
+        allResults.add(alsResult);
+
+        // Валидация LC
+        if (als.getLC() != null) {
+            ValidationResult lcResult = validateLC(als.getLC());
+            allResults.add(lcResult);
+        }
+        // Валидация LB
+        if (als.getLbList()!=null) {
+            for (LBDTO lb : als.getLbList()) {
+                ValidationResult lbResult = validateLB(lb);
+                allResults.add(lbResult);
+            }
+        }
+        logger.info("Глубокая валидация АКХ завершена. Всего результатов: {}. Ошибок: {}",
+                allResults.size(),
+                allResults.stream().filter(r -> !r.isValid()).count());
+
+        return allResults;
     }
     /**
      * Валидация размеров ALS (Автоматическая камера хранения)
@@ -223,24 +452,37 @@ public class SizeValidator {
         logValidationResult(result);
         return result;
     }
-    /**
-     * Дополнительные проверки консистентности ALS
-     */
-    private static void validateALSConsistency(ValidationResult result, ALSDTO als) {
-        int usableHeight = als.getHeight() - als.getUpperFrame() - als.getBottomFrame();
+    public static ValidationResult validateLC(LCDTO lc) {
+        logger.info("Валидация размеров МУ (id:{}})", lc.getId());
 
-        if (usableHeight < HEIGHT_CELL_MIN) {
-            result.addError("heightConsistency",
-                    "Полезная высота слишком мала (рамы занимают слишком много)",
-                    usableHeight, HEIGHT_CELL_MIN, HEIGHT_MAX - UPPER_FRAME_MAX - BOTTOM_FRAME_MAX);
-        }
+        ValidationResult result = new ValidationResult("LC", lc.getId());
 
-        // Проверка что LC указана
-        if (als.getLC() == null) {
-            result.addError("lc", "МУ отсутствует", null, null, null);
-        }
+        // Проверка верхней рамы
+        validateRange(result, "upperFrame", lc.getUpperFrame(),
+                UPPER_FRAME_MIN, UPPER_FRAME_MAX,
+                "Верхняя рама");
+
+        // Проверка нижней рамы
+        validateRange(result, "bottomFrame", lc.getBottomFrame(),
+                BOTTOM_FRAME_MIN, BOTTOM_FRAME_MAX,
+                "Нижняя рама");
+
+        // Проверка высоты
+        validateRange(result, "height", lc.getHeight(),
+                HEIGHT_LC_MIN, HEIGHT_MAX,
+                "Высота модуля");
+
+        // Проверка глубины
+        validateRange(result, "depth", lc.getDepth(),
+                DEPTH_MIN, DEPTH_MAX,
+                "Глубина модуля");
+
+        // Проверка консистентности размеров
+        validateLCConsistency(result, lc);
+
+        logValidationResult(result);
+        return result;
     }
-
     /**
      * Валидация размеров LB (Модуль хранения)
      */
@@ -294,125 +536,12 @@ public class SizeValidator {
         logValidationResult(result);
         return result;
     }
-    /**
-     * Валидация количества ячеек в LB
-     */
-    private static void validateLBCellCount(ValidationResult result, LBDTO lb, TypeLb typeLb) {
-        int heightCellMax = lb.getHeight() - lb.getUpperFrame() - lb.getBottomFrame();
-        int countCellsMax = (heightCellMax - typeLb.getShelfThick()) /
-                (HEIGHT_CELL_MIN + typeLb.getShelfThick());
-
-        if (lb.getCountCells() < COUNT_CELLS_MIN) {
-            result.addError("countCells",
-                    "Количество ячеек меньше допустимого",
-                    lb.getCountCells(), COUNT_CELLS_MIN, countCellsMax);
-        } else if (lb.getCountCells() > countCellsMax) {
-            result.addError("countCells",
-                    "Количество ячеек больше допустимого",
-                    lb.getCountCells(), COUNT_CELLS_MIN, countCellsMax);
-        }
-    }
-
-    /**
-     * Валидация размеров ячеек в LB
-     */
-    private static void validateLBCellDimensions(ValidationResult result, LBDTO lb, TypeLb typeLb) {
-        // Высота ячейки
-        double heightCell = (double) (lb.getHeight() - lb.getUpperFrame() - lb.getBottomFrame() -
-                (lb.getCountCells() - 1) * typeLb.getShelfThick()) / lb.getCountCells();
-
-        if (heightCell < HEIGHT_CELL_MIN) {
-            result.addError("heightCell",
-                    "Высота ячейки меньше допустимой",
-                    String.format("%.2f", heightCell),
-                    HEIGHT_CELL_MIN,
-                    lb.getHeight() - lb.getUpperFrame() - lb.getBottomFrame());
-        }
-
-        // Глубина ячейки
-        int depthCell = lb.getDepth() - 20;
-        if (depthCell < DEPTH_CELL_MIN) {
-            result.addError("depthCell",
-                    "Глубина ячейки меньше допустимой",
-                    depthCell, DEPTH_CELL_MIN, DEPTH_CELL_MAX);
-        } else if (depthCell > DEPTH_CELL_MAX) {
-            result.addError("depthCell",
-                    "Глубина ячейки больше допустимой",
-                    depthCell, DEPTH_CELL_MIN, DEPTH_CELL_MAX);
-        }
-
-        // Ширина ячейки
-        int widthCell = lb.getWidth() - typeLb.getDeltaWidth();
-        int widthCellMax = WIDTH_MAX - typeLb.getDeltaWidth();
-
-        if (widthCell < WIDTH_CELL_MIN) {
-            result.addError("widthCell",
-                    "Ширина ячейки меньше допустимой",
-                    widthCell, WIDTH_CELL_MIN, widthCellMax);
-        } else if (widthCell > widthCellMax) {
-            result.addError("widthCell",
-                    "Ширина ячейки больше допустимой",
-                    widthCell, WIDTH_CELL_MIN, widthCellMax);
-        }
-    }
-    /**
-     * Валидация всего проекта
-     */
-    public static List<ValidationResult> validateProject(ProjectDTO projectDTO) {
-        logger.info("Валидация проекта (id:{} ALS count:{})", projectDTO.getId(), projectDTO.getAlsList().size());
-
-        List<ValidationResult> allResults = new ArrayList<>();
-
-        for (ALSDTO als : projectDTO.getAlsList()) {
-            // Валидация ALS
-            ValidationResult alsResult = validateALS(als);
-            allResults.add(alsResult);
-
-            // Валидация LC
-            if (als.getLC() != null) {
-                ValidationResult lcResult = validateLC(als.getLC());
-                allResults.add(lcResult);
-            }
-
-            // Валидация LB
-            for (LBDTO lb : als.getLbList()) {
-                ValidationResult lbResult = validateLB(lb);
-                allResults.add(lbResult);
-            }
-        }
-
-        logger.info("Валидация проекта завершена. Всего результатов: {}. Ошибок: {}",
-                allResults.size(),
-                allResults.stream().filter(r -> !r.isValid()).count());
-
-        return allResults;
-    }
-    public static List<ValidationResult> deepValidateALS(ALSDTO als){
-        logger.info("Глубокая валидация размеров АКХ (id:{})", als.getId());
-        List<ValidationResult> allResults = new ArrayList<>();
-        // Валидация ALS
-        ValidationResult alsResult = validateALS(als);
-        allResults.add(alsResult);
-
-        // Валидация LC
-        if (als.getLC() != null) {
-            ValidationResult lcResult = validateLC(als.getLC());
-            allResults.add(lcResult);
-        }
-
-        // Валидация LB
-        for (LBDTO lb : als.getLbList()) {
-            ValidationResult lbResult = validateLB(lb);
-            allResults.add(lbResult);
-        }
-        logger.info("Глубокая валидация АКХ завершена. Всего результатов: {}. Ошибок: {}",
-                allResults.size(),
-                allResults.stream().filter(r -> !r.isValid()).count());
-
-        return allResults;
-    }
     public static List<String> getErrorValidateALSSizesList(ALSDTO als)  {
         ValidationResult result = validateALS(als);
+        return convertValidationResultToStrings(result);
+    }
+    public static List<String> getErrorValidateLCSizesList(LCDTO lc){
+        ValidationResult result=validateLC(lc);
         return convertValidationResultToStrings(result);
     }
     public static List<List<String>> getErrorValidateLBSizesLists(ALSDTO als)  {

@@ -33,7 +33,6 @@ public class LBRestController {
     @GetMapping("/")
     public ResponseEntity<?> getAllLB() {
         logger.info("Fetching all LB");
-
         try {
             List<LBDTO> lbList = lbService.findAll();
             ApiResponse<List<LBDTO>> response=ApiResponse.success(lbList);

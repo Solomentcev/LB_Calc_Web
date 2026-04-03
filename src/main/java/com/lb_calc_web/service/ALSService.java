@@ -3,6 +3,8 @@ package com.lb_calc_web.service;
 import com.lb_calc_web.dto.ALSDTO;
 import com.lb_calc_web.dto.LBDTO;
 import com.lb_calc_web.dto.LCDTO;
+import com.lb_calc_web.dto.validation.ValidationResult;
+import com.lb_calc_web.handler.ValidationSizeException;
 import com.lb_calc_web.mapper.ALSMapper;
 import com.lb_calc_web.model.ALS;
 import com.lb_calc_web.model.attributes.Colors;
@@ -10,6 +12,7 @@ import com.lb_calc_web.model.attributes.DirectionDoorOpening;
 import com.lb_calc_web.model.attributes.PositionLC;
 import com.lb_calc_web.repository.ALSRepository;
 import com.lb_calc_web.service.util.ALSImageService;
+import com.lb_calc_web.service.util.SizeValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Example;
@@ -77,33 +80,66 @@ public class ALSService {
     @Transactional
     public ALSDTO saveALS(ALSDTO alsDTO)  {
         logger.info("Сохранение АКХ(id%d-%s)...".formatted(alsDTO.getId(), alsDTO.getName()));
-        resizeLC(alsDTO);
-        alsDTO.setLC(lcService.saveLC(alsDTO.getLC()));
-        resizeLBs(alsDTO);
-        for (LBDTO lbDTO : alsDTO.getLbList()) {
-              lbDTO.setId(lbService.saveLB(lbDTO).getId());
+        prepareALS(alsDTO);
+        ValidationResult validationResult=new ValidationResult();
+        try {
+            persistLCandLB(alsDTO);
+        } catch (ValidationSizeException e) {
+            validationResult.addErrors(e.getValidationResult());
         }
-        updateALSsizeAndDescription(alsDTO);
-        ALS als =ALSMapper.toALS(alsDTO);
-        Optional<ALS> optional=getOptionalALS(als);
+        validationResult.addErrors(SizeValidator.validateALS(alsDTO));
+        if(!validationResult.isValid()){
+            logger.warn("Ошибка валидации АКХ(id%d-%s): %s".formatted(alsDTO.getId(), alsDTO.getName(), validationResult.getErrors()));
+            throw new ValidationSizeException(validationResult);
+        }
+        Optional<ALS> optional=getOptionalALS(ALSMapper.toALS(alsDTO));
         if (optional.isPresent()) {
-            als = optional.get();
-            logger.info("АКХ(id(%d-%s) найдена в БД.".formatted(als.getId(), als.getName()));
-            return ALSMapper.toALSDTO(als);
+            logger.info("АКХ(id(%d-%s) найдена в БД.".formatted(optional.get().getId(), optional.get().getName()));
+            return ALSMapper.toALSDTO(optional.get());
         } else {
             logger.info("АКХ(id%d-%s) не найдена в БД.".formatted(alsDTO.getId(), alsDTO.getName()));
-            alsDTO.setId(0L);
-            ALS alsNew=ALSMapper.toALS(alsDTO);
-            logger.info("Сохранение АКХ в БД...");
-            alsNew=alsRepository.save(alsNew);
-            alsDTO.setId(alsNew.getId());
-            alsNew.getQuantityLB().addAll(ALSMapper.getALSLBSetFromLBDTOMap(alsDTO.getQuantityLB(),alsDTO));
-            alslbService.saveAll(alsNew.getQuantityLB());
-            logger.info("АКХ(id%d-%s) cохранена в БД.".formatted(alsNew.getId(), alsNew.getName()));
-            return ALSMapper.toALSDTO(alsNew);
+        }
+        return persistNewALS(alsDTO);
+    }
+
+    private ALSDTO persistNewALS(ALSDTO alsDTO) {
+        alsDTO.setId(0L);
+        ALS alsNew=ALSMapper.toALS(alsDTO);
+        logger.info("Сохранение АКХ в БД...");
+        alsNew=alsRepository.save(alsNew);
+        alsDTO.setId(alsNew.getId());
+        alsNew.getQuantityLB().addAll(ALSMapper.getALSLBSetFromLBDTOMap(alsDTO.getQuantityLB(), alsDTO));
+        alslbService.saveAll(alsNew.getQuantityLB());
+        logger.info("АКХ(id%d-%s) cохранена в БД.".formatted(alsNew.getId(), alsNew.getName()));
+        return ALSMapper.toALSDTO(alsNew);
+    }
+
+    private void persistLCandLB(ALSDTO alsDTO) {
+        ValidationResult validationResult=new ValidationResult();
+        try {
+            alsDTO.setLC(lcService.saveLC(alsDTO.getLC()));
+        } catch (ValidationSizeException e) {
+            validationResult.addErrors(e.getValidationResult());
+        }
+        for (LBDTO lbDTO : alsDTO.getLbList()) {
+            try {
+                lbDTO.setId(lbService.saveLB(lbDTO).getId());
+            } catch (ValidationSizeException e) {
+                validationResult.addErrors(e.getValidationResult());
+            }
+        }
+        if (!validationResult.isValid()) {
+            throw new ValidationSizeException(validationResult);
         }
     }
-     public ALSDTO resizeLC(ALSDTO alsDTO) {
+
+    private void prepareALS(ALSDTO alsDTO) {
+        resizeLC(alsDTO);
+        resizeLBs(alsDTO);
+        updateALSsizeAndDescription(alsDTO);
+    }
+
+    public ALSDTO resizeLC(ALSDTO alsDTO) {
          LCDTO lc=alsDTO.getLC();
          logger.info("Корректировка размеров и описания МУ(id%d-%s) в АКХ(id%d-%s)..."
                  .formatted(lc.getId(),lc.getName(),alsDTO.getId(),alsDTO.getName()));
@@ -133,11 +169,8 @@ public class ALSService {
             lbDTO.setColorBody(String.valueOf(Colors.valueOf(alsDTO.getColorBody())));
             lbDTO.setColorDoor(String.valueOf(Colors.valueOf(alsDTO.getColorDoor())));
             lbService.updateLBsizeAndDescription(lbDTO);
-            if (positionLC.equals(PositionLC.RIGHT) || (positionLC.equals(PositionLC.CENTER)&& i<=lbList.size()/2)) {
-                lbDTO.setDirectionDoorOpening(String.valueOf(DirectionDoorOpening.LEFT));
-            } else if(positionLC.equals(PositionLC.LEFT)){
-                lbDTO.setDirectionDoorOpening(String.valueOf(DirectionDoorOpening.RIGHT));
-            }
+
+            lbDTO.setDirectionDoorOpening(String.valueOf(resolveDoorDirection(positionLC, i, lbList.size())));
         }
         return alsDTO;
     }
@@ -148,20 +181,24 @@ public class ALSService {
                    .formatted(alsId,als.getName()));
             LBDTO lb=lbService.createLB(als.getHeight(),als.getDepth(), als.getUpperFrame(), als.getBottomFrame(),
                     Colors.valueOf(als.getColorBody()),Colors.valueOf(als.getColorDoor()));
-           addLB(als, lb);
+            addLB(als, lb);
            return saveALS(als);
     }
-    public static ALSDTO addLB(ALSDTO als, LBDTO lb) {
+    public ALSDTO addLB(ALSDTO als, LBDTO lb) {
         logger.info("Добавление МХ(id%d-%s) в АКХ(id%d-%s)..."
                 .formatted(lb.getId(),lb.getName(),als.getId(),als.getName()));
-        if (als.getPositionLC().equals(String.valueOf(PositionLC.LEFT))) {
-            lb.setDirectionDoorOpening(String.valueOf(DirectionDoorOpening.RIGHT));}
-        if (als.getPositionLC().equals(String.valueOf(PositionLC.RIGHT))) {
-            lb.setDirectionDoorOpening(String.valueOf(DirectionDoorOpening.LEFT));
-        }
-        if (als.getPositionLC().equals(String.valueOf(PositionLC.CENTER))) {
-            lb.setDirectionDoorOpening(String.valueOf(DirectionDoorOpening.RIGHT));
-            als.getLbList().get((als.getLbList().size()+1)/2-1).setDirectionDoorOpening(String.valueOf(DirectionDoorOpening.LEFT));
+
+        int newIndex = als.getLbList().size(); // индекс нового LB
+        PositionLC positionLC = PositionLC.valueOf(als.getPositionLC());
+
+        lb.setDirectionDoorOpening(
+                String.valueOf(resolveDoorDirection(positionLC, newIndex, als.getLbList().size() + 1))
+        );
+
+        // Для CENTER корректируем уже существующий LB в левой половине
+        if (positionLC == PositionLC.CENTER && !als.getLbList().isEmpty()) {
+            int leftIndex = (als.getLbList().size() + 1) / 2 - 1;
+            als.getLbList().get(leftIndex).setDirectionDoorOpening(String.valueOf(DirectionDoorOpening.LEFT));
         }
         als.getLbList().add(lb);
         int count=0;
@@ -247,10 +284,7 @@ public class ALSService {
     public Optional<ALS> getOptionalALS(ALS alsNew) {
         logger.info("Поиск АКХ по характеристикам...");
         ExampleMatcher modelMatcher = ExampleMatcher.matching()
-                .withIgnorePaths("id")
-                .withIgnorePaths("name")
-                .withIgnorePaths("description")
-                .withIgnorePaths("depthCell")
+                .withIgnorePaths("id","name", "description", "depthCell")
                 .withMatcher("lc",ignoreCase())
                 .withMatcher("height", ignoreCase())
                 .withMatcher("depth", ignoreCase())
@@ -284,5 +318,20 @@ public class ALSService {
         als.setName("АКХ на "+ als.getCountCells() +" ячеек");
         als.setQuantityLB(ALSMapper.getLBDTOMapFromLBDTOList(als.getLbList()));
         return als;
+    }
+    private DirectionDoorOpening resolveDoorDirection(PositionLC positionLC, int lbIndex, int totalLBs) {
+        switch (positionLC) {
+            case LEFT -> {
+                return DirectionDoorOpening.RIGHT;
+            }
+            case RIGHT -> {
+                return DirectionDoorOpening.LEFT;
+            }
+            case CENTER -> {
+                // Если левая половина — LEFT, правая — RIGHT
+                return lbIndex < totalLBs / 2 ? DirectionDoorOpening.LEFT : DirectionDoorOpening.RIGHT;
+            }
+            default -> throw new IllegalArgumentException("Unknown PositionLC: " + positionLC);
+        }
     }
 }

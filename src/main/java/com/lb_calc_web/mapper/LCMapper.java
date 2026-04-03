@@ -8,8 +8,6 @@ import com.lb_calc_web.model.attributes.DisplayLC;
 import com.lb_calc_web.model.attributes.Payment;
 import com.lb_calc_web.service.util.LCImageService;
 
-import java.util.Optional;
-
 public class LCMapper {
 
     public static LCDTO toLCDTO(LC lc){
@@ -20,7 +18,7 @@ public class LCMapper {
         lcDTO.setPrinter(lc.isPrinter());
         lcDTO.setPayment(String.valueOf(lc.getPayment()));
         lcDTO.setRfidReader(lc.isRfidReader());
-        lcDTO.setColorBody(lc.getColorBody().toString());
+        lcDTO.setColorBody(String.valueOf(lc.getColorBody()));
         lcDTO.setHeight(lc.getHeight());
         lcDTO.setWidth(lc.getDisplay().getWidth());
         lcDTO.setDepth(lc.getDepth());
