@@ -1,11 +1,11 @@
 package com.lb_calc_web.controller;
 
 import com.lb_calc_web.dto.LBDTO;
+import com.lb_calc_web.handler.ValidationSizeException;
 import com.lb_calc_web.model.attributes.Colors;
 import com.lb_calc_web.model.attributes.DirectionDoorOpening;
 import com.lb_calc_web.model.attributes.TypeLb;
 import com.lb_calc_web.service.LBService;
-import com.lb_calc_web.service.util.SizeValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 @Controller
 @RequestMapping("/lbs")
@@ -44,17 +43,14 @@ public class LBController {
     }
     @PostMapping("/save")
     public String saveLB(@ModelAttribute("lb") LBDTO lb, Model model){
+        try {
+            lb=lbService.saveLB(lb);
+        } catch (ValidationSizeException e) {
+            model.addAttribute("errors",e.getErrors());
+            model.addAttribute("lb", lb);
+            return "lbs/lb";
+        }
 
-            List<String> errorList= SizeValidator.getErrorValidateLBSizesList(lb);
-            if (errorList.isEmpty()) {
-                lb=lbService.saveLB(lb);
-            } else {
-                logger.warn(errorList.toString());
-                model.addAttribute("errors",errorList);
-                model.addAttribute("lb", lb);
-
-                return "lbs/lb";
-            }
         return "redirect:/lbs/" +lb.getId();
     }
     @ModelAttribute("typeList")

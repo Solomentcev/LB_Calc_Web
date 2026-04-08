@@ -248,11 +248,11 @@ public class SizeValidator {
     static void validateRange(ValidationResult result, String fieldName,
                                       int value, int min, int max, String fieldLabel) {
         if (value < min) {
-            result.addError(fieldName,
+            result.addError(result, fieldName,
                     fieldLabel + " меньше допустимой",
                     value, min, max);
         } else if (value > max) {
-            result.addError(fieldName,
+            result.addError(result, fieldName,
                     fieldLabel + " больше допустимой",
                     value, min, max);
         }
@@ -264,7 +264,7 @@ public class SizeValidator {
         int usableHeight = lc.getHeight() - lc.getUpperFrame() - lc.getBottomFrame();
 
         if (usableHeight < HEIGHT_LC_PANEL_MIN) {
-            result.addError("heightConsistency",
+            result.addError(result,"heightConsistency",
                     "Полезная высота слишком мала для панели управления",
                     usableHeight, HEIGHT_LC_PANEL_MIN, HEIGHT_MAX - UPPER_FRAME_MAX - BOTTOM_FRAME_MAX);
         }
@@ -293,20 +293,20 @@ public class SizeValidator {
      */
     static void validateALSConsistency(ValidationResult result, ALSDTO als) {
         if (als.getLC() == null) {
-            result.addError("lc", "МУ отсутствует", null, null, null);
+            result.addError(result,"lc", "МУ отсутствует", null, null, null);
         }
         if (als.getLbList() == null || als.getLbList().isEmpty()) {
-            result.addError("lbList", "Список МХ пустой", null, null, null);
+            result.addError(result,"lbList", "Список МХ пустой", null, null, null);
         }
         int usableHeight = als.getHeight() - als.getUpperFrame() - als.getBottomFrame();
         if (usableHeight < HEIGHT_CELL_MIN) {
-            result.addError("heightConsistency",
+            result.addError(result,"heightConsistency",
                     "Полезная высота слишком мала для ячейки",
                     usableHeight, HEIGHT_CELL_MIN, HEIGHT_MAX - UPPER_FRAME_MAX - BOTTOM_FRAME_MAX);
         }
 
         if (usableHeight < HEIGHT_LC_PANEL_MIN) {
-            result.addError("heightConsistency",
+            result.addError(result,"heightConsistency",
                     "Полезная высота слишком мала для панели управления",
                     usableHeight, HEIGHT_LC_PANEL_MIN, HEIGHT_MAX - UPPER_FRAME_MAX - BOTTOM_FRAME_MAX);
         }
@@ -322,11 +322,11 @@ public class SizeValidator {
                 (HEIGHT_CELL_MIN+typeLb.getShelfThick());
         int countCells= lb.getCountCells();
         if (countCells < COUNT_CELLS_MIN) {
-            result.addError("countCells",
+            result.addError(result,"countCells",
                     "Количество ячеек меньше допустимого",
                     countCells, COUNT_CELLS_MIN, countCellsMax);
         } else if (countCells > countCellsMax) {
-            result.addError("countCells",
+            result.addError(result,"countCells",
                     "Количество ячеек больше допустимого",
                     countCells, COUNT_CELLS_MIN, countCellsMax);
         }
@@ -341,7 +341,7 @@ public class SizeValidator {
                 (lb.getCountCells() - 1) * typeLb.getShelfThick()) / lb.getCountCells();
 
         if (heightCell < HEIGHT_CELL_MIN) {
-            result.addError("heightCell",
+            result.addError(result,"heightCell",
                     "Высота ячейки меньше допустимой",
                     String.format("%.2f", heightCell),
                     HEIGHT_CELL_MIN,
@@ -351,11 +351,11 @@ public class SizeValidator {
         // Глубина ячейки
         int depthCell = lb.getDepth() - 20;
         if (depthCell < DEPTH_CELL_MIN) {
-            result.addError("depthCell",
+            result.addError(result,"depthCell",
                     "Глубина ячейки меньше допустимой",
                     depthCell, DEPTH_CELL_MIN, DEPTH_CELL_MAX);
         } else if (depthCell > DEPTH_CELL_MAX) {
-            result.addError("depthCell",
+            result.addError(result,"depthCell",
                     "Глубина ячейки больше допустимой",
                     depthCell, DEPTH_CELL_MIN, DEPTH_CELL_MAX);
         }
@@ -365,11 +365,11 @@ public class SizeValidator {
         int widthCellMax = WIDTH_MAX - typeLb.getDeltaWidth();
 
         if (widthCell < WIDTH_CELL_MIN) {
-            result.addError("widthCell",
+            result.addError(result,"widthCell",
                     "Ширина ячейки меньше допустимой",
                     widthCell, WIDTH_CELL_MIN, widthCellMax);
         } else if (widthCell > widthCellMax) {
-            result.addError("widthCell",
+            result.addError(result,"widthCell",
                     "Ширина ячейки больше допустимой",
                     widthCell, WIDTH_CELL_MIN, widthCellMax);
         }
@@ -503,7 +503,7 @@ public class SizeValidator {
 
         // Проверка типа
         if (lb.getType() == null) {
-            result.addError("type", "Тип модуля не указан", null, null, null);
+            result.addError(result,"type", "Тип модуля не указан", null, null, null);
             logValidationResult(result);
             return result;
         }

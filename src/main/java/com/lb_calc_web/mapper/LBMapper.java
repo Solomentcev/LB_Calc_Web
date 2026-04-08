@@ -1,14 +1,14 @@
 package com.lb_calc_web.mapper;
 
 import com.lb_calc_web.dto.LBDTO;
-import com.lb_calc_web.model.ALSLB;
 import com.lb_calc_web.model.LB;
 import com.lb_calc_web.model.attributes.Colors;
 import com.lb_calc_web.model.attributes.DirectionDoorOpening;
 import com.lb_calc_web.model.attributes.TypeLb;
 import com.lb_calc_web.service.util.LBImageService;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 public class LBMapper {
     public static LBDTO toLBDTO(LB lb){
         LBDTO lbDTO = new LBDTO();
@@ -65,31 +65,31 @@ public class LBMapper {
         }
         return lbDTOList;
     }
-    public static Map<LBDTO,Integer> toLBDTOMap(List<LB> lbList) {
-        Map<LBDTO,Integer> quantityLBDTO = new HashMap<>();
-        for(LB lb:lbList){
-            if (quantityLBDTO.containsKey(toLBDTO(lb))){
-                Integer i= quantityLBDTO.get(toLBDTO(lb));
-                i=i+1;
-                quantityLBDTO.put(toLBDTO(lb),i);
-            } else quantityLBDTO.put(toLBDTO(lb),1);
-        }
-        return quantityLBDTO;
-    }
-    public static Map<LBDTO,Integer> toLBDTOMap(Set<ALSLB> lbSet) {
-        Map<LBDTO,Integer> quantityLBDTO = new HashMap<>();
-        for(ALSLB alsLlb :lbSet){
-            quantityLBDTO.put(toLBDTO(alsLlb.getLb()), alsLlb.getQuantity());
-        }
-        return quantityLBDTO;
-    }
-
-    public static List<LB> toLBList(List<LBDTO> lbDTOList) {
-        List<LB> lbList = new ArrayList<>();
-        for (LBDTO lbDTO :lbDTOList) {
-            lbList.add(LBMapper.toLB(lbDTO));
-        }
-        return lbList;
-    }
+//    public static Map<LBDTO,Integer> toLBDTOMap(List<LB> lbList) {
+//        Map<LBDTO,Integer> quantityLBDTO = new HashMap<>();
+//        for(LB lb:lbList){
+//            if (quantityLBDTO.containsKey(toLBDTO(lb))){
+//                Integer i= quantityLBDTO.get(toLBDTO(lb));
+//                i=i+1;
+//                quantityLBDTO.put(toLBDTO(lb),i);
+//            } else quantityLBDTO.put(toLBDTO(lb),1);
+//        }
+//        return quantityLBDTO;
+//    }
+//    public static Map<LBDTO,Integer> toLBDTOMap(Set<ALSLB> lbSet) {
+//        Map<LBDTO,Integer> quantityLBDTO = new HashMap<>();
+//        for(ALSLB alsLlb :lbSet){
+//            quantityLBDTO.put(toLBDTO(alsLlb.getLb()), alsLlb.getQuantity());
+//        }
+//        return quantityLBDTO;
+//    }
+//
+//    public static List<LB> toLBList(List<LBDTO> lbDTOList) {
+//        List<LB> lbList = new ArrayList<>();
+//        for (LBDTO lbDTO :lbDTOList) {
+//            lbList.add(LBMapper.toLB(lbDTO));
+//        }
+//        return lbList;
+//    }
 
 }

@@ -101,8 +101,8 @@ public class ALSService {
         }
         return persistNewALS(alsDTO);
     }
-
-    private ALSDTO persistNewALS(ALSDTO alsDTO) {
+    @Transactional
+    public ALSDTO persistNewALS(ALSDTO alsDTO) {
         alsDTO.setId(0L);
         ALS alsNew=ALSMapper.toALS(alsDTO);
         logger.info("Сохранение АКХ в БД...");
@@ -113,17 +113,19 @@ public class ALSService {
         logger.info("АКХ(id%d-%s) cохранена в БД.".formatted(alsNew.getId(), alsNew.getName()));
         return ALSMapper.toALSDTO(alsNew);
     }
-
-    private void persistLCandLB(ALSDTO alsDTO) {
+    @Transactional
+    protected void persistLCandLB(ALSDTO alsDTO) {
         ValidationResult validationResult=new ValidationResult();
         try {
             alsDTO.setLC(lcService.saveLC(alsDTO.getLC()));
         } catch (ValidationSizeException e) {
             validationResult.addErrors(e.getValidationResult());
         }
+        List<LBDTO> savedLBs = new ArrayList<>();
         for (LBDTO lbDTO : alsDTO.getLbList()) {
             try {
-                lbDTO.setId(lbService.saveLB(lbDTO).getId());
+                LBDTO saved = lbService.saveLB(lbDTO);
+                savedLBs.add(saved);
             } catch (ValidationSizeException e) {
                 validationResult.addErrors(e.getValidationResult());
             }
@@ -131,6 +133,7 @@ public class ALSService {
         if (!validationResult.isValid()) {
             throw new ValidationSizeException(validationResult);
         }
+        alsDTO.setLbList(savedLBs);
     }
 
     private void prepareALS(ALSDTO alsDTO) {
@@ -258,7 +261,7 @@ public class ALSService {
                 break;
             }
         }
-        saveALS(als);
+        als=saveALS(als);
         List<Object> ALSlbIdList=new ArrayList<>();
         ALSlbIdList.add(als);
         for(LBDTO lbDto:als.getLbList()){
@@ -268,6 +271,14 @@ public class ALSService {
            }
         }
         ALSlbIdList.add(newLBId);
+
+//        Map<String, Object> alslbIdMap=new HashMap<>();
+//        alslbIdMap.put("ALS",als);
+//        alslbIdMap.put("newLBId",newLBId);
+//
+//        alslbIdMap.get("ALS");
+//        alslbIdMap.get("newLBId");
+
         return ALSlbIdList;
     }
     @Transactional

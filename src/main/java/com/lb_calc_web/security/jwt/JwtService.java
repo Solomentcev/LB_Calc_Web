@@ -6,7 +6,6 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,57 +31,66 @@ public class JwtService {
 
 
     public String extractEmail(String token) {
-        logger.debug("Extracting email from token {}", token);
-        Claims claims=getAccessClaims(token);
-        return claims.getSubject();
+        logger.debug("[JWT][extractEmail] start token...");
+        Claims claims = getAccessClaims(token);
+        String subject = claims.getSubject();
+        if (subject == null || subject.isBlank()) {
+            throw new JwtException("Access token does not contain subject(email)");
+        }
+        logger.debug("[JWT][extractEmail] success subject={}", subject);
+        return subject;
     }
 
     public Claims getAccessClaims(String token) {
-        return getAllClaims(token,jwtAccessSecret);
+        logger.debug("[JWT][getAccessClaims] start token...");
+        Claims claims = parseClaimsStrict(token, jwtAccessSecret, "access");
+        logger.debug("[JWT][getAccessClaims] success subject={}", claims.getSubject());
+        return claims;
     }
     public Claims getRefreshClaims(String token) {
-
-        return getAllClaims(token,jwtRefreshSecret);
+        logger.debug("[JWT][getRefreshClaims] start token");
+        Claims claims = parseClaimsStrict(token, jwtRefreshSecret, "refresh");
+        logger.debug("[JWT][getRefreshClaims] success subject={}", claims.getSubject());
+        return claims;
     }
     public String generateAccessToken(EmployeeDTO employeeDTO) {
-        return Jwts.builder()
+        logger.debug("[JWT][generateAccessToken] start user={}", employeeDTO.getEmail());
+
+        String token = Jwts.builder()
                 .claim("id", employeeDTO.getId())
                 .claim("role", employeeDTO.getRole())
-                .claim("type","access")
+                .claim("type", "access")
                 .setSubject(employeeDTO.getEmail())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + accessExpiration))
                 .signWith(getSigningKey(jwtAccessSecret), SignatureAlgorithm.HS256)
                 .compact();
+
+        logger.debug("[JWT][generateAccessToken] success token");
+        return token;
     }
     public String generateRefreshToken(EmployeeDTO employeeDTO) {
-        return Jwts.builder()
+        logger.debug("[JWT][generateRefreshToken] start user={}", employeeDTO.getEmail());
+
+        String token = Jwts.builder()
                 .setSubject(employeeDTO.getEmail())
                 .claim("ver", UUID.randomUUID().toString())
-                .claim("type","refresh")
+                .claim("type", "refresh")
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + refreshExpiration))
                 .signWith(getSigningKey(jwtRefreshSecret), SignatureAlgorithm.HS256)
                 .compact();
+
+        logger.debug("[JWT][generateRefreshToken] success token");
+        return token;
     }
 
-
-    private Claims getAllClaims(String token, String secretKey) {
-        logger.debug("Extracting claims from token {}", token);
-        try {
-            return Jwts
-                        .parserBuilder()
-                        .setSigningKey(getSigningKey(secretKey))
-                        .build()
-                        .parseClaimsJws(token)
-                        .getBody();
-        } catch (ClaimJwtException e) {
-            return e.getClaims();
+    public boolean isExpired(Claims claims) {
+        Date exp = claims.getExpiration();
+        if (exp == null) {
+            throw new JwtException("Token claims do not contain expiration");
         }
-    }
-
-    public boolean isExpired(Claims c) {
-        return c.getExpiration().before(new Date());
+        return exp.before(new Date());
     }
 
     public boolean isAccess(Claims c) {
@@ -92,27 +100,23 @@ public class JwtService {
     public boolean isRefresh(Claims c) {
         return "refresh".equals(c.get("type"));
     }
-    public boolean isValidatedAccessToken(@NonNull String accessToken) {
-        logger.debug("Validating access token {}", accessToken);
-        return isValidatedToken(accessToken, jwtAccessSecret);
+    public boolean isValidatedAccessToken(String accessToken) {
+        logger.debug("[JWT][validateAccess] start token...");
+        return isValidatedToken(accessToken, jwtAccessSecret, "access");
     }
 
-    public boolean isValidatedRefreshToken(@NonNull String refreshToken) {
-        logger.debug("Validating refresh token {}", refreshToken);
-        return isValidatedToken(refreshToken, jwtRefreshSecret);
+    public boolean isValidatedRefreshToken( String refreshToken) {
+        logger.debug("[JWT][validateRefresh] start token...");
+        return isValidatedToken(refreshToken, jwtRefreshSecret, "refresh");
     }
-
-    private boolean isValidatedToken(@NonNull String token, @NonNull String secretKey) {
+    private boolean isValidatedToken(@NonNull String token, @NonNull String secretKey, @NonNull String tokenKind) {
         try {
-            Jwts.parserBuilder()
-                    .setSigningKey(getSigningKey(secretKey))
-                    .build()
-                    .parseClaimsJws(token);
-            logger.debug("Токен is valid {}", token);
-            return true;
-        } catch (Exception e) {
-            logger.debug("Токен invalid {}", token);
-            logger.error(e.getMessage());
+            Claims claims = parseClaimsStrict(token, secretKey, tokenKind);
+            if ("access".equals(tokenKind) && !isAccess(claims)) return false;
+            if ("refresh".equals(tokenKind) && !isRefresh(claims)) return false;
+            return !isExpired(claims);
+        } catch (JwtException e) {
+            logger.debug("[JWT][validate:{}] invalid reason={}", tokenKind, e.getMessage());
             return false;
         }
     }
@@ -125,7 +129,7 @@ public class JwtService {
         cookie.setHttpOnly(true);
         cookie.setPath("/");
         cookie.setMaxAge((int) TimeUnit.MILLISECONDS.toSeconds( accessExpiration));
-
+        logger.debug("[JWT][cookie] access cookie prepared");
         return cookie;
     }
     public Cookie generateRefreshTokenCookie(String token) {
@@ -133,6 +137,44 @@ public class JwtService {
         cookie.setHttpOnly(true);
         cookie.setPath("/");
         cookie.setMaxAge((int) TimeUnit.MILLISECONDS.toSeconds(refreshExpiration));
+        logger.debug("[JWT][cookie] refresh cookie prepared");
         return cookie;
     }
+
+    private Claims parseClaimsStrict(String token, String secretKey, String tokenKind) {
+        try {
+            return Jwts.parserBuilder()
+                    .setSigningKey(getSigningKey(secretKey))
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+
+        } catch (ExpiredJwtException e) {
+            logger.info("[JWT][parse:{}] expired token", tokenKind);
+            throw new JwtException(tokenKind + " token is expired", e);
+
+        } catch (UnsupportedJwtException e) {
+            logger.warn("[JWT][parse:{}] unsupported token", tokenKind);
+            throw new JwtException(tokenKind + " token format is unsupported", e);
+
+        } catch (MalformedJwtException e) {
+            logger.warn("[JWT][parse:{}] malformed token", tokenKind);
+            throw new JwtException(tokenKind + " token is malformed", e);
+
+        } catch (SecurityException | SignatureException e) {
+            logger.warn("[JWT][parse:{}] bad signature token", tokenKind);
+            throw new JwtException(tokenKind + " token signature is invalid", e);
+
+        } catch (IllegalArgumentException e) {
+            logger.warn("[JWT][parse:{}] empty/illegal token", tokenKind);
+            throw new JwtException(tokenKind + " token is empty or illegal", e);
+
+        } catch (JwtException e) {
+            logger.warn("[JWT][parse:{}] generic jwt error token", tokenKind);
+            throw new JwtException("Cannot parse " + tokenKind + " token", e);
+        }
+    }
+
+
+
 }

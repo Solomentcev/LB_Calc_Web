@@ -3,13 +3,14 @@ package com.lb_calc_web.security.jwt;
 import com.lb_calc_web.dto.EmployeeDTO;
 import com.lb_calc_web.service.EmployeeService;
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -19,6 +20,7 @@ import java.io.IOException;
 
 @Component
 public class JwtAuthentificationFilter extends OncePerRequestFilter {
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private final JwtService jwtService;
     private final EmployeeService employeeService;
     public JwtAuthentificationFilter(JwtService jwtService, EmployeeService employeeService) {
@@ -27,149 +29,184 @@ public class JwtAuthentificationFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        logger.debug("JWT Authentication Filtering...");
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain filterChain) throws ServletException, IOException {
+
+        logger.debug("[JWT-FILTER] start uri={} method={}", request.getRequestURI(), request.getMethod());
+
         try {
-            String accessToken= getAccessToken(request);
-            logger.debug("JWT Authentication Filter Access Token: " + accessToken);
-            if(accessToken != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                try {
-                    try {
-                        Claims claims= jwtService.getAccessClaims(accessToken);
-                        if(jwtService.isAccess(claims)) {
-                            String userEmail = claims.getSubject();
-                            authenticate(userEmail);
-                        }
-                    } catch (ExpiredJwtException e) {
-                        logger.debug("Access token expired, trying refresh..."+e.getMessage());
-                       Claims claims=e.getClaims();
-                        if(jwtService.isAccess(claims)) {
-                            tryRefresh(request, response);
-                        }
-                    }
-                } catch (JwtException e) {
-                    logger.warn("JWT Token Invalid " +e.getMessage());
-                }
-            } else logger.debug("JWT Token is null or User is authentificated");
+            if (SecurityContextHolder.getContext().getAuthentication() != null) {
+                logger.debug("[JWT-FILTER] skip: security context already authenticated");
+                filterChain.doFilter(request, response);
+                return;
+            }
+
+            String accessToken = getAccessToken(request);
+
+            if (accessToken == null || accessToken.isBlank()) {
+                logger.debug("[JWT-FILTER] no access token provided");
+                filterChain.doFilter(request, response);
+                return;
+            }
+
+            processAccessOrRefresh(accessToken, request, response);
+
+        } catch (JwtException e) {
+            logger.warn("[JWT-FILTER] jwt error: {}", e.getMessage());
+            clearAuthentication(response);
         } catch (Exception e) {
-            logger.warn(e.getMessage());
-            SecurityContextHolder.clearContext();
+            logger.error("[JWT-FILTER] unexpected error", e);
+            clearAuthentication(response);
         }
+
         filterChain.doFilter(request, response);
     }
-    private void tryRefresh(HttpServletRequest req, HttpServletResponse res) {
 
-        String refreshToken = getRefreshToken(req);
-
-        if (refreshToken == null ) return;
+    private void processAccessOrRefresh(String accessToken,
+                                        HttpServletRequest request,
+                                        HttpServletResponse response) {
+        logger.debug("[JWT-FILTER] process access token");
 
         try {
-            Claims claims = jwtService.getRefreshClaims(refreshToken);
-            if(!jwtService.isRefresh(claims)) return;
-            String userEmail = claims.getSubject();
-            EmployeeDTO employeeDTO=employeeService.loadUserByEmail(userEmail);
-            String newAccessToken= jwtService.generateAccessToken(employeeDTO);
-            String newRefreshToken= jwtService.generateRefreshToken(employeeDTO);
-            boolean isRest=isRestRequest(req);
-            if (!isRest) {
-                res.addCookie(jwtService.generateAccessTokenCookie(newAccessToken));
-                res.addCookie(jwtService.generateRefreshTokenCookie(newRefreshToken));
-                logger.debug("Sent new tokens in cookies for web client");
-            } else {
-                res.setHeader("Authorization", "Bearer " + newAccessToken);
-                res.setHeader("Refresh-Token", newRefreshToken);
-                logger.debug("Sent new tokens in response headers for REST client");
+            Claims accessClaims = jwtService.getAccessClaims(accessToken);
+
+            if (!jwtService.isAccess(accessClaims)) {
+                throw new JwtException("Provided token is not access token");
             }
-            authenticate(userEmail);
-            logger.info("User {} re-authenticated with refreshed access token"+ userEmail);
-        }catch (ExpiredJwtException e) {
-            logger.info("Refresh token expired → user needs re-login"+e.getMessage());
-            clearAuthentication(res);
+
+            if (jwtService.isExpired(accessClaims)) {
+                logger.info("[JWT-FILTER] access token expired -> try refresh");
+                tryRefresh(request, response);
+                return;
+            }
+
+            String email = accessClaims.getSubject();
+            if (email == null || email.isBlank()) {
+                throw new JwtException("Access token subject(email) is missing");
+            }
+
+            authenticate(email);
+            logger.debug("[JWT-FILTER] authenticated by access token");
+
         } catch (JwtException e) {
-            logger.warn("Invalid refresh token → possible attack"+e.getMessage());
-            clearAuthentication(res);
-        } catch (Exception e) {
-            logger.error("Unexpected refresh error", e);
-            clearAuthentication(res);
+
+            logger.info("[JWT-FILTER] access rejected: {} -> try refresh", e.getMessage());
+            tryRefresh(request, response);
         }
+    }
+    private void tryRefresh(HttpServletRequest request, HttpServletResponse response) {
+        logger.debug("[JWT-FILTER] refresh stage start");
+
+        String refreshToken = getRefreshToken(request);
+        if (refreshToken == null || refreshToken.isBlank()) {
+            throw new JwtException("Refresh token is missing");
+        }
+
+        Claims refreshClaims = jwtService.getRefreshClaims(refreshToken);
+
+        if (!jwtService.isRefresh(refreshClaims)) {
+            throw new JwtException("Token type is not refresh");
+        }
+
+        if (jwtService.isExpired(refreshClaims)) {
+            throw new JwtException("Refresh token is expired");
+        }
+
+        String userEmail = refreshClaims.getSubject();
+        if (userEmail == null || userEmail.isBlank()) {
+            throw new JwtException("Refresh token subject(email) is missing");
+        }
+
+        EmployeeDTO employeeDTO = employeeService.loadUserByEmail(userEmail);
+
+        String newAccessToken = jwtService.generateAccessToken(employeeDTO);
+        String newRefreshToken = jwtService.generateRefreshToken(employeeDTO);
+
+        if (isRestRequest(request)) {
+            response.setHeader("Authorization", "Bearer " + newAccessToken);
+            response.setHeader("Refresh-Token", newRefreshToken);
+            logger.debug("[JWT-FILTER] new tokens sent in headers (REST)");
+        } else {
+            response.addCookie(jwtService.generateAccessTokenCookie(newAccessToken));
+            response.addCookie(jwtService.generateRefreshTokenCookie(newRefreshToken));
+            logger.debug("[JWT-FILTER] new tokens sent in cookies (WEB)");
+        }
+
+        authenticate(userEmail);
+        logger.info("[JWT-FILTER] user={} re-authenticated via refresh", userEmail);
 
     }
 
     private boolean isRestRequest(HttpServletRequest req) {
+        String uri = req.getRequestURI();
+        if (uri != null && uri.startsWith("/api")) return true;
+
+        String requestedWith = req.getHeader("X-Requested-With");
+        if ("XMLHttpRequest".equalsIgnoreCase(requestedWith)) return true;
+
         String accept = req.getHeader("Accept");
         String contentType = req.getContentType();
-        String requestedWith = req.getHeader("X-Requested-With");
-        String uri = req.getRequestURI();
 
-        // 1. API paths (самый надёжный способ)
-        if (uri != null && uri.startsWith("/api")) {
-            return true;
-        }
-
-        // 2. AJAX / fetch requests
-        if ("XMLHttpRequest".equalsIgnoreCase(requestedWith)) {
-            return true;
-        }
-
-        // 3. JSON requests (Accept / Content-Type)
-        return (accept != null && accept.contains("application/json")) ||
-                (contentType != null && contentType.contains("application/json"));
-
-        // fallback → считаем UI
+        return (accept != null && accept.contains("application/json"))
+                || (contentType != null && contentType.contains("application/json"));
     }
 
     private String getAccessToken(HttpServletRequest req) {
         String header = req.getHeader("Authorization");
-        if (header != null && header.startsWith("Bearer ")) return header.substring(7);
-
+        if (header != null && header.startsWith("Bearer ")) {
+            String value = header.substring(7).trim();
+            return value.isEmpty() ? null : value;
+        }
         return getTokenFromCookie(req, "jwtAccess");
     }
 
     private String getRefreshToken(HttpServletRequest req) {
-        String h = req.getHeader("Refresh-Token");
-        if (h != null) return h;
-
+        String header = req.getHeader("Refresh-Token");
+        if (header != null && !header.isBlank()) {
+            return header.trim();
+        }
         return getTokenFromCookie(req, "jwtRefresh");
     }
 
     private String getTokenFromCookie(HttpServletRequest req, String name) {
-        if (req.getCookies() == null) return null;
-        for (Cookie c : req.getCookies()) {
-            if (name.equals(c.getName())) return c.getValue();
+        Cookie[] cookies = req.getCookies();
+        if (cookies == null) return null;
+
+        for (Cookie c : cookies) {
+            if (name.equals(c.getName())) {
+                String value = c.getValue();
+                return (value == null || value.isBlank()) ? null : value;
+            }
         }
         return null;
     }
 
 
     private void authenticate(String userEmail) {
-        EmployeeDTO employee = this.employeeService.loadUserByEmail(userEmail);
-        logger.debug("Аутентификация...");
-        logger.debug("User: " + employee);
-        logger.debug("Email: " + userEmail);
+        EmployeeDTO employee = employeeService.loadUserByEmail(userEmail);
 
-        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                employee,
-                null,
-                employee.getAuthorities()
-                //  List.of(new SimpleGrantedAuthority(employee.getRole().name())));
-        );
+        UsernamePasswordAuthenticationToken authToken =
+                new UsernamePasswordAuthenticationToken(employee, null, employee.getAuthorities());
+
         SecurityContextHolder.getContext().setAuthentication(authToken);
-        logger.debug("Authentication Success "+authToken);
+        logger.debug("[JWT-FILTER] authentication success user={}", userEmail);
     }
     private void clearAuthentication(HttpServletResponse response) {
         SecurityContextHolder.clearContext();
 
-        // Удаляем cookies
         Cookie accessCookie = new Cookie("jwtAccess", null);
         accessCookie.setMaxAge(0);
         accessCookie.setPath("/");
+        accessCookie.setHttpOnly(true);
         response.addCookie(accessCookie);
 
         Cookie refreshCookie = new Cookie("jwtRefresh", null);
         refreshCookie.setMaxAge(0);
         refreshCookie.setPath("/");
+        refreshCookie.setHttpOnly(true);
         response.addCookie(refreshCookie);
 
-        logger.debug("Authentication cleared and cookies deleted");
+        logger.debug("[JWT-FILTER] security context cleared, auth cookies removed");
     }
 }

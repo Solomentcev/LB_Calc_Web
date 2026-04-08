@@ -46,7 +46,6 @@ public class EmployeeService implements UserDetailsService {
         logger.info("Поиск пользователя (%s)...".formatted(email));
         Employee employee = employeeRepository.findByEmail(email).orElseThrow(() ->
                 new UsernameNotFoundException("Пользователь %s не найден".formatted(email)));
-        logger.debug(employee.toString());
         EmployeeDTO employeeDTO = EmployeeMapper.toEmployeeDTO(employee);
         return employeeDTO;
     }
@@ -64,7 +63,7 @@ public class EmployeeService implements UserDetailsService {
         return EmployeeMapper.toProfileDTOfromEmployee(employee);
     }
 
-    // @PreAuthorize("hasRole('ADMIN')")
+     @PreAuthorize("hasRole('ADMIN')")
     @Transactional
     public EmployeeDTO save(EmployeeDTO employeeDTO) {
         if (employeeDTO.getId()==null || employeeDTO.getId() <= 0) {
