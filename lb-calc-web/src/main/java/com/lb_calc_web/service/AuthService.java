@@ -4,6 +4,8 @@ import com.lb_calc_web.dto.EmployeeDTO;
 import com.lb_calc_web.dto.JwtResponse;
 import com.lb_calc_web.dto.LoginRequest;
 import com.lb_calc_web.dto.RegistrationDTO;
+import com.lb_calc_web.event.UserEvent;
+import com.lb_calc_web.event.UserEventType;
 import com.lb_calc_web.mapper.EmployeeMapper;
 import com.lb_calc_web.model.user.Employee;
 import com.lb_calc_web.model.user.Role;
@@ -17,6 +19,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.support.SendResult;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -26,6 +30,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 public class AuthService {
@@ -34,12 +39,14 @@ public class AuthService {
     private final EmployeeRepository employeeRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private KafkaTemplate<String, UserEvent> kafkaTemplate;
 
-    public AuthService(EmployeeService employeeService, EmployeeRepository employeeRepository, PasswordEncoder passwordEncoder, JwtService jwtService) {
+    public AuthService(EmployeeService employeeService, EmployeeRepository employeeRepository, PasswordEncoder passwordEncoder, JwtService jwtService, KafkaTemplate<String, UserEvent> kafkaTemplate) {
         this.employeeService = employeeService;
         this.employeeRepository = employeeRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
+        this.kafkaTemplate = kafkaTemplate;
     }
     public JwtResponse login(LoginRequest loginRequest) throws AuthException {
         logger.info("Login attempt for email: {}", loginRequest.getEmail());
@@ -58,6 +65,17 @@ public class AuthService {
             String access = jwtService.generateAccessToken(user);
             String refresh = jwtService.generateRefreshToken(user);
 
+            UserEvent userEvent=new UserEvent(UserEventType.USER_LOGGED_IN, user.getId(), user.getEmail());
+            CompletableFuture<SendResult<String,UserEvent>> future=kafkaTemplate
+                    .send("user-events-topic", String.valueOf(user.getId()), userEvent);
+            future.whenComplete((sendResult, throwable) -> {
+                if (throwable != null) {
+                    logger.error("Failed to send user event to Kafka: {}", throwable.getMessage());
+                } else {
+                    logger.info("User event sent to Kafka successfully: {}", sendResult.getRecordMetadata());
+                }
+            });
+            logger.info("Return: {}", user.getId());
             return new JwtResponse(access, refresh);
 
         } else {
@@ -111,6 +129,20 @@ public class AuthService {
         employeeDTO.setRegistrationDate(LocalDate.now());
         employeeDTO.setRole(Role.ROLE_MANAGER);
         Employee employee=employeeRepository.save(EmployeeMapper.toEmployee(employeeDTO));
-        return EmployeeMapper.toEmployeeDTO(employee);
+        EmployeeDTO employeeDTO1= EmployeeMapper.toEmployeeDTO(employee);
+
+        UserEvent userEvent=new UserEvent(UserEventType.USER_REGISTERED, employeeDTO1.getId(), employeeDTO1.getEmail());
+        CompletableFuture<SendResult<String,UserEvent>> future=kafkaTemplate
+                .send("user-events-topic", String.valueOf(employeeDTO1.getId()), userEvent);
+        future.whenComplete((sendResult, throwable) -> {
+            if (throwable != null) {
+                logger.error("Failed to send user event to Kafka: {}", throwable.getMessage());
+            } else {
+                logger.info("User event sent to Kafka successfully: {}", sendResult.getRecordMetadata());
+            }
+        });
+        logger.info("Return: {}", employeeDTO1.getId());
+
+        return employeeDTO1;
     }
 }
