@@ -1,0 +1,12 @@
+git
+workflow-aggregator
+pipeline-stage-view
+maven-plugin
+credentials-binding
+ssh-credentials
+bitbucket
+junit
+htmlpublisher
+allure-jenkins-plugin
+timestamper
+blueocean
