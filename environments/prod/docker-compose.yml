@@ -6,7 +6,7 @@ services:
 
   mysql:
     image: mysql:8.4
-    container_name: lb-calc-dev-mysql
+    container_name: lb-calc-prod-mysql
     restart: unless-stopped
 
     environment:
@@ -17,7 +17,7 @@ services:
       - "${MYSQL_PORT}:3306"
 
     volumes:
-      - dev_mysql_data:/var/lib/mysql
+      - prod_mysql_data:/var/lib/mysql
 
     healthcheck:
       test:
@@ -36,7 +36,7 @@ services:
 
   kafka:
     image: apache/kafka:4.0.0
-    container_name: lb-calc-dev-kafka
+    container_name: lb-calc-prod-kafka
     restart: unless-stopped
 
     ports:
@@ -67,7 +67,7 @@ services:
       KAFKA_NUM_PARTITIONS: 3
 
     volumes:
-      - dev_kafka_data:/var/lib/kafka/data
+      - prod_kafka_data:/var/lib/kafka/data
 
 
   # ============================================================
@@ -83,7 +83,7 @@ services:
 
     image: lb-calc-web:${APP_VERSION}
 
-    container_name: lb-calc-dev-web
+    container_name: lb-calc-prod-web
     restart: unless-stopped
 
     environment:
@@ -124,7 +124,7 @@ services:
 
     image: notification-service:${APP_VERSION}
 
-    container_name: lb-calc-dev-notification
+    container_name: lb-calc-prod-notification
     restart: unless-stopped
 
     environment:
@@ -145,8 +145,8 @@ services:
 
 volumes:
 
-  dev_mysql_data:
-    name: dev_mysql_data
+  prod_mysql_data:
+    name: prod_mysql_data
 
-  dev_kafka_data:
-    name: dev_kafka_data
+  prod_kafka_data:
+    name: prod_kafka_data

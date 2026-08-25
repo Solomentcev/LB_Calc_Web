@@ -2,8 +2,10 @@ FROM eclipse-temurin:21-jre
 
 WORKDIR /app
 
-COPY lb-calc-web/target/*.jar app.jar
+ARG APP_VERSION
 
-EXPOSE 8080
+COPY lb-calc-web/target/lb-calc-web-${APP_VERSION}.jar app.jar
+
+EXPOSE 8081
 
 ENTRYPOINT ["java", "-jar", "app.jar"]

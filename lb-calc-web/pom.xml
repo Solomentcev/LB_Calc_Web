@@ -10,7 +10,7 @@
     <parent>
         <groupId>ru.lbcalc</groupId>
         <artifactId>LB_Calc_Web</artifactId>
-        <version>0.0.1-SNAPSHOT</version>
+        <version>${revision}</version>
     </parent>
 
     <artifactId>lb-calc-web</artifactId>

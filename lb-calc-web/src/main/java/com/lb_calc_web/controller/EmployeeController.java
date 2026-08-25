@@ -22,6 +22,7 @@ import java.util.List;
 @Controller
 
 public class EmployeeController {
+    private final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(EmployeeController.class);
     private final List<Role> roles;
     private final EmployeeService employeeService;
     private final PasswordEncoder passwordEncoder;
@@ -33,8 +34,17 @@ public class EmployeeController {
     }
     @GetMapping("/myprofile")
     public String myProfile(Model model) {
+        logger.info("=== MYPROFILE CONTROLLER START ===");
+
         EmployeeDTO employee= employeeService.getCurrentEmployee();
+
+        logger.info("EmployeeDTO = {}", employee);
+        logger.info("EmployeeDTO id = {}", employee.getId());
+
         model.addAttribute("employee",employee);
+
+        logger.info("Model employee = {}", model.getAttribute("employee"));
+
         return "myprofile";
     }
     @GetMapping("/myprofile/changepassword")

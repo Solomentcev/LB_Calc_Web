@@ -113,15 +113,37 @@ public class EmployeeService implements UserDetailsService {
         return isExist;
     }
     public EmployeeDTO getCurrentEmployee() {
+
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        logger.info("AUTH = {}", auth);
+        logger.info("AUTH class = {}", auth != null ? auth.getClass() : null);
+
         if (auth == null) {
             throw new NoSuchElementException("Пользователь не аутентифицирован");
         }
         Object principal = auth.getPrincipal();
+
+        logger.info("PRINCIPAL = {}", principal);
+        logger.info("PRINCIPAL class = {}", principal != null ? principal.getClass() : null);
+
         if (principal instanceof EmployeeDTO employeeDTO) {
-            return loadUserByEmail(employeeDTO.getEmail());
+            logger.info("Principal is EmployeeDTO");
+            logger.info("Employee email = {}", employeeDTO.getEmail());
+
+            EmployeeDTO employee=loadUserByEmail(employeeDTO.getEmail());
+
+            logger.info("Loaded employee = {}", employee);
+            return employee;
         }
-        return loadUserByEmail(auth.getName());
+        logger.info("Principal is NOT EmployeeDTO");
+        logger.info("Authentication name = {}", auth.getName());
+
+        EmployeeDTO employee = loadUserByEmail(auth.getName());
+
+        logger.info("Loaded employee = {}", employee);
+
+        return employee;
     }
 }
 

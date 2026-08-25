@@ -40,10 +40,12 @@ public class ProjectController extends BaseCatalogController{
     public String createProject(Model model) {
         ProjectDTO project = projectService.createProject();
         model.addAttribute("project", project);
+        System.out.println(project.toString());
         return "/projects/project";
     }
     @PostMapping("/{id}/save")
     public String saveProject( @ModelAttribute("project") ProjectDTO project, Model model) {
+        System.out.println(project.toString());
         for(ALSDTO als:project.getAlsList()){
             als=alsService.resizeLC(als);
             als=alsService.resizeLBs(als);
@@ -54,7 +56,7 @@ public class ProjectController extends BaseCatalogController{
         }else{
             model.addAttribute("projectErrors", errorProjectList);
             model.addAttribute("project", project);
-            return "/projects/project";
+            return "projects/project";
         }
 
         return "redirect:/projects/"+project.getId();

@@ -2,7 +2,9 @@ FROM eclipse-temurin:21-jre
 
 WORKDIR /app
 
-COPY notification-service/target/*.jar app.jar
+ARG APP_VERSION
+
+COPY notification-service/target/notification-service-${APP_VERSION}.jar app.jar
 
 EXPOSE 8080
 

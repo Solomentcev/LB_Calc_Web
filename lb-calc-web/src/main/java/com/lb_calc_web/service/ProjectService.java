@@ -83,6 +83,7 @@ public class ProjectService {
     public ProjectDTO saveProject(ProjectDTO projectDTO) {
         logger.info("Сохранение Проекта(id%d-%s)..."
                 .formatted(projectDTO.getId(), projectDTO.getName()));
+        System.out.println(projectDTO);
         ValidationResult validationResult=new ValidationResult();
         List<ALSDTO> savedALSs=new ArrayList<>();
         for(ALSDTO als:projectDTO.getAlsList()){
@@ -115,6 +116,7 @@ public class ProjectService {
         logger.info("Проект(id%d-%s) обновлен в БД..."
                 .formatted(project.getId(), project.getName()));
         projectDTO=ProjectMapper.toProjectDTO(project);
+        saveProject(projectDTO);
         return projectDTO;
     }
     @Transactional
