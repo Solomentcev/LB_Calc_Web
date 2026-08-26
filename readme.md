@@ -70,7 +70,7 @@ LB Calc Web → Kafka → Notification Service → Email
 
 ```bash
 cd environments/dev
-docker compose --env-file .env up -d --build
+docker compose --env-file dev.env up -d --build
 ```
 
 Основное приложение:

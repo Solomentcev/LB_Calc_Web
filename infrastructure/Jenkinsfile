@@ -1,0 +1,196 @@
+pipeline {
+    agent any
+
+    environment {
+        MAVEN_SETTINGS = '/var/jenkins_home/.m2/settings.xml'
+
+        DEV_COMPOSE  = 'environments/dev/docker-compose.yml'
+        TEST_COMPOSE = 'environments/test/docker-compose.yml'
+        PROD_COMPOSE = 'environments/prod/docker-compose.yml'
+
+        DEV_ENV  = '/var/jenkins_env/dev.env'
+        TEST_ENV = '/var/jenkins_env/test.env'
+        PROD_ENV = '/var/jenkins_env/prod.env'
+    }
+
+    stages {
+
+        stage('Checkout') {
+            steps {
+                git(
+                    branch: 'master',
+                    credentialsId: 'github-ssh',
+                    url: 'git@github.com:Solomentcev/LB_Calc_Web.git'
+                )
+            }
+        }
+
+        stage('Get version') {
+            steps {
+                script {
+                    env.APP_VERSION = sh(
+                        script: """
+                            mvn -s ${MAVEN_SETTINGS} \
+                                help:evaluate \
+                                -Dexpression=revision \
+                                -q \
+                                -DforceStdout
+                        """,
+                        returnStdout: true
+                    ).trim()
+
+                    echo "Application version: ${env.APP_VERSION}"
+                }
+            }
+        }
+
+        stage('Build') {
+            steps {
+                sh """
+                    mvn -s ${MAVEN_SETTINGS} \
+                        clean package \
+                        -DskipTests \
+                        -Drevision=${APP_VERSION}
+                """
+            }
+        }
+
+        stage('Docker Build') {
+            steps {
+                sh """
+                    APP_VERSION=${APP_VERSION} \
+                    docker compose \
+                        --env-file ${DEV_ENV} \
+                        -f ${DEV_COMPOSE} \
+                        build
+                """
+
+                sh """
+                    docker images | grep -E \
+                        'lb-calc-web|notification-service'
+                """
+            }
+        }
+
+        stage('Deploy DEV') {
+            steps {
+                sh """
+                    APP_VERSION=${APP_VERSION} \
+                    docker compose \
+                        --env-file ${DEV_ENV} \
+                        -f ${DEV_COMPOSE} \
+                        up -d --no-build --force-recreate
+                """
+            }
+        }
+
+        stage('Deploy TEST') {
+            steps {
+                sh """
+                    APP_VERSION=${APP_VERSION} \
+                    docker compose \
+                        --env-file ${TEST_ENV} \
+                        -f ${TEST_COMPOSE} \
+                        up -d --no-build --force-recreate
+                """
+            }
+        }
+
+        stage('TEST verification') {
+            steps {
+                sh """
+                    APP_VERSION=${APP_VERSION} \
+                    docker compose \
+                        --env-file ${TEST_ENV} \
+                        -f ${TEST_COMPOSE} \
+                        ps
+                """
+
+                sh '''
+                    echo "Waiting for TEST web..."
+
+                    for i in $(seq 1 30); do
+                        if curl -fsS http://host.docker.internal:8083/login > /dev/null; then
+                            echo "TEST web is available"
+                            exit 0
+                        fi
+
+                        echo "Attempt $i/30"
+                        sleep 2
+                    done
+
+                    echo "TEST web is unavailable"
+
+                    docker compose \
+                        --env-file ${TEST_ENV} \
+                        -f ${TEST_COMPOSE} \
+                        logs --tail=100 lb-calc-web
+
+                    exit 1
+                '''
+            }
+        }
+
+        stage('Deploy PROD') {
+            steps {
+                sh """
+                    APP_VERSION=${APP_VERSION} \
+                    docker compose \
+                        --env-file ${PROD_ENV} \
+                        -f ${PROD_COMPOSE} \
+                        up -d --no-build --force-recreate
+                """
+            }
+        }
+
+        stage('PROD verification') {
+            steps {
+                sh """
+                    APP_VERSION=${APP_VERSION} \
+                    docker compose \
+                        --env-file ${PROD_ENV} \
+                        -f ${PROD_COMPOSE} \
+                        ps
+                """
+
+                sh '''
+                    echo "Waiting for PROD web..."
+
+                    for i in $(seq 1 30); do
+                        if curl -fsS http://host.docker.internal:8085/login > /dev/null; then
+                            echo "PROD web is available"
+                            exit 0
+                        fi
+
+                        echo "Attempt $i/30"
+                        sleep 2
+                    done
+
+                    echo "PROD web is unavailable"
+
+                    docker compose \
+                        --env-file ${PROD_ENV} \
+                        -f ${PROD_COMPOSE} \
+                        logs --tail=100 lb-calc-web
+
+                    exit 1
+                '''
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "======================================"
+            echo "CI/CD completed successfully"
+            echo "Version: ${APP_VERSION}"
+            echo "======================================"
+        }
+
+        failure {
+            echo "======================================"
+            echo "CI/CD failed"
+            echo "======================================"
+        }
+    }
+}

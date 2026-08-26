@@ -10,7 +10,7 @@ target/
 .env
 *.env
 !.env.example
-
+environments/.secrets/
 # IntelliJ IDEA
 .idea/
 *.iws

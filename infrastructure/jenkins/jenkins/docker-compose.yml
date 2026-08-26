@@ -17,7 +17,7 @@ services:
     volumes:
       - jenkins_home:/var/jenkins_home
       - /var/run/docker.sock:/var/run/docker.sock
-
+      - /home/denis/JAVA_PROJECTS/LB_Calc_Web/environments/.secrets:/var/jenkins_env:ro
     networks:
       - jenkins_network
 
