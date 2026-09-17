@@ -4,12 +4,6 @@ import jakarta.persistence.*;
 
 import java.util.Objects;
 
-/**
- * JPA-сущность связи проекта с ALS.
- *
- * <p>Одна запись определяет, какой ALS входит в проект
- * и в каком количестве.</p>
- */
 @Entity
 @Table(
         name = "project_als",
@@ -22,16 +16,10 @@ import java.util.Objects;
 )
 public class ProjectALSEntity {
 
-    /**
-     * Идентификатор записи связи.
-     */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    /**
-     * Проект.
-     */
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(
             name = "project_id",
@@ -39,9 +27,6 @@ public class ProjectALSEntity {
     )
     private ProjectEntity project;
 
-    /**
-     * ALS, входящая в проект.
-     */
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(
             name = "als_id",
@@ -49,16 +34,10 @@ public class ProjectALSEntity {
     )
     private ALSEntity als;
 
-    /**
-     * Количество ALS в проекте.
-     */
     @Column(nullable = false)
     private int quantity;
 
-    /**
-     * Конструктор для JPA.
-     */
-    protected ProjectALSEntity() {
+    public ProjectALSEntity() {
     }
 
     public Long getId() {

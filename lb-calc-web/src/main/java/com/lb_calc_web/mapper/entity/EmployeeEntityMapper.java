@@ -11,7 +11,7 @@ import com.lb_calc_web.entity.EmployeeEntity;
  */
 public final class EmployeeEntityMapper {
 
-    private EmployeeEntityMapper() {
+    public EmployeeEntityMapper() {
     }
 
     /**

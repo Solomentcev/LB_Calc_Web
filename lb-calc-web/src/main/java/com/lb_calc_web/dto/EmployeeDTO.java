@@ -1,6 +1,6 @@
 package com.lb_calc_web.dto;
 
-import com.lb_calc_web.entity.user.Role;
+import com.lb_calc_web.domain.attributes.Role;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;

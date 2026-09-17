@@ -78,7 +78,7 @@ public class EmployeeEntity {
     private Role role;
 
     /**
-     * Конструктор для JPA.
+     * Конструктор для JPA и мапперов.
      */
     public EmployeeEntity() {
     }

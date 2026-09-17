@@ -2,28 +2,42 @@ package com.lb_calc_web.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 public class LCDTO {
+
     private Long id;
     private String name;
     private String description;
+
     private int height;
     private int width;
     private int depth;
+
     private int upperFrame;
     private int bottomFrame;
+
     private String display;
     private String barReader;
     private String payment;
+
     private boolean printer;
     private boolean rfidReader;
+
     private String colorBody;
+    private String colorDoor;
+
+    private List<String> accessMethods = new ArrayList<>();
+    private List<String> printOptions = new ArrayList<>();
+
     @JsonIgnore
     private String stringLCImage;
 
     public LCDTO() {
     }
+
     public Long getId() {
         return id;
     }
@@ -70,6 +84,22 @@ public class LCDTO {
 
     public void setDepth(int depth) {
         this.depth = depth;
+    }
+
+    public int getUpperFrame() {
+        return upperFrame;
+    }
+
+    public void setUpperFrame(int upperFrame) {
+        this.upperFrame = upperFrame;
+    }
+
+    public int getBottomFrame() {
+        return bottomFrame;
+    }
+
+    public void setBottomFrame(int bottomFrame) {
+        this.bottomFrame = bottomFrame;
     }
 
     public String getDisplay() {
@@ -120,20 +150,32 @@ public class LCDTO {
         this.colorBody = colorBody;
     }
 
-    public int getUpperFrame() {
-        return upperFrame;
+    public String getColorDoor() {
+        return colorDoor;
     }
 
-    public void setUpperFrame(int upperFrame) {
-        this.upperFrame = upperFrame;
+    public void setColorDoor(String colorDoor) {
+        this.colorDoor = colorDoor;
     }
 
-    public int getBottomFrame() {
-        return bottomFrame;
+    public List<String> getAccessMethods() {
+        return accessMethods;
     }
 
-    public void setBottomFrame(int bottomFrame) {
-        this.bottomFrame = bottomFrame;
+    public void setAccessMethods(List<String> accessMethods) {
+        this.accessMethods = accessMethods == null
+                ? new ArrayList<>()
+                : new ArrayList<>(accessMethods);
+    }
+
+    public List<String> getPrintOptions() {
+        return printOptions;
+    }
+
+    public void setPrintOptions(List<String> printOptions) {
+        this.printOptions = printOptions == null
+                ? new ArrayList<>()
+                : new ArrayList<>(printOptions);
     }
 
     public String getStringLCImage() {
@@ -146,19 +188,50 @@ public class LCDTO {
 
     @Override
     public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
         LCDTO lcdto = (LCDTO) o;
-        return getHeight() == lcdto.getHeight() && getWidth() == lcdto.getWidth() && getDepth() == lcdto.getDepth()
-                && getUpperFrame() == lcdto.getUpperFrame() && getBottomFrame() == lcdto.getBottomFrame()
-                && isPrinter() == lcdto.isPrinter() && isRfidReader() == lcdto.isRfidReader()
-                && Objects.equals(getDisplay(), lcdto.getDisplay()) && Objects.equals(getBarReader(), lcdto.getBarReader())
-                && Objects.equals(getPayment(), lcdto.getPayment()) && Objects.equals(getColorBody(), lcdto.getColorBody());
+
+        return height == lcdto.height
+                && width == lcdto.width
+                && depth == lcdto.depth
+                && upperFrame == lcdto.upperFrame
+                && bottomFrame == lcdto.bottomFrame
+                && printer == lcdto.printer
+                && rfidReader == lcdto.rfidReader
+                && Objects.equals(display, lcdto.display)
+                && Objects.equals(barReader, lcdto.barReader)
+                && Objects.equals(payment, lcdto.payment)
+                && Objects.equals(colorBody, lcdto.colorBody)
+                && Objects.equals(colorDoor, lcdto.colorDoor)
+                && Objects.equals(accessMethods, lcdto.accessMethods)
+                && Objects.equals(printOptions, lcdto.printOptions);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getHeight(), getWidth(), getDepth(), getUpperFrame(), getBottomFrame(), getDisplay(),
-                getBarReader(), getPayment(), isPrinter(), isRfidReader(), getColorBody());
+        return Objects.hash(
+                height,
+                width,
+                depth,
+                upperFrame,
+                bottomFrame,
+                display,
+                barReader,
+                payment,
+                printer,
+                rfidReader,
+                colorBody,
+                colorDoor,
+                accessMethods,
+                printOptions
+        );
     }
 
     @Override
@@ -166,7 +239,7 @@ public class LCDTO {
         return "LCDTO{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
-//                ", description='" + description + '\'' +
+                ", description='" + description + '\'' +
                 ", height=" + height +
                 ", width=" + width +
                 ", depth=" + depth +
@@ -178,6 +251,9 @@ public class LCDTO {
                 ", printer=" + printer +
                 ", rfidReader=" + rfidReader +
                 ", colorBody='" + colorBody + '\'' +
-                '}'+'\n';
+                ", colorDoor='" + colorDoor + '\'' +
+                ", accessMethods=" + accessMethods +
+                ", printOptions=" + printOptions +
+                '}';
     }
 }

@@ -13,42 +13,30 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 
-/**
- * Маппер между доменной моделью Project и JPA-сущностью ProjectEntity.
- *
- * <p>В Domain набор ALS хранится как:
- * {@code Map<ALS, Integer>}.
- *
- * <p>В persistence-слое эта структура представлена
- * сущностями ProjectALSEntity, где quantity является свойством связи.
- */
 public class ProjectEntityMapper {
 
-    private final EmployeeEntityMapper employeeMapper;
     private final ALSEntityMapper alsMapper;
 
     public ProjectEntityMapper(
-            EmployeeEntityMapper employeeMapper,
             ALSEntityMapper alsMapper
     ) {
-        this.employeeMapper = Objects.requireNonNull(employeeMapper);
-        this.alsMapper = Objects.requireNonNull(alsMapper);
+        this.alsMapper = Objects.requireNonNull(
+                alsMapper,
+                "ALSEntityMapper не должен быть null"
+        );
     }
 
-    /**
-     * Entity -> Domain.
-     */
     public Project toDomain(ProjectEntity entity) {
         Objects.requireNonNull(
                 entity,
                 "ProjectEntity не должен быть null"
         );
 
-        Employee createdBy = employeeMapper.toDomain(
+        Employee createdBy = EmployeeEntityMapper.toDomain(
                 entity.getCreatedBy()
         );
 
-        Employee updatedBy = employeeMapper.toDomain(
+        Employee updatedBy = EmployeeEntityMapper.toDomain(
                 entity.getUpdatedBy()
         );
 
@@ -77,13 +65,6 @@ public class ProjectEntityMapper {
         );
     }
 
-    /**
-     * Domain -> Entity.
-     *
-     * <p>Для связанных сущностей используются новые Entity.
-     * Для существующих записей БД необходимо использовать перегруженный
-     * метод с resolver-функциями.
-     */
     public ProjectEntity toEntity(Project domain) {
         Objects.requireNonNull(
                 domain,
@@ -92,17 +73,11 @@ public class ProjectEntityMapper {
 
         return toEntity(
                 domain,
-                employeeMapper::toEntity,
+                EmployeeEntityMapper::toEntity,
                 alsMapper::toEntity
         );
     }
 
-    /**
-     * Domain -> Entity с resolver-функциями.
-     *
-     * <p>Resolver позволяет использовать уже существующие EmployeeEntity
-     * и ALSEntity вместо создания новых записей.
-     */
     public ProjectEntity toEntity(
             Project domain,
             Function<Employee, EmployeeEntity> employeeResolver,
@@ -112,10 +87,12 @@ public class ProjectEntityMapper {
                 domain,
                 "Project не должен быть null"
         );
+
         Objects.requireNonNull(
                 employeeResolver,
                 "employeeResolver не должен быть null"
         );
+
         Objects.requireNonNull(
                 alsResolver,
                 "alsResolver не должен быть null"
@@ -133,9 +110,6 @@ public class ProjectEntityMapper {
         return entity;
     }
 
-    /**
-     * Обновляет существующую ProjectEntity.
-     */
     public void updateEntity(
             Project domain,
             ProjectEntity entity,
@@ -146,9 +120,20 @@ public class ProjectEntityMapper {
                 domain,
                 "Project не должен быть null"
         );
+
         Objects.requireNonNull(
                 entity,
                 "ProjectEntity не должен быть null"
+        );
+
+        Objects.requireNonNull(
+                employeeResolver,
+                "employeeResolver не должен быть null"
+        );
+
+        Objects.requireNonNull(
+                alsResolver,
+                "alsResolver не должен быть null"
         );
 
         entity.setName(domain.getName());

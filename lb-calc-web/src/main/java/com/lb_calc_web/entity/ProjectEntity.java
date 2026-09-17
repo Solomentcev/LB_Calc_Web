@@ -7,74 +7,37 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-/**
- * JPA-сущность проекта.
- *
- * <p>Проект содержит набор ALS и количество каждого ALS.
- * В доменной модели это представлено как {@code Map<ALS, Integer>}.
- * В persistence-слое используется {@link ProjectALSEntity},
- * поскольку количество является свойством связи между проектом и ALS.</p>
- */
 @Entity
 @Table(name = "project")
 public class ProjectEntity {
 
-    /**
-     * Идентификатор проекта.
-     */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    /**
-     * Название проекта.
-     */
     @Column(nullable = false)
     private String name;
 
-    /**
-     * Описание проекта.
-     *
-     * <p>В Domain оно формируется на основании ALS проекта.</p>
-     */
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    /**
-     * Компания-заказчик.
-     */
     @Column(nullable = false)
     private String company;
 
-    /**
-     * Дата создания проекта.
-     */
     @Column(name = "created_at", nullable = false)
     private LocalDate createdAt;
 
-    /**
-     * Сотрудник, создавший проект.
-     */
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "created_by_id", nullable = false)
     private EmployeeEntity createdBy;
 
-    /**
-     * Дата последнего изменения проекта.
-     */
     @Column(name = "updated_at", nullable = false)
     private LocalDate updatedAt;
 
-    /**
-     * Сотрудник, выполнивший последнее изменение.
-     */
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "updated_by_id", nullable = false)
     private EmployeeEntity updatedBy;
 
-    /**
-     * ALS, входящие в проект, и их количество.
-     */
     @OneToMany(
             mappedBy = "project",
             cascade = CascadeType.ALL,
@@ -82,10 +45,7 @@ public class ProjectEntity {
     )
     private List<ProjectALSEntity> alsEntries = new ArrayList<>();
 
-    /**
-     * Конструктор для JPA.
-     */
-    protected ProjectEntity() {
+    public ProjectEntity() {
     }
 
     public Long getId() {

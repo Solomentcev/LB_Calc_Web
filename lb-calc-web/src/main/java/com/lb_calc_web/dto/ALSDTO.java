@@ -2,30 +2,59 @@ package com.lb_calc_web.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 public class ALSDTO {
 
     private Long id;
     private String name;
     private String description;
+
     private int height;
     private int depth;
     private int width;
+
     private int upperFrame;
     private int bottomFrame;
+
     private int depthCell;
     private int countCells;
-    private LCDTO lc;
-    private String positionLC;
+
     private String colorDoor;
     private String colorBody;
-    private List<LBDTO> lbList =new ArrayList<>();
+
+    /**
+     * Обычный модуль управления.
+     */
+    private LCDTO lc;
+
+    /**
+     * LBC одновременно является storage- и control-модулем.
+     */
+    private LBCDTO lbc;
+
+    /**
+     * Положение модуля управления.
+     */
+    private String positionLC;
+
+    /**
+     * Список LB для текущего API-представления ALS.
+     */
+    private List<LBDTO> lbList = new ArrayList<>();
+
+    /**
+     * Количество одинаковых LB.
+     */
     @JsonIgnore
-    private Map<LBDTO, Integer> quantityLB=new HashMap<>();
+    private Map<LBDTO, Integer> quantityLB = new HashMap<>();
+
     @JsonIgnore
     private String stringALSImage;
-
 
     public ALSDTO() {
     }
@@ -110,22 +139,6 @@ public class ALSDTO {
         this.countCells = countCells;
     }
 
-    public LCDTO getLC() {
-        return lc;
-    }
-
-    public void setLC(LCDTO lc) {
-        this.lc = lc;
-    }
-
-    public String getPositionLC() {
-        return positionLC;
-    }
-
-    public void setPositionLC(String positionLC) {
-        this.positionLC = positionLC;
-    }
-
     public String getColorDoor() {
         return colorDoor;
     }
@@ -140,6 +153,30 @@ public class ALSDTO {
 
     public void setColorBody(String colorBody) {
         this.colorBody = colorBody;
+    }
+
+    public LCDTO getLC() {
+        return lc;
+    }
+
+    public void setLC(LCDTO lc) {
+        this.lc = lc;
+    }
+
+    public LBCDTO getLBC() {
+        return lbc;
+    }
+
+    public void setLBC(LBCDTO lbc) {
+        this.lbc = lbc;
+    }
+
+    public String getPositionLC() {
+        return positionLC;
+    }
+
+    public void setPositionLC(String positionLC) {
+        this.positionLC = positionLC;
     }
 
     public List<LBDTO> getLbList() {
@@ -168,20 +205,50 @@ public class ALSDTO {
 
     @Override
     public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
         ALSDTO alsdto = (ALSDTO) o;
-        return getHeight() == alsdto.getHeight() && getDepth() == alsdto.getDepth() && getWidth() == alsdto.getWidth()
-                && getUpperFrame() == alsdto.getUpperFrame() && getBottomFrame() == alsdto.getBottomFrame()
-                && getDepthCell() == alsdto.getDepthCell() && getCountCells() == alsdto.getCountCells()
-                && Objects.equals(lc, alsdto.lc) && Objects.equals(getPositionLC(), alsdto.getPositionLC())
-                && Objects.equals(getColorDoor(), alsdto.getColorDoor()) && Objects.equals(getColorBody(), alsdto.getColorBody())
-                && Objects.deepEquals(getQuantityLB(), alsdto.getQuantityLB());
+
+        return height == alsdto.height
+                && depth == alsdto.depth
+                && width == alsdto.width
+                && upperFrame == alsdto.upperFrame
+                && bottomFrame == alsdto.bottomFrame
+                && depthCell == alsdto.depthCell
+                && countCells == alsdto.countCells
+                && Objects.equals(lc, alsdto.lc)
+                && Objects.equals(lbc, alsdto.lbc)
+                && Objects.equals(positionLC, alsdto.positionLC)
+                && Objects.equals(colorDoor, alsdto.colorDoor)
+                && Objects.equals(colorBody, alsdto.colorBody)
+                && Objects.equals(lbList, alsdto.lbList)
+                && Objects.equals(quantityLB, alsdto.quantityLB);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getHeight(), getDepth(), getWidth(), getUpperFrame(), getBottomFrame(), getDepthCell(),
-                getCountCells(), lc, getPositionLC(), getColorDoor(), getColorBody());
+        return Objects.hash(
+                height,
+                depth,
+                width,
+                upperFrame,
+                bottomFrame,
+                depthCell,
+                countCells,
+                lc,
+                lbc,
+                positionLC,
+                colorDoor,
+                colorBody,
+                lbList,
+                quantityLB
+        );
     }
 
     @Override
@@ -189,20 +256,21 @@ public class ALSDTO {
         return "ALSDTO{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
-//                ", description='" + description + '\'' +
+                ", description='" + description + '\'' +
                 ", height=" + height +
                 ", depth=" + depth +
                 ", width=" + width +
                 ", upperFrame=" + upperFrame +
                 ", bottomFrame=" + bottomFrame +
                 ", depthCell=" + depthCell +
-                ", countCells=" + countCells +"\n"+
+                ", countCells=" + countCells +
                 ", lc=" + lc +
+                ", lbc=" + lbc +
                 ", positionLC='" + positionLC + '\'' +
                 ", colorDoor='" + colorDoor + '\'' +
-                ", colorBody='" + colorBody + '\'' +"\n"+
-                ", lbList=" + lbList +"\n"+
-                ", quantityLB=" + quantityLB +"\n"+
+                ", colorBody='" + colorBody + '\'' +
+                ", lbList=" + lbList +
+                ", quantityLB=" + quantityLB +
                 '}';
     }
 }
