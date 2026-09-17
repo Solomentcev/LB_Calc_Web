@@ -2,9 +2,9 @@ package com.lb_calc_web.mapper;
 
 import com.lb_calc_web.dto.ALSDTO;
 import com.lb_calc_web.dto.ProjectDTO;
-import com.lb_calc_web.model.ALS;
-import com.lb_calc_web.model.Project;
-import com.lb_calc_web.model.ProjectALS;
+import com.lb_calc_web.entity.ALS;
+import com.lb_calc_web.entity.Project;
+import com.lb_calc_web.entity.ProjectALS;
 import org.springframework.stereotype.Component;
 
 import java.util.*;

@@ -1,8 +1,6 @@
 package com.lb_calc_web.dto;
 
-import com.lb_calc_web.model.user.Role;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
+import com.lb_calc_web.entity.user.Role;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;

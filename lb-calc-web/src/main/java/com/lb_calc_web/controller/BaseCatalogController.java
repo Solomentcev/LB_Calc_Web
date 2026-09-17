@@ -1,6 +1,6 @@
 package com.lb_calc_web.controller;
 
-import com.lb_calc_web.model.attributes.*;
+import com.lb_calc_web.entity.attributes.*;
 import org.springframework.web.bind.annotation.ModelAttribute;
 
 import java.util.Arrays;

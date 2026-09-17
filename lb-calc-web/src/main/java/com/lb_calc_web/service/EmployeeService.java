@@ -3,7 +3,7 @@ package com.lb_calc_web.service;
 import com.lb_calc_web.dto.EmployeeDTO;
 import com.lb_calc_web.dto.ProfileDTO;
 import com.lb_calc_web.mapper.EmployeeMapper;
-import com.lb_calc_web.model.user.Employee;
+import com.lb_calc_web.entity.Employee;
 import com.lb_calc_web.repository.EmployeeRepository;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

@@ -1,7 +1,7 @@
 package com.lb_calc_web.controller;
 
 import com.lb_calc_web.dto.LCDTO;
-import com.lb_calc_web.model.attributes.*;
+import com.lb_calc_web.entity.attributes.*;
 import com.lb_calc_web.service.LCService;
 import com.lb_calc_web.service.util.SizeValidator;
 import org.slf4j.Logger;
@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 @Controller
 @RequestMapping("/lcs")

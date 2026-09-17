@@ -4,7 +4,7 @@ import com.lb_calc_web.dto.ChangePasswordDTO;
 import com.lb_calc_web.dto.CreateEmployeeDTO;
 import com.lb_calc_web.dto.EmployeeDTO;
 import com.lb_calc_web.dto.ProfileDTO;
-import com.lb_calc_web.model.user.Role;
+import com.lb_calc_web.entity.user.Role;
 import com.lb_calc_web.service.EmployeeService;
 import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;

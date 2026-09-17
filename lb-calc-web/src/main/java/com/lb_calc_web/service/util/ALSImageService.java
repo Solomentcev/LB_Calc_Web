@@ -2,7 +2,7 @@ package com.lb_calc_web.service.util;
 
 import com.lb_calc_web.dto.ALSDTO;
 import com.lb_calc_web.dto.LBDTO;
-import com.lb_calc_web.model.attributes.PositionLC;
+import com.lb_calc_web.entity.attributes.PositionLC;
 
 import javax.imageio.ImageIO;
 import java.awt.*;

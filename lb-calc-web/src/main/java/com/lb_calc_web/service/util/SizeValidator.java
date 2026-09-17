@@ -5,7 +5,7 @@ import com.lb_calc_web.dto.LBDTO;
 import com.lb_calc_web.dto.LCDTO;
 import com.lb_calc_web.dto.ProjectDTO;
 import com.lb_calc_web.dto.validation.ValidationResult;
-import com.lb_calc_web.model.attributes.TypeLb;
+import com.lb_calc_web.entity.attributes.TypeLb;
 import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

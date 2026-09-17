@@ -3,7 +3,6 @@ package com.lb_calc_web.controller;
 import com.lb_calc_web.dto.ALSDTO;
 import com.lb_calc_web.dto.LBDTO;
 import com.lb_calc_web.dto.LCDTO;
-import com.lb_calc_web.model.attributes.*;
 import com.lb_calc_web.service.*;
 import com.lb_calc_web.service.util.SizeValidator;
 import org.slf4j.Logger;

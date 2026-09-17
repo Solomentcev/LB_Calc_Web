@@ -5,10 +5,10 @@ import com.lb_calc_web.dto.LBDTO;
 import com.lb_calc_web.dto.LCDTO;
 import com.lb_calc_web.dto.ProjectDTO;
 import com.lb_calc_web.mapper.ALSMapper;
-import com.lb_calc_web.model.ALS;
-import com.lb_calc_web.model.LB;
-import com.lb_calc_web.model.LC;
-import com.lb_calc_web.model.attributes.*;
+import com.lb_calc_web.entity.ALS;
+import com.lb_calc_web.entity.LB;
+import com.lb_calc_web.entity.LC;
+import com.lb_calc_web.entity.attributes.*;
 import com.lb_calc_web.service.util.ALSImageService;
 import com.lb_calc_web.service.util.SizeValidator;
 

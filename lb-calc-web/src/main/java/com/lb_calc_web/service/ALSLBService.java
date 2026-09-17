@@ -1,8 +1,7 @@
 package com.lb_calc_web.service;
 
-import com.lb_calc_web.model.ALS;
-import com.lb_calc_web.model.ALSLB;
-import com.lb_calc_web.model.LB;
+import com.lb_calc_web.entity.ALS;
+import com.lb_calc_web.entity.LB;
 import com.lb_calc_web.repository.ALSLBRepository;
 import org.springframework.stereotype.Service;
 

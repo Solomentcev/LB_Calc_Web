@@ -2,9 +2,9 @@ package com.lb_calc_web.controller;
 
 import com.lb_calc_web.dto.LBDTO;
 import com.lb_calc_web.handler.ValidationSizeException;
-import com.lb_calc_web.model.attributes.Colors;
-import com.lb_calc_web.model.attributes.DirectionDoorOpening;
-import com.lb_calc_web.model.attributes.TypeLb;
+import com.lb_calc_web.entity.attributes.Colors;
+import com.lb_calc_web.entity.attributes.DirectionDoorOpening;
+import com.lb_calc_web.entity.attributes.TypeLb;
 import com.lb_calc_web.service.LBService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

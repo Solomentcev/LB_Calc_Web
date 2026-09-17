@@ -3,11 +3,10 @@ package com.lb_calc_web.mapper;
 import com.lb_calc_web.dto.ALSDTO;
 import com.lb_calc_web.dto.LBDTO;
 import com.lb_calc_web.dto.LCDTO;
-import com.lb_calc_web.model.ALS;
-import com.lb_calc_web.model.ALSLB;
-import com.lb_calc_web.model.LB;
-import com.lb_calc_web.model.attributes.Colors;
-import com.lb_calc_web.model.attributes.PositionLC;
+import com.lb_calc_web.entity.ALS;
+import com.lb_calc_web.entity.LB;
+import com.lb_calc_web.entity.attributes.Colors;
+import com.lb_calc_web.entity.attributes.PositionLC;
 import com.lb_calc_web.service.util.ALSImageService;
 import org.springframework.stereotype.Component;
 

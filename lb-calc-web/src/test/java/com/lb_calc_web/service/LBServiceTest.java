@@ -5,7 +5,7 @@ import com.lb_calc_web.dto.LBDTO;
 import com.lb_calc_web.dto.validation.ValidationResult;
 import com.lb_calc_web.handler.ValidationSizeException;
 import com.lb_calc_web.mapper.LBMapper;
-import com.lb_calc_web.model.LB;
+import com.lb_calc_web.entity.LB;
 import com.lb_calc_web.repository.LBRepository;
 import com.lb_calc_web.service.util.SizeValidator;
 import org.junit.jupiter.api.BeforeEach;

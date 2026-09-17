@@ -2,7 +2,7 @@ package com.lb_calc_web.mapper;
 
 import com.lb_calc_web.dto.EmployeeDTO;
 import com.lb_calc_web.dto.ProfileDTO;
-import com.lb_calc_web.model.user.Employee;
+import com.lb_calc_web.entity.Employee;
 
 import java.util.ArrayList;
 import java.util.List;

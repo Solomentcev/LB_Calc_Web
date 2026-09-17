@@ -1,9 +1,9 @@
 package com.lb_calc_web.service.util;
 
 import com.lb_calc_web.dto.LBDTO;
-import com.lb_calc_web.model.attributes.Colors;
-import com.lb_calc_web.model.attributes.DirectionDoorOpening;
-import com.lb_calc_web.model.attributes.TypeLb;
+import com.lb_calc_web.entity.attributes.Colors;
+import com.lb_calc_web.entity.attributes.DirectionDoorOpening;
+import com.lb_calc_web.entity.attributes.TypeLb;
 
 import javax.imageio.ImageIO;
 import java.awt.*;

@@ -1,11 +1,11 @@
 package com.lb_calc_web.mapper;
 
 import com.lb_calc_web.dto.LCDTO;
-import com.lb_calc_web.model.LC;
-import com.lb_calc_web.model.attributes.BarReader;
-import com.lb_calc_web.model.attributes.Colors;
-import com.lb_calc_web.model.attributes.DisplayLC;
-import com.lb_calc_web.model.attributes.Payment;
+import com.lb_calc_web.entity.LC;
+import com.lb_calc_web.entity.attributes.BarReader;
+import com.lb_calc_web.entity.attributes.Colors;
+import com.lb_calc_web.entity.attributes.DisplayLC;
+import com.lb_calc_web.entity.attributes.Payment;
 import com.lb_calc_web.service.util.LCImageService;
 
 public class LCMapper {
