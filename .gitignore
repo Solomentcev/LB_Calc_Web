@@ -6,11 +6,18 @@ target/
 # Maven Wrapper
 .mvn/wrapper/maven-wrapper.jar
 
+# AI
+.junie
+.clinerules
+.cline
+.agents
+
 # Environment / secrets
 .env
 *.env
 !.env.example
 environments/.secrets/
+
 # IntelliJ IDEA
 .idea/
 *.iws
