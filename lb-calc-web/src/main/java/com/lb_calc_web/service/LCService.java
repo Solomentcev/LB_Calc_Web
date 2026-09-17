@@ -3,7 +3,7 @@ package com.lb_calc_web.service;
 import com.lb_calc_web.dto.LCDTO;
 import com.lb_calc_web.dto.validation.ValidationResult;
 import com.lb_calc_web.handler.ValidationSizeException;
-import com.lb_calc_web.mapper.LCMapper;
+import com.lb_calc_web.mapper.dto.LCMapper;
 import com.lb_calc_web.entity.LC;
 import com.lb_calc_web.entity.attributes.BarReader;
 import com.lb_calc_web.entity.attributes.Colors;

@@ -63,7 +63,7 @@ public class ALSModuleEntity {
     /**
      * Конструктор для JPA.
      */
-    protected ALSModuleEntity() {
+    public ALSModuleEntity() {
     }
 
     public Long getId() {

@@ -4,7 +4,7 @@ import com.lb_calc_web.dto.*;
 import com.lb_calc_web.dto.validation.ValidationResult;
 import com.lb_calc_web.handler.ValidationSizeException;
 import com.lb_calc_web.helper.ExcellHelper;
-import com.lb_calc_web.mapper.ProjectMapper;
+import com.lb_calc_web.mapper.dto.ProjectMapper;
 import com.lb_calc_web.entity.Project;
 import com.lb_calc_web.repository.ProjectALSRepository;
 import com.lb_calc_web.repository.ProjectRepository;

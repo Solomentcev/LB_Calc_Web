@@ -5,7 +5,7 @@ import com.lb_calc_web.dto.LBDTO;
 import com.lb_calc_web.dto.LCDTO;
 import com.lb_calc_web.dto.validation.ValidationResult;
 import com.lb_calc_web.handler.ValidationSizeException;
-import com.lb_calc_web.mapper.ALSMapper;
+import com.lb_calc_web.mapper.dto.ALSMapper;
 import com.lb_calc_web.entity.ALS;
 import com.lb_calc_web.entity.attributes.Colors;
 import com.lb_calc_web.entity.attributes.DirectionDoorOpening;

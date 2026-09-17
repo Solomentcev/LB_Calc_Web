@@ -84,7 +84,7 @@ public class LCEntity extends ModuleEntity {
     /**
      * Конструктор для JPA.
      */
-    protected LCEntity() {
+    public LCEntity() {
     }
 
     public String getDisplay() {

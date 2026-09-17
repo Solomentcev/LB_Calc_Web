@@ -80,7 +80,7 @@ public class EmployeeEntity {
     /**
      * Конструктор для JPA.
      */
-    protected EmployeeEntity() {
+    public EmployeeEntity() {
     }
 
     public Long getId() {

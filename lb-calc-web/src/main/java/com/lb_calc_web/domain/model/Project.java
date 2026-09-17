@@ -1,7 +1,5 @@
 package com.lb_calc_web.domain.model;
 
-import com.lb_calc_web.domain.attributes.Role;
-
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -142,4 +140,57 @@ public class Project {
         this.updatedBy = Objects.requireNonNull(updatedBy);
         update();
     }
+    public static Project restore(
+            String name,
+            String company,
+            LocalDate createdAt,
+            Employee createdBy,
+            LocalDate updatedAt,
+            Employee updatedBy,
+            Map<ALS, Integer> quantityALS
+    ) {
+        Objects.requireNonNull(name);
+        Objects.requireNonNull(company);
+        Objects.requireNonNull(createdAt);
+        Objects.requireNonNull(createdBy);
+        Objects.requireNonNull(updatedAt);
+        Objects.requireNonNull(updatedBy);
+        Objects.requireNonNull(quantityALS);
+
+        Project project = new Project(
+                name,
+                company,
+                createdAt,
+                createdBy
+        );
+
+        project.updatedAt = updatedAt;
+        project.updatedBy = updatedBy;
+
+        for (Map.Entry<ALS, Integer> entry : quantityALS.entrySet()) {
+            Integer quantity = Objects.requireNonNull(
+                    entry.getValue(),
+                    "Количество ALS не должно быть null"
+            );
+
+            if (quantity < 1) {
+                throw new IllegalArgumentException(
+                        "Количество ALS должно быть больше нуля"
+                );
+            }
+
+            project.quantityALS.put(
+                    Objects.requireNonNull(
+                            entry.getKey(),
+                            "ALS не должен быть null"
+                    ),
+                    quantity
+            );
+        }
+
+        project.updateDescription();
+
+        return project;
+    }
+
 }

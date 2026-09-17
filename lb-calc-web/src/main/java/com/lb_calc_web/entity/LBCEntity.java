@@ -86,7 +86,7 @@ public class LBCEntity extends StorageModuleEntity {
     /**
      * Конструктор для JPA.
      */
-    protected LBCEntity() {
+    public LBCEntity() {
     }
 
     public String getDisplay() {

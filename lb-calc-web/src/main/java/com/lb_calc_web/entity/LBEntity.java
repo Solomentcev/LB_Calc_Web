@@ -23,6 +23,6 @@ public class LBEntity extends StorageModuleEntity {
     /**
      * Конструктор для JPA.
      */
-    protected LBEntity() {
+    public LBEntity() {
     }
 }

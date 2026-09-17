@@ -102,7 +102,7 @@ public class ALSEntity {
     /**
      * Конструктор для JPA.
      */
-    protected ALSEntity() {
+    public ALSEntity() {
     }
 
     public Long getId() {

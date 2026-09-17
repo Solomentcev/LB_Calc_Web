@@ -6,7 +6,7 @@ import com.lb_calc_web.dto.LoginRequest;
 import com.lb_calc_web.dto.RegistrationDTO;
 import com.lb_calc_web.event.UserEvent;
 import com.lb_calc_web.event.UserEventType;
-import com.lb_calc_web.mapper.EmployeeMapper;
+import com.lb_calc_web.mapper.dto.EmployeeMapper;
 import com.lb_calc_web.entity.Employee;
 import com.lb_calc_web.entity.user.Role;
 import com.lb_calc_web.repository.EmployeeRepository;

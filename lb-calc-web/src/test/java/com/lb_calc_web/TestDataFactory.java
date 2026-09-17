@@ -4,7 +4,7 @@ import com.lb_calc_web.dto.ALSDTO;
 import com.lb_calc_web.dto.LBDTO;
 import com.lb_calc_web.dto.LCDTO;
 import com.lb_calc_web.dto.ProjectDTO;
-import com.lb_calc_web.mapper.ALSMapper;
+import com.lb_calc_web.mapper.dto.ALSMapper;
 import com.lb_calc_web.entity.ALS;
 import com.lb_calc_web.entity.LB;
 import com.lb_calc_web.entity.LC;

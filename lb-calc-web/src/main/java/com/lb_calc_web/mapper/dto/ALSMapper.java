@@ -1,4 +1,4 @@
-package com.lb_calc_web.mapper;
+package com.lb_calc_web.mapper.dto;
 
 import com.lb_calc_web.dto.ALSDTO;
 import com.lb_calc_web.dto.LBDTO;
