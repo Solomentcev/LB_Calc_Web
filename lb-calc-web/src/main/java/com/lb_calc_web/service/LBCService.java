@@ -116,7 +116,10 @@ public class LBCService {
         );
 
         dto.setDirectionDoorOpening(
-                DirectionDoorOpening.LEFT.name()
+                environment.getProperty(
+                        "lbc.direction.default",
+                        DirectionDoorOpening.LEFT.name()
+                )
         );
 
         dto.setColorBody(colorBody.name());
