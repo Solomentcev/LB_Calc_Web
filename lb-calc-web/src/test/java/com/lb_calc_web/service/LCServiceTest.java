@@ -2,13 +2,14 @@ package com.lb_calc_web.service;
 
 import com.lb_calc_web.TestDataFactory;
 import com.lb_calc_web.dto.LCDTO;
+import com.lb_calc_web.entity.LCEntity;
 import com.lb_calc_web.handler.ValidationSizeException;
-import com.lb_calc_web.entity.LC;
+import com.lb_calc_web.mapper.dto.LCDtoMapper;
+import com.lb_calc_web.mapper.entity.LCEntityMapper;
 import com.lb_calc_web.repository.LCRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.*;
+import org.springframework.mock.env.MockEnvironment;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -17,141 +18,159 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(org.mockito.junit.jupiter.MockitoExtension.class)
 class LCServiceTest {
 
-    @Mock
     private LCRepository lcRepository;
-
-    @InjectMocks
+    private MockEnvironment environment;
     private LCService lcService;
-
-    private LCDTO validLC;
 
     @BeforeEach
     void setUp() {
         TestDataFactory.initSizeValidator();
-        validLC = TestDataFactory.validLCDTO(1L);
+
+        lcRepository = mock(LCRepository.class);
+
+        environment = new MockEnvironment()
+                .withProperty("size.height.default", "1940")
+                .withProperty("size.depth.default", "500")
+                .withProperty("size.frame.upper.default", "50")
+                .withProperty("size.frame.bottom.default", "50")
+                .withProperty("lc.display.default", "LC10")
+                .withProperty("lc.bar-reader.default", "Без сканера")
+                .withProperty("lc.payment.default", "NONE")
+                .withProperty("lc.printer.default", "false")
+                .withProperty("lc.rfid-reader.default", "true")
+                .withProperty("lc.color.body.default", "Blue");
+
+        lcService =
+                new LCService(
+                        lcRepository,
+                        environment
+                );
     }
 
-
-    // -----------------------------
-    // createLC()
-    // -----------------------------
     @Test
-    void createLC_default_shouldReturnValidObject() {
-        LCDTO lc = lcService.createLC();
+    void createLC_shouldCreateValidDefault() {
+        LCDTO result = lcService.createLC();
 
-        assertNotNull(lc);
-        assertEquals(1940, lc.getHeight());
-        assertEquals(500, lc.getDepth());
-        assertNotNull(lc.getName());
-        assertNotNull(lc.getDescription());
+        assertNotNull(result);
+        assertEquals(1940, result.getHeight());
+        assertEquals(500, result.getDepth());
+        assertEquals("LC10", result.getDisplay());
+        assertTrue(result.getWidth() > 0);
+        assertNotNull(result.getDescription());
     }
 
-    // -----------------------------
-    // findAll()
-    // -----------------------------
     @Test
-    void findAll_shouldReturnSortedList() {
-        LC lc1 =TestDataFactory.validLC(2L);
-        LC lc2 = TestDataFactory.validLC(1L);
+    void findAll_shouldReturnSortedById() {
+        LCEntity first =
+                spy(
+                        LCEntityMapper.toEntity(
+                                LCDtoMapper.toDomain(
+                                        TestDataFactory.validLCDTO(1L)
+                                )
+                        )
+                );
+        LCEntity second =
+                spy(
+                        LCEntityMapper.toEntity(
+                                LCDtoMapper.toDomain(
+                                        TestDataFactory.validLCDTO(2L)
+                                )
+                        )
+                );
 
-        when(lcRepository.findAll()).thenReturn(List.of(lc1, lc2));
+        doReturn(1L).when(first).getId();
+        doReturn(2L).when(second).getId();
+
+        when(lcRepository.findAll())
+                .thenReturn(List.of(second, first));
 
         List<LCDTO> result = lcService.findAll();
 
         assertEquals(2, result.size());
-        assertTrue(result.get(0).getId() < result.get(1).getId());
+        assertEquals(1L, result.get(0).getId());
+        assertEquals(2L, result.get(1).getId());
     }
 
-    // -----------------------------
-    // findById()
-    // -----------------------------
     @Test
-    void findById_existing_shouldReturnDTO() {
-        LC lc = TestDataFactory.validLC(1L);
+    void findById_existing_shouldReturnDto() {
+        LCEntity entity =
+                spy(
+                        LCEntityMapper.toEntity(
+                                LCDtoMapper.toDomain(
+                                        TestDataFactory.validLCDTO(1L)
+                                )
+                        )
+                );
 
-        when(lcRepository.findById(1L)).thenReturn(Optional.of(lc));
+        doReturn(1L).when(entity).getId();
+
+        when(lcRepository.findById(1L))
+                .thenReturn(Optional.of(entity));
 
         LCDTO result = lcService.findById(1L);
 
-        assertNotNull(result);
         assertEquals(1L, result.getId());
     }
 
     @Test
-    void findById_notFound_shouldThrow() {
-        when(lcRepository.findById(1L)).thenReturn(Optional.empty());
+    void findById_missing_shouldThrow() {
+        when(lcRepository.findById(1L))
+                .thenReturn(Optional.empty());
 
-        assertThrows(NoSuchElementException.class,
-                () -> lcService.findById(1L));
+        assertThrows(
+                NoSuchElementException.class,
+                () -> lcService.findById(1L)
+        );
     }
 
-    // -----------------------------
-    // saveLC()
-    // -----------------------------
     @Test
-    void saveLC_valid_new_shouldSave() {
-        LC saved = TestDataFactory.validLC(10L);
+    void saveLC_shouldReturnExistingByConfiguration() {
+        LCDTO dto = TestDataFactory.validLCDTO(1L);
 
-        when(lcRepository.findOne(any())).thenReturn(Optional.empty());
-        when(lcRepository.save(any())).thenReturn(saved);
+        LCEntity existing =
+                LCEntityMapper.toEntity(
+                        LCDtoMapper.toDomain(dto)
+                );
 
-        LCDTO result = lcService.saveLC(validLC);
+        when(lcRepository.findAll())
+                .thenReturn(List.of(existing));
+
+        LCDTO result = lcService.saveLC(dto);
 
         assertNotNull(result);
-        assertEquals(10L, result.getId());
-
-        verify(lcRepository).save(any());
+        verify(lcRepository, never()).save(any());
     }
 
     @Test
-    void saveLC_existing_shouldReturnExisting() {
-        LC existing = TestDataFactory.validLC(5L);
+    void saveLC_shouldPersistNewConfiguration() {
+        LCDTO dto = TestDataFactory.validLCDTO(1L);
+        LCEntity saved =
+                LCEntityMapper.toEntity(
+                        LCDtoMapper.toDomain(dto)
+                );
 
-        when(lcRepository.findOne(any())).thenReturn(Optional.of(existing));
+        when(lcRepository.findAll()).thenReturn(List.of());
+        when(lcRepository.save(any(LCEntity.class)))
+                .thenReturn(saved);
 
-        LCDTO result = lcService.saveLC(validLC);
+        LCDTO result = lcService.saveLC(dto);
 
-        assertEquals(5L, result.getId());
-        verify(lcRepository, never()).save(any());
+        assertNotNull(result);
+        verify(lcRepository).save(any(LCEntity.class));
     }
 
     @Test
     void saveLC_invalid_shouldThrowValidationException() {
-        validLC.setHeight(10); // некорректная высота
+        LCDTO dto = TestDataFactory.validLCDTO(1L);
+        dto.setHeight(10);
 
-        assertThrows(ValidationSizeException.class,
-                () -> lcService.saveLC(validLC));
+        assertThrows(
+                ValidationSizeException.class,
+                () -> lcService.saveLC(dto)
+        );
 
         verify(lcRepository, never()).save(any());
-    }
-
-    // -----------------------------
-    // updateLCsizeAndDescription()
-    // -----------------------------
-    @Test
-    void updateLCsizeAndDescription_shouldSetFields() {
-        lcService.updateLCsizeAndDescription(validLC);
-
-        assertNotNull(validLC.getName());
-        assertNotNull(validLC.getDescription());
-        assertTrue(validLC.getWidth() > 0);
-    }
-
-    // -----------------------------
-    // getOptionalLC()
-    // -----------------------------
-    @Test
-    void getOptionalLC_shouldCallRepository() {
-        LC lc = new LC();
-
-        when(lcRepository.findOne(any())).thenReturn(Optional.of(lc));
-
-        Optional<LC> result = lcService.getOptionalLC(lc);
-
-        assertTrue(result.isPresent());
-        verify(lcRepository).findOne(any());
     }
 }
