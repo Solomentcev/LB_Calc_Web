@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml"
+<html lang="ru" xmlns="http://www.w3.org/1999/xhtml"
       xmlns:th="http://www.thymeleaf.org">
 
 <head>
@@ -66,21 +66,21 @@
                         <input type="number"
                                class="form-control"
                                th:field="*{id}"
-                               readonly>
+                               readonly aria-label="id">
                     </div>
 
                     <div class="col-md-4">
                         <label>Название</label>
                         <input type="text"
                                class="form-control"
-                               th:field="*{name}">
+                               th:field="*{name}" aria-label="name">
                     </div>
 
                     <div class="col-md-6">
                         <label>Компания</label>
                         <input type="text"
                                class="form-control"
-                               th:field="*{company}">
+                               th:field="*{company}" aria-label="company">
                     </div>
 
                 </div>
@@ -107,7 +107,7 @@
                                th:value="${project.createdBy != null
                                           ? project.createdBy.username
                                           : ''}"
-                               readonly>
+                               readonly aria-label="Поле формы">
                     </div>
 
                     <div class="col-md-3">
@@ -115,7 +115,7 @@
                         <input type="text"
                                class="form-control"
                                th:field="*{createdAt}"
-                               readonly>
+                               readonly aria-label="createdAt">
                     </div>
 
                     <div class="col-md-3">
@@ -125,7 +125,7 @@
                                th:value="${project.updatedBy != null
                                           ? project.updatedBy.username
                                           : ''}"
-                               readonly>
+                               readonly aria-label="Поле формы">
                     </div>
 
                     <div class="col-md-3">
@@ -133,7 +133,7 @@
                         <input type="text"
                                class="form-control"
                                th:field="*{updatedAt}"
-                               readonly>
+                               readonly aria-label="updatedAt">
                     </div>
 
                 </div>
@@ -184,7 +184,7 @@
                         <input type="number"
                                class="form-control"
                                th:field="*{alsList[__${item.index}__].id}"
-                               readonly>
+                               readonly aria-label="alsList[index].id">
                     </div>
 
                     <div class="col-md-4">
@@ -192,7 +192,7 @@
                         <input type="text"
                                class="form-control"
                                th:field="*{alsList[__${item.index}__].name}"
-                               readonly>
+                               readonly aria-label="alsList[index].name">
                     </div>
 
                     <div class="col-md-6">
@@ -200,7 +200,7 @@
                         <input type="text"
                                class="form-control"
                                th:field="*{alsList[__${item.index}__].description}"
-                               readonly>
+                               readonly aria-label="alsList[index].description">
                     </div>
 
                 </div>
@@ -211,7 +211,7 @@
                         <label>Положение LC</label>
 
                         <select class="form-control"
-                                th:field="*{alsList[__${item.index}__].positionLC}">
+                                th:field="*{alsList[__${item.index}__].positionLC}" aria-label="alsList[index].positionLC">
 
                             <option th:each="position : ${positionLCList}"
                                     th:value="${position}"
@@ -226,14 +226,14 @@
                         <input type="number"
                                class="form-control"
                                th:field="*{alsList[__${item.index}__].countCells}"
-                               readonly>
+                               readonly aria-label="alsList[index].countCells">
                     </div>
 
                     <div class="col-md-2">
                         <label>Высота</label>
                         <input type="number"
                                class="form-control"
-                               th:field="*{alsList[__${item.index}__].height}">
+                               th:field="*{alsList[__${item.index}__].height}" aria-label="alsList[index].height">
                     </div>
 
                     <div class="col-md-2">
@@ -241,14 +241,14 @@
                         <input type="number"
                                class="form-control"
                                th:field="*{alsList[__${item.index}__].width}"
-                               readonly>
+                               readonly aria-label="alsList[index].width">
                     </div>
 
                     <div class="col-md-2">
                         <label>Глубина</label>
                         <input type="number"
                                class="form-control"
-                               th:field="*{alsList[__${item.index}__].depth}">
+                               th:field="*{alsList[__${item.index}__].depth}" aria-label="alsList[index].depth">
                     </div>
 
                     <div class="col-md-2">
@@ -256,7 +256,7 @@
                         <input type="number"
                                class="form-control"
                                th:field="*{alsList[__${item.index}__].depthCell}"
-                               readonly>
+                               readonly aria-label="alsList[index].depthCell">
                     </div>
 
                 </div>
@@ -267,21 +267,21 @@
                         <label>Верхняя рама</label>
                         <input type="number"
                                class="form-control"
-                               th:field="*{alsList[__${item.index}__].upperFrame}">
+                               th:field="*{alsList[__${item.index}__].upperFrame}" aria-label="alsList[index].upperFrame">
                     </div>
 
                     <div class="col-md-3">
                         <label>Нижняя рама</label>
                         <input type="number"
                                class="form-control"
-                               th:field="*{alsList[__${item.index}__].bottomFrame}">
+                               th:field="*{alsList[__${item.index}__].bottomFrame}" aria-label="alsList[index].bottomFrame">
                     </div>
 
                     <div class="col-md-3">
                         <label>Цвет корпуса</label>
 
                         <select class="form-control"
-                                th:field="*{alsList[__${item.index}__].colorBody}">
+                                th:field="*{alsList[__${item.index}__].colorBody}" aria-label="alsList[index].colorBody">
 
                             <option th:each="color : ${colorsList}"
                                     th:value="${color}"
@@ -295,7 +295,7 @@
                         <label>Цвет дверей</label>
 
                         <select class="form-control"
-                                th:field="*{alsList[__${item.index}__].colorDoor}">
+                                th:field="*{alsList[__${item.index}__].colorDoor}" aria-label="alsList[index].colorDoor">
 
                             <option th:each="color : ${colorsList}"
                                     th:value="${color}"
@@ -351,7 +351,7 @@
                             <label>Display</label>
 
                             <select class="form-control"
-                                    th:field="*{alsList[__${item.index}__].LC.display}">
+                                    th:field="*{alsList[__${item.index}__].LC.display}" aria-label="alsList[index].LC.display">
 
                                 <option th:each="display : ${displayList}"
                                         th:value="${display}"
@@ -365,7 +365,7 @@
                             <label>Оплата</label>
 
                             <select class="form-control"
-                                    th:field="*{alsList[__${item.index}__].LC.payment}">
+                                    th:field="*{alsList[__${item.index}__].LC.payment}" aria-label="alsList[index].LC.payment">
 
                                 <option th:each="payment : ${paymentList}"
                                         th:value="${payment}"
@@ -379,7 +379,7 @@
                             <label>Barcode Reader</label>
 
                             <select class="form-control"
-                                    th:field="*{alsList[__${item.index}__].LC.barReader}">
+                                    th:field="*{alsList[__${item.index}__].LC.barReader}" aria-label="alsList[index].LC.barReader">
 
                                 <option th:each="reader : ${barReaderList}"
                                         th:value="${reader}"
@@ -396,7 +396,7 @@
                             </label>
 
                             <input type="checkbox"
-                                   th:field="*{alsList[__${item.index}__].LC.printer}">
+                                   th:field="*{alsList[__${item.index}__].LC.printer}" aria-label="alsList[index].LC.printer">
 
                         </div>
 
@@ -473,14 +473,14 @@
                             <input type="text"
                                    class="form-control"
                                    th:value="${lb.name}"
-                                   readonly>
+                                   readonly aria-label="Поле формы">
                         </div>
 
                         <div class="col-md-3">
                             <label>Тип</label>
 
                             <select class="form-control"
-                                    th:field="*{alsList[__${item.index}__].lbList[__${lbItem.index}__].type}">
+                                    th:field="*{alsList[__${item.index}__].lbList[__${lbItem.index}__].type}" aria-label="alsList[index].lbList[__${lbItem.index}__].type">
 
                                 <option th:each="type : ${typeList}"
                                         th:value="${type}"
@@ -495,7 +495,7 @@
 
                             <input type="number"
                                    class="form-control"
-                                   th:field="*{alsList[__${item.index}__].lbList[__${lbItem.index}__].countCells}">
+                                   th:field="*{alsList[__${item.index}__].lbList[__${lbItem.index}__].countCells}" aria-label="alsList[index].lbList[__${lbItem.index}__].countCells">
                         </div>
 
                         <div class="col-md-3">
@@ -503,7 +503,7 @@
 
                             <input type="number"
                                    class="form-control"
-                                   th:field="*{alsList[__${item.index}__].lbList[__${lbItem.index}__].width}">
+                                   th:field="*{alsList[__${item.index}__].lbList[__${lbItem.index}__].width}" aria-label="alsList[index].lbList[__${lbItem.index}__].width">
                         </div>
 
                     </div>
