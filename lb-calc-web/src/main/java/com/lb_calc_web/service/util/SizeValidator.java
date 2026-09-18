@@ -3,8 +3,10 @@ package com.lb_calc_web.service.util;
 import com.lb_calc_web.domain.attributes.TypeLb;
 import com.lb_calc_web.dto.ALSDTO;
 import com.lb_calc_web.dto.LBDTO;
+import com.lb_calc_web.dto.LBCDTO;
 import com.lb_calc_web.dto.LCDTO;
 import com.lb_calc_web.dto.ProjectDTO;
+import com.lb_calc_web.domain.equipment.Display;
 import com.lb_calc_web.dto.validation.ValidationResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -391,22 +393,30 @@ public class SizeValidator {
             ValidationResult result,
             ALSDTO als
     ) {
-        if (als.getLC() == null) {
+        boolean hasControlModule =
+                als.getLC() != null || als.getLBC() != null;
+
+        boolean hasStorageModule =
+                (als.getLbList() != null
+                        && !als.getLbList().isEmpty())
+                        || als.getLBC() != null;
+
+        if (!hasControlModule) {
             result.addError(
                     result,
-                    "lc",
-                    "МУ отсутствует",
+                    "controlModule",
+                    "Модуль управления отсутствует",
                     null,
                     null,
                     null
             );
         }
 
-        if (als.getLbList() == null || als.getLbList().isEmpty()) {
+        if (!hasStorageModule) {
             result.addError(
                     result,
-                    "lbList",
-                    "Список МХ пустой",
+                    "storageModules",
+                    "Список модулей хранения пустой",
                     null,
                     null,
                     null
@@ -434,6 +444,31 @@ public class SizeValidator {
                     result,
                     "heightConsistency",
                     "Полезная высота слишком мала для панели управления",
+                    usableHeight,
+                    HEIGHT_LC_PANEL_MIN,
+                    HEIGHT_MAX
+            );
+        }
+    }
+
+    /**
+     * Проверка консистентности LBC.
+     * LBC должен одновременно обеспечивать хранение и панель управления.
+     */
+    static void validateLBCConsistency(
+            ValidationResult result,
+            LBCDTO lbc
+    ) {
+        int usableHeight =
+                lbc.getHeight()
+                        - lbc.getUpperFrame()
+                        - lbc.getBottomFrame();
+
+        if (usableHeight < HEIGHT_LC_PANEL_MIN) {
+            result.addError(
+                    result,
+                    "heightConsistency",
+                    "Полезная высота слишком мала для панели управления LBC",
                     usableHeight,
                     HEIGHT_LC_PANEL_MIN,
                     HEIGHT_MAX
@@ -775,6 +810,294 @@ public class SizeValidator {
     }
 
     /**
+     * Валидация LBC.
+     *
+     * <p>LBC проверяется как storage-модуль и как модуль управления.
+     * Он остаётся одним физическим модулем.</p>
+     */
+    public static ValidationResult validateLBC(LBCDTO lbc) {
+
+        logger.info(
+                "Валидация размеров LBC (id:{} type:{})",
+                lbc.getId(),
+                lbc.getType()
+        );
+
+        ValidationResult result =
+                new ValidationResult(
+                        "LBC",
+                        lbc.getId()
+                );
+
+        validateRange(
+                result,
+                "upperFrame",
+                lbc.getUpperFrame(),
+                UPPER_FRAME_MIN,
+                UPPER_FRAME_MAX,
+                "Верхняя рама"
+        );
+
+        validateRange(
+                result,
+                "bottomFrame",
+                lbc.getBottomFrame(),
+                BOTTOM_FRAME_MIN,
+                BOTTOM_FRAME_MAX,
+                "Нижняя рама"
+        );
+
+        if (lbc.getType() == null || lbc.getType().isBlank()) {
+            result.addError(
+                    result,
+                    "type",
+                    "Тип модуля не указан",
+                    null,
+                    null,
+                    null
+            );
+            logValidationResult(result);
+            return result;
+        }
+
+        validateRange(
+                result,
+                "deltaWidth",
+                lbc.getDeltaWidth(),
+                TYPE_DELTA_WIDTH_MIN,
+                TYPE_DELTA_WIDTH_MAX,
+                "Добавочная ширина"
+        );
+
+        validateRange(
+                result,
+                "shelfThick",
+                lbc.getShelfThick(),
+                TYPE_SHELF_THICK_MIN,
+                TYPE_SHELF_THICK_MAX,
+                "Толщина полки"
+        );
+
+        validateRange(
+                result,
+                "serviceZoneWidth",
+                lbc.getServiceZoneWidth(),
+                TYPE_SERVICE_ZONE_WIDTH_MIN,
+                TYPE_SERVICE_ZONE_WIDTH_MAX,
+                "Ширина сервисной зоны"
+        );
+
+        TypeLb typeLb;
+
+        try {
+            typeLb = new TypeLb(
+                    lbc.getType(),
+                    lbc.getDeltaWidth(),
+                    lbc.getShelfThick(),
+                    lbc.getServiceZoneWidth()
+            );
+        } catch (IllegalArgumentException e) {
+            result.addError(
+                    result,
+                    "type",
+                    "Некорректные параметры типа LBC: "
+                            + e.getMessage(),
+                    null,
+                    null,
+                    null
+            );
+            logValidationResult(result);
+            return result;
+        }
+
+        int heightMin =
+                Math.max(
+                        HEIGHT_MIN,
+                        HEIGHT_CELL_MIN
+                                + lbc.getUpperFrame()
+                                + lbc.getBottomFrame()
+                );
+
+        validateRange(
+                result,
+                "height",
+                lbc.getHeight(),
+                heightMin,
+                HEIGHT_MAX,
+                "Высота модуля"
+        );
+
+        validateRange(
+                result,
+                "depth",
+                lbc.getDepth(),
+                DEPTH_MIN,
+                DEPTH_MAX,
+                "Глубина модуля"
+        );
+
+        int storageWidthMin =
+                WIDTH_CELL_MIN
+                        + typeLb.getDeltaWidth();
+
+        int controlWidthMin =
+                requiredLBCControlWidth(
+                        lbc.getDisplay()
+                );
+
+        int widthMin =
+                Math.max(
+                        storageWidthMin,
+                        controlWidthMin
+                );
+
+        validateRange(
+                result,
+                "width",
+                lbc.getWidth(),
+                widthMin,
+                WIDTH_MAX,
+                "Ширина модуля"
+        );
+
+        validateRange(
+                result,
+                "doorThickness",
+                lbc.getDoorThickness(),
+                DOOR_THICKNESS_MIN,
+                DOOR_THICKNESS_MAX,
+                "Толщина дверцы"
+        );
+
+        int usableHeight =
+                lbc.getHeight()
+                        - lbc.getUpperFrame()
+                        - lbc.getBottomFrame();
+
+        if (usableHeight > 0) {
+            int calculatedCountCellsMax =
+                    (usableHeight + typeLb.getShelfThick())
+                            / (HEIGHT_CELL_MIN + typeLb.getShelfThick());
+
+            int countCellsMax =
+                    Math.min(
+                            calculatedCountCellsMax,
+                            COUNT_CELLS_MAX
+                    );
+
+            validateRange(
+                    result,
+                    "countCells",
+                    lbc.getCountCells(),
+                    COUNT_CELLS_MIN,
+                    countCellsMax,
+                    "Количество ячеек"
+            );
+        }
+
+        if (lbc.getCountCells() > 0) {
+            double heightCell =
+                    (
+                            lbc.getHeight()
+                                    - lbc.getUpperFrame()
+                                    - lbc.getBottomFrame()
+                                    - (lbc.getCountCells() - 1)
+                                    * typeLb.getShelfThick()
+                    ) / (double) lbc.getCountCells();
+
+            if (heightCell < HEIGHT_CELL_MIN) {
+                result.addError(
+                        result,
+                        "heightCell",
+                        "Высота ячейки меньше допустимой",
+                        String.format("%.2f", heightCell),
+                        HEIGHT_CELL_MIN,
+                        lbc.getHeight()
+                );
+            }
+
+            int depthCell =
+                    lbc.getDepth() - lbc.getDoorThickness();
+
+            if (depthCell < DEPTH_CELL_MIN) {
+                result.addError(
+                        result,
+                        "depthCell",
+                        "Глубина ячейки меньше допустимой",
+                        depthCell,
+                        DEPTH_CELL_MIN,
+                        DEPTH_CELL_MAX
+                );
+            } else if (depthCell > DEPTH_CELL_MAX) {
+                result.addError(
+                        result,
+                        "depthCell",
+                        "Глубина ячейки больше допустимой",
+                        depthCell,
+                        DEPTH_CELL_MIN,
+                        DEPTH_CELL_MAX
+                );
+            }
+
+            int widthCell =
+                    lbc.getWidth() - typeLb.getDeltaWidth();
+
+            int widthCellMax =
+                    WIDTH_MAX - typeLb.getDeltaWidth();
+
+            if (widthCell < WIDTH_CELL_MIN) {
+                result.addError(
+                        result,
+                        "widthCell",
+                        "Ширина ячейки меньше допустимой",
+                        widthCell,
+                        WIDTH_CELL_MIN,
+                        widthCellMax
+                );
+            } else if (widthCell > widthCellMax) {
+                result.addError(
+                        result,
+                        "widthCell",
+                        "Ширина ячейки больше допустимой",
+                        widthCell,
+                        WIDTH_CELL_MIN,
+                        widthCellMax
+                );
+            }
+        }
+
+        validateLBCConsistency(
+                result,
+                lbc
+        );
+
+        logValidationResult(result);
+        return result;
+    }
+
+    private static int requiredLBCControlWidth(String displayName) {
+        if (displayName == null || displayName.isBlank()) {
+            return 0;
+        }
+
+        if (displayName.equals(Display.NONE.getName())) {
+            return 0;
+        }
+
+        return List.of(
+                        Display.LC10,
+                        Display.LC17,
+                        Display.LC19
+                )
+                .stream()
+                .filter(display ->
+                        display.getName().equals(displayName))
+                .mapToInt(Display::getWidth)
+                .findFirst()
+                .orElse(0);
+    }
+
+    /**
      * Валидация LC.
      */
     public static ValidationResult validateLC(LCDTO lc) {
@@ -922,6 +1245,12 @@ public class SizeValidator {
             );
         }
 
+        if (als.getLBC() != null) {
+            results.add(
+                    validateLBC(als.getLBC())
+            );
+        }
+
         if (als.getLbList() != null) {
             for (LBDTO lb : als.getLbList()) {
                 results.add(
@@ -1034,6 +1363,15 @@ public class SizeValidator {
         );
     }
 
+    public static List<String> getErrorValidateLBCSizesList(
+            LBCDTO lbc
+    ) {
+        return convertValidationResultToStrings(
+                validateLBC(lbc)
+        );
+    }
+
+
     public static List<List<String>> getErrorValidateLBSizesLists(
             ALSDTO als
     ) {
@@ -1075,13 +1413,23 @@ public class SizeValidator {
             List<String> alsErrors =
                     getErrorValidateALSSizesList(als);
 
-            List<String> lcErrors =
-                    getErrorValidateLCSizesList(
-                            als.getLC()
-                    );
+            List<String> controlErrors =
+                    als.getLBC() != null
+                            ? getErrorValidateLBCSizesList(als.getLBC())
+                            : als.getLC() != null
+                            ? getErrorValidateLCSizesList(als.getLC())
+                            : List.of();
 
             List<List<String>> lbErrors =
                     getErrorValidateLBSizesLists(als);
+
+            if (als.getLBC() != null) {
+                lbErrors.add(
+                        getErrorValidateLBCSizesList(
+                                als.getLBC()
+                        )
+                );
+            }
 
             List<List<String>> alsErrorsNested =
                     new ArrayList<>();
@@ -1090,7 +1438,7 @@ public class SizeValidator {
                     new ArrayList<>();
 
             alsErrorsNested.add(alsErrors);
-            lcErrorsNested.add(lcErrors);
+            lcErrorsNested.add(controlErrors);
 
             List<List<List<String>>> alsResult =
                     new ArrayList<>();
@@ -1101,7 +1449,7 @@ public class SizeValidator {
 
             if (
                     alsErrors.isEmpty()
-                            && lcErrors.isEmpty()
+                            && controlErrors.isEmpty()
                             && lbErrors.isEmpty()
             ) {
                 validCount++;
