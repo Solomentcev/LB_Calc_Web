@@ -45,6 +45,8 @@ public class Project {
     }
 
     public void removeALS(ALS als) {
+        Objects.requireNonNull(als, "ALS не должен быть null");
+
         Integer quantity = quantityALS.get(als);
 
         if (quantity == null) {
@@ -72,12 +74,13 @@ public class Project {
             );
         }
 
-        quantityALS.put(newALS, quantity);
+        quantityALS.merge(newALS, quantity, Integer::sum);
 
         update();
     }
 
     public int getQuantity(ALS als) {
+        Objects.requireNonNull(als, "ALS не должен быть null");
         return quantityALS.getOrDefault(als, 0);
     }
 
@@ -179,12 +182,13 @@ public class Project {
                 );
             }
 
-            project.quantityALS.put(
+            project.quantityALS.merge(
                     Objects.requireNonNull(
                             entry.getKey(),
                             "ALS не должен быть null"
                     ),
-                    quantity
+                    quantity,
+                    Integer::sum
             );
         }
 
