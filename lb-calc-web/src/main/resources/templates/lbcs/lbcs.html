@@ -1,0 +1,33 @@
+
+<!DOCTYPE html>
+<html lang="ru" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><title>LBC</title>
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" crossorigin="anonymous">
+</head>
+<body>
+<div th:replace="~{header :: header}"></div>
+<div class="container-fluid">
+    <h1>Комбинированные модули LBC</h1>
+    <a th:href="@{/lbcs/create}" class="btn btn-primary btn-sm mb-3">Создать LBC</a>
+    <table class="table table-striped table-responsive-md">
+        <thead><tr>
+            <th>ID</th><th>Название</th><th>Тип</th><th>Ячейки</th>
+            <th>Размеры В×Ш×Г</th><th>Display</th><th>Payment</th><th>Действие</th>
+        </tr></thead>
+        <tbody>
+        <tr th:each="lbc : ${lbcs}">
+            <td th:text="${lbc.id}">ID</td>
+            <td th:text="${lbc.name}">Name</td>
+            <td th:text="${lbc.type}">Type</td>
+            <td th:text="${lbc.countCells}">Cells</td>
+            <td th:text="${lbc.height + ' × ' + lbc.width + ' × ' + lbc.depth}">Size</td>
+            <td th:text="${lbc.display}">Display</td>
+            <td th:text="${lbc.payment}">Payment</td>
+            <td><a th:href="@{/lbcs/{id}(id=${lbc.id})}" class="btn btn-primary btn-sm">Редактировать</a></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+<div th:replace="~{footer :: footer}"></div>
+</body>
+</html>

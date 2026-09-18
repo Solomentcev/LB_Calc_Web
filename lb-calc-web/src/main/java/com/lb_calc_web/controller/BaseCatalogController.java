@@ -1,8 +1,11 @@
 package com.lb_calc_web.controller;
 
+import com.lb_calc_web.domain.attributes.AccessMethod;
 import com.lb_calc_web.domain.attributes.Colors;
 import com.lb_calc_web.domain.attributes.DirectionDoorOpening;
 import com.lb_calc_web.domain.attributes.Payment;
+import com.lb_calc_web.domain.attributes.PrintOption;
+import com.lb_calc_web.domain.attributes.PositionControlModule;
 import com.lb_calc_web.domain.attributes.PositionLC;
 import com.lb_calc_web.domain.equipment.BarReader;
 import com.lb_calc_web.domain.equipment.Display;
@@ -23,8 +26,28 @@ public abstract class BaseCatalogController {
     /**
      * Положение модуля управления внутри ALS.
      */
+    protected final List<PositionControlModule>
+            positionControlModuleList =
+            Arrays.asList(PositionControlModule.values());
+
+    /**
+     * Старое имя оставлено для совместимости старых шаблонов.
+     */
+    @Deprecated
     protected final List<PositionLC> positionLCList =
             Arrays.asList(PositionLC.values());
+
+    /**
+     * Способы доступа LBC.
+     */
+    protected final List<AccessMethod> accessMethodList =
+            Arrays.asList(AccessMethod.values());
+
+    /**
+     * Варианты печати LBC.
+     */
+    protected final List<PrintOption> printOptionList =
+            Arrays.asList(PrintOption.values());
 
     /**
      * Способы оплаты.
@@ -79,9 +102,26 @@ public abstract class BaseCatalogController {
         return colorsList;
     }
 
+    @ModelAttribute("positionControlModuleList")
+    public List<PositionControlModule>
+    positionControlModuleList() {
+        return positionControlModuleList;
+    }
+
+    @Deprecated
     @ModelAttribute("positionLCList")
     public List<PositionLC> positionLCList() {
         return positionLCList;
+    }
+
+    @ModelAttribute("accessMethodList")
+    public List<AccessMethod> accessMethodList() {
+        return accessMethodList;
+    }
+
+    @ModelAttribute("printOptionList")
+    public List<PrintOption> printOptionList() {
+        return printOptionList;
     }
 
     @ModelAttribute("paymentList")

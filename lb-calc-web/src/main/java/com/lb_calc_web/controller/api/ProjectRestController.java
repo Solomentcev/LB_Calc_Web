@@ -2,6 +2,7 @@ package com.lb_calc_web.controller.api;
 
 import com.lb_calc_web.controller.api.response.ApiResponse;
 import com.lb_calc_web.dto.ALSDTO;
+import com.lb_calc_web.dto.LBCDTO;
 import com.lb_calc_web.dto.LBDTO;
 import com.lb_calc_web.dto.LCDTO;
 import com.lb_calc_web.dto.ProjectDTO;
@@ -422,6 +423,114 @@ public class ProjectRestController {
 
             return badRequest(
                     "LC validation failed",
+                    e.getErrors()
+            );
+        }
+    }
+
+    /**
+     * Заменить control-модуль ALS проекта новым LBC.
+     */
+    @PostMapping(
+            "/{projectId}/als/{alsId}/replace-lbc"
+    )
+    @Operation(
+            summary = "Заменить control-модуль ALS на LBC"
+    )
+    public ResponseEntity<?> replaceLBC(
+            @PathVariable Long projectId,
+            @PathVariable Long alsId
+    ) {
+        try {
+            ALSDTO saved =
+                    projectService.replaceWithNewLBCAtProject(
+                            projectId,
+                            alsId
+                    );
+
+            return ResponseEntity.ok(
+                    ApiResponse.success(
+                            "LBC added to ALS successfully",
+                            saved
+                    )
+            );
+        } catch (NoSuchElementException e) {
+            return notFound(e);
+        } catch (ValidationSizeException e) {
+            return badRequest(
+                    "LBC validation failed",
+                    e.getErrors()
+            );
+        }
+    }
+
+    /**
+     * Получить LBC проекта.
+     */
+    @GetMapping(
+            "/{projectId}/als/{alsId}/lbc/{lbcId}"
+    )
+    @Operation(
+            summary = "Получить LBC ALS проекта"
+    )
+    public ResponseEntity<?> getLBC(
+            @PathVariable Long projectId,
+            @PathVariable Long alsId,
+            @PathVariable Long lbcId
+    ) {
+        try {
+            LBCDTO lbc =
+                    projectService.findLBCInProject(
+                            projectId,
+                            alsId,
+                            lbcId
+                    );
+
+            return ResponseEntity.ok(
+                    ApiResponse.success(lbc)
+            );
+        } catch (NoSuchElementException e) {
+            return notFound(e);
+        }
+    }
+
+    /**
+     * Обновить LBC проекта.
+     */
+    @PutMapping(
+            "/{projectId}/als/{alsId}/lbc/{lbcId}"
+    )
+    @Operation(
+            summary = "Обновить LBC ALS проекта"
+    )
+    public ResponseEntity<?> updateLBC(
+            @PathVariable Long projectId,
+            @PathVariable Long alsId,
+            @PathVariable Long lbcId,
+            @RequestBody LBCDTO lbc
+    ) {
+        try {
+            lbc.setId(lbcId);
+
+            LBCDTO saved =
+                    projectService.saveLBCAtProject(
+                            projectId,
+                            alsId,
+                            lbcId,
+                            lbc
+                    );
+
+            return ResponseEntity.ok(
+                    ApiResponse.success(
+                            "LBC updated successfully",
+                            saved
+                    )
+            );
+        } catch (NoSuchElementException e) {
+            return notFound(e);
+        } catch (ValidationSizeException e) {
+            return badRequest(
+                    "LBC validation failed",
                     e.getErrors()
             );
         }

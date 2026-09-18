@@ -1,6 +1,7 @@
 package com.lb_calc_web.controller;
 
 import com.lb_calc_web.dto.ALSDTO;
+import com.lb_calc_web.dto.LBCDTO;
 import com.lb_calc_web.dto.LBDTO;
 import com.lb_calc_web.dto.LCDTO;
 import com.lb_calc_web.dto.ProjectDTO;
@@ -333,6 +334,104 @@ public class ProjectController
     }
 
     /**
+     * Форма редактирования LBC.
+     */
+    @GetMapping(
+            "/{projectId}/alss/{alsId}/lbcs/{lbcId}"
+    )
+    public String editLBC(
+            @PathVariable Long projectId,
+            @PathVariable Long alsId,
+            @PathVariable Long lbcId,
+            Model model
+    ) {
+        ProjectDTO project =
+                projectService.findById(projectId);
+
+        ALSDTO als =
+                projectService.findALSInProject(
+                        projectId,
+                        alsId
+                );
+
+        LBCDTO lbc =
+                projectService.findLBCInProject(
+                        projectId,
+                        alsId,
+                        lbcId
+                );
+
+        model.addAttribute("project", project);
+        model.addAttribute("als", als);
+        model.addAttribute("lbc", lbc);
+        model.addAttribute("projectId", projectId);
+        model.addAttribute("alsId", alsId);
+        model.addAttribute("lbcId", lbcId);
+
+        return "projects/project_lbc";
+    }
+
+    /**
+     * Сохранение LBC в ALS проекта.
+     */
+    @PostMapping(
+            "/{projectId}/alss/{alsId}/lbcs/{lbcId}/save"
+    )
+    public String saveLBC(
+            @PathVariable Long projectId,
+            @PathVariable Long alsId,
+            @PathVariable Long lbcId,
+            @ModelAttribute("lbc") LBCDTO lbc,
+            Model model
+    ) {
+        try {
+            lbc.setId(lbcId);
+
+            projectService.saveLBCAtProject(
+                    projectId,
+                    alsId,
+                    lbcId,
+                    lbc
+            );
+
+            return "redirect:/projects/"
+                    + projectId
+                    + "/alss/"
+                    + alsId;
+
+        } catch (ValidationSizeException e) {
+            model.addAttribute(
+                    "errors",
+                    e.getErrors()
+            );
+
+            model.addAttribute(
+                    "project",
+                    projectService.findById(projectId)
+            );
+
+            model.addAttribute(
+                    "als",
+                    projectService.findALSInProject(
+                            projectId,
+                            alsId
+                    )
+            );
+
+            model.addAttribute(
+                    "lbc",
+                    lbc
+            );
+
+            model.addAttribute("projectId", projectId);
+            model.addAttribute("alsId", alsId);
+            model.addAttribute("lbcId", lbcId);
+
+            return "projects/project_lbc";
+        }
+    }
+
+    /**
      * Форма редактирования LB.
      */
     @GetMapping(
@@ -440,6 +539,28 @@ public class ProjectController
 
             return "projects/project_lb";
         }
+    }
+
+    /**
+     * Заменяет control-модуль ALS проекта на новый LBC.
+     */
+    @PostMapping(
+            "/{projectId}/alss/{alsId}/replaceLBC"
+    )
+    public String replaceLBC(
+            @PathVariable Long projectId,
+            @PathVariable Long alsId
+    ) {
+        ALSDTO als =
+                projectService.replaceWithNewLBCAtProject(
+                        projectId,
+                        alsId
+                );
+
+        return "redirect:/projects/"
+                + projectId
+                + "/alss/"
+                + als.getId();
     }
 
     /**

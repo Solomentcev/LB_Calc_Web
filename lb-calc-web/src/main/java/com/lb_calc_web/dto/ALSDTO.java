@@ -1,6 +1,8 @@
 package com.lb_calc_web.dto;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,23 +35,29 @@ public class ALSDTO {
     private LCDTO lc;
 
     /**
+     * Комбинированный модуль.
      * LBC одновременно является storage- и control-модулем.
      */
     private LBCDTO lbc;
 
     /**
-     * Положение модуля управления.
+     * Положение единственного модуля управления.
+     *
+     * <p>Название обобщено, поскольку control-модулем может быть
+     * как LC, так и LBC.</p>
      */
-    private String positionLC;
+    @JsonProperty("positionControlModule")
+    @JsonAlias("positionLC")
+    private String positionControlModule;
 
     /**
-     * Список LB для текущего API-представления ALS.
+     * Список обычных LB.
+     *
+     * <p>LBC хранится отдельно в DTO, но на уровне Domain
+     * он также входит в storage-модули ALS.</p>
      */
     private List<LBDTO> lbList = new ArrayList<>();
 
-    /**
-     * Количество одинаковых LB.
-     */
     @JsonIgnore
     private Map<LBDTO, Integer> quantityLB = new HashMap<>();
 
@@ -171,12 +179,30 @@ public class ALSDTO {
         this.lbc = lbc;
     }
 
-    public String getPositionLC() {
-        return positionLC;
+    public String getPositionControlModule() {
+        return positionControlModule;
     }
 
+    public void setPositionControlModule(
+            String positionControlModule
+    ) {
+        this.positionControlModule = positionControlModule;
+    }
+
+    /**
+     * Обратная совместимость с прежним именованием.
+     */
+    @Deprecated
+    public String getPositionLC() {
+        return getPositionControlModule();
+    }
+
+    /**
+     * Обратная совместимость с прежним именованием.
+     */
+    @Deprecated
     public void setPositionLC(String positionLC) {
-        this.positionLC = positionLC;
+        setPositionControlModule(positionLC);
     }
 
     public List<LBDTO> getLbList() {
@@ -184,7 +210,10 @@ public class ALSDTO {
     }
 
     public void setLbList(List<LBDTO> lbList) {
-        this.lbList = lbList;
+        this.lbList =
+                lbList == null
+                        ? new ArrayList<>()
+                        : lbList;
     }
 
     public Map<LBDTO, Integer> getQuantityLB() {
@@ -192,7 +221,10 @@ public class ALSDTO {
     }
 
     public void setQuantityLB(Map<LBDTO, Integer> quantityLB) {
-        this.quantityLB = quantityLB;
+        this.quantityLB =
+                quantityLB == null
+                        ? new HashMap<>()
+                        : quantityLB;
     }
 
     public String getStringALSImage() {
@@ -224,11 +256,23 @@ public class ALSDTO {
                 && countCells == alsdto.countCells
                 && Objects.equals(lc, alsdto.lc)
                 && Objects.equals(lbc, alsdto.lbc)
-                && Objects.equals(positionLC, alsdto.positionLC)
-                && Objects.equals(colorDoor, alsdto.colorDoor)
-                && Objects.equals(colorBody, alsdto.colorBody)
+                && Objects.equals(
+                positionControlModule,
+                alsdto.positionControlModule
+        )
+                && Objects.equals(
+                colorDoor,
+                alsdto.colorDoor
+        )
+                && Objects.equals(
+                colorBody,
+                alsdto.colorBody
+        )
                 && Objects.equals(lbList, alsdto.lbList)
-                && Objects.equals(quantityLB, alsdto.quantityLB);
+                && Objects.equals(
+                quantityLB,
+                alsdto.quantityLB
+        );
     }
 
     @Override
@@ -243,7 +287,7 @@ public class ALSDTO {
                 countCells,
                 lc,
                 lbc,
-                positionLC,
+                positionControlModule,
                 colorDoor,
                 colorBody,
                 lbList,
@@ -266,7 +310,8 @@ public class ALSDTO {
                 ", countCells=" + countCells +
                 ", lc=" + lc +
                 ", lbc=" + lbc +
-                ", positionLC='" + positionLC + '\'' +
+                ", positionControlModule='" +
+                positionControlModule + '\'' +
                 ", colorDoor='" + colorDoor + '\'' +
                 ", colorBody='" + colorBody + '\'' +
                 ", lbList=" + lbList +

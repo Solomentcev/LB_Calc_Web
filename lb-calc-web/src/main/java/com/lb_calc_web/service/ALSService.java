@@ -2,9 +2,14 @@ package com.lb_calc_web.service;
 
 import com.lb_calc_web.domain.attributes.Colors;
 import com.lb_calc_web.dto.ALSDTO;
+import com.lb_calc_web.dto.LBCDTO;
 import com.lb_calc_web.dto.LBDTO;
 import com.lb_calc_web.dto.LCDTO;
 import com.lb_calc_web.entity.ALSEntity;
+import com.lb_calc_web.entity.ALSModuleEntity;
+import com.lb_calc_web.entity.LBEntity;
+import com.lb_calc_web.entity.LBCEntity;
+import com.lb_calc_web.entity.LCEntity;
 import com.lb_calc_web.entity.ModuleEntity;
 import com.lb_calc_web.handler.ValidationSizeException;
 import com.lb_calc_web.mapper.dto.ALSDtoMapper;
@@ -36,6 +41,7 @@ public class ALSService {
     private final ModuleEntityRepository moduleRepository;
     private final LBService lbService;
     private final LCService lcService;
+    private final LBCService lbcService;
     private final Environment environment;
 
     public ALSService(
@@ -43,12 +49,14 @@ public class ALSService {
             ModuleEntityRepository moduleRepository,
             LBService lbService,
             LCService lcService,
+            LBCService lbcService,
             Environment environment
     ) {
         this.alsRepository = alsRepository;
         this.moduleRepository = moduleRepository;
         this.lbService = lbService;
         this.lcService = lcService;
+        this.lbcService = lbcService;
         this.environment = environment;
     }
 
@@ -63,8 +71,7 @@ public class ALSService {
                                 ALSEntity::getId
                         )
                 )
-                .map(ALSEntityMapper::toDomain)
-                .map(ALSDtoMapper::toDto)
+                .map(this::toDto)
                 .toList();
     }
 
@@ -85,9 +92,7 @@ public class ALSService {
                                 )
                         );
 
-        return ALSDtoMapper.toDto(
-                ALSEntityMapper.toDomain(entity)
-        );
+        return toDto(entity);
     }
 
     /**
@@ -157,9 +162,10 @@ public class ALSService {
                 colorDoor.name()
         );
 
-        als.setPositionLC(
-                getRequired(
-                        "als.position.lc.default"
+        als.setPositionControlModule(
+                environment.getProperty(
+                        "als.position.control-module.default",
+                        getRequired("als.position.lc.default")
                 )
         );
 
@@ -209,9 +215,11 @@ public class ALSService {
                     duplicate.get().getId()
             );
 
-            return ALSDtoMapper.toDto(
-                    ALSEntityMapper.toDomain(
-                            duplicate.get()
+            return addALSImage(
+                    ALSDtoMapper.toDto(
+                            ALSEntityMapper.toDomain(
+                                    duplicate.get()
+                            )
                     )
             );
         }
@@ -252,8 +260,10 @@ public class ALSService {
                 saved.getId()
         );
 
-        return ALSDtoMapper.toDto(
-                ALSEntityMapper.toDomain(saved)
+        return addALSImage(
+                ALSDtoMapper.toDto(
+                        ALSEntityMapper.toDomain(saved)
+                )
         );
     }
 
@@ -350,32 +360,137 @@ public class ALSService {
             ALSDTO als,
             LCDTO lc
     ) {
+        Objects.requireNonNull(
+                als,
+                "ALS не должен быть null"
+        );
+
+        Objects.requireNonNull(
+                lc,
+                "LC не должен быть null"
+        );
+
         als.setLC(lc);
+        als.setLBC(null);
 
         recalculateDto(als);
 
         return saveALS(als);
     }
 
+    /**
+     * Заменяет текущий control-модуль ALS на LBC.
+     *
+     * <p>LBC при этом остаётся одним физическим модулем,
+     * но одновременно учитывается как control и storage.</p>
+     */
+    @Transactional
+    public ALSDTO replaceLBCandSaveALS(
+            ALSDTO als,
+            LBCDTO lbc
+    ) {
+        Objects.requireNonNull(
+                als,
+                "ALS не должен быть null"
+        );
+
+        Objects.requireNonNull(
+                lbc,
+                "LBC не должен быть null"
+        );
+
+        als.setLBC(lbc);
+        als.setLC(null);
+
+        recalculateDto(als);
+
+        return saveALS(als);
+    }
+
+    /**
+     * Создаёт новый LBC на базе общих параметров ALS
+     * и заменяет текущий control-модуль.
+     */
+    @Transactional
+    public ALSDTO replaceWithNewLBCandSaveALS(
+            Long alsId
+    ) {
+        ALSDTO als =
+                findById(alsId);
+
+        LBCDTO lbc =
+                lbcService.createLBC(
+                        als.getHeight(),
+                        als.getDepth(),
+                        als.getUpperFrame(),
+                        als.getBottomFrame(),
+                        Colors.valueOf(
+                                als.getColorBody()
+                        ),
+                        Colors.valueOf(
+                                als.getColorDoor()
+                        )
+                );
+
+        return replaceLBCandSaveALS(
+                als,
+                lbc
+        );
+    }
+
     private void saveChildModules(
             ALSDTO dto
     ) {
-        dto.setLC(
-                lcService.saveLC(
-                        dto.getLC()
-                )
-        );
+        if (dto.getLC() != null && dto.getLBC() != null) {
+            throw new IllegalArgumentException(
+                    "ALS не может одновременно содержать LC и LBC"
+            );
+        }
+
+        if (dto.getLC() != null) {
+            dto.setLC(
+                    lcService.saveLC(
+                            dto.getLC()
+                    )
+            );
+        }
+
+        if (dto.getLBC() != null) {
+            dto.getLBC().setDirectionDoorOpening(
+                    getLBCDoorDirection(
+                            dto.getPositionControlModule()
+                    )
+            );
+
+            dto.setLBC(
+                    lbcService.saveLBC(
+                            dto.getLBC()
+                    )
+            );
+        }
 
         List<LBDTO> savedLBs =
                 new ArrayList<>();
 
-        for (LBDTO lb : dto.getLbList()) {
-            savedLBs.add(
-                    lbService.saveLB(lb)
-            );
+        if (dto.getLbList() != null) {
+            for (LBDTO lb : dto.getLbList()) {
+                savedLBs.add(
+                        lbService.saveLB(lb)
+                );
+            }
         }
 
         dto.setLbList(savedLBs);
+    }
+
+    private String getLBCDoorDirection(
+            String position
+    ) {
+        if ("LEFT".equals(position)) {
+            return "RIGHT";
+        }
+
+        return "LEFT";
     }
 
     private void validate(
@@ -519,32 +634,44 @@ public class ALSService {
     private void recalculateDto(
             ALSDTO dto
     ) {
-        int width =
-                dto.getLC() != null
-                        ? dto.getLC().getWidth()
-                        : 0;
-
+        int width = 0;
         int countCells = 0;
         int minDepthCell = Integer.MAX_VALUE;
 
-        for (LBDTO lb : dto.getLbList()) {
-            width += lb.getWidth();
+        if (dto.getLC() != null) {
+            width += dto.getLC().getWidth();
+        }
 
-            countCells +=
-                    lb.getCountCells();
+        if (dto.getLBC() != null) {
+            width += dto.getLBC().getWidth();
+            countCells += dto.getLBC().getCountCells();
 
-            if (lb.getDepthCell() > 0) {
+            if (dto.getLBC().getDepthCell() > 0) {
                 minDepthCell =
                         Math.min(
                                 minDepthCell,
-                                lb.getDepthCell()
+                                dto.getLBC().getDepthCell()
                         );
+            }
+        }
+
+        if (dto.getLbList() != null) {
+            for (LBDTO lb : dto.getLbList()) {
+                width += lb.getWidth();
+                countCells += lb.getCountCells();
+
+                if (lb.getDepthCell() > 0) {
+                    minDepthCell =
+                            Math.min(
+                                    minDepthCell,
+                                    lb.getDepthCell()
+                            );
+                }
             }
         }
 
         dto.setWidth(width);
         dto.setCountCells(countCells);
-
         dto.setDepthCell(
                 minDepthCell == Integer.MAX_VALUE
                         ? 0
@@ -557,10 +684,21 @@ public class ALSService {
                         + " ячеек"
         );
 
-        String lcDescription =
-                dto.getLC() == null
-                        ? ""
-                        : dto.getLC().getDescription();
+        String controlDescription = "";
+
+        if (dto.getLBC() != null) {
+            controlDescription =
+                    dto.getLBC().getDescription();
+        } else if (dto.getLC() != null) {
+            controlDescription =
+                    dto.getLC().getDescription();
+        }
+
+        int storageModuleCount =
+                dto.getLbList() == null
+                        ? 0
+                        : dto.getLbList().size()
+                                + (dto.getLBC() != null ? 1 : 0);
 
         dto.setDescription(
                 "АКХ на "
@@ -576,10 +714,81 @@ public class ALSService {
                         + "/"
                         + dto.getColorDoor()
                         + "; Модулей хранения: "
-                        + dto.getLbList().size()
+                        + storageModuleCount
                         + " шт.;\n"
-                        + lcDescription
+                        + controlDescription
         );
+    }
+
+    /**
+     * Entity -> DTO с восстановлением persistence-ID дочерних модулей.
+     *
+     * <p>ID не входят в domain-модель, поэтому обогащение выполняется
+     * здесь, на границе persistence/application.</p>
+     */
+    ALSDTO toDto(ALSEntity entity) {
+        ALSDTO dto =
+                ALSDtoMapper.toDto(
+                        ALSEntityMapper.toDomain(entity)
+                );
+
+        enrichModuleIds(
+                dto,
+                entity
+        );
+
+        return addALSImage(dto);
+    }
+
+    void enrichModuleIds(
+            ALSDTO dto,
+            ALSEntity entity
+    ) {
+        int lbIndex = 0;
+
+        List<ALSModuleEntity> associations =
+                entity.getModules()
+                        .stream()
+                        .sorted(
+                                Comparator.comparingInt(
+                                        ALSModuleEntity::getModuleOrder
+                                )
+                        )
+                        .toList();
+
+        for (ALSModuleEntity association : associations) {
+            ModuleEntity module =
+                    association.getModule();
+
+            if (module instanceof LBCEntity
+                    && dto.getLBC() != null) {
+                dto.getLBC().setId(module.getId());
+                continue;
+            }
+
+            if (module instanceof LCEntity
+                    && dto.getLC() != null) {
+                dto.getLC().setId(module.getId());
+                continue;
+            }
+
+            if (module instanceof LBEntity
+                    && dto.getLbList() != null
+                    && lbIndex < dto.getLbList().size()) {
+                dto.getLbList()
+                        .get(lbIndex++)
+                        .setId(module.getId());
+            }
+        }
+    }
+
+    private ALSDTO addALSImage(
+            ALSDTO dto
+    ) {
+        dto.setStringALSImage(
+                ALSImageService.getStringALSImage(dto)
+        );
+        return dto;
     }
 
     private String getRequired(

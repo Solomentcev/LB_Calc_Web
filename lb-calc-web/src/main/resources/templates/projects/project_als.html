@@ -90,12 +90,12 @@
                 <div class="row mt-3">
 
                     <div class="col-md-2">
-                        <label>Положение LC</label>
+                        <label>Положение control-модуля</label>
 
                         <select class="form-control"
-                                th:field="*{positionLC}" aria-label="positionLC">
+                                th:field="*{positionControlModule}" aria-label="positionControlModule">
 
-                            <option th:each="position : ${positionLCList}"
+                            <option th:each="position : ${positionControlModuleList}"
                                     th:value="${position}"
                                     th:text="${position}">
                             </option>
@@ -277,6 +277,87 @@
 
             </div>
 
+        </div>
+
+
+        <!-- LBC -->
+
+        <div th:if="${als.LBC != null}"
+             class="card mb-4">
+
+            <div class="card-header">
+                <h4 th:text="${'LBC — ' + als.LBC.name}">
+                    LBC
+                </h4>
+            </div>
+
+            <div class="card-body">
+                <input type="hidden" th:field="*{lbc.id}">
+                <input type="hidden" th:field="*{lbc.name}">
+                <input type="hidden" th:field="*{lbc.description}">
+                <input type="hidden" th:field="*{lbc.type}">
+                <input type="hidden" th:field="*{lbc.height}">
+                <input type="hidden" th:field="*{lbc.width}">
+                <input type="hidden" th:field="*{lbc.depth}">
+                <input type="hidden" th:field="*{lbc.upperFrame}">
+                <input type="hidden" th:field="*{lbc.bottomFrame}">
+                <input type="hidden" th:field="*{lbc.shelfThick}">
+                <input type="hidden" th:field="*{lbc.deltaWidth}">
+                <input type="hidden" th:field="*{lbc.serviceZoneWidth}">
+                <input type="hidden" th:field="*{lbc.doorThickness}">
+                <input type="hidden" th:field="*{lbc.countCells}">
+                <input type="hidden" th:field="*{lbc.heightCell}">
+                <input type="hidden" th:field="*{lbc.widthCell}">
+                <input type="hidden" th:field="*{lbc.depthCell}">
+                <input type="hidden" th:field="*{lbc.directionDoorOpening}">
+                <input type="hidden" th:field="*{lbc.colorBody}">
+                <input type="hidden" th:field="*{lbc.colorDoor}">
+                <input type="hidden" th:field="*{lbc.display}">
+                <input type="hidden" th:field="*{lbc.barReader}">
+                <input type="hidden" th:field="*{lbc.payment}">
+                <input type="hidden" th:field="*{lbc.printer}">
+                <input type="hidden" th:field="*{lbc.rfidReader}">
+
+                <input type="hidden"
+                       th:each="method, methodStat : ${als.LBC.accessMethods}"
+                       th:name="|lbc.accessMethods[${methodStat.index}]|"
+                       th:value="${method}">
+                <input type="hidden"
+                       th:each="option, optionStat : ${als.LBC.printOptions}"
+                       th:name="|lbc.printOptions[${optionStat.index}]|"
+                       th:value="${option}">
+
+                <div class="row">
+                    <div class="col-md-2">
+                        <strong>ID:</strong>
+                        <span th:text="${als.LBC.id}"></span>
+                    </div>
+                    <div class="col-md-2">
+                        <strong>Тип:</strong>
+                        <span th:text="${als.LBC.type}"></span>
+                    </div>
+                    <div class="col-md-2">
+                        <strong>Ячеек:</strong>
+                        <span th:text="${als.LBC.countCells}"></span>
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Display:</strong>
+                        <span th:text="${als.LBC.display}"></span>
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Payment:</strong>
+                        <span th:text="${als.LBC.payment}"></span>
+                    </div>
+                </div>
+
+                <a th:href="@{/projects/{projectId}/alss/{alsId}/lbcs/{lbcId}(
+                            projectId=${projectId},
+                            alsId=${alsId},
+                            lbcId=${als.LBC.id})}"
+                   class="btn btn-primary btn-sm">
+                    Редактировать LBC
+                </a>
+            </div>
         </div>
 
         <!-- LB -->

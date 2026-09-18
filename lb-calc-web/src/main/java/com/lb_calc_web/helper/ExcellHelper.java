@@ -1,6 +1,7 @@
 package com.lb_calc_web.helper;
 
 import com.lb_calc_web.dto.ALSDTO;
+import com.lb_calc_web.dto.LBCDTO;
 import com.lb_calc_web.dto.LBDTO;
 import com.lb_calc_web.dto.ProjectDTO;
 import com.lb_calc_web.service.util.ALSImageService;
@@ -303,6 +304,17 @@ public class ExcellHelper {
 
         int i = 1;
 
+        if (als.getLBC() != null) {
+            r = lbcRow(
+                    sheet,
+                    als.getLBC(),
+                    1,
+                    i++,
+                    s,
+                    r
+            );
+        }
+
         for (
                 Map.Entry<LBDTO, Integer> entry
                 : als.getQuantityLB().entrySet()
@@ -319,6 +331,50 @@ public class ExcellHelper {
         }
 
         return r + 1;
+    }
+
+    private static int lbcRow(
+            Sheet sheet,
+            LBCDTO lbc,
+            Integer qty,
+            int index,
+            Styles s,
+            int r
+    ) {
+        Row row =
+                sheet.createRow(r++);
+
+        createCell(
+                row,
+                1,
+                "LBC " + index,
+                s.cell
+        );
+
+        createCell(
+                row,
+                2,
+                lbc.getDescription(),
+                s.wrap
+        );
+
+        sheet.addMergedRegion(
+                new CellRangeAddress(
+                        row.getRowNum(),
+                        row.getRowNum(),
+                        2,
+                        3
+                )
+        );
+
+        createCell(
+                row,
+                4,
+                String.valueOf(qty),
+                s.cell
+        );
+
+        return r;
     }
 
     private static int lbRow(
@@ -380,7 +436,7 @@ public class ExcellHelper {
         createCell(
                 row,
                 1,
-                "#",
+                "Модуль",
                 s.tableHeader
         );
 
