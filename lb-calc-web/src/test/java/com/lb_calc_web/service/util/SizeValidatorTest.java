@@ -287,7 +287,7 @@ class SizeValidatorTest {
         SizeValidator.validateLBCellCount(
                 result,
                 lb,
-                TypeLb.TYPE1
+                new TypeLb("TYPE1", 100, 5, 40)
         );
 
         assertTrue(result.isValid());
