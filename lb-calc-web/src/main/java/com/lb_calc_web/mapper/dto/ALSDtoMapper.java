@@ -186,13 +186,16 @@ public final class ALSDtoMapper {
                 storageModules
         );
 
-        PositionControlModule position = PositionControlModule.valueOf(
-                position
-        );
+        PositionControlModule controlPosition =
+                PositionControlModule.valueOf(
+                        position == null || position.isBlank()
+                                ? PositionControlModule.CENTER.name()
+                                : position
+                );
 
         int index;
 
-        switch (position) {
+        switch (controlPosition) {
             case LEFT -> index = 0;
 
             case RIGHT -> index = modules.size();
@@ -200,7 +203,7 @@ public final class ALSDtoMapper {
             case CENTER -> index = modules.size() / 2;
 
             default -> throw new IllegalStateException(
-                    "Неизвестное положение модуля управления: " + position
+                    "Неизвестное положение модуля управления: " + controlPosition
             );
         }
 
