@@ -1,14 +1,14 @@
 package com.lb_calc_web;
 
+import com.lb_calc_web.domain.attributes.Colors;
+import com.lb_calc_web.domain.attributes.Payment;
+import com.lb_calc_web.domain.equipment.BarReader;
+import com.lb_calc_web.domain.model.LC;
 import com.lb_calc_web.dto.ALSDTO;
 import com.lb_calc_web.dto.LBDTO;
 import com.lb_calc_web.dto.LCDTO;
 import com.lb_calc_web.dto.ProjectDTO;
-import com.lb_calc_web.mapper.dto.ALSMapper;
-import com.lb_calc_web.entity.ALS;
-import com.lb_calc_web.entity.LB;
-import com.lb_calc_web.entity.LC;
-import com.lb_calc_web.entity.attributes.*;
+
 import com.lb_calc_web.service.util.ALSImageService;
 import com.lb_calc_web.service.util.SizeValidator;
 

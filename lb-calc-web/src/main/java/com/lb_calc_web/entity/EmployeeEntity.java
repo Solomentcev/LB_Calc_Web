@@ -10,10 +10,10 @@ import java.util.Objects;
  * JPA-сущность сотрудника системы.
  *
  * <p>Содержит персональные данные сотрудника, его роль
- * и хэш пароля для аутентификации.</p>
+ * и зашифрованный пароль для аутентификации.</p>
  *
  * <p>Исходный пароль в базе не хранится.
- * Поле {@code passwordHash} содержит результат работы
+ * Поле {@code encryptedPassword} содержит результат работы
  * {@code PasswordEncoder}.</p>
  */
 @Entity
@@ -57,12 +57,12 @@ public class EmployeeEntity {
     private String email;
 
     /**
-     * Хэш пароля сотрудника.
+     * Зашифрованный пароль сотрудника.
      *
      * <p>Исходный пароль здесь не хранится.</p>
      */
-    @Column(name = "password_hash", nullable = false)
-    private String passwordHash;
+    @Column(name = "encrypted_password", nullable = false)
+    private String encryptedPassword;
 
     /**
      * Дата регистрации сотрудника.
@@ -78,7 +78,7 @@ public class EmployeeEntity {
     private Role role;
 
     /**
-     * Конструктор для JPA и мапперов.
+     * Конструктор для JPA.
      */
     public EmployeeEntity() {
     }
@@ -120,14 +120,14 @@ public class EmployeeEntity {
         );
     }
 
-    public String getPasswordHash() {
-        return passwordHash;
+    public String getEncryptedPassword() {
+        return encryptedPassword;
     }
 
-    public void setPasswordHash(String passwordHash) {
-        this.passwordHash = Objects.requireNonNull(
-                passwordHash,
-                "Хэш пароля не должен быть null"
+    public void setEncryptedPassword(String encryptedPassword) {
+        this.encryptedPassword = Objects.requireNonNull(
+                encryptedPassword,
+                "Зашифрованный пароль не должен быть null"
         );
     }
 
@@ -184,7 +184,7 @@ public class EmployeeEntity {
                 ", firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +
                 ", email='" + email + '\'' +
-                ", passwordHash='[PROTECTED]'" +
+                ", encryptedPassword='[PROTECTED]'" +
                 ", registrationDate=" + registrationDate +
                 ", role=" + role +
                 '}';
