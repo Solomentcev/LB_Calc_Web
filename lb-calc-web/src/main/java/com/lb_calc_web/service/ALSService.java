@@ -164,9 +164,10 @@ public class ALSService {
                 colorDoor.name()
         );
 
-        als.setPositionLC(
-                getRequired(
-                        "als.position.lc.default"
+        als.setPositionControlModule(
+                environment.getProperty(
+                        "als.position.control-module.default",
+                        getRequired("als.position.lc.default")
                 )
         );
 
@@ -216,9 +217,11 @@ public class ALSService {
                     duplicate.get().getId()
             );
 
-            return ALSDtoMapper.toDto(
-                    ALSEntityMapper.toDomain(
-                            duplicate.get()
+            return addALSImage(
+                    ALSDtoMapper.toDto(
+                            ALSEntityMapper.toDomain(
+                                    duplicate.get()
+                            )
                     )
             );
         }
