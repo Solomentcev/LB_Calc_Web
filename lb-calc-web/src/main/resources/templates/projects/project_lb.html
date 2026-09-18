@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml"
+<html lang="ru" xmlns="http://www.w3.org/1999/xhtml"
       xmlns:th="http://www.thymeleaf.org">
 
 <head>
@@ -78,7 +78,7 @@
                         <input type="number"
                                class="form-control"
                                th:field="*{id}"
-                               readonly>
+                               readonly aria-label="id">
                     </div>
 
                     <div class="col-md-5">
@@ -87,14 +87,14 @@
                         <input type="text"
                                class="form-control"
                                th:field="*{name}"
-                               readonly>
+                               readonly aria-label="name">
                     </div>
 
                     <div class="col-md-5">
                         <label>Тип</label>
 
                         <select class="form-control"
-                                th:field="*{type}">
+                                th:field="*{type}" aria-label="type">
 
                             <option th:each="type : ${typeLbList}"
                                     th:value="${type}"
@@ -113,7 +113,7 @@
 
                         <input type="number"
                                class="form-control"
-                               th:field="*{countCells}">
+                               th:field="*{countCells}" aria-label="countCells">
                     </div>
 
                     <div class="col-md-3">
@@ -121,7 +121,7 @@
 
                         <input type="number"
                                class="form-control"
-                               th:field="*{width}">
+                               th:field="*{width}" aria-label="width">
                     </div>
 
                     <div class="col-md-3">
@@ -130,7 +130,7 @@
                         <input type="number"
                                class="form-control"
                                th:field="*{height}"
-                               readonly>
+                               readonly aria-label="height">
                     </div>
 
                     <div class="col-md-3">
@@ -139,7 +139,7 @@
                         <input type="number"
                                class="form-control"
                                th:field="*{depth}"
-                               readonly>
+                               readonly aria-label="depth">
                     </div>
 
                 </div>
@@ -152,7 +152,7 @@
                         <input type="number"
                                class="form-control"
                                th:field="*{heightCell}"
-                               readonly>
+                               readonly aria-label="heightCell">
                     </div>
 
                     <div class="col-md-3">
@@ -161,7 +161,7 @@
                         <input type="number"
                                class="form-control"
                                th:field="*{widthCell}"
-                               readonly>
+                               readonly aria-label="widthCell">
                     </div>
 
                     <div class="col-md-3">
@@ -170,7 +170,7 @@
                         <input type="number"
                                class="form-control"
                                th:field="*{depthCell}"
-                               readonly>
+                               readonly aria-label="depthCell">
                     </div>
 
                     <div class="col-md-3">
@@ -179,7 +179,7 @@
                         <input type="number"
                                class="form-control"
                                th:field="*{shelfThick}"
-                               readonly>
+                               readonly aria-label="shelfThick">
                     </div>
 
                 </div>
@@ -192,7 +192,7 @@
                         <input type="text"
                                class="form-control"
                                th:field="*{directionDoorOpening}"
-                               readonly>
+                               readonly aria-label="directionDoorOpening">
                     </div>
 
                     <div class="col-md-3">
@@ -201,7 +201,7 @@
                         <input type="text"
                                class="form-control"
                                th:field="*{colorBody}"
-                               readonly>
+                               readonly aria-label="colorBody">
                     </div>
 
                     <div class="col-md-3">
@@ -210,7 +210,7 @@
                         <input type="text"
                                class="form-control"
                                th:field="*{colorDoor}"
-                               readonly>
+                               readonly aria-label="colorDoor">
                     </div>
 
                     <div class="col-md-3">
@@ -219,7 +219,7 @@
                         <input type="number"
                                class="form-control"
                                th:field="*{doorThickness}"
-                               readonly>
+                               readonly aria-label="doorThickness">
                     </div>
 
                 </div>
