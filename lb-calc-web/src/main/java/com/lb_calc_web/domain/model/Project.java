@@ -39,12 +39,12 @@ public class Project {
     /**
      * Компания, для которой создаётся проект.
      */
-    private String company;
+    private final String company;
 
     /**
      * Дата создания проекта.
      */
-    private LocalDate createdAt;
+    private final LocalDate createdAt;
 
     /**
      * Дата последнего изменения проекта.
@@ -54,7 +54,7 @@ public class Project {
     /**
      * Сотрудник, создавший проект.
      */
-    private Employee createdBy;
+    private final Employee createdBy;
 
     /**
      * Сотрудник, выполнивший последнее изменение.
