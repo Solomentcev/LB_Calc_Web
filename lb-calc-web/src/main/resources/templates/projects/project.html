@@ -211,9 +211,9 @@
                         <label>Положение control-модуля</label>
 
                         <select class="form-control"
-                                th:field="*{alsList[__${item.index}__] .positionControlModule}" aria-label="alsList[index] .positionControlModule">
+                                th:field="*{alsList[__${item.index}__] .positionControlModule}" aria-label="alsList[index].positionControlModule">
 
-                            <option th:each="position : ${positionLCList}"
+                            <option th:each="position : ${positionControlModuleList}"
                                     th:value="${position}"
                                     th:text="${position}">
                             </option>
