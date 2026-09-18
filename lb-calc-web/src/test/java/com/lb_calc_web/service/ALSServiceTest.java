@@ -40,6 +40,12 @@ class ALSServiceTest {
         lbcService = mock(LBCService.class);
 
         environment = new MockEnvironment()
+                .withProperty("size.height.default", "1940")
+                .withProperty("size.depth.default", "500")
+                .withProperty("size.frame.upper.default", "50")
+                .withProperty("size.frame.bottom.default", "50")
+                .withProperty("als.color.body.default", "Blue")
+                .withProperty("als.color.door.default", "White")
                 .withProperty("als.position.control-module.default", "CENTER")
                 .withProperty("als.position.lc.default", "CENTER");
 
