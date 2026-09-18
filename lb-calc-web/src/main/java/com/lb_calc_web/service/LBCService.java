@@ -21,6 +21,7 @@ import com.lb_calc_web.handler.ValidationSizeException;
 import com.lb_calc_web.mapper.dto.LBCDtoMapper;
 import com.lb_calc_web.mapper.entity.LBCEntityMapper;
 import com.lb_calc_web.repository.LBCRepository;
+import com.lb_calc_web.service.util.LBCImageService;
 import com.lb_calc_web.service.util.SizeValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -151,8 +152,7 @@ public class LBCService {
         LBC domain = LBCDtoMapper.toDomain(dto);
         LBCDTO result = LBCDtoMapper.toDto(domain);
         result.setId(0L);
-
-        return result;
+        return addLBCImage(result);
     }
 
     public List<LBCDTO> findAll() {
@@ -315,6 +315,13 @@ public class LBCService {
 
         dto.setId(entity.getId());
 
+        return addLBCImage(dto);
+    }
+
+    private LBCDTO addLBCImage(LBCDTO dto) {
+        dto.setStringLBCImage(
+                LBCImageService.getStringLBCImage(dto)
+        );
         return dto;
     }
 
