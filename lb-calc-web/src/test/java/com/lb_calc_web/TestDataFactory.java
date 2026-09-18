@@ -54,6 +54,9 @@ public final class TestDataFactory {
         SizeValidator.setDepthCellMax(880);
         SizeValidator.setDepthMin(170);
 
+        SizeValidator.setDoorThicknessMin(5);
+        SizeValidator.setDoorThicknessMax(50);
+
         SizeValidator.setUpperFrameMin(20);
         SizeValidator.setUpperFrameMax(300);
 
