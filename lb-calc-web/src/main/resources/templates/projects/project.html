@@ -208,10 +208,10 @@
                 <div class="row mt-3">
 
                     <div class="col-md-2">
-                        <label>Положение LC</label>
+                        <label>Положение control-модуля</label>
 
                         <select class="form-control"
-                                th:field="*{alsList[__${item.index}__].positionLC}" aria-label="alsList[index].positionLC">
+                                th:field="*{alsList[__${item.index}__] .positionControlModule}" aria-label="alsList[index] .positionControlModule">
 
                             <option th:each="position : ${positionLCList}"
                                     th:value="${position}"
@@ -417,6 +417,117 @@
                 </div>
 
                 <hr>
+
+
+                <!-- LBC: один физический модуль -->
+
+                <div th:if="${als.LBC != null}"
+                     class="border rounded p-3 mb-3">
+
+                    <h5 th:text="${'LBC — ' + als.LBC.name}">
+                        LBC
+                    </h5>
+
+                    <input type="hidden"
+                           th:field="*{alsList[__${item.index}__].lbc.id}">
+                    <input type="hidden"
+                           th:field="*{alsList[__${item.index}__].lbc.name}">
+                    <input type="hidden"
+                           th:field="*{alsList[__${item.index}__].lbc.description}">
+                    <input type="hidden"
+                           th:field="*{alsList[__${item.index}__].lbc.type}">
+                    <input type="hidden"
+                           th:field="*{alsList[__${item.index}__].lbc.height}">
+                    <input type="hidden"
+                           th:field="*{alsList[__${item.index}__].lbc.width}">
+                    <input type="hidden"
+                           th:field="*{alsList[__${item.index}__].lbc.depth}">
+                    <input type="hidden"
+                           th:field="*{alsList[__${item.index}__].lbc.upperFrame}">
+                    <input type="hidden"
+                           th:field="*{alsList[__${item.index}__].lbc.bottomFrame}">
+                    <input type="hidden"
+                           th:field="*{alsList[__${item.index}__].lbc.shelfThick}">
+                    <input type="hidden"
+                           th:field="*{alsList[__${item.index}__].lbc.deltaWidth}">
+                    <input type="hidden"
+                           th:field="*{alsList[__${item.index}__].lbc.serviceZoneWidth}">
+                    <input type="hidden"
+                           th:field="*{alsList[__${item.index}__].lbc.doorThickness}">
+                    <input type="hidden"
+                           th:field="*{alsList[__${item.index}__].lbc.countCells}">
+                    <input type="hidden"
+                           th:field="*{alsList[__${item.index}__].lbc.heightCell}">
+                    <input type="hidden"
+                           th:field="*{alsList[__${item.index}__].lbc.widthCell}">
+                    <input type="hidden"
+                           th:field="*{alsList[__${item.index}__].lbc.depthCell}">
+                    <input type="hidden"
+                           th:field="*{alsList[__${item.index}__].lbc.directionDoorOpening}">
+                    <input type="hidden"
+                           th:field="*{alsList[__${item.index}__].lbc.colorBody}">
+                    <input type="hidden"
+                           th:field="*{alsList[__${item.index}__].lbc.colorDoor}">
+                    <input type="hidden"
+                           th:field="*{alsList[__${item.index}__].lbc.display}">
+                    <input type="hidden"
+                           th:field="*{alsList[__${item.index}__].lbc.barReader}">
+                    <input type="hidden"
+                           th:field="*{alsList[__${item.index}__].lbc.payment}">
+                    <input type="hidden"
+                           th:field="*{alsList[__${item.index}__].lbc.printer}">
+                    <input type="hidden"
+                           th:field="*{alsList[__${item.index}__].lbc.rfidReader}">
+
+                    <input type="hidden"
+                           th:each="method, methodStat : ${als.LBC.accessMethods}"
+                           th:name="|alsList[${item.index}].lbc.accessMethods[${methodStat.index}]|"
+                           th:value="${method}">
+                    <input type="hidden"
+                           th:each="option, optionStat : ${als.LBC.printOptions}"
+                           th:name="|alsList[${item.index}].lbc.printOptions[${optionStat.index}]|"
+                           th:value="${option}">
+
+                    <div class="row">
+                        <div class="col-md-2">
+                            <strong>ID:</strong>
+                            <span th:text="${als.LBC.id}"></span>
+                        </div>
+                        <div class="col-md-2">
+                            <strong>Тип:</strong>
+                            <span th:text="${als.LBC.type}"></span>
+                        </div>
+                        <div class="col-md-2">
+                            <strong>Ячеек:</strong>
+                            <span th:text="${als.LBC.countCells}"></span>
+                        </div>
+                        <div class="col-md-3">
+                            <strong>Display:</strong>
+                            <span th:text="${als.LBC.display}"></span>
+                        </div>
+                        <div class="col-md-3">
+                            <strong>Payment:</strong>
+                            <span th:text="${als.LBC.payment}"></span>
+                        </div>
+                    </div>
+
+                    <div class="mt-2">
+                        <a th:href="@{/projects/{projectId}/alss/{alsId}/lbcs/{lbcId}(
+                                    projectId=${project.id},
+                                    alsId=${als.id},
+                                    lbcId=${als.LBC.id})}"
+                           class="btn btn-primary btn-sm">
+                            Редактировать LBC
+                        </a>
+                        <button type="submit"
+                                class="btn btn-warning btn-sm"
+                                th:formaction="@{/projects/{projectId}/alss/{alsId}/replaceLBC(
+                                    projectId=${project.id},
+                                    alsId=${als.id})}">
+                            Пересоздать LBC
+                        </button>
+                    </div>
+                </div>
 
                 <!-- LB -->
 
