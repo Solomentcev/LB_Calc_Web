@@ -108,20 +108,38 @@ public final class ProjectDtoMapper {
         for (Map.Entry<ALS, Integer> entry :
                 domainQuantity.entrySet()) {
 
-            ALSDTO alsDto =
+            ALS als =
+                    entry.getKey();
+
+            int quantity =
+                    entry.getValue();
+
+            ALSDTO quantityDto =
                     toALSDto(
-                            entry.getKey(),
+                            als,
                             alsIdResolver
                     );
 
-            alsList.add(
-                    alsDto
+            quantityALS.put(
+                    quantityDto,
+                    quantity
             );
 
-            quantityALS.put(
-                    alsDto,
-                    entry.getValue()
-            );
+            /*
+             * alsList представляет физический состав проекта.
+             * Поэтому при quantity=2 должны присутствовать две записи.
+             */
+            for (int i = 0;
+                 i < quantity;
+                 i++) {
+
+                alsList.add(
+                        toALSDto(
+                                als,
+                                alsIdResolver
+                        )
+                );
+            }
         }
 
         dto.setAlsList(
