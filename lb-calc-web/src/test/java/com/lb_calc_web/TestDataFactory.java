@@ -61,6 +61,17 @@ public final class TestDataFactory {
         SizeValidator.setBottomFrameMax(300);
 
         SizeValidator.setCountCellsMin(1);
+
+        SizeValidator.setCountCellsMax(20);
+
+        SizeValidator.setTypeDeltaWidthMin(0);
+        SizeValidator.setTypeDeltaWidthMax(500);
+
+        SizeValidator.setTypeShelfThickMin(0);
+        SizeValidator.setTypeShelfThickMax(100);
+
+        SizeValidator.setTypeServiceZoneWidthMin(0);
+        SizeValidator.setTypeServiceZoneWidthMax(300);
     }
 
     public static LCDTO validLCDTO(Long id) {

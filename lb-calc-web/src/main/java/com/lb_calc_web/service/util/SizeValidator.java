@@ -298,6 +298,34 @@ public class SizeValidator {
         COUNT_CELLS_MIN = value;
     }
 
+    public static void setCountCellsMax(int value) {
+        COUNT_CELLS_MAX = value;
+    }
+
+    public static void setTypeDeltaWidthMin(int value) {
+        TYPE_DELTA_WIDTH_MIN = value;
+    }
+
+    public static void setTypeDeltaWidthMax(int value) {
+        TYPE_DELTA_WIDTH_MAX = value;
+    }
+
+    public static void setTypeShelfThickMin(int value) {
+        TYPE_SHELF_THICK_MIN = value;
+    }
+
+    public static void setTypeShelfThickMax(int value) {
+        TYPE_SHELF_THICK_MAX = value;
+    }
+
+    public static void setTypeServiceZoneWidthMin(int value) {
+        TYPE_SERVICE_ZONE_WIDTH_MIN = value;
+    }
+
+    public static void setTypeServiceZoneWidthMax(int value) {
+        TYPE_SERVICE_ZONE_WIDTH_MAX = value;
+    }
+
     public static void setWidthCellMin(int value) {
         WIDTH_CELL_MIN = value;
     }
