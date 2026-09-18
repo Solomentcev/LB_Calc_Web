@@ -1,24 +1,36 @@
 package com.lb_calc_web;
 
+import com.lb_calc_web.domain.attributes.AccessMethod;
 import com.lb_calc_web.domain.attributes.Colors;
+import com.lb_calc_web.domain.attributes.DirectionDoorOpening;
 import com.lb_calc_web.domain.attributes.Payment;
+import com.lb_calc_web.domain.attributes.PrintOption;
+import com.lb_calc_web.domain.attributes.TypeLb;
 import com.lb_calc_web.domain.equipment.BarReader;
+import com.lb_calc_web.domain.equipment.Display;
+import com.lb_calc_web.domain.model.ALS;
+import com.lb_calc_web.domain.model.LBC;
+import com.lb_calc_web.domain.model.LB;
 import com.lb_calc_web.domain.model.LC;
 import com.lb_calc_web.dto.ALSDTO;
+import com.lb_calc_web.dto.LBCDTO;
 import com.lb_calc_web.dto.LBDTO;
 import com.lb_calc_web.dto.LCDTO;
 import com.lb_calc_web.dto.ProjectDTO;
-
+import com.lb_calc_web.mapper.dto.ALSDtoMapper;
+import com.lb_calc_web.mapper.dto.LBCDtoMapper;
 import com.lb_calc_web.service.util.ALSImageService;
 import com.lb_calc_web.service.util.SizeValidator;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class TestDataFactory {
-    // Настройка валидатора размеров для тестов
+public final class TestDataFactory {
+
+    private TestDataFactory() {
+    }
+
     public static void initSizeValidator() {
-        // Настройка валидатора размеров для тестов
         SizeValidator.setHeightCellMin(85);
         SizeValidator.setHeightMin(600);
         SizeValidator.setHeightMax(2300);
@@ -42,143 +54,226 @@ public class TestDataFactory {
         SizeValidator.setCountCellsMin(1);
     }
 
-    // =====================================================
-    // ======================= LC ===========================
-    // =====================================================
-
     public static LCDTO validLCDTO(Long id) {
         LCDTO lc = new LCDTO();
+
         lc.setId(id);
         lc.setHeight(1940);
+        lc.setWidth(Display.LC10.getWidth());
         lc.setDepth(500);
         lc.setUpperFrame(50);
         lc.setBottomFrame(50);
-        lc.setColorBody(Colors.Blue.name());
-        lc.setDisplay(DisplayLC.LC10.name());
-        lc.setWidth(DisplayLC.LC10.getWidth());
-        lc.setPrinter(false);
+
+        lc.setDisplay(Display.LC10.getName());
+        lc.setBarReader(BarReader.NONE.getName());
         lc.setPayment(Payment.NONE.name());
-        lc.setBarReader(BarReader.NONE.name());
+        lc.setPrinter(false);
         lc.setRfidReader(true);
+
+        lc.setColorBody(Colors.Blue.name());
+        lc.setColorDoor(Colors.White.name());
+
+        lc.setAccessMethods(List.of());
+        lc.setPrintOptions(List.of());
+
         return lc;
     }
 
     public static LC validLC(Long id) {
-        LC lc = new LC();
-        lc.setId(id);
-        lc.setHeight(1940);
-        lc.setDepth(500);
-        lc.setUpperFrame(50);
-        lc.setBottomFrame(50);
-        lc.setColorBody(Colors.Blue);
-        lc.setDisplay(DisplayLC.LC10);
-        lc.setWidth(DisplayLC.LC10.getWidth());
-        lc.setPrinter(false);
-        lc.setPayment(Payment.NONE);
-        lc.setBarReader(BarReader.NONE);
-        lc.setRfidReader(true);
-        return lc;
+        return com.lb_calc_web.mapper.dto.LCDtoMapper
+                .toDomain(validLCDTO(id));
     }
-
-    // =====================================================
-    // ======================= LB ===========================
-    // =====================================================
 
     public static LBDTO validLBDTO(Long id) {
         LBDTO lb = new LBDTO();
+
         lb.setId(id);
-        lb.setHeight(2000);
+        lb.setHeight(1940);
         lb.setWidth(500);
         lb.setDepth(500);
         lb.setUpperFrame(50);
         lb.setBottomFrame(50);
-        lb.setCountCells(3);
 
+        lb.setCountCells(3);
         lb.setType(TypeLb.TYPE1.name());
         lb.setShelfThick(TypeLb.TYPE1.getShelfThick());
-        lb.setDirectionDoorOpening(DirectionDoorOpening.LEFT.name());
+        lb.setDeltaWidth(TypeLb.TYPE1.getDeltaWidth());
+        lb.setServiceZoneWidth(TypeLb.TYPE1.getServiceZoneWidth());
+
+        lb.setDoorThickness(20);
+        lb.setDirectionDoorOpening(
+                DirectionDoorOpening.LEFT.name()
+        );
+
         lb.setColorBody(Colors.Blue.name());
         lb.setColorDoor(Colors.White.name());
+
         return lb;
     }
 
     public static LB validLB(Long id) {
-        LB lb = new LB();
-        lb.setId(id);
-        lb.setHeight(2000);
-        lb.setWidth(500);
-        lb.setDepth(500);
-        lb.setUpperFrame(50);
-        lb.setBottomFrame(50);
-        lb.setCountCells(3);
-        lb.setType(TypeLb.TYPE1);
-        lb.setShelfThick(TypeLb.TYPE1.getShelfThick());
-        lb.setDirectionDoorOpening(DirectionDoorOpening.LEFT);
-        lb.setColorBody(Colors.Blue);
-        lb.setColorDoor(Colors.White);
-        return lb;
+        return com.lb_calc_web.mapper.dto.LBDtoMapper
+                .toDomain(validLBDTO(id));
     }
-    // =====================================================
-    // ======================= ALS ==========================
-    // =====================================================
+
+    public static LBCDTO validLBCDTO(Long id) {
+        LBCDTO lbc = new LBCDTO();
+
+        lbc.setId(id);
+        lbc.setHeight(1940);
+        lbc.setWidth(500);
+        lbc.setDepth(500);
+        lbc.setUpperFrame(50);
+        lbc.setBottomFrame(50);
+
+        lbc.setCountCells(3);
+        lbc.setType(TypeLb.TYPE1.name());
+        lbc.setShelfThick(TypeLb.TYPE1.getShelfThick());
+        lbc.setDeltaWidth(TypeLb.TYPE1.getDeltaWidth());
+        lbc.setServiceZoneWidth(TypeLb.TYPE1.getServiceZoneWidth());
+
+        lbc.setDoorThickness(20);
+        lbc.setDirectionDoorOpening(
+                DirectionDoorOpening.LEFT.name()
+        );
+
+        lbc.setColorBody(Colors.Blue.name());
+        lbc.setColorDoor(Colors.White.name());
+
+        lbc.setDisplay(Display.LC10.getName());
+        lbc.setBarReader(BarReader.NONE.getName());
+        lbc.setPayment(Payment.NONE.name());
+        lbc.setPrinter(false);
+        lbc.setRfidReader(true);
+        lbc.setAccessMethods(List.of());
+        lbc.setPrintOptions(List.of());
+
+        return lbc;
+    }
+
+    public static LBC validLBC(Long id) {
+        return LBCDtoMapper.toDomain(
+                validLBCDTO(id)
+        );
+    }
 
     public static ALSDTO validALSDTO(Long id) {
         ALSDTO als = new ALSDTO();
+
         als.setId(id);
-        als.setHeight(2000);
+        als.setHeight(1940);
         als.setDepth(500);
         als.setUpperFrame(50);
         als.setBottomFrame(50);
-        als.setDepthCell(480);
-        als.setColorBody(String.valueOf(Colors.Blue));
-        als.setColorDoor(String.valueOf(Colors.White));
-        als.setPositionLC(String.valueOf(PositionLC.CENTER));
-        // LC
-        LCDTO lc = validLCDTO(id + 100);
+        als.setColorBody(Colors.Blue.name());
+        als.setColorDoor(Colors.White.name());
+        als.setPositionControlModule("CENTER");
+
+        LCDTO lc = validLCDTO(id + 100L);
         als.setLC(lc);
 
-        // LB list
         List<LBDTO> lbList = new ArrayList<>();
-        LBDTO lb1 = validLBDTO(id + 200);
-        LBDTO lb2 = validLBDTO(id + 201);
+        LBDTO lb1 = validLBDTO(id + 200L);
+        LBDTO lb2 = validLBDTO(id + 201L);
+
         lbList.add(lb1);
         lbList.add(lb2);
 
-        als.getQuantityLB().put(lb1,1);
-        als.getQuantityLB().put(lb2,1);
-
         als.setLbList(lbList);
 
-        als.setCountCells(lb1.getCountCells()+lb2.getCountCells());
-        als.setWidth(lc.getWidth()+ lb1.getWidth()+ lb2.getWidth());
-        als.setDescription("АКХ на "+ als.getCountCells() +" ячеек, ВхШхГ,мм: "
-                +als.getHeight()+"x"+ als.getWidth()+"x"+als.getDepth()
-                +"; Цвет: "+als.getColorBody()+"/"+als.getColorDoor()+"; "
-                +"Модулей хранения: "+als.getLbList().size() +" шт.;\n"
-                +als.getLC().getDescription());
-        als.setName("АКХ на "+ als.getCountCells() +" ячеек");
-        als.setStringALSImage(ALSImageService.getStringALSImage(als));
+        als.getQuantityLB().put(lb1, 1);
+        als.getQuantityLB().put(lb2, 1);
+
+        als.setCountCells(
+                lb1.getCountCells()
+                        + lb2.getCountCells()
+        );
+
+        als.setWidth(
+                lc.getWidth()
+                        + lb1.getWidth()
+                        + lb2.getWidth()
+        );
+
+        als.setName(
+                "АКХ на "
+                        + als.getCountCells()
+                        + " ячеек"
+        );
+
+        als.setDescription(
+                "АКХ на "
+                        + als.getCountCells()
+                        + " ячеек"
+        );
+
+        als.setStringALSImage(
+                ALSImageService.getStringALSImage(als)
+        );
+
         return als;
     }
 
-    // =====================================================
-    // ===================== PROJECT ========================
-    // =====================================================
+    public static ALSDTO validLBCALSDTO(Long id) {
+        ALSDTO als = new ALSDTO();
 
-    public static ProjectDTO validProject(Long id) {
-        ProjectDTO project = new ProjectDTO();
-        project.setId(id);
+        als.setId(id);
+        als.setHeight(1940);
+        als.setDepth(500);
+        als.setUpperFrame(50);
+        als.setBottomFrame(50);
+        als.setColorBody(Colors.Blue.name());
+        als.setColorDoor(Colors.White.name());
+        als.setPositionControlModule("CENTER");
+        als.setLBC(validLBCDTO(id + 100L));
 
-        List<ALSDTO> alsList = new ArrayList<>();
-        alsList.add(validALSDTO(id + 1));
-        alsList.add(validALSDTO(id + 2));
+        als.setCountCells(
+                als.getLBC().getCountCells()
+        );
+        als.setWidth(
+                als.getLBC().getWidth()
+        );
+        als.setDepthCell(
+                als.getLBC().getDepthCell()
+        );
+        als.setName(
+                "АКХ на "
+                        + als.getCountCells()
+                        + " ячеек"
+        );
+        als.setDescription(
+                "АКХ на "
+                        + als.getCountCells()
+                        + " ячеек"
+        );
+        als.setStringALSImage(
+                ALSImageService.getStringALSImage(als)
+        );
 
-        project.setAlsList(alsList);
-
-        return project;
+        return als;
     }
 
     public static ALS validALS(Long id) {
-        return ALSMapper.toALS(validALSDTO(id));
+        return ALSDtoMapper.toDomain(
+                validALSDTO(id)
+        );
+    }
+
+    public static ProjectDTO validProject(Long id) {
+        ProjectDTO project = new ProjectDTO();
+
+        project.setId(id);
+        project.setName("TEST_" + id);
+        project.setCompany("TEST_COMPANY");
+        project.setDescription("TEST_PROJECT");
+
+        project.setAlsList(
+                List.of(
+                        validALSDTO(id + 1L),
+                        validALSDTO(id + 2L)
+                )
+        );
+
+        return project;
     }
 }

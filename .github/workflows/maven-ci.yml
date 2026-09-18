@@ -1,12 +1,15 @@
-name: Maven build
+name: Maven test
 
 on:
+  push:
+    branches:
+      - feature/lbc-full-support
   pull_request:
     branches:
       - master
 
 jobs:
-  lbc-build:
+  test:
     runs-on: ubuntu-latest
 
     steps:
@@ -20,107 +23,5 @@ jobs:
           java-version: '17'
           cache: maven
 
-      - name: Compile application
-        run: mvn -B -pl lb-calc-web -Dmaven.test.skip=true package
-
-      - name: Run LBC smoke test
-        working-directory: lb-calc-web
-        shell: bash
-        run: |
-          cat > /tmp/LBCSmokeTest.java <<'EOF'
-          import com.lb_calc_web.domain.attributes.AccessMethod;
-          import com.lb_calc_web.domain.attributes.Colors;
-          import com.lb_calc_web.domain.attributes.DirectionDoorOpening;
-          import com.lb_calc_web.domain.attributes.Payment;
-          import com.lb_calc_web.domain.attributes.PrintOption;
-          import com.lb_calc_web.domain.attributes.TypeLb;
-          import com.lb_calc_web.domain.equipment.Display;
-          import com.lb_calc_web.domain.model.ALS;
-          import com.lb_calc_web.domain.model.ControlConfiguration;
-          import com.lb_calc_web.domain.model.EquipmentConfiguration;
-          import com.lb_calc_web.domain.model.LBC;
-          import com.lb_calc_web.domain.model.ControlModule;
-          import com.lb_calc_web.domain.model.StorageModule;
-          import com.lb_calc_web.dto.LBCDTO;
-          import com.lb_calc_web.mapper.dto.LBCDtoMapper;
-          import com.lb_calc_web.service.util.LBCImageService;
-          import java.io.ByteArrayInputStream;
-          import java.util.List;
-          import java.util.Set;
-          import javax.imageio.ImageIO;
-
-          public class LBCSmokeTest {
-              public static void main(String[] args) throws Exception {
-                  ControlConfiguration control =
-                          new ControlConfiguration(
-                                  Payment.NONE,
-                                  Set.<AccessMethod>of(),
-                                  Set.<PrintOption>of(),
-                                  new EquipmentConfiguration(
-                                          List.of(Display.LC10),
-                                          List.of()
-                                  )
-                          );
-
-                  LBC lbc =
-                          new LBC(
-                                  1940,
-                                  500,
-                                  600,
-                                  100,
-                                  100,
-                                  Colors.Blue,
-                                  Colors.White,
-                                  new TypeLb(
-                                          "TYPE1",
-                                          100,
-                                          5,
-                                          20
-                                  ),
-                                  10,
-                                  DirectionDoorOpening.LEFT,
-                                  20,
-                                  control
-                          );
-
-                  ALS als =
-                          new ALS(
-                                  1940,
-                                  600,
-                                  100,
-                                  100,
-                                  Colors.Blue,
-                                  Colors.White,
-                                  List.of(lbc)
-                          );
-
-                  if (!(lbc instanceof ControlModule)) {
-                      throw new AssertionError("LBC is not a ControlModule");
-                  }
-
-                  if (!(lbc instanceof StorageModule)) {
-                      throw new AssertionError("LBC is not a StorageModule");
-                  }
-
-                  if (als.getCountCells() != 10) {
-                      throw new AssertionError("LBC cells are not included in ALS");
-                  }
-
-                  LBCDTO dto = LBCDtoMapper.toDto(lbc);
-
-                  byte[] image =
-                          LBCImageService.getBytesArrayLBCImage(dto);
-
-                  if (ImageIO.read(
-                          new ByteArrayInputStream(image)
-                  ) == null) {
-                      throw new AssertionError("LBC image was not generated");
-                  }
-
-                  System.out.println("LBC smoke test passed");
-              }
-          }
-          EOF
-
-          javac -cp target/classes /tmp/LBCSmokeTest.java
-          java -cp target/classes:/tmp LBCSmokeTest
+      - name: Run full test suite
+        run: mvn -B test
