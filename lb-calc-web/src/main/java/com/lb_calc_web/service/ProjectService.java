@@ -4,6 +4,7 @@ import com.lb_calc_web.domain.model.ALS;
 import com.lb_calc_web.domain.model.Employee;
 import com.lb_calc_web.domain.model.Project;
 import com.lb_calc_web.dto.ALSDTO;
+import com.lb_calc_web.dto.LBCDTO;
 import com.lb_calc_web.dto.LBDTO;
 import com.lb_calc_web.dto.LCDTO;
 import com.lb_calc_web.dto.ProjectDTO;
@@ -418,6 +419,40 @@ public class ProjectService {
     }
 
     /**
+     * Находит LBC внутри конкретного ALS конкретного проекта.
+     */
+    @Transactional(readOnly = true)
+    public LBCDTO findLBCInProject(
+            Long projectId,
+            Long alsId,
+            Long lbcId
+    ) {
+        ALSDTO als =
+                findALSInProject(
+                        projectId,
+                        alsId
+                );
+
+        LBCDTO lbc =
+                als.getLBC();
+
+        if (lbc == null
+                || !Objects.equals(
+                lbc.getId(),
+                lbcId
+        )) {
+            throw new NoSuchElementException(
+                    "LBC с id "
+                            + lbcId
+                            + " не найден в ALS "
+                            + alsId
+            );
+        }
+
+        return lbc;
+    }
+
+    /**
      * Находит LB внутри конкретного ALS конкретного проекта.
      */
     @Transactional(readOnly = true)
@@ -595,6 +630,113 @@ public class ProjectService {
                 updatedALS.getLC(),
                 "После сохранения LC отсутствует в ALS"
         );
+    }
+
+    /**
+     * Заменяет LBC в ALS и сохраняет проект.
+     */
+    @Transactional
+    public ALSDTO replaceLBCandSaveProject(
+            ProjectDTO project,
+            ALSDTO als,
+            Long alsId,
+            LBCDTO lbc
+    ) {
+        Objects.requireNonNull(
+                lbc,
+                "LBC не должен быть null"
+        );
+
+        ALSDTO updatedALS =
+                alsService.replaceLBCandSaveALS(
+                        als,
+                        lbc
+                );
+
+        replaceALSandSaveProject(
+                project,
+                updatedALS,
+                alsId
+        );
+
+        return updatedALS;
+    }
+
+    /**
+     * Сохраняет LBC конкретного ALS конкретного проекта.
+     */
+    @Transactional
+    public LBCDTO saveLBCAtProject(
+            Long projectId,
+            Long alsId,
+            Long lbcId,
+            LBCDTO lbc
+    ) {
+        Objects.requireNonNull(
+                lbc,
+                "LBC не должен быть null"
+        );
+
+        ProjectDTO project =
+                findById(projectId);
+
+        ALSDTO als =
+                findALSInProject(
+                        projectId,
+                        alsId
+                );
+
+        findLBCInProject(
+                projectId,
+                alsId,
+                lbcId
+        );
+
+        lbc.setId(lbcId);
+
+        ALSDTO updatedALS =
+                replaceLBCandSaveProject(
+                        project,
+                        als,
+                        alsId,
+                        lbc
+                );
+
+        return Objects.requireNonNull(
+                updatedALS.getLBC(),
+                "После сохранения LBC отсутствует в ALS"
+        );
+    }
+
+    /**
+     * Заменяет текущий control-модуль проекта на новый LBC.
+     */
+    @Transactional
+    public ALSDTO replaceWithNewLBCAtProject(
+            Long projectId,
+            Long alsId
+    ) {
+        ProjectDTO project =
+                findById(projectId);
+
+        ALSDTO als =
+                findALSInProject(
+                        projectId,
+                        alsId
+                );
+
+        ALSDTO updatedALS =
+                alsService.replaceWithNewLBCandSaveALS(
+                        alsId
+                );
+
+        replaceALSandSaveProject(
+                project,
+                updatedALS,
+                alsId
+        );
+
+        return updatedALS;
     }
 
     /**
