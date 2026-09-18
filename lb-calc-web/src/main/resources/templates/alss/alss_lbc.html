@@ -1,0 +1,44 @@
+
+<!DOCTYPE html>
+<html lang="ru" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><title>LBC внутри ALS</title>
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" crossorigin="anonymous">
+</head>
+<body>
+<div th:replace="~{header :: header}"></div>
+<div class="container-fluid">
+<form th:action="@{/alss/{alsId}/lbcs/{lbcId}/save(alsId=${als.id},lbcId=${lbc.id})}" th:object="${lbc}" method="post">
+<button type="submit" class="btn btn-primary btn-sm mb-3">Сохранить LBC</button>
+<a th:href="@{/alss/{id}(id=${als.id})}" class="btn btn-secondary btn-sm mb-3">Вернуться к ALS</a>
+<div th:if="${errors != null}" class="alert alert-danger">
+<div th:each="error : ${errors}" th:text="${error}">Error</div>
+</div>
+<div class="row"><div class="col-md-5">
+<input type="hidden" th:field="*{id}"><input type="hidden" th:field="*{name}"><input type="hidden" th:field="*{description}">
+<table class="table table-striped">
+<tr><th>Тип</th><td><select class="form-control" th:field="*{type}">
+<option th:each="type : ${typeList}" th:value="${type}" th:text="${type}"></option>
+</select></td></tr>
+<tr><th>Количество ячеек</th><td><input class="form-control" type="number" th:field="*{countCells}"></td></tr>
+<tr><th>Высота</th><td><input class="form-control" type="number" th:field="*{height}"></td></tr>
+<tr><th>Ширина</th><td><input class="form-control" type="number" th:field="*{width}"></td></tr>
+<tr><th>Глубина</th><td><input class="form-control" type="number" th:field="*{depth}"></td></tr>
+<tr><th>Верхняя рама</th><td><input class="form-control" type="number" th:field="*{upperFrame}"></td></tr>
+<tr><th>Нижняя рама</th><td><input class="form-control" type="number" th:field="*{bottomFrame}"></td></tr>
+<tr><th>Толщина дверцы</th><td><input class="form-control" type="number" th:field="*{doorThickness}"></td></tr>
+<tr><th>Направление дверей</th><td><select class="form-control" th:field="*{directionDoorOpening}">
+<option th:each="direction : ${directionDoorOpeningList}" th:value="${direction}" th:text="${direction}"></option>
+</select></td></tr>
+<tr><th>Цвет корпуса</th><td><select class="form-control" th:field="*{colorBody}">
+<option th:each="color : ${colorsList}" th:value="${color}" th:text="${color}"></option>
+</select></td></tr>
+<tr><th>Цвет дверей</th><td><select class="form-control" th:field="*{colorDoor}">
+<option th:each="color : ${colorsList}" th:value="${color}" th:text="${color}"></option>
+</select></td></tr>
+</table>
+</div><div class="col-md-7">
+<img class="img-thumbnail" th:src="'data:image/png;base64,' + ${lbc.stringLBCImage}" alt="LBC Image">
+</div></div>
+</form></div>
+<div th:replace="~{footer :: footer}"></div>
+</body></html>
