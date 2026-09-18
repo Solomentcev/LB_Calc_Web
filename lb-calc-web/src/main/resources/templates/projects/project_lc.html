@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml"
+<html lang="ru" xmlns="http://www.w3.org/1999/xhtml"
       xmlns:th="http://www.thymeleaf.org">
 
 <head>
@@ -78,7 +78,7 @@
                         <input type="number"
                                class="form-control"
                                th:field="*{id}"
-                               readonly>
+                               readonly aria-label="id">
                     </div>
 
                     <div class="col-md-5">
@@ -87,14 +87,14 @@
                         <input type="text"
                                class="form-control"
                                th:field="*{name}"
-                               readonly>
+                               readonly aria-label="name">
                     </div>
 
                     <div class="col-md-5">
                         <label>Цвет корпуса</label>
 
                         <select class="form-control"
-                                th:field="*{colorBody}">
+                                th:field="*{colorBody}" aria-label="colorBody">
 
                             <option th:each="color : ${colorsList}"
                                     th:value="${color}"
@@ -112,7 +112,7 @@
                         <label>Display</label>
 
                         <select class="form-control"
-                                th:field="*{display}">
+                                th:field="*{display}" aria-label="display">
 
                             <option th:each="display : ${displayList}"
                                     th:value="${display}"
@@ -126,7 +126,7 @@
                         <label>Оплата</label>
 
                         <select class="form-control"
-                                th:field="*{payment}">
+                                th:field="*{payment}" aria-label="payment">
 
                             <option th:each="payment : ${paymentList}"
                                     th:value="${payment}"
@@ -140,7 +140,7 @@
                         <label>Barcode Reader</label>
 
                         <select class="form-control"
-                                th:field="*{barReader}">
+                                th:field="*{barReader}" aria-label="barReader">
 
                             <option th:each="reader : ${barReaderList}"
                                     th:value="${reader}"
@@ -157,7 +157,7 @@
                         </label>
 
                         <input type="checkbox"
-                               th:field="*{printer}">
+                               th:field="*{printer}" aria-label="printer">
 
                     </div>
 
@@ -172,7 +172,7 @@
                         </label>
 
                         <input type="checkbox"
-                               th:field="*{rfidReader}">
+                               th:field="*{rfidReader}" aria-label="rfidReader">
 
                     </div>
 
@@ -180,7 +180,7 @@
                         <label>Цвет дверей</label>
 
                         <select class="form-control"
-                                th:field="*{colorDoor}">
+                                th:field="*{colorDoor}" aria-label="colorDoor">
 
                             <option th:each="color : ${colorsList}"
                                     th:value="${color}"
@@ -196,7 +196,7 @@
                         <input type="number"
                                class="form-control"
                                th:field="*{height}"
-                               readonly>
+                               readonly aria-label="height">
                     </div>
 
                     <div class="col-md-3">
@@ -205,7 +205,7 @@
                         <input type="number"
                                class="form-control"
                                th:field="*{width}"
-                               readonly>
+                               readonly aria-label="width">
                     </div>
 
                 </div>
@@ -233,7 +233,7 @@
                         <input type="text"
                                class="form-control"
                                th:value="${#strings.listJoin(lc.accessMethods, ', ')}"
-                               readonly>
+                               readonly aria-label="Поле формы">
 
                     </div>
 
@@ -246,7 +246,7 @@
                         <input type="text"
                                class="form-control"
                                th:value="${#strings.listJoin(lc.printOptions, ', ')}"
-                               readonly>
+                               readonly aria-label="Поле формы">
 
                     </div>
 
