@@ -456,6 +456,12 @@ public class ALSService {
         }
 
         if (dto.getLBC() != null) {
+            dto.getLBC().setDirectionDoorOpening(
+                    getLBCDoorDirection(
+                            dto.getPositionControlModule()
+                    )
+            );
+
             dto.setLBC(
                     lbcService.saveLBC(
                             dto.getLBC()
@@ -475,6 +481,16 @@ public class ALSService {
         }
 
         dto.setLbList(savedLBs);
+    }
+
+    private String getLBCDoorDirection(
+            String position
+    ) {
+        if ("LEFT".equals(position)) {
+            return "RIGHT";
+        }
+
+        return "LEFT";
     }
 
     private void validate(
