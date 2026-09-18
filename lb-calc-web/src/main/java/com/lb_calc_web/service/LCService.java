@@ -1,134 +1,341 @@
 package com.lb_calc_web.service;
 
+import com.lb_calc_web.domain.attributes.Colors;
+import com.lb_calc_web.domain.attributes.Payment;
+import com.lb_calc_web.domain.equipment.BarReader;
+import com.lb_calc_web.domain.equipment.Display;
+import com.lb_calc_web.domain.model.LC;
 import com.lb_calc_web.dto.LCDTO;
 import com.lb_calc_web.dto.validation.ValidationResult;
+import com.lb_calc_web.entity.LCEntity;
 import com.lb_calc_web.handler.ValidationSizeException;
-import com.lb_calc_web.mapper.dto.LCMapper;
-import com.lb_calc_web.entity.LC;
-import com.lb_calc_web.entity.attributes.BarReader;
-import com.lb_calc_web.entity.attributes.Colors;
-import com.lb_calc_web.entity.attributes.DisplayLC;
-import com.lb_calc_web.entity.attributes.Payment;
+import com.lb_calc_web.mapper.dto.LCDtoMapper;
+import com.lb_calc_web.mapper.entity.LCEntityMapper;
 import com.lb_calc_web.repository.LCRepository;
-import com.lb_calc_web.service.util.LCImageService;
 import com.lb_calc_web.service.util.SizeValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.ExampleMatcher;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
-
-import static org.springframework.data.domain.ExampleMatcher.GenericPropertyMatchers.ignoreCase;
+import java.util.Comparator;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Objects;
+import java.util.Optional;
 
 @Service
 public class LCService {
-    private static final Logger logger = LoggerFactory.getLogger(LCService.class);
+
+    private static final Logger logger =
+            LoggerFactory.getLogger(LCService.class);
+
     private final LCRepository lcRepository;
+    private final Environment environment;
 
-    public LCService(LCRepository lcRepository) {
+    public LCService(
+            LCRepository lcRepository,
+            Environment environment
+    ) {
         this.lcRepository = lcRepository;
+        this.environment = environment;
     }
 
+    /**
+     * Создаёт шаблон LC с параметрами по умолчанию.
+     * В БД объект не сохраняется.
+     */
     public LCDTO createLC() {
-        return initLC(1940, 500, 50, 50, Colors.Blue);
-    }
-    public LCDTO createLC(int height, int depth, int upperFrame, int bottomFrame, Colors colorBody) {
-        return initLC(height, depth, upperFrame, bottomFrame, colorBody);
-    }
-    private LCDTO initLC(int height, int depth, int upperFrame, int bottomFrame, Colors colorBody) {
-        logger.info("Создание МУ...");
-        LCDTO lc = new LCDTO();
-        lc.setId(0L);
-        lc.setHeight(height);
-        lc.setDepth(depth);
-        lc.setBottomFrame(bottomFrame);
-        lc.setUpperFrame(upperFrame);
-        lc.setColorBody(String.valueOf(colorBody));
-        lc.setDisplay(String.valueOf(DisplayLC.LC10));
-        lc.setPrinter(false);
-        lc.setPayment(String.valueOf(Payment.NONE));
-        lc.setBarReader(String.valueOf(BarReader.NONE));
-        lc.setRfidReader(true);
-        updateLCsizeAndDescription(lc);
-        lc.setStringLCImage(LCImageService.getStringLCImage(lc));
-        logger.info("Создан МУ(%s)".formatted(lc.getName()));
-        return lc;
+
+        logger.info(
+                "Создание нового LC с параметрами по умолчанию"
+        );
+
+        return createLC(
+                requiredInt("size.height.default"),
+                requiredInt("size.depth.default"),
+                requiredInt("size.frame.upper.default"),
+                requiredInt("size.frame.bottom.default"),
+                requiredColor("lc.color.body.default")
+        );
     }
 
+    /**
+     * Создаёт шаблон LC с заданными базовыми параметрами.
+     * В БД объект не сохраняется.
+     */
+    public LCDTO createLC(
+            int height,
+            int depth,
+            int upperFrame,
+            int bottomFrame,
+            Colors colorBody
+    ) {
+        String displayName =
+                environment.getRequiredProperty(
+                        "lc.display.default"
+                );
+
+        LCDTO dto = new LCDTO();
+
+        dto.setId(0L);
+
+        dto.setHeight(height);
+        dto.setDepth(depth);
+
+        dto.setUpperFrame(upperFrame);
+        dto.setBottomFrame(bottomFrame);
+
+        dto.setDisplay(displayName);
+        dto.setWidth(
+                findDisplay(displayName).getWidth()
+        );
+
+        dto.setBarReader(
+                environment.getRequiredProperty(
+                        "lc.bar-reader.default"
+                )
+        );
+
+        dto.setPayment(
+                environment.getRequiredProperty(
+                        "lc.payment.default"
+                )
+        );
+
+        dto.setPrinter(
+                requiredBoolean(
+                        "lc.printer.default"
+                )
+        );
+
+        dto.setRfidReader(
+                requiredBoolean(
+                        "lc.rfid-reader.default"
+                )
+        );
+
+        dto.setColorBody(
+                colorBody.name()
+        );
+
+        dto.setColorDoor(
+                environment.getRequiredProperty(
+                        "lc.color.door.default"
+                )
+        );
+
+        /*
+         * Domain выполняет расчёт имени,
+         * описания и проверку ширины.
+         */
+        LC domain = LCDtoMapper.toDomain(dto);
+
+        LCDTO result = LCDtoMapper.toDto(domain);
+        result.setId(0L);
+
+        return result;
+    }
+
+    /**
+     * Получить все LC.
+     */
     public List<LCDTO> findAll() {
-        logger.info("Получение списка МУ...");
-        List<LC> lcs = lcRepository.findAll();
-        List<LCDTO> lcDTOs = new ArrayList<>();
-        for (LC lc : lcs) {
-            lcDTOs.add(LCMapper.toLCDTO(lc));
-        }
-        lcDTOs.sort(Comparator.comparing(LCDTO::getId));
-        return lcDTOs;
+
+        logger.info("Получение списка LC");
+
+        return lcRepository.findAll()
+                .stream()
+                .sorted(
+                        Comparator.comparing(
+                                LCEntity::getId,
+                                Comparator.nullsLast(
+                                        Comparator.naturalOrder()
+                                )
+                        )
+                )
+                .map(this::toDto)
+                .toList();
     }
 
+    /**
+     * Получить LC по ID.
+     */
     public LCDTO findById(Long id) {
-        logger.info("Поиск МУ(id%d)...".formatted(id));
-        LC lc = lcRepository.findById(id).orElseThrow(() ->
-                new NoSuchElementException("Модуль Управления id%d не найден".formatted(id)));
-        return LCMapper.toLCDTO(lc);
+
+        logger.info(
+                "Поиск LC по id={}",
+                id
+        );
+
+        LCEntity entity =
+                lcRepository.findById(id)
+                        .orElseThrow(() ->
+                                new NoSuchElementException(
+                                        "Модуль управления LC с id="
+                                                + id
+                                                + " не найден"
+                                )
+                        );
+
+        return toDto(entity);
     }
 
-    public LCDTO saveLC(LCDTO lcdto) {
-        logger.info("Сохранение МУ(id%d-%s)...".formatted(lcdto.getId(), lcdto.getName()));
-        updateLCsizeAndDescription(lcdto);
-        ValidationResult validationResult = SizeValidator.validateLC(lcdto);
+    /**
+     * Сохранить LC.
+     *
+     * <p>Перед сохранением выполняется:
+     * валидация DTO,
+     * преобразование в Domain,
+     * проверка наличия аналогичной конфигурации,
+     * преобразование Domain -> Entity.</p>
+     */
+    public LCDTO saveLC(LCDTO dto) {
+
+        Objects.requireNonNull(
+                dto,
+                "LCDTO не должен быть null"
+        );
+
+        logger.info(
+                "Сохранение LC: id={}, display={}",
+                dto.getId(),
+                dto.getDisplay()
+        );
+
+        ValidationResult validationResult =
+                SizeValidator.validateLC(dto);
+
         if (!validationResult.isValid()) {
-            logger.warn("Ошибки валидации МУ(id:{}): {}", lcdto.getId(), validationResult.getErrors());
-            throw new ValidationSizeException(validationResult);
+
+            logger.warn(
+                    "LC не прошёл валидацию: {}",
+                    validationResult.getErrors()
+            );
+
+            throw new ValidationSizeException(
+                    validationResult
+            );
         }
-        Optional<LC> optional = getOptionalLC(LCMapper.toLC(lcdto));
-        if (optional.isPresent()) {
-            logger.info("МУ(id(%d-%s) найден в БД.".formatted(optional.get().getId(), optional.get().getName()));
-            return LCMapper.toLCDTO(optional.get());
+
+        /*
+         * DTO -> Domain.
+         *
+         * Здесь Domain:
+         * - создаёт конфигурацию оборудования;
+         * - проверяет ширину;
+         * - формирует name/description.
+         */
+        LC domain = LCDtoMapper.toDomain(dto);
+
+        /*
+         * Проверяем, нет ли уже такой конфигурации.
+         */
+        Optional<LCEntity> existing =
+                lcRepository.findAll()
+                        .stream()
+                        .filter(entity -> {
+                            LC existingDomain =
+                                    LCEntityMapper.toDomain(entity);
+
+                            return existingDomain.equals(domain);
+                        })
+                        .findFirst();
+
+        if (existing.isPresent()) {
+
+            logger.info(
+                    "Аналогичный LC уже существует, id={}",
+                    existing.get().getId()
+            );
+
+            return toDto(existing.get());
         }
-        logger.info("МУ не найден в БД.");
-        return persistNewLC(lcdto);
-    }
-    private LCDTO persistNewLC(LCDTO lcdto) {
-        lcdto.setId(0L);
-        LC lcNew = LCMapper.toLC(lcdto);
-        logger.info("Сохранение МУ в БД...");
-        lcNew = lcRepository.save(lcNew);
-        logger.info("МУ(id%d-%s) cохранён в БД.".formatted(lcNew.getId(), lcNew.getName()));
-        return LCMapper.toLCDTO(lcNew);
+
+        /*
+         * Domain -> Entity.
+         */
+        LCEntity entity =
+                LCEntityMapper.toEntity(domain);
+
+        LCEntity saved =
+                lcRepository.save(entity);
+
+        logger.info(
+                "LC сохранён, id={}",
+                saved.getId()
+        );
+
+        return toDto(saved);
     }
 
-    public void updateLCsizeAndDescription(LCDTO lc) {
-        logger.info("Корректировка размеров и описания МУ(id%d-%s)...".formatted(lc.getId(),lc.getName()));
-        lc.setWidth(DisplayLC.valueOf(lc.getDisplay()).getWidth());
-        lc.setDescription("Модуль управления " + lc.getDisplay() +" "+
-                "Размеры(ВхШхГ,мм): "+lc.getHeight()+"х"+lc.getWidth()+"х"+lc.getDepth()+";\n"+
-                "Дисплей: "+lc.getDisplay()+";\n"+
-                "Принтер: "+lc.isPrinter()+";\n"+
-                "Оплата: "+lc.getPayment()+";\n"+
-                "Сканер: "+lc.getBarReader()+";\n"+
-                "Считыватель: "+lc.isRfidReader()+";\n");
-        lc.setName("Модуль управления " + lc.getDisplay());
+    /**
+     * Entity -> Domain -> DTO.
+     */
+    private LCDTO toDto(LCEntity entity) {
+
+        LC domain =
+                LCEntityMapper.toDomain(entity);
+
+        LCDTO dto =
+                LCDtoMapper.toDto(domain);
+
+        /*
+         * ID относится к persistence-слою,
+         * поэтому добавляем его после domain-маппинга.
+         */
+        dto.setId(entity.getId());
+
+        return dto;
     }
 
-    public Optional<LC> getOptionalLC(LC lcNew) {
-        logger.info("Поиск МУ по характеристикам...");
-        ExampleMatcher modelMatcher = ExampleMatcher.matching()
-                .withIgnorePaths("id","name","description")
-                .withMatcher("height", ExampleMatcher.GenericPropertyMatchers.exact())
-                .withMatcher("upperFrame", ExampleMatcher.GenericPropertyMatchers.exact())
-                .withMatcher("bottomFrame", ExampleMatcher.GenericPropertyMatchers.exact())
-                .withMatcher("depth", ExampleMatcher.GenericPropertyMatchers.exact())
-                .withMatcher("colorBody", ignoreCase())
-                .withMatcher("display", ignoreCase())
-                .withMatcher("printer", ExampleMatcher.GenericPropertyMatchers.exact())
-                .withMatcher("payment", ExampleMatcher.GenericPropertyMatchers.exact())
-                .withMatcher("barReader", ignoreCase())
-                .withMatcher("rfidReader", ignoreCase())
-                .withMatcher("width", ExampleMatcher.GenericPropertyMatchers.exact());
-        Example<LC> example = Example.of(lcNew, modelMatcher);
-        return lcRepository.findOne(example);
+    /**
+     * Получение Display по имени.
+     */
+    private Display findDisplay(String name) {
+
+        for (Display display : List.of(
+                Display.NONE,
+                Display.LC10,
+                Display.LC17,
+                Display.LC19
+        )) {
+            if (display.getName().equals(name)) {
+                return display;
+            }
+        }
+
+        throw new IllegalArgumentException(
+                "Неизвестный дисплей LC: " + name
+        );
+    }
+
+    /**
+     * Получение обязательного int-параметра.
+     */
+    private int requiredInt(String key) {
+        return environment.getRequiredProperty(
+                key,
+                Integer.class
+        );
+    }
+
+    /**
+     * Получение обязательного boolean-параметра.
+     */
+    private boolean requiredBoolean(String key) {
+        return environment.getRequiredProperty(
+                key,
+                Boolean.class
+        );
+    }
+
+    /**
+     * Получение обязательного цвета.
+     */
+    private Colors requiredColor(String key) {
+        return Colors.valueOf(
+                environment.getRequiredProperty(key)
+        );
     }
 }

@@ -9,15 +9,34 @@ import com.lb_calc_web.dto.ProjectDTO;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 public final class ProjectDtoMapper {
 
     private ProjectDtoMapper() {
     }
 
-    public static ProjectDTO toDto(Project domain) {
+    public static ProjectDTO toDto(
+            Project domain
+    ) {
+        return toDto(
+                domain,
+                als -> null
+        );
+    }
+
+    public static ProjectDTO toDto(
+            Project domain,
+            Function<ALS, Long> alsIdResolver
+    ) {
         if (domain == null) {
             return null;
+        }
+
+        if (alsIdResolver == null) {
+            throw new IllegalArgumentException(
+                    "alsIdResolver не должен быть null"
+            );
         }
 
         ProjectDTO dto = new ProjectDTO();
@@ -41,11 +60,17 @@ public final class ProjectDtoMapper {
                 )
         );
 
-        List<ALSDTO> alsList = domain.getQuantityALS()
-                .keySet()
-                .stream()
-                .map(ALSDtoMapper::toDto)
-                .toList();
+        List<ALSDTO> alsList =
+                domain.getQuantityALS()
+                        .keySet()
+                        .stream()
+                        .map(
+                                als -> toALSDto(
+                                        als,
+                                        alsIdResolver
+                                )
+                        )
+                        .toList();
 
         dto.setAlsList(alsList);
 
@@ -55,9 +80,11 @@ public final class ProjectDtoMapper {
         for (Map.Entry<ALS, Integer> entry :
                 domain.getQuantityALS().entrySet()) {
 
-            ALSDTO alsDto = ALSDtoMapper.toDto(
-                    entry.getKey()
-            );
+            ALSDTO alsDto =
+                    toALSDto(
+                            entry.getKey(),
+                            alsIdResolver
+                    );
 
             quantityALS.put(
                     alsDto,
@@ -70,7 +97,24 @@ public final class ProjectDtoMapper {
         return dto;
     }
 
-    public static Project toDomain(ProjectDTO dto) {
+    private static ALSDTO toALSDto(
+            ALS domain,
+            Function<ALS, Long> alsIdResolver
+    ) {
+        ALSDTO dto =
+                ALSDtoMapper.toDto(domain);
+
+        Long id =
+                alsIdResolver.apply(domain);
+
+        dto.setId(id);
+
+        return dto;
+    }
+
+    public static Project toDomain(
+            ProjectDTO dto
+    ) {
         if (dto == null) {
             return null;
         }
@@ -144,7 +188,9 @@ public final class ProjectDtoMapper {
         Map<ALSDTO, Integer> quantityALS =
                 dto.getQuantityALS();
 
-        if (quantityALS != null && !quantityALS.isEmpty()) {
+        if (quantityALS != null
+                && !quantityALS.isEmpty()) {
+
             for (Map.Entry<ALSDTO, Integer> entry :
                     quantityALS.entrySet()) {
 
@@ -154,7 +200,8 @@ public final class ProjectDtoMapper {
                     );
                 }
 
-                Integer quantity = entry.getValue();
+                Integer quantity =
+                        entry.getValue();
 
                 if (quantity == null || quantity < 1) {
                     throw new IllegalArgumentException(
@@ -173,18 +220,23 @@ public final class ProjectDtoMapper {
             return result;
         }
 
-        List<ALSDTO> alsList = dto.getAlsList();
+        List<ALSDTO> alsList =
+                dto.getAlsList();
 
         if (alsList == null) {
             return result;
         }
 
         for (ALSDTO alsDto : alsList) {
+
             if (alsDto == null) {
                 continue;
             }
 
-            ALS als = ALSDtoMapper.toDomain(alsDto);
+            ALS als =
+                    ALSDtoMapper.toDomain(
+                            alsDto
+                    );
 
             result.merge(
                     als,

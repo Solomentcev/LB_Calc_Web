@@ -1,6 +1,6 @@
 package com.lb_calc_web.security.jwt;
 
-import com.lb_calc_web.dto.EmployeeDTO;
+import com.lb_calc_web.security.EmployeePrincipal;
 import com.lb_calc_web.service.EmployeeService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
@@ -19,194 +19,401 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
 @Component
-public class JwtAuthentificationFilter extends OncePerRequestFilter {
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+public class JwtAuthentificationFilter
+        extends OncePerRequestFilter {
+
+    private static final Logger logger =
+            LoggerFactory.getLogger(
+                    JwtAuthentificationFilter.class
+            );
+
     private final JwtService jwtService;
     private final EmployeeService employeeService;
-    public JwtAuthentificationFilter(JwtService jwtService, EmployeeService employeeService) {
+
+    public JwtAuthentificationFilter(
+            JwtService jwtService,
+            EmployeeService employeeService
+    ) {
         this.jwtService = jwtService;
         this.employeeService = employeeService;
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    FilterChain filterChain) throws ServletException, IOException {
-
-        logger.debug("[JWT-FILTER] start uri={} method={}", request.getRequestURI(), request.getMethod());
+    protected void doFilterInternal(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            FilterChain filterChain
+    ) throws ServletException, IOException {
 
         try {
-            if (SecurityContextHolder.getContext().getAuthentication() != null) {
-                logger.debug("[JWT-FILTER] skip: security context already authenticated");
-                filterChain.doFilter(request, response);
+
+            if (SecurityContextHolder
+                    .getContext()
+                    .getAuthentication() != null) {
+
+                filterChain.doFilter(
+                        request,
+                        response
+                );
+
                 return;
             }
 
-            String accessToken = getAccessToken(request);
+            String accessToken =
+                    getAccessToken(request);
 
-            if (accessToken == null || accessToken.isBlank()) {
-                logger.debug("[JWT-FILTER] no access token provided");
-                filterChain.doFilter(request, response);
+            if (accessToken == null
+                    || accessToken.isBlank()) {
+
+                filterChain.doFilter(
+                        request,
+                        response
+                );
+
                 return;
             }
 
-            processAccessOrRefresh(accessToken, request, response);
+            processAccessOrRefresh(
+                    accessToken,
+                    request,
+                    response
+            );
 
         } catch (JwtException e) {
-            logger.warn("[JWT-FILTER] jwt error: {}", e.getMessage());
+
+            logger.debug(
+                    "[JWT-FILTER] JWT error: {}",
+                    e.getMessage()
+            );
+
             clearAuthentication(response);
+
         } catch (Exception e) {
-            logger.error("[JWT-FILTER] unexpected error", e);
+
+            logger.error(
+                    "[JWT-FILTER] Unexpected error",
+                    e
+            );
+
             clearAuthentication(response);
         }
 
-        filterChain.doFilter(request, response);
+        filterChain.doFilter(
+                request,
+                response
+        );
     }
 
-    private void processAccessOrRefresh(String accessToken,
-                                        HttpServletRequest request,
-                                        HttpServletResponse response) {
-        logger.debug("[JWT-FILTER] process access token");
+    private void processAccessOrRefresh(
+            String accessToken,
+            HttpServletRequest request,
+            HttpServletResponse response
+    ) {
 
         try {
-            Claims accessClaims = jwtService.getAccessClaims(accessToken);
 
-            if (!jwtService.isAccess(accessClaims)) {
-                throw new JwtException("Provided token is not access token");
+            Claims accessClaims =
+                    jwtService.getAccessClaims(
+                            accessToken
+                    );
+
+            if (!jwtService.isAccess(
+                    accessClaims
+            )) {
+
+                throw new JwtException(
+                        "Provided token is not access token"
+                );
             }
 
-            if (jwtService.isExpired(accessClaims)) {
-                logger.info("[JWT-FILTER] access token expired -> try refresh");
-                tryRefresh(request, response);
+            if (jwtService.isExpired(
+                    accessClaims
+            )) {
+
+                tryRefresh(
+                        request,
+                        response
+                );
+
                 return;
             }
 
-            String email = accessClaims.getSubject();
+            String email =
+                    accessClaims.getSubject();
+
             if (email == null || email.isBlank()) {
-                throw new JwtException("Access token subject(email) is missing");
+
+                throw new JwtException(
+                        "Access token subject is missing"
+                );
             }
 
             authenticate(email);
-            logger.debug("[JWT-FILTER] authenticated by access token");
 
         } catch (JwtException e) {
 
-            logger.info("[JWT-FILTER] access rejected: {} -> try refresh", e.getMessage());
-            tryRefresh(request, response);
+            logger.debug(
+                    "[JWT-FILTER] Access rejected: {}",
+                    e.getMessage()
+            );
+
+            tryRefresh(
+                    request,
+                    response
+            );
         }
     }
-    private void tryRefresh(HttpServletRequest request, HttpServletResponse response) {
-        logger.debug("[JWT-FILTER] refresh stage start");
 
-        String refreshToken = getRefreshToken(request);
-        if (refreshToken == null || refreshToken.isBlank()) {
-            throw new JwtException("Refresh token is missing");
+    private void tryRefresh(
+            HttpServletRequest request,
+            HttpServletResponse response
+    ) {
+
+        String refreshToken =
+                getRefreshToken(request);
+
+        if (refreshToken == null
+                || refreshToken.isBlank()) {
+
+            throw new JwtException(
+                    "Refresh token is missing"
+            );
         }
 
-        Claims refreshClaims = jwtService.getRefreshClaims(refreshToken);
+        Claims refreshClaims =
+                jwtService.getRefreshClaims(
+                        refreshToken
+                );
 
-        if (!jwtService.isRefresh(refreshClaims)) {
-            throw new JwtException("Token type is not refresh");
+        if (!jwtService.isRefresh(
+                refreshClaims
+        )) {
+
+            throw new JwtException(
+                    "Token type is not refresh"
+            );
         }
 
-        if (jwtService.isExpired(refreshClaims)) {
-            throw new JwtException("Refresh token is expired");
+        if (jwtService.isExpired(
+                refreshClaims
+        )) {
+
+            throw new JwtException(
+                    "Refresh token is expired"
+            );
         }
 
-        String userEmail = refreshClaims.getSubject();
-        if (userEmail == null || userEmail.isBlank()) {
-            throw new JwtException("Refresh token subject(email) is missing");
+        String email =
+                refreshClaims.getSubject();
+
+        if (email == null || email.isBlank()) {
+
+            throw new JwtException(
+                    "Refresh token subject is missing"
+            );
         }
 
-        EmployeeDTO employeeDTO = employeeService.loadUserByEmail(userEmail);
+        EmployeePrincipal principal =
+                employeeService.loadUserByUsername(
+                        email
+                );
 
-        String newAccessToken = jwtService.generateAccessToken(employeeDTO);
-        String newRefreshToken = jwtService.generateRefreshToken(employeeDTO);
+        String newAccessToken =
+                jwtService.generateAccessToken(
+                        principal
+                );
+
+        String newRefreshToken =
+                jwtService.generateRefreshToken(
+                        principal
+                );
 
         if (isRestRequest(request)) {
-            response.setHeader("Authorization", "Bearer " + newAccessToken);
-            response.setHeader("Refresh-Token", newRefreshToken);
-            logger.debug("[JWT-FILTER] new tokens sent in headers (REST)");
+
+            response.setHeader(
+                    "Authorization",
+                    "Bearer " + newAccessToken
+            );
+
+            response.setHeader(
+                    "Refresh-Token",
+                    newRefreshToken
+            );
+
         } else {
-            response.addCookie(jwtService.generateAccessTokenCookie(newAccessToken));
-            response.addCookie(jwtService.generateRefreshTokenCookie(newRefreshToken));
-            logger.debug("[JWT-FILTER] new tokens sent in cookies (WEB)");
+
+            response.addCookie(
+                    jwtService.generateAccessTokenCookie(
+                            newAccessToken
+                    )
+            );
+
+            response.addCookie(
+                    jwtService.generateRefreshTokenCookie(
+                            newRefreshToken
+                    )
+            );
         }
 
-        authenticate(userEmail);
-        logger.info("[JWT-FILTER] user={} re-authenticated via refresh", userEmail);
-
+        authenticate(email);
     }
 
-    private boolean isRestRequest(HttpServletRequest req) {
-        String uri = req.getRequestURI();
-        if (uri != null && uri.startsWith("/api")) return true;
+    private void authenticate(
+            String email
+    ) {
 
-        String requestedWith = req.getHeader("X-Requested-With");
-        if ("XMLHttpRequest".equalsIgnoreCase(requestedWith)) return true;
+        EmployeePrincipal principal =
+                employeeService.loadUserByUsername(
+                        email
+                );
 
-        String accept = req.getHeader("Accept");
-        String contentType = req.getContentType();
+        UsernamePasswordAuthenticationToken authentication =
+                new UsernamePasswordAuthenticationToken(
+                        principal,
+                        null,
+                        principal.getAuthorities()
+                );
 
-        return (accept != null && accept.contains("application/json"))
-                || (contentType != null && contentType.contains("application/json"));
+        SecurityContextHolder
+                .getContext()
+                .setAuthentication(authentication);
     }
 
-    private String getAccessToken(HttpServletRequest req) {
-        String header = req.getHeader("Authorization");
-        if (header != null && header.startsWith("Bearer ")) {
-            String value = header.substring(7).trim();
-            return value.isEmpty() ? null : value;
+    private boolean isRestRequest(
+            HttpServletRequest request
+    ) {
+
+        String uri =
+                request.getRequestURI();
+
+        if (uri != null
+                && uri.startsWith("/api")) {
+
+            return true;
         }
-        return getTokenFromCookie(req, "jwtAccess");
+
+        String requestedWith =
+                request.getHeader(
+                        "X-Requested-With"
+                );
+
+        if ("XMLHttpRequest".equalsIgnoreCase(
+                requestedWith
+        )) {
+
+            return true;
+        }
+
+        String accept =
+                request.getHeader("Accept");
+
+        String contentType =
+                request.getContentType();
+
+        return (accept != null
+                && accept.contains(
+                "application/json"
+        ))
+                || (contentType != null
+                && contentType.contains(
+                "application/json"
+        ));
     }
 
-    private String getRefreshToken(HttpServletRequest req) {
-        String header = req.getHeader("Refresh-Token");
-        if (header != null && !header.isBlank()) {
+    private String getAccessToken(
+            HttpServletRequest request
+    ) {
+
+        String header =
+                request.getHeader("Authorization");
+
+        if (header != null
+                && header.startsWith("Bearer ")) {
+
+            String value =
+                    header.substring(7).trim();
+
+            return value.isEmpty()
+                    ? null
+                    : value;
+        }
+
+        return getTokenFromCookie(
+                request,
+                "jwtAccess"
+        );
+    }
+
+    private String getRefreshToken(
+            HttpServletRequest request
+    ) {
+
+        String header =
+                request.getHeader("Refresh-Token");
+
+        if (header != null
+                && !header.isBlank()) {
+
             return header.trim();
         }
-        return getTokenFromCookie(req, "jwtRefresh");
+
+        return getTokenFromCookie(
+                request,
+                "jwtRefresh"
+        );
     }
 
-    private String getTokenFromCookie(HttpServletRequest req, String name) {
-        Cookie[] cookies = req.getCookies();
-        if (cookies == null) return null;
+    private String getTokenFromCookie(
+            HttpServletRequest request,
+            String name
+    ) {
 
-        for (Cookie c : cookies) {
-            if (name.equals(c.getName())) {
-                String value = c.getValue();
-                return (value == null || value.isBlank()) ? null : value;
+        Cookie[] cookies =
+                request.getCookies();
+
+        if (cookies == null) {
+            return null;
+        }
+
+        for (Cookie cookie : cookies) {
+
+            if (name.equals(cookie.getName())) {
+
+                String value =
+                        cookie.getValue();
+
+                return value == null
+                        || value.isBlank()
+                        ? null
+                        : value;
             }
         }
+
         return null;
     }
 
+    private void clearAuthentication(
+            HttpServletResponse response
+    ) {
 
-    private void authenticate(String userEmail) {
-        EmployeeDTO employee = employeeService.loadUserByEmail(userEmail);
-
-        UsernamePasswordAuthenticationToken authToken =
-                new UsernamePasswordAuthenticationToken(employee, null, employee.getAuthorities());
-
-        SecurityContextHolder.getContext().setAuthentication(authToken);
-        logger.debug("[JWT-FILTER] authentication success user={}", userEmail);
-    }
-    private void clearAuthentication(HttpServletResponse response) {
         SecurityContextHolder.clearContext();
 
-        Cookie accessCookie = new Cookie("jwtAccess", null);
+        Cookie accessCookie =
+                new Cookie("jwtAccess", null);
+
         accessCookie.setMaxAge(0);
         accessCookie.setPath("/");
         accessCookie.setHttpOnly(true);
+
         response.addCookie(accessCookie);
 
-        Cookie refreshCookie = new Cookie("jwtRefresh", null);
+        Cookie refreshCookie =
+                new Cookie("jwtRefresh", null);
+
         refreshCookie.setMaxAge(0);
         refreshCookie.setPath("/");
         refreshCookie.setHttpOnly(true);
-        response.addCookie(refreshCookie);
 
-        logger.debug("[JWT-FILTER] security context cleared, auth cookies removed");
+        response.addCookie(refreshCookie);
     }
 }

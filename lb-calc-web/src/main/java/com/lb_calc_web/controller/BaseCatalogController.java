@@ -1,41 +1,134 @@
 package com.lb_calc_web.controller;
 
-import com.lb_calc_web.entity.attributes.*;
+import com.lb_calc_web.domain.attributes.Colors;
+import com.lb_calc_web.domain.attributes.DirectionDoorOpening;
+import com.lb_calc_web.domain.attributes.Payment;
+import com.lb_calc_web.domain.attributes.PositionLC;
+import com.lb_calc_web.domain.equipment.BarReader;
+import com.lb_calc_web.domain.equipment.Display;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.ModelAttribute;
 
 import java.util.Arrays;
 import java.util.List;
 
 public abstract class BaseCatalogController {
-    protected final List<Colors> colorsList = Arrays.asList(Colors.values());
-    protected final List<PositionLC> positionLCList = Arrays.asList(PositionLC.values());
-    protected final List<Payment> paymentList = Arrays.asList(Payment.values());
-    protected final List<DisplayLC> displayList = Arrays.asList(DisplayLC.values());
-    protected final List<BarReader> barReaderList = Arrays.asList(BarReader.values());
-    protected final List<TypeLb> typeLbList = Arrays.asList(TypeLb.values());
-    protected final List<DirectionDoorOpening> directionDoorOpeningList = Arrays.asList(DirectionDoorOpening.values());
+
+    /**
+     * Цвета корпуса и дверей.
+     */
+    protected final List<Colors> colorsList =
+            Arrays.asList(Colors.values());
+
+    /**
+     * Положение модуля управления внутри ALS.
+     */
+    protected final List<PositionLC> positionLCList =
+            Arrays.asList(PositionLC.values());
+
+    /**
+     * Способы оплаты.
+     */
+    protected final List<Payment> paymentList =
+            Arrays.asList(Payment.values());
+
+    /**
+     * Доступные дисплеи LC.
+     *
+     * <p>Display больше не enum, поэтому передаём
+     * в шаблон имена оборудования.</p>
+     */
+    protected final List<String> displayList =
+            List.of(
+                    Display.NONE.getName(),
+                    Display.LC10.getName(),
+                    Display.LC17.getName(),
+                    Display.LC19.getName()
+            );
+
+    /**
+     * Доступные сканеры штрихкода.
+     *
+     * <p>BarReader больше не enum.</p>
+     */
+    protected final List<String> barReaderList =
+            List.of(
+                    BarReader.NONE.getName(),
+                    BarReader.READER_1D.getName(),
+                    BarReader.READER_2D.getName()
+            );
+
+    /**
+     * Список типов LB из конфигурации.
+     *
+     * <p>TypeLb больше не enum.
+     * Типы задаются в size-bounds.properties.</p>
+     */
+    @Value("${lb.types}")
+    private String lbTypes;
+
+    /**
+     * Направление открытия дверей.
+     */
+    protected final List<DirectionDoorOpening>
+            directionDoorOpeningList =
+            Arrays.asList(DirectionDoorOpening.values());
 
     @ModelAttribute("colorsList")
-    public List<Colors> colorsList() { return colorsList; }
+    public List<Colors> colorsList() {
+        return colorsList;
+    }
 
     @ModelAttribute("positionLCList")
-    public List<PositionLC> positionLCList() { return positionLCList; }
+    public List<PositionLC> positionLCList() {
+        return positionLCList;
+    }
 
     @ModelAttribute("paymentList")
-    public List<Payment> paymentList() { return paymentList; }
+    public List<Payment> paymentList() {
+        return paymentList;
+    }
 
     @ModelAttribute("displayList")
-    public List<DisplayLC> displayList() { return displayList; }
+    public List<String> displayList() {
+        return displayList;
+    }
 
     @ModelAttribute("barReaderList")
-    public List<BarReader> barReaderList() { return barReaderList; }
+    public List<String> barReaderList() {
+        return barReaderList;
+    }
 
+    /**
+     * Список типов LB.
+     */
     @ModelAttribute("typeList")
-    public List<TypeLb> typeList() { return typeLbList; }
+    public List<String> typeList() {
+        return getTypeLbList();
+    }
 
+    /**
+     * Список типов LB.
+     */
     @ModelAttribute("typeLbList")
-    public List<TypeLb> typeLbList() { return typeLbList; }
+    public List<String> typeLbList() {
+        return getTypeLbList();
+    }
 
     @ModelAttribute("directionDoorOpeningList")
-    public List<DirectionDoorOpening> directionDoorOpeningList() { return directionDoorOpeningList; }
+    public List<DirectionDoorOpening>
+    directionDoorOpeningList() {
+        return directionDoorOpeningList;
+    }
+
+    private List<String> getTypeLbList() {
+        if (lbTypes == null || lbTypes.isBlank()) {
+            return List.of();
+        }
+
+        return Arrays.stream(lbTypes.split(","))
+                .map(String::trim)
+                .filter(type -> !type.isBlank())
+                .toList();
+    }
 }

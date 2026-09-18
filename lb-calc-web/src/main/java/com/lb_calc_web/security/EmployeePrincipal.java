@@ -19,19 +19,19 @@ public final class EmployeePrincipal implements UserDetails {
 
     private final Long id;
     private final String email;
-    private final String passwordHash;
+    private final String encryptedPassword;
     private final Role role;
 
     public EmployeePrincipal(
             Long id,
             String email,
-            String passwordHash,
+            String encryptedPassword,
             Role role
     ) {
         this.id = Objects.requireNonNull(id, "ID сотрудника не должен быть null");
         this.email = Objects.requireNonNull(email, "Email не должен быть null");
-        this.passwordHash = Objects.requireNonNull(
-                passwordHash,
+        this.encryptedPassword = Objects.requireNonNull(
+                encryptedPassword,
                 "Хэш пароля не должен быть null"
         );
         this.role = Objects.requireNonNull(
@@ -62,7 +62,7 @@ public final class EmployeePrincipal implements UserDetails {
      */
     @Override
     public String getPassword() {
-        return passwordHash;
+        return encryptedPassword;
     }
 
     /**

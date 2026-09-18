@@ -1,15 +1,13 @@
 package com.lb_calc_web.controller.api;
 
-import com.lb_calc_web.controller.ProjectController;
 import com.lb_calc_web.controller.api.response.ApiResponse;
 import com.lb_calc_web.dto.ALSDTO;
-import com.lb_calc_web.dto.LBDTO;
-import com.lb_calc_web.dto.LCDTO;
 import com.lb_calc_web.dto.ProjectDTO;
-import com.lb_calc_web.dto.validation.ValidationResult;
-import com.lb_calc_web.service.ALSService;
+import com.lb_calc_web.handler.ValidationSizeException;
 import com.lb_calc_web.service.ProjectService;
-import com.lb_calc_web.service.util.SizeValidator;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.InputStreamResource;
@@ -20,361 +18,476 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.ByteArrayInputStream;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @RestController
 @RequestMapping("/api/v1/projects")
 @PreAuthorize("isAuthenticated()")
+@Tag(
+        name = "Projects",
+        description = "API проектов"
+)
+@SecurityRequirement(name = "bearerAuth")
 public class ProjectRestController {
-    private static final Logger logger = LoggerFactory.getLogger(ProjectController.class);
+
+    private static final Logger logger =
+            LoggerFactory.getLogger(
+                    ProjectRestController.class
+            );
+
     private final ProjectService projectService;
-    private final ALSService alsService;
 
-    public ProjectRestController(ProjectService projectService, ALSService alsService) {
-        this.projectService = projectService;
-        this.alsService = alsService;
+    public ProjectRestController(
+            ProjectService projectService
+    ) {
+        this.projectService =
+                projectService;
     }
-    /**
-     * GET /api/v1/projects
-     * Получить все проекты
-     */
+
     @GetMapping
+    @Operation(
+            summary = "Получить список проектов"
+    )
     public ResponseEntity<?> getAllProjects() {
-        logger.info("Fetching all projects");
 
-        try {
-            List<ProjectDTO> projects = projectService.findAll();
-            ApiResponse<List<ProjectDTO>> response= ApiResponse.success(projects);
-            return ResponseEntity.ok(response);
+        List<ProjectDTO> projects =
+                projectService.findAll();
 
-        } catch (Exception e) {
-            logger.error("Error fetching projects", e);
-            ApiResponse<String> response= ApiResponse.error("Error fetching projects",e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-        }
+        return ResponseEntity.ok(
+                ApiResponse.success(
+                        "Project list fetched successfully",
+                        projects
+                )
+        );
     }
-    @GetMapping("/create")
-    private ResponseEntity<?> createProject() {
-        logger.info("Creating new project");
-        try {
-            ProjectDTO project = projectService.createProject();
-            ApiResponse<ProjectDTO> response = ApiResponse.success( "Project created successfully", project);
-            return ResponseEntity.status(HttpStatus.CREATED).body(response);
-        } catch (Exception e) {
-            logger.error("Error creating project", e);
-            ApiResponse<Void> response = ApiResponse.error(e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-        }
-    }
-    @PostMapping("/{id}/update")
-    public ResponseEntity<?> updateProject(@PathVariable Long id, @RequestBody ProjectDTO project) {
-        logger.debug("Updating project {}", project);
-        if (project.getId() == 0) {
-            return ResponseEntity.badRequest().build();
-        }
 
-        if (project.getId() != id.intValue()) {
-            return ResponseEntity.badRequest().build();
-        }
-        for(ALSDTO als:project.getAlsList()){
-            als=alsService.resizeLC(als);
-            als=alsService.resizeLBs(als);
-        }
-        try {
-            List<ValidationResult> errorProjectList= SizeValidator.validateProject(project);
-            if (errorProjectList.isEmpty()) {
-                project=projectService.saveProject(project);
-                ApiResponse<ProjectDTO> response = ApiResponse.success(project);
-                return ResponseEntity.status(HttpStatus.OK).body(response);
-            }else{
-                ApiResponse<List<ValidationResult>> response = ApiResponse.error("Project validation failed", errorProjectList);
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
-            }
-        } catch (Exception e) {
-            logger.error("Error updating project", e);
-            ApiResponse<Void> response = ApiResponse.error(e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-        }
-    }
-    @PostMapping("/save")
-    public ResponseEntity<?> saveProject(@RequestBody ProjectDTO project) {
-        logger.debug("Saving new project {}", project);
-        for(ALSDTO als:project.getAlsList()){
-            als=alsService.resizeLC(als);
-            als=alsService.resizeLBs(als);
-        }
-        try {
-            List<ValidationResult> errorProjectList= SizeValidator.validateProject(project);
-            if (errorProjectList.isEmpty()) {
-                project=projectService.saveProject(project);
-                ApiResponse<ProjectDTO> response = ApiResponse.success(project);
-                return ResponseEntity.status(HttpStatus.CREATED).body(response);
-            }else{
-                ApiResponse<List<ValidationResult>> response = ApiResponse.error("Project validation failed", errorProjectList);
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
-            }
-        } catch (Exception e) {
-            logger.error("Error updating project", e);
-            ApiResponse<Void> response = ApiResponse.error(e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-        }
-    }
     @GetMapping("/{id}")
-    public ResponseEntity<?> getProjectById(@PathVariable Long id) {
-        logger.info("Fetching project with id: {}", id);
+    @Operation(
+            summary = "Получить проект по ID"
+    )
+    public ResponseEntity<?> getProjectById(
+            @PathVariable Long id
+    ) {
         try {
-            ProjectDTO project =projectService.findById(id);
-            ApiResponse<ProjectDTO> response = ApiResponse.success(project);
-            return ResponseEntity.status(HttpStatus.OK).body(response);
-        } catch (Exception e) {
-            logger.warn("Project not found with id: {}", id);
-            ApiResponse<String> response = ApiResponse.error("Project not found with id:"+id,e.getMessage());
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+
+            ProjectDTO project =
+                    projectService.findById(id);
+
+            return ResponseEntity.ok(
+                    ApiResponse.success(
+                            project
+                    )
+            );
+
+        } catch (NoSuchElementException e) {
+
+            return ResponseEntity.status(
+                            HttpStatus.NOT_FOUND
+                    )
+                    .body(
+                            ApiResponse.error(
+                                    e.getMessage()
+                            )
+                    );
         }
     }
-    /**
-     * DELETE /api/v1/projects/{id}
-     * Удалить проект
-     */
+
+    @GetMapping("/create")
+    @Operation(
+            summary = "Получить шаблон нового проекта"
+    )
+    public ResponseEntity<?> createProject() {
+
+        return ResponseEntity.ok(
+                ApiResponse.success(
+                        projectService.createProject()
+                )
+        );
+    }
+
+    @PostMapping
+    @Operation(
+            summary = "Создать проект"
+    )
+    public ResponseEntity<?> createProject(
+            @RequestBody ProjectDTO project
+    ) {
+        try {
+
+            project.setId(0L);
+
+            ProjectDTO saved =
+                    projectService.saveProject(
+                            project
+                    );
+
+            return ResponseEntity.status(
+                            HttpStatus.CREATED
+                    )
+                    .body(
+                            ApiResponse.success(
+                                    saved
+                            )
+                    );
+
+        } catch (ValidationSizeException e) {
+
+            return ResponseEntity.badRequest()
+                    .body(
+                            ApiResponse.error(
+                                    "Project validation failed",
+                                    e.getErrors()
+                            )
+                    );
+
+        } catch (IllegalArgumentException
+                 | IllegalStateException e) {
+
+            return ResponseEntity.badRequest()
+                    .body(
+                            ApiResponse.error(
+                                    e.getMessage()
+                            )
+                    );
+        }
+    }
+
+    @PutMapping("/{id}")
+    @Operation(
+            summary = "Обновить проект"
+    )
+    public ResponseEntity<?> updateProject(
+            @PathVariable Long id,
+            @RequestBody ProjectDTO project
+    ) {
+        try {
+
+            project.setId(id);
+
+            ProjectDTO saved =
+                    projectService.saveProject(
+                            project
+                    );
+
+            return ResponseEntity.ok(
+                    ApiResponse.success(
+                            saved
+                    )
+            );
+
+        } catch (NoSuchElementException e) {
+
+            return ResponseEntity.status(
+                            HttpStatus.NOT_FOUND
+                    )
+                    .body(
+                            ApiResponse.error(
+                                    e.getMessage()
+                            )
+                    );
+
+        } catch (ValidationSizeException e) {
+
+            return ResponseEntity.badRequest()
+                    .body(
+                            ApiResponse.error(
+                                    "Project validation failed",
+                                    e.getErrors()
+                            )
+                    );
+
+        } catch (IllegalArgumentException
+                 | IllegalStateException e) {
+
+            return ResponseEntity.badRequest()
+                    .body(
+                            ApiResponse.error(
+                                    e.getMessage()
+                            )
+                    );
+        }
+    }
+
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteProject(@PathVariable Long id) {
-        logger.info("Deleting project with id: {}", id);
-
+    @Operation(
+            summary = "Удалить проект"
+    )
+    public ResponseEntity<?> deleteProject(
+            @PathVariable Long id
+    ) {
         try {
+
             projectService.deleteById(id);
-            ApiResponse<Object> response =ApiResponse.success("Project deleted successfully");
 
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok(
+                    ApiResponse.success(
+                            "Project deleted successfully"
+                    )
+            );
 
-        } catch (Exception e) {
-            logger.error("Error deleting project", e);
-            ApiResponse<String> response = ApiResponse.error("Error deleting project", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        } catch (NoSuchElementException e) {
+
+            return ResponseEntity.status(
+                            HttpStatus.NOT_FOUND
+                    )
+                    .body(
+                            ApiResponse.error(
+                                    e.getMessage()
+                            )
+                    );
         }
     }
 
-    /**
-     * POST /api/v1/projects/{id}/export
-     * Экспортировать проект в Excel
-     */
-    @PostMapping("/{id}/export")
-    public ResponseEntity<?> exportProjectToExcel(@PathVariable Long id) {
-        logger.info("Exporting project with id: {}", id);
-
+    @PostMapping("/{id}/add-als")
+    @Operation(
+            summary = "Добавить ALS в проект"
+    )
+    public ResponseEntity<?> addALSToProject(
+            @PathVariable Long id
+    ) {
         try {
-            ProjectDTO project = projectService.findById(id);
-            ByteArrayInputStream excelFile = projectService.exportToExcel(project);
 
-            HttpHeaders headers = new HttpHeaders();
-            headers.add("Content-Disposition",
-                    "attachment; filename=project_" + id + ".xlsx");
-            headers.setContentType(MediaType.parseMediaType(
-                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
+            ProjectDTO project =
+                    projectService
+                            .addNewALSandSaveProject(id);
+
+            return ResponseEntity.status(
+                            HttpStatus.CREATED
+                    )
+                    .body(
+                            ApiResponse.success(
+                                    "ALS added to project successfully",
+                                    project
+                            )
+                    );
+
+        } catch (NoSuchElementException e) {
+
+            return ResponseEntity.status(
+                            HttpStatus.NOT_FOUND
+                    )
+                    .body(
+                            ApiResponse.error(
+                                    e.getMessage()
+                            )
+                    );
+        }
+    }
+
+    @DeleteMapping(
+            "/{projectId}/als/{alsId}"
+    )
+    @Operation(
+            summary = "Удалить ALS из проекта"
+    )
+    public ResponseEntity<?> deleteALS(
+            @PathVariable Long projectId,
+            @PathVariable Long alsId
+    ) {
+        try {
+
+            ProjectDTO project =
+                    projectService
+                            .deleteALSandSaveProject(
+                                    projectId,
+                                    alsId
+                            );
+
+            return ResponseEntity.ok(
+                    ApiResponse.success(
+                            "ALS deleted from project successfully",
+                            project
+                    )
+            );
+
+        } catch (NoSuchElementException e) {
+
+            return ResponseEntity.status(
+                            HttpStatus.NOT_FOUND
+                    )
+                    .body(
+                            ApiResponse.error(
+                                    e.getMessage()
+                            )
+                    );
+        }
+    }
+
+    @PostMapping("/{id}/export")
+    @Operation(
+            summary = "Экспортировать проект в Excel"
+    )
+    public ResponseEntity<?> exportProjectToExcel(
+            @PathVariable Long id
+    ) {
+        try {
+
+            ProjectDTO project =
+                    projectService.findById(id);
+
+            InputStreamResource file =
+                    new InputStreamResource(
+                            projectService.exportToExcel(
+                                    project
+                            )
+                    );
 
             return ResponseEntity.ok()
-                    .headers(headers)
-                    .contentType(MediaType.parseMediaType(
-                            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
-                    .body(new InputStreamResource(excelFile));
+                    .header(
+                            HttpHeaders.CONTENT_DISPOSITION,
+                            "attachment; filename=project_"
+                                    + id
+                                    + ".xlsx"
+                    )
+                    .contentType(
+                            MediaType.parseMediaType(
+                                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                            )
+                    )
+                    .body(file);
 
-        } catch (Exception e) {
-            logger.error("Error exporting project", e);
-            ApiResponse<String> response = ApiResponse.error("Error exporting project",e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-        }
-    }
-    /**
-     * POST /api/v1/projects/{id}/add-als
-     * Добавить новый ALS к проекту
-     */
-    @PostMapping("/{id}/add-als")
+        } catch (NoSuchElementException e) {
 
-    public ResponseEntity<?> addALSToProject(@PathVariable Long id) {
-        logger.info("Adding new ALS to project id: {}", id);
-
-        try {
-            ProjectDTO project = projectService.addNewALSandSaveProject(id);
-            ApiResponse<Object> response =ApiResponse.success("ALS added in Project successfully", project);
-            return ResponseEntity.status(HttpStatus.CREATED).body(response);
-
-        } catch (Exception e) {
-            logger.error("Error adding ALS to project", e);
-            ApiResponse<String> response = ApiResponse.error("Error adding ALS to project", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-        }
-    }
-    /**
-     * DELETE /api/v1/projects/{projectId}/alss/{alsId}/delete
-     * Удалить ALS из проекта
-     */
-    @DeleteMapping("/{projectId}/als/{alsId}/delete")
-
-    public ResponseEntity<?> deleteALSFromProject(
-            @PathVariable Long projectId,
-            @PathVariable Long alsId) {
-        logger.info("Deleting ALS {} from project {}", alsId, projectId);
-
-        try {
-            ProjectDTO project = projectService.deleteALSandSaveProject(projectId, alsId);
-            ApiResponse<Object> response =ApiResponse.success("ALS deleted from Project successfully",project);
-            return ResponseEntity.ok(response);
-
-        } catch (Exception e) {
-            logger.error("Error deleting ALS from project", e);
-            ApiResponse<String> response = ApiResponse.error("Error deleting ALS from project", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+            return ResponseEntity.status(
+                            HttpStatus.NOT_FOUND
+                    )
+                    .body(
+                            ApiResponse.error(
+                                    e.getMessage()
+                            )
+                    );
         }
     }
 
-    /**
-     * POST /api/v1/projects/{projectId}/alss/{alsId}/save
-     * Сохранить ALS в проекте с валидацией
-     */
-    @PostMapping("/{projectId}/alss/{alsId}/save")
-
-    public ResponseEntity<?> saveALSInProject(
-            @PathVariable Long projectId,
+    @PostMapping("/{id}/alss/{alsId}")
+    @Operation(
+            summary = "Сохранить ALS в проекте"
+    )
+    public ResponseEntity<?> saveALS(
+            @PathVariable Long id,
             @PathVariable Long alsId,
-            @RequestBody ALSDTO als) {
-        logger.info("Saving ALS {} in project {}", alsId, projectId);
-
+            @RequestBody ALSDTO als
+    ) {
         try {
-            ProjectDTO project = projectService.findById(projectId);
-            List<ValidationResult> errorAlsList=SizeValidator.deepValidateALS(als);
-             if (!errorAlsList.isEmpty()) {
-                ApiResponse<List<ValidationResult>> response = ApiResponse.error("ALS validation failed", errorAlsList);
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
-            }
-            ALSDTO saved = projectService.replaceALSandSaveProject(project, als, alsId);
-            ApiResponse<Object> response =ApiResponse.success("ALS saved in Project successfully", saved);
 
-            return ResponseEntity.ok(response);
+            ProjectDTO project =
+                    projectService.findById(id);
 
-        } catch (Exception e) {
-            logger.error("Error saving ALS in project", e);
-            ApiResponse<String> response = ApiResponse.error("Error saving ALS in project", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-        }
-    }
-    /**
-     * POST /api/v1/projects/{projectId}/als/{alsId}/lcs/{lcId}/save
-     * Сохранить LC для ALS в проекте с валидацией
-     */
-    @PostMapping("/{projectId}/alss/{alsId}/lcs/{lcId}/save")
+            ALSDTO savedALS =
+                    projectService
+                            .replaceALSandSaveProject(
+                                    project,
+                                    als,
+                                    alsId
+                            );
 
-    public ResponseEntity<?> saveLCInProject(
-            @PathVariable Long projectId,
-            @PathVariable Long alsId,
-            @PathVariable Long lcId,
-            @RequestBody LCDTO lc) {
-        logger.info("Saving LC {} for ALS {} in project {}", lcId, alsId, projectId);
+            return ResponseEntity.ok(
+                    ApiResponse.success(
+                            "ALS saved in project successfully",
+                            savedALS
+                    )
+            );
 
-        try {
-            ProjectDTO project = projectService.findById(projectId);
-            ALSDTO als = alsService.findById(alsId);
+        } catch (NoSuchElementException e) {
 
-            // Валидация размеров LC
-            List<String> errorList = SizeValidator.getErrorValidateLCSizesList(lc);
+            return ResponseEntity.status(
+                            HttpStatus.NOT_FOUND
+                    )
+                    .body(
+                            ApiResponse.error(
+                                    e.getMessage()
+                            )
+                    );
 
-            if (!errorList.isEmpty()) {
-               ApiResponse<Void> errorResponse = ApiResponse.error("LC validation failed", errorList);
-                return ResponseEntity.badRequest().body(errorResponse);
-            }
+        } catch (ValidationSizeException e) {
 
-            ALSDTO saved = projectService.replaceLCandSaveProject(project, als, alsId, lc);
-            ApiResponse<Object> response =ApiResponse.success("LC saved in Project successfully", saved);
-
-            return ResponseEntity.ok(response);
-
-        } catch (Exception e) {
-            logger.error("Error saving LC in project", e);
-            ApiResponse<String> response = ApiResponse.error("Error saving LC in project", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+            return ResponseEntity.badRequest()
+                    .body(
+                            ApiResponse.error(
+                                    "ALS validation failed",
+                                    e.getErrors()
+                            )
+                    );
         }
     }
 
-    /**
-     * POST /api/v1/projects/{projectId}/alss/{alsId}/lbs/add
-     * Добавить новый LB к ALS в проекте
-     */
     @PostMapping("/{projectId}/als/{alsId}/lbs/add")
-
-    public ResponseEntity<?> addLBToALSInProject(
+    @Operation(
+            summary = "Добавить LB в ALS проекта"
+    )
+    public ResponseEntity<?> addLB(
             @PathVariable Long projectId,
-            @PathVariable Long alsId) {
-        logger.info("Adding new LB to ALS {} in project {}", alsId, projectId);
-
+            @PathVariable Long alsId
+    ) {
         try {
-            ALSDTO als = projectService.addLBAtProject(projectId, alsId);
-            ApiResponse<ALSDTO> response =ApiResponse.success("ALS added in Project successfully", als);
-            return ResponseEntity.status(HttpStatus.CREATED).body(response);
 
-        } catch (Exception e) {
-            logger.error("Error adding LB to ALS", e);
-            ApiResponse<String> response = ApiResponse.error("Error adding LB to ALS", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+            ALSDTO als =
+                    projectService.addLBAtProject(
+                            projectId,
+                            alsId
+                    );
+
+            return ResponseEntity.status(
+                            HttpStatus.CREATED
+                    )
+                    .body(
+                            ApiResponse.success(
+                                    "LB added successfully",
+                                    als
+                            )
+                    );
+
+        } catch (NoSuchElementException e) {
+
+            return ResponseEntity.status(
+                            HttpStatus.NOT_FOUND
+                    )
+                    .body(
+                            ApiResponse.error(
+                                    e.getMessage()
+                            )
+                    );
         }
     }
 
-    /**
-     * DELETE /api/v1/projects/{projectId}/als/{alsId}/lbs/{lbId}/delete
-     * Удалить LB из ALS в проекте
-     */
-    @DeleteMapping("/{projectId}/als/{alsId}/lbs/{lbId}/delete")
-
-    public ResponseEntity<?> deleteLBFromALSInProject(
+    @DeleteMapping(
+            "/{projectId}/als/{alsId}/lbs/{lbId}"
+    )
+    @Operation(
+            summary = "Удалить LB из ALS проекта"
+    )
+    public ResponseEntity<?> deleteLB(
             @PathVariable Long projectId,
             @PathVariable Long alsId,
-            @PathVariable Long lbId) {
-        logger.info("Deleting LB {} from ALS {} in project {}", lbId, alsId, projectId);
-
+            @PathVariable Long lbId
+    ) {
         try {
-            ALSDTO als = projectService.deleteLBatProject(projectId, alsId, lbId);
-            ApiResponse<ALSDTO> response =ApiResponse.success("ALS deleted from Project successfully", als);
-            return ResponseEntity.ok(response);
 
-        } catch (Exception e) {
-            logger.error("Error deleting LB from ALS", e);
-            ApiResponse<String> response = ApiResponse.error("Error deleting LB from ALS", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-        }
-    }
-    /**
-     * POST /api/v1/projects/{projectId}/alss/{alsId}/lbs/{lbId}/save
-     * Сохранить LB для ALS в проекте с валидацией
-     */
-    @PostMapping("/{projectId}/als/{alsId}/lbs/{lbId}/save")
+            ALSDTO als =
+                    projectService.deleteLBatProject(
+                            projectId,
+                            alsId,
+                            lbId
+                    );
 
-    public ResponseEntity<?> saveLBInProject(
-            @PathVariable Long projectId,
-            @PathVariable Long alsId,
-            @PathVariable Long lbId,
-            @RequestBody LBDTO lb) {
-        logger.info("Saving LB {} for ALS {} in project {}", lbId, alsId, projectId);
+            return ResponseEntity.ok(
+                    ApiResponse.success(
+                            "LB deleted successfully",
+                            als
+                    )
+            );
 
-        try {
-            ProjectDTO project = projectService.findById(projectId);
+        } catch (NoSuchElementException e) {
 
-            // Валидация размеров LB
-            List<String> errorList = SizeValidator.getErrorValidateLBSizesList(lb);
-
-            if (!errorList.isEmpty()) {
-                ApiResponse<Void> errorResponse = ApiResponse.error("LB validation failed", errorList);
-                return ResponseEntity.badRequest().body(errorResponse);
-            }
-
-            List<Object> result = projectService.saveLBatProject(projectId, alsId, lbId, lb);
-            ALSDTO savedALS = (ALSDTO) result.get(0);
-            Integer newLbId = (Integer) result.get(1);
-            ApiResponse<ALSDTO> response =ApiResponse.success("LB saved in Project successfully", savedALS);
-            return ResponseEntity.ok(response);
-
-        } catch (Exception e) {
-            logger.error("Error saving LB in project", e);
-            ApiResponse<String> response = ApiResponse.error("Error saving LB in project", e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
-
+            return ResponseEntity.status(
+                            HttpStatus.NOT_FOUND
+                    )
+                    .body(
+                            ApiResponse.error(
+                                    e.getMessage()
+                            )
+                    );
         }
     }
 }

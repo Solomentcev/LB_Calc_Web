@@ -2,8 +2,11 @@ package com.lb_calc_web.controller.api;
 
 import com.lb_calc_web.controller.api.response.ApiResponse;
 import com.lb_calc_web.dto.ALSDTO;
+import com.lb_calc_web.handler.ValidationSizeException;
 import com.lb_calc_web.service.ALSService;
-import jakarta.validation.Valid;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -12,75 +15,219 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-
+import java.util.NoSuchElementException;
 
 @RestController
 @RequestMapping("/api/v1/alss")
 @PreAuthorize("isAuthenticated()")
+@Tag(
+        name = "ALS",
+        description = "API автоматизированных систем хранения"
+)
+@SecurityRequirement(name = "bearerAuth")
 public class ALSRestController {
-    private static final Logger logger = LoggerFactory.getLogger(ALSRestController.class);
+
+    private static final Logger logger =
+            LoggerFactory.getLogger(
+                    ALSRestController.class
+            );
+
     private final ALSService alsService;
 
-    public ALSRestController(ALSService alsService) {
+    public ALSRestController(
+            ALSService alsService
+    ) {
         this.alsService = alsService;
     }
-    /**
-     * GET /api/v1/alss
-     * Получить все ALS
-     */
+
     @GetMapping
+    @Operation(
+            summary = "Получить список ALS"
+    )
     public ResponseEntity<?> getAllALS() {
-        logger.info("Fetching all ALS");
+
+        List<ALSDTO> alsList =
+                alsService.findAll();
+
+        return ResponseEntity.ok(
+                ApiResponse.success(
+                        "ALS list fetched successfully",
+                        alsList
+                )
+        );
+    }
+
+    @GetMapping("/{id}")
+    @Operation(
+            summary = "Получить ALS по ID"
+    )
+    public ResponseEntity<?> getALSById(
+            @PathVariable Long id
+    ) {
 
         try {
-            List<ALSDTO> alsList = alsService.findAll();
-            ApiResponse<List<ALSDTO>> response = ApiResponse.success("ALS list fetched successfully", alsList);
-            return ResponseEntity.ok(response);
+            ALSDTO als =
+                    alsService.findById(id);
 
-        } catch (Exception e) {
-            logger.error("Error fetching ALS", e);
-            ApiResponse<String> error = ApiResponse.error("Error while fetching ALS",e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+            return ResponseEntity.ok(
+                    ApiResponse.success(als)
+            );
+
+        } catch (NoSuchElementException e) {
+
+            return ResponseEntity.status(
+                            HttpStatus.NOT_FOUND
+                    )
+                    .body(
+                            ApiResponse.error(
+                                    e.getMessage()
+                            )
+                    );
         }
     }
 
-    /**
-     * GET /api/v1/alss/{id}
-     * Получить ALS по ID
-     */
-    @GetMapping("/als/{id}")
-    public ResponseEntity<?> getALSById(@PathVariable Long id) {
-        logger.info("Fetching ALS with id: {}", id);
+    @GetMapping("/create")
+    @Operation(
+            summary = "Получить шаблон ALS"
+    )
+    public ResponseEntity<?> createALS() {
+
+        return ResponseEntity.ok(
+                ApiResponse.success(
+                        alsService.createALS()
+                )
+        );
+    }
+
+    @PostMapping
+    @Operation(
+            summary = "Создать ALS"
+    )
+    public ResponseEntity<?> createALS(
+            @RequestBody ALSDTO dto
+    ) {
 
         try {
-            ALSDTO als = alsService.findById(id);
-            ApiResponse<ALSDTO> response = ApiResponse.success(als);
-            return ResponseEntity.ok(response);
+            dto.setId(0L);
 
-        } catch (Exception e) {
-            logger.warn("ALS not found with id: {}", id);
-            ApiResponse<Void> errorResponse = ApiResponse.error(e.getMessage());
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+            ALSDTO saved =
+                    alsService.saveALS(dto);
+
+            return ResponseEntity.status(
+                            HttpStatus.CREATED
+                    )
+                    .body(
+                            ApiResponse.success(
+                                    saved
+                            )
+                    );
+
+        } catch (ValidationSizeException e) {
+
+            logger.warn(
+                    "Ошибка валидации ALS: {}",
+                    e.getErrors()
+            );
+
+            return ResponseEntity.badRequest()
+                    .body(
+                            ApiResponse.error(
+                                    "Ошибка валидации ALS",
+                                    e.getErrors()
+                            )
+                    );
+
+        } catch (IllegalArgumentException
+                 | IllegalStateException e) {
+
+            return ResponseEntity.badRequest()
+                    .body(
+                            ApiResponse.error(
+                                    e.getMessage()
+                            )
+                    );
         }
     }
 
-    /**
-     * POST /api/v1/alss
-     * Создать новый ALS
-     */
-    @PostMapping("/als")
-    public ResponseEntity<?> createALS(@RequestBody @Valid ALSDTO alsDTO) {
-        logger.info("Creating new ALS");
+    @PutMapping("/{id}")
+    @Operation(
+            summary = "Обновить ALS"
+    )
+    public ResponseEntity<?> updateALS(
+            @PathVariable Long id,
+            @RequestBody ALSDTO dto
+    ) {
 
         try {
-            ALSDTO createdALS = alsService.saveALS(alsDTO);
-            ApiResponse<ALSDTO> response = ApiResponse.success(createdALS);
-            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+            dto.setId(id);
 
-        } catch (Exception e) {
-            logger.error("Error creating ALS", e);
-            ApiResponse<String> errorResponse = ApiResponse.error("Error creating ALS",e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+            ALSDTO saved =
+                    alsService.saveALS(dto);
+
+            return ResponseEntity.ok(
+                    ApiResponse.success(saved)
+            );
+
+        } catch (NoSuchElementException e) {
+
+            return ResponseEntity.status(
+                            HttpStatus.NOT_FOUND
+                    )
+                    .body(
+                            ApiResponse.error(
+                                    e.getMessage()
+                            )
+                    );
+
+        } catch (ValidationSizeException e) {
+
+            return ResponseEntity.badRequest()
+                    .body(
+                            ApiResponse.error(
+                                    "Ошибка валидации ALS",
+                                    e.getErrors()
+                            )
+                    );
+
+        } catch (IllegalArgumentException
+                 | IllegalStateException e) {
+
+            return ResponseEntity.badRequest()
+                    .body(
+                            ApiResponse.error(
+                                    e.getMessage()
+                            )
+                    );
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    @Operation(
+            summary = "Удалить ALS"
+    )
+    public ResponseEntity<?> deleteALS(
+            @PathVariable Long id
+    ) {
+
+        try {
+            alsService.deleteALS(id);
+
+            return ResponseEntity.ok(
+                    ApiResponse.success(
+                            "ALS deleted successfully"
+                    )
+            );
+
+        } catch (NoSuchElementException e) {
+
+            return ResponseEntity.status(
+                            HttpStatus.NOT_FOUND
+                    )
+                    .body(
+                            ApiResponse.error(
+                                    e.getMessage()
+                            )
+                    );
         }
     }
 }

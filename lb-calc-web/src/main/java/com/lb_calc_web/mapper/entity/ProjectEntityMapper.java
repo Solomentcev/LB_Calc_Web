@@ -13,39 +13,39 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 
-public class ProjectEntityMapper {
+public final class ProjectEntityMapper {
 
-    private final ALSEntityMapper alsMapper;
-
-    public ProjectEntityMapper(
-            ALSEntityMapper alsMapper
-    ) {
-        this.alsMapper = Objects.requireNonNull(
-                alsMapper,
-                "ALSEntityMapper не должен быть null"
-        );
+    private ProjectEntityMapper() {
     }
 
-    public Project toDomain(ProjectEntity entity) {
+    public static Project toDomain(
+            ProjectEntity entity
+    ) {
         Objects.requireNonNull(
                 entity,
                 "ProjectEntity не должен быть null"
         );
 
-        Employee createdBy = EmployeeEntityMapper.toDomain(
-                entity.getCreatedBy()
-        );
+        Employee createdBy =
+                EmployeeEntityMapper.toDomain(
+                        entity.getCreatedBy()
+                );
 
-        Employee updatedBy = EmployeeEntityMapper.toDomain(
-                entity.getUpdatedBy()
-        );
+        Employee updatedBy =
+                EmployeeEntityMapper.toDomain(
+                        entity.getUpdatedBy()
+                );
 
-        Map<ALS, Integer> quantityALS = new LinkedHashMap<>();
+        Map<ALS, Integer> quantityALS =
+                new LinkedHashMap<>();
 
-        for (ProjectALSEntity entry : entity.getAlsEntries()) {
-            ALS als = alsMapper.toDomain(
-                    entry.getAls()
-            );
+        for (ProjectALSEntity entry :
+                entity.getAlsEntries()) {
+
+            ALS als =
+                    ALSEntityMapper.toDomain(
+                            entry.getAls()
+                    );
 
             quantityALS.merge(
                     als,
@@ -65,20 +65,7 @@ public class ProjectEntityMapper {
         );
     }
 
-    public ProjectEntity toEntity(Project domain) {
-        Objects.requireNonNull(
-                domain,
-                "Project не должен быть null"
-        );
-
-        return toEntity(
-                domain,
-                EmployeeEntityMapper::toEntity,
-                alsMapper::toEntity
-        );
-    }
-
-    public ProjectEntity toEntity(
+    public static ProjectEntity toEntity(
             Project domain,
             Function<Employee, EmployeeEntity> employeeResolver,
             Function<ALS, ALSEntity> alsResolver
@@ -88,17 +75,8 @@ public class ProjectEntityMapper {
                 "Project не должен быть null"
         );
 
-        Objects.requireNonNull(
-                employeeResolver,
-                "employeeResolver не должен быть null"
-        );
-
-        Objects.requireNonNull(
-                alsResolver,
-                "alsResolver не должен быть null"
-        );
-
-        ProjectEntity entity = new ProjectEntity();
+        ProjectEntity entity =
+                new ProjectEntity();
 
         updateEntity(
                 domain,
@@ -110,7 +88,7 @@ public class ProjectEntityMapper {
         return entity;
     }
 
-    public void updateEntity(
+    public static void updateEntity(
             Project domain,
             ProjectEntity entity,
             Function<Employee, EmployeeEntity> employeeResolver,
@@ -136,47 +114,75 @@ public class ProjectEntityMapper {
                 "alsResolver не должен быть null"
         );
 
-        entity.setName(domain.getName());
-        entity.setDescription(domain.getDescription());
-        entity.setCompany(domain.getCompany());
-        entity.setCreatedAt(domain.getCreatedAt());
-        entity.setUpdatedAt(domain.getUpdatedAt());
+        entity.setName(
+                domain.getName()
+        );
+
+        entity.setDescription(
+                domain.getDescription()
+        );
+
+        entity.setCompany(
+                domain.getCompany()
+        );
+
+        entity.setCreatedAt(
+                domain.getCreatedAt()
+        );
+
+        entity.setUpdatedAt(
+                domain.getUpdatedAt()
+        );
 
         entity.setCreatedBy(
                 Objects.requireNonNull(
-                        employeeResolver.apply(domain.getCreatedBy()),
-                        "employeeResolver вернул null для createdBy"
+                        employeeResolver.apply(
+                                domain.getCreatedBy()
+                        ),
+                        "createdBy не найден"
                 )
         );
 
         entity.setUpdatedBy(
                 Objects.requireNonNull(
-                        employeeResolver.apply(domain.getUpdatedBy()),
-                        "employeeResolver вернул null для updatedBy"
+                        employeeResolver.apply(
+                                domain.getUpdatedBy()
+                        ),
+                        "updatedBy не найден"
                 )
         );
 
         entity.getAlsEntries().clear();
 
-        for (Map.Entry<ALS, Integer> entry
-                : domain.getQuantityALS().entrySet()) {
+        for (Map.Entry<ALS, Integer> entry :
+                domain.getQuantityALS().entrySet()) {
 
-            ALS domainAls = entry.getKey();
-            int quantity = entry.getValue();
+            ALSEntity alsEntity =
+                    Objects.requireNonNull(
+                            alsResolver.apply(
+                                    entry.getKey()
+                            ),
+                            "ALS не найден"
+                    );
 
-            ALSEntity alsEntity = Objects.requireNonNull(
-                    alsResolver.apply(domainAls),
-                    "alsResolver вернул null"
-            );
-
-            ProjectALSEntity projectAlsEntity =
+            ProjectALSEntity projectAls =
                     new ProjectALSEntity();
 
-            projectAlsEntity.setProject(entity);
-            projectAlsEntity.setAls(alsEntity);
-            projectAlsEntity.setQuantity(quantity);
+            projectAls.setProject(
+                    entity
+            );
 
-            entity.getAlsEntries().add(projectAlsEntity);
+            projectAls.setAls(
+                    alsEntity
+            );
+
+            projectAls.setQuantity(
+                    entry.getValue()
+            );
+
+            entity.getAlsEntries().add(
+                    projectAls
+            );
         }
     }
 }

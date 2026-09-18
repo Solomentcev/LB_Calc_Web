@@ -1,9 +1,12 @@
 package com.lb_calc_web.controller;
 
+import com.lb_calc_web.domain.attributes.Colors;
+import com.lb_calc_web.domain.attributes.Payment;
+import com.lb_calc_web.domain.equipment.BarReader;
+import com.lb_calc_web.domain.equipment.Display;
 import com.lb_calc_web.dto.LCDTO;
-import com.lb_calc_web.entity.attributes.*;
+import com.lb_calc_web.handler.ValidationSizeException;
 import com.lb_calc_web.service.LCService;
-import com.lb_calc_web.service.util.SizeValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -16,55 +19,145 @@ import java.util.List;
 @Controller
 @RequestMapping("/lcs")
 public class LCController {
-    private static final Logger logger = LoggerFactory.getLogger(LCController.class);
+
+    private static final Logger logger =
+            LoggerFactory.getLogger(LCController.class);
+
     private final LCService lcService;
-    protected final List<Colors> colorsList = Arrays.asList(Colors.values());
-    protected final List<Payment> paymentList = Arrays.asList(Payment.values());
-    protected final List<DisplayLC> displayList = Arrays.asList(DisplayLC.values());
-    protected final List<BarReader> barReaderList = Arrays.asList(BarReader.values());
+
+    private final List<Colors> colorsList =
+            Arrays.asList(Colors.values());
+
+    private final List<Payment> paymentList =
+            Arrays.asList(Payment.values());
+
+    private final List<String> displayList =
+            List.of(
+                    Display.NONE.getName(),
+                    Display.LC10.getName(),
+                    Display.LC17.getName(),
+                    Display.LC19.getName()
+            );
+
+    private final List<String> barReaderList =
+            List.of(
+                    BarReader.NONE.getName(),
+                    BarReader.READER_1D.getName(),
+                    BarReader.READER_2D.getName()
+            );
 
     public LCController(LCService lcService) {
         this.lcService = lcService;
-
     }
+
+    /**
+     * Создание нового LC.
+     */
     @GetMapping("/create")
-    private String createLC(Model model) {
+    public String createLC(Model model) {
+
+        logger.info("Открытие страницы создания LC");
+
         LCDTO lc = lcService.createLC();
+
         model.addAttribute("lc", lc);
 
-        return "/lcs/lc";
-    }
-    @PostMapping("/save")
-    public String saveLC(@ModelAttribute("lc") LCDTO lc, Model model) {
-        List<String> errorList= SizeValidator.getErrorValidateLCSizesList(lc);
-        if (errorList.isEmpty()) {
-            lc=lcService.saveLC(lc);
-        } else {
-            logger.warn(errorList.toString());
-            model.addAttribute("errors",errorList);
-            model.addAttribute("lc", lc);
-
-            return "/lcs/lc";
-        }
-        return "redirect:/lcs/" + lc.getId();
+        return "lcs/lc";
     }
 
+    /**
+     * Редактирование существующего LC.
+     */
     @GetMapping("/{id}")
-    private String editLC(@PathVariable(value = "id") Long id, Model model) {
+    public String editLC(
+            @PathVariable Long id,
+            Model model
+    ) {
+
+        logger.info(
+                "Открытие страницы редактирования LC id={}",
+                id
+        );
+
         LCDTO lc = lcService.findById(id);
+
         model.addAttribute("lc", lc);
 
-        return "/lcs/lc";
+        return "lcs/lc";
     }
+
+    /**
+     * Сохранение LC.
+     */
+    @PostMapping("/save")
+    public String saveLC(
+            @ModelAttribute("lc") LCDTO lc,
+            Model model
+    ) {
+
+        logger.info(
+                "Сохранение LC id={}, display={}",
+                lc.getId(),
+                lc.getDisplay()
+        );
+
+        try {
+
+            LCDTO savedLC =
+                    lcService.saveLC(lc);
+
+            return "redirect:/lcs/" + savedLC.getId();
+
+        } catch (ValidationSizeException e) {
+
+            logger.warn(
+                    "LC не прошёл валидацию: {}",
+                    e.getErrors()
+            );
+
+            model.addAttribute(
+                    "errors",
+                    e.getErrors()
+            );
+
+            model.addAttribute(
+                    "lc",
+                    lc
+            );
+
+            return "lcs/lc";
+        }
+    }
+
+    /**
+     * Список цветов.
+     */
     @ModelAttribute("colorsList")
-    public List<Colors> colorsList() { return colorsList; }
+    public List<Colors> colorsList() {
+        return colorsList;
+    }
 
+    /**
+     * Список способов оплаты.
+     */
     @ModelAttribute("paymentList")
-    public List<Payment> paymentList() { return paymentList; }
+    public List<Payment> paymentList() {
+        return paymentList;
+    }
 
+    /**
+     * Список доступных дисплеев.
+     */
     @ModelAttribute("displayList")
-    public List<DisplayLC> displayList() { return displayList; }
+    public List<String> displayList() {
+        return displayList;
+    }
 
+    /**
+     * Список доступных сканеров штрихкода.
+     */
     @ModelAttribute("barReaderList")
-    public List<BarReader> barReaderList() { return barReaderList; }
+    public List<String> barReaderList() {
+        return barReaderList;
+    }
 }

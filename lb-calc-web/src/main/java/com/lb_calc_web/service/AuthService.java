@@ -1,15 +1,18 @@
 package com.lb_calc_web.service;
 
+import com.lb_calc_web.domain.attributes.Role;
+import com.lb_calc_web.domain.model.Employee;
+import com.lb_calc_web.dto.CreateEmployeeDTO;
 import com.lb_calc_web.dto.EmployeeDTO;
 import com.lb_calc_web.dto.JwtResponse;
 import com.lb_calc_web.dto.LoginRequest;
 import com.lb_calc_web.dto.RegistrationDTO;
+import com.lb_calc_web.entity.EmployeeEntity;
 import com.lb_calc_web.event.UserEvent;
 import com.lb_calc_web.event.UserEventType;
-import com.lb_calc_web.mapper.dto.EmployeeMapper;
-import com.lb_calc_web.entity.Employee;
-import com.lb_calc_web.entity.user.Role;
+import com.lb_calc_web.mapper.entity.EmployeeEntityMapper;
 import com.lb_calc_web.repository.EmployeeRepository;
+import com.lb_calc_web.security.EmployeePrincipal;
 import com.lb_calc_web.security.jwt.JwtService;
 import io.jsonwebtoken.Claims;
 import jakarta.security.auth.message.AuthException;
@@ -19,6 +22,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.lang.NonNull;
@@ -28,121 +32,356 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.concurrent.CompletableFuture;
 
 @Service
 public class AuthService {
-    private final Logger logger = LoggerFactory.getLogger(AuthService.class);
+
+    private static final Logger logger =
+            LoggerFactory.getLogger(AuthService.class);
+
     private final EmployeeService employeeService;
     private final EmployeeRepository employeeRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
-    private KafkaTemplate<String, UserEvent> kafkaTemplate;
+    private final KafkaTemplate<String, UserEvent> kafkaTemplate;
+    private final String userEventsTopic;
 
-    public AuthService(EmployeeService employeeService, EmployeeRepository employeeRepository, PasswordEncoder passwordEncoder, JwtService jwtService, KafkaTemplate<String, UserEvent> kafkaTemplate) {
+    public AuthService(
+            EmployeeService employeeService,
+            EmployeeRepository employeeRepository,
+            PasswordEncoder passwordEncoder,
+            JwtService jwtService,
+            KafkaTemplate<String, UserEvent> kafkaTemplate,
+            @Value("${app.kafka.topic.user-events}")
+            String userEventsTopic
+    ) {
         this.employeeService = employeeService;
         this.employeeRepository = employeeRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
         this.kafkaTemplate = kafkaTemplate;
+        this.userEventsTopic = userEventsTopic;
     }
-    public JwtResponse login(LoginRequest loginRequest) throws AuthException {
-        logger.info("Login attempt for email: {}", loginRequest.getEmail());
-        EmployeeDTO user;
+
+    /**
+     * Авторизация пользователя.
+     *
+     * Главный объект здесь — EmployeePrincipal.
+     */
+    public JwtResponse login(
+            LoginRequest loginRequest
+    ) throws AuthException {
+
+        logger.info(
+                "Попытка входа email={}",
+                loginRequest.getEmail()
+        );
+
+        EmployeePrincipal principal;
+
         try {
-            user = employeeService.loadUserByEmail(loginRequest.getEmail());
+            principal =
+                    employeeService.loadUserByUsername(
+                            loginRequest.getEmail()
+                    );
         } catch (UsernameNotFoundException e) {
-            logger.error("User not found");
-            throw new AuthException("User not found");
-        }
-        if (passwordEncoder.matches(loginRequest.getPassword(), user.getEncryptedPassword())) {
-            logger.info("Password verified");
-            Authentication auth = new UsernamePasswordAuthenticationToken(user.getEmail(), user.getEncryptedPassword(), user.getAuthorities());
-            SecurityContextHolder.getContext().setAuthentication(auth);
-            logger.info("Authentication successful");
-            String access = jwtService.generateAccessToken(user);
-            String refresh = jwtService.generateRefreshToken(user);
 
-            UserEvent userEvent=new UserEvent(UserEventType.USER_LOGGED_IN, user.getId(), user.getEmail());
-            CompletableFuture<SendResult<String,UserEvent>> future=kafkaTemplate
-                    .send("user-events-topic", String.valueOf(user.getId()), userEvent);
-            future.whenComplete((sendResult, throwable) -> {
-                if (throwable != null) {
-                    logger.error("Failed to send user event to Kafka: {}", throwable.getMessage());
-                } else {
-                    logger.info("User event sent to Kafka successfully: {}", sendResult.getRecordMetadata());
-                }
-            });
-            logger.info("Return: {}", user.getId());
-            return new JwtResponse(access, refresh);
-
-        } else {
-            logger.info("Password not verified");
-            throw new AuthException("Password not verified");
+            throw new AuthException(
+                    "Пользователь не найден"
+            );
         }
+
+        if (!passwordEncoder.matches(
+                loginRequest.getPassword(),
+                principal.getPassword()
+        )) {
+
+            throw new AuthException(
+                    "Неверный пароль"
+            );
+        }
+
+        Authentication authentication =
+                new UsernamePasswordAuthenticationToken(
+                        principal,
+                        null,
+                        principal.getAuthorities()
+                );
+
+        SecurityContextHolder
+                .getContext()
+                .setAuthentication(authentication);
+
+        logger.info(
+                "Аутентификация успешна email={}",
+                principal.getUsername()
+        );
+
+        String accessToken =
+                jwtService.generateAccessToken(principal);
+
+        String refreshToken =
+                jwtService.generateRefreshToken(principal);
+
+        publishEvent(
+                UserEventType.USER_LOGGED_IN,
+                principal.getId(),
+                principal.getUsername()
+        );
+
+        return new JwtResponse(
+                accessToken,
+                refreshToken
+        );
     }
 
-    public JwtResponse refresh(@NonNull String refreshToken) {
-        logger.info("Refreshing token...: {}", refreshToken);
-        Claims claims = jwtService.getRefreshClaims(refreshToken);
+    public JwtResponse refresh(
+            @NonNull String refreshToken
+    ) {
+
+        Claims claims =
+                jwtService.getRefreshClaims(refreshToken);
+
         if (!jwtService.isRefresh(claims)) {
-            logger.info("Invalid token type");
             return new JwtResponse(null, null);
         }
-        String email= claims.getSubject();
-        EmployeeDTO user = employeeService.loadUserByEmail(email);
-        String accessToken = jwtService.generateAccessToken(user);
-        String newRefreshToken = jwtService.generateRefreshToken(user);
-        logger.info("Refreshing token success: %s".formatted(newRefreshToken));
-        return new JwtResponse(accessToken, newRefreshToken);
+
+        String email = claims.getSubject();
+
+        EmployeePrincipal principal =
+                employeeService.loadUserByUsername(email);
+
+        String accessToken =
+                jwtService.generateAccessToken(principal);
+
+        String newRefreshToken =
+                jwtService.generateRefreshToken(principal);
+
+        return new JwtResponse(
+                accessToken,
+                newRefreshToken
+        );
     }
-    public Cookie generateAccessTokenCookie(String token) {
+
+    public Cookie generateAccessTokenCookie(
+            String token
+    ) {
         return jwtService.generateAccessTokenCookie(token);
     }
-    public Cookie generateRefreshTokenCookie(String token) {
+
+    public Cookie generateRefreshTokenCookie(
+            String token
+    ) {
         return jwtService.generateRefreshTokenCookie(token);
     }
 
-    public boolean existsByEmail(@NotBlank @Size(max = 50) @Email String email) {
-        logger.info("Is exist (%s)...".formatted(email));
+    public boolean existsByEmail(
+            @NotBlank
+            @Size(max = 50)
+            @Email
+            String email
+    ) {
         return employeeService.existsByEmail(email);
     }
-    public EmployeeDTO registration(RegistrationDTO registrationDTO) throws RuntimeException {
-        logger.info("Регистрация пользователя...");
-        if (!registrationDTO.getPassword().equals(registrationDTO.getConfirmPassword())) {
-            logger.info("Пароли не совпадают");
-            throw new RuntimeException("Пароли не совпадают");
-        }
+
+    /**
+     * Обычная регистрация пользователя.
+     * Зарегистрированный пользователь получает ROLE_MANAGER.
+     */
+    @Transactional
+    public EmployeeDTO registration(
+            RegistrationDTO registrationDTO
+    ) {
+
+        validatePasswords(
+                registrationDTO.getPassword(),
+                registrationDTO.getConfirmPassword()
+        );
 
         if (existsByEmail(registrationDTO.getEmail())) {
-            logger.info("Email уже используется");
-            throw new RuntimeException("Email уже используется");
+            throw new IllegalArgumentException(
+                    "Email уже используется"
+            );
         }
-        EmployeeDTO employeeDTO = new EmployeeDTO();
-        employeeDTO.setFirstName(registrationDTO.getFirstName());
-        employeeDTO.setLastName(registrationDTO.getLastName());
-        employeeDTO.setEmail(registrationDTO.getEmail());
-        employeeDTO.setPassword(registrationDTO.getPassword());
-        employeeDTO.setEncryptedPassword(passwordEncoder.encode(registrationDTO.getPassword()));
-        employeeDTO.setRegistrationDate(LocalDate.now());
-        employeeDTO.setRole(Role.ROLE_MANAGER);
-        Employee employee=employeeRepository.save(EmployeeMapper.toEmployee(employeeDTO));
-        EmployeeDTO employeeDTO1= EmployeeMapper.toEmployeeDTO(employee);
 
-        UserEvent userEvent=new UserEvent(UserEventType.USER_REGISTERED, employeeDTO1.getId(), employeeDTO1.getEmail());
-        CompletableFuture<SendResult<String,UserEvent>> future=kafkaTemplate
-                .send("user-events-topic", String.valueOf(employeeDTO1.getId()), userEvent);
-        future.whenComplete((sendResult, throwable) -> {
-            if (throwable != null) {
-                logger.error("Failed to send user event to Kafka: {}", throwable.getMessage());
-            } else {
-                logger.info("User event sent to Kafka successfully: {}", sendResult.getRecordMetadata());
-            }
-        });
-        logger.info("Return: {}", employeeDTO1.getId());
+        Employee domain = new Employee(
+                registrationDTO.getFirstName(),
+                registrationDTO.getLastName(),
+                registrationDTO.getEmail(),
+                LocalDate.now(),
+                Role.ROLE_MANAGER
+        );
 
-        return employeeDTO1;
+        EmployeeEntity entity =
+                EmployeeEntityMapper.toEntity(domain);
+
+        entity.setEncryptedPassword(
+                passwordEncoder.encode(
+                        registrationDTO.getPassword()
+                )
+        );
+
+        EmployeeEntity saved =
+                employeeRepository.save(entity);
+
+        EmployeeDTO result =
+                employeeService.loadUserById(
+                        saved.getId().intValue()
+                );
+
+        publishEvent(
+                UserEventType.USER_REGISTERED,
+                saved.getId(),
+                saved.getEmail()
+        );
+
+        return result;
+    }
+
+    /**
+     * Создание сотрудника администратором.
+     */
+    @Transactional
+    public EmployeeDTO createEmployee(
+            CreateEmployeeDTO createEmployeeDTO
+    ) {
+
+        validatePasswords(
+                createEmployeeDTO.getPassword(),
+                createEmployeeDTO.getConfirmPassword()
+        );
+
+        if (existsByEmail(createEmployeeDTO.getEmail())) {
+            throw new IllegalArgumentException(
+                    "Пользователь с таким email уже существует"
+            );
+        }
+
+        Employee domain = new Employee(
+                createEmployeeDTO.getFirstName(),
+                createEmployeeDTO.getLastName(),
+                createEmployeeDTO.getEmail(),
+                LocalDate.now(),
+                createEmployeeDTO.getRole()
+        );
+
+        EmployeeEntity entity =
+                EmployeeEntityMapper.toEntity(domain);
+
+        entity.setEncryptedPassword(
+                passwordEncoder.encode(
+                        createEmployeeDTO.getPassword()
+                )
+        );
+
+        EmployeeEntity saved =
+                employeeRepository.save(entity);
+
+        EmployeeDTO result =
+                employeeService.loadUserById(
+                        saved.getId().intValue()
+                );
+
+        publishEvent(
+                UserEventType.EMPLOYEE_CREATED,
+                saved.getId(),
+                saved.getEmail()
+        );
+
+        return result;
+    }
+
+    /**
+     * Смена пароля.
+     *
+     * Пароль не проходит через EmployeeDTO.
+     */
+    @Transactional
+    public void changePassword(
+            Long employeeId,
+            String newPassword
+    ) {
+
+        EmployeeEntity employee =
+                employeeRepository.findById(employeeId)
+                        .orElseThrow(() ->
+                                new IllegalArgumentException(
+                                        "Сотрудник с id=" +
+                                                employeeId +
+                                                " не найден"
+                                )
+                        );
+
+        employee.setEncryptedPassword(
+                passwordEncoder.encode(newPassword)
+        );
+
+        employeeRepository.save(employee);
+
+        publishEvent(
+                UserEventType.PASSWORD_CHANGED,
+                employee.getId(),
+                employee.getEmail()
+        );
+    }
+
+    private void validatePasswords(
+            String password,
+            String confirmPassword
+    ) {
+
+        if (!password.equals(confirmPassword)) {
+            throw new IllegalArgumentException(
+                    "Пароли не совпадают"
+            );
+        }
+    }
+
+    private void publishEvent(
+            UserEventType type,
+            Long userId,
+            String email
+    ) {
+
+        UserEvent event =
+                new UserEvent(
+                        type,
+                        userId,
+                        email
+                );
+
+        CompletableFuture<SendResult<String, UserEvent>> future =
+                kafkaTemplate.send(
+                        userEventsTopic,
+                        String.valueOf(userId),
+                        event
+                );
+
+        future.whenComplete(
+                (sendResult, throwable) -> {
+
+                    if (throwable != null) {
+
+                        logger.error(
+                                "Ошибка отправки события Kafka type={}, userId={}: {}",
+                                type,
+                                userId,
+                                throwable.getMessage()
+                        );
+
+                        return;
+                    }
+
+                    logger.debug(
+                            "Kafka event sent type={}, userId={}",
+                            type,
+                            userId
+                    );
+                }
+        );
     }
 }

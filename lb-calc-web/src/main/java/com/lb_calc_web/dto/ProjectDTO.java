@@ -16,7 +16,8 @@ public class ProjectDTO {
     private LocalDate updatedAt;
     private List<ALSDTO> alsList = new ArrayList<>();
     @JsonIgnore
-    private Map<ALSDTO, Integer> quantityALS =new HashMap<>();
+    private Map<ALSDTO, Integer> quantityALS =
+            new LinkedHashMap<>();
 
     public ProjectDTO() {
     }

@@ -1,348 +1,600 @@
 package com.lb_calc_web.service;
 
+import com.lb_calc_web.domain.attributes.Colors;
 import com.lb_calc_web.dto.ALSDTO;
 import com.lb_calc_web.dto.LBDTO;
 import com.lb_calc_web.dto.LCDTO;
-import com.lb_calc_web.dto.validation.ValidationResult;
+import com.lb_calc_web.entity.ALSEntity;
+import com.lb_calc_web.entity.ModuleEntity;
 import com.lb_calc_web.handler.ValidationSizeException;
-import com.lb_calc_web.mapper.dto.ALSMapper;
-import com.lb_calc_web.entity.ALS;
-import com.lb_calc_web.entity.attributes.Colors;
-import com.lb_calc_web.entity.attributes.DirectionDoorOpening;
-import com.lb_calc_web.entity.attributes.PositionLC;
+import com.lb_calc_web.mapper.dto.ALSDtoMapper;
+import com.lb_calc_web.mapper.entity.ALSEntityMapper;
 import com.lb_calc_web.repository.ALSRepository;
+import com.lb_calc_web.repository.ModuleEntityRepository;
 import com.lb_calc_web.service.util.ALSImageService;
 import com.lb_calc_web.service.util.SizeValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.ExampleMatcher;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
-
-import static org.springframework.data.domain.ExampleMatcher.GenericPropertyMatchers.ignoreCase;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Objects;
+import java.util.Optional;
 
 @Service
 public class ALSService {
-    private static final Logger logger = LoggerFactory.getLogger(ALSService.class);
+
+    private static final Logger logger =
+            LoggerFactory.getLogger(ALSService.class);
+
     private final ALSRepository alsRepository;
+    private final ModuleEntityRepository moduleRepository;
     private final LBService lbService;
     private final LCService lcService;
-    private final ALSLBService alslbService;
+    private final Environment environment;
 
-    public ALSService(ALSRepository alsRepository, LBService lbService, LCService lcService, ALSLBService alslbService) {
+    public ALSService(
+            ALSRepository alsRepository,
+            ModuleEntityRepository moduleRepository,
+            LBService lbService,
+            LCService lcService,
+            Environment environment
+    ) {
         this.alsRepository = alsRepository;
+        this.moduleRepository = moduleRepository;
         this.lbService = lbService;
         this.lcService = lcService;
-        this.alslbService = alslbService;
+        this.environment = environment;
     }
+
+    @Transactional(readOnly = true)
     public List<ALSDTO> findAll() {
         logger.info("Получение списка АКХ...");
-        List<ALS> alsList=alsRepository.findAll();
-        List<ALSDTO> alsDTOList;
-        alsDTOList=ALSMapper.getALSDTOListFromALSList(alsList);
-        return alsDTOList;
+
+        return alsRepository.findAll()
+                .stream()
+                .sorted(
+                        Comparator.comparing(
+                                ALSEntity::getId
+                        )
+                )
+                .map(ALSEntityMapper::toDomain)
+                .map(ALSDtoMapper::toDto)
+                .toList();
     }
+
+    @Transactional(readOnly = true)
     public ALSDTO findById(Long id) {
-        logger.info("Поиск АКХ (id%d)...".formatted(id));
-        ALS als=alsRepository.findById(id).orElseThrow(()->
-                new NoSuchElementException("АКХ с id%d не найдена".formatted(id)));
-        ALSDTO alsDTO=ALSMapper.toALSDTO(als);
-        return alsDTO;
+        logger.info(
+                "Поиск АКХ(id{})...",
+                id
+        );
+
+        ALSEntity entity =
+                alsRepository.findById(id)
+                        .orElseThrow(
+                                () -> new NoSuchElementException(
+                                        "АКХ с id"
+                                                + id
+                                                + " не найдена"
+                                )
+                        );
+
+        return ALSDtoMapper.toDto(
+                ALSEntityMapper.toDomain(entity)
+        );
     }
+
+    /**
+     * Создаёт DTO для формы создания ALS.
+     *
+     * Значения берутся из properties.
+     */
     @Transactional
     public ALSDTO createALS() {
         logger.info("Создание АКХ...");
-        ALSDTO als = new ALSDTO();
-        als.setId(0L);
-        als.setBottomFrame(50);
-        als.setUpperFrame(50);
-        als.setHeight(1940);
-        als.setDepth(500);
-        als.setDepthCell(480);
-        als.setColorBody(String.valueOf(Colors.Blue));
-        als.setColorDoor(String.valueOf(Colors.White));
-        als.setPositionLC(String.valueOf(PositionLC.CENTER));
-        LCDTO lc=lcService.createLC(als.getHeight(),als.getDepth(),als.getUpperFrame(),als.getBottomFrame(), Colors.valueOf(als.getColorBody()));
-        als.setLC(lc);
-        LBDTO lb=lbService.createLB(als.getHeight(),als.getDepth(), als.getUpperFrame(), als.getBottomFrame(),
-                Colors.valueOf(als.getColorBody()),
-                Colors.valueOf(als.getColorDoor()));
-        als.getLbList().add(lb);
-        als.getQuantityLB().put(lb,1);
-        updateALSsizeAndDescription(als);
-        als.setStringALSImage(ALSImageService.getStringALSImage(als));
-        logger.info("Создана АКХ(%s)".formatted(lb.getName()));
-        return als;
-    }
-    @Transactional
-    public ALSDTO saveALS(ALSDTO alsDTO)  {
-        logger.info("Сохранение АКХ(id%d-%s)...".formatted(alsDTO.getId(), alsDTO.getName()));
-        prepareALS(alsDTO);
-        ValidationResult validationResult=new ValidationResult();
-        try {
-            persistLCandLB(alsDTO);
-        } catch (ValidationSizeException e) {
-            validationResult.addErrors(e.getValidationResult());
-        }
-        validationResult.addErrors(SizeValidator.validateALS(alsDTO));
-        if(!validationResult.isValid()){
-            logger.warn("Ошибка валидации АКХ(id%d-%s): %s".formatted(alsDTO.getId(), alsDTO.getName(), validationResult.getErrors()));
-            throw new ValidationSizeException(validationResult);
-        }
-        Optional<ALS> optional=getOptionalALS(ALSMapper.toALS(alsDTO));
-        if (optional.isPresent()) {
-            logger.info("АКХ(id(%d-%s) найдена в БД.".formatted(optional.get().getId(), optional.get().getName()));
-            return ALSMapper.toALSDTO(optional.get());
-        } else {
-            logger.info("АКХ(id%d-%s) не найдена в БД.".formatted(alsDTO.getId(), alsDTO.getName()));
-        }
-        return persistNewALS(alsDTO);
-    }
-    @Transactional
-    public ALSDTO persistNewALS(ALSDTO alsDTO) {
-        alsDTO.setId(0L);
-        ALS alsNew=ALSMapper.toALS(alsDTO);
-        logger.info("Сохранение АКХ в БД...");
-        alsNew=alsRepository.save(alsNew);
-        alsDTO.setId(alsNew.getId());
-        alsNew.getQuantityLB().addAll(ALSMapper.getALSLBSetFromLBDTOMap(alsDTO.getQuantityLB(), alsDTO));
-        alslbService.saveAll(alsNew.getQuantityLB());
-        logger.info("АКХ(id%d-%s) cохранена в БД.".formatted(alsNew.getId(), alsNew.getName()));
-        return ALSMapper.toALSDTO(alsNew);
-    }
-    @Transactional
-    protected void persistLCandLB(ALSDTO alsDTO) {
-        ValidationResult validationResult=new ValidationResult();
-        try {
-            alsDTO.setLC(lcService.saveLC(alsDTO.getLC()));
-        } catch (ValidationSizeException e) {
-            validationResult.addErrors(e.getValidationResult());
-        }
-        List<LBDTO> savedLBs = new ArrayList<>();
-        for (LBDTO lbDTO : alsDTO.getLbList()) {
-            try {
-                LBDTO saved = lbService.saveLB(lbDTO);
-                savedLBs.add(saved);
-            } catch (ValidationSizeException e) {
-                validationResult.addErrors(e.getValidationResult());
-            }
-        }
-        if (!validationResult.isValid()) {
-            throw new ValidationSizeException(validationResult);
-        }
-        alsDTO.setLbList(savedLBs);
-    }
 
-    private void prepareALS(ALSDTO alsDTO) {
-        resizeLC(alsDTO);
-        resizeLBs(alsDTO);
-        updateALSsizeAndDescription(alsDTO);
-    }
+        int height = getInt("size.height.default");
+        int depth = getInt("size.depth.default");
+        int upperFrame = getInt("size.frame.upper.default");
+        int bottomFrame = getInt("size.frame.bottom.default");
 
-    public ALSDTO resizeLC(ALSDTO alsDTO) {
-         LCDTO lc=alsDTO.getLC();
-         logger.info("Корректировка размеров и описания МУ(id%d-%s) в АКХ(id%d-%s)..."
-                 .formatted(lc.getId(),lc.getName(),alsDTO.getId(),alsDTO.getName()));
-         lc.setHeight(alsDTO.getHeight());
-         lc.setDepth(alsDTO.getDepth());
-         lc.setUpperFrame(alsDTO.getUpperFrame());
-         lc.setBottomFrame(alsDTO.getBottomFrame());
-         lc.setColorBody(String.valueOf(Colors.valueOf(alsDTO.getColorBody())));
-         lcService.updateLCsizeAndDescription(lc);
-         alsDTO.setLC(lc);
-         return alsDTO;
-    }
+        Colors colorBody =
+                Colors.valueOf(
+                        getRequired(
+                                "als.color.body.default"
+                        )
+                );
 
-    public ALSDTO resizeLBs(ALSDTO alsDTO)  {
-        logger.info("Корректировка размеров и описания МХ в АКХ(id%d-%s)..."
-                .formatted(alsDTO.getId(),alsDTO.getName()));
-        List<LBDTO> lbList=alsDTO.getLbList();
-        PositionLC positionLC= PositionLC.valueOf(alsDTO.getPositionLC());
-        for (int i = 1; i <= lbList.size(); i++) {
-            LBDTO lbDTO=lbList.get(i-1);
-            logger.info("Корректировка размеров и описания МХ(id%d-%s)..."
-                    .formatted(lbDTO.getId(),lbDTO.getName()));
-            lbDTO.setHeight(alsDTO.getHeight());
-            lbDTO.setDepth(alsDTO.getDepth());
-            lbDTO.setUpperFrame(alsDTO.getUpperFrame());
-            lbDTO.setBottomFrame(alsDTO.getBottomFrame());
-            lbDTO.setColorBody(String.valueOf(Colors.valueOf(alsDTO.getColorBody())));
-            lbDTO.setColorDoor(String.valueOf(Colors.valueOf(alsDTO.getColorDoor())));
-            lbService.updateLBsizeAndDescription(lbDTO);
+        Colors colorDoor =
+                Colors.valueOf(
+                        getRequired(
+                                "als.color.door.default"
+                        )
+                );
 
-            lbDTO.setDirectionDoorOpening(String.valueOf(resolveDoorDirection(positionLC, i, lbList.size())));
-        }
-        return alsDTO;
-    }
-   @Transactional
-    public ALSDTO addNewLBandSaveALS(Long alsId) {
-           ALSDTO als = findById(alsId);
-           logger.info("Добавление нового МХ в АКХ(id%d-%s) и сохранение..."
-                   .formatted(alsId,als.getName()));
-            LBDTO lb=lbService.createLB(als.getHeight(),als.getDepth(), als.getUpperFrame(), als.getBottomFrame(),
-                    Colors.valueOf(als.getColorBody()),Colors.valueOf(als.getColorDoor()));
-            addLB(als, lb);
-           return saveALS(als);
-    }
-    public ALSDTO addLB(ALSDTO als, LBDTO lb) {
-        logger.info("Добавление МХ(id%d-%s) в АКХ(id%d-%s)..."
-                .formatted(lb.getId(),lb.getName(),als.getId(),als.getName()));
+        LCDTO lc =
+                lcService.createLC(
+                        height,
+                        depth,
+                        upperFrame,
+                        bottomFrame,
+                        colorBody
+                );
 
-        int newIndex = als.getLbList().size(); // индекс нового LB
-        PositionLC positionLC = PositionLC.valueOf(als.getPositionLC());
-
-        lb.setDirectionDoorOpening(
-                String.valueOf(resolveDoorDirection(positionLC, newIndex, als.getLbList().size() + 1))
+        lc.setColorDoor(
+                colorDoor.name()
         );
 
-        // Для CENTER корректируем уже существующий LB в левой половине
-        if (positionLC == PositionLC.CENTER && !als.getLbList().isEmpty()) {
-            int leftIndex = (als.getLbList().size() + 1) / 2 - 1;
-            als.getLbList().get(leftIndex).setDirectionDoorOpening(String.valueOf(DirectionDoorOpening.LEFT));
-        }
+        LBDTO lb =
+                lbService.createLB(
+                        height,
+                        depth,
+                        upperFrame,
+                        bottomFrame,
+                        colorBody,
+                        colorDoor
+                );
+
+        ALSDTO als = new ALSDTO();
+
+        als.setId(0L);
+        als.setHeight(height);
+        als.setDepth(depth);
+        als.setUpperFrame(upperFrame);
+        als.setBottomFrame(bottomFrame);
+
+        als.setColorBody(
+                colorBody.name()
+        );
+
+        als.setColorDoor(
+                colorDoor.name()
+        );
+
+        als.setPositionLC(
+                getRequired(
+                        "als.position.lc.default"
+                )
+        );
+
+        als.setLC(lc);
+
         als.getLbList().add(lb);
-        int count=0;
-        for (Map.Entry<LBDTO,Integer> entry:als.getQuantityLB().entrySet()){
-            if (entry.getKey().equals(lb)) {
-                count=entry.getValue();
-                break;
-            }
-        }
-        if (als.getQuantityLB().containsKey(lb))
-            als.getQuantityLB().put(lb,count+1);
-        else als.getQuantityLB().put(lb,1);
-        updateALSsizeAndDescription(als);
+
+        recalculateDto(als);
+
+        als.setStringALSImage(
+                ALSImageService.getStringALSImage(
+                        als
+                )
+        );
+
+        logger.info(
+                "Создана АКХ: {}",
+                als.getName()
+        );
+
         return als;
     }
+
     @Transactional
-    public ALSDTO deleteLBandSaveALS(Long alsId, Long lbId){
-        logger.info("Удаление МХ(id%d) из АКХ(id%d) и сохранение...".formatted(lbId,alsId));
-        ALSDTO als = deleteLBfromALS(alsId, lbId);
+    public ALSDTO saveALS(ALSDTO dto) {
+        logger.info(
+                "Сохранение АКХ(id={}, name={})...",
+                dto.getId(),
+                dto.getName()
+        );
+
+        saveChildModules(dto);
+
+        validate(dto);
+
+        var domain = ALSDtoMapper.toDomain(dto);
+
+        Optional<ALSEntity> duplicate =
+                findDuplicate(
+                        domain,
+                        dto.getId()
+                );
+
+        if (duplicate.isPresent()) {
+            logger.info(
+                    "Такой ALS уже существует: id={}",
+                    duplicate.get().getId()
+            );
+
+            return ALSDtoMapper.toDto(
+                    ALSEntityMapper.toDomain(
+                            duplicate.get()
+                    )
+            );
+        }
+
+        ALSEntity entity;
+
+        if (dto.getId() != null
+                && dto.getId() > 0) {
+
+            entity =
+                    alsRepository.findById(
+                            dto.getId()
+                    ).orElseThrow(
+                            () -> new NoSuchElementException(
+                                    "АКХ с id"
+                                            + dto.getId()
+                                            + " не найдена"
+                            )
+                    );
+
+            updateEntity(
+                    domain,
+                    entity
+            );
+
+        } else {
+            entity =
+                    createEntity(
+                            domain
+                    );
+        }
+
+        ALSEntity saved =
+                alsRepository.save(entity);
+
+        logger.info(
+                "АКХ сохранена: id={}",
+                saved.getId()
+        );
+
+        return ALSDtoMapper.toDto(
+                ALSEntityMapper.toDomain(saved)
+        );
+    }
+
+    @Transactional
+    public void deleteALS(Long id) {
+        logger.info(
+                "Удаление АКХ(id={})...",
+                id
+        );
+
+        ALSEntity entity =
+                alsRepository.findById(id)
+                        .orElseThrow(
+                                () -> new NoSuchElementException(
+                                        "АКХ с id"
+                                                + id
+                                                + " не найдена"
+                                )
+                        );
+
+        alsRepository.delete(entity);
+    }
+
+    /**
+     * Добавление нового LB в существующую ALS.
+     */
+    @Transactional
+    public ALSDTO addNewLBandSaveALS(
+            Long alsId
+    ) {
+        ALSDTO als =
+                findById(alsId);
+
+        LBDTO lb =
+                lbService.createLB(
+                        als.getHeight(),
+                        als.getDepth(),
+                        als.getUpperFrame(),
+                        als.getBottomFrame(),
+                        Colors.valueOf(
+                                als.getColorBody()
+                        ),
+                        Colors.valueOf(
+                                als.getColorDoor()
+                        )
+                );
+
+        als.getLbList().add(lb);
+
+        recalculateDto(als);
+
         return saveALS(als);
     }
 
-    private ALSDTO deleteLBfromALS(Long alsId, Long lbId) {
-        logger.info("Удаление МХ(id%d) из АКХ(id%d)...".formatted(lbId,alsId));
-        ALSDTO als = findById(alsId);
-        LBDTO lb = lbService.findById(lbId);
-        int count=0;
-        for (Map.Entry<LBDTO,Integer> entry:als.getQuantityLB().entrySet()){
-            if (entry.getKey().equals(lb)) {
-                count=entry.getValue();
-                break;
-            }
+    /**
+     * Удаление LB из ALS.
+     */
+    @Transactional
+    public ALSDTO deleteLBandSaveALS(
+            Long alsId,
+            Long lbId
+    ) {
+        ALSDTO als =
+                findById(alsId);
+
+        boolean removed =
+                als.getLbList().removeIf(
+                        lb ->
+                                Objects.equals(
+                                        lb.getId(),
+                                        lbId
+                                )
+                );
+
+        if (!removed) {
+            throw new NoSuchElementException(
+                    "LB с id"
+                            + lbId
+                            + " не найден в ALS "
+                            + alsId
+            );
         }
-        if (als.getQuantityLB().containsKey(lb) && count>1)
-            als.getQuantityLB().put(lb,count-1);
-        else als.getQuantityLB().put(lb,1);
-        als.getLbList().remove(lb);
-        return als;
+
+        recalculateDto(als);
+
+        return saveALS(als);
     }
 
+    /**
+     * Замена LC в ALS.
+     */
     @Transactional
-    public List<Object> replaceLBandSaveALS(Long alsId , Long lbID, LBDTO lb) {
-        logger.info("Замена МХ(id%d) на МХ(id%d-%s) в АКХ(id%d) и сохранение..."
-                .formatted(lbID,lb.getId(),lb.getName(), alsId));
-        ALSDTO als = findById(alsId);
-        lbService.updateLBsizeAndDescription(lb);
-        Long newLBId= 0L;
-        for(LBDTO lbDto:als.getLbList()){
-            if (Objects.equals(lbDto.getId(), lbID)) {
-                if(!lbDto.equals(lb)) {
-                    lbDto.setCountCells(lb.getCountCells());
-                    lbDto.setType(lb.getType());
-                    lbDto.setWidth(lb.getWidth());
-                    lbDto.setHeight(lb.getHeight());
-                    lbDto.setId(0L);
-                }
-                break;
-            }
-        }
-        als=saveALS(als);
-        List<Object> ALSlbIdList=new ArrayList<>();
-        ALSlbIdList.add(als);
-        for(LBDTO lbDto:als.getLbList()){
-           if(lbDto.equals(lb)){
-               newLBId=lbDto.getId();
-               break;
-           }
-        }
-        ALSlbIdList.add(newLBId);
-
-//        Map<String, Object> alslbIdMap=new HashMap<>();
-//        alslbIdMap.put("ALS",als);
-//        alslbIdMap.put("newLBId",newLBId);
-//
-//        alslbIdMap.get("ALS");
-//        alslbIdMap.get("newLBId");
-
-        return ALSlbIdList;
-    }
-    @Transactional
-    public ALSDTO replaceLCandSaveALS(ALSDTO als, LCDTO lc) {
-        logger.info("Замена МУ на МУ(id%d) в АКХ(id%d) и сохранение..."
-                .formatted(lc.getId(),als.getId()));
+    public ALSDTO replaceLCandSaveALS(
+            ALSDTO als,
+            LCDTO lc
+    ) {
         als.setLC(lc);
-        ALSDTO alsNew=ALSService.updateALSsizeAndDescription(als);
-        saveALS(alsNew);
-        return alsNew;
+
+        recalculateDto(als);
+
+        return saveALS(als);
     }
 
-    @Transactional
-    public Optional<ALS> getOptionalALS(ALS alsNew) {
-        logger.info("Поиск АКХ по характеристикам...");
-        ExampleMatcher modelMatcher = ExampleMatcher.matching()
-                .withIgnorePaths("id","name", "description", "depthCell")
-                .withMatcher("lc",ignoreCase())
-                .withMatcher("height", ignoreCase())
-                .withMatcher("depth", ignoreCase())
-                .withMatcher("width", ignoreCase())
-                .withMatcher("upperFrame", ignoreCase())
-                .withMatcher("bottomFrame", ignoreCase())
-                .withMatcher("countCells", ignoreCase())
-                .withMatcher("colorBody", ignoreCase())
-                .withMatcher("colorDoor", ignoreCase())
-                .withMatcher("positionLC", ignoreCase())
-                ;
-        Example<ALS> example = Example.of(alsNew, modelMatcher);
-        return alsRepository.findOne(example);
-    }
-    private static ALSDTO updateALSsizeAndDescription(ALSDTO als) {
-        logger.info("Корректировка размеров и описания АКХ(id%d-%s)..."
-                .formatted(als.getId(),als.getName()));
-        int countCells=0;
-        int width=als.getLC().getWidth();
-        for(LBDTO lb:als.getLbList()){
-            countCells=countCells+lb.getCountCells();
-            width=width+lb.getWidth();
+    private void saveChildModules(
+            ALSDTO dto
+    ) {
+        dto.setLC(
+                lcService.saveLC(
+                        dto.getLC()
+                )
+        );
+
+        List<LBDTO> savedLBs =
+                new ArrayList<>();
+
+        for (LBDTO lb : dto.getLbList()) {
+            savedLBs.add(
+                    lbService.saveLB(lb)
+            );
         }
-        als.setCountCells(countCells);
-        als.setWidth(width);
-        als.setDescription("АКХ на "+ als.getCountCells() +" ячеек, ВхШхГ,мм: "
-                +als.getHeight()+"x"+ als.getWidth()+"x"+als.getDepth()
-                +"; Цвет: "+als.getColorBody()+"/"+als.getColorDoor()+"; "
-                +"Модулей хранения: "+als.getLbList().size() +" шт.;\n"
-                +als.getLC().getDescription());
-        als.setName("АКХ на "+ als.getCountCells() +" ячеек");
-        als.setQuantityLB(ALSMapper.getLBDTOMapFromLBDTOList(als.getLbList()));
-        return als;
+
+        dto.setLbList(savedLBs);
     }
-    private DirectionDoorOpening resolveDoorDirection(PositionLC positionLC, int lbIndex, int totalLBs) {
-        switch (positionLC) {
-            case LEFT -> {
-                return DirectionDoorOpening.RIGHT;
-            }
-            case RIGHT -> {
-                return DirectionDoorOpening.LEFT;
-            }
-            case CENTER -> {
-                // Если левая половина — LEFT, правая — RIGHT
-                return lbIndex < totalLBs / 2 ? DirectionDoorOpening.LEFT : DirectionDoorOpening.RIGHT;
-            }
-            default -> throw new IllegalArgumentException("Unknown PositionLC: " + positionLC);
+
+    private void validate(
+            ALSDTO dto
+    ) {
+        var results =
+                SizeValidator.deepValidateALS(
+                        dto
+                );
+
+        var errors = results.stream()
+                .filter(result -> !result.isValid())
+                .flatMap(
+                        result ->
+                                result.getErrors()
+                                        .stream()
+                )
+                .toList();
+
+        if (!errors.isEmpty()) {
+            var validationResult =
+                    new com.lb_calc_web.dto.validation.ValidationResult(
+                            "ALS",
+                            dto.getId()
+                    );
+
+            errors.forEach(
+                    validationResult::addError
+            );
+
+            throw new ValidationSizeException(
+                    validationResult
+            );
         }
+    }
+
+    private Optional<ALSEntity> findDuplicate(
+            com.lb_calc_web.domain.model.ALS domain,
+            Long currentId
+    ) {
+        return alsRepository.findAll()
+                .stream()
+                .filter(
+                        entity ->
+                                currentId == null
+                                        || !Objects.equals(
+                                        entity.getId(),
+                                        currentId
+                                )
+                )
+                .filter(
+                        entity -> {
+                            try {
+                                return domain.equals(
+                                        ALSEntityMapper.toDomain(
+                                                entity
+                                        )
+                                );
+                            } catch (RuntimeException e) {
+                                logger.warn(
+                                        "Не удалось сравнить ALS id={}",
+                                        entity.getId(),
+                                        e
+                                );
+                                return false;
+                            }
+                        }
+                )
+                .findFirst();
+    }
+
+    private ALSEntity createEntity(
+            com.lb_calc_web.domain.model.ALS domain
+    ) {
+        List<ModuleEntity> moduleCache =
+                moduleRepository.findAll();
+
+        return ALSEntityMapper.toEntity(
+                domain,
+                module ->
+                        resolveModule(
+                                module,
+                                moduleCache
+                        )
+        );
+    }
+
+    private void updateEntity(
+            com.lb_calc_web.domain.model.ALS domain,
+            ALSEntity entity
+    ) {
+        List<ModuleEntity> moduleCache =
+                moduleRepository.findAll();
+
+        ALSEntityMapper.updateEntity(
+                domain,
+                entity,
+                module ->
+                        resolveModule(
+                                module,
+                                moduleCache
+                        )
+        );
+    }
+
+    private ModuleEntity resolveModule(
+            com.lb_calc_web.domain.model.Module domainModule,
+            List<ModuleEntity> cache
+    ) {
+        for (ModuleEntity entity : cache) {
+            try {
+                if (domainModule.equals(
+                        ALSEntityMapper.toDomainModule(entity)
+                )) {
+                    return entity;
+                }
+            } catch (RuntimeException e) {
+                logger.warn(
+                        "Не удалось преобразовать ModuleEntity id={}",
+                        entity.getId(),
+                        e
+                );
+            }
+        }
+
+        ModuleEntity newEntity =
+                ALSEntityMapper.createModuleEntity(
+                        domainModule
+                );
+
+        ModuleEntity saved =
+                moduleRepository.save(
+                        newEntity
+                );
+
+        cache.add(saved);
+
+        return saved;
+    }
+
+    private void recalculateDto(
+            ALSDTO dto
+    ) {
+        int width =
+                dto.getLC() != null
+                        ? dto.getLC().getWidth()
+                        : 0;
+
+        int countCells = 0;
+        int minDepthCell = Integer.MAX_VALUE;
+
+        for (LBDTO lb : dto.getLbList()) {
+            width += lb.getWidth();
+
+            countCells +=
+                    lb.getCountCells();
+
+            if (lb.getDepthCell() > 0) {
+                minDepthCell =
+                        Math.min(
+                                minDepthCell,
+                                lb.getDepthCell()
+                        );
+            }
+        }
+
+        dto.setWidth(width);
+        dto.setCountCells(countCells);
+
+        dto.setDepthCell(
+                minDepthCell == Integer.MAX_VALUE
+                        ? 0
+                        : minDepthCell
+        );
+
+        dto.setName(
+                "АКХ на "
+                        + countCells
+                        + " ячеек"
+        );
+
+        String lcDescription =
+                dto.getLC() == null
+                        ? ""
+                        : dto.getLC().getDescription();
+
+        dto.setDescription(
+                "АКХ на "
+                        + countCells
+                        + " ячеек, ВхШхГ, мм: "
+                        + dto.getHeight()
+                        + "x"
+                        + dto.getWidth()
+                        + "x"
+                        + dto.getDepth()
+                        + "; Цвет: "
+                        + dto.getColorBody()
+                        + "/"
+                        + dto.getColorDoor()
+                        + "; Модулей хранения: "
+                        + dto.getLbList().size()
+                        + " шт.;\n"
+                        + lcDescription
+        );
+    }
+
+    private String getRequired(
+            String key
+    ) {
+        return environment.getRequiredProperty(
+                key
+        );
+    }
+
+    private int getInt(
+            String key
+    ) {
+        return Integer.parseInt(
+                getRequired(key)
+        );
     }
 }
