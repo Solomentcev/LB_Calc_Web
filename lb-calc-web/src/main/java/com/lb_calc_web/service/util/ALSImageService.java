@@ -1,8 +1,10 @@
 package com.lb_calc_web.service.util;
 
-import com.lb_calc_web.domain.attributes.PositionLC;
+import com.lb_calc_web.domain.attributes.PositionControlModule;
 import com.lb_calc_web.dto.ALSDTO;
+import com.lb_calc_web.dto.LBCDTO;
 import com.lb_calc_web.dto.LBDTO;
+import com.lb_calc_web.dto.LCDTO;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -13,6 +15,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.Base64;
+import java.util.List;
 
 public class ALSImageService {
 
@@ -54,9 +57,6 @@ public class ALSImageService {
             BufferedImage img,
             ALSDTO als
     ) {
-
-        int x = 0;
-
         Graphics2D g2d =
                 (Graphics2D) img.getGraphics();
 
@@ -70,28 +70,28 @@ public class ALSImageService {
                 RenderingHints.VALUE_RENDER_QUALITY
         );
 
-        PositionLC position =
-                PositionLC.valueOf(
-                        als.getPositionLC()
+        PositionControlModule position =
+                PositionControlModule.valueOf(
+                        als.getPositionControlModule()
                 );
 
-        if (position == PositionLC.LEFT) {
+        int x = 0;
 
-            LCImageService.drawLC(
+        if (position == PositionControlModule.LEFT) {
+            x += drawControlModule(
                     img,
-                    als.getLC(),
+                    als,
                     x
             );
-
-            x += als.getLC().getWidth() / 10;
         }
 
-        for (int i = 1;
-             i <= als.getLbList().size();
-             i++) {
+        List<LBDTO> lbList =
+                als.getLbList() == null
+                        ? List.of()
+                        : als.getLbList();
 
-            LBDTO lb =
-                    als.getLbList().get(i - 1);
+        for (int i = 0; i < lbList.size(); i++) {
+            LBDTO lb = lbList.get(i);
 
             LBImageService.drawLB(
                     img,
@@ -101,32 +101,69 @@ public class ALSImageService {
 
             x += lb.getWidth() / 10;
 
-            if (position == PositionLC.CENTER) {
+            if (position == PositionControlModule.CENTER
+                    && (
+                    i + 1 >= lbList.size() / 2
+                            || lbList.size() <= 1
+            )) {
+                x += drawControlModule(
+                        img,
+                        als,
+                        x
+                );
 
-                if (als.getLbList().size() / 2 == i
-                        || als.getLbList().size() <= 1) {
-
-                    LCImageService.drawLC(
-                            img,
-                            als.getLC(),
-                            x
-                    );
-
-                    x += als.getLC().getWidth() / 10;
-                }
+                position = null;
             }
         }
 
-        if (position == PositionLC.RIGHT) {
-
-            LCImageService.drawLC(
+        if (position == PositionControlModule.RIGHT
+                || (
+                position == PositionControlModule.CENTER
+                        && als.getLbList().isEmpty()
+        )) {
+            x += drawControlModule(
                     img,
-                    als.getLC(),
+                    als,
                     x
             );
         }
 
         g2d.dispose();
+    }
+
+    /**
+     * Рисует единственный control-модуль ALS.
+     * LBC остаётся одним физическим модулем и не раскладывается
+     * на отдельные LB и LC.
+     */
+    private static int drawControlModule(
+            BufferedImage img,
+            ALSDTO als,
+            int x
+    ) {
+        if (als.getLBC() != null) {
+            LBCImageService.drawLBC(
+                    img,
+                    als.getLBC(),
+                    x
+            );
+
+            return als.getLBC().getWidth() / 10;
+        }
+
+        if (als.getLC() != null) {
+            LCImageService.drawLC(
+                    img,
+                    als.getLC(),
+                    x
+            );
+
+            return als.getLC().getWidth() / 10;
+        }
+
+        throw new IllegalStateException(
+                "ALS должен содержать модуль управления"
+        );
     }
 
     public static File getFileLCImage(
