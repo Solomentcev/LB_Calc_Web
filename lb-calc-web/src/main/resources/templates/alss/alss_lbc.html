@@ -36,6 +36,26 @@
 <option th:each="color : ${colorsList}" th:value="${color}" th:text="${color}"></option>
 </select></td></tr>
 </table>
+<h5>Управление LBC</h5>
+<table class="table table-striped">
+<tr><th>Display</th><td><select class="form-control" th:field="*{display}">
+<option th:each="display : ${displayList}" th:value="${display}" th:text="${display}"></option>
+</select></td></tr>
+<tr><th>Barcode Reader</th><td><select class="form-control" th:field="*{barReader}">
+<option th:each="reader : ${barReaderList}" th:value="${reader}" th:text="${reader}"></option>
+</select></td></tr>
+<tr><th>Оплата</th><td><select class="form-control" th:field="*{payment}">
+<option th:each="payment : ${paymentList}" th:value="${payment}" th:text="${payment}"></option>
+</select></td></tr>
+<tr><th>Printer</th><td><input type="checkbox" th:field="*{printer}"></td></tr>
+<tr><th>RFID</th><td><input type="checkbox" th:field="*{rfidReader}"></td></tr>
+<tr><th>Способы доступа</th><td><select multiple class="form-control" th:field="*{accessMethods}">
+<option th:each="method : ${accessMethodList}" th:value="${method}" th:text="${method}"></option>
+</select></td></tr>
+<tr><th>Печать</th><td><select multiple class="form-control" th:field="*{printOptions}">
+<option th:each="option : ${printOptionList}" th:value="${option}" th:text="${option}"></option>
+</select></td></tr>
+</table>
 </div><div class="col-md-7">
 <img class="img-thumbnail" th:src="'data:image/png;base64,' + ${lbc.stringLBCImage}" alt="LBC Image">
 </div></div>
