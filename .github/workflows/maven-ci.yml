@@ -1,6 +1,9 @@
 name: Maven test
 
 on:
+  push:
+    branches:
+      - feature/lbc-full-support
   pull_request:
     branches:
       - master
