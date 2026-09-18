@@ -2,7 +2,7 @@ package com.lb_calc_web.domain.model;
 
 import com.lb_calc_web.domain.attributes.Colors;
 import com.lb_calc_web.domain.attributes.DirectionDoorOpening;
-import com.lb_calc_web.domain.attributes.PositionLC;
+import com.lb_calc_web.domain.attributes.PositionControlModule;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -388,22 +388,32 @@ public class ALS {
      *
      * @return положение модуля управления
      */
-    public PositionLC getPositionLC() {
+    public PositionControlModule getPositionControlModule() {
         int controlIndex = getControlModuleIndex();
 
         if (modules.size() == 1) {
-            return PositionLC.CENTER;
+            return PositionControlModule.CENTER;
         }
 
         if (controlIndex == 0) {
-            return PositionLC.LEFT;
+            return PositionControlModule.LEFT;
         }
 
         if (controlIndex == modules.size() - 1) {
-            return PositionLC.RIGHT;
+            return PositionControlModule.RIGHT;
         }
 
-        return PositionLC.CENTER;
+        return PositionControlModule.CENTER;
+    }
+
+    /**
+     * Обратная совместимость со старым именем.
+     */
+    @Deprecated
+    public com.lb_calc_web.domain.attributes.PositionLC getPositionLC() {
+        return com.lb_calc_web.domain.attributes.PositionLC.valueOf(
+                getPositionControlModule().name()
+        );
     }
 
     /**
@@ -477,7 +487,7 @@ public class ALS {
      */
     private void recalculateDoorDirections() {
         int controlIndex = getControlModuleIndex();
-        PositionLC position = getPositionLC();
+        PositionControlModule position = getPositionControlModule();
 
         for (int i = 0; i < modules.size(); i++) {
             Module module = modules.get(i);
