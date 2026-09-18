@@ -93,9 +93,9 @@
                         <label>Положение control-модуля</label>
 
                         <select class="form-control"
-                                th:field="*{positionLC}" aria-label="positionLC">
+                                th:field="*{positionControlModule}" aria-label="positionControlModule">
 
-                            <option th:each="position : ${positionLCList}"
+                            <option th:each="position : ${positionControlModuleList}"
                                     th:value="${position}"
                                     th:text="${position}">
                             </option>
