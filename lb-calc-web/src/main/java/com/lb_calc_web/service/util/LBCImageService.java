@@ -114,21 +114,23 @@ public final class LBCImageService {
                 1
         );
 
-        // Storage-зона
+        // Storage-зона и встроенная control-зона.
         boolean directionLeft =
                 DirectionDoorOpening.LEFT.name()
-                        .equals(lbc.getDirectionDoorOpening());
-
-        int storageX =
-                directionLeft
-                        ? x
-                        : x + serviceZoneWidth;
+                        .equals(
+                                lbc.getDirectionDoorOpening()
+                        );
 
         int storageWidth =
                 Math.max(
                         1,
                         width - serviceZoneWidth
                 );
+
+        int storageX =
+                directionLeft
+                        ? x
+                        : x + serviceZoneWidth;
 
         g2d.setColor(bodyColor.getColor());
 
@@ -143,38 +145,66 @@ public final class LBCImageService {
                             ) * (i - 1)
                     ) / 10;
 
-            g2d.fillRect(
+            g2d.fillRoundRect(
                     storageX,
                     y,
                     storageWidth,
-                    shelfThickness
+                    shelfThickness,
+                    1,
+                    1
             );
         }
 
-        // Встроенная панель управления внутри того же корпуса.
+        /*
+         * Control-зона LBC занимает сервисную зону того же физического
+         * корпуса, поэтому LBC не раскладывается на отдельные LC и LB.
+         */
         int usableHeight =
-                height - upperFrame - bottomFrame;
-
-        int panelHeight =
-                Math.min(
-                        Math.max(60, usableHeight / 4),
-                        Math.max(60, usableHeight - 20)
+                Math.max(
+                        1,
+                        height - upperFrame - bottomFrame
                 );
+
+        int controlWidth =
+                serviceZoneWidth > 0
+                        ? Math.max(
+                        1,
+                        serviceZoneWidth
+                        )
+                        : Math.max(
+                        1,
+                        width
+                );
+
+        int panelX =
+                directionLeft
+                        ? x + storageWidth
+                        : x;
 
         int panelY =
-                upperFrame + 10;
+                upperFrame + 5;
 
-        int panelWidth =
-                Math.min(
-                        Math.max(100, width - 20),
-                        width - 20
+        int panelHeight =
+                Math.max(
+                        1,
+                        usableHeight - 10
                 );
 
-        int panelX = x + (width - panelWidth) / 2;
+        int panelMargin =
+                Math.min(
+                        5,
+                        Math.max(0, controlWidth / 10)
+                );
+
+        int panelWidth =
+                Math.max(
+                        1,
+                        controlWidth - panelMargin * 2
+                );
 
         g2d.setColor(Color.DARK_GRAY);
         g2d.fillRoundRect(
-                panelX,
+                panelX + panelMargin,
                 panelY,
                 panelWidth,
                 panelHeight,
@@ -184,7 +214,7 @@ public final class LBCImageService {
 
         g2d.setColor(Color.BLACK);
         g2d.drawRoundRect(
-                panelX,
+                panelX + panelMargin,
                 panelY,
                 panelWidth,
                 panelHeight,
@@ -198,26 +228,35 @@ public final class LBCImageService {
             int displayWidth =
                     Math.min(
                             Math.max(
-                                    20,
+                                    10,
                                     display.getDisplayWidth() / 10
                             ),
-                            panelWidth - 20
+                            Math.max(
+                                    1,
+                                    panelWidth - 4
+                            )
                     );
 
             int displayHeight =
                     Math.min(
                             Math.max(
-                                    15,
+                                    10,
                                     display.getDisplayHeight() / 10
                             ),
-                            panelHeight - 20
+                            Math.max(
+                                    1,
+                                    panelHeight - 4
+                            )
                     );
 
             int displayX =
-                    x + (width - displayWidth) / 2;
+                    panelX
+                            + panelMargin
+                            + (panelWidth - displayWidth) / 2;
 
             int displayY =
-                    panelY + (panelHeight - displayHeight) / 2;
+                    panelY
+                            + (panelHeight - displayHeight) / 2;
 
             g2d.setColor(Color.GRAY);
             g2d.fillRoundRect(
@@ -240,33 +279,32 @@ public final class LBCImageService {
             );
         }
 
-        // Небольшие обозначения оборудования панели.
         g2d.setColor(Color.BLACK);
 
         if (!BarReader.NONE.getName().equals(lbc.getBarReader())) {
             g2d.fillRect(
-                    panelX + 5,
-                    panelY + 5,
-                    8,
-                    8
+                    panelX + panelMargin + 2,
+                    panelY + 2,
+                    6,
+                    6
             );
         }
 
         if (lbc.isPrinter()) {
             g2d.fillRect(
-                    panelX + panelWidth - 13,
-                    panelY + 5,
-                    8,
-                    8
+                    panelX + panelMargin + 2,
+                    panelY + panelHeight - 8,
+                    6,
+                    6
             );
         }
 
         if (lbc.isRfidReader()) {
             g2d.fillRect(
-                    panelX + panelWidth - 13,
-                    panelY + panelHeight - 13,
-                    8,
-                    8
+                    panelX + controlWidth - panelMargin - 8,
+                    panelY + panelHeight - 8,
+                    6,
+                    6
             );
         }
 
