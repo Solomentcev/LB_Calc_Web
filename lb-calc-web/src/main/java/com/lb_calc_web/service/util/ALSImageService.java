@@ -72,7 +72,9 @@ public class ALSImageService {
 
         PositionControlModule position =
                 PositionControlModule.valueOf(
-                        als.getPositionControlModule()
+                        als.getPositionControlModule() == null
+                                ? PositionControlModule.CENTER.name()
+                                : als.getPositionControlModule()
                 );
 
         int x = 0;
