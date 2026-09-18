@@ -6,6 +6,10 @@ import com.lb_calc_web.dto.LBCDTO;
 import com.lb_calc_web.dto.LBDTO;
 import com.lb_calc_web.dto.LCDTO;
 import com.lb_calc_web.entity.ALSEntity;
+import com.lb_calc_web.entity.ALSModuleEntity;
+import com.lb_calc_web.entity.LBEntity;
+import com.lb_calc_web.entity.LBCEntity;
+import com.lb_calc_web.entity.LCEntity;
 import com.lb_calc_web.entity.ModuleEntity;
 import com.lb_calc_web.handler.ValidationSizeException;
 import com.lb_calc_web.mapper.dto.ALSDtoMapper;
@@ -67,9 +71,7 @@ public class ALSService {
                                 ALSEntity::getId
                         )
                 )
-                .map(ALSEntityMapper::toDomain)
-                .map(ALSDtoMapper::toDto)
-                .map(this::addALSImage)
+                .map(this::toDto)
                 .toList();
     }
 
@@ -90,11 +92,7 @@ public class ALSService {
                                 )
                         );
 
-        return addALSImage(
-                ALSDtoMapper.toDto(
-                        ALSEntityMapper.toDomain(entity)
-                )
-        );
+        return toDto(entity);
     }
 
     /**
@@ -704,6 +702,68 @@ public class ALSService {
                         + " шт.;\n"
                         + controlDescription
         );
+    }
+
+    /**
+     * Entity -> DTO с восстановлением persistence-ID дочерних модулей.
+     *
+     * <p>ID не входят в domain-модель, поэтому обогащение выполняется
+     * здесь, на границе persistence/application.</p>
+     */
+    ALSDTO toDto(ALSEntity entity) {
+        ALSDTO dto =
+                ALSDtoMapper.toDto(
+                        ALSEntityMapper.toDomain(entity)
+                );
+
+        enrichModuleIds(
+                dto,
+                entity
+        );
+
+        return addALSImage(dto);
+    }
+
+    void enrichModuleIds(
+            ALSDTO dto,
+            ALSEntity entity
+    ) {
+        int lbIndex = 0;
+
+        List<ALSModuleEntity> associations =
+                entity.getModules()
+                        .stream()
+                        .sorted(
+                                Comparator.comparingInt(
+                                        ALSModuleEntity::getModuleOrder
+                                )
+                        )
+                        .toList();
+
+        for (ALSModuleEntity association : associations) {
+            ModuleEntity module =
+                    association.getModule();
+
+            if (module instanceof LBCEntity
+                    && dto.getLBC() != null) {
+                dto.getLBC().setId(module.getId());
+                continue;
+            }
+
+            if (module instanceof LCEntity
+                    && dto.getLC() != null) {
+                dto.getLC().setId(module.getId());
+                continue;
+            }
+
+            if (module instanceof LBEntity
+                    && dto.getLbList() != null
+                    && lbIndex < dto.getLbList().size()) {
+                dto.getLbList()
+                        .get(lbIndex++)
+                        .setId(module.getId());
+            }
+        }
     }
 
     private ALSDTO addALSImage(
