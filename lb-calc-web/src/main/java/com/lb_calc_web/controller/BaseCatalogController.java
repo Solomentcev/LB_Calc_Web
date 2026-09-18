@@ -3,6 +3,7 @@ package com.lb_calc_web.controller;
 import com.lb_calc_web.domain.attributes.Colors;
 import com.lb_calc_web.domain.attributes.DirectionDoorOpening;
 import com.lb_calc_web.domain.attributes.Payment;
+import com.lb_calc_web.domain.attributes.PositionControlModule;
 import com.lb_calc_web.domain.attributes.PositionLC;
 import com.lb_calc_web.domain.equipment.BarReader;
 import com.lb_calc_web.domain.equipment.Display;
@@ -23,6 +24,14 @@ public abstract class BaseCatalogController {
     /**
      * Положение модуля управления внутри ALS.
      */
+    protected final List<PositionControlModule>
+            positionControlModuleList =
+            Arrays.asList(PositionControlModule.values());
+
+    /**
+     * Старое имя оставлено для совместимости старых шаблонов.
+     */
+    @Deprecated
     protected final List<PositionLC> positionLCList =
             Arrays.asList(PositionLC.values());
 
@@ -79,6 +88,13 @@ public abstract class BaseCatalogController {
         return colorsList;
     }
 
+    @ModelAttribute("positionControlModuleList")
+    public List<PositionControlModule>
+    positionControlModuleList() {
+        return positionControlModuleList;
+    }
+
+    @Deprecated
     @ModelAttribute("positionLCList")
     public List<PositionLC> positionLCList() {
         return positionLCList;
