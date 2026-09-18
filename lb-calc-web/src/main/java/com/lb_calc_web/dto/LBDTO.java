@@ -5,35 +5,40 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.Objects;
 
 public class LBDTO {
+
     private Long id;
     private String name;
     private String description;
+
     private String type;
+
     private int height;
     private int width;
     private int depth;
+
     private int upperFrame;
     private int bottomFrame;
+
     private int shelfThick;
+    private int deltaWidth;
+    private int serviceZoneWidth;
+    private int doorThickness;
+
     private int countCells;
+
     private double heightCell;
     private int widthCell;
     private int depthCell;
+
     private String directionDoorOpening;
+
     private String colorDoor;
     private String colorBody;
+
     @JsonIgnore
     private String stringLBImage;
 
     public LBDTO() {
-    }
-
-    public String getStringLBImage() {
-        return stringLBImage;
-    }
-
-    public void setStringLBImage(String stringLBImage) {
-        this.stringLBImage = stringLBImage;
     }
 
     public Long getId() {
@@ -116,6 +121,30 @@ public class LBDTO {
         this.shelfThick = shelfThick;
     }
 
+    public int getDeltaWidth() {
+        return deltaWidth;
+    }
+
+    public void setDeltaWidth(int deltaWidth) {
+        this.deltaWidth = deltaWidth;
+    }
+
+    public int getServiceZoneWidth() {
+        return serviceZoneWidth;
+    }
+
+    public void setServiceZoneWidth(int serviceZoneWidth) {
+        this.serviceZoneWidth = serviceZoneWidth;
+    }
+
+    public int getDoorThickness() {
+        return doorThickness;
+    }
+
+    public void setDoorThickness(int doorThickness) {
+        this.doorThickness = doorThickness;
+    }
+
     public int getCountCells() {
         return countCells;
     }
@@ -172,24 +201,66 @@ public class LBDTO {
         this.colorBody = colorBody;
     }
 
+    public String getStringLBImage() {
+        return stringLBImage;
+    }
+
+    public void setStringLBImage(String stringLBImage) {
+        this.stringLBImage = stringLBImage;
+    }
+
     @Override
     public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
         LBDTO lbdto = (LBDTO) o;
-        return getHeight() == lbdto.getHeight() && getWidth() == lbdto.getWidth() && getDepth() == lbdto.getDepth()
-                && getUpperFrame() == lbdto.getUpperFrame() && getBottomFrame() == lbdto.getBottomFrame()
-                && getShelfThick() == lbdto.getShelfThick() && getCountCells() == lbdto.getCountCells()
-                && Double.compare(getHeightCell(), lbdto.getHeightCell()) == 0 && getWidthCell() == lbdto.getWidthCell()
-                && getDepthCell() == lbdto.getDepthCell() && Objects.equals(getType(), lbdto.getType())
-                && Objects.equals(getDirectionDoorOpening(), lbdto.getDirectionDoorOpening())
-                && Objects.equals(getColorDoor(), lbdto.getColorDoor()) && Objects.equals(getColorBody(), lbdto.getColorBody());
+
+        return height == lbdto.height
+                && width == lbdto.width
+                && depth == lbdto.depth
+                && upperFrame == lbdto.upperFrame
+                && bottomFrame == lbdto.bottomFrame
+                && shelfThick == lbdto.shelfThick
+                && deltaWidth == lbdto.deltaWidth
+                && serviceZoneWidth == lbdto.serviceZoneWidth
+                && doorThickness == lbdto.doorThickness
+                && countCells == lbdto.countCells
+                && Double.compare(heightCell, lbdto.heightCell) == 0
+                && widthCell == lbdto.widthCell
+                && depthCell == lbdto.depthCell
+                && Objects.equals(type, lbdto.type)
+                && Objects.equals(directionDoorOpening, lbdto.directionDoorOpening)
+                && Objects.equals(colorDoor, lbdto.colorDoor)
+                && Objects.equals(colorBody, lbdto.colorBody);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getType(), getHeight(), getWidth(), getDepth(), getUpperFrame(), getBottomFrame(),
-                getShelfThick(), getCountCells(), getHeightCell(), getWidthCell(), getDepthCell(),
-                getDirectionDoorOpening(), getColorDoor(), getColorBody());
+        return Objects.hash(
+                type,
+                height,
+                width,
+                depth,
+                upperFrame,
+                bottomFrame,
+                shelfThick,
+                deltaWidth,
+                serviceZoneWidth,
+                doorThickness,
+                countCells,
+                heightCell,
+                widthCell,
+                depthCell,
+                directionDoorOpening,
+                colorDoor,
+                colorBody
+        );
     }
 
     @Override
@@ -205,6 +276,9 @@ public class LBDTO {
                 ", upperFrame=" + upperFrame +
                 ", bottomFrame=" + bottomFrame +
                 ", shelfThick=" + shelfThick +
+                ", deltaWidth=" + deltaWidth +
+                ", serviceZoneWidth=" + serviceZoneWidth +
+                ", doorThickness=" + doorThickness +
                 ", countCells=" + countCells +
                 ", heightCell=" + heightCell +
                 ", widthCell=" + widthCell +
@@ -212,6 +286,6 @@ public class LBDTO {
                 ", directionDoorOpening='" + directionDoorOpening + '\'' +
                 ", colorDoor='" + colorDoor + '\'' +
                 ", colorBody='" + colorBody + '\'' +
-                '}'+"\n";
+                '}';
     }
 }

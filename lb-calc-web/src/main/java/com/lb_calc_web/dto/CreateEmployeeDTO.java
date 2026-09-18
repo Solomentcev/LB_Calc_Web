@@ -1,26 +1,32 @@
 package com.lb_calc_web.dto;
 
-import com.lb_calc_web.model.user.Role;
+import com.lb_calc_web.domain.attributes.Role;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 public class CreateEmployeeDTO {
+
     @NotBlank
     private String firstName;
+
     @NotBlank
     @Size(max = 20)
     private String lastName;
+
     @NotBlank
     @Size(max = 50)
     @Email
     private String email;
+
     @NotNull
     private Role role;
+
     @NotBlank
     @Size(max = 120)
     private String password;
+
     @NotBlank
     @Size(max = 120)
     private String confirmPassword;
@@ -29,7 +35,9 @@ public class CreateEmployeeDTO {
         return firstName;
     }
 
-    public void setFirstName(@NotBlank String firstName) {
+    public void setFirstName(
+            @NotBlank String firstName
+    ) {
         this.firstName = firstName;
     }
 
@@ -37,7 +45,9 @@ public class CreateEmployeeDTO {
         return lastName;
     }
 
-    public void setLastName(@NotBlank @Size(max = 20) String lastName) {
+    public void setLastName(
+            @NotBlank @Size(max = 20) String lastName
+    ) {
         this.lastName = lastName;
     }
 
@@ -45,24 +55,10 @@ public class CreateEmployeeDTO {
         return email;
     }
 
-    public void setEmail(@NotBlank @Size(max = 50) @Email String email) {
+    public void setEmail(
+            @NotBlank @Size(max = 50) @Email String email
+    ) {
         this.email = email;
-    }
-
-    public @NotBlank @Size(max = 120) String getPassword() {
-        return password;
-    }
-
-    public void setPassword(@NotBlank @Size(max = 120) String password) {
-        this.password = password;
-    }
-
-    public @NotBlank @Size(max = 120) String getConfirmPassword() {
-        return confirmPassword;
-    }
-
-    public void setConfirmPassword(@NotBlank @Size(max = 120) String confirmPassword) {
-        this.confirmPassword = confirmPassword;
     }
 
     public Role getRole() {
@@ -71,5 +67,25 @@ public class CreateEmployeeDTO {
 
     public void setRole(Role role) {
         this.role = role;
+    }
+
+    public @NotBlank @Size(max = 120) String getPassword() {
+        return password;
+    }
+
+    public void setPassword(
+            @NotBlank @Size(max = 120) String password
+    ) {
+        this.password = password;
+    }
+
+    public @NotBlank @Size(max = 120) String getConfirmPassword() {
+        return confirmPassword;
+    }
+
+    public void setConfirmPassword(
+            @NotBlank @Size(max = 120) String confirmPassword
+    ) {
+        this.confirmPassword = confirmPassword;
     }
 }

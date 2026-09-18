@@ -3,7 +3,7 @@ package com.lb_calc_web.service;
 import com.lb_calc_web.TestDataFactory;
 import com.lb_calc_web.dto.LCDTO;
 import com.lb_calc_web.handler.ValidationSizeException;
-import com.lb_calc_web.model.LC;
+import com.lb_calc_web.entity.LC;
 import com.lb_calc_web.repository.LCRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

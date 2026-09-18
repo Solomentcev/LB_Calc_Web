@@ -1,7 +1,7 @@
 package com.lb_calc_web.security.jwt;
 
+import com.lb_calc_web.domain.attributes.Role;
 import com.lb_calc_web.dto.EmployeeDTO;
-import com.lb_calc_web.model.user.Role;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.SignatureAlgorithm;

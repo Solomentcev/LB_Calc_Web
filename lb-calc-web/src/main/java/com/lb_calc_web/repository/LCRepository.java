@@ -1,7 +1,7 @@
 package com.lb_calc_web.repository;
 
-import com.lb_calc_web.model.LC;
+import com.lb_calc_web.entity.LCEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface LCRepository extends JpaRepository<LC, Long> {
+public interface LCRepository extends JpaRepository<LCEntity, Long> {
 }

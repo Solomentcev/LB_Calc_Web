@@ -1,9 +1,8 @@
 package com.lb_calc_web.service.util;
 
+import com.lb_calc_web.domain.attributes.Colors;
+import com.lb_calc_web.domain.attributes.DirectionDoorOpening;
 import com.lb_calc_web.dto.LBDTO;
-import com.lb_calc_web.model.attributes.Colors;
-import com.lb_calc_web.model.attributes.DirectionDoorOpening;
-import com.lb_calc_web.model.attributes.TypeLb;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -16,97 +15,439 @@ import java.io.IOException;
 import java.util.Base64;
 
 public class LBImageService {
-    static Image createLBImage(LBDTO lb) {
-        BufferedImage img = new BufferedImage(lb.getWidth()/10+1, lb.getHeight()/10+1, BufferedImage.TYPE_INT_ARGB);
-        AffineTransform scalingTransform = new AffineTransform();
+
+    static Image createLBImage(
+            LBDTO lb
+    ) {
+
+        BufferedImage img =
+                new BufferedImage(
+                        lb.getWidth() / 10 + 1,
+                        lb.getHeight() / 10 + 1,
+                        BufferedImage.TYPE_INT_ARGB
+                );
+
+        AffineTransform scalingTransform =
+                new AffineTransform();
 
         scalingTransform.scale(3, 3);
-        AffineTransformOp scaleOp = new AffineTransformOp(scalingTransform, AffineTransformOp.TYPE_BILINEAR);
-        int x=0;
 
-        drawLB(img, lb,x);
-        BufferedImage scaledImg = new BufferedImage(img.getWidth()*3, img.getHeight()*3, BufferedImage.TYPE_INT_ARGB);
-        scaledImg= scaleOp.filter(img, scaledImg);
+        AffineTransformOp scaleOp =
+                new AffineTransformOp(
+                        scalingTransform,
+                        AffineTransformOp.TYPE_BILINEAR
+                );
+
+        drawLB(
+                img,
+                lb,
+                0
+        );
+
+        BufferedImage scaledImg =
+                new BufferedImage(
+                        img.getWidth() * 3,
+                        img.getHeight() * 3,
+                        BufferedImage.TYPE_INT_ARGB
+                );
+
+        scaledImg =
+                scaleOp.filter(
+                        img,
+                        scaledImg
+                );
+
         return scaledImg;
     }
 
-    static void drawLB(Image img, LBDTO lb, int x) {
-        Graphics2D g2d = (Graphics2D) img.getGraphics();
-        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-        g2d.setColor(Colors.valueOf(lb.getColorDoor()).getColor());
-        g2d.fillRoundRect(x,0, lb.getWidth()/10,lb.getHeight()/10, 1,1);//габариты модуля
-        g2d.setColor(Colors.valueOf(lb.getColorBody()).getColor());
-        g2d.fillRoundRect(x,0, lb.getWidth()/10,lb.getUpperFrame()/10, 1,1); //верхняя рама
-        g2d.fillRoundRect(x,(lb.getHeight() -lb.getBottomFrame())/10, lb.getWidth()/10,lb.getBottomFrame()/10, 1,1);//нижняя рама
-        if (DirectionDoorOpening.valueOf(lb.getDirectionDoorOpening()).equals(DirectionDoorOpening.LEFT)){
-            g2d.fillRoundRect(x+(lb.getWidth()- TypeLb.valueOf(lb.getType()).getServiceZoneWidth())/10,(lb.getUpperFrame())/10,
-                    TypeLb.valueOf(lb.getType()).getServiceZoneWidth()/10,(lb.getHeight()-lb.getUpperFrame()-lb.getBottomFrame())/10, 1,1);// сервисная планка
+    static void drawLB(
+            Image img,
+            LBDTO lb,
+            int x
+    ) {
 
-            for (int i = 2; i <=lb.getCountCells() ; i++) {
-                g2d.fillRoundRect(x,
-                        (int) ((lb.getHeight()-lb.getBottomFrame()-(lb.getHeightCell() +lb.getShelfThick()) * (i-1)) / 10),
-                        (lb.getWidth() - TypeLb.valueOf(lb.getType()).getServiceZoneWidth()) / 10, lb.getShelfThick() / 10, 1, 1);
+        Graphics2D g2d =
+                (Graphics2D) img.getGraphics();
+
+        g2d.setRenderingHint(
+                RenderingHints.KEY_ANTIALIASING,
+                RenderingHints.VALUE_ANTIALIAS_ON
+        );
+
+        g2d.setRenderingHint(
+                RenderingHints.KEY_RENDERING,
+                RenderingHints.VALUE_RENDER_QUALITY
+        );
+
+        int serviceZoneWidth =
+                lb.getServiceZoneWidth();
+
+        int shelfThickness =
+                lb.getShelfThick();
+
+        boolean directionLeft =
+                DirectionDoorOpening.LEFT.name()
+                        .equals(
+                                lb.getDirectionDoorOpening()
+                        );
+
+        // Двери
+        g2d.setColor(
+                Colors.valueOf(
+                        lb.getColorDoor()
+                ).getColor()
+        );
+
+        g2d.fillRoundRect(
+                x,
+                0,
+                lb.getWidth() / 10,
+                lb.getHeight() / 10,
+                1,
+                1
+        );
+
+        // Корпус
+        g2d.setColor(
+                Colors.valueOf(
+                        lb.getColorBody()
+                ).getColor()
+        );
+
+        // Верхняя рама
+        g2d.fillRoundRect(
+                x,
+                0,
+                lb.getWidth() / 10,
+                lb.getUpperFrame() / 10,
+                1,
+                1
+        );
+
+        // Нижняя рама
+        g2d.fillRoundRect(
+                x,
+                (
+                        lb.getHeight()
+                                - lb.getBottomFrame()
+                ) / 10,
+                lb.getWidth() / 10,
+                lb.getBottomFrame() / 10,
+                1,
+                1
+        );
+
+        if (directionLeft) {
+
+            // Сервисная зона
+            g2d.fillRoundRect(
+                    x
+                            + (
+                            lb.getWidth()
+                                    - serviceZoneWidth
+                    ) / 10,
+                    lb.getUpperFrame() / 10,
+                    serviceZoneWidth / 10,
+                    (
+                            lb.getHeight()
+                                    - lb.getUpperFrame()
+                                    - lb.getBottomFrame()
+                    ) / 10,
+                    1,
+                    1
+            );
+
+            // Полки
+            for (
+                    int i = 2;
+                    i <= lb.getCountCells();
+                    i++
+            ) {
+
+                g2d.fillRoundRect(
+                        x,
+                        (
+                                int
+                                ) (
+                                (
+                                        lb.getHeight()
+                                                - lb.getBottomFrame()
+                                                - (
+                                                lb.getHeightCell()
+                                                        + shelfThickness
+                                        ) * (i - 1)
+                                ) / 10
+                        ),
+                        (
+                                lb.getWidth()
+                                        - serviceZoneWidth
+                        ) / 10,
+                        shelfThickness / 10,
+                        1,
+                        1
+                );
             }
-        } else {
-            g2d.fillRoundRect(x,(lb.getUpperFrame())/10,
-                    TypeLb.valueOf(lb.getType()).getServiceZoneWidth()/10,
-                    (lb.getHeight()-lb.getUpperFrame()- lb.getBottomFrame())/10, 1,1);// сервисная планка
 
-            for (int i = 2; i <=lb.getCountCells() ; i++) {
-                g2d.fillRoundRect(x+(TypeLb.valueOf(lb.getType()).getServiceZoneWidth())/10,
-                        (int) ((lb.getHeight()-lb.getBottomFrame()-(lb.getHeightCell()+lb.getShelfThick()) * (i-1)) / 10),
-                        (lb.getWidth() -TypeLb.valueOf(lb.getType()).getServiceZoneWidth()) / 10, lb.getShelfThick() / 10, 1, 1);
+        } else {
+
+            // Сервисная зона
+            g2d.fillRoundRect(
+                    x,
+                    lb.getUpperFrame() / 10,
+                    serviceZoneWidth / 10,
+                    (
+                            lb.getHeight()
+                                    - lb.getUpperFrame()
+                                    - lb.getBottomFrame()
+                    ) / 10,
+                    1,
+                    1
+            );
+
+            // Полки
+            for (
+                    int i = 2;
+                    i <= lb.getCountCells();
+                    i++
+            ) {
+
+                g2d.fillRoundRect(
+                        x
+                                + serviceZoneWidth / 10,
+                        (
+                                int
+                                ) (
+                                (
+                                        lb.getHeight()
+                                                - lb.getBottomFrame()
+                                                - (
+                                                lb.getHeightCell()
+                                                        + shelfThickness
+                                        ) * (i - 1)
+                                ) / 10
+                        ),
+                        (
+                                lb.getWidth()
+                                        - serviceZoneWidth
+                        ) / 10,
+                        shelfThickness / 10,
+                        1,
+                        1
+                );
             }
         }
+
+        // Чёрные границы
         g2d.setColor(Color.BLACK);
-        g2d.drawRoundRect(x,0, lb.getWidth()/10,lb.getHeight()/10, 1,1);
-        g2d.drawRoundRect(x,0, lb.getWidth()/10,lb.getUpperFrame()/10, 1,1); //верхняя рама
-        g2d.drawRoundRect(x,(lb.getHeight()-lb.getBottomFrame())/10, lb.getWidth()/10,lb.getBottomFrame()/10, 1,1);//нижняя рама
-        if (DirectionDoorOpening.valueOf(lb.getDirectionDoorOpening()).equals(DirectionDoorOpening.LEFT)){
-            g2d.drawRoundRect(x+(lb.getWidth()-TypeLb.valueOf(lb.getType()).getServiceZoneWidth())/10,(lb.getUpperFrame())/10,
-                    TypeLb.valueOf(lb.getType()).getServiceZoneWidth()/10,(lb.getHeight()-lb.getUpperFrame()- lb.getBottomFrame())/10, 1,1);// сервисная планка
 
-            for (int i = 2; i <=lb.getCountCells() ; i++) {
-                g2d.drawRoundRect(x, (int) ((lb.getHeight() - lb.getBottomFrame()-(lb.getHeightCell() * (i - 1) + lb.getShelfThick() * (i-1))) / 10),
-                        (lb.getWidth() - TypeLb.valueOf(lb.getType()).getServiceZoneWidth()) / 10, lb.getShelfThick() / 10, 1, 1);
+        // Габариты
+        g2d.drawRoundRect(
+                x,
+                0,
+                lb.getWidth() / 10,
+                lb.getHeight() / 10,
+                1,
+                1
+        );
+
+        // Верхняя рама
+        g2d.drawRoundRect(
+                x,
+                0,
+                lb.getWidth() / 10,
+                lb.getUpperFrame() / 10,
+                1,
+                1
+        );
+
+        // Нижняя рама
+        g2d.drawRoundRect(
+                x,
+                (
+                        lb.getHeight()
+                                - lb.getBottomFrame()
+                ) / 10,
+                lb.getWidth() / 10,
+                lb.getBottomFrame() / 10,
+                1,
+                1
+        );
+
+        if (directionLeft) {
+
+            g2d.drawRoundRect(
+                    x
+                            + (
+                            lb.getWidth()
+                                    - serviceZoneWidth
+                    ) / 10,
+                    lb.getUpperFrame() / 10,
+                    serviceZoneWidth / 10,
+                    (
+                            lb.getHeight()
+                                    - lb.getUpperFrame()
+                                    - lb.getBottomFrame()
+                    ) / 10,
+                    1,
+                    1
+            );
+
+            for (
+                    int i = 2;
+                    i <= lb.getCountCells();
+                    i++
+            ) {
+
+                g2d.drawRoundRect(
+                        x,
+                        (
+                                int
+                                ) (
+                                (
+                                        lb.getHeight()
+                                                - lb.getBottomFrame()
+                                                - (
+                                                lb.getHeightCell()
+                                                        * (i - 1)
+                                                        + shelfThickness
+                                                        * (i - 1)
+                                        )
+                                ) / 10
+                        ),
+                        (
+                                lb.getWidth()
+                                        - serviceZoneWidth
+                        ) / 10,
+                        shelfThickness / 10,
+                        1,
+                        1
+                );
             }
-        } else {
-            g2d.drawRoundRect(x,(lb.getUpperFrame())/10,
-                    TypeLb.valueOf(lb.getType()).getServiceZoneWidth()/10,(lb.getHeight()-lb.getUpperFrame()- lb.getBottomFrame())/10, 1,1);// сервисная планка
 
-            for (int i = 2; i <=lb.getCountCells() ; i++) {
-                g2d.drawRoundRect(x+(TypeLb.valueOf(lb.getType()).getServiceZoneWidth())/10,
-                        (int) ((lb.getHeight()- lb.getBottomFrame()-(lb.getHeightCell() * (i - 1) + lb.getShelfThick() * (i-1))) / 10),
-                        (lb.getWidth() - TypeLb.valueOf(lb.getType()).getServiceZoneWidth()) / 10, lb.getShelfThick() / 10, 1, 1);
+        } else {
+
+            g2d.drawRoundRect(
+                    x,
+                    lb.getUpperFrame() / 10,
+                    serviceZoneWidth / 10,
+                    (
+                            lb.getHeight()
+                                    - lb.getUpperFrame()
+                                    - lb.getBottomFrame()
+                    ) / 10,
+                    1,
+                    1
+            );
+
+            for (
+                    int i = 2;
+                    i <= lb.getCountCells();
+                    i++
+            ) {
+
+                g2d.drawRoundRect(
+                        x
+                                + serviceZoneWidth / 10,
+                        (
+                                int
+                                ) (
+                                (
+                                        lb.getHeight()
+                                                - lb.getBottomFrame()
+                                                - (
+                                                lb.getHeightCell()
+                                                        * (i - 1)
+                                                        + shelfThickness
+                                                        * (i - 1)
+                                        )
+                                ) / 10
+                        ),
+                        (
+                                lb.getWidth()
+                                        - serviceZoneWidth
+                        ) / 10,
+                        shelfThickness / 10,
+                        1,
+                        1
+                );
             }
         }
+
         g2d.dispose();
     }
-    public static File getFileLBImage(LBDTO lb) {
-        BufferedImage img = (BufferedImage) createLBImage(lb);
-        File file=new File("src/main/resources/static/lbs/"+"lb"+lb.getId()+".png");
+
+    public static File getFileLBImage(
+            LBDTO lb
+    ) {
+
+        BufferedImage img =
+                (BufferedImage) createLBImage(lb);
+
+        File file =
+                new File(
+                        "src/main/resources/static/lbs/lb"
+                                + lb.getId()
+                                + ".png"
+                );
+
         try {
-             file.createNewFile();
-            ImageIO.write(img, "png", file);
+
+            file.createNewFile();
+
+            ImageIO.write(
+                    img,
+                    "png",
+                    file
+            );
 
         } catch (IOException e) {
-            throw new RuntimeException("Error creating file"+e.getMessage());
+
+            throw new RuntimeException(
+                    "Error creating file: "
+                            + e.getMessage(),
+                    e
+            );
         }
+
         return file;
     }
-    public static byte[] getBytesArrayLBImage(LBDTO lb) {
-        BufferedImage img = (BufferedImage) createLBImage(lb);
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+    public static byte[] getBytesArrayLBImage(
+            LBDTO lb
+    ) {
+
+        BufferedImage img =
+                (BufferedImage) createLBImage(lb);
+
+        ByteArrayOutputStream baos =
+                new ByteArrayOutputStream();
+
         try {
-            ImageIO.write(img, "png", baos);
+
+            ImageIO.write(
+                    img,
+                    "png",
+                    baos
+            );
 
         } catch (IOException e) {
-            throw new RuntimeException("Error creating"+e.getMessage());
+
+            throw new RuntimeException(
+                    "Error creating image: "
+                            + e.getMessage(),
+                    e
+            );
         }
+
         return baos.toByteArray();
     }
-    public static String getStringLBImage(LBDTO lb) {
-        return Base64.getEncoder().encodeToString(getBytesArrayLBImage(lb));
+
+    public static String getStringLBImage(
+            LBDTO lb
+    ) {
+
+        return Base64.getEncoder().encodeToString(
+                getBytesArrayLBImage(lb)
+        );
     }
 }

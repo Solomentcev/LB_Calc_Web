@@ -3,8 +3,7 @@ package com.lb_calc_web.security.config;
 import com.lb_calc_web.security.jwt.JwtAuthentificationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.annotation.Order;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -12,64 +11,112 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.http.HttpStatus;
 
 @Configuration
 @EnableWebSecurity
-@EnableGlobalMethodSecurity(prePostEnabled = true)
+@EnableMethodSecurity
 public class SecurityConfiguration {
-    private final JwtAuthentificationFilter jwtAuthentificationFilterAuthFilter;
 
-    public SecurityConfiguration(JwtAuthentificationFilter jwtAuthentificationFilterAuthFilter) {
+    private final JwtAuthentificationFilter jwtAuthentificationFilter;
 
-        this.jwtAuthentificationFilterAuthFilter = jwtAuthentificationFilterAuthFilter;
+    public SecurityConfiguration(
+            JwtAuthentificationFilter jwtAuthentificationFilter
+    ) {
+        this.jwtAuthentificationFilter =
+                jwtAuthentificationFilter;
     }
 
     @Bean
-    @Order(1)
-    public SecurityFilterChain securityCookieFilterChain(HttpSecurity http) throws Exception {
-        http.csrf(AbstractHttpConfigurer::disable);
-        http.authorizeHttpRequests(auth -> {
-                    auth.requestMatchers("/login/**", "/registration/**","/error")
-                            .permitAll();
-                    auth.requestMatchers("/api/v1/login","/api/v1/registration","/api/v1/logout","/api/v1/refresh")
-                                    .permitAll();
+    public SecurityFilterChain securityFilterChain(
+            HttpSecurity http
+    ) throws Exception {
 
-                    auth.requestMatchers("/employees/**").hasAuthority("ROLE_ADMIN").anyRequest().authenticated();
-                })
-//                .formLogin(form -> form
-//                        .loginPage("/login")
-//                        .loginProcessingUrl("/login")
-//                        .successForwardUrl("/profile")
-//                        .permitAll()
-//                )
-                .exceptionHandling(c ->
-                        // основная точка входа
-                {
-                    c.authenticationEntryPoint(
-                                    new LoginUrlAuthenticationEntryPoint("/login"));
-                            // точка входа для REST API
-
-                })
-                .logout(logout -> logout
-                        .logoutUrl("/logout")
-                        .deleteCookies("jwtAccess")
-                        .deleteCookies("jwtRefresh")
-                        .logoutSuccessUrl("/login?logout")
-
+        http
+                .csrf(
+                        AbstractHttpConfigurer::disable
                 )
-                .addFilterBefore(jwtAuthentificationFilterAuthFilter, UsernamePasswordAuthenticationFilter.class);
-                http.sessionManagement(session -> {
-                    session.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-                });
+
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(
+                                SessionCreationPolicy.STATELESS
+                        )
+                )
+
+                .authorizeHttpRequests(auth -> auth
+
+                        .requestMatchers(
+                                "/login/**",
+                                "/registration/**",
+                                "/error"
+                        ).permitAll()
+
+                        .requestMatchers(
+                                "/swagger-ui.html",
+                                "/swagger-ui/**",
+                                "/v3/api-docs",
+                                "/v3/api-docs/**",
+                                "/v3/api-docs.yaml"
+                        ).permitAll()
+
+                        .requestMatchers(
+                                "/api/v1/login",
+                                "/api/v1/registration",
+                                "/api/v1/logout",
+                                "/api/v1/refresh"
+                        ).permitAll()
+
+                        .requestMatchers(
+                                "/employees/**"
+                        ).hasAuthority("ROLE_ADMIN")
+
+                        .anyRequest().authenticated()
+                )
+
+                .exceptionHandling(exception -> exception
+
+                        .defaultAuthenticationEntryPointFor(
+                                new HttpStatusEntryPoint(
+                                        HttpStatus.UNAUTHORIZED
+                                ),
+                                request ->
+                                        request.getRequestURI()
+                                                .startsWith("/api/")
+                        )
+
+                        .defaultAuthenticationEntryPointFor(
+                                new LoginUrlAuthenticationEntryPoint(
+                                        "/login"
+                                ),
+                                request -> true
+                        )
+                )
+
+                .logout(logout ->
+                        logout
+                                .logoutUrl("/logout")
+                                .deleteCookies(
+                                        "jwtAccess",
+                                        "jwtRefresh"
+                                )
+                                .logoutSuccessUrl(
+                                        "/login?logout"
+                                )
+                )
+
+                .addFilterBefore(
+                        jwtAuthentificationFilter,
+                        UsernamePasswordAuthenticationFilter.class
+                );
+
         return http.build();
     }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-
         return new BCryptPasswordEncoder();
     }
 }
-
