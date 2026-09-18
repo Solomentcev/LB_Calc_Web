@@ -1235,6 +1235,34 @@ public class ProjectService {
                 entity.getId()
         );
 
+        Map<Long, ALSEntity> alsEntitiesById =
+                new HashMap<>();
+
+        for (var entry : entity.getAlsEntries()) {
+            alsEntitiesById.put(
+                    entry.getAls().getId(),
+                    entry.getAls()
+            );
+        }
+
+        for (ALSDTO alsDto : dto.getAlsList()) {
+            if (alsDto == null || alsDto.getId() == null) {
+                continue;
+            }
+
+            ALSEntity alsEntity =
+                    alsEntitiesById.get(
+                            alsDto.getId()
+                    );
+
+            if (alsEntity != null) {
+                alsService.enrichModuleIds(
+                        alsDto,
+                        alsEntity
+                );
+            }
+        }
+
         return dto;
     }
 
