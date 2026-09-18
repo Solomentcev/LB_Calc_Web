@@ -135,7 +135,7 @@ public final class LBCImageService {
         g2d.setColor(bodyColor.getColor());
 
         for (int i = 2; i <= lbc.getCountCells(); i++) {
-            int y =
+            int y = (int) (
                     (
                             lbc.getHeight()
                                     - lbc.getBottomFrame()
@@ -143,7 +143,8 @@ public final class LBCImageService {
                                     lbc.getHeightCell()
                                             + lbc.getShelfThick()
                             ) * (i - 1)
-                    ) / 10;
+                    ) / 10.0
+            );
 
             g2d.fillRoundRect(
                     storageX,
