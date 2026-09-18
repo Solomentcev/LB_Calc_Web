@@ -30,6 +30,15 @@ public final class TestDataFactory {
     private TestDataFactory() {
     }
 
+    private static TypeLb type1() {
+        return new TypeLb(
+                "TYPE1",
+                100,
+                5,
+                40
+        );
+    }
+
     public static void initSizeValidator() {
         SizeValidator.setHeightCellMin(85);
         SizeValidator.setHeightMin(600);
@@ -95,10 +104,11 @@ public final class TestDataFactory {
         lb.setBottomFrame(50);
 
         lb.setCountCells(3);
-        lb.setType(TypeLb.TYPE1.name());
-        lb.setShelfThick(TypeLb.TYPE1.getShelfThick());
-        lb.setDeltaWidth(TypeLb.TYPE1.getDeltaWidth());
-        lb.setServiceZoneWidth(TypeLb.TYPE1.getServiceZoneWidth());
+        TypeLb type = type1();
+        lb.setType(type.getType());
+        lb.setShelfThick(type.getShelfThick());
+        lb.setDeltaWidth(type.getDeltaWidth());
+        lb.setServiceZoneWidth(type.getServiceZoneWidth());
 
         lb.setDoorThickness(20);
         lb.setDirectionDoorOpening(
@@ -127,10 +137,11 @@ public final class TestDataFactory {
         lbc.setBottomFrame(50);
 
         lbc.setCountCells(3);
-        lbc.setType(TypeLb.TYPE1.name());
-        lbc.setShelfThick(TypeLb.TYPE1.getShelfThick());
-        lbc.setDeltaWidth(TypeLb.TYPE1.getDeltaWidth());
-        lbc.setServiceZoneWidth(TypeLb.TYPE1.getServiceZoneWidth());
+        TypeLb type = type1();
+        lbc.setType(type.getType());
+        lbc.setShelfThick(type.getShelfThick());
+        lbc.setDeltaWidth(type.getDeltaWidth());
+        lbc.setServiceZoneWidth(type.getServiceZoneWidth());
 
         lbc.setDoorThickness(20);
         lbc.setDirectionDoorOpening(
