@@ -6,16 +6,31 @@ import com.lb_calc_web.domain.model.Project;
 import com.lb_calc_web.dto.ALSDTO;
 import com.lb_calc_web.dto.ProjectDTO;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 
+/**
+ * Преобразует Project между доменной моделью и DTO.
+ *
+ * <p>Маппер не содержит бизнес-логики и не работает
+ * с репозиториями или сервисами.</p>
+ */
 public final class ProjectDtoMapper {
 
     private ProjectDtoMapper() {
     }
 
+    /**
+     * Преобразует доменный проект в DTO без восстановления
+     * идентификаторов ALS.
+     *
+     * @param domain доменный проект
+     * @return DTO или {@code null}, если domain равен {@code null}
+     */
     public static ProjectDTO toDto(
             Project domain
     ) {
@@ -25,6 +40,13 @@ public final class ProjectDtoMapper {
         );
     }
 
+    /**
+     * Преобразует доменный проект в DTO.
+     *
+     * @param domain доменный проект
+     * @param alsIdResolver функция получения persistence-id для ALS
+     * @return DTO проекта
+     */
     public static ProjectDTO toDto(
             Project domain,
             Function<ALS, Long> alsIdResolver
@@ -33,20 +55,32 @@ public final class ProjectDtoMapper {
             return null;
         }
 
-        if (alsIdResolver == null) {
-            throw new IllegalArgumentException(
-                    "alsIdResolver не должен быть null"
-            );
-        }
+        Objects.requireNonNull(
+                alsIdResolver,
+                "alsIdResolver не должен быть null"
+        );
 
         ProjectDTO dto = new ProjectDTO();
 
-        dto.setName(domain.getName());
-        dto.setDescription(domain.getDescription());
-        dto.setCompany(domain.getCompany());
+        dto.setName(
+                domain.getName()
+        );
 
-        dto.setCreatedAt(domain.getCreatedAt());
-        dto.setUpdatedAt(domain.getUpdatedAt());
+        dto.setDescription(
+                domain.getDescription()
+        );
+
+        dto.setCompany(
+                domain.getCompany()
+        );
+
+        dto.setCreatedAt(
+                domain.getCreatedAt()
+        );
+
+        dto.setUpdatedAt(
+                domain.getUpdatedAt()
+        );
 
         dto.setCreatedBy(
                 EmployeeDtoMapper.toDto(
@@ -60,25 +94,19 @@ public final class ProjectDtoMapper {
                 )
         );
 
-        List<ALSDTO> alsList =
-                domain.getQuantityALS()
-                        .keySet()
-                        .stream()
-                        .map(
-                                als -> toALSDto(
-                                        als,
-                                        alsIdResolver
-                                )
-                        )
-                        .toList();
+        Map<ALS, Integer> domainQuantity =
+                domain.getQuantityALS();
 
-        dto.setAlsList(alsList);
+        List<ALSDTO> alsList =
+                new ArrayList<>(
+                        domainQuantity.size()
+                );
 
         Map<ALSDTO, Integer> quantityALS =
                 new LinkedHashMap<>();
 
         for (Map.Entry<ALS, Integer> entry :
-                domain.getQuantityALS().entrySet()) {
+                domainQuantity.entrySet()) {
 
             ALSDTO alsDto =
                     toALSDto(
@@ -86,32 +114,37 @@ public final class ProjectDtoMapper {
                             alsIdResolver
                     );
 
+            alsList.add(
+                    alsDto
+            );
+
             quantityALS.put(
                     alsDto,
                     entry.getValue()
             );
         }
 
-        dto.setQuantityALS(quantityALS);
+        dto.setAlsList(
+                alsList
+        );
+
+        dto.setQuantityALS(
+                quantityALS
+        );
 
         return dto;
     }
 
-    private static ALSDTO toALSDto(
-            ALS domain,
-            Function<ALS, Long> alsIdResolver
-    ) {
-        ALSDTO dto =
-                ALSDtoMapper.toDto(domain);
-
-        Long id =
-                alsIdResolver.apply(domain);
-
-        dto.setId(id);
-
-        return dto;
-    }
-
+    /**
+     * Преобразует DTO в доменную модель.
+     *
+     * <p>Количество ALS рассчитывается исключительно
+     * по списку {@code alsList}. Поле {@code quantityALS}
+     * DTO является только представлением для UI.</p>
+     *
+     * @param dto DTO проекта
+     * @return доменный проект или {@code null}
+     */
     public static Project toDomain(
             ProjectDTO dto
     ) {
@@ -142,7 +175,9 @@ public final class ProjectDtoMapper {
                 );
 
         Map<ALS, Integer> quantityALS =
-                toDomainQuantityALS(dto);
+                toDomainQuantityALS(
+                        dto
+                );
 
         return Project.restore(
                 dto.getName(),
@@ -155,6 +190,12 @@ public final class ProjectDtoMapper {
         );
     }
 
+    /**
+     * Преобразует список доменных проектов в DTO.
+     *
+     * @param domains список доменных проектов
+     * @return список DTO
+     */
     public static List<ProjectDTO> toDtoList(
             List<Project> domains
     ) {
@@ -167,6 +208,12 @@ public final class ProjectDtoMapper {
                 .toList();
     }
 
+    /**
+     * Преобразует список DTO в доменные проекты.
+     *
+     * @param dtos список DTO
+     * @return список доменных проектов
+     */
     public static List<Project> toDomainList(
             List<ProjectDTO> dtos
     ) {
@@ -179,46 +226,20 @@ public final class ProjectDtoMapper {
                 .toList();
     }
 
+    /**
+     * Формирует количество ALS по фактическому списку DTO.
+     *
+     * <p>Например:
+     * {@code [A, A, B]} → {@code A=2, B=1}.</p>
+     *
+     * @param dto DTO проекта
+     * @return количество каждого типа ALS
+     */
     private static Map<ALS, Integer> toDomainQuantityALS(
             ProjectDTO dto
     ) {
         Map<ALS, Integer> result =
                 new LinkedHashMap<>();
-
-        Map<ALSDTO, Integer> quantityALS =
-                dto.getQuantityALS();
-
-        if (quantityALS != null
-                && !quantityALS.isEmpty()) {
-
-            for (Map.Entry<ALSDTO, Integer> entry :
-                    quantityALS.entrySet()) {
-
-                if (entry.getKey() == null) {
-                    throw new IllegalArgumentException(
-                            "ALS проекта не должен быть null"
-                    );
-                }
-
-                Integer quantity =
-                        entry.getValue();
-
-                if (quantity == null || quantity < 1) {
-                    throw new IllegalArgumentException(
-                            "Количество ALS должно быть больше нуля"
-                    );
-                }
-
-                result.put(
-                        ALSDtoMapper.toDomain(
-                                entry.getKey()
-                        ),
-                        quantity
-                );
-            }
-
-            return result;
-        }
 
         List<ALSDTO> alsList =
                 dto.getAlsList();
@@ -230,12 +251,15 @@ public final class ProjectDtoMapper {
         for (ALSDTO alsDto : alsList) {
 
             if (alsDto == null) {
-                continue;
+                throw new IllegalArgumentException(
+                        "ALS проекта не должен быть null"
+                );
             }
 
             ALS als =
-                    ALSDtoMapper.toDomain(
-                            alsDto
+                    Objects.requireNonNull(
+                            ALSDtoMapper.toDomain(alsDto),
+                            "ALS не должен быть null"
                     );
 
             result.merge(
@@ -246,5 +270,26 @@ public final class ProjectDtoMapper {
         }
 
         return result;
+    }
+
+    /**
+     * Преобразует ALS в ALSDTO и восстанавливает его id.
+     *
+     * @param domain доменный ALS
+     * @param alsIdResolver функция получения id
+     * @return ALSDTO
+     */
+    private static ALSDTO toALSDto(
+            ALS domain,
+            Function<ALS, Long> alsIdResolver
+    ) {
+        ALSDTO dto =
+                ALSDtoMapper.toDto(domain);
+
+        dto.setId(
+                alsIdResolver.apply(domain)
+        );
+
+        return dto;
     }
 }

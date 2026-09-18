@@ -4,6 +4,8 @@ import com.lb_calc_web.domain.model.ALS;
 import com.lb_calc_web.domain.model.Employee;
 import com.lb_calc_web.domain.model.Project;
 import com.lb_calc_web.dto.ALSDTO;
+import com.lb_calc_web.dto.LBDTO;
+import com.lb_calc_web.dto.LCDTO;
 import com.lb_calc_web.dto.ProjectDTO;
 import com.lb_calc_web.dto.validation.ValidationError;
 import com.lb_calc_web.dto.validation.ValidationResult;
@@ -31,11 +33,14 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.ByteArrayInputStream;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Comparator;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Objects;
+import java.util.Set;
 
 @Service
 public class ProjectService {
@@ -73,19 +78,12 @@ public class ProjectService {
         return projectRepository
                 .findAllWithUsers()
                 .stream()
-                .sorted(
-                        Comparator.comparing(
-                                ProjectEntity::getId
-                        )
-                )
                 .map(this::toDto)
                 .toList();
     }
 
     @Transactional(readOnly = true)
-    public ProjectDTO findById(
-            Long id
-    ) {
+    public ProjectDTO findById(Long id) {
         logger.info(
                 "Поиск проекта(id={})...",
                 id
@@ -95,7 +93,7 @@ public class ProjectService {
                 projectRepository.findById(id)
                         .orElseThrow(
                                 () -> new NoSuchElementException(
-                                        "Проект с id"
+                                        "Проект с id "
                                                 + id
                                                 + " не найден"
                                 )
@@ -104,6 +102,12 @@ public class ProjectService {
         return toDto(entity);
     }
 
+    /**
+     * Создаёт DTO для формы создания проекта.
+     *
+     * Сам проект пока не сохраняется.
+     * Сохраняется только при submit формы.
+     */
     @Transactional
     public ProjectDTO createProject() {
         logger.info("Создание проекта...");
@@ -119,25 +123,18 @@ public class ProjectService {
         ALSDTO als =
                 alsService.createALS();
 
-        project.getAlsList().add(
-                als
-        );
-
-        rebuildQuantityALS(
-                project
-        );
-
-        updateDescription(
-                project
-        );
+        project.getAlsList().add(als);
 
         return project;
     }
 
+    /**
+     * Инициализация нового проекта.
+     */
     public ProjectDTO initProject(
             String company
     ) {
-        Employee employee =
+        Employee currentEmployee =
                 EmployeeDtoMapper.toDomain(
                         employeeService.getCurrentEmployee()
                 );
@@ -150,7 +147,7 @@ public class ProjectService {
                         company,
                         company,
                         now,
-                        employee
+                        currentEmployee
                 );
 
         ProjectDTO dto =
@@ -167,10 +164,29 @@ public class ProjectService {
         return dto;
     }
 
+    /**
+     * Сохраняет проект.
+     *
+     * Общая схема:
+     *
+     * 1. Загружаем существующий проект, если это update.
+     * 2. Устанавливаем серверные metadata.
+     * 3. Сохраняем ALS и получаем реальные ID.
+     * 4. Валидируем проект.
+     * 5. DTO -> domain.
+     * 6. Разрешаем ALS -> ALSEntity.
+     * 7. Domain -> ProjectEntity.
+     * 8. Сохраняем ProjectEntity.
+     */
     @Transactional
     public ProjectDTO saveProject(
             ProjectDTO dto
     ) {
+        Objects.requireNonNull(
+                dto,
+                "Проект не должен быть null"
+        );
+
         logger.info(
                 "Сохранение проекта(id={}, name={})...",
                 dto.getId(),
@@ -188,18 +204,12 @@ public class ProjectService {
         );
 
         List<ALSDTO> savedALS =
-                saveALS(dto.getAlsList());
+                saveALS(
+                        dto.getAlsList()
+                );
 
         dto.setAlsList(
                 savedALS
-        );
-
-        rebuildQuantityALS(
-                dto
-        );
-
-        updateDescription(
-                dto
         );
 
         validateProject(
@@ -211,6 +221,11 @@ public class ProjectService {
                         dto
                 );
 
+        Map<ALS, ALSEntity> alsEntities =
+                resolveALSEntities(
+                        savedALS
+                );
+
         ProjectEntity entity;
 
         if (existing == null) {
@@ -218,7 +233,7 @@ public class ProjectService {
                     ProjectEntityMapper.toEntity(
                             domain,
                             this::resolveEmployee,
-                            this::resolveALS
+                            alsEntities
                     );
         } else {
             entity = existing;
@@ -227,7 +242,7 @@ public class ProjectService {
                     domain,
                     entity,
                     this::resolveEmployee,
-                    this::resolveALS
+                    alsEntities
             );
         }
 
@@ -257,17 +272,16 @@ public class ProjectService {
                 projectRepository.findById(id)
                         .orElseThrow(
                                 () -> new NoSuchElementException(
-                                        "Проект с id"
+                                        "Проект с id "
                                                 + id
                                                 + " не найден"
                                 )
                         );
 
-        projectRepository.delete(
-                entity
-        );
+        projectRepository.delete(entity);
     }
 
+    @Transactional(readOnly = true)
     public ByteArrayInputStream exportToExcel(
             ProjectDTO projectDTO
     ) {
@@ -280,6 +294,9 @@ public class ProjectService {
         );
     }
 
+    /**
+     * Добавляет новый ALS в проект.
+     */
     @Transactional
     public ProjectDTO addNewALSandSaveProject(
             Long projectId
@@ -290,16 +307,14 @@ public class ProjectService {
         ALSDTO als =
                 alsService.createALS();
 
-        project.getAlsList().add(
-                als
-        );
-
-        rebuildQuantityALS(project);
-        updateDescription(project);
+        project.getAlsList().add(als);
 
         return saveProject(project);
     }
 
+    /**
+     * Удаляет ALS из проекта.
+     */
     @Transactional
     public ProjectDTO deleteALSandSaveProject(
             Long projectId,
@@ -308,46 +323,165 @@ public class ProjectService {
         ProjectDTO project =
                 findById(projectId);
 
+        findALSInProject(
+                projectId,
+                alsId
+        );
+
         boolean removed =
                 project.getAlsList()
                         .removeIf(
                                 als ->
-                                        als.getId() != null
-                                                && als.getId().equals(alsId)
+                                        als != null
+                                                && Objects.equals(
+                                                als.getId(),
+                                                alsId
+                                        )
                         );
 
         if (!removed) {
             throw new NoSuchElementException(
-                    "ALS с id"
+                    "ALS с id "
                             + alsId
                             + " не найден в проекте "
                             + projectId
             );
         }
 
-        rebuildQuantityALS(project);
-        updateDescription(project);
-
         return saveProject(project);
     }
 
+    /**
+     * Находит ALS внутри конкретного проекта.
+     */
+    @Transactional(readOnly = true)
+    public ALSDTO findALSInProject(
+            Long projectId,
+            Long alsId
+    ) {
+        ProjectDTO project =
+                findById(projectId);
+
+        return project.getAlsList()
+                .stream()
+                .filter(
+                        als ->
+                                als != null
+                                        && Objects.equals(
+                                        als.getId(),
+                                        alsId
+                                )
+                )
+                .findFirst()
+                .orElseThrow(
+                        () -> new NoSuchElementException(
+                                "ALS с id "
+                                        + alsId
+                                        + " не найден в проекте "
+                                        + projectId
+                        )
+                );
+    }
+
+    /**
+     * Находит LC внутри конкретного ALS конкретного проекта.
+     */
+    @Transactional(readOnly = true)
+    public LCDTO findLCInProject(
+            Long projectId,
+            Long alsId,
+            Long lcId
+    ) {
+        ALSDTO als =
+                findALSInProject(
+                        projectId,
+                        alsId
+                );
+
+        LCDTO lc =
+                als.getLC();
+
+        if (lc == null
+                || !Objects.equals(
+                lc.getId(),
+                lcId
+        )) {
+            throw new NoSuchElementException(
+                    "LC с id "
+                            + lcId
+                            + " не найден в ALS "
+                            + alsId
+            );
+        }
+
+        return lc;
+    }
+
+    /**
+     * Находит LB внутри конкретного ALS конкретного проекта.
+     */
+    @Transactional(readOnly = true)
+    public LBDTO findLBInProject(
+            Long projectId,
+            Long alsId,
+            Long lbId
+    ) {
+        ALSDTO als =
+                findALSInProject(
+                        projectId,
+                        alsId
+                );
+
+        return als.getLbList()
+                .stream()
+                .filter(
+                        lb ->
+                                lb != null
+                                        && Objects.equals(
+                                        lb.getId(),
+                                        lbId
+                                )
+                )
+                .findFirst()
+                .orElseThrow(
+                        () -> new NoSuchElementException(
+                                "LB с id "
+                                        + lbId
+                                        + " не найден в ALS "
+                                        + alsId
+                        )
+                );
+    }
+
+    /**
+     * Заменяет ALS внутри проекта и сохраняет проект.
+     */
     @Transactional
     public ALSDTO replaceALSandSaveProject(
             ProjectDTO project,
             ALSDTO als,
             Long alsId
     ) {
+        Objects.requireNonNull(
+                project,
+                "Проект не должен быть null"
+        );
+
+        Objects.requireNonNull(
+                als,
+                "ALS не должен быть null"
+        );
+
         logger.info(
                 "Замена ALS(id={}) в проекте(id={})...",
                 alsId,
                 project.getId()
         );
 
-        boolean replaced =
-                false;
-
         List<ALSDTO> alsList =
                 project.getAlsList();
+
+        boolean replaced = false;
 
         for (int i = 0;
              i < alsList.size();
@@ -356,8 +490,12 @@ public class ProjectService {
             ALSDTO current =
                     alsList.get(i);
 
-            if (current.getId() != null
-                    && current.getId().equals(alsId)) {
+            if (current != null
+                    && Objects.equals(
+                    current.getId(),
+                    alsId
+            )) {
+                als.setId(alsId);
 
                 alsList.set(
                         i,
@@ -371,27 +509,33 @@ public class ProjectService {
 
         if (!replaced) {
             throw new NoSuchElementException(
-                    "ALS с id"
+                    "ALS с id "
                             + alsId
-                            + " не найден в проекте"
+                            + " не найден в проекте "
+                            + project.getId()
             );
         }
-
-        rebuildQuantityALS(project);
-        updateDescription(project);
 
         saveProject(project);
 
         return als;
     }
 
+    /**
+     * Заменяет LC в ALS и сохраняет проект.
+     */
     @Transactional
     public ALSDTO replaceLCandSaveProject(
             ProjectDTO project,
             ALSDTO als,
             Long alsId,
-            com.lb_calc_web.dto.LCDTO lc
+            LCDTO lc
     ) {
+        Objects.requireNonNull(
+                lc,
+                "LC не должен быть null"
+        );
+
         ALSDTO updatedALS =
                 alsService.replaceLCandSaveALS(
                         als,
@@ -407,6 +551,55 @@ public class ProjectService {
         return updatedALS;
     }
 
+    /**
+     * Сохраняет LC конкретного ALS конкретного проекта.
+     */
+    @Transactional
+    public LCDTO saveLCAtProject(
+            Long projectId,
+            Long alsId,
+            Long lcId,
+            LCDTO lc
+    ) {
+        Objects.requireNonNull(
+                lc,
+                "LC не должен быть null"
+        );
+
+        ProjectDTO project =
+                findById(projectId);
+
+        ALSDTO als =
+                findALSInProject(
+                        projectId,
+                        alsId
+                );
+
+        findLCInProject(
+                projectId,
+                alsId,
+                lcId
+        );
+
+        lc.setId(lcId);
+
+        ALSDTO updatedALS =
+                replaceLCandSaveProject(
+                        project,
+                        als,
+                        alsId,
+                        lc
+                );
+
+        return Objects.requireNonNull(
+                updatedALS.getLC(),
+                "После сохранения LC отсутствует в ALS"
+        );
+    }
+
+    /**
+     * Добавляет LB в конкретный ALS конкретного проекта.
+     */
     @Transactional
     public ALSDTO addLBAtProject(
             Long projectId,
@@ -414,6 +607,11 @@ public class ProjectService {
     ) {
         ProjectDTO project =
                 findById(projectId);
+
+        findALSInProject(
+                projectId,
+                alsId
+        );
 
         ALSDTO als =
                 alsService.addNewLBandSaveALS(
@@ -429,6 +627,110 @@ public class ProjectService {
         return als;
     }
 
+    /**
+     * Сохраняет LB конкретного ALS конкретного проекта.
+     */
+    @Transactional
+    public LBDTO saveLBAtProject(
+            Long projectId,
+            Long alsId,
+            Long lbId,
+            LBDTO lb
+    ) {
+        Objects.requireNonNull(
+                lb,
+                "LB не должен быть null"
+        );
+
+        ProjectDTO project =
+                findById(projectId);
+
+        ALSDTO als =
+                findALSInProject(
+                        projectId,
+                        alsId
+                );
+
+        findLBInProject(
+                projectId,
+                alsId,
+                lbId
+        );
+
+        lb.setId(lbId);
+
+        List<LBDTO> lbList =
+                new ArrayList<>(
+                        als.getLbList()
+                );
+
+        boolean replaced = false;
+
+        for (int i = 0;
+             i < lbList.size();
+             i++) {
+
+            LBDTO current =
+                    lbList.get(i);
+
+            if (current != null
+                    && Objects.equals(
+                    current.getId(),
+                    lbId
+            )) {
+                lbList.set(
+                        i,
+                        lb
+                );
+
+                replaced = true;
+                break;
+            }
+        }
+
+        if (!replaced) {
+            throw new NoSuchElementException(
+                    "LB с id "
+                            + lbId
+                            + " не найден в ALS "
+                            + alsId
+            );
+        }
+
+        als.setLbList(lbList);
+
+        ALSDTO updatedALS =
+                alsService.saveALS(als);
+
+        replaceALSandSaveProject(
+                project,
+                updatedALS,
+                alsId
+        );
+
+        return updatedALS.getLbList()
+                .stream()
+                .filter(
+                        value ->
+                                value != null
+                                        && Objects.equals(
+                                        value.getId(),
+                                        lbId
+                                )
+                )
+                .findFirst()
+                .orElseThrow(
+                        () -> new NoSuchElementException(
+                                "После сохранения LB с id "
+                                        + lbId
+                                        + " не найден"
+                        )
+                );
+    }
+
+    /**
+     * Удаляет LB из конкретного ALS конкретного проекта.
+     */
     @Transactional
     public ALSDTO deleteLBatProject(
             Long projectId,
@@ -437,6 +739,12 @@ public class ProjectService {
     ) {
         ProjectDTO project =
                 findById(projectId);
+
+        findLBInProject(
+                projectId,
+                alsId,
+                lbId
+        );
 
         ALSDTO als =
                 alsService.deleteLBandSaveALS(
@@ -463,13 +771,25 @@ public class ProjectService {
         return projectRepository.findById(id)
                 .orElseThrow(
                         () -> new NoSuchElementException(
-                                "Проект с id"
+                                "Проект с id "
                                         + id
                                         + " не найден"
                         )
                 );
     }
 
+    /**
+     * Metadata проекта контролируются сервером.
+     *
+     * CREATE:
+     * - createdBy = текущий сотрудник
+     * - createdAt = текущая дата
+     *
+     * UPDATE:
+     * - createdBy/createdAt берутся из БД
+     * - updatedBy = текущий сотрудник
+     * - updatedAt = текущая дата
+     */
     private void prepareMetadata(
             ProjectDTO dto,
             ProjectEntity existing
@@ -487,17 +807,13 @@ public class ProjectService {
 
         if (existing == null) {
 
-            if (dto.getCreatedBy() == null) {
-                dto.setCreatedBy(
-                        currentEmployee
-                );
-            }
+            dto.setCreatedBy(
+                    currentEmployee
+            );
 
-            if (dto.getCreatedAt() == null) {
-                dto.setCreatedAt(
-                        LocalDate.now()
-                );
-            }
+            dto.setCreatedAt(
+                    LocalDate.now()
+            );
 
             if (dto.getCompany() == null
                     || dto.getCompany().isBlank()) {
@@ -519,42 +835,48 @@ public class ProjectService {
                 );
             }
 
-        } else {
+            return;
+        }
 
-            if (dto.getCreatedBy() == null) {
-                dto.setCreatedBy(
-                        EmployeeDtoMapper.toDto(
-                                EmployeeEntityMapper.toDomain(
-                                        existing.getCreatedBy()
-                                )
+        /*
+         * При update эти поля не должны приходить
+         * от клиента как источник истины.
+         */
+        dto.setCreatedBy(
+                EmployeeDtoMapper.toDto(
+                        EmployeeEntityMapper.toDomain(
+                                existing.getCreatedBy()
                         )
-                );
-            }
+                )
+        );
 
-            if (dto.getCreatedAt() == null) {
-                dto.setCreatedAt(
-                        existing.getCreatedAt()
-                );
-            }
+        dto.setCreatedAt(
+                existing.getCreatedAt()
+        );
 
-            if (dto.getCompany() == null
-                    || dto.getCompany().isBlank()) {
+        if (dto.getCompany() == null
+                || dto.getCompany().isBlank()) {
 
-                dto.setCompany(
-                        existing.getCompany()
-                );
-            }
+            dto.setCompany(
+                    existing.getCompany()
+            );
+        }
 
-            if (dto.getName() == null
-                    || dto.getName().isBlank()) {
+        if (dto.getName() == null
+                || dto.getName().isBlank()) {
 
-                dto.setName(
-                        existing.getName()
-                );
-            }
+            dto.setName(
+                    existing.getName()
+            );
         }
     }
 
+    /**
+     * Сохраняет все ALS, входящие в проект.
+     *
+     * После сохранения DTO обязательно получают
+     * актуальные persistence ID.
+     */
     private List<ALSDTO> saveALS(
             List<ALSDTO> source
     ) {
@@ -568,8 +890,11 @@ public class ProjectService {
                 );
 
         for (ALSDTO als : source) {
+
             if (als == null) {
-                continue;
+                throw new IllegalArgumentException(
+                        "ALS проекта не должен быть null"
+                );
             }
 
             result.add(
@@ -582,56 +907,87 @@ public class ProjectService {
         return result;
     }
 
-    private void rebuildQuantityALS(
-            ProjectDTO dto
+    /**
+     * Разрешает ALS из DTO в ALSEntity.
+     *
+     * Для связанной сущности нам нужен именно persistence ID,
+     * поэтому здесь нет сравнения ALS по конфигурации.
+     */
+    private Map<ALS, ALSEntity> resolveALSEntities(
+            List<ALSDTO> savedALS
     ) {
-        Map<ALSDTO, Integer> quantity =
+        Map<ALS, ALSEntity> result =
                 new LinkedHashMap<>();
 
-        if (dto.getAlsList() != null) {
-            for (ALSDTO als :
-                    dto.getAlsList()) {
+        if (savedALS == null
+                || savedALS.isEmpty()) {
+            return result;
+        }
 
-                if (als == null) {
-                    continue;
-                }
+        Set<Long> ids =
+                new LinkedHashSet<>();
 
-                quantity.merge(
-                        als,
-                        1,
-                        Integer::sum
+        for (ALSDTO dto : savedALS) {
+
+            if (dto == null) {
+                throw new IllegalArgumentException(
+                        "ALS проекта не должен быть null"
+                );
+            }
+
+            Long id =
+                    dto.getId();
+
+            if (id == null || id <= 0) {
+                throw new IllegalStateException(
+                        "После сохранения ALS не получил корректный id"
+                );
+            }
+
+            ids.add(id);
+        }
+
+        List<ALSEntity> entities =
+                alsRepository.findAllById(ids);
+
+        Map<Long, ALSEntity> entitiesById =
+                new HashMap<>();
+
+        for (ALSEntity entity : entities) {
+            entitiesById.put(
+                    entity.getId(),
+                    entity
+            );
+        }
+
+        for (Long id : ids) {
+
+            if (!entitiesById.containsKey(id)) {
+                throw new NoSuchElementException(
+                        "ALS с id "
+                                + id
+                                + " не найдена в БД"
                 );
             }
         }
 
-        dto.setQuantityALS(
-                quantity
-        );
-    }
+        for (ALSDTO dto : savedALS) {
 
-    private void updateDescription(
-            ProjectDTO dto
-    ) {
-        StringBuilder description =
-                new StringBuilder();
+            ALS domain =
+                    ALSDtoMapper.toDomain(dto);
 
-        for (Map.Entry<ALSDTO, Integer> entry :
-                dto.getQuantityALS().entrySet()) {
+            ALSEntity entity =
+                    entitiesById.get(
+                            dto.getId()
+                    );
 
-            description
-                    .append(
-                            entry.getKey().getName()
-                    )
-                    .append(" - ")
-                    .append(
-                            entry.getValue()
-                    )
-                    .append(" шт.\n");
+            result.put(
+                    domain,
+                    entity
+            );
         }
 
-        dto.setDescription(
-                description.toString()
-        );
+        return result;
     }
 
     private void validateProject(
@@ -655,27 +1011,37 @@ public class ProjectService {
                         )
                         .toList();
 
-        if (!errors.isEmpty()) {
-
-            ValidationResult combined =
-                    new ValidationResult(
-                            "Project",
-                            dto.getId()
-                    );
-
-            errors.forEach(
-                    combined::addError
-            );
-
-            throw new ValidationSizeException(
-                    combined
-            );
+        if (errors.isEmpty()) {
+            return;
         }
+
+        ValidationResult combined =
+                new ValidationResult(
+                        "Project",
+                        dto.getId()
+                );
+
+        errors.forEach(
+                combined::addError
+        );
+
+        throw new ValidationSizeException(
+                combined
+        );
     }
 
+    /**
+     * DTO/domain Employee -> JPA EmployeeEntity.
+     */
     private EmployeeEntity resolveEmployee(
             Employee domain
     ) {
+        if (domain == null) {
+            throw new IllegalArgumentException(
+                    "Employee не должен быть null"
+            );
+        }
+
         return employeeRepository
                 .findByEmail(
                         domain.getEmail()
@@ -689,40 +1055,9 @@ public class ProjectService {
                 );
     }
 
-    private ALSEntity resolveALS(
-            ALS domain
-    ) {
-        List<ALSEntity> entities =
-                alsRepository.findAll();
-
-        for (ALSEntity entity :
-                entities) {
-
-            try {
-                ALS existing =
-                        ALSEntityMapper.toDomain(
-                                entity
-                        );
-
-                if (domain.equals(existing)) {
-                    return entity;
-                }
-
-            } catch (RuntimeException e) {
-
-                logger.warn(
-                        "Не удалось сравнить ALS id={}",
-                        entity.getId(),
-                        e
-                );
-            }
-        }
-
-        throw new IllegalStateException(
-                "ALS для проекта не найдена в БД"
-        );
-    }
-
+    /**
+     * Entity -> DTO.
+     */
     private ProjectDTO toDto(
             ProjectEntity entity
     ) {

@@ -1,160 +1,266 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:th="http://www.thymeleaf.org">
+
 <head>
-    <meta charset="utf-8"/>
-    <title>LB_Calc_WEB</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
-          integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
+    <meta charset="UTF-8">
+    <title>LC проекта</title>
+
+    <link rel="stylesheet"
+          href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+          integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkJwJ8ERdknLPMO"
           crossorigin="anonymous">
 </head>
-<body>
-<div th:replace="~{header :: header}"></div>
-<div class="container">
-    <br/>
-    <form action="#" th:action="@{/projects/{projectId}/alss/{alsId}/lcs/{lcId}/save
-    (projectId=${project.getId()},alsId=${als.getId()},lcId=${als.getLC().getId()})}"
-          th:object="${lc}" method="post">
-        <p  th:each="erorr, item: ${errors}" class="alert alert-danger"
-            th:text="${item.current}"></p>
-         <button type="submit" class="btn btn-primary btn-sm mb-3">Сохранить Модуль управления</button>
-        <a th:href="@{/projects/{projectId}/alss/{alsId} (projectId=${project.getId()},alsId=${als.getId()})}"
-           class="btn btn-primary btn-sm mb-3"
-           th:text="'Back to #'+${als.id}+'-'+${als.name}">Back to ALS</a>
-        <a th:href="@{/projects/{projectId} (projectId=${project.getId()})}"
-           class="btn btn-primary btn-sm mb-3"
-           th:text="'Back to #'+${project.id}+'-'+${project.name}">Back to Project </a>
 
-         <br/>
-        <h4 th:text="*{description}">Модуль управления</h4>
-        <label hidden="hidden">
-            <input size="180"  type="text" th:field="*{description}" readonly="readonly">
-        </label>
-        <table class="table table-striped table-responsive-md">
-            <tr>
-                <th>ID</th>
-                <td>
-                    <label>
-                        <input type="number" size="3" th:field="*{id}" readonly="readonly">
-                    </label>
-                </td>
-                <td rowspan="13">
-                    <div class="container-fluid">
-                        <img class="img-thumbnail"
-                             th:src="'data:image/png;base64,'+${lc.getStringLCImage()}"
-                             alt="LC Image">
+<body>
+
+<div th:replace="~{header :: header}"></div>
+
+<div class="container-fluid">
+
+    <br>
+
+    <form th:action="@{/projects/{projectId}/alss/{alsId}/lcs/{lcId}/save(
+                projectId=${projectId},
+                alsId=${alsId},
+                lcId=${lcId})}"
+          th:object="${lc}"
+          method="post">
+
+        <div class="mb-3">
+
+            <button type="submit"
+                    class="btn btn-primary btn-sm">
+                Сохранить LC
+            </button>
+
+            <a th:href="@{/projects/{projectId}/alss/{alsId}(
+                        projectId=${projectId},
+                        alsId=${alsId})}"
+               class="btn btn-secondary btn-sm">
+                Назад к ALS
+            </a>
+
+            <a th:href="@{/projects/{projectId}(
+                        projectId=${projectId})}"
+               class="btn btn-secondary btn-sm">
+                Назад к проекту
+            </a>
+
+        </div>
+
+        <div th:if="${errors != null}"
+             class="alert alert-danger">
+
+            <div th:each="error : ${errors}"
+                 th:text="${error}">
+            </div>
+
+        </div>
+
+        <div class="card">
+
+            <div class="card-header">
+
+                <h3 th:text="${lc.description}">
+                    Модуль управления
+                </h3>
+
+            </div>
+
+            <div class="card-body">
+
+                <div class="row">
+
+                    <div class="col-md-2">
+                        <label>ID</label>
+
+                        <input type="number"
+                               class="form-control"
+                               th:field="*{id}"
+                               readonly>
                     </div>
-                </td>
-            </tr>
-            <tr>
-                <th>Name</th>
-                <td>
-                    <label>
-                        <input  size="30" type="text" height="" th:field="*{name}" readonly="readonly">
-                    </label>
-                </td>
-            </tr>
-            <tr>
-                <th>Height</th>
-                <td>
-                    <label>
-                        <input type="number" size="4" th:field="*{height}" readonly>
-                    </label>
-                </td>
-            </tr>
-            <tr>
-                <th>Width</th>
-                <td>
-                    <label>
-                        <input type="number" size="4" th:field="*{width}" readonly="readonly">
-                    </label>
-                </td>
-            </tr>
-            <tr>
-                <th>Depth</th>
-                <td>
-                    <label>
-                        <input type="number" size="4" th:field="*{depth}" readonly="readonly">
-                    </label>
-                </td>
-            </tr>
-            <tr>
-                <th>UpperFrame</th>
-                <td>
-                    <label>
-                        <input type="number" size="4" th:field="*{upperFrame}" readonly="readonly">
-                    </label>
-                </td>
-            </tr>
-            <tr>
-                <th>BottomFrame</th>
-                <td>
-                    <label>
-                        <input type="number" size="4" th:field="*{bottomFrame}" readonly="readonly">
-                    </label>
-                </td>
-            </tr>
-            <tr>
-                <th>ColorBody</th>
-                <td>
-                    <label>
-                        <input type="text" th:field="*{colorBody}"
-                               readonly="readonly">
-                    </label>
-                </td>
-            </tr>
-            <tr>
-                <th>Display</th>
-                <td>
-                    <label>
-                        <select th:field="*{display}">
-                            <option th:each="display:${displayList}" th:value="${display}" th:text="${display}">
+
+                    <div class="col-md-5">
+                        <label>Название</label>
+
+                        <input type="text"
+                               class="form-control"
+                               th:field="*{name}"
+                               readonly>
+                    </div>
+
+                    <div class="col-md-5">
+                        <label>Цвет корпуса</label>
+
+                        <select class="form-control"
+                                th:field="*{colorBody}">
+
+                            <option th:each="color : ${colorsList}"
+                                    th:value="${color}"
+                                    th:text="${color}">
                             </option>
+
                         </select>
-                    </label>
-                </td>
-            </tr>
-            <tr>
-                <th>Payment</th>
-                <td>
-                    <label>
-                        <select th:field="*{payment}">
-                            <option th:each="payment:${paymentList}" th:value="${payment}" th:text="${payment}">
+                    </div>
+
+                </div>
+
+                <div class="row mt-3">
+
+                    <div class="col-md-3">
+                        <label>Display</label>
+
+                        <select class="form-control"
+                                th:field="*{display}">
+
+                            <option th:each="display : ${displayList}"
+                                    th:value="${display}"
+                                    th:text="${display}">
                             </option>
+
                         </select>
-                    </label>
-                </td>
-            </tr>
-            <tr>
-                <th>Printer</th>
-                <td>
-                    <label>
-                        <input type="checkbox" size="4" th:field="*{printer}">
-                    </label>
-                </td>
-            </tr>
-            <tr>
-                <th>BarReader</th>
-                <td>
-                    <label>
-                        <select th:field="*{barReader}">
-                            <option th:each="barReader:${barReaderList}" th:value="${barReader}" th:text="${barReader}">
+                    </div>
+
+                    <div class="col-md-3">
+                        <label>Оплата</label>
+
+                        <select class="form-control"
+                                th:field="*{payment}">
+
+                            <option th:each="payment : ${paymentList}"
+                                    th:value="${payment}"
+                                    th:text="${payment}">
                             </option>
+
                         </select>
-                    </label>
-                </td>
-            </tr>
-            <tr>
-                <th>RfidReader</th>
-                <td>
-                    <label>
-                        <input type="checkbox" size="4" th:field="*{rfidReader}">
-                    </label>
-                </td>
-            </tr>
-        </table>
-</form>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label>Barcode Reader</label>
+
+                        <select class="form-control"
+                                th:field="*{barReader}">
+
+                            <option th:each="reader : ${barReaderList}"
+                                    th:value="${reader}"
+                                    th:text="${reader}">
+                            </option>
+
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
+
+                        <label class="d-block">
+                            Printer
+                        </label>
+
+                        <input type="checkbox"
+                               th:field="*{printer}">
+
+                    </div>
+
+                </div>
+
+                <div class="row mt-3">
+
+                    <div class="col-md-3">
+
+                        <label>
+                            RFID Reader
+                        </label>
+
+                        <input type="checkbox"
+                               th:field="*{rfidReader}">
+
+                    </div>
+
+                    <div class="col-md-3">
+                        <label>Цвет дверей</label>
+
+                        <select class="form-control"
+                                th:field="*{colorDoor}">
+
+                            <option th:each="color : ${colorsList}"
+                                    th:value="${color}"
+                                    th:text="${color}">
+                            </option>
+
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label>Высота</label>
+
+                        <input type="number"
+                               class="form-control"
+                               th:field="*{height}"
+                               readonly>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label>Ширина</label>
+
+                        <input type="number"
+                               class="form-control"
+                               th:field="*{width}"
+                               readonly>
+                    </div>
+
+                </div>
+
+                <input type="hidden"
+                       th:field="*{description}">
+
+                <input type="hidden"
+                       th:field="*{depth}">
+
+                <input type="hidden"
+                       th:field="*{upperFrame}">
+
+                <input type="hidden"
+                       th:field="*{bottomFrame}">
+
+                <div class="row mt-3">
+
+                    <div class="col-md-6">
+
+                        <label>
+                            Способы доступа
+                        </label>
+
+                        <input type="text"
+                               class="form-control"
+                               th:value="${#strings.listJoin(lc.accessMethods, ', ')}"
+                               readonly>
+
+                    </div>
+
+                    <div class="col-md-6">
+
+                        <label>
+                            Опции печати
+                        </label>
+
+                        <input type="text"
+                               class="form-control"
+                               th:value="${#strings.listJoin(lc.printOptions, ', ')}"
+                               readonly>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </form>
+
 </div>
+
 <div th:replace="~{footer :: footer}"></div>
+
 </body>
 </html>

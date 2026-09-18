@@ -1,669 +1,564 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:th="http://www.thymeleaf.org">
+
 <head>
-    <meta charset="utf-8"/>
-    <title>LB_Calc_WEB</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
-          integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
+    <meta charset="UTF-8">
+    <title>Проект</title>
+
+    <link rel="stylesheet"
+          href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+          integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkJwJ8ERdknLPMO"
           crossorigin="anonymous">
 </head>
-<body>
-<header th:replace="~{header :: header}"></header>
-<div class="container-fluid">
-    <br/>
-    <form  th:action="@{/projects/{id}/save (id=${project.getId()})}"
-          th:object="${project}" method="POST">
-        <button type="submit" class="btn btn-primary btn-sm mb-3">Сохранить проект</button>
-        <a th:href="@{'/projects'}" class="btn btn-primary btn-sm mb-3">Back to Project list </a>
-        <a th:href="@{/projects/{id}/savetoexcel (id=${project.getId()})}" class="btn btn-primary btn-sm mb-3">Save to Excel</a>
-        <br/>
-        <div>
-            <h2 th:text="*{name}">Проект</h2>
-            <table border="1" class="table table-striped table-responsive-md">
-                <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Company</th>
-                    <th>Description</th>
-                    <th>CreatedBy</th>
-                    <th>CreatedAt</th>
-                    <th>UpdateBy</th>
-                    <th>UpdatedAt</th>
-                    <th>Action</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr>
-                    <td>
-                        <label>
-                            <input size="3" type="number" th:field="*{id}" readonly="readonly">
-                        </label>
-                    </td>
-                    <td>
-                        <label>
-                            <input type="text" th:field="*{company}">
-                        </label>
-                    </td>
-                    <td>
-                        <label>
-                            <input type="text" size="50" th:field="*{description}" readonly="readonly">
-                        </label>
-                    </td>
-                    <td>
-                        <label>
-                            <a th:text="*{createdBy.getUsername()}" th:href="@{'/profiles/'+*{createdBy.getId()}}" ></a>
-                        </label>
-                        <label hidden="hidden">
-                            <input type="number" th:field="*{createdBy.id}" readonly="readonly">
-                        </label>
-                        <label hidden="hidden">
-                            <input type="text" th:field="*{createdBy.lastName}" readonly="readonly">
-                        </label>
-                        <label hidden="hidden">
-                            <input type="text" th:field="*{createdBy.firstName}" readonly="readonly">
-                        </label>
-                        <label hidden="hidden">
-                            <input type="email" th:field="*{createdBy.email}" readonly="readonly">
-                        </label>
-                    </td>
-                    <td>
-                        <label>
-                            <input type="text" th:field="*{createdAt}" readonly="readonly">
-                        </label>
-                    </td>
-                    <td>
-                        <label>
-                            <a th:text="*{updatedBy.username}" th:href="@{'/profiles/'+*{updatedBy.getId()}}" ></a>
-                        </label>
-                        <label hidden="hidden">
-                            <input type="number" th:field="*{updatedBy.id}" readonly="readonly">
-                        </label>
-                        <label hidden="hidden">
-                            <input type="text" th:field="*{updatedBy.lastName}" readonly="readonly">
-                        </label>
-                        <label hidden="hidden">name=
-                            <input type="text" th:field="*{updatedBy.firstName}" readonly="readonly">
-                        </label>
-                        <label hidden="hidden">
-                            <input type="email" th:field="*{updatedBy.email}" readonly="readonly">
-                        </label>
-                    </td>
-                    <td>
-                        <label>
-                            <input type="text" th:field="*{updatedAt}" readonly="readonly">
-                        </label>
-                    </td>
-                    <td hidden>
-                        <label>
-                            <input type="hidden" th:field="*{name}" readonly="readonly">
-                        </label>
-                    </td>
 
-                    <td>
-                        <button type="submit"
-                                class="btn btn-primary"
-                                th:formaction="@{/projects/{id}/addALS (id=${project.id})}">
-                            Add ALS
-                        </button>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
+<body>
+
+<div th:replace="~{header :: header}"></div>
+
+<div class="container-fluid">
+
+    <br>
+
+    <form th:action="@{/projects/{id}/save(id=${project.id})}"
+          th:object="${project}"
+          method="post">
+
+        <div class="mb-3">
+
+            <button type="submit"
+                    class="btn btn-primary btn-sm">
+                Сохранить проект
+            </button>
+
+            <a th:href="@{/projects}"
+               class="btn btn-secondary btn-sm">
+                К списку проектов
+            </a>
+
+            <a th:href="@{/projects/{id}/savetoexcel(id=${project.id})}"
+               class="btn btn-success btn-sm">
+                Excel
+            </a>
+
+            <button type="submit"
+                    class="btn btn-primary btn-sm"
+                    th:formaction="@{/projects/{id}/addALS(id=${project.id})}">
+                Добавить ALS
+            </button>
+
         </div>
-        <div th:each="als, item: ${project.alsList}">
-            <div>
+
+        <div class="card mb-4">
+
+            <div class="card-header">
+                <h2 th:text="${project.name}">
+                    Проект
+                </h2>
+            </div>
+
+            <div class="card-body">
 
                 <div class="row">
-                    <div class="col">
-                        <p class="alert alert-danger"
-                           th:if="${projectErrors}!=null
-                            and !${projectErrors[__${item.index}__].get(0).get(0).isEmpty()}"
-                           th:text="${projectErrors[__${item.index}__].get(0)}"></p>
-                        <table border="1" class="table table-striped table-responsive-md">
-                            <tr>
-                                <th colspan="2">
-                                    <h4 th:text="'#'+${item.index+1}+'-'+${als.name}">Автоматическая камера
-                                        хранения</h4>
-                                </th>
-                            </tr>
-                            <tr>
-                                <th>ID</th>
-                                <td>
-                                    <label>
-                                        <input type="number" size="3" th:name="|alsList[${item.index}].id|"
-                                               th:value="${als.getId()}"
-                                               readonly="readonly"/>
-                                    </label>
-                                </td>
 
-                            </tr>
-                            <tr>
-                                <th>Name</th>
-                                <td>
-                                    <label>
-                                        <input th:size="30" th:name="|alsList[${item.index}].name|"
-                                               th:value="${als.getName()}"
-                                               readonly="readonly">
-                                    </label>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th hidden="hidden">Description</th>
-                                <td hidden="hidden">
-                                    <label>
-                                        <input th:name="|alsList[${item.index}].description|"
-                                               th:value="${als.getDescription()}"
-                                               readonly="readonly">
-                                    </label>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>PositionLC</th>
-                                <td>
-                                    <label>
-                                        <select th:field="*{alsList[__${item.index}__].positionLC}">
-                                            <option th:each="positionLC:${positionLCList}"
-                                                    th:value="${positionLC}"
-                                                    th:text="${positionLC}">
-                                            </option>
-                                        </select>
-                                    </label>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>CountCells</th>
-                                <td>
-                                    <label>
-                                        <input type="number" size="3" th:name="|alsList[${item.index}].countCells|"
-                                               th:value="${als.getCountCells()}"
-                                               readonly="readonly">
-                                    </label>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>Height</th>
-                                <td>
-                                    <label>
-                                        <input size="4" type="number" th:name="|alsList[${item.index}].height|"
-                                               th:value="${als.getHeight()}">
-                                    </label>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>Width</th>
-                                <td>
-                                    <label>
-                                        <input size="4" type="number" th:name="|alsList[${item.index}].width|"
-                                               th:value="${als.getWidth()}"
-                                               readonly="readonly">
-                                    </label>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>Depth</th>
-                                <td>
-                                    <label>
-                                        <input size="4" type="number" th:name="|alsList[${item.index}].depth|"
-                                               th:value="${als.getDepth()}">
-                                    </label>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>UpperFrame</th>
-                                <td>
-                                    <label>
-                                        <input size="4" type="number" th:name="|alsList[${item.index}].upperFrame|"
-                                               th:value="${als.getUpperFrame()}">
-                                    </label>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>BottomFrame</th>
-                                <td>
-                                    <label>
-                                        <input size="4" type="number" th:name="|alsList[${item.index}].bottomFrame|"
-                                               th:value="${als.getBottomFrame()}">
-                                    </label>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>DepthCell</th>
-                                <td>
-                                    <label>
-                                        <input size="4" type="number" th:name="|alsList[${item.index}].depthCell|"
-                                               th:value="${als.getDepthCell()}"
-                                               readonly="readonly">
-                                    </label>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>ColorBody</th>
-                                <td>
-                                    <label>
-                                        <select th:field="*{alsList[__${item.index}__].colorBody}">
-                                            <option th:each="color:${colorsList}"
-                                                    th:text="${color}"
-                                                    th:value="${color}">
-                                            </option>
-                                        </select>
-
-                                    </label>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>ColorDoor</th>
-                                <td>
-                                    <label>
-                                        <select th:field="*{alsList[__${item.index}__].colorDoor}">
-                                            <option th:each="color:${colorsList}"
-                                                    th:value="${color}"
-                                                    th:text="${color}">
-                                            </option>
-                                        </select>
-
-                                    </label>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>Quantity</th>
-                                <td th:text="1">Quantity</td>
-                            </tr>
-                            <tr>
-                                <th>Action</th>
-                                <td>
-                                    <a th:href="@{/projects/{id}/alss/{alsId} (id=${project.getId()}, alsId=${als.getId()})}"
-                                       class="btn btn-primary">Edit</a>
-                                    &nbsp
-                                    <a
-                                            class="btn btn-danger"
-                                            th:href="@{/projects/{id}/alss/{alsId}/delete (
-                                                                id=${project.getId()},
-                                                                alsId=${als.getId()})}">Delete
-                                    </a>
-                                </td>
-                            </tr>
-                        </table>
+                    <div class="col-md-2">
+                        <label>ID</label>
+                        <input type="number"
+                               class="form-control"
+                               th:field="*{id}"
+                               readonly>
                     </div>
-                    <div class="col">
-                        <p class="alert alert-danger"
-                           th:if="${projectErrors}!=null
-                                and !${projectErrors[__${item.index}__].get(1).get(0).isEmpty()}"
-                           th:text="${projectErrors[__${item.index}__].get(1)}">
 
-                        </p>
-                        <table border="1" class="table table-striped table-responsive-md">
-                            <tr>
-                                <th colspan="2">
-                                    <h5 th:text="${als.LC.description}">Модуль управления</h5>
-                                </th>
-                            </tr>
-                            <tr>
-                                <th>ID</th>
-                                <td>
-                                    <label>
-                                        <input type="number" size="3"
-                                               th:name="|alsList[${item.index}].LC.id|"
-                                               th:value="${als.getLC().id}"
-                                               readonly="readonly">
-                                    </label>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>Name</th>
-                                <td>
-                                    <label>
-                                        <input size="30" type="text"
-                                               th:name="|alsList[${item.index}].LC.name|"
-                                               th:value="${als.LC.name}"
-                                               readonly="readonly">
-                                    </label>
-                                </td>
-                            </tr>
-                            <tr hidden="hidden">
-                                <th>Description</th>
-                                <td>
-                                    <label>
-                                        <input size="30" type="text"
-                                               th:name="|alsList[${item.index}].LC.description|"
-                                               th:value="${als.LC.description}">
-                                    </label>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>Height</th>
-                                <td>
-                                    <label>
-                                        <input type="number" size="4"
-                                               th:name="|alsList[${item.index}].LC.height|"
-                                               th:value="${als.LC.height}"
-                                               readonly="readonly">
-                                    </label>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>Width</th>
-                                <td>
-                                    <label>
-                                        <input type="number" size="4"
-                                               th:name="|alsList[${item.index}].LC.width|"
-                                               th:value="${als.LC.width}" readonly="readonly">
-                                    </label>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>Depth</th>
-                                <td>
-                                    <label>
-                                        <input type="number" size="4"
-                                               th:name="|alsList[${item.index}].LC.depth|"
-                                               th:value="${als.LC.depth}" readonly="readonly">
-                                    </label>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>UpperFrame</th>
-                                <td>
-                                    <label>
-                                        <input type="number" size="4"
-                                               th:name="|alsList[${item.index}].LC.upperFrame|"
-                                               th:value="${als.LC.upperFrame}" readonly="readonly">
-                                    </label>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>BottomFrame</th>
-                                <td>
-                                    <label>
-                                        <input type="number" size="4"
-                                               th:name="|alsList[${item.index}].LC.bottomFrame|"
-                                               th:value="${als.LC.bottomFrame}" readonly="readonly">
-                                    </label>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>ColorBody</th>
-                                <td>
-                                    <label>
-                                        <input type="text"
-                                               th:name="|alsList[${item.index}].LC.colorBody|"
-                                               th:value="${als.LC.colorBody}"
-                                               readonly="readonly">
-                                    </label>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>Display</th>
-                                <td>
-                                    <label>
-                                        <select th:field="*{alsList[__${item.index}__].LC.display}">
-                                            <option th:each="display:${displayList}"
-                                                    th:value="${display}" th:text="${display}">
-                                            </option>
-                                        </select>
-
-                                    </label>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>Payment</th>
-                                <td>
-                                    <label>
-                                        <select th:field="*{alsList[__${item.index}__].LC.payment}">
-                                            <option th:each="payment:${paymentList}"
-                                                    th:value="${payment}" th:text="${payment}">
-                                            </option>
-                                        </select>
-
-                                    </label>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>Printer</th>
-                                <td>
-                                    <label>
-                                        <input type="checkbox"
-                                               th:id="${als.LC.printer}"
-                                               th:name="|alsList[${item.index}].LC.printer|"
-                                               th:field="*{alsList[__${item.index}__].LC.printer}">
-
-
-                                    </label>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>BarReader</th>
-                                <td>
-                                    <label>
-                                        <select th:field="*{alsList[__${item.index}__].LC.barReader}">
-                                            <option th:each="barReader:${barReaderList}" th:value="${barReader}"
-                                                    th:text="${barReader}">
-                                            </option>
-                                        </select>
-                                    </label>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>RfidReader</th>
-                                <td>
-                                    <label>
-                                        <input type="checkbox"
-                                               th:id="${als.LC.rfidReader}"
-                                               th:name="|alsList[${item.index}].LC.rfidReader|"
-                                               th:field="*{alsList[__${item.index}__].LC.rfidReader}"
-                                               th:value="${als.LC.rfidReader}"
-                                               th:checked="${als.LC.rfidReader}">
-                                    </label>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <a th:href="@{/projects/{projectId}/alss/{alsId}/lcs/{lcId}
-                                (projectId=${project.getId()},alsId=${als.getId()},
-                                lcId=${als.getLC().getId()})}"
-                                       class="btn btn-primary">Edit LC</a>
-                                </td>
-                            </tr>
-                        </table>
+                    <div class="col-md-4">
+                        <label>Название</label>
+                        <input type="text"
+                               class="form-control"
+                               th:field="*{name}">
                     </div>
-                    <div class="col">
-                        <div class="container-fluid">
-                            <img class="img-thumbnail"
-                                 th:src="'data:image/png;base64,'+${als.getStringALSImage()}"
-                                 alt="ALS Image">
-                        </div>
+
+                    <div class="col-md-6">
+                        <label>Компания</label>
+                        <input type="text"
+                               class="form-control"
+                               th:field="*{company}">
                     </div>
+
                 </div>
-                <br/>
-                <div>
-                    <h3>Модули хранения:</h3>
-                    <div class="container-fluid"  th:each="lb, lbs:${als.lbList}">
-                        <div >
-                            <p class="alert alert-danger"
-                               th:if="${projectErrors}!=null and !${projectErrors[__${item.index}__].get(2).isEmpty()}
-                               and !${projectErrors[__${item.index}__].get(2)[__${lbs.index}__].isEmpty()}"
-                               th:text="${projectErrors[__${item.index}__].get(2)[__${lbs.index}__]}">
 
-                            </p>
-                            <table border="1" class="table table-striped table-responsive-md">
-                                <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Name</th>
-                                    <th hidden="hidden">Description</th>
-                                    <th>Type</th>
-                                    <th hidden="hidden">ShelfThick</th>
-                                    <th>CountCells</th>
+                <div class="row mt-3">
 
-                                    <th hidden="hidden">Height</th>
-                                    <th>Width</th>
-                                    <th hidden="hidden">Depth</th>
-                                    <th hidden="hidden">UpperFrame</th>
-                                    <th hidden="hidden">BottomFrame</th>
-                                    <th>HeightCell</th>
-                                    <th>WidthCell</th>
-                                    <th>DepthCell</th>
-                                    <th>DirectionDoorOpening</th>
-                                    <th>ColorBody</th>
-                                    <th>ColorDoor</th>
-                                    <th>Quantity</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                <tr>
-                                    <td>
-                                        <label>
-                                            <input type="number" size="3"
-                                                   th:name="|alsList[${item.index}].lbList[${lbs.index}].id|"
-                                                   th:value="${lb.id}"
-                                                   readonly="readonly"/>
-                                        </label>
-                                    </td>
-                                    <td>
-                                        <label>
-                                            <input size="30"
-                                                   th:name="|alsList[${item.index}].lbList[${lbs.index}].name|"
-                                                   th:value="${lb.name}"
-                                                   readonly="readonly"/>
-                                        </label>
-                                    </td>
-                                    <td hidden="hidden">
-                                        <label>
-                                            <input size="50"
-                                                   th:name="|alsList[${item.index}].lbList[${lbs.index}].description|"
-                                                   th:value="${lb.getDescription()}"
-                                                   readonly="readonly"/>
-                                        </label>
-                                    </td>
-                                    <td>
-                                        <label>
-                                            <select th:field="*{alsList[__${item.index}__].lbList[__${lbs.index}__].type}">
-                                                <option th:each="type:${typeList}"
-                                                        th:value="${type}"
-                                                        th:text="${type}">
-                                                </option>
-                                            </select>
+                    <div class="col-md-12">
+                        <label>Описание</label>
 
-                                        </label>
-                                    </td>
-                                    <td hidden="hidden">
-                                        <label>
-                                            <input type="number" size="5"
-                                                   th:name="|alsList[${item.index}].lbList[${lbs.index}].shelfThick|"
-                                                   th:value="${lb.getShelfThick()}"/>
-                                        </label>
-                                    </td>
-                                    <td>
-                                        <label>
-                                            <input type="number" size="2"
-                                                   th:name="|alsList[${item.index}].lbList[${lbs.index}].countCells|"
-                                                   th:value="${lb.getCountCells()}"/>
-                                        </label>
-                                    </td>
-
-                                    <td hidden="hidden">
-                                        <label>
-                                            <input type="number" size="4"
-                                                   th:name="|alsList[${item.index}].lbList[${lbs.index}].height|"
-                                                   th:value="${lb.getHeight()}"
-                                                   readonly="readonly"/>
-                                        </label>
-                                    </td>
-                                    <td>
-                                        <label>
-                                            <input type="number" size="4"
-                                                   th:name="|alsList[${item.index}].lbList[${lbs.index}].width|"
-                                                   th:value="${lb.getWidth()}"/>
-                                        </label>
-                                    </td>
-                                    <td hidden="hidden">
-                                        <label>
-                                            <input type="number" size="4"
-                                                   th:name="|alsList[${item.index}].lbList[${lbs.index}].depth|"
-                                                   th:value="${lb.getDepth()}"
-                                                   readonly="readonly"/>
-                                        </label>
-                                    </td>
-                                    <td hidden="hidden">
-                                        <label>
-                                            <input type="number" size="3"
-                                                   th:name="|alsList[${item.index}].lbList[${lbs.index}].upperFrame|"
-                                                   th:value="${lb.getUpperFrame()}"
-                                                   readonly="readonly"/>
-                                        </label>
-                                    </td>
-                                    <td hidden="hidden">
-                                        <label>
-                                            <input type="number" size="3"
-                                                   th:name="|alsList[${item.index}].lbList[${lbs.index}].bottomFrame|"
-                                                   th:value="${lb.getBottomFrame()}"
-                                                   readonly="readonly"/>
-                                        </label>
-                                    </td>
-                                    <td>
-                                        <label>
-                                            <input type="number" size="4"
-                                                   th:name="|alsList[${item.index}].lbList[${lbs.index}].heightCell|"
-                                                   th:value="${lb.getHeightCell()}"
-                                                   readonly="readonly"/>
-                                        </label>
-                                    </td>
-                                    <td>
-                                        <label>
-                                            <input type="number" size="4"
-                                                   th:name="|alsList[${item.index}].lbList[${lbs.index}].widthCell|"
-                                                   th:value="${lb.getWidthCell()}"
-                                                   readonly="readonly"/>
-                                        </label>
-                                    </td>
-                                    <td>
-                                        <label>
-                                            <input type="number" size="4"
-                                                   th:name="|alsList[${item.index}].lbList[${lbs.index}].depthCell|"
-                                                   th:value="${lb.getDepthCell()}"
-                                                   readonly="readonly"/>
-                                        </label>
-                                    </td>
-                                    <td>
-                                        <label>
-                                            <input th:name="|alsList[${item.index}].lbList[${lbs.index}].directionDoorOpening|"
-                                                   th:value="${lb.getDirectionDoorOpening()}"
-                                                   readonly="readonly"/>
-                                        </label>
-                                    </td>
-                                    <td>
-                                        <label>
-                                            <input th:name="|alsList[${item.index}].lbList[${lbs.index}].colorBody|"
-                                                   th:value="${lb.getColorBody()}"
-                                                   readonly="readonly"/>
-                                        </label>
-                                    </td>
-                                    <td>
-                                        <label>
-                                            <input th:name="|alsList[${item.index}].lbList[${lbs.index}].colorDoor|"
-                                                   th:value="${lb.getColorDoor()}"
-                                                   readonly="readonly"/>
-                                        </label>
-                                    </td>
-                                    <td th:text="1">Quantity</td>
-                                    <td>
-                                        <a th:href="@{/projects/{projectId}/alss/{alsId}/lbs/{lbId} (alsId=${als.getId()},
-                                lbId=${lb.getId()}, projectId=${project.getId()})}"
-                                           class="btn btn-primary">Edit</a>
-                                    </td>
-                                </tr>
-                                </tbody>
-                            </table>
-                        </div>
+                        <textarea class="form-control"
+                                  rows="3"
+                                  th:field="*{description}"
+                                  readonly></textarea>
                     </div>
-                    <br/>
+
                 </div>
+
+                <div class="row mt-3">
+
+                    <div class="col-md-3">
+                        <label>Создал</label>
+                        <input type="text"
+                               class="form-control"
+                               th:value="${project.createdBy != null
+                                          ? project.createdBy.username
+                                          : ''}"
+                               readonly>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label>Дата создания</label>
+                        <input type="text"
+                               class="form-control"
+                               th:field="*{createdAt}"
+                               readonly>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label>Изменил</label>
+                        <input type="text"
+                               class="form-control"
+                               th:value="${project.updatedBy != null
+                                          ? project.updatedBy.username
+                                          : ''}"
+                               readonly>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label>Дата изменения</label>
+                        <input type="text"
+                               class="form-control"
+                               th:field="*{updatedAt}"
+                               readonly>
+                    </div>
+
+                </div>
+
             </div>
+
         </div>
 
+        <div th:if="${projectErrors != null}"
+             class="alert alert-danger">
+
+            <div th:each="errorGroup : ${projectErrors}">
+                <div th:each="error : ${errorGroup}"
+                     th:text="${error}">
+                </div>
+            </div>
+
+        </div>
+
+        <div th:each="als, item : ${project.alsList}"
+             class="card mb-4">
+
+            <div class="card-header">
+
+                <div class="d-flex justify-content-between">
+
+                    <h4 th:text="'ALS #' + ${item.index + 1}
+                                + ' - ' + ${als.name}">
+                        ALS
+                    </h4>
+
+                    <span class="badge badge-secondary"
+                          th:text="'Количество: '
+                                  + ${project.quantityALS.get(als)}">
+                        Количество
+                    </span>
+
+                </div>
+
+            </div>
+
+            <div class="card-body">
+
+                <div class="row">
+
+                    <div class="col-md-2">
+                        <label>ID</label>
+                        <input type="number"
+                               class="form-control"
+                               th:field="*{alsList[__${item.index}__].id}"
+                               readonly>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label>Название</label>
+                        <input type="text"
+                               class="form-control"
+                               th:field="*{alsList[__${item.index}__].name}"
+                               readonly>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label>Описание</label>
+                        <input type="text"
+                               class="form-control"
+                               th:field="*{alsList[__${item.index}__].description}"
+                               readonly>
+                    </div>
+
+                </div>
+
+                <div class="row mt-3">
+
+                    <div class="col-md-2">
+                        <label>Положение LC</label>
+
+                        <select class="form-control"
+                                th:field="*{alsList[__${item.index}__].positionLC}">
+
+                            <option th:each="position : ${positionLCList}"
+                                    th:value="${position}"
+                                    th:text="${position}">
+                            </option>
+
+                        </select>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label>Ячеек</label>
+                        <input type="number"
+                               class="form-control"
+                               th:field="*{alsList[__${item.index}__].countCells}"
+                               readonly>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label>Высота</label>
+                        <input type="number"
+                               class="form-control"
+                               th:field="*{alsList[__${item.index}__].height}">
+                    </div>
+
+                    <div class="col-md-2">
+                        <label>Ширина</label>
+                        <input type="number"
+                               class="form-control"
+                               th:field="*{alsList[__${item.index}__].width}"
+                               readonly>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label>Глубина</label>
+                        <input type="number"
+                               class="form-control"
+                               th:field="*{alsList[__${item.index}__].depth}">
+                    </div>
+
+                    <div class="col-md-2">
+                        <label>Глубина ячейки</label>
+                        <input type="number"
+                               class="form-control"
+                               th:field="*{alsList[__${item.index}__].depthCell}"
+                               readonly>
+                    </div>
+
+                </div>
+
+                <div class="row mt-3">
+
+                    <div class="col-md-3">
+                        <label>Верхняя рама</label>
+                        <input type="number"
+                               class="form-control"
+                               th:field="*{alsList[__${item.index}__].upperFrame}">
+                    </div>
+
+                    <div class="col-md-3">
+                        <label>Нижняя рама</label>
+                        <input type="number"
+                               class="form-control"
+                               th:field="*{alsList[__${item.index}__].bottomFrame}">
+                    </div>
+
+                    <div class="col-md-3">
+                        <label>Цвет корпуса</label>
+
+                        <select class="form-control"
+                                th:field="*{alsList[__${item.index}__].colorBody}">
+
+                            <option th:each="color : ${colorsList}"
+                                    th:value="${color}"
+                                    th:text="${color}">
+                            </option>
+
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label>Цвет дверей</label>
+
+                        <select class="form-control"
+                                th:field="*{alsList[__${item.index}__].colorDoor}">
+
+                            <option th:each="color : ${colorsList}"
+                                    th:value="${color}"
+                                    th:text="${color}">
+                            </option>
+
+                        </select>
+                    </div>
+
+                </div>
+
+                <hr>
+
+                <!-- LC -->
+
+                <h5 th:if="${als.LC != null}"
+                    th:text="${als.LC.description}">
+                    Модуль управления
+                </h5>
+
+                <div th:if="${als.LC != null}">
+
+                    <input type="hidden"
+                           th:field="*{alsList[__${item.index}__].LC.id}">
+
+                    <input type="hidden"
+                           th:field="*{alsList[__${item.index}__].LC.name}">
+
+                    <input type="hidden"
+                           th:field="*{alsList[__${item.index}__].LC.description}">
+
+                    <input type="hidden"
+                           th:field="*{alsList[__${item.index}__].LC.height}">
+
+                    <input type="hidden"
+                           th:field="*{alsList[__${item.index}__].LC.width}">
+
+                    <input type="hidden"
+                           th:field="*{alsList[__${item.index}__].LC.depth}">
+
+                    <input type="hidden"
+                           th:field="*{alsList[__${item.index}__].LC.upperFrame}">
+
+                    <input type="hidden"
+                           th:field="*{alsList[__${item.index}__].LC.bottomFrame}">
+
+                    <input type="hidden"
+                           th:field="*{alsList[__${item.index}__].LC.colorBody}">
+
+                    <div class="row">
+
+                        <div class="col-md-3">
+                            <label>Display</label>
+
+                            <select class="form-control"
+                                    th:field="*{alsList[__${item.index}__].LC.display}">
+
+                                <option th:each="display : ${displayList}"
+                                        th:value="${display}"
+                                        th:text="${display}">
+                                </option>
+
+                            </select>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label>Оплата</label>
+
+                            <select class="form-control"
+                                    th:field="*{alsList[__${item.index}__].LC.payment}">
+
+                                <option th:each="payment : ${paymentList}"
+                                        th:value="${payment}"
+                                        th:text="${payment}">
+                                </option>
+
+                            </select>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label>Barcode Reader</label>
+
+                            <select class="form-control"
+                                    th:field="*{alsList[__${item.index}__].LC.barReader}">
+
+                                <option th:each="reader : ${barReaderList}"
+                                        th:value="${reader}"
+                                        th:text="${reader}">
+                                </option>
+
+                            </select>
+                        </div>
+
+                        <div class="col-md-3">
+
+                            <label class="d-block">
+                                Printer
+                            </label>
+
+                            <input type="checkbox"
+                                   th:field="*{alsList[__${item.index}__].LC.printer}">
+
+                        </div>
+
+                    </div>
+
+                    <div class="mt-2">
+
+                        <a th:href="@{/projects/{projectId}/alss/{alsId}/lcs/{lcId}(
+                                    projectId=${project.id},
+                                    alsId=${als.id},
+                                    lcId=${als.LC.id})}"
+                           class="btn btn-primary btn-sm">
+                            Редактировать LC
+                        </a>
+
+                    </div>
+
+                </div>
+
+                <hr>
+
+                <!-- LB -->
+
+                <h5>
+                    Модули хранения
+                </h5>
+
+                <div th:each="lb, lbItem : ${als.lbList}"
+                     class="border rounded p-3 mb-3">
+
+                    <input type="hidden"
+                           th:field="*{alsList[__${item.index}__].lbList[__${lbItem.index}__].id}">
+
+                    <input type="hidden"
+                           th:field="*{alsList[__${item.index}__].lbList[__${lbItem.index}__].name}">
+
+                    <input type="hidden"
+                           th:field="*{alsList[__${item.index}__].lbList[__${lbItem.index}__].description}">
+
+                    <input type="hidden"
+                           th:field="*{alsList[__${item.index}__].lbList[__${lbItem.index}__].height}">
+
+                    <input type="hidden"
+                           th:field="*{alsList[__${item.index}__].lbList[__${lbItem.index}__].depth}">
+
+                    <input type="hidden"
+                           th:field="*{alsList[__${item.index}__].lbList[__${lbItem.index}__].upperFrame}">
+
+                    <input type="hidden"
+                           th:field="*{alsList[__${item.index}__].lbList[__${lbItem.index}__].bottomFrame}">
+
+                    <input type="hidden"
+                           th:field="*{alsList[__${item.index}__].lbList[__${lbItem.index}__].heightCell}">
+
+                    <input type="hidden"
+                           th:field="*{alsList[__${item.index}__].lbList[__${lbItem.index}__].widthCell}">
+
+                    <input type="hidden"
+                           th:field="*{alsList[__${item.index}__].lbList[__${lbItem.index}__].depthCell}">
+
+                    <input type="hidden"
+                           th:field="*{alsList[__${item.index}__].lbList[__${lbItem.index}__].directionDoorOpening}">
+
+                    <input type="hidden"
+                           th:field="*{alsList[__${item.index}__].lbList[__${lbItem.index}__].colorBody}">
+
+                    <input type="hidden"
+                           th:field="*{alsList[__${item.index}__].lbList[__${lbItem.index}__].colorDoor}">
+
+                    <div class="row">
+
+                        <div class="col-md-3">
+                            <label>LB</label>
+                            <input type="text"
+                                   class="form-control"
+                                   th:value="${lb.name}"
+                                   readonly>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label>Тип</label>
+
+                            <select class="form-control"
+                                    th:field="*{alsList[__${item.index}__].lbList[__${lbItem.index}__].type}">
+
+                                <option th:each="type : ${typeList}"
+                                        th:value="${type}"
+                                        th:text="${type}">
+                                </option>
+
+                            </select>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label>Количество ячеек</label>
+
+                            <input type="number"
+                                   class="form-control"
+                                   th:field="*{alsList[__${item.index}__].lbList[__${lbItem.index}__].countCells}">
+                        </div>
+
+                        <div class="col-md-3">
+                            <label>Ширина</label>
+
+                            <input type="number"
+                                   class="form-control"
+                                   th:field="*{alsList[__${item.index}__].lbList[__${lbItem.index}__].width}">
+                        </div>
+
+                    </div>
+
+                    <div class="mt-2">
+
+                        <a th:href="@{/projects/{projectId}/alss/{alsId}/lbs/{lbId}(
+                                    projectId=${project.id},
+                                    alsId=${als.id},
+                                    lbId=${lb.id})}"
+                           class="btn btn-primary btn-sm">
+                            Редактировать
+                        </a>
+
+                    </div>
+
+                </div>
+
+                <button type="submit"
+                        class="btn btn-primary btn-sm"
+                        th:formaction="@{/projects/{projectId}/alss/{alsId}/addLB(
+                                    projectId=${project.id},
+                                    alsId=${als.id})}">
+                    Добавить LB
+                </button>
+
+                <button type="submit"
+                        class="btn btn-info btn-sm">
+                    Сохранить изменения
+                </button>
+
+                <a th:href="@{/projects/{projectId}/alss/{alsId}(
+                            projectId=${project.id},
+                            alsId=${als.id})}"
+                   class="btn btn-secondary btn-sm">
+                    Открыть ALS
+                </a>
+
+                <button type="submit"
+                        class="btn btn-danger btn-sm"
+                        th:formaction="@{/projects/{projectId}/alss/{alsId}/delete(
+                                    projectId=${project.id},
+                                    alsId=${als.id})}">
+                    Удалить ALS
+                </button>
+
+            </div>
+
+        </div>
 
     </form>
+
 </div>
-<footer th:replace="~{footer :: footer}"></footer>
+
+<div th:replace="~{footer :: footer}"></div>
+
 </body>
 </html>

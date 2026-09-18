@@ -11,13 +11,24 @@ import com.lb_calc_web.entity.ProjectEntity;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.function.Function;
 
+/**
+ * Маппер проекта между доменной и persistence-моделями.
+ *
+ * <p>Не работает с репозиториями и не содержит логики
+ * поиска сущностей в базе данных.</p>
+ */
 public final class ProjectEntityMapper {
 
     private ProjectEntityMapper() {
     }
 
+    /**
+     * Преобразует ProjectEntity в доменный Project.
+     *
+     * @param entity persistence-модель проекта
+     * @return доменный проект
+     */
     public static Project toDomain(
             ProjectEntity entity
     ) {
@@ -65,10 +76,21 @@ public final class ProjectEntityMapper {
         );
     }
 
+    /**
+     * Создаёт новую ProjectEntity из доменного проекта.
+     *
+     * @param domain доменный проект
+     * @param employeeResolver преобразователь Employee → EmployeeEntity
+     * @param alsEntities соответствие ALS → ALSEntity
+     * @return новая persistence-сущность
+     */
     public static ProjectEntity toEntity(
             Project domain,
-            Function<Employee, EmployeeEntity> employeeResolver,
-            Function<ALS, ALSEntity> alsResolver
+            java.util.function.Function<
+                    Employee,
+                    EmployeeEntity
+                    > employeeResolver,
+            Map<ALS, ALSEntity> alsEntities
     ) {
         Objects.requireNonNull(
                 domain,
@@ -82,17 +104,29 @@ public final class ProjectEntityMapper {
                 domain,
                 entity,
                 employeeResolver,
-                alsResolver
+                alsEntities
         );
 
         return entity;
     }
 
+    /**
+     * Обновляет существующую ProjectEntity данными
+     * из доменного проекта.
+     *
+     * @param domain доменный проект
+     * @param entity существующая persistence-сущность
+     * @param employeeResolver преобразователь Employee → EmployeeEntity
+     * @param alsEntities соответствие ALS → ALSEntity
+     */
     public static void updateEntity(
             Project domain,
             ProjectEntity entity,
-            Function<Employee, EmployeeEntity> employeeResolver,
-            Function<ALS, ALSEntity> alsResolver
+            java.util.function.Function<
+                    Employee,
+                    EmployeeEntity
+                    > employeeResolver,
+            Map<ALS, ALSEntity> alsEntities
     ) {
         Objects.requireNonNull(
                 domain,
@@ -110,8 +144,8 @@ public final class ProjectEntityMapper {
         );
 
         Objects.requireNonNull(
-                alsResolver,
-                "alsResolver не должен быть null"
+                alsEntities,
+                "alsEntities не должен быть null"
         );
 
         entity.setName(
@@ -152,17 +186,26 @@ public final class ProjectEntityMapper {
                 )
         );
 
+        /*
+         * Collection принадлежит ProjectEntity.
+         * При обновлении заменяем её содержимое,
+         * а orphanRemoval удаляет старые связи.
+         */
         entity.getAlsEntries().clear();
 
         for (Map.Entry<ALS, Integer> entry :
                 domain.getQuantityALS().entrySet()) {
 
+            ALS als =
+                    Objects.requireNonNull(
+                            entry.getKey(),
+                            "ALS не должен быть null"
+                    );
+
             ALSEntity alsEntity =
                     Objects.requireNonNull(
-                            alsResolver.apply(
-                                    entry.getKey()
-                            ),
-                            "ALS не найден"
+                            alsEntities.get(als),
+                            "Для ALS не найдена ALSEntity"
                     );
 
             ProjectALSEntity projectAls =
