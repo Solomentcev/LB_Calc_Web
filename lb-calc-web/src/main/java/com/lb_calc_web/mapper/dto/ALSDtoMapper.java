@@ -1,7 +1,7 @@
 package com.lb_calc_web.mapper.dto;
 
 import com.lb_calc_web.domain.attributes.Colors;
-import com.lb_calc_web.domain.attributes.PositionLC;
+import com.lb_calc_web.domain.attributes.PositionControlModule;
 import com.lb_calc_web.domain.model.ALS;
 import com.lb_calc_web.domain.model.LB;
 import com.lb_calc_web.domain.model.LBC;
@@ -53,8 +53,8 @@ public final class ALSDtoMapper {
                 domain.getColorDoor().name()
         );
 
-        dto.setPositionLC(
-                domain.getPositionLC().name()
+        dto.setPositionControlModule(
+                domain.getPositionControlModule().name()
         );
 
         List<LBDTO> lbList = new ArrayList<>();
@@ -132,14 +132,14 @@ public final class ALSDtoMapper {
             );
         } else {
             throw new IllegalStateException(
-                    "ALS должен содержать LC или LBC"
+                    "ALS должен содержать модуль управления"
             );
         }
 
         List<Module> modules = insertControlModule(
                 storageModules,
                 controlModule,
-                dto.getPositionLC()
+                dto.getPositionControlModule()
         );
 
         return new ALS(
@@ -186,13 +186,13 @@ public final class ALSDtoMapper {
                 storageModules
         );
 
-        PositionLC positionLC = PositionLC.valueOf(
+        PositionControlModule position = PositionControlModule.valueOf(
                 position
         );
 
         int index;
 
-        switch (positionLC) {
+        switch (position) {
             case LEFT -> index = 0;
 
             case RIGHT -> index = modules.size();
@@ -200,7 +200,7 @@ public final class ALSDtoMapper {
             case CENTER -> index = modules.size() / 2;
 
             default -> throw new IllegalStateException(
-                    "Неизвестное положение LC: " + position
+                    "Неизвестное положение модуля управления: " + position
             );
         }
 
