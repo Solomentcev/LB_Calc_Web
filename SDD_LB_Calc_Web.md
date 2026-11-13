@@ -255,16 +255,18 @@
 | DELETE | /api/v1/employees/{id}          | Удалить сотрудника      | —                   | 204 No Content              |
 | POST   | /api/v1/employees/{id}/password | Сменить пароль          | `{newPassword}`     | 204 No Content              |
 
-### 6.2.3. Оборудование (Только ADMIN для записи)
+### 6.2.3. Типизированные каталоги оборудования (Только ADMIN для записи)
 
-| Метод  | Путь                              | Описание                      | Тело запроса            | Ответ                        |
-|--------|-----------------------------------|-------------------------------|-------------------------|------------------------------|
-| GET    | /api/v1/equipment                 | Список оборудования           | Query: `type`, `active` | `List<EquipmentDTO>`         |
-| GET    | /api/v1/equipment/{id}            | Детали оборудования           | —                       | `EquipmentDTO`               |
-| POST   | /api/v1/equipment                 | Создать оборудование (ADMIN)  | `CreateEquipmentDTO`    | `EquipmentDTO` (201 Created) |
-| PUT    | /api/v1/equipment/{id}            | Обновить оборудование (ADMIN) | `UpdateEquipmentDTO`    | `EquipmentDTO`               |
-| DELETE | /api/v1/equipment/{id}            | Удалить оборудование (ADMIN)  | —                       | 204 No Content               |
-| POST   | /api/v1/equipment/{id}/deactivate | Деактивировать (ADMIN)        | —                       | 204 No Content               |
+| Метод | Путь | Описание | Тело запроса | Ответ |
+|--------|------|----------|--------------|-------|
+| GET | /api/v1/equipment/{catalogType} | Список позиций выбранного каталога | Query: active | List<EquipmentDTO> |
+| GET | /api/v1/equipment/{catalogType}/{id} | Детали позиции каталога | — | EquipmentDTO |
+| POST | /api/v1/equipment/{catalogType} | Создать позицию (ADMIN) | Общие поля + поля типа каталога | EquipmentDTO (201 Created) |
+| PUT | /api/v1/equipment/{catalogType}/{id} | Обновить управляемые поля (ADMIN) | UpdateEquipmentDTO | EquipmentDTO |
+| DELETE | /api/v1/equipment/{catalogType}/{id} | Удалить позицию, если она не используется | — | 204 No Content |
+| POST | /api/v1/equipment/{catalogType}/{id}/deactivate | Деактивировать (ADMIN) | — | 204 No Content |
+
+Поддерживаемые значения catalogType: PRINTER, MONITOR, PAYMENT, RFID_READER, QR_READER, BAR_READER. Каждый каталог возвращает собственную структуру специализированных характеристик. Общие поля переиспользуются через абстракцию Equipment.
 
 ### 6.2.4. Проекты
 
@@ -383,21 +385,19 @@
     Authorization: Bearer {accessToken}
 
     {
-      "paymentMode": "PAID",
-      "connectionMode": "NETWORK",
+      "paymentMode": "CASH_AND_CASHLESS",
+      "monitorSize": 17,
+      "printerRequired": true,
+      "accessMethods": ["RFID", "QR_CODE"],
       "colorBody": "RAL7035",
       "colorDoor": "RAL9003",
-      "display": {
-        "enabled": true,
-        "size": 21.5,
-        "touch": true
-      },
-      "accessMethods": ["RFID", "QR_CODE"],
-      "printOption": "REQUIRED",
+      "controlModulePosition": "CENTER",
+      "height": 1940,
+      "depth": 500,
       "modules": [
-        {"type": "LB", "countCells": 16, "direction": "LEFT"},
+        {"type": "LB", "countCells": 16},
         {"type": "LC"},
-        {"type": "LB", "countCells": 16, "direction": "RIGHT"}
+        {"type": "LB", "countCells": 16}
       ]
     }
 
@@ -622,7 +622,7 @@
     CREATE UNIQUE INDEX uk_project_als ON project_als(project_id, als_id);
 
     -- ALS по ключевым характеристикам
-    CREATE INDEX idx_als_characteristics ON als(payment_mode, monitor_size, printer_required, color_body, color_door);
+    CREATE INDEX idx_als_characteristics ON als(payment_mode, monitor_size, printer_required, control_module_position, color_body, color_door);
 
 ---
 
@@ -640,7 +640,8 @@
 
 1. Создание таблиц equipment_type, equipment, module_equipment.
 2. Удаление устаревших таблиц: lc_access_method, lc_print_option, lbc_access_method, lbc_print_option.
-3. Добавление полей характеристик (display_enabled, color_body и т.д.) в таблицу als.
+3. Добавление актуальных полей ALS (payment_mode, monitor_size, printer_required, control_module_position, color_body, color_door, height, depth) и таблицы связей способов доступа.
+4. Создание специализированных моделей характеристик для каталогов PRINTER, MONITOR, PAYMENT, RFID_READER, QR_READER и BAR_READER.
 4. Создание индексов для Find-or-Create (см. раздел 10.5).
 
 ## 11.3. Docker Compose
