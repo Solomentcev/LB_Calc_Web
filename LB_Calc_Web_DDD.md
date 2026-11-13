@@ -432,3 +432,43 @@
 ---
 
 *Документ утверждён. Данная спецификация является единственным источником истины для проектирования, рефакторинга и развития доменной модели LB_Calc_Web.*
+
+# 7. GUEST MODE AND PROJECT LIFECYCLE
+## 7.1. Guest user
+
+A guest is an unauthenticated visitor who can create and configure projects and ALS configurations without creating an account. Guest work is temporary and is stored in the browser; it is not persisted as a Project aggregate in the server database.
+
+Guest capabilities include:
+- creating and editing projects in the browser;
+- adding and configuring ALS and its modules;
+- selecting equipment from server-side catalogs;
+- using the same domain calculations and business validation as an authenticated user, through permitted public application endpoints.
+
+## 7.2. Guest data storage
+
+- IndexedDB is the primary browser storage for guest projects and their configuration data.
+- LocalStorage is reserved for lightweight UI preferences and must not be used as the primary project store.
+- Equipment catalogs and shared reference data remain server-side and are stored in MySQL. Public read access is provided only through explicitly permitted endpoints.
+- No guest Project records or temporary guest-project tables are created in MySQL. No separate server-side guest account or guest session is introduced solely to store project drafts.
+
+## 7.3. Authenticated project storage
+
+Projects saved by authenticated users are persisted in MySQL and associated with the authenticated Employee/account. Access to saved projects follows the normal authorization and ownership rules.
+
+## 7.4. Transfer of guest projects to an account
+
+After registration or authentication, the user may transfer selected guest projects from IndexedDB to the authenticated account.
+
+The transfer follows these rules:
+1. The browser sends the selected project data to the server through the permitted REST API.
+2. The server treats all received data as untrusted input and reconstructs/validates it using the same domain rules used for ordinary project operations.
+3. The server assigns ownership from the authenticated principal; the client cannot choose or override the owner.
+4. The server persists the project and its valid ALS configurations.
+5. The browser deletes the corresponding local guest copy only after the server confirms successful persistence.
+6. If the transfer fails, the local copy remains available for retry.
+
+The exact user experience for duplicate projects, conflict resolution and retry presentation is a separate functional-design decision; it must not weaken server-side validation or cause premature deletion of local data.
+
+## 7.5. Shared domain model
+
+Guest and authenticated workflows use the same ALS, Module, Equipment and Project business rules and calculation logic. Guest mode changes the persistence location and access context, not the domain model or calculation algorithms.
