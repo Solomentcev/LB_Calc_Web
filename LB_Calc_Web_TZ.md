@@ -584,21 +584,26 @@ DRAFT (в сессии) → SAVED/IMMUTABLE (в БД) → USED (в проект�
 **Поля:**
 
 - id — идентификатор
-- paymentMode, connectionMode — режимы
-- colorBody, colorDoor — цвета
-- displayConfig — конфигурация дисплея (VO)
-- accessMethods — множество методов доступа
-- printOption — опция печати
-- lightingConfig, powerSupplyConfig, powerOutletConfig — конфигурации (VO)
+- paymentMode — NONE / CASH / CASHLESS / CASH_AND_CASHLESS
+- monitorSize — NONE / 10 / 17 / 19
+- printerRequired — признак наличия принтера (YES / NO)
+- accessMethods — множество RFID / BARCODE / QR_CODE / PIN
+- controlModulePosition — LEFT / CENTER / RIGHT
+- colorBody, colorDoor — общие цвета всех модулей
+- height, depth — общие габариты всех модулей
+- width — производная величина, сумма ширин модулей
 - modules — упорядоченный список ALSModule
-- name, description — производные (генерируются автоматически)
-- totalWidth, totalCells — производные (рассчитываются)
+- name, description — производные, генерируются автоматически
 
 **Инварианты:**
 
-- Ровно один ControlModule (LC или LBC)
-- Хотя бы один StorageModule (LB или LBC)
-- LC и LBC не могут сосуществовать
+- Ровно один ControlModule (LC или LBC).
+- Хотя бы один StorageModule (LB или LBC).
+- LC и LBC не могут сосуществовать.
+- Положение управляющего модуля соответствует порядку модулей.
+- Высота, глубина и цвета модулей синхронизированы с ALS.
+- Ширина ALS равна сумме ширин модулей.
+- Действуют зависимости PIN → монитор и дополнительный способ доступа; оплата/Bar-reader/QR-reader/PIN → обязательный принтер.
 
 ### Aggregate: Project
 
@@ -614,13 +619,13 @@ DRAFT (в сессии) → SAVED/IMMUTABLE (в БД) → USED (в проект�
 
 ## 3.3. Value Objects
 
-- EquipmentType: code, name, category
-- DisplayConfiguration: enabled, size, touch
-- PowerSupplyConfiguration: mainsRequired, upsRequired, backupDuration, requiredPower
-- PowerOutletConfiguration: enabled, quantity
-- LightingConfiguration: enabled
-- TypeLb: type, deltaWidth, shelfThick, serviceZoneWidth
-- Colors: Enum (Blue, White, Gray, Black, RAL7035, RAL9003, ...)
+- EquipmentType — тип логического каталога оборудования.
+- PaymentMode: NONE, CASH, CASHLESS, CASH_AND_CASHLESS.
+- MonitorSize: NONE, 10, 17, 19.
+- AccessMethod: RFID, BARCODE, QR_CODE, PIN.
+- ControlModulePosition: LEFT, CENTER, RIGHT.
+- TypeLb: type, deltaWidth, shelfThick, serviceZoneWidth.
+- Colors: значения справочника цветов.
 
 ## 3.4. Domain Services
 
@@ -654,23 +659,31 @@ DRAFT (в сессии) → SAVED/IMMUTABLE (в БД) → USED (в проект�
 - id — BIGINT — PK
 - code — VARCHAR(50) — UNIQUE, NOT NULL
 - name — VARCHAR(100) — NOT NULL
-- category — ENUM — NOT NULL (CONTROL, STORAGE, POWER, NETWORK)
+- category — тип/назначение оборудования
 
-### equipment
+### equipment (общие сведения)
 
 - id — BIGINT — PK
 - equipment_type_id — BIGINT — FK → equipment_type.id, NOT NULL
-- manufacturer — VARCHAR(100) — NOT NULL
-- model — VARCHAR(100) — NOT NULL
-- Общие поля оборудования хранятся отдельно от специализированных характеристик конкретного каталога
-- Для каждого типа оборудования предусмотрена собственная модель характеристик/таблица расширения; универсальное поле parameters не заменяет типизированную модель
-- Для MySQL используется тип JSON только там, где он действительно необходим для дополнительных атрибутов
-- width, height, depth — INTEGER — NOT NULL
-- power_consumption — INTEGER
-- max_locks — INTEGER — для LOCK_CONTROLLER
+- manufacturer — VARCHAR(100)
+- model — VARCHAR(100)
+- width, height, depth — INTEGER — общие габариты, если применимы
 - unit_cost — DECIMAL(12,2)
 - is_active — BOOLEAN — DEFAULT true
 - is_default_for_type — BOOLEAN — DEFAULT false
+
+### Специализированные каталоги оборудования
+
+Для каждого каталога предусматривается собственная модель характеристик и валидации, связанная с общей записью Equipment:
+
+- printer_equipment — характеристики принтера;
+- monitor_equipment — характеристики монитора;
+- payment_equipment — характеристики оборудования оплаты;
+- rfid_reader_equipment — характеристики RFID-считывателя;
+- qr_reader_equipment — характеристики QR-считывателя;
+- bar_reader_equipment — характеристики считывателя штрихкодов.
+
+Конкретный состав полей специализированных моделей определяется отдельно для каждого типа. Общая таблица Equipment не должна превращаться в универсальную таблицу со множеством необязательных и несвязанных полей.
 
 ### module (базовая, наследование JOINED)
 
@@ -710,19 +723,13 @@ DRAFT (в сессии) → SAVED/IMMUTABLE (в БД) → USED (в проект�
 ### als
 
 - id — BIGINT — PK
-- height, width, depth — INTEGER — NOT NULL
-- upper_frame, bottom_frame — INTEGER — NOT NULL
-- color_body, color_door — ENUM — NOT NULL
-- payment_mode, connection_mode — ENUM — NOT NULL
-- display_enabled — BOOLEAN — NOT NULL
-- display_size — DECIMAL(4,1)
-- display_touch — BOOLEAN
-- print_option — ENUM — NOT NULL
-- lighting_enabled — BOOLEAN — NOT NULL
-- mains_required, ups_required — BOOLEAN — NOT NULL
-- backup_duration, required_power — INTEGER
-- outlet_enabled — BOOLEAN — NOT NULL
-- outlet_quantity — INTEGER
+- height, width, depth — INTEGER — NOT NULL; width рассчитывается как сумма ширин модулей
+- color_body, color_door — ссылки/значения справочника цветов, NOT NULL
+- payment_mode — ENUM(NONE, CASH, CASHLESS, CASH_AND_CASHLESS), NOT NULL
+- monitor_size — значение NONE / 10 / 17 / 19, NOT NULL
+- printer_required — BOOLEAN, NOT NULL
+- control_module_position — ENUM(LEFT, CENTER, RIGHT), NOT NULL для многомодульной конфигурации
+- Остальные общие и специализированные характеристики оборудования в ALS не дублируются: они представлены требованиями и выбранными позициями в модулях.
 
 ### als_access_method (таблица для множества методов доступа ALS)
 
