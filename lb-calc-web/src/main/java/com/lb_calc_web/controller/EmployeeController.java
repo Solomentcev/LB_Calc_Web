@@ -40,6 +40,11 @@ public class EmployeeController {
         this.roles = Arrays.asList(Role.values());
     }
 
+    @ModelAttribute
+    public void addRoles(Model model) {
+        model.addAttribute("roles", roles);
+    }
+
     @GetMapping("/myprofile")
     public String myProfile(Model model) {
 

@@ -1,0 +1,30 @@
+# Скомпилированные файлы (САМОЕ ВАЖНОЕ!)
+**/target/
+**/*.class
+**/*.jar
+**/*.war
+
+# Отчеты тестов
+**/surefire-reports/
+
+# IDE файлы
+.idea/
+*.iml
+.vscode/
+
+# Maven wrapper (не нужен для анализа)
+mvnw
+mvnw.cmd
+
+# Docker volumes и логи
+**/logs/
+**/*.log
+
+# Временные файлы
+**/*.tmp
+**/*.bak
+# Секреты — НИКОГДА не читать
+.env
+.env.local
+.env.test
+.env.prod
