@@ -980,3 +980,47 @@
 ---
 
 *Документ утверждён. Функциональные требования являются основой для разработки, тестирования и приёмки системы LB_Calc_Web.*
+
+
+# 10. GUEST WORK WITHOUT AUTHENTICATION
+## 10.1. Guest access
+
+The system shall allow an unauthenticated visitor to work with project drafts without creating an account. A guest shall be able to create and edit projects, configure ALS and modules, select equipment from available catalogs, and use the system's calculations and visualization features that are exposed to guest access.
+
+Guest projects are browser-local drafts and are not saved to the server database.
+
+## 10.2. Browser storage
+
+- Guest projects and their configuration data shall be stored in IndexedDB.
+- LocalStorage shall be used only for lightweight interface preferences, not as the primary store for projects.
+- A guest shall be able to return to locally stored drafts while using the same browser profile, subject to normal browser storage availability.
+- Clearing browser data or using another browser/device may make local guest drafts unavailable; the interface should communicate that guest drafts are stored locally.
+
+## 10.3. Server-side data available to guests
+
+Equipment catalogs and shared reference data remain on the server. Guests may read the data required for configuration through explicitly public, read-only endpoints. Any operation that changes shared catalogs or administrative data requires authorization.
+
+Guest calculations and validation that depend on authoritative domain rules shall be performed by the server through explicitly permitted endpoints. The server must not create a persistent guest Project merely to perform these operations.
+
+## 10.4. Transfer guest projects after registration or login
+
+After registration or login, the system shall offer the user the ability to transfer selected guest projects into the authenticated account.
+
+Acceptance criteria:
+1. The browser submits selected local projects to the server using the authenticated REST API.
+2. The server validates the complete submitted data, including ALS structure, module compatibility, equipment requirements and dimensional constraints, using the same domain rules as for normal project operations.
+3. Project ownership is assigned from the authenticated principal and is never trusted from client-supplied owner fields.
+4. A project is reported as transferred only after successful server persistence.
+5. The browser removes a local project only after receiving confirmation of successful persistence for that project.
+6. On validation, network or persistence failure, the local project remains in IndexedDB and the user receives an actionable error.
+7. The user can choose which guest projects to transfer; the system must not silently discard unselected drafts.
+
+## 10.5. Common business behavior
+
+Guest and authenticated users shall use the same business rules, calculation algorithms and equipment compatibility checks. The difference is the storage and authorization context, not a separate guest-specific implementation of ALS logic.
+
+The system shall not create guest accounts, temporary guest-project database records or server-side guest sessions solely for storing guest projects.
+
+## 10.6. Decisions still requiring functional detail
+
+The detailed interaction for duplicate project names, conflict resolution when a similar project already exists, and the visual retry flow is not specified here and must be designed separately.
