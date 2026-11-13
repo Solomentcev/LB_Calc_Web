@@ -679,3 +679,43 @@
 ---
 
 *Документ утверждён и готов к передаче в разработку.*
+
+# 12. GUEST MODE: CLIENT-SIDE DRAFTS AND ACCOUNT IMPORT
+## 12.1. Overview
+
+The application supports guest configuration without authentication. Guest projects are browser-local drafts; they are not persisted as Project records in MySQL. Guest mode changes the storage and authorization context, not the domain model or calculation rules.
+
+## 12.2. Client storage
+
+- IndexedDB stores guest projects and their complete configuration data.
+- LocalStorage stores only lightweight UI preferences.
+- The browser is responsible for retaining guest drafts until the user deletes them or successfully imports them into an account.
+- The application must not treat browser storage as authoritative for catalog data or security decisions.
+
+## 12.3. Server access for guests
+
+Guests may access explicitly public, read-only endpoints for equipment catalogs and reference data. Where authoritative calculations or validation are required, the application may expose narrowly scoped public endpoints that do not persist a guest Project.
+
+All catalog mutations, administrative operations and account-specific project operations remain protected. No temporary guest-project database records, guest accounts or dedicated server-side guest sessions are created for draft storage.
+
+## 12.4. Import flow after registration or authentication
+
+1. The user registers or signs in.
+2. The browser detects locally stored guest projects and offers the user a choice of which projects to import.
+3. The browser submits selected project data to the authenticated REST API.
+4. The server validates the submitted data through the shared Application Services and Domain Model. Client-side validation is only a usability aid and is not trusted.
+5. The server assigns ownership using the authenticated principal, not a client-supplied owner identifier.
+6. The server persists the project and returns a per-project success or failure result.
+7. The browser deletes only those local projects for which successful persistence has been confirmed. Failed or unprocessed projects remain in IndexedDB.
+
+## 12.5. MVC, REST and application services
+
+MVC controllers render HTML/Thymeleaf; REST controllers accept and return JSON. Both expose the same business operations and call the same Application Services and Domain Model. They must not contain separate copies of project, ALS, equipment or calculation logic.
+
+Guest and authenticated access is controlled at the security/application boundary. A public endpoint must not provide access to another user's saved projects or allow mutation of shared catalogs.
+
+## 12.6. API and error-handling implications
+
+The import API must distinguish successful persistence from validation, authorization, conflict and infrastructure failures. A response must identify which submitted projects were successfully saved so that the client does not delete unsaved local data.
+
+Duplicate-project conflict policy, idempotency keys and the detailed retry protocol remain open design items and must be settled before the import endpoint is considered fully specified.
