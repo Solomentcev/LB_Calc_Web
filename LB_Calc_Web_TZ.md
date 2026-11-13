@@ -277,7 +277,6 @@ countCells — минимум 1, максимум 20, по умолчанию 3
 ### 4.2. Оборудование для модулей хранения (LB/LBC)
 
 - Всегда для каждой ячейки → ELECTRONIC_LOCK — количество countCells модуля
-- lighting.enabled = true → LIGHTING — количество countCells модуля
 
 ### 4.3. Алгоритм выбора оборудования из каталога
 
@@ -361,7 +360,7 @@ cellHeight = (int) (usableHeight / countCells)
 - equipmentType
 - manufacturer
 - model
-- технические параметры (parameters)
+- специализированные характеристики, определяемые типом каталога
 - габариты (width, height, depth)
 - потребляемая мощность (powerConsumption)
 
