@@ -761,3 +761,37 @@ DRAFT (в сессии) → SAVED/IMMUTABLE (в БД) → USED (в проект�
 ---
 
 Документ утверждён и готов к передаче в разработку.
+
+# 12. GUEST MODE AND TRANSFER OF PROJECTS
+## 12.1. Guest work
+
+The application shall support unauthenticated project configuration. A guest can create and edit project drafts, configure ALS and modules, select equipment from the available catalogs, and use the same calculation and validation rules as an authenticated user.
+
+Guest projects are not persisted in MySQL. They are stored in the browser using IndexedDB. LocalStorage is reserved for small interface preferences and is not a project database.
+
+## 12.2. Server responsibilities in guest mode
+
+MySQL remains the authoritative storage for equipment catalogs and shared reference data. Guests can access only explicitly public read endpoints needed to view catalog data. Server-side calculations and validation needed by the configurator may be exposed through explicitly permitted public endpoints.
+
+Public guest operations must not create persistent guest projects, temporary guest rows or a dedicated guest account/session. Any endpoint that changes shared catalog data or performs account/project administration remains protected.
+
+## 12.3. Importing guest projects into an account
+
+After registration or authentication, the user can select guest projects stored in IndexedDB and submit them to the server.
+
+The server shall:
+- require an authenticated principal for the import operation;
+- validate all submitted project, ALS, module, dimension and equipment data using the authoritative domain model;
+- ignore client-supplied ownership and assign the project to the authenticated user;
+- persist the project and return an explicit success result;
+- return validation or persistence errors without implying that the project was saved.
+
+The client shall retain the local project until successful persistence has been confirmed. Failed imports must leave the local data intact so the user can correct the data or retry.
+
+## 12.4. Shared application and domain logic
+
+MVC controllers (HTML/Thymeleaf) and REST controllers (JSON) expose the same business capabilities and call the same Application Services and Domain Model. Guest and authenticated workflows must not have duplicated calculation or business-rule implementations. Access restrictions are enforced at the application/security boundary.
+
+## 12.5. Unspecified details
+
+Conflict handling for duplicate projects, import idempotency and the detailed retry/user-notification interaction require separate design. These details must be resolved before finalizing the import API contract.
