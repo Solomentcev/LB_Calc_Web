@@ -183,6 +183,8 @@ LBC при этом остаётся одним физическим модул�
 
 `cellWidth = moduleWidth - typeLb.deltaWidth`
 
+`TypeLb.serviceZoneWidth` существует как параметр конструктивного типа, но текущий `StorageModule.recalculateStorageCells()` не вычитает его из ширины ячейки. ТЗ задаёт целевую формулу с дополнительным вычитанием сервисной зоны; это известное расхождение.
+
 `cellDepth = moduleDepth - doorThickness`
 
 `usableHeight = moduleHeight - upperFrame - bottomFrame - (countCells - 1) * shelfThick`
