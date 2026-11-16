@@ -245,12 +245,16 @@ public class ALS {
     }
 
     /**
-     * Возвращает модули ALS в физическом порядке слева направо.
+     * Возвращает независимые копии модулей ALS в физическом порядке.
      *
-     * @return неизменяемый список модулей
+     * <p>Изменение возвращённых объектов не влияет на агрегат.</p>
+     *
+     * @return неизменяемый список копий модулей
      */
     public List<Module> getModules() {
-        return Collections.unmodifiableList(modules);
+        return modules.stream()
+                .map(Module::copy)
+                .toList();
     }
 
     /**
@@ -332,21 +336,77 @@ public class ALS {
     }
 
     /**
-     * Удаляет конкретный экземпляр модуля из ALS.
+     * Удаляет первый модуль, равный указанному по конфигурации.
      *
-     * @param module удаляемый экземпляр модуля
-     * @return {@code true}, если модуль найден и удалён
+     * <p>Если в ALS присутствуют одинаковые модули и требуется удалить
+     * конкретную физическую позицию, следует использовать
+     * {@link #removeModuleAt(int)}.</p>
+     *
+     * @param module конфигурация удаляемого модуля
+     * @return {@code true}, если равный модуль найден и удалён
      */
     public boolean removeModule(Module module) {
         Objects.requireNonNull(module, "Модуль не должен быть null");
 
-        int index = findModuleIndexByIdentity(module);
-        if (index < 0) {
-            return false;
+        for (int i = 0; i < modules.size(); i++) {
+            if (modules.get(i).equals(module)) {
+                removeModuleAt(i);
+                return true;
+            }
         }
 
-        mutate(candidate -> candidate.modules.remove(index));
-        return true;
+        return false;
+    }
+
+    /**
+     * Удаляет модуль хранения по его физическому индексу в списке ALS.
+     *
+     * <p>Удаление управляющего модуля запрещено. Для удаления LBC
+     * требуется отдельная доменная операция, поскольку он выполняет
+     * одновременно две роли.</p>
+     *
+     * @param moduleIndex физический индекс модуля слева направо
+     * @throws IndexOutOfBoundsException если индекс выходит за границы
+     * @throws IllegalArgumentException если выбран управляющий модуль
+     */
+    public void removeModuleAt(int moduleIndex) {
+        Module current = modules.get(moduleIndex);
+
+        if (current instanceof ControlModule) {
+            throw new IllegalArgumentException(
+                    "Нельзя удалить управляющий модуль отдельно от его роли"
+            );
+        }
+
+        mutate(candidate -> candidate.modules.remove(moduleIndex));
+    }
+
+    /**
+     * Заменяет модуль по физическому индексу, сохраняя его доменные роли.
+     *
+     * @param moduleIndex физический индекс модуля слева направо
+     * @param replacement новый модуль
+     * @throws IllegalArgumentException если замена меняет роли модуля
+     */
+    public void replaceModuleAt(int moduleIndex, Module replacement) {
+        Objects.requireNonNull(replacement, "Новый модуль не должен быть null");
+
+        Module current = modules.get(moduleIndex);
+
+        boolean currentControl = current instanceof ControlModule;
+        boolean replacementControl = replacement instanceof ControlModule;
+        boolean currentStorage = current instanceof StorageModule;
+        boolean replacementStorage = replacement instanceof StorageModule;
+
+        if (currentControl != replacementControl
+                || currentStorage != replacementStorage) {
+            throw new IllegalArgumentException(
+                    "При замене модуля необходимо сохранить его доменные роли"
+            );
+        }
+
+        Module replacementCopy = replacement.copy();
+        mutate(candidate -> candidate.modules.set(moduleIndex, replacementCopy));
     }
 
     /**
@@ -361,31 +421,6 @@ public class ALS {
      * @throws IllegalArgumentException если модуль не принадлежит ALS
      *                                  или является управляющим
      */
-    public void replaceStorageModule(
-            StorageModule current,
-            StorageModule replacement
-    ) {
-        Objects.requireNonNull(current, "Текущий модуль не должен быть null");
-        Objects.requireNonNull(replacement, "Новый модуль не должен быть null");
-
-        if (current instanceof ControlModule
-                || replacement instanceof ControlModule) {
-            throw new IllegalArgumentException(
-                    "Замена LBC выполняется через операцию замены модуля управления"
-            );
-        }
-
-        int index = findModuleIndexByIdentity(current);
-        if (index < 0) {
-            throw new IllegalArgumentException(
-                    "Заменяемый модуль не принадлежит ALS"
-            );
-        }
-
-        Module replacementCopy = replacement.copy();
-        mutate(candidate -> candidate.modules.set(index, replacementCopy));
-    }
-
     /**
      * Выполняет изменение на независимом кандидате и публикует его
      * состояние только после успешной проверки и пересчёта.
@@ -452,15 +487,7 @@ public class ALS {
      * @throws IllegalStateException если модуль управления отсутствует
      */
     public ControlModule getControlModule() {
-        for (Module module : modules) {
-            if (module instanceof ControlModule controlModule) {
-                return controlModule;
-            }
-        }
-
-        throw new IllegalStateException(
-                "В ALS отсутствует модуль управления"
-        );
+        return (ControlModule) getControlModuleAsModule().copy();
     }
 
     /**
@@ -472,6 +499,7 @@ public class ALS {
         return modules.stream()
                 .filter(StorageModule.class::isInstance)
                 .map(StorageModule.class::cast)
+                .map(module -> (StorageModule) module.copy())
                 .toList();
     }
 
@@ -773,26 +801,6 @@ public class ALS {
                     "ALS должен содержать хотя бы один модуль хранения"
             );
         }
-    }
-
-    /**
-     * Ищет индекс конкретного экземпляра модуля.
-     *
-     * <p>Используется сравнение по {@code ==}, а не по equals(),
-     * поскольку одинаковые модули могут присутствовать в ALS
-     * одновременно как разные экземпляры.</p>
-     *
-     * @param module искомый экземпляр
-     * @return индекс экземпляра или {@code -1}, если он отсутствует
-     */
-    private int findModuleIndexByIdentity(Module module) {
-        for (int i = 0; i < modules.size(); i++) {
-            if (modules.get(i) == module) {
-                return i;
-            }
-        }
-
-        return -1;
     }
 
     /**

@@ -293,33 +293,23 @@ public class ALSService {
         Objects.requireNonNull(dto, "ALS не должен быть null");
         Objects.requireNonNull(lbId, "Идентификатор LB не должен быть null");
 
-        int dtoIndex = -1;
+        int lbIndex = -1;
         for (int i = 0; i < dto.getLbList().size(); i++) {
             if (Objects.equals(dto.getLbList().get(i).getId(), lbId)) {
-                dtoIndex = i;
+                lbIndex = i;
                 break;
             }
         }
 
-        if (dtoIndex < 0) {
+        if (lbIndex < 0) {
             throw new NoSuchElementException(
                     "LB с id " + lbId + " не найден в ALS " + dto.getId()
             );
         }
 
         var domain = ALSDtoMapper.toDomain(dto);
-        List<com.lb_calc_web.domain.model.LB> storageModules =
-                domain.getModules().stream()
-                        .filter(com.lb_calc_web.domain.model.LB.class::isInstance)
-                        .map(com.lb_calc_web.domain.model.LB.class::cast)
-                        .toList();
-
-        if (dtoIndex >= storageModules.size()
-                || !domain.removeModule(storageModules.get(dtoIndex))) {
-            throw new IllegalStateException(
-                    "Не удалось сопоставить LB из DTO с доменным модулем ALS"
-            );
-        }
+        int moduleIndex = findPhysicalLbIndex(domain, lbIndex);
+        domain.removeModuleAt(moduleIndex);
 
         return ALSDtoMapper.toDto(domain);
     }
@@ -350,24 +340,39 @@ public class ALSService {
         }
 
         var domain = ALSDtoMapper.toDomain(als);
-
-        List<LB> storageModules = domain.getModules().stream()
-                .filter(LB.class::isInstance)
-                .map(LB.class::cast)
-                .toList();
-
-        if (lbIndex >= storageModules.size()) {
-            throw new IllegalStateException(
-                    "Не удалось сопоставить LB DTO с модулем доменной ALS"
-            );
-        }
-
-        domain.replaceStorageModule(
-                storageModules.get(lbIndex),
+        int moduleIndex = findPhysicalLbIndex(domain, lbIndex);
+        domain.replaceModuleAt(
+                moduleIndex,
                 LBDtoMapper.toDomain(lb)
         );
 
         return ALSDtoMapper.toDto(domain);
+    }
+
+    /**
+     * Находит физический индекс LB по его позиции в DTO-списке LB.
+     */
+    private int findPhysicalLbIndex(
+            com.lb_calc_web.domain.model.ALS domain,
+            int lbIndex
+    ) {
+        int currentLbIndex = 0;
+        List<com.lb_calc_web.domain.model.Module> modules =
+                domain.getModules();
+
+        for (int i = 0; i < modules.size(); i++) {
+            if (modules.get(i) instanceof LB) {
+                if (currentLbIndex == lbIndex) {
+                    return i;
+                }
+
+                currentLbIndex++;
+            }
+        }
+
+        throw new IllegalStateException(
+                "Не удалось сопоставить LB DTO с модулем доменной ALS"
+        );
     }
 
     /**
