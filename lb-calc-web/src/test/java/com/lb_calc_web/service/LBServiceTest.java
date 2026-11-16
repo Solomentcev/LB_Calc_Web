@@ -46,9 +46,9 @@ class LBServiceTest {
         lbService =
                 new LBService(
                         lbRepository,
-                        environment
-                ),
-                        TestDataFactory.createSizeValidator()$2;
+                        environment,
+                        TestDataFactory.createSizeValidator()
+                );
     }
 
     @Test

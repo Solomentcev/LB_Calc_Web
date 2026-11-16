@@ -48,9 +48,9 @@ class ProjectServiceTest {
                         employeeRepository,
                         alsService,
                         employeeService,
-                        environment
-                ),
-                        TestDataFactory.createSizeValidator()$2;
+                        environment,
+                        TestDataFactory.createSizeValidator()
+                );
     }
 
     @Test

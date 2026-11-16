@@ -52,9 +52,9 @@ class LBCServiceTest {
         lbcService =
                 new LBCService(
                         lbcRepository,
-                        environment
-                ),
-                        TestDataFactory.createSizeValidator()$2;
+                        environment,
+                        TestDataFactory.createSizeValidator()
+                );
     }
 
     @Test

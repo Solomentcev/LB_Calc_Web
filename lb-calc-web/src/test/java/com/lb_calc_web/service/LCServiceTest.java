@@ -45,9 +45,9 @@ class LCServiceTest {
         lcService =
                 new LCService(
                         lcRepository,
-                        environment
-                ),
-                        TestDataFactory.createSizeValidator()$2;
+                        environment,
+                        TestDataFactory.createSizeValidator()
+                );
     }
 
     @Test

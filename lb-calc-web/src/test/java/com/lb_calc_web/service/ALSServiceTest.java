@@ -55,9 +55,9 @@ class ALSServiceTest {
                         lbService,
                         lcService,
                         lbcService,
-                        environment
-                ),
-                        TestDataFactory.createSizeValidator()$2;
+                        environment,
+                        TestDataFactory.createSizeValidator()
+                );
     }
 
     @Test
