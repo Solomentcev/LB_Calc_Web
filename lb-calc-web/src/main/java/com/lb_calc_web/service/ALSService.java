@@ -631,92 +631,31 @@ public class ALSService {
         return saved;
     }
 
+    /**
+     * Обновляет производные поля DTO на основании доменной модели ALS.
+     *
+     * <p>Расчёты ширины, количества ячеек, глубины и описания
+     * выполняются только доменной моделью. DTO получает готовые
+     * значения и не содержит самостоятельной бизнес-логики.</p>
+     */
     private void recalculateDto(
             ALSDTO dto
     ) {
-        int width = 0;
-        int countCells = 0;
-        int minDepthCell = Integer.MAX_VALUE;
-
-        if (dto.getLC() != null) {
-            width += dto.getLC().getWidth();
-        }
-
-        if (dto.getLBC() != null) {
-            width += dto.getLBC().getWidth();
-            countCells += dto.getLBC().getCountCells();
-
-            if (dto.getLBC().getDepthCell() > 0) {
-                minDepthCell =
-                        Math.min(
-                                minDepthCell,
-                                dto.getLBC().getDepthCell()
-                        );
-            }
-        }
-
-        if (dto.getLbList() != null) {
-            for (LBDTO lb : dto.getLbList()) {
-                width += lb.getWidth();
-                countCells += lb.getCountCells();
-
-                if (lb.getDepthCell() > 0) {
-                    minDepthCell =
-                            Math.min(
-                                    minDepthCell,
-                                    lb.getDepthCell()
-                            );
-                }
-            }
-        }
-
-        dto.setWidth(width);
-        dto.setCountCells(countCells);
-        dto.setDepthCell(
-                minDepthCell == Integer.MAX_VALUE
-                        ? 0
-                        : minDepthCell
+        Objects.requireNonNull(
+                dto,
+                "ALS не должен быть null"
         );
 
-        dto.setName(
-                "АКХ на "
-                        + countCells
-                        + " ячеек"
-        );
+        var domain = ALSDtoMapper.toDomain(dto);
+        ALSDTO calculated = ALSDtoMapper.toDto(domain);
 
-        String controlDescription = "";
-
-        if (dto.getLBC() != null) {
-            controlDescription =
-                    dto.getLBC().getDescription();
-        } else if (dto.getLC() != null) {
-            controlDescription =
-                    dto.getLC().getDescription();
-        }
-
-        int storageModuleCount =
-                dto.getLbList() == null
-                        ? 0
-                        : dto.getLbList().size()
-                                + (dto.getLBC() != null ? 1 : 0);
-
-        dto.setDescription(
-                "АКХ на "
-                        + countCells
-                        + " ячеек, ВхШхГ, мм: "
-                        + dto.getHeight()
-                        + "x"
-                        + dto.getWidth()
-                        + "x"
-                        + dto.getDepth()
-                        + "; Цвет: "
-                        + dto.getColorBody()
-                        + "/"
-                        + dto.getColorDoor()
-                        + "; Модулей хранения: "
-                        + storageModuleCount
-                        + " шт.;\n"
-                        + controlDescription
+        dto.setName(calculated.getName());
+        dto.setDescription(calculated.getDescription());
+        dto.setWidth(calculated.getWidth());
+        dto.setCountCells(calculated.getCountCells());
+        dto.setDepthCell(calculated.getDepthCell());
+        dto.setPositionControlModule(
+                calculated.getPositionControlModule()
         );
     }
 
