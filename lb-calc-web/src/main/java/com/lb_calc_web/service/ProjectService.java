@@ -204,18 +204,18 @@ public class ProjectService {
                 existing
         );
 
+        /*
+         * Сначала проверяем весь проект. До успешной валидации
+         * не создаём и не связываем новые конфигурации ALS.
+         */
+        validateProject(dto);
+
         List<ALSDTO> savedALS =
                 saveALS(
                         dto.getAlsList()
                 );
 
-        dto.setAlsList(
-                savedALS
-        );
-
-        validateProject(
-                dto
-        );
+        dto.setAlsList(savedALS);
 
         Project domain =
                 ProjectDtoMapper.toDomain(
@@ -530,8 +530,6 @@ public class ProjectService {
                     current.getId(),
                     alsId
             )) {
-                als.setId(alsId);
-
                 alsList.set(
                         i,
                         als

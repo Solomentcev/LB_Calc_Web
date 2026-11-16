@@ -197,8 +197,6 @@ public class ALSService {
                 dto.getName()
         );
 
-        saveChildModules(dto);
-
         validate(dto);
 
         var domain = ALSDtoMapper.toDomain(dto);
@@ -206,7 +204,7 @@ public class ALSService {
         Optional<ALSEntity> duplicate =
                 findDuplicate(
                         domain,
-                        dto.getId()
+                        null
                 );
 
         if (duplicate.isPresent()) {
@@ -224,33 +222,13 @@ public class ALSService {
             );
         }
 
-        ALSEntity entity;
-
-        if (dto.getId() != null
-                && dto.getId() > 0) {
-
-            entity =
-                    alsRepository.findById(
-                            dto.getId()
-                    ).orElseThrow(
-                            () -> new NoSuchElementException(
-                                    "АКХ с id"
-                                            + dto.getId()
-                                            + " не найдена"
-                            )
-                    );
-
-            updateEntity(
-                    domain,
-                    entity
-            );
-
-        } else {
-            entity =
-                    createEntity(
-                            domain
-                    );
-        }
+        /*
+         * Сохранённая конфигурация ALS неизменяема.
+         * Изменённая конфигурация создаётся как новая запись;
+         * существующая запись может быть только переиспользована
+         * при полном совпадении доменной конфигурации.
+         */
+        ALSEntity entity = createEntity(domain);
 
         ALSEntity saved =
                 alsRepository.save(entity);
