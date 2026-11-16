@@ -8,9 +8,12 @@ import com.lb_calc_web.entity.EmployeeEntity;
 import com.lb_calc_web.entity.ProjectALSEntity;
 import com.lb_calc_web.entity.ProjectEntity;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
 
 /**
  * Маппер проекта между доменной и persistence-моделями.
@@ -81,7 +84,7 @@ public final class ProjectEntityMapper {
      *
      * @param domain доменный проект
      * @param employeeResolver преобразователь Employee → EmployeeEntity
-     * @param alsEntities соответствие ALS → ALSEntity
+     * @param alsResolver функция разрешения ALS в ALSEntity
      * @return новая persistence-сущность
      */
     public static ProjectEntity toEntity(
@@ -90,7 +93,7 @@ public final class ProjectEntityMapper {
                     Employee,
                     EmployeeEntity
                     > employeeResolver,
-            Map<ALS, ALSEntity> alsEntities
+            Function<ALS, ALSEntity> alsResolver
     ) {
         Objects.requireNonNull(
                 domain,
@@ -104,7 +107,7 @@ public final class ProjectEntityMapper {
                 domain,
                 entity,
                 employeeResolver,
-                alsEntities
+                alsResolver
         );
 
         return entity;
@@ -117,7 +120,7 @@ public final class ProjectEntityMapper {
      * @param domain доменный проект
      * @param entity существующая persistence-сущность
      * @param employeeResolver преобразователь Employee → EmployeeEntity
-     * @param alsEntities соответствие ALS → ALSEntity
+     * @param alsResolver функция разрешения ALS в ALSEntity
      */
     public static void updateEntity(
             Project domain,
@@ -126,7 +129,7 @@ public final class ProjectEntityMapper {
                     Employee,
                     EmployeeEntity
                     > employeeResolver,
-            Map<ALS, ALSEntity> alsEntities
+            Function<ALS, ALSEntity> alsResolver
     ) {
         Objects.requireNonNull(
                 domain,
@@ -144,8 +147,8 @@ public final class ProjectEntityMapper {
         );
 
         Objects.requireNonNull(
-                alsEntities,
-                "alsEntities не должен быть null"
+                alsResolver,
+                "alsResolver не должен быть null"
         );
 
         entity.setName(
@@ -187,45 +190,67 @@ public final class ProjectEntityMapper {
         );
 
         /*
-         * Collection принадлежит ProjectEntity.
-         * При обновлении заменяем её содержимое,
-         * а orphanRemoval удаляет старые связи.
+         * Сохраняем существующие строки связи, если ALS остаётся
+         * в составе проекта. Это сохраняет ID ProjectALSEntity
+         * и не создаёт лишние DELETE/INSERT при обычном обновлении.
          */
-        entity.getAlsEntries().clear();
+        Map<Long, Integer> desiredQuantities =
+                new LinkedHashMap<>();
+
+        Map<Long, ALSEntity> desiredALSEntities =
+                new LinkedHashMap<>();
 
         for (Map.Entry<ALS, Integer> entry :
                 domain.getQuantityALS().entrySet()) {
 
-            ALS als =
-                    Objects.requireNonNull(
-                            entry.getKey(),
-                            "ALS не должен быть null"
-                    );
+            ALS als = Objects.requireNonNull(
+                    entry.getKey(),
+                    "ALS не должен быть null"
+            );
 
-            ALSEntity alsEntity =
-                    Objects.requireNonNull(
-                            alsEntities.get(als),
-                            "Для ALS не найдена ALSEntity"
-                    );
+            ALSEntity alsEntity = Objects.requireNonNull(
+                    alsResolver.apply(als),
+                    "Для ALS не найдена ALSEntity"
+            );
+
+            desiredQuantities.put(
+                    alsEntity.getId(),
+                    entry.getValue()
+            );
+
+            desiredALSEntities.put(
+                    alsEntity.getId(),
+                    alsEntity
+            );
+        }
+
+        List<ProjectALSEntity> entriesToRemove =
+                new ArrayList<>();
+
+        for (ProjectALSEntity current : entity.getAlsEntries()) {
+            Long alsId = current.getAls().getId();
+            Integer quantity = desiredQuantities.remove(alsId);
+
+            if (quantity == null) {
+                entriesToRemove.add(current);
+            } else {
+                current.setQuantity(quantity);
+            }
+        }
+
+        entity.getAlsEntries().removeAll(entriesToRemove);
+
+        for (Map.Entry<Long, Integer> entry :
+                desiredQuantities.entrySet()) {
 
             ProjectALSEntity projectAls =
                     new ProjectALSEntity();
 
-            projectAls.setProject(
-                    entity
-            );
+            projectAls.setProject(entity);
+            projectAls.setAls(desiredALSEntities.get(entry.getKey()));
+            projectAls.setQuantity(entry.getValue());
 
-            projectAls.setAls(
-                    alsEntity
-            );
-
-            projectAls.setQuantity(
-                    entry.getValue()
-            );
-
-            entity.getAlsEntries().add(
-                    projectAls
-            );
+            entity.getAlsEntries().add(projectAls);
         }
     }
 }
