@@ -313,23 +313,46 @@ public abstract class StorageModule extends Module {
             );
         }
 
+        if (countCells > 20) {
+            throw new IllegalStateException(
+                    "Количество ячеек не должно превышать 20: "
+                            + countCells
+            );
+        }
+
         int cellWidth =
-                getWidth() - typeLb.getDeltaWidth();
+                getWidth()
+                        - typeLb.getDeltaWidth()
+                        - typeLb.getServiceZoneWidth();
 
         int cellDepth =
                 getDepth() - doorThickness;
 
-        double usableHeight =
-                getHeight()
+        long usableHeight =
+                (long) getHeight()
                         - getUpperFrame()
                         - getBottomFrame()
-                        - ((countCells - 1) * typeLb.getShelfThick());
+                        - ((long) (countCells - 1)
+                        * typeLb.getShelfThick());
 
-        double cellHeight =
-                usableHeight / countCells;
+        int cellHeight =
+                (int) (usableHeight / countCells);
+
+        if (cellHeight < 85) {
+            throw new IllegalStateException(
+                    String.format(
+                            "Высота ячейки %d мм меньше минимально "
+                                    + "допустимой 85 мм "
+                                    + "(модуль: %d мм, ячеек: %d)",
+                            cellHeight,
+                            getHeight(),
+                            countCells
+                    )
+            );
+        }
 
         setCellDimensions(
-                (int) cellHeight,
+                cellHeight,
                 cellWidth,
                 cellDepth
         );
