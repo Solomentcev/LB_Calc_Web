@@ -196,8 +196,17 @@ public abstract class StorageModule extends Module {
      * @throws IllegalArgumentException если количество меньше единицы
      */
     public void setCountCells(int countCells) {
+        List<StorageCell> previousCells = new ArrayList<>(cells);
+
         setCells(createCells(countCells));
-        recalculate();
+
+        try {
+            recalculate();
+        } catch (RuntimeException exception) {
+            setCells(previousCells);
+            recalculate();
+            throw exception;
+        }
     }
 
     /**
@@ -229,9 +238,9 @@ public abstract class StorageModule extends Module {
      * @throws IllegalArgumentException если количество меньше единицы
      */
     protected List<StorageCell> createCells(int countCells) {
-        if (countCells < 1) {
+        if (countCells < 1 || countCells > 20) {
             throw new IllegalArgumentException(
-                    "Количество ячеек должно быть больше нуля"
+                    "Количество ячеек должно быть от 1 до 20"
             );
         }
 
@@ -314,7 +323,9 @@ public abstract class StorageModule extends Module {
         }
 
         int cellWidth =
-                getWidth() - typeLb.getDeltaWidth();
+                getWidth()
+                        - typeLb.getDeltaWidth()
+                        - typeLb.getServiceZoneWidth();
 
         int cellDepth =
                 getDepth() - doorThickness;
@@ -325,11 +336,18 @@ public abstract class StorageModule extends Module {
                         - getBottomFrame()
                         - ((countCells - 1) * typeLb.getShelfThick());
 
-        double cellHeight =
-                usableHeight / countCells;
+        int cellHeight =
+                (int) (usableHeight / countCells);
+
+        if (cellHeight < 85) {
+            throw new IllegalStateException(
+                    "Высота ячейки " + cellHeight
+                            + " мм меньше допустимых 85 мм"
+            );
+        }
 
         setCellDimensions(
-                (int) cellHeight,
+                cellHeight,
                 cellWidth,
                 cellDepth
         );
