@@ -17,6 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class SizeValidatorTest {
 
+    private SizeValidator sizeValidator;
     private LBDTO lb;
     private LCDTO lc;
     private LBCDTO lbc;
@@ -25,7 +26,7 @@ class SizeValidatorTest {
 
     @BeforeEach
     void setUp() {
-        TestDataFactory.initSizeValidator();
+        sizeValidator = TestDataFactory.createSizeValidator();
 
         lb = TestDataFactory.validLBDTO(1L);
         lc = TestDataFactory.validLCDTO(2L);
@@ -38,7 +39,7 @@ class SizeValidatorTest {
     void validateRange_withinBounds_shouldPass() {
         ValidationResult result = new ValidationResult();
 
-        SizeValidator.validateRange(
+        sizeValidator.validateRange(
                 result,
                 "height",
                 100,
@@ -54,7 +55,7 @@ class SizeValidatorTest {
     void validateRange_belowMin_shouldAddError() {
         ValidationResult result = new ValidationResult();
 
-        SizeValidator.validateRange(
+        sizeValidator.validateRange(
                 result,
                 "height",
                 40,
@@ -73,7 +74,7 @@ class SizeValidatorTest {
     void validateRange_aboveMax_shouldAddError() {
         ValidationResult result = new ValidationResult();
 
-        SizeValidator.validateRange(
+        sizeValidator.validateRange(
                 result,
                 "height",
                 210,
@@ -91,7 +92,7 @@ class SizeValidatorTest {
     @Test
     void validateLB_valid_shouldPass() {
         ValidationResult result =
-                SizeValidator.validateLB(lb);
+                sizeValidator.validateLB(lb);
 
         assertTrue(result.isValid());
     }
@@ -100,7 +101,7 @@ class SizeValidatorTest {
     void validateLB_widthShouldIncludeServiceZoneWidth() {
         lb.setWidth(239);
 
-        ValidationResult result = SizeValidator.validateLB(lb);
+        ValidationResult result = sizeValidator.validateLB(lb);
 
         assertTrue(
                 result.getErrors().stream()
@@ -116,7 +117,7 @@ class SizeValidatorTest {
     void validateLBC_widthShouldIncludeServiceZoneWidth() {
         lbc.setWidth(239);
 
-        ValidationResult result = SizeValidator.validateLBC(lbc);
+        ValidationResult result = sizeValidator.validateLBC(lbc);
 
         assertTrue(
                 result.getErrors().stream()
@@ -131,7 +132,7 @@ class SizeValidatorTest {
     @Test
     void validateLC_valid_shouldPass() {
         ValidationResult result =
-                SizeValidator.validateLC(lc);
+                sizeValidator.validateLC(lc);
 
         assertTrue(result.isValid());
     }
@@ -139,7 +140,7 @@ class SizeValidatorTest {
     @Test
     void validateLBC_valid_shouldPass() {
         ValidationResult result =
-                SizeValidator.validateLBC(lbc);
+                sizeValidator.validateLBC(lbc);
 
         assertTrue(result.isValid());
     }
@@ -149,12 +150,12 @@ class SizeValidatorTest {
         lbc.setHeight(
                 lbc.getUpperFrame()
                         + lbc.getBottomFrame()
-                        + SizeValidator.getHeightLcPanelMin()
+                        + sizeValidator.getHeightLcPanelMin()
                         - 10
         );
 
         ValidationResult result =
-                SizeValidator.validateLBC(lbc);
+                sizeValidator.validateLBC(lbc);
 
         assertFalse(result.isValid());
     }
@@ -162,7 +163,7 @@ class SizeValidatorTest {
     @Test
     void validateALS_validWithLC_shouldPass() {
         ValidationResult result =
-                SizeValidator.validateALS(als);
+                sizeValidator.validateALS(als);
 
         assertTrue(result.isValid());
     }
@@ -173,7 +174,7 @@ class SizeValidatorTest {
                 TestDataFactory.validLBCALSDTO(20L);
 
         ValidationResult result =
-                SizeValidator.validateALS(lbcAls);
+                sizeValidator.validateALS(lbcAls);
 
         assertTrue(result.isValid());
     }
@@ -184,7 +185,7 @@ class SizeValidatorTest {
         als.setLBC(null);
 
         ValidationResult result =
-                SizeValidator.validateALS(als);
+                sizeValidator.validateALS(als);
 
         assertFalse(result.isValid());
         assertTrue(
@@ -207,7 +208,7 @@ class SizeValidatorTest {
         lbcAls.setLbList(List.of());
 
         ValidationResult result =
-                SizeValidator.validateALS(lbcAls);
+                sizeValidator.validateALS(lbcAls);
 
         assertTrue(result.isValid());
     }
@@ -217,7 +218,7 @@ class SizeValidatorTest {
         lb.setHeight(10);
 
         ValidationResult result =
-                SizeValidator.validateLB(lb);
+                sizeValidator.validateLB(lb);
 
         assertFalse(result.isValid());
         assertTrue(
@@ -237,12 +238,12 @@ class SizeValidatorTest {
         lc.setHeight(
                 lc.getUpperFrame()
                         + lc.getBottomFrame()
-                        + SizeValidator.getHeightLcPanelMin()
+                        + sizeValidator.getHeightLcPanelMin()
                         - 1
         );
 
         ValidationResult result =
-                SizeValidator.validateLC(lc);
+                sizeValidator.validateLC(lc);
 
         assertFalse(result.isValid());
         assertTrue(
@@ -266,7 +267,7 @@ class SizeValidatorTest {
         );
 
         List<ValidationResult> results =
-                SizeValidator.validateProject(
+                sizeValidator.validateProject(
                         lbcProject
                 );
 
@@ -286,7 +287,7 @@ class SizeValidatorTest {
         lbc.setHeight(10);
 
         List<String> errors =
-                SizeValidator.getErrorValidateLBCSizesList(
+                sizeValidator.getErrorValidateLBCSizesList(
                         lbc
                 );
 
@@ -299,7 +300,7 @@ class SizeValidatorTest {
                 TestDataFactory.validLBCALSDTO(40L);
 
         List<ValidationResult> results =
-                SizeValidator.deepValidateALS(lbcAls);
+                sizeValidator.deepValidateALS(lbcAls);
 
         assertTrue(
                 results.stream()
@@ -316,7 +317,7 @@ class SizeValidatorTest {
     void validateLBCellCount_shouldRespectConfiguredBounds() {
         ValidationResult result = new ValidationResult();
 
-        SizeValidator.validateLBCellCount(
+        sizeValidator.validateLBCellCount(
                 result,
                 lb,
                 new TypeLb("TYPE1", 100, 5, 40)

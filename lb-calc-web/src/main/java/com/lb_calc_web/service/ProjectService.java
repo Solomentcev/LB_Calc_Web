@@ -56,6 +56,7 @@ public class ProjectService {
     private final ALSService alsService;
     private final EmployeeService employeeService;
     private final Environment environment;
+    private final SizeValidator sizeValidator;
 
     public ProjectService(
             ProjectRepository projectRepository,
@@ -63,7 +64,8 @@ public class ProjectService {
             EmployeeRepository employeeRepository,
             ALSService alsService,
             EmployeeService employeeService,
-            Environment environment
+            Environment environment,
+            SizeValidator sizeValidator
     ) {
         this.projectRepository = projectRepository;
         this.alsRepository = alsRepository;
@@ -71,6 +73,7 @@ public class ProjectService {
         this.alsService = alsService;
         this.employeeService = employeeService;
         this.environment = environment;
+        this.sizeValidator = sizeValidator;
     }
 
     @Transactional(readOnly = true)
@@ -1052,7 +1055,7 @@ public class ProjectService {
             ProjectDTO dto
     ) {
         List<ValidationResult> results =
-                SizeValidator.validateProject(
+                sizeValidator.validateProject(
                         dto
                 );
 

@@ -47,6 +47,7 @@ public class ALSService {
     private final LCService lcService;
     private final LBCService lbcService;
     private final Environment environment;
+    private final SizeValidator sizeValidator;
 
     public ALSService(
             ALSRepository alsRepository,
@@ -54,7 +55,8 @@ public class ALSService {
             LBService lbService,
             LCService lcService,
             LBCService lbcService,
-            Environment environment
+            Environment environment,
+            SizeValidator sizeValidator
     ) {
         this.alsRepository = alsRepository;
         this.moduleRepository = moduleRepository;
@@ -62,6 +64,7 @@ public class ALSService {
         this.lcService = lcService;
         this.lbcService = lbcService;
         this.environment = environment;
+        this.sizeValidator = sizeValidator;
     }
 
     @Transactional(readOnly = true)
@@ -463,7 +466,7 @@ public class ALSService {
             ALSDTO dto
     ) {
         var results =
-                SizeValidator.deepValidateALS(
+                sizeValidator.deepValidateALS(
                         dto
                 );
 

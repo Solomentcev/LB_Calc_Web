@@ -45,13 +45,16 @@ public class LBCService {
 
     private final LBCRepository lbcRepository;
     private final Environment environment;
+    private final SizeValidator sizeValidator;
 
     public LBCService(
             LBCRepository lbcRepository,
-            Environment environment
+            Environment environment,
+            SizeValidator sizeValidator
     ) {
         this.lbcRepository = lbcRepository;
         this.environment = environment;
+        this.sizeValidator = sizeValidator;
     }
 
     /**
@@ -206,7 +209,7 @@ public class LBCService {
         applyTypeConfiguration(dto);
 
         ValidationResult validationResult =
-                SizeValidator.validateLBC(dto);
+                sizeValidator.validateLBC(dto);
 
         if (!validationResult.isValid()) {
             logger.warn(

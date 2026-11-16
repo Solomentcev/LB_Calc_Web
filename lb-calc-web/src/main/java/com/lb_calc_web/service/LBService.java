@@ -30,13 +30,16 @@ public class LBService {
 
     private final LBRepository lbRepository;
     private final Environment environment;
+    private final SizeValidator sizeValidator;
 
     public LBService(
             LBRepository lbRepository,
-            Environment environment
+            Environment environment,
+            SizeValidator sizeValidator
     ) {
         this.lbRepository = lbRepository;
         this.environment = environment;
+        this.sizeValidator = sizeValidator;
     }
 
     /**
@@ -171,7 +174,7 @@ public class LBService {
          * Проверяем размеры до преобразования в Domain.
          */
         ValidationResult validationResult =
-                SizeValidator.validateLB(dto);
+                sizeValidator.validateLB(dto);
 
         if (!validationResult.isValid()) {
             logger.warn(

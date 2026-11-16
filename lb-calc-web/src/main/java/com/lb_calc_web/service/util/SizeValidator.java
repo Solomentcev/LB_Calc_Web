@@ -10,358 +10,31 @@ import com.lb_calc_web.domain.equipment.Display;
 import com.lb_calc_web.dto.validation.ValidationResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import jakarta.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
 
 @Component
 public class SizeValidator {
 
-    private static final Logger logger =
+    private final Logger logger =
             LoggerFactory.getLogger(SizeValidator.class);
 
-    private static int UPPER_FRAME_MIN;
-    private static int UPPER_FRAME_MAX;
+    private final SizeBounds bounds;
 
-    private static int BOTTOM_FRAME_MIN;
-    private static int BOTTOM_FRAME_MAX;
-
-    private static int HEIGHT_CELL_MIN;
-    private static int HEIGHT_MAX;
-    private static int HEIGHT_MIN;
-    private static int HEIGHT_LC_MIN;
-    private static int HEIGHT_LC_PANEL_MIN;
-
-    private static int COUNT_CELLS_MIN;
-    private static int COUNT_CELLS_MAX;
-
-    private static int WIDTH_CELL_MIN;
-    private static int WIDTH_MAX;
-
-    private static int DEPTH_CELL_MIN;
-    private static int DEPTH_CELL_MAX;
-    private static int DEPTH_MIN;
-    private static int DEPTH_MAX;
-
-    private static int DOOR_THICKNESS_MIN;
-    private static int DOOR_THICKNESS_MAX;
-
-    private static int TYPE_DELTA_WIDTH_MIN;
-    private static int TYPE_DELTA_WIDTH_MAX;
-
-    private static int TYPE_SHELF_THICK_MIN;
-    private static int TYPE_SHELF_THICK_MAX;
-
-    private static int TYPE_SERVICE_ZONE_WIDTH_MIN;
-    private static int TYPE_SERVICE_ZONE_WIDTH_MAX;
-
-    /*
-     * Значения берутся только из size-bounds.properties.
-     */
-
-    @Value("${size.frame.upper.min}")
-    private int upperFrameMin;
-
-    @Value("${size.frame.upper.max}")
-    private int upperFrameMax;
-
-    @Value("${size.frame.bottom.min}")
-    private int bottomFrameMin;
-
-    @Value("${size.frame.bottom.max}")
-    private int bottomFrameMax;
-
-    @Value("${size.height.cell.min}")
-    private int heightCellMin;
-
-    @Value("${size.height.max}")
-    private int heightMax;
-
-    @Value("${size.height.min}")
-    private int heightMin;
-
-    @Value("${size.height.lc.min}")
-    private int heightLcMin;
-
-    @Value("${size.height.lc.panel.min}")
-    private int heightLcPanelMin;
-
-    @Value("${size.count.cells.min}")
-    private int countCellsMin;
-
-    @Value("${size.count.cells.max}")
-    private int countCellsMax;
-
-    @Value("${size.width.cell.min}")
-    private int widthCellMin;
-
-    @Value("${size.width.max}")
-    private int widthMax;
-
-    @Value("${size.depth.cell.min}")
-    private int depthCellMin;
-
-    @Value("${size.depth.cell.max}")
-    private int depthCellMax;
-
-    @Value("${size.depth.min}")
-    private int depthMin;
-
-    @Value("${size.depth.max}")
-    private int depthMax;
-
-    @Value("${size.door.thickness.min}")
-    private int doorThicknessMin;
-
-    @Value("${size.door.thickness.max}")
-    private int doorThicknessMax;
-
-    @Value("${size.type.delta-width.min}")
-    private int typeDeltaWidthMin;
-
-    @Value("${size.type.delta-width.max}")
-    private int typeDeltaWidthMax;
-
-    @Value("${size.type.shelf-thick.min}")
-    private int typeShelfThickMin;
-
-    @Value("${size.type.shelf-thick.max}")
-    private int typeShelfThickMax;
-
-    @Value("${size.type.service-zone-width.min}")
-    private int typeServiceZoneWidthMin;
-
-    @Value("${size.type.service-zone-width.max}")
-    private int typeServiceZoneWidthMax;
-
-    @PostConstruct
-    private void init() {
-
-        UPPER_FRAME_MIN = upperFrameMin;
-        UPPER_FRAME_MAX = upperFrameMax;
-
-        BOTTOM_FRAME_MIN = bottomFrameMin;
-        BOTTOM_FRAME_MAX = bottomFrameMax;
-
-        HEIGHT_CELL_MIN = heightCellMin;
-        HEIGHT_MAX = heightMax;
-        HEIGHT_MIN = heightMin;
-        HEIGHT_LC_MIN = heightLcMin;
-        HEIGHT_LC_PANEL_MIN = heightLcPanelMin;
-
-        COUNT_CELLS_MIN = countCellsMin;
-        COUNT_CELLS_MAX = countCellsMax;
-
-        WIDTH_CELL_MIN = widthCellMin;
-        WIDTH_MAX = widthMax;
-
-        DEPTH_CELL_MIN = depthCellMin;
-        DEPTH_CELL_MAX = depthCellMax;
-        DEPTH_MIN = depthMin;
-        DEPTH_MAX = depthMax;
-
-        DOOR_THICKNESS_MIN = doorThicknessMin;
-        DOOR_THICKNESS_MAX = doorThicknessMax;
-
-        TYPE_DELTA_WIDTH_MIN = typeDeltaWidthMin;
-        TYPE_DELTA_WIDTH_MAX = typeDeltaWidthMax;
-
-        TYPE_SHELF_THICK_MIN = typeShelfThickMin;
-        TYPE_SHELF_THICK_MAX = typeShelfThickMax;
-
-        TYPE_SERVICE_ZONE_WIDTH_MIN = typeServiceZoneWidthMin;
-        TYPE_SERVICE_ZONE_WIDTH_MAX = typeServiceZoneWidthMax;
-
-        logger.info("SizeValidator configuration loaded");
+    public SizeValidator(SizeBounds bounds) {
+        this.bounds = bounds;
     }
 
-    public static int getUpperFrameMin() {
-        return UPPER_FRAME_MIN;
-    }
-
-    public static int getUpperFrameMax() {
-        return UPPER_FRAME_MAX;
-    }
-
-    public static int getBottomFrameMin() {
-        return BOTTOM_FRAME_MIN;
-    }
-
-    public static int getBottomFrameMax() {
-        return BOTTOM_FRAME_MAX;
-    }
-
-    public static int getHeightCellMin() {
-        return HEIGHT_CELL_MIN;
-    }
-
-    public static int getHeightMax() {
-        return HEIGHT_MAX;
-    }
-
-    public static int getHeightMin() {
-        return HEIGHT_MIN;
-    }
-
-    public static int getHeightLcMin() {
-        return HEIGHT_LC_MIN;
-    }
-
-    public static int getHeightLcPanelMin() {
-        return HEIGHT_LC_PANEL_MIN;
-    }
-
-    public static int getCountCellsMin() {
-        return COUNT_CELLS_MIN;
-    }
-
-    public static int getCountCellsMax() {
-        return COUNT_CELLS_MAX;
-    }
-
-    public static int getWidthCellMin() {
-        return WIDTH_CELL_MIN;
-    }
-
-    public static int getWidthMax() {
-        return WIDTH_MAX;
-    }
-
-    public static int getDepthCellMin() {
-        return DEPTH_CELL_MIN;
-    }
-
-    public static int getDepthCellMax() {
-        return DEPTH_CELL_MAX;
-    }
-
-    public static int getDepthMin() {
-        return DEPTH_MIN;
-    }
-
-    public static int getDepthMax() {
-        return DEPTH_MAX;
-    }
-
-    public static int getDoorThicknessMin() {
-        return DOOR_THICKNESS_MIN;
-    }
-
-    public static int getDoorThicknessMax() {
-        return DOOR_THICKNESS_MAX;
-    }
-
-    /*
-     * Эти setters оставляем для существующих unit-тестов.
-     */
-
-    public static void setUpperFrameMin(int value) {
-        UPPER_FRAME_MIN = value;
-    }
-
-    public static void setUpperFrameMax(int value) {
-        UPPER_FRAME_MAX = value;
-    }
-
-    public static void setBottomFrameMin(int value) {
-        BOTTOM_FRAME_MIN = value;
-    }
-
-    public static void setBottomFrameMax(int value) {
-        BOTTOM_FRAME_MAX = value;
-    }
-
-    public static void setHeightCellMin(int value) {
-        HEIGHT_CELL_MIN = value;
-    }
-
-    public static void setHeightMax(int value) {
-        HEIGHT_MAX = value;
-    }
-
-    public static void setHeightMin(int value) {
-        HEIGHT_MIN = value;
-    }
-
-    public static void setHeightLcMin(int value) {
-        HEIGHT_LC_MIN = value;
-    }
-
-    public static void setHeightLcPanelMin(int value) {
-        HEIGHT_LC_PANEL_MIN = value;
-    }
-
-    public static void setCountCellsMin(int value) {
-        COUNT_CELLS_MIN = value;
-    }
-
-    public static void setCountCellsMax(int value) {
-        COUNT_CELLS_MAX = value;
-    }
-
-    public static void setTypeDeltaWidthMin(int value) {
-        TYPE_DELTA_WIDTH_MIN = value;
-    }
-
-    public static void setTypeDeltaWidthMax(int value) {
-        TYPE_DELTA_WIDTH_MAX = value;
-    }
-
-    public static void setTypeShelfThickMin(int value) {
-        TYPE_SHELF_THICK_MIN = value;
-    }
-
-    public static void setTypeShelfThickMax(int value) {
-        TYPE_SHELF_THICK_MAX = value;
-    }
-
-    public static void setTypeServiceZoneWidthMin(int value) {
-        TYPE_SERVICE_ZONE_WIDTH_MIN = value;
-    }
-
-    public static void setTypeServiceZoneWidthMax(int value) {
-        TYPE_SERVICE_ZONE_WIDTH_MAX = value;
-    }
-
-    public static void setWidthCellMin(int value) {
-        WIDTH_CELL_MIN = value;
-    }
-
-    public static void setWidthMax(int value) {
-        WIDTH_MAX = value;
-    }
-
-    public static void setDepthCellMin(int value) {
-        DEPTH_CELL_MIN = value;
-    }
-
-    public static void setDepthMax(int value) {
-        DEPTH_MAX = value;
-    }
-
-    public static void setDepthMin(int value) {
-        DEPTH_MIN = value;
-    }
-
-    public static void setDepthCellMax(int value) {
-        DEPTH_CELL_MAX = value;
-    }
-
-    public static void setDoorThicknessMin(int value) {
-        DOOR_THICKNESS_MIN = value;
-    }
-
-    public static void setDoorThicknessMax(int value) {
-        DOOR_THICKNESS_MAX = value;
+    public int getHeightLcPanelMin() {
+        return bounds.getHeightLcPanelMin();
     }
 
     /**
      * Проверка диапазона.
      */
-    static void validateRange(
+    void validateRange(
             ValidationResult result,
             String fieldName,
             int value,
@@ -393,7 +66,7 @@ public class SizeValidator {
     /**
      * Проверка консистентности LC.
      */
-    static void validateLCConsistency(
+    void validateLCConsistency(
             ValidationResult result,
             LCDTO lc
     ) {
@@ -402,14 +75,14 @@ public class SizeValidator {
                         - lc.getUpperFrame()
                         - lc.getBottomFrame();
 
-        if (usableHeight < HEIGHT_LC_PANEL_MIN) {
+        if (usableHeight < bounds.getHeightLcPanelMin()) {
             result.addError(
                     result,
                     "heightConsistency",
                     "Полезная высота слишком мала для панели управления",
                     usableHeight,
-                    HEIGHT_LC_PANEL_MIN,
-                    HEIGHT_MAX
+                    bounds.getHeightLcPanelMin(),
+                    bounds.getHeightMax()
             );
         }
     }
@@ -417,7 +90,7 @@ public class SizeValidator {
     /**
      * Проверка консистентности ALS.
      */
-    static void validateALSConsistency(
+    void validateALSConsistency(
             ValidationResult result,
             ALSDTO als
     ) {
@@ -456,25 +129,25 @@ public class SizeValidator {
                         - als.getUpperFrame()
                         - als.getBottomFrame();
 
-        if (usableHeight < HEIGHT_CELL_MIN) {
+        if (usableHeight < bounds.getHeightCellMin()) {
             result.addError(
                     result,
                     "heightConsistency",
                     "Полезная высота слишком мала для ячейки",
                     usableHeight,
-                    HEIGHT_CELL_MIN,
-                    HEIGHT_MAX
+                    bounds.getHeightCellMin(),
+                    bounds.getHeightMax()
             );
         }
 
-        if (usableHeight < HEIGHT_LC_PANEL_MIN) {
+        if (usableHeight < bounds.getHeightLcPanelMin()) {
             result.addError(
                     result,
                     "heightConsistency",
                     "Полезная высота слишком мала для панели управления",
                     usableHeight,
-                    HEIGHT_LC_PANEL_MIN,
-                    HEIGHT_MAX
+                    bounds.getHeightLcPanelMin(),
+                    bounds.getHeightMax()
             );
         }
     }
@@ -483,7 +156,7 @@ public class SizeValidator {
      * Проверка консистентности LBC.
      * LBC должен одновременно обеспечивать хранение и панель управления.
      */
-    static void validateLBCConsistency(
+    void validateLBCConsistency(
             ValidationResult result,
             LBCDTO lbc
     ) {
@@ -492,14 +165,14 @@ public class SizeValidator {
                         - lbc.getUpperFrame()
                         - lbc.getBottomFrame();
 
-        if (usableHeight < HEIGHT_LC_PANEL_MIN) {
+        if (usableHeight < bounds.getHeightLcPanelMin()) {
             result.addError(
                     result,
                     "heightConsistency",
                     "Полезная высота слишком мала для панели управления LBC",
                     usableHeight,
-                    HEIGHT_LC_PANEL_MIN,
-                    HEIGHT_MAX
+                    bounds.getHeightLcPanelMin(),
+                    bounds.getHeightMax()
             );
         }
     }
@@ -507,7 +180,7 @@ public class SizeValidator {
     /**
      * Валидация количества ячеек LB.
      */
-    static void validateLBCellCount(
+    void validateLBCellCount(
             ValidationResult result,
             LBDTO lb,
             TypeLb typeLb
@@ -523,19 +196,19 @@ public class SizeValidator {
 
         int calculatedCountCellsMax =
                 (usableHeight + typeLb.getShelfThick())
-                        / (HEIGHT_CELL_MIN + typeLb.getShelfThick());
+                        / (bounds.getHeightCellMin() + typeLb.getShelfThick());
 
         int countCellsMax =
                 Math.min(
                         calculatedCountCellsMax,
-                        COUNT_CELLS_MAX
+                        bounds.getCountCellsMax()
                 );
 
         validateRange(
                 result,
                 "countCells",
                 lb.getCountCells(),
-                COUNT_CELLS_MIN,
+                bounds.getCountCellsMin(),
                 countCellsMax,
                 "Количество ячеек"
         );
@@ -544,7 +217,7 @@ public class SizeValidator {
     /**
      * Валидация размеров ячеек LB.
      */
-    static void validateLBCellDimensions(
+    void validateLBCellDimensions(
             ValidationResult result,
             LBDTO lb,
             TypeLb typeLb
@@ -564,13 +237,13 @@ public class SizeValidator {
                                 * typeLb.getShelfThick()
                 ) / (double) countCells;
 
-        if (heightCell < HEIGHT_CELL_MIN) {
+        if (heightCell < bounds.getHeightCellMin()) {
             result.addError(
                     result,
                     "heightCell",
                     "Высота ячейки меньше допустимой",
                     String.format("%.2f", heightCell),
-                    HEIGHT_CELL_MIN,
+                    bounds.getHeightCellMin(),
                     lb.getHeight()
             );
         }
@@ -585,23 +258,23 @@ public class SizeValidator {
         int depthCell =
                 lb.getDepth() - lb.getDoorThickness();
 
-        if (depthCell < DEPTH_CELL_MIN) {
+        if (depthCell < bounds.getDepthCellMin()) {
             result.addError(
                     result,
                     "depthCell",
                     "Глубина ячейки меньше допустимой",
                     depthCell,
-                    DEPTH_CELL_MIN,
-                    DEPTH_CELL_MAX
+                    bounds.getDepthCellMin(),
+                    bounds.getDepthCellMax()
             );
-        } else if (depthCell > DEPTH_CELL_MAX) {
+        } else if (depthCell > bounds.getDepthCellMax()) {
             result.addError(
                     result,
                     "depthCell",
                     "Глубина ячейки больше допустимой",
                     depthCell,
-                    DEPTH_CELL_MIN,
-                    DEPTH_CELL_MAX
+                    bounds.getDepthCellMin(),
+                    bounds.getDepthCellMax()
             );
         }
 
@@ -611,17 +284,17 @@ public class SizeValidator {
                         - typeLb.getServiceZoneWidth();
 
         int widthCellMax =
-                WIDTH_MAX
+                bounds.getWidthMax()
                         - typeLb.getDeltaWidth()
                         - typeLb.getServiceZoneWidth();
 
-        if (widthCell < WIDTH_CELL_MIN) {
+        if (widthCell < bounds.getWidthCellMin()) {
             result.addError(
                     result,
                     "widthCell",
                     "Ширина ячейки меньше допустимой",
                     widthCell,
-                    WIDTH_CELL_MIN,
+                    bounds.getWidthCellMin(),
                     widthCellMax
             );
         } else if (widthCell > widthCellMax) {
@@ -630,7 +303,7 @@ public class SizeValidator {
                     "widthCell",
                     "Ширина ячейки больше допустимой",
                     widthCell,
-                    WIDTH_CELL_MIN,
+                    bounds.getWidthCellMin(),
                     widthCellMax
             );
         }
@@ -642,7 +315,7 @@ public class SizeValidator {
      * <p>TypeLb больше не enum. Поэтому создаём его
      * из параметров DTO.</p>
      */
-    static boolean validateLBType(
+    boolean validateLBType(
             ValidationResult result,
             LBDTO lb
     ) {
@@ -663,8 +336,8 @@ public class SizeValidator {
                 result,
                 "deltaWidth",
                 lb.getDeltaWidth(),
-                TYPE_DELTA_WIDTH_MIN,
-                TYPE_DELTA_WIDTH_MAX,
+                bounds.getTypeDeltaWidthMin(),
+                bounds.getTypeDeltaWidthMax(),
                 "Добавочная ширина"
         );
 
@@ -672,8 +345,8 @@ public class SizeValidator {
                 result,
                 "shelfThick",
                 lb.getShelfThick(),
-                TYPE_SHELF_THICK_MIN,
-                TYPE_SHELF_THICK_MAX,
+                bounds.getTypeShelfThickMin(),
+                bounds.getTypeShelfThickMax(),
                 "Толщина полки"
         );
 
@@ -681,8 +354,8 @@ public class SizeValidator {
                 result,
                 "serviceZoneWidth",
                 lb.getServiceZoneWidth(),
-                TYPE_SERVICE_ZONE_WIDTH_MIN,
-                TYPE_SERVICE_ZONE_WIDTH_MAX,
+                bounds.getTypeServiceZoneWidthMin(),
+                bounds.getTypeServiceZoneWidthMax(),
                 "Ширина сервисной зоны"
         );
 
@@ -692,7 +365,7 @@ public class SizeValidator {
     /**
      * Валидация LB.
      */
-    public static ValidationResult validateLB(LBDTO lb) {
+    public ValidationResult validateLB(LBDTO lb) {
 
         logger.info(
                 "Валидация размеров LB (id:{} type:{})",
@@ -710,8 +383,8 @@ public class SizeValidator {
                 result,
                 "upperFrame",
                 lb.getUpperFrame(),
-                UPPER_FRAME_MIN,
-                UPPER_FRAME_MAX,
+                bounds.getUpperFrameMin(),
+                bounds.getUpperFrameMax(),
                 "Верхняя рама"
         );
 
@@ -719,8 +392,8 @@ public class SizeValidator {
                 result,
                 "bottomFrame",
                 lb.getBottomFrame(),
-                BOTTOM_FRAME_MIN,
-                BOTTOM_FRAME_MAX,
+                bounds.getBottomFrameMin(),
+                bounds.getBottomFrameMax(),
                 "Нижняя рама"
         );
 
@@ -763,8 +436,8 @@ public class SizeValidator {
          */
         int heightMin =
                 Math.max(
-                        HEIGHT_MIN,
-                        HEIGHT_CELL_MIN
+                        bounds.getHeightMin(),
+                        bounds.getHeightCellMin()
                                 + lb.getUpperFrame()
                                 + lb.getBottomFrame()
                 );
@@ -774,7 +447,7 @@ public class SizeValidator {
                 "height",
                 lb.getHeight(),
                 heightMin,
-                HEIGHT_MAX,
+                bounds.getHeightMax(),
                 "Высота модуля"
         );
 
@@ -785,8 +458,8 @@ public class SizeValidator {
                 result,
                 "depth",
                 lb.getDepth(),
-                DEPTH_MIN,
-                DEPTH_MAX,
+                bounds.getDepthMin(),
+                bounds.getDepthMax(),
                 "Глубина модуля"
         );
 
@@ -794,7 +467,7 @@ public class SizeValidator {
          * Ширина модуля зависит от выбранного типа LB.
          */
         int widthMin =
-                WIDTH_CELL_MIN
+                bounds.getWidthCellMin()
                         + typeLb.getDeltaWidth()
                         + typeLb.getServiceZoneWidth();
 
@@ -803,7 +476,7 @@ public class SizeValidator {
                 "width",
                 lb.getWidth(),
                 widthMin,
-                WIDTH_MAX,
+                bounds.getWidthMax(),
                 "Ширина модуля"
         );
 
@@ -814,8 +487,8 @@ public class SizeValidator {
                 result,
                 "doorThickness",
                 lb.getDoorThickness(),
-                DOOR_THICKNESS_MIN,
-                DOOR_THICKNESS_MAX,
+                bounds.getDoorThicknessMin(),
+                bounds.getDoorThicknessMax(),
                 "Толщина дверцы"
         );
 
@@ -848,7 +521,7 @@ public class SizeValidator {
      * <p>LBC проверяется как storage-модуль и как модуль управления.
      * Он остаётся одним физическим модулем.</p>
      */
-    public static ValidationResult validateLBC(LBCDTO lbc) {
+    public ValidationResult validateLBC(LBCDTO lbc) {
 
         logger.info(
                 "Валидация размеров LBC (id:{} type:{})",
@@ -866,8 +539,8 @@ public class SizeValidator {
                 result,
                 "upperFrame",
                 lbc.getUpperFrame(),
-                UPPER_FRAME_MIN,
-                UPPER_FRAME_MAX,
+                bounds.getUpperFrameMin(),
+                bounds.getUpperFrameMax(),
                 "Верхняя рама"
         );
 
@@ -875,8 +548,8 @@ public class SizeValidator {
                 result,
                 "bottomFrame",
                 lbc.getBottomFrame(),
-                BOTTOM_FRAME_MIN,
-                BOTTOM_FRAME_MAX,
+                bounds.getBottomFrameMin(),
+                bounds.getBottomFrameMax(),
                 "Нижняя рама"
         );
 
@@ -897,8 +570,8 @@ public class SizeValidator {
                 result,
                 "deltaWidth",
                 lbc.getDeltaWidth(),
-                TYPE_DELTA_WIDTH_MIN,
-                TYPE_DELTA_WIDTH_MAX,
+                bounds.getTypeDeltaWidthMin(),
+                bounds.getTypeDeltaWidthMax(),
                 "Добавочная ширина"
         );
 
@@ -906,8 +579,8 @@ public class SizeValidator {
                 result,
                 "shelfThick",
                 lbc.getShelfThick(),
-                TYPE_SHELF_THICK_MIN,
-                TYPE_SHELF_THICK_MAX,
+                bounds.getTypeShelfThickMin(),
+                bounds.getTypeShelfThickMax(),
                 "Толщина полки"
         );
 
@@ -915,8 +588,8 @@ public class SizeValidator {
                 result,
                 "serviceZoneWidth",
                 lbc.getServiceZoneWidth(),
-                TYPE_SERVICE_ZONE_WIDTH_MIN,
-                TYPE_SERVICE_ZONE_WIDTH_MAX,
+                bounds.getTypeServiceZoneWidthMin(),
+                bounds.getTypeServiceZoneWidthMax(),
                 "Ширина сервисной зоны"
         );
 
@@ -945,8 +618,8 @@ public class SizeValidator {
 
         int heightMin =
                 Math.max(
-                        HEIGHT_MIN,
-                        HEIGHT_CELL_MIN
+                        bounds.getHeightMin(),
+                        bounds.getHeightCellMin()
                                 + lbc.getUpperFrame()
                                 + lbc.getBottomFrame()
                 );
@@ -956,7 +629,7 @@ public class SizeValidator {
                 "height",
                 lbc.getHeight(),
                 heightMin,
-                HEIGHT_MAX,
+                bounds.getHeightMax(),
                 "Высота модуля"
         );
 
@@ -964,13 +637,13 @@ public class SizeValidator {
                 result,
                 "depth",
                 lbc.getDepth(),
-                DEPTH_MIN,
-                DEPTH_MAX,
+                bounds.getDepthMin(),
+                bounds.getDepthMax(),
                 "Глубина модуля"
         );
 
         int storageWidthMin =
-                WIDTH_CELL_MIN
+                bounds.getWidthCellMin()
                         + typeLb.getDeltaWidth()
                         + typeLb.getServiceZoneWidth();
 
@@ -990,7 +663,7 @@ public class SizeValidator {
                 "width",
                 lbc.getWidth(),
                 widthMin,
-                WIDTH_MAX,
+                bounds.getWidthMax(),
                 "Ширина модуля"
         );
 
@@ -998,8 +671,8 @@ public class SizeValidator {
                 result,
                 "doorThickness",
                 lbc.getDoorThickness(),
-                DOOR_THICKNESS_MIN,
-                DOOR_THICKNESS_MAX,
+                bounds.getDoorThicknessMin(),
+                bounds.getDoorThicknessMax(),
                 "Толщина дверцы"
         );
 
@@ -1011,19 +684,19 @@ public class SizeValidator {
         if (usableHeight > 0) {
             int calculatedCountCellsMax =
                     (usableHeight + typeLb.getShelfThick())
-                            / (HEIGHT_CELL_MIN + typeLb.getShelfThick());
+                            / (bounds.getHeightCellMin() + typeLb.getShelfThick());
 
             int countCellsMax =
                     Math.min(
                             calculatedCountCellsMax,
-                            COUNT_CELLS_MAX
+                            bounds.getCountCellsMax()
                     );
 
             validateRange(
                     result,
                     "countCells",
                     lbc.getCountCells(),
-                    COUNT_CELLS_MIN,
+                    bounds.getCountCellsMin(),
                     countCellsMax,
                     "Количество ячеек"
             );
@@ -1039,13 +712,13 @@ public class SizeValidator {
                                     * typeLb.getShelfThick()
                     ) / (double) lbc.getCountCells();
 
-            if (heightCell < HEIGHT_CELL_MIN) {
+            if (heightCell < bounds.getHeightCellMin()) {
                 result.addError(
                         result,
                         "heightCell",
                         "Высота ячейки меньше допустимой",
                         String.format("%.2f", heightCell),
-                        HEIGHT_CELL_MIN,
+                        bounds.getHeightCellMin(),
                         lbc.getHeight()
                 );
             }
@@ -1053,23 +726,23 @@ public class SizeValidator {
             int depthCell =
                     lbc.getDepth() - lbc.getDoorThickness();
 
-            if (depthCell < DEPTH_CELL_MIN) {
+            if (depthCell < bounds.getDepthCellMin()) {
                 result.addError(
                         result,
                         "depthCell",
                         "Глубина ячейки меньше допустимой",
                         depthCell,
-                        DEPTH_CELL_MIN,
-                        DEPTH_CELL_MAX
+                        bounds.getDepthCellMin(),
+                        bounds.getDepthCellMax()
                 );
-            } else if (depthCell > DEPTH_CELL_MAX) {
+            } else if (depthCell > bounds.getDepthCellMax()) {
                 result.addError(
                         result,
                         "depthCell",
                         "Глубина ячейки больше допустимой",
                         depthCell,
-                        DEPTH_CELL_MIN,
-                        DEPTH_CELL_MAX
+                        bounds.getDepthCellMin(),
+                        bounds.getDepthCellMax()
                 );
             }
 
@@ -1079,17 +752,17 @@ public class SizeValidator {
                             - typeLb.getServiceZoneWidth();
 
             int widthCellMax =
-                    WIDTH_MAX
+                    bounds.getWidthMax()
                             - typeLb.getDeltaWidth()
                             - typeLb.getServiceZoneWidth();
 
-            if (widthCell < WIDTH_CELL_MIN) {
+            if (widthCell < bounds.getWidthCellMin()) {
                 result.addError(
                         result,
                         "widthCell",
                         "Ширина ячейки меньше допустимой",
                         widthCell,
-                        WIDTH_CELL_MIN,
+                        bounds.getWidthCellMin(),
                         widthCellMax
                 );
             } else if (widthCell > widthCellMax) {
@@ -1098,7 +771,7 @@ public class SizeValidator {
                         "widthCell",
                         "Ширина ячейки больше допустимой",
                         widthCell,
-                        WIDTH_CELL_MIN,
+                        bounds.getWidthCellMin(),
                         widthCellMax
                 );
             }
@@ -1113,7 +786,7 @@ public class SizeValidator {
         return result;
     }
 
-    private static int requiredLBCControlWidth(String displayName) {
+    private int requiredLBCControlWidth(String displayName) {
         if (displayName == null || displayName.isBlank()) {
             return 0;
         }
@@ -1138,7 +811,7 @@ public class SizeValidator {
     /**
      * Валидация LC.
      */
-    public static ValidationResult validateLC(LCDTO lc) {
+    public ValidationResult validateLC(LCDTO lc) {
 
         logger.info(
                 "Валидация размеров LC (id:{})",
@@ -1155,8 +828,8 @@ public class SizeValidator {
                 result,
                 "upperFrame",
                 lc.getUpperFrame(),
-                UPPER_FRAME_MIN,
-                UPPER_FRAME_MAX,
+                bounds.getUpperFrameMin(),
+                bounds.getUpperFrameMax(),
                 "Верхняя рама"
         );
 
@@ -1164,8 +837,8 @@ public class SizeValidator {
                 result,
                 "bottomFrame",
                 lc.getBottomFrame(),
-                BOTTOM_FRAME_MIN,
-                BOTTOM_FRAME_MAX,
+                bounds.getBottomFrameMin(),
+                bounds.getBottomFrameMax(),
                 "Нижняя рама"
         );
 
@@ -1173,8 +846,8 @@ public class SizeValidator {
                 result,
                 "height",
                 lc.getHeight(),
-                HEIGHT_LC_MIN,
-                HEIGHT_MAX,
+                bounds.getHeightLcMin(),
+                bounds.getHeightMax(),
                 "Высота модуля"
         );
 
@@ -1182,8 +855,8 @@ public class SizeValidator {
                 result,
                 "depth",
                 lc.getDepth(),
-                DEPTH_MIN,
-                DEPTH_MAX,
+                bounds.getDepthMin(),
+                bounds.getDepthMax(),
                 "Глубина модуля"
         );
 
@@ -1200,7 +873,7 @@ public class SizeValidator {
     /**
      * Валидация ALS.
      */
-    public static ValidationResult validateALS(ALSDTO als) {
+    public ValidationResult validateALS(ALSDTO als) {
 
         logger.info(
                 "Валидация размеров ALS (id:{})",
@@ -1217,8 +890,8 @@ public class SizeValidator {
                 result,
                 "upperFrame",
                 als.getUpperFrame(),
-                UPPER_FRAME_MIN,
-                UPPER_FRAME_MAX,
+                bounds.getUpperFrameMin(),
+                bounds.getUpperFrameMax(),
                 "Верхняя рама"
         );
 
@@ -1226,8 +899,8 @@ public class SizeValidator {
                 result,
                 "bottomFrame",
                 als.getBottomFrame(),
-                BOTTOM_FRAME_MIN,
-                BOTTOM_FRAME_MAX,
+                bounds.getBottomFrameMin(),
+                bounds.getBottomFrameMax(),
                 "Нижняя рама"
         );
 
@@ -1235,8 +908,8 @@ public class SizeValidator {
                 result,
                 "height",
                 als.getHeight(),
-                HEIGHT_MIN,
-                HEIGHT_MAX,
+                bounds.getHeightMin(),
+                bounds.getHeightMax(),
                 "Высота модуля"
         );
 
@@ -1244,8 +917,8 @@ public class SizeValidator {
                 result,
                 "depth",
                 als.getDepth(),
-                DEPTH_MIN,
-                DEPTH_MAX,
+                bounds.getDepthMin(),
+                bounds.getDepthMax(),
                 "Глубина модуля"
         );
 
@@ -1262,7 +935,7 @@ public class SizeValidator {
     /**
      * Глубокая валидация ALS.
      */
-    public static List<ValidationResult> deepValidateALS(
+    public List<ValidationResult> deepValidateALS(
             ALSDTO als
     ) {
         logger.info(
@@ -1312,7 +985,7 @@ public class SizeValidator {
     /**
      * Валидация всего проекта.
      */
-    public static List<ValidationResult> validateProject(
+    public List<ValidationResult> validateProject(
             ProjectDTO projectDTO
     ) {
         logger.info(
@@ -1342,7 +1015,7 @@ public class SizeValidator {
         return allResults;
     }
 
-    private static void logValidationResult(
+    private void logValidationResult(
             ValidationResult result
     ) {
         if (result.isValid()) {
@@ -1369,7 +1042,7 @@ public class SizeValidator {
         }
     }
 
-    private static List<String> convertValidationResultToStrings(
+    private List<String> convertValidationResultToStrings(
             ValidationResult result
     ) {
         List<String> strings =
@@ -1385,7 +1058,7 @@ public class SizeValidator {
         return strings;
     }
 
-    public static List<String> getErrorValidateALSSizesList(
+    public List<String> getErrorValidateALSSizesList(
             ALSDTO als
     ) {
         return convertValidationResultToStrings(
@@ -1393,7 +1066,7 @@ public class SizeValidator {
         );
     }
 
-    public static List<String> getErrorValidateLCSizesList(
+    public List<String> getErrorValidateLCSizesList(
             LCDTO lc
     ) {
         return convertValidationResultToStrings(
@@ -1401,7 +1074,7 @@ public class SizeValidator {
         );
     }
 
-    public static List<String> getErrorValidateLBCSizesList(
+    public List<String> getErrorValidateLBCSizesList(
             LBCDTO lbc
     ) {
         return convertValidationResultToStrings(
@@ -1410,7 +1083,7 @@ public class SizeValidator {
     }
 
 
-    public static List<List<String>> getErrorValidateLBSizesLists(
+    public List<List<String>> getErrorValidateLBSizesLists(
             ALSDTO als
     ) {
         List<List<String>> result =
@@ -1429,7 +1102,7 @@ public class SizeValidator {
         return result;
     }
 
-    public static List<String> getErrorValidateLBSizesList(
+    public List<String> getErrorValidateLBSizesList(
             LBDTO lb
     ) {
         return convertValidationResultToStrings(
@@ -1437,7 +1110,7 @@ public class SizeValidator {
         );
     }
 
-    public static List<List<List<List<String>>>>
+    public List<List<List<List<String>>>>
     getErrorValidateProjectSizeList(
             ProjectDTO projectDTO
     ) {

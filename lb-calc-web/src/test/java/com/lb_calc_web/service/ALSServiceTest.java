@@ -31,7 +31,6 @@ class ALSServiceTest {
 
     @BeforeEach
     void setUp() {
-        TestDataFactory.initSizeValidator();
 
         alsRepository = mock(ALSRepository.class);
         moduleRepository = mock(ModuleEntityRepository.class);
@@ -57,7 +56,8 @@ class ALSServiceTest {
                         lcService,
                         lbcService,
                         environment
-                );
+                ),
+                        TestDataFactory.createSizeValidator()$2;
     }
 
     @Test

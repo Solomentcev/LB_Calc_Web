@@ -32,13 +32,16 @@ public class LCService {
 
     private final LCRepository lcRepository;
     private final Environment environment;
+    private final SizeValidator sizeValidator;
 
     public LCService(
             LCRepository lcRepository,
-            Environment environment
+            Environment environment,
+            SizeValidator sizeValidator
     ) {
         this.lcRepository = lcRepository;
         this.environment = environment;
+        this.sizeValidator = sizeValidator;
     }
 
     /**
@@ -204,7 +207,7 @@ public class LCService {
         );
 
         ValidationResult validationResult =
-                SizeValidator.validateLC(dto);
+                sizeValidator.validateLC(dto);
 
         if (!validationResult.isValid()) {
 

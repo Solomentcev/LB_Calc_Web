@@ -26,7 +26,6 @@ class LCServiceTest {
 
     @BeforeEach
     void setUp() {
-        TestDataFactory.initSizeValidator();
 
         lcRepository = mock(LCRepository.class);
 
@@ -47,7 +46,8 @@ class LCServiceTest {
                 new LCService(
                         lcRepository,
                         environment
-                );
+                ),
+                        TestDataFactory.createSizeValidator()$2;
     }
 
     @Test

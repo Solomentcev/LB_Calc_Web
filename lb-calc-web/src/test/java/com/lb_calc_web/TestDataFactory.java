@@ -21,6 +21,7 @@ import com.lb_calc_web.mapper.dto.ALSDtoMapper;
 import com.lb_calc_web.mapper.dto.LBCDtoMapper;
 import com.lb_calc_web.service.util.ALSImageService;
 import com.lb_calc_web.service.util.SizeValidator;
+import com.lb_calc_web.service.util.SizeBounds;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,42 +40,34 @@ public final class TestDataFactory {
         );
     }
 
-    public static void initSizeValidator() {
-        SizeValidator.setHeightCellMin(85);
-        SizeValidator.setHeightMin(600);
-        SizeValidator.setHeightMax(2300);
-        SizeValidator.setHeightLcMin(600);
-        SizeValidator.setHeightLcPanelMin(300);
-
-        SizeValidator.setWidthCellMin(100);
-        SizeValidator.setWidthMax(1200);
-
-        SizeValidator.setDepthCellMin(100);
-        SizeValidator.setDepthMax(900);
-        SizeValidator.setDepthCellMax(880);
-        SizeValidator.setDepthMin(170);
-
-        SizeValidator.setDoorThicknessMin(5);
-        SizeValidator.setDoorThicknessMax(50);
-
-        SizeValidator.setUpperFrameMin(20);
-        SizeValidator.setUpperFrameMax(300);
-
-        SizeValidator.setBottomFrameMin(20);
-        SizeValidator.setBottomFrameMax(300);
-
-        SizeValidator.setCountCellsMin(1);
-
-        SizeValidator.setCountCellsMax(20);
-
-        SizeValidator.setTypeDeltaWidthMin(0);
-        SizeValidator.setTypeDeltaWidthMax(500);
-
-        SizeValidator.setTypeShelfThickMin(0);
-        SizeValidator.setTypeShelfThickMax(100);
-
-        SizeValidator.setTypeServiceZoneWidthMin(0);
-        SizeValidator.setTypeServiceZoneWidthMax(300);
+    public static SizeValidator createSizeValidator() {
+        return new SizeValidator(new SizeBounds(
+                20,
+                300,
+                20,
+                300,
+                85,
+                2300,
+                600,
+                600,
+                300,
+                1,
+                20,
+                100,
+                1200,
+                100,
+                880,
+                170,
+                900,
+                5,
+                50,
+                0,
+                500,
+                0,
+                100,
+                0,
+                300
+        ));
     }
 
     public static LCDTO validLCDTO(Long id) {
