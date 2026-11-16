@@ -97,6 +97,38 @@ class SizeValidatorTest {
     }
 
     @Test
+    void validateLB_widthShouldIncludeServiceZoneWidth() {
+        lb.setWidth(239);
+
+        ValidationResult result = SizeValidator.validateLB(lb);
+
+        assertTrue(
+                result.getErrors().stream()
+                        .anyMatch(error -> "width".equals(error.getField()))
+        );
+        assertTrue(
+                result.getErrors().stream()
+                        .anyMatch(error -> "widthCell".equals(error.getField()))
+        );
+    }
+
+    @Test
+    void validateLBC_widthShouldIncludeServiceZoneWidth() {
+        lbc.setWidth(239);
+
+        ValidationResult result = SizeValidator.validateLBC(lbc);
+
+        assertTrue(
+                result.getErrors().stream()
+                        .anyMatch(error -> "width".equals(error.getField()))
+        );
+        assertTrue(
+                result.getErrors().stream()
+                        .anyMatch(error -> "widthCell".equals(error.getField()))
+        );
+    }
+
+    @Test
     void validateLC_valid_shouldPass() {
         ValidationResult result =
                 SizeValidator.validateLC(lc);
