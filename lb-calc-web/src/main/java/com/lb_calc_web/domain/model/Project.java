@@ -175,16 +175,17 @@ public class Project {
     }
 
     /**
-     * Заменяет одну конфигурацию ALS другой.
+     * Заменяет одну единицу конфигурации ALS другой.
      *
-     * <p>Количество старой конфигурации переносится на новую.
-     * Если новая конфигурация уже присутствует в проекте,
-     * её существующее количество увеличивается.</p>
+     * <p>Если исходная конфигурация представлена в проекте несколькими
+     * одинаковыми экземплярами, количество уменьшается только на единицу.
+     * Остальные экземпляры сохраняются. Если новая конфигурация уже есть
+     * в проекте, её количество увеличивается на единицу.</p>
      *
      * @param oldALS конфигурация ALS, которую необходимо заменить
      * @param newALS новая конфигурация ALS
      * @throws NullPointerException если один из параметров равен null
-     * @throws IllegalArgumentException если oldALS отсутствует в проекте
+     * @throws IllegalArgumentException если исходная конфигурация отсутствует
      */
     public void replaceALS(
             ALS oldALS,
@@ -200,8 +201,7 @@ public class Project {
                 "Новый ALS не должен быть null"
         );
 
-        Integer quantity =
-                removeConfiguration(oldALS);
+        Integer quantity = findQuantity(oldALS);
 
         if (quantity == null) {
             throw new IllegalArgumentException(
@@ -209,9 +209,15 @@ public class Project {
             );
         }
 
+        if (quantity > 1) {
+            replaceQuantity(oldALS, quantity - 1);
+        } else {
+            removeConfiguration(oldALS);
+        }
+
         quantityALS.merge(
                 newALS.copy(),
-                quantity,
+                1,
                 Integer::sum
         );
 
