@@ -191,6 +191,11 @@ public class ALSService {
 
     @Transactional
     public ALSDTO saveALS(ALSDTO dto) {
+        Objects.requireNonNull(
+                dto,
+                "ALS не должен быть null"
+        );
+
         logger.info(
                 "Сохранение АКХ(id={}, name={})...",
                 dto.getId(),
@@ -202,10 +207,7 @@ public class ALSService {
         var domain = ALSDtoMapper.toDomain(dto);
 
         Optional<ALSEntity> duplicate =
-                findDuplicate(
-                        domain,
-                        null
-                );
+                findDuplicate(domain);
 
         if (duplicate.isPresent()) {
             logger.info(
@@ -213,13 +215,7 @@ public class ALSService {
                     duplicate.get().getId()
             );
 
-            return addALSImage(
-                    ALSDtoMapper.toDto(
-                            ALSEntityMapper.toDomain(
-                                    duplicate.get()
-                            )
-                    )
-            );
+            return toDto(duplicate.get());
         }
 
         /*
@@ -416,61 +412,6 @@ public class ALSService {
         );
     }
 
-    private void saveChildModules(
-            ALSDTO dto
-    ) {
-        if (dto.getLC() != null && dto.getLBC() != null) {
-            throw new IllegalArgumentException(
-                    "ALS не может одновременно содержать LC и LBC"
-            );
-        }
-
-        if (dto.getLC() != null) {
-            dto.setLC(
-                    lcService.saveLC(
-                            dto.getLC()
-                    )
-            );
-        }
-
-        if (dto.getLBC() != null) {
-            dto.getLBC().setDirectionDoorOpening(
-                    getLBCDoorDirection(
-                            dto.getPositionControlModule()
-                    )
-            );
-
-            dto.setLBC(
-                    lbcService.saveLBC(
-                            dto.getLBC()
-                    )
-            );
-        }
-
-        List<LBDTO> savedLBs =
-                new ArrayList<>();
-
-        if (dto.getLbList() != null) {
-            for (LBDTO lb : dto.getLbList()) {
-                savedLBs.add(
-                        lbService.saveLB(lb)
-                );
-            }
-        }
-
-        dto.setLbList(savedLBs);
-    }
-
-    private String getLBCDoorDirection(
-            String position
-    ) {
-        if ("LEFT".equals(position)) {
-            return "RIGHT";
-        }
-
-        return "LEFT";
-    }
-
     private void validate(
             ALSDTO dto
     ) {
@@ -505,38 +446,33 @@ public class ALSService {
         }
     }
 
+    /**
+     * Ищет уже сохранённую конфигурацию с тем же доменным содержимым.
+     *
+     * <p>Идентификатор входного DTO намеренно не учитывается:
+     * сохранённая конфигурация неизменяема. Изменённая ALS должна
+     * получить новую запись, а совпадающая конфигурация переиспользует
+     * существующую.</p>
+     */
     private Optional<ALSEntity> findDuplicate(
-            com.lb_calc_web.domain.model.ALS domain,
-            Long currentId
+            com.lb_calc_web.domain.model.ALS domain
     ) {
         return alsRepository.findAll()
                 .stream()
-                .filter(
-                        entity ->
-                                currentId == null
-                                        || !Objects.equals(
-                                        entity.getId(),
-                                        currentId
-                                )
-                )
-                .filter(
-                        entity -> {
-                            try {
-                                return domain.equals(
-                                        ALSEntityMapper.toDomain(
-                                                entity
-                                        )
-                                );
-                            } catch (RuntimeException e) {
-                                logger.warn(
-                                        "Не удалось сравнить ALS id={}",
-                                        entity.getId(),
-                                        e
-                                );
-                                return false;
-                            }
-                        }
-                )
+                .filter(entity -> {
+                    try {
+                        return domain.equals(
+                                ALSEntityMapper.toDomain(entity)
+                        );
+                    } catch (RuntimeException e) {
+                        logger.warn(
+                                "Не удалось сравнить ALS id={}",
+                                entity.getId(),
+                                e
+                        );
+                        return false;
+                    }
+                })
                 .findFirst();
     }
 
@@ -548,24 +484,6 @@ public class ALSService {
 
         return ALSEntityMapper.toEntity(
                 domain,
-                module ->
-                        resolveModule(
-                                module,
-                                moduleCache
-                        )
-        );
-    }
-
-    private void updateEntity(
-            com.lb_calc_web.domain.model.ALS domain,
-            ALSEntity entity
-    ) {
-        List<ModuleEntity> moduleCache =
-                moduleRepository.findAll();
-
-        ALSEntityMapper.updateEntity(
-                domain,
-                entity,
                 module ->
                         resolveModule(
                                 module,
