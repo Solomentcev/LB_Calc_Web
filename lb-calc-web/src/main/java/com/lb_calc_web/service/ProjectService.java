@@ -748,63 +748,19 @@ public class ProjectService {
 
         lb.setId(lbId);
 
-        List<LBDTO> lbList =
-                new ArrayList<>(
-                        als.getLbList()
-                );
-
-        boolean replaced = false;
-
-        for (int i = 0;
-             i < lbList.size();
-             i++) {
-
-            LBDTO current =
-                    lbList.get(i);
-
-            if (current != null
-                    && Objects.equals(
-                    current.getId(),
-                    lbId
-            )) {
-                lbList.set(
-                        i,
-                        lb
-                );
-
-                replaced = true;
-                break;
-            }
-        }
-
-        if (!replaced) {
-            throw new NoSuchElementException(
-                    "LB с id "
-                            + lbId
-                            + " не найден в ALS "
-                            + alsId
-            );
-        }
-
-        als.setLbList(lbList);
-
         ALSDTO updatedALS =
+                alsService.replaceLB(als, lb);
+
+        ALSDTO savedALS =
                 replaceALSandSaveProject(
                         project,
-                        als,
+                        updatedALS,
                         alsId
                 );
 
-        return updatedALS.getLbList()
-                .stream()
-                .filter(
-                        value ->
-                                value != null
-                                        && Objects.equals(
-                                        value.getId(),
-                                        lbId
-                                )
-                )
+        return savedALS.getLbList().stream()
+                .filter(value -> value != null
+                        && Objects.equals(value.getId(), lbId))
                 .findFirst()
                 .orElseThrow(
                         () -> new NoSuchElementException(

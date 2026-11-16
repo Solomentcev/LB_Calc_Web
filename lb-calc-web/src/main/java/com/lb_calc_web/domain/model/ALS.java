@@ -350,6 +350,43 @@ public class ALS {
     }
 
     /**
+     * Заменяет обычный модуль LB, сохраняя его физическую позицию.
+     *
+     * <p>Операция доступна только для самостоятельных модулей хранения.
+     * LBC заменяется отдельным сценарием, поскольку одновременно
+     * выполняет роль модуля управления.</p>
+     *
+     * @param current заменяемый экземпляр LB
+     * @param replacement новая конфигурация LB
+     * @throws IllegalArgumentException если модуль не принадлежит ALS
+     *                                  или является управляющим
+     */
+    public void replaceStorageModule(
+            StorageModule current,
+            StorageModule replacement
+    ) {
+        Objects.requireNonNull(current, "Текущий модуль не должен быть null");
+        Objects.requireNonNull(replacement, "Новый модуль не должен быть null");
+
+        if (current instanceof ControlModule
+                || replacement instanceof ControlModule) {
+            throw new IllegalArgumentException(
+                    "Замена LBC выполняется через операцию замены модуля управления"
+            );
+        }
+
+        int index = findModuleIndexByIdentity(current);
+        if (index < 0) {
+            throw new IllegalArgumentException(
+                    "Заменяемый модуль не принадлежит ALS"
+            );
+        }
+
+        Module replacementCopy = replacement.copy();
+        mutate(candidate -> candidate.modules.set(index, replacementCopy));
+    }
+
+    /**
      * Выполняет изменение на независимом кандидате и публикует его
      * состояние только после успешной проверки и пересчёта.
      *

@@ -1,6 +1,7 @@
 package com.lb_calc_web.service;
 
 import com.lb_calc_web.domain.attributes.Colors;
+import com.lb_calc_web.domain.model.LB;
 import com.lb_calc_web.dto.ALSDTO;
 import com.lb_calc_web.dto.LBCDTO;
 import com.lb_calc_web.dto.LBDTO;
@@ -319,6 +320,52 @@ public class ALSService {
                     "Не удалось сопоставить LB из DTO с доменным модулем ALS"
             );
         }
+
+        return ALSDtoMapper.toDto(domain);
+    }
+
+    /**
+     * Формирует ALS с заменённым LB без сохранения.
+     *
+     * <p>Модуль заменяется в домене по его физической позиции.
+     * Идентификатор DTO используется только для поиска исходного LB.</p>
+     */
+    public ALSDTO replaceLB(ALSDTO als, LBDTO lb) {
+        Objects.requireNonNull(als, "ALS не должен быть null");
+        Objects.requireNonNull(lb, "LB не должен быть null");
+        Objects.requireNonNull(lb.getId(), "Идентификатор LB не должен быть null");
+
+        int lbIndex = -1;
+        for (int i = 0; i < als.getLbList().size(); i++) {
+            if (Objects.equals(als.getLbList().get(i).getId(), lb.getId())) {
+                lbIndex = i;
+                break;
+            }
+        }
+
+        if (lbIndex < 0) {
+            throw new NoSuchElementException(
+                    "LB с id " + lb.getId() + " не найден в ALS " + als.getId()
+            );
+        }
+
+        var domain = ALSDtoMapper.toDomain(als);
+
+        List<LB> storageModules = domain.getModules().stream()
+                .filter(LB.class::isInstance)
+                .map(LB.class::cast)
+                .toList();
+
+        if (lbIndex >= storageModules.size()) {
+            throw new IllegalStateException(
+                    "Не удалось сопоставить LB DTO с модулем доменной ALS"
+            );
+        }
+
+        domain.replaceStorageModule(
+                storageModules.get(lbIndex),
+                LBDtoMapper.toDomain(lb)
+        );
 
         return ALSDtoMapper.toDto(domain);
     }
