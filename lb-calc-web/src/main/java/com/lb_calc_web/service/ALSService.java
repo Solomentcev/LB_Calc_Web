@@ -265,14 +265,10 @@ public class ALSService {
     }
 
     /**
-     * Добавляет новый LB в существующую ALS.
-     *
-     * <p>Сторона вставки определяется доменным агрегатом на основании
-     * положения управляющего модуля и баланса сторон.</p>
+     * Формирует изменённую конфигурацию ALS с новым LB без сохранения.
      */
-    @Transactional
-    public ALSDTO addNewLBandSaveALS(Long alsId) {
-        ALSDTO dto = findById(alsId);
+    public ALSDTO addNewLB(ALSDTO dto) {
+        Objects.requireNonNull(dto, "ALS не должен быть null");
 
         LBDTO lbDto = lbService.createLB(
                 dto.getHeight(),
@@ -286,15 +282,15 @@ public class ALSService {
         var domain = ALSDtoMapper.toDomain(dto);
         domain.addStorageModule(LBDtoMapper.toDomain(lbDto));
 
-        return saveALS(ALSDtoMapper.toDto(domain));
+        return ALSDtoMapper.toDto(domain);
     }
 
     /**
-     * Удаляет LB из ALS по идентификатору каталожного модуля.
+     * Формирует изменённую конфигурацию ALS без указанного LB.
      */
-    @Transactional
-    public ALSDTO deleteLBandSaveALS(Long alsId, Long lbId) {
-        ALSDTO dto = findById(alsId);
+    public ALSDTO deleteLB(ALSDTO dto, Long lbId) {
+        Objects.requireNonNull(dto, "ALS не должен быть null");
+        Objects.requireNonNull(lbId, "Идентификатор LB не должен быть null");
 
         int dtoIndex = -1;
         for (int i = 0; i < dto.getLbList().size(); i++) {
@@ -306,7 +302,7 @@ public class ALSService {
 
         if (dtoIndex < 0) {
             throw new NoSuchElementException(
-                    "LB с id " + lbId + " не найден в ALS " + alsId
+                    "LB с id " + lbId + " не найден в ALS " + dto.getId()
             );
         }
 
@@ -324,43 +320,40 @@ public class ALSService {
             );
         }
 
-        return saveALS(ALSDtoMapper.toDto(domain));
+        return ALSDtoMapper.toDto(domain);
     }
 
     /**
-     * Заменяет управляющий модуль на LC, сохраняя его физическую позицию.
+     * Формирует ALS с заменённым управляющим модулем LC без сохранения.
      */
-    @Transactional
-    public ALSDTO replaceLCandSaveALS(ALSDTO als, LCDTO lc) {
+    public ALSDTO replaceLC(ALSDTO als, LCDTO lc) {
         Objects.requireNonNull(als, "ALS не должен быть null");
         Objects.requireNonNull(lc, "LC не должен быть null");
 
         var domain = ALSDtoMapper.toDomain(als);
         domain.replaceControlModule(LCDtoMapper.toDomain(lc));
 
-        return saveALS(ALSDtoMapper.toDto(domain));
+        return ALSDtoMapper.toDto(domain);
     }
 
     /**
-     * Заменяет управляющий модуль на LBC, сохраняя его физическую позицию.
+     * Формирует ALS с заменённым управляющим модулем LBC без сохранения.
      */
-    @Transactional
-    public ALSDTO replaceLBCandSaveALS(ALSDTO als, LBCDTO lbc) {
+    public ALSDTO replaceLBC(ALSDTO als, LBCDTO lbc) {
         Objects.requireNonNull(als, "ALS не должен быть null");
         Objects.requireNonNull(lbc, "LBC не должен быть null");
 
         var domain = ALSDtoMapper.toDomain(als);
         domain.replaceControlModule(LBCDtoMapper.toDomain(lbc));
 
-        return saveALS(ALSDtoMapper.toDto(domain));
+        return ALSDtoMapper.toDto(domain);
     }
 
     /**
-     * Создаёт новый LBC и заменяет им текущий управляющий модуль.
+     * Создаёт новый LBC и формирует изменённую ALS без сохранения.
      */
-    @Transactional
-    public ALSDTO replaceWithNewLBCandSaveALS(Long alsId) {
-        ALSDTO als = findById(alsId);
+    public ALSDTO replaceWithNewLBC(ALSDTO als) {
+        Objects.requireNonNull(als, "ALS не должен быть null");
 
         LBCDTO lbc = lbcService.createLBC(
                 als.getHeight(),
@@ -371,7 +364,47 @@ public class ALSService {
                 Colors.valueOf(als.getColorDoor())
         );
 
-        return replaceLBCandSaveALS(als, lbc);
+        return replaceLBC(als, lbc);
+    }
+
+    /**
+     * Добавляет LB в сохранённую ALS и сохраняет новую конфигурацию.
+     */
+    @Transactional
+    public ALSDTO addNewLBandSaveALS(Long alsId) {
+        return saveALS(addNewLB(findById(alsId)));
+    }
+
+    /**
+     * Удаляет LB из сохранённой ALS и сохраняет новую конфигурацию.
+     */
+    @Transactional
+    public ALSDTO deleteLBandSaveALS(Long alsId, Long lbId) {
+        return saveALS(deleteLB(findById(alsId), lbId));
+    }
+
+    /**
+     * Заменяет LC в сохранённой ALS и сохраняет новую конфигурацию.
+     */
+    @Transactional
+    public ALSDTO replaceLCandSaveALS(ALSDTO als, LCDTO lc) {
+        return saveALS(replaceLC(als, lc));
+    }
+
+    /**
+     * Заменяет LBC в сохранённой ALS и сохраняет новую конфигурацию.
+     */
+    @Transactional
+    public ALSDTO replaceLBCandSaveALS(ALSDTO als, LBCDTO lbc) {
+        return saveALS(replaceLBC(als, lbc));
+    }
+
+    /**
+     * Создаёт новый LBC для сохранённой ALS и сохраняет результат.
+     */
+    @Transactional
+    public ALSDTO replaceWithNewLBCandSaveALS(Long alsId) {
+        return saveALS(replaceWithNewLBC(findById(alsId)));
     }
 
     private void validate(

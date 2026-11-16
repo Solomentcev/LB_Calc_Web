@@ -570,18 +570,13 @@ public class ProjectService {
         );
 
         ALSDTO updatedALS =
-                alsService.replaceLCandSaveALS(
-                        als,
-                        lc
-                );
+                alsService.replaceLC(als, lc);
 
-        replaceALSandSaveProject(
+        return replaceALSandSaveProject(
                 project,
                 updatedALS,
                 alsId
         );
-
-        return updatedALS;
     }
 
     /**
@@ -646,18 +641,13 @@ public class ProjectService {
         );
 
         ALSDTO updatedALS =
-                alsService.replaceLBCandSaveALS(
-                        als,
-                        lbc
-                );
+                alsService.replaceLBC(als, lbc);
 
-        replaceALSandSaveProject(
+        return replaceALSandSaveProject(
                 project,
                 updatedALS,
                 alsId
         );
-
-        return updatedALS;
     }
 
     /**
@@ -724,17 +714,13 @@ public class ProjectService {
                 );
 
         ALSDTO updatedALS =
-                alsService.replaceWithNewLBCandSaveALS(
-                        alsId
-                );
+                alsService.replaceWithNewLBC(als);
 
-        replaceALSandSaveProject(
+        return replaceALSandSaveProject(
                 project,
                 updatedALS,
                 alsId
         );
-
-        return updatedALS;
     }
 
     /**
@@ -748,23 +734,17 @@ public class ProjectService {
         ProjectDTO project =
                 findById(projectId);
 
-        findALSInProject(
-                projectId,
-                alsId
-        );
+        ALSDTO currentALS =
+                findALSInProject(projectId, alsId);
 
         ALSDTO als =
-                alsService.addNewLBandSaveALS(
-                        alsId
-                );
+                alsService.addNewLB(currentALS);
 
-        replaceALSandSaveProject(
+        return replaceALSandSaveProject(
                 project,
                 als,
                 alsId
         );
-
-        return als;
     }
 
     /**
@@ -840,13 +820,11 @@ public class ProjectService {
         als.setLbList(lbList);
 
         ALSDTO updatedALS =
-                alsService.saveALS(als);
-
-        replaceALSandSaveProject(
-                project,
-                updatedALS,
-                alsId
-        );
+                replaceALSandSaveProject(
+                        project,
+                        als,
+                        alsId
+                );
 
         return updatedALS.getLbList()
                 .stream()
@@ -887,18 +865,16 @@ public class ProjectService {
         );
 
         ALSDTO als =
-                alsService.deleteLBandSaveALS(
-                        alsId,
+                alsService.deleteLB(
+                        findALSInProject(projectId, alsId),
                         lbId
                 );
 
-        replaceALSandSaveProject(
+        return replaceALSandSaveProject(
                 project,
                 als,
                 alsId
         );
-
-        return als;
     }
 
     private ProjectEntity loadExistingProject(
