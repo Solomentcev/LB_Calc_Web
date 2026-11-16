@@ -380,6 +380,35 @@ public class ALS {
     }
 
     /**
+     * Заменяет управляющий модуль, сохраняя его физическую позицию.
+     *
+     * <p>Замена проверяется на независимой копии ALS. Если после замены
+     * нарушается структура агрегата или расчёт характеристик модулей,
+     * исходная конфигурация остаётся неизменной.</p>
+     *
+     * @param controlModule новый управляющий модуль
+     */
+    public void replaceControlModule(ControlModule controlModule) {
+        Objects.requireNonNull(
+                controlModule,
+                "Модуль управления не должен быть null"
+        );
+
+        if (!(controlModule instanceof Module replacement)) {
+            throw new IllegalArgumentException(
+                    "Управляющий модуль должен быть модулем ALS"
+            );
+        }
+
+        Module replacementCopy = replacement.copy();
+
+        mutate(candidate -> {
+            int controlIndex = candidate.getControlModuleIndex();
+            candidate.modules.set(controlIndex, replacementCopy);
+        });
+    }
+
+    /**
      * Возвращает единственный модуль управления.
      *
      * @return модуль управления

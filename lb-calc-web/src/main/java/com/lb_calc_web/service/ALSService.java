@@ -13,6 +13,9 @@ import com.lb_calc_web.entity.LCEntity;
 import com.lb_calc_web.entity.ModuleEntity;
 import com.lb_calc_web.handler.ValidationSizeException;
 import com.lb_calc_web.mapper.dto.ALSDtoMapper;
+import com.lb_calc_web.mapper.dto.LBDtoMapper;
+import com.lb_calc_web.mapper.dto.LCDtoMapper;
+import com.lb_calc_web.mapper.dto.LBCDtoMapper;
 import com.lb_calc_web.mapper.entity.ALSEntityMapper;
 import com.lb_calc_web.repository.ALSRepository;
 import com.lb_calc_web.repository.ModuleEntityRepository;
@@ -262,154 +265,113 @@ public class ALSService {
     }
 
     /**
-     * Добавление нового LB в существующую ALS.
+     * Добавляет новый LB в существующую ALS.
+     *
+     * <p>Сторона вставки определяется доменным агрегатом на основании
+     * положения управляющего модуля и баланса сторон.</p>
      */
     @Transactional
-    public ALSDTO addNewLBandSaveALS(
-            Long alsId
-    ) {
-        ALSDTO als =
-                findById(alsId);
+    public ALSDTO addNewLBandSaveALS(Long alsId) {
+        ALSDTO dto = findById(alsId);
 
-        LBDTO lb =
-                lbService.createLB(
-                        als.getHeight(),
-                        als.getDepth(),
-                        als.getUpperFrame(),
-                        als.getBottomFrame(),
-                        Colors.valueOf(
-                                als.getColorBody()
-                        ),
-                        Colors.valueOf(
-                                als.getColorDoor()
-                        )
-                );
+        LBDTO lbDto = lbService.createLB(
+                dto.getHeight(),
+                dto.getDepth(),
+                dto.getUpperFrame(),
+                dto.getBottomFrame(),
+                Colors.valueOf(dto.getColorBody()),
+                Colors.valueOf(dto.getColorDoor())
+        );
 
-        als.getLbList().add(lb);
+        var domain = ALSDtoMapper.toDomain(dto);
+        domain.addStorageModule(LBDtoMapper.toDomain(lbDto));
 
-        recalculateDto(als);
-
-        return saveALS(als);
+        return saveALS(ALSDtoMapper.toDto(domain));
     }
 
     /**
-     * Удаление LB из ALS.
+     * Удаляет LB из ALS по идентификатору каталожного модуля.
      */
     @Transactional
-    public ALSDTO deleteLBandSaveALS(
-            Long alsId,
-            Long lbId
-    ) {
-        ALSDTO als =
-                findById(alsId);
+    public ALSDTO deleteLBandSaveALS(Long alsId, Long lbId) {
+        ALSDTO dto = findById(alsId);
 
-        boolean removed =
-                als.getLbList().removeIf(
-                        lb ->
-                                Objects.equals(
-                                        lb.getId(),
-                                        lbId
-                                )
-                );
+        int dtoIndex = -1;
+        for (int i = 0; i < dto.getLbList().size(); i++) {
+            if (Objects.equals(dto.getLbList().get(i).getId(), lbId)) {
+                dtoIndex = i;
+                break;
+            }
+        }
 
-        if (!removed) {
+        if (dtoIndex < 0) {
             throw new NoSuchElementException(
-                    "LB с id"
-                            + lbId
-                            + " не найден в ALS "
-                            + alsId
+                    "LB с id " + lbId + " не найден в ALS " + alsId
             );
         }
 
-        recalculateDto(als);
+        var domain = ALSDtoMapper.toDomain(dto);
+        List<com.lb_calc_web.domain.model.LB> storageModules =
+                domain.getModules().stream()
+                        .filter(com.lb_calc_web.domain.model.LB.class::isInstance)
+                        .map(com.lb_calc_web.domain.model.LB.class::cast)
+                        .toList();
 
-        return saveALS(als);
+        if (dtoIndex >= storageModules.size()
+                || !domain.removeModule(storageModules.get(dtoIndex))) {
+            throw new IllegalStateException(
+                    "Не удалось сопоставить LB из DTO с доменным модулем ALS"
+            );
+        }
+
+        return saveALS(ALSDtoMapper.toDto(domain));
     }
 
     /**
-     * Замена LC в ALS.
+     * Заменяет управляющий модуль на LC, сохраняя его физическую позицию.
      */
     @Transactional
-    public ALSDTO replaceLCandSaveALS(
-            ALSDTO als,
-            LCDTO lc
-    ) {
-        Objects.requireNonNull(
-                als,
-                "ALS не должен быть null"
-        );
+    public ALSDTO replaceLCandSaveALS(ALSDTO als, LCDTO lc) {
+        Objects.requireNonNull(als, "ALS не должен быть null");
+        Objects.requireNonNull(lc, "LC не должен быть null");
 
-        Objects.requireNonNull(
-                lc,
-                "LC не должен быть null"
-        );
+        var domain = ALSDtoMapper.toDomain(als);
+        domain.replaceControlModule(LCDtoMapper.toDomain(lc));
 
-        als.setLC(lc);
-        als.setLBC(null);
-
-        recalculateDto(als);
-
-        return saveALS(als);
+        return saveALS(ALSDtoMapper.toDto(domain));
     }
 
     /**
-     * Заменяет текущий control-модуль ALS на LBC.
-     *
-     * <p>LBC при этом остаётся одним физическим модулем,
-     * но одновременно учитывается как control и storage.</p>
+     * Заменяет управляющий модуль на LBC, сохраняя его физическую позицию.
      */
     @Transactional
-    public ALSDTO replaceLBCandSaveALS(
-            ALSDTO als,
-            LBCDTO lbc
-    ) {
-        Objects.requireNonNull(
-                als,
-                "ALS не должен быть null"
-        );
+    public ALSDTO replaceLBCandSaveALS(ALSDTO als, LBCDTO lbc) {
+        Objects.requireNonNull(als, "ALS не должен быть null");
+        Objects.requireNonNull(lbc, "LBC не должен быть null");
 
-        Objects.requireNonNull(
-                lbc,
-                "LBC не должен быть null"
-        );
+        var domain = ALSDtoMapper.toDomain(als);
+        domain.replaceControlModule(LBCDtoMapper.toDomain(lbc));
 
-        als.setLBC(lbc);
-        als.setLC(null);
-
-        recalculateDto(als);
-
-        return saveALS(als);
+        return saveALS(ALSDtoMapper.toDto(domain));
     }
 
     /**
-     * Создаёт новый LBC на базе общих параметров ALS
-     * и заменяет текущий control-модуль.
+     * Создаёт новый LBC и заменяет им текущий управляющий модуль.
      */
     @Transactional
-    public ALSDTO replaceWithNewLBCandSaveALS(
-            Long alsId
-    ) {
-        ALSDTO als =
-                findById(alsId);
+    public ALSDTO replaceWithNewLBCandSaveALS(Long alsId) {
+        ALSDTO als = findById(alsId);
 
-        LBCDTO lbc =
-                lbcService.createLBC(
-                        als.getHeight(),
-                        als.getDepth(),
-                        als.getUpperFrame(),
-                        als.getBottomFrame(),
-                        Colors.valueOf(
-                                als.getColorBody()
-                        ),
-                        Colors.valueOf(
-                                als.getColorDoor()
-                        )
-                );
-
-        return replaceLBCandSaveALS(
-                als,
-                lbc
+        LBCDTO lbc = lbcService.createLBC(
+                als.getHeight(),
+                als.getDepth(),
+                als.getUpperFrame(),
+                als.getBottomFrame(),
+                Colors.valueOf(als.getColorBody()),
+                Colors.valueOf(als.getColorDoor())
         );
+
+        return replaceLBCandSaveALS(als, lbc);
     }
 
     private void validate(
