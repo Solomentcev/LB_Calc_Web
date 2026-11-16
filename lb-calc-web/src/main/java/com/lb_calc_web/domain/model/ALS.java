@@ -139,6 +139,31 @@ public class ALS {
     }
 
     /**
+     * Создаёт полную независимую копию ALS.
+     *
+     * <p>Каждый модуль и его изменяемое внутреннее состояние
+     * копируются отдельно. Копия может изменяться без влияния
+     * на исходную ALS.</p>
+     *
+     * @return независимая копия ALS
+     */
+    public ALS copy() {
+        List<Module> moduleCopies = modules.stream()
+                .map(Module::copy)
+                .toList();
+
+        return new ALS(
+                height,
+                depth,
+                upperFrame,
+                bottomFrame,
+                colorBody,
+                colorDoor,
+                moduleCopies
+        );
+    }
+
+    /**
      * Возвращает наименование ALS.
      *
      * @return наименование ALS

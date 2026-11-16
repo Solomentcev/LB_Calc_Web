@@ -109,6 +109,28 @@ public class LB extends StorageModule {
     }
 
     /**
+     * Создаёт независимую копию LB.
+     *
+     * @return копия LB с теми же конструктивными параметрами
+     */
+    @Override
+    public LB copy() {
+        return new LB(
+                getHeight(),
+                getWidth(),
+                getDepth(),
+                getUpperFrame(),
+                getBottomFrame(),
+                getColorBody(),
+                getColorDoor(),
+                getTypeLb(),
+                getCountCells(),
+                getDirectionDoorOpening(),
+                getDoorThickness()
+        );
+    }
+
+    /**
      * Сравнивает LB по исходной конфигурации.
      *
      * <p>В сравнении участвуют только параметры, определяющие

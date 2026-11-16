@@ -253,6 +253,29 @@ public class LBC extends StorageModule implements ControlModule {
     }
 
     /**
+     * Создаёт независимую копию LBC.
+     *
+     * @return копия LBC с независимыми ячейками и конфигурацией управления
+     */
+    @Override
+    public LBC copy() {
+        return new LBC(
+                getHeight(),
+                getWidth(),
+                getDepth(),
+                getUpperFrame(),
+                getBottomFrame(),
+                getColorBody(),
+                getColorDoor(),
+                getTypeLb(),
+                getCountCells(),
+                getDirectionDoorOpening(),
+                getDoorThickness(),
+                controlConfiguration.copy()
+        );
+    }
+
+    /**
      * Сравнивает LBC по его конфигурации.
      *
      * <p>В сравнении участвуют параметры, определяющие конфигурацию

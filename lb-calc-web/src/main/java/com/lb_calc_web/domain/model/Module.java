@@ -89,5 +89,12 @@ public abstract class Module {
         this.colorDoor = colorDoor;
     }
 
+    /**
+     * Создаёт независимую копию конфигурации модуля.
+     *
+     * @return копия модуля без общих изменяемых внутренних объектов
+     */
+    public abstract Module copy();
+
     public abstract void recalculate();
 }

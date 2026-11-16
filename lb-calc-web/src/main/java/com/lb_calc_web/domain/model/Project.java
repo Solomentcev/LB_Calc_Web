@@ -132,7 +132,7 @@ public class Project {
         );
 
         quantityALS.merge(
-                als,
+                als.copy(),
                 1,
                 Integer::sum
         );
@@ -159,19 +159,16 @@ public class Project {
         );
 
         Integer quantity =
-                quantityALS.get(als);
+                findQuantity(als);
 
         if (quantity == null) {
             return;
         }
 
         if (quantity > 1) {
-            quantityALS.put(
-                    als,
-                    quantity - 1
-            );
+            replaceQuantity(als, quantity - 1);
         } else {
-            quantityALS.remove(als);
+            removeConfiguration(als);
         }
 
         update();
@@ -204,7 +201,7 @@ public class Project {
         );
 
         Integer quantity =
-                quantityALS.remove(oldALS);
+                removeConfiguration(oldALS);
 
         if (quantity == null) {
             throw new IllegalArgumentException(
@@ -213,7 +210,7 @@ public class Project {
         }
 
         quantityALS.merge(
-                newALS,
+                newALS.copy(),
                 quantity,
                 Integer::sum
         );
@@ -234,10 +231,9 @@ public class Project {
                 "ALS не должен быть null"
         );
 
-        return quantityALS.getOrDefault(
-                als,
-                0
-        );
+        return findQuantity(als) == null
+                ? 0
+                : findQuantity(als);
     }
 
     /**
@@ -251,9 +247,13 @@ public class Project {
      * @return неизменяемое представление конфигураций ALS и их количества
      */
     public Map<ALS, Integer> getQuantityALS() {
-        return Collections.unmodifiableMap(
-                quantityALS
+        Map<ALS, Integer> snapshot = new LinkedHashMap<>();
+
+        quantityALS.forEach((als, quantity) ->
+                snapshot.put(als.copy(), quantity)
         );
+
+        return Collections.unmodifiableMap(snapshot);
     }
 
     /**
@@ -350,6 +350,53 @@ public class Project {
      */
     public Employee getUpdatedBy() {
         return updatedBy;
+    }
+
+    /**
+     * Ищет количество конфигурации без зависимости от hashCode
+     * переданного извне объекта.
+     */
+    private Integer findQuantity(ALS target) {
+        return quantityALS.entrySet().stream()
+                .filter(entry -> entry.getKey().equals(target))
+                .map(Map.Entry::getValue)
+                .findFirst()
+                .orElse(null);
+    }
+
+    /**
+     * Удаляет конфигурацию по её бизнес-содержимому.
+     */
+    private Integer removeConfiguration(ALS target) {
+        var iterator = quantityALS.entrySet().iterator();
+
+        while (iterator.hasNext()) {
+            Map.Entry<ALS, Integer> entry = iterator.next();
+
+            if (entry.getKey().equals(target)) {
+                Integer quantity = entry.getValue();
+                iterator.remove();
+                return quantity;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Обновляет количество, сохраняя внутренний ключ неизменным.
+     */
+    private void replaceQuantity(ALS target, int quantity) {
+        for (Map.Entry<ALS, Integer> entry : quantityALS.entrySet()) {
+            if (entry.getKey().equals(target)) {
+                entry.setValue(quantity);
+                return;
+            }
+        }
+
+        throw new IllegalStateException(
+                "Конфигурация ALS не найдена при обновлении количества"
+        );
     }
 
     /**
@@ -488,7 +535,7 @@ public class Project {
             }
 
             project.quantityALS.merge(
-                    als,
+                    als.copy(),
                     quantity,
                     Integer::sum
             );

@@ -281,6 +281,25 @@ public class LC extends Module implements ControlModule {
     }
 
     /**
+     * Создаёт независимую копию LC.
+     *
+     * @return копия LC с независимой конфигурацией управления
+     */
+    @Override
+    public LC copy() {
+        return new LC(
+                getHeight(),
+                getWidth(),
+                getDepth(),
+                getUpperFrame(),
+                getBottomFrame(),
+                getColorBody(),
+                getColorDoor(),
+                controlConfiguration.copy()
+        );
+    }
+
+    /**
      * Сравнивает LC по его конфигурации.
      *
      * <p>В сравнении участвуют физические параметры модуля,

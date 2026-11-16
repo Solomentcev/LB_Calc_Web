@@ -55,6 +55,21 @@ public class EquipmentConfiguration {
     }
 
     /**
+     * Создаёт независимую копию конфигурации оборудования.
+     *
+     * <p>Объекты оборудования неизменяемы, поэтому копируются
+     * списки, а экземпляры оборудования безопасно переиспользуются.</p>
+     *
+     * @return независимая копия конфигурации
+     */
+    public EquipmentConfiguration copy() {
+        return new EquipmentConfiguration(
+                requiredEquipment,
+                additionalEquipment
+        );
+    }
+
+    /**
      * Возвращает обязательное оборудование.
      *
      * <p>Возвращается представление списка только для чтения.</p>

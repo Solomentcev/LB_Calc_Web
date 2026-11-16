@@ -118,6 +118,20 @@ public class ControlConfiguration {
     }
 
     /**
+     * Создаёт независимую копию конфигурации управления.
+     *
+     * @return копия с независимыми наборами и конфигурацией оборудования
+     */
+    public ControlConfiguration copy() {
+        return new ControlConfiguration(
+                payment,
+                accessMethods,
+                printOptions,
+                equipmentConfiguration.copy()
+        );
+    }
+
+    /**
      * Возвращает способ оплаты.
      *
      * @return способ оплаты
