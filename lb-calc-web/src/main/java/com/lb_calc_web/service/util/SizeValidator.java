@@ -795,7 +795,8 @@ public class SizeValidator {
          */
         int widthMin =
                 WIDTH_CELL_MIN
-                        + typeLb.getDeltaWidth();
+                        + typeLb.getDeltaWidth()
+                        + typeLb.getServiceZoneWidth();
 
         validateRange(
                 result,
@@ -970,7 +971,8 @@ public class SizeValidator {
 
         int storageWidthMin =
                 WIDTH_CELL_MIN
-                        + typeLb.getDeltaWidth();
+                        + typeLb.getDeltaWidth()
+                        + typeLb.getServiceZoneWidth();
 
         int controlWidthMin =
                 requiredLBCControlWidth(
