@@ -45,7 +45,7 @@ LB Calc Web → Kafka → Notification Service → Email
 
 ## Технологии
 
-* Java 21
+* Java 17
 * Spring Boot
 * Spring Data JPA / Hibernate
 * Spring Security / JWT
