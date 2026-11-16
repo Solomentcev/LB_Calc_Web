@@ -131,7 +131,7 @@ public class ALS {
                     Objects.requireNonNull(
                             module,
                             "Модуль не должен быть null"
-                    )
+                    ).copy()
             );
         }
 
@@ -254,91 +254,129 @@ public class ALS {
     }
 
     /**
-     * Добавляет модуль в конец ALS.
+     * Добавляет независимую копию модуля в конец ALS.
+     *
+     * <p>Для добавления нового модуля хранения с автоматическим
+     * определением стороны следует использовать
+     * {@link #addStorageModule(StorageModule)}.</p>
      *
      * @param module добавляемый модуль
-     * @throws NullPointerException если модуль не задан
-     * @throws IllegalStateException если после добавления
-     *                               структура ALS становится недопустимой
      */
     public void addModule(Module module) {
-        Objects.requireNonNull(
-                module,
-                "Модуль не должен быть null"
-        );
-
-        modules.add(module);
-
-        try {
-            recalculate();
-        } catch (RuntimeException e) {
-            modules.remove(modules.size() - 1);
-            throw e;
-        }
+        addModule(modules.size(), module);
     }
 
     /**
-     * Вставляет модуль в заданную позицию.
-     *
-     * <p>Индекс {@code 0} соответствует крайнему левому положению.</p>
+     * Вставляет независимую копию модуля в заданную позицию.
      *
      * @param index позиция модуля
      * @param module добавляемый модуль
-     * @throws NullPointerException если модуль не задан
-     * @throws IndexOutOfBoundsException если индекс недопустим
-     * @throws IllegalStateException если после добавления
-     *                               структура ALS становится недопустимой
      */
     public void addModule(int index, Module module) {
-        Objects.requireNonNull(
-                module,
-                "Модуль не должен быть null"
-        );
+        Objects.requireNonNull(module, "Модуль не должен быть null");
+        Module moduleCopy = module.copy();
 
-        modules.add(index, module);
+        mutate(candidate -> candidate.modules.add(index, moduleCopy));
+    }
 
-        try {
-            recalculate();
-        } catch (RuntimeException e) {
-            modules.remove(index);
-            throw e;
+    /**
+     * Добавляет модуль хранения со стороны, определяемой положением
+     * управляющего модуля.
+     *
+     * <p>Если управляющий модуль находится слева, новый модуль
+     * добавляется справа от него; если справа — слева. При центральном
+     * положении модуль добавляется на менее заполненную сторону.
+     * При равном количестве модулей хранения он добавляется справа.</p>
+     *
+     * @param module добавляемый модуль хранения
+     * @throws IllegalArgumentException если передан не самостоятельный
+     *                                  модуль хранения
+     */
+    public void addStorageModule(StorageModule module) {
+        Objects.requireNonNull(module, "Модуль хранения не должен быть null");
+
+        if (module instanceof ControlModule) {
+            throw new IllegalArgumentException(
+                    "Для добавления LBC требуется отдельная операция замены "
+                            + "модуля управления"
+            );
         }
+
+        Module moduleCopy = module.copy();
+
+        mutate(candidate -> {
+            int controlIndex = candidate.getControlModuleIndex();
+            PositionControlModule position =
+                    candidate.getPositionControlModule();
+
+            int insertionIndex;
+
+            switch (position) {
+                case LEFT -> insertionIndex = controlIndex + 1;
+                case RIGHT -> insertionIndex = controlIndex;
+                case CENTER -> {
+                    int leftCount = controlIndex;
+                    int rightCount =
+                            candidate.modules.size() - controlIndex - 1;
+                    insertionIndex = leftCount < rightCount
+                            ? controlIndex
+                            : controlIndex + 1;
+                }
+                default -> throw new IllegalStateException(
+                        "Неизвестное положение модуля управления"
+                );
+            }
+
+            candidate.modules.add(insertionIndex, moduleCopy);
+        });
     }
 
     /**
      * Удаляет конкретный экземпляр модуля из ALS.
      *
-     * <p>Удаление выполняется по идентичности объекта, а не через
-     * {@link Object#equals(Object)}, поскольку в ALS могут находиться
-     * несколько одинаковых модулей.</p>
-     *
      * @param module удаляемый экземпляр модуля
-     * @return {@code true}, если именно этот экземпляр был удалён
-     * @throws NullPointerException если модуль не задан
-     * @throws IllegalStateException если после удаления
-     *                               структура ALS становится недопустимой
+     * @return {@code true}, если модуль найден и удалён
      */
     public boolean removeModule(Module module) {
-        Objects.requireNonNull(
-                module,
-                "Модуль не должен быть null"
-        );
+        Objects.requireNonNull(module, "Модуль не должен быть null");
 
         int index = findModuleIndexByIdentity(module);
-
         if (index < 0) {
             return false;
         }
 
-        Module removedModule = modules.remove(index);
+        mutate(candidate -> candidate.modules.remove(index));
+        return true;
+    }
 
-        try {
-            recalculate();
-            return true;
-        } catch (RuntimeException e) {
-            modules.add(index, removedModule);
-            throw e;
-        }
+    /**
+     * Выполняет изменение на независимом кандидате и публикует его
+     * состояние только после успешной проверки и пересчёта.
+     *
+     * <p>При исключении исходный агрегат и его модули остаются
+     * неизменными.</p>
+     *
+     * @param operation операция изменения кандидата
+     */
+    private void mutate(java.util.function.Consumer<ALS> operation) {
+        ALS candidate = copy();
+        operation.accept(candidate);
+        candidate.recalculate();
+        replaceState(candidate);
+    }
+
+    /**
+     * Переносит проверенное состояние кандидата в текущий агрегат.
+     */
+    private void replaceState(ALS candidate) {
+        modules.clear();
+        candidate.modules.stream()
+                .map(Module::copy)
+                .forEach(modules::add);
+
+        width = candidate.width;
+        name = candidate.name;
+        description = candidate.description;
     }
 
     /**
