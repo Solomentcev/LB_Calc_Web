@@ -204,10 +204,7 @@ public class ALSService {
         var domain = ALSDtoMapper.toDomain(dto);
 
         Optional<ALSEntity> duplicate =
-                findDuplicate(
-                        domain,
-                        dto.getId()
-                );
+                findDuplicate(domain, null);
 
         if (duplicate.isPresent()) {
             logger.info(
@@ -224,33 +221,13 @@ public class ALSService {
             );
         }
 
-        ALSEntity entity;
-
-        if (dto.getId() != null
-                && dto.getId() > 0) {
-
-            entity =
-                    alsRepository.findById(
-                            dto.getId()
-                    ).orElseThrow(
-                            () -> new NoSuchElementException(
-                                    "АКХ с id"
-                                            + dto.getId()
-                                            + " не найдена"
-                            )
-                    );
-
-            updateEntity(
-                    domain,
-                    entity
-            );
-
-        } else {
-            entity =
-                    createEntity(
-                            domain
-                    );
-        }
+        /*
+         * Сохранённая ALS не изменяется.
+         * Если эквивалентная конфигурация уже существует,
+         * выше возвращается её запись. Иначе создаётся новая ALS
+         * с новыми связями модулей.
+         */
+        ALSEntity entity = createEntity(domain);
 
         ALSEntity saved =
                 alsRepository.save(entity);
@@ -534,14 +511,6 @@ public class ALSService {
         return alsRepository.findAll()
                 .stream()
                 .filter(
-                        entity ->
-                                currentId == null
-                                        || !Objects.equals(
-                                        entity.getId(),
-                                        currentId
-                                )
-                )
-                .filter(
                         entity -> {
                             try {
                                 return domain.equals(
@@ -570,24 +539,6 @@ public class ALSService {
 
         return ALSEntityMapper.toEntity(
                 domain,
-                module ->
-                        resolveModule(
-                                module,
-                                moduleCache
-                        )
-        );
-    }
-
-    private void updateEntity(
-            com.lb_calc_web.domain.model.ALS domain,
-            ALSEntity entity
-    ) {
-        List<ModuleEntity> moduleCache =
-                moduleRepository.findAll();
-
-        ALSEntityMapper.updateEntity(
-                domain,
-                entity,
                 module ->
                         resolveModule(
                                 module,
