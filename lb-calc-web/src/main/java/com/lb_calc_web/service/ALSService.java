@@ -204,7 +204,7 @@ public class ALSService {
         var domain = ALSDtoMapper.toDomain(dto);
 
         Optional<ALSEntity> duplicate =
-                findDuplicate(domain, null);
+                findDuplicate(domain);
 
         if (duplicate.isPresent()) {
             logger.info(
@@ -505,8 +505,7 @@ public class ALSService {
     }
 
     private Optional<ALSEntity> findDuplicate(
-            com.lb_calc_web.domain.model.ALS domain,
-            Long currentId
+            com.lb_calc_web.domain.model.ALS domain
     ) {
         return alsRepository.findAll()
                 .stream()
