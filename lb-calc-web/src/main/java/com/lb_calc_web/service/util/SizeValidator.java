@@ -609,7 +609,7 @@ public class SizeValidator {
                 lb.getWidth() - typeLb.getDeltaWidth() - typeLb.getServiceZoneWidth();
 
         int widthCellMax =
-                WIDTH_MAX - typeLb.getDeltaWidth() - typeLb.getServiceZoneWidth() - typeLb.getServiceZoneWidth();
+                WIDTH_MAX - typeLb.getDeltaWidth() - typeLb.getServiceZoneWidth();
 
         if (widthCell < WIDTH_CELL_MIN) {
             result.addError(
@@ -1073,7 +1073,7 @@ public class SizeValidator {
                     lbc.getWidth() - typeLb.getDeltaWidth() - typeLb.getServiceZoneWidth();
 
             int widthCellMax =
-                    WIDTH_MAX - typeLb.getDeltaWidth() - typeLb.getServiceZoneWidth() - typeLb.getServiceZoneWidth();
+                    WIDTH_MAX - typeLb.getDeltaWidth() - typeLb.getServiceZoneWidth();
 
             if (widthCell < WIDTH_CELL_MIN) {
                 result.addError(
