@@ -178,11 +178,14 @@ public class Project {
     }
 
     /**
-     * Заменяет одну конфигурацию ALS другой.
+     * Заменяет ровно одну единицу конфигурации ALS.
      *
-     * <p>Количество старой конфигурации переносится на новую.
-     * Если новая конфигурация уже присутствует в проекте,
-     * её существующее количество увеличивается.</p>
+     * <p>Остальные экземпляры старой конфигурации остаются в проекте.
+     * Если новая конфигурация уже присутствует, её количество
+     * увеличивается на единицу.</p>
+     *
+     * <p>Новое состояние сначала рассчитывается в отдельной карте,
+     * поэтому ошибка проверки не оставляет проект частично изменённым.</p>
      *
      * @param oldALS конфигурация ALS, которую необходимо заменить
      * @param newALS новая конфигурация ALS
@@ -203,8 +206,7 @@ public class Project {
                 "Новый ALS не должен быть null"
         );
 
-        Integer quantity =
-                quantityALS.remove(oldALS);
+        Integer quantity = quantityALS.get(oldALS);
 
         if (quantity == null) {
             throw new IllegalArgumentException(
@@ -212,11 +214,27 @@ public class Project {
             );
         }
 
-        quantityALS.merge(
+        if (oldALS.equals(newALS)) {
+            return;
+        }
+
+        Map<ALS, Integer> updatedQuantityALS =
+                new LinkedHashMap<>(quantityALS);
+
+        if (quantity == 1) {
+            updatedQuantityALS.remove(oldALS);
+        } else {
+            updatedQuantityALS.put(oldALS, quantity - 1);
+        }
+
+        updatedQuantityALS.merge(
                 newALS,
-                quantity,
+                1,
                 Integer::sum
         );
+
+        quantityALS.clear();
+        quantityALS.putAll(updatedQuantityALS);
 
         update();
     }
