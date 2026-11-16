@@ -516,7 +516,7 @@ public class ProjectService {
         List<ALSDTO> alsList =
                 project.getAlsList();
 
-        boolean replaced = false;
+        int replacedIndex = -1;
 
         for (int i = 0;
              i < alsList.size();
@@ -537,12 +537,12 @@ public class ProjectService {
                         als
                 );
 
-                replaced = true;
+                replacedIndex = i;
                 break;
             }
         }
 
-        if (!replaced) {
+        if (replacedIndex < 0) {
             throw new NoSuchElementException(
                     "ALS с id "
                             + alsId
@@ -551,9 +551,9 @@ public class ProjectService {
             );
         }
 
-        saveProject(project);
+        ProjectDTO savedProject = saveProject(project);
 
-        return als;
+        return savedProject.getAlsList().get(replacedIndex);
     }
 
     /**
