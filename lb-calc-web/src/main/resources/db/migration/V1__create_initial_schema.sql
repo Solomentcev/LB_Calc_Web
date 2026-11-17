@@ -10,6 +10,7 @@ CREATE TABLE employee (
                           encrypted_password VARCHAR(255) NOT NULL,
                           registration_date DATE NOT NULL,
                           role VARCHAR(50) NOT NULL,
+                          is_active BOOLEAN NOT NULL DEFAULT TRUE,
 
                           CONSTRAINT pk_employee
                               PRIMARY KEY (id),
