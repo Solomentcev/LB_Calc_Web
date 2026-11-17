@@ -84,8 +84,7 @@ class LBCServiceTest {
         when(lbcRepository.findCandidates(
                 anyInt(), anyInt(), anyInt(), anyInt(), anyInt(),
                 any(), any(), anyString(), anyInt(), anyInt(), anyInt(),
-                anyInt(), any(), anyInt(), any(), anyInt(), any(), anyInt(),
-                anyBoolean(), anyInt(), anyBoolean(), anyInt(), any()
+                anyInt(), any(), anyInt(), any()
         )).thenReturn(List.of());
 
         when(lbcRepository.save(any(LBCEntity.class)))
@@ -112,8 +111,7 @@ class LBCServiceTest {
         when(lbcRepository.findCandidates(
                 anyInt(), anyInt(), anyInt(), anyInt(), anyInt(),
                 any(), any(), anyString(), anyInt(), anyInt(), anyInt(),
-                anyInt(), any(), anyInt(), any(), anyInt(), any(), anyInt(),
-                anyBoolean(), anyInt(), anyBoolean(), anyInt(), any()
+                anyInt(), any(), anyInt(), any()
         )).thenReturn(List.of(existing));
 
         LBCDTO result =
