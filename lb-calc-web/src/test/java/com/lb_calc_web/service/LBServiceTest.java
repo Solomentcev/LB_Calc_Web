@@ -112,6 +112,19 @@ class LBServiceTest {
     }
 
     @Test
+    void saveLB_widthBelowMinimum_shouldThrowValidationException() {
+        LBDTO dto = TestDataFactory.validLBDTO(1L);
+        dto.setWidth(159);
+
+        assertThrows(
+                ValidationSizeException.class,
+                () -> lbService.saveLB(dto)
+        );
+
+        verify(lbRepository, never()).save(any());
+    }
+
+    @Test
     void findById_existing_shouldReturnDto() {
         LBDTO dto = TestDataFactory.validLBDTO(1L);
         LBEntity entity =
