@@ -203,4 +203,43 @@ class PersistenceIntegrationTest {
         assertEquals(Set.of(AccessMethod.RFID), restoredLBC.getAccessMethods());
         assertEquals(Set.of(PrintOption.BARCODE), restoredLBC.getPrintOptions());
     }
+
+    @Test
+    void updatingAlsModuleOrder_shouldPersistReorderedAssociations() {
+        ALS domainALS = TestDataFactory.validALS(null);
+        Map<Module, ModuleEntity> resolvedModules = new HashMap<>();
+
+        ALSEntity alsEntity = ALSEntityMapper.toEntity(
+                domainALS,
+                module -> resolvedModules.computeIfAbsent(
+                        module,
+                        candidate -> moduleRepository.saveAndFlush(
+                                ModuleEntityMapper.toEntity(candidate)
+                        )
+                )
+        );
+        alsEntity = alsRepository.saveAndFlush(alsEntity);
+
+        Long alsId = alsEntity.getId();
+        List<ModuleEntity> reorderedModules = alsEntity.getModules().stream()
+                .map(com.lb_calc_web.entity.ALSModuleEntity::getModule)
+                .collect(java.util.stream.Collectors.toCollection(java.util.ArrayList::new));
+        java.util.Collections.swap(reorderedModules, 0, 1);
+
+        alsEntity.synchronizeModules(reorderedModules);
+        alsRepository.saveAndFlush(alsEntity);
+        entityManager.clear();
+
+        ALSEntity restored = alsRepository.findById(alsId).orElseThrow();
+
+        assertEquals(reorderedModules.size(), restored.getModules().size());
+        for (int index = 0; index < reorderedModules.size(); index++) {
+            assertEquals(index, restored.getModules().get(index).getModuleOrder());
+            assertEquals(
+                    reorderedModules.get(index).getId(),
+                    restored.getModules().get(index).getModule().getId()
+            );
+        }
+    }
+
 }
