@@ -272,6 +272,5 @@ class ALSServiceTest {
         assertEquals(lbc.getCountCells(), result.getLBC().getCountCells());
         assertEquals(2, result.getLbList().size());
         assertNull(result.getLC());
-        assertNull(result.getLC());
     }
 }
