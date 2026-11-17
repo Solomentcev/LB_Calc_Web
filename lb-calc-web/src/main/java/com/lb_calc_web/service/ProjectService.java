@@ -19,7 +19,6 @@ import com.lb_calc_web.entity.EmployeeEntity;
 import com.lb_calc_web.entity.ProjectEntity;
 import com.lb_calc_web.handler.ValidationSizeException;
 import com.lb_calc_web.helper.ExcellHelper;
-import com.lb_calc_web.mapper.dto.ALSDtoMapper;
 import com.lb_calc_web.mapper.dto.EmployeeDtoMapper;
 import com.lb_calc_web.mapper.dto.ProjectDtoMapper;
 import com.lb_calc_web.mapper.entity.ALSEntityMapper;
@@ -218,7 +217,7 @@ public class ProjectService {
          */
         Project domain;
         try {
-            domain = ProjectDtoMapper.toDomain(dto);
+            domain = ProjectDtoMapper.toDomain(dto, alsService::toDomain);
         } catch (IllegalStateException exception) {
             ValidationResult validationResult =
                     new ValidationResult("Project", dto.getId());
@@ -251,6 +250,14 @@ public class ProjectService {
                 );
 
         dto.setAlsList(savedALS);
+
+        /*
+         * ALSService возвращает канонические DTO с конструктивными
+         * параметрами, разрешёнными из конфигурации приложения.
+         * Повторно собираем Project, чтобы его ALS совпадали с теми,
+         * для которых ниже разрешаются persistence-сущности.
+         */
+        domain = ProjectDtoMapper.toDomain(dto, alsService::toDomain);
 
         Function<ALS, ALSEntity> alsResolver =
                 resolveALSEntities(
@@ -334,7 +341,7 @@ public class ProjectService {
         Project domain = ProjectDtoMapper.toDomain(source);
 
         domain.addALS(
-                ALSDtoMapper.toDomain(alsService.createALS())
+                alsService.toDomain(alsService.createALS())
         );
 
         return saveProject(toDto(domain, source));
@@ -352,7 +359,7 @@ public class ProjectService {
         ALSDTO selected = findALSInProject(projectId, alsId);
 
         Project domain = ProjectDtoMapper.toDomain(source);
-        ALS selectedDomain = ALSDtoMapper.toDomain(selected);
+        ALS selectedDomain = alsService.toDomain(selected);
 
         if (domain.getQuantity(selectedDomain) == 0) {
             throw new NoSuchElementException(
@@ -531,7 +538,7 @@ public class ProjectService {
 
         Project domain = ProjectDtoMapper.toDomain(project);
         ALS oldConfiguration = ALSDtoMapper.toDomain(selected);
-        ALS newConfiguration = ALSDtoMapper.toDomain(als);
+        ALS newConfiguration = alsService.toDomain(als);
 
         domain.replaceALS(oldConfiguration, newConfiguration);
 
@@ -539,7 +546,7 @@ public class ProjectService {
 
         return savedProject.getAlsList().stream()
                 .filter(value -> value != null
-                        && ALSDtoMapper.toDomain(value).equals(newConfiguration))
+                        && alsService.toDomain(value).equals(newConfiguration))
                 .findFirst()
                 .orElseThrow(
                         () -> new IllegalStateException(
@@ -839,7 +846,7 @@ public class ProjectService {
                         : source.getAlsList().stream()
                                 .filter(existing -> existing != null
                                         && existing.getId() != null
-                                        && ALSDtoMapper.toDomain(existing).equals(requested))
+                                        && alsService.toDomain(existing).equals(requested))
                                 .map(ALSDTO::getId)
                                 .findFirst()
                                 .orElse(null)
@@ -1055,7 +1062,7 @@ public class ProjectService {
         List<Map.Entry<ALS, ALSEntity>> resolved = new ArrayList<>();
 
         for (ALSDTO dto : savedALS) {
-            ALS domain = ALSDtoMapper.toDomain(dto);
+            ALS domain = alsService.toDomain(dto);
             ALSEntity entity = entitiesById.get(dto.getId());
 
             boolean alreadyResolved = resolved.stream()
@@ -1178,7 +1185,7 @@ public class ProjectService {
         return source.getAlsList().stream()
                 .filter(Objects::nonNull)
                 .filter(candidate ->
-                        ALSDtoMapper.toDomain(candidate).equals(target)
+                        alsService.toDomain(candidate).equals(target)
                 )
                 .findFirst()
                 .orElse(null);

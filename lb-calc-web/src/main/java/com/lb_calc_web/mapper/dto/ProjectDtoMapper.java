@@ -166,9 +166,28 @@ public final class ProjectDtoMapper {
     public static Project toDomain(
             ProjectDTO dto
     ) {
+        return toDomain(dto, ALSDtoMapper::toDomain);
+    }
+
+    /**
+     * Преобразует DTO проекта в доменную модель с заданным преобразованием ALS.
+     *
+     * <p>Application-слой может передать преобразователь, который разрешает
+     * конструктивные параметры вложенных модулей из конфигурации приложения.</p>
+     *
+     * @param dto DTO проекта
+     * @param alsMapper преобразователь DTO ALS в доменную модель
+     * @return доменный проект или {@code null}
+     */
+    public static Project toDomain(
+            ProjectDTO dto,
+            Function<ALSDTO, ALS> alsMapper
+    ) {
         if (dto == null) {
             return null;
         }
+
+        Objects.requireNonNull(alsMapper, "alsMapper не должен быть null");
 
         if (dto.getCreatedBy() == null) {
             throw new IllegalArgumentException(
@@ -194,7 +213,8 @@ public final class ProjectDtoMapper {
 
         Map<ALS, Integer> quantityALS =
                 toDomainQuantityALS(
-                        dto
+                        dto,
+                        alsMapper
                 );
 
         return Project.restore(
@@ -254,7 +274,8 @@ public final class ProjectDtoMapper {
      * @return количество каждого типа ALS
      */
     private static Map<ALS, Integer> toDomainQuantityALS(
-            ProjectDTO dto
+            ProjectDTO dto,
+            Function<ALSDTO, ALS> alsMapper
     ) {
         Map<ALS, Integer> result =
                 new LinkedHashMap<>();
@@ -276,7 +297,7 @@ public final class ProjectDtoMapper {
 
             ALS als =
                     Objects.requireNonNull(
-                            ALSDtoMapper.toDomain(alsDto),
+                            alsMapper.apply(alsDto),
                             "ALS не должен быть null"
                     );
 

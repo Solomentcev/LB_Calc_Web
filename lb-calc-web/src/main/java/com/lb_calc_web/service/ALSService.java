@@ -503,7 +503,7 @@ public class ALSService {
      * Конструктивные параметры типов берутся из конфигурации приложения,
      * а не из значений, переданных клиентом.
      */
-    private ALS toDomain(ALSDTO dto) {
+    ALS toDomain(ALSDTO dto) {
         return ALSDtoMapper.toDomain(
                 dto,
                 lbDto -> TypeLbFactory.forLB(environment, lbDto.getType()),
