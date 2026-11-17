@@ -95,7 +95,9 @@ public final class EmployeeEntityMapper {
         entity.setFirstName(domain.getFirstName());
         entity.setLastName(domain.getLastName());
         entity.setEmail(domain.getEmail());
-        entity.setRegistrationDate(domain.getRegistrationDate());
+        if (entity.getRegistrationDate() == null) {
+            entity.setRegistrationDate(domain.getRegistrationDate());
+        }
         entity.setRole(domain.getRole());
     }
 }
