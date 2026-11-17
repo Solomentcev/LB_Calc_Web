@@ -2,6 +2,7 @@ package com.lb_calc_web.mapper.entity;
 
 import com.lb_calc_web.TestDataFactory;
 import com.lb_calc_web.domain.equipment.BarReader;
+import com.lb_calc_web.domain.equipment.EquipmentItem;
 import com.lb_calc_web.domain.model.EquipmentConfiguration;
 import com.lb_calc_web.entity.EquipmentQuantityEmbeddable;
 import com.lb_calc_web.entity.LBCEntity;
@@ -24,7 +25,14 @@ class ControlModuleEquipmentEntityMapperTest {
         LCEntity entity = LCEntityMapper.toEntity(domain);
         var restored = LCEntityMapper.toDomain(entity);
 
-        assertEquals(2, entity.getBarReaders().size());
+        assertEquals(
+                domain.getControlConfiguration().getEquipmentConfiguration()
+                        .getAllItems().size(),
+                entity.getEquipment().size()
+        );
+        assertEquals(2, entity.getEquipment().stream()
+                .filter(item -> item.getCatalogPositionId().startsWith("BAR_READER"))
+                .count());
         assertEquals(domain, restored);
     }
 
@@ -53,8 +61,33 @@ class ControlModuleEquipmentEntityMapperTest {
 
         assertThrows(
                 IllegalArgumentException.class,
-                () -> new LCEntity().setBarReaders(Set.of(one, two))
+                () -> new LCEntity().setEquipment(Set.of(one, two))
         );
+    }
+
+    @Test
+    void lc_shouldPersistEveryEquipmentPositionAndQuantity() {
+        var domain = TestDataFactory.validLC(1L);
+        EquipmentConfiguration configuration =
+                domain.getControlConfiguration().getEquipmentConfiguration();
+
+        configuration.addRequiredEquipment(BarReader.READER_1D, 2);
+        configuration.addAdditionalEquipment(BarReader.READER_2D, 3);
+
+        LCEntity entity = LCEntityMapper.toEntity(domain);
+
+        assertEquals(
+                configuration.getAllItems().size(),
+                entity.getEquipment().size()
+        );
+        assertEquals(
+                2,
+                entity.getEquipment().stream()
+                        .filter(item -> item.getCatalogPositionId()
+                                .equals(BarReader.READER_1D_ID))
+                        .findFirst().orElseThrow().getQuantity()
+        );
+        assertEquals(domain, LCEntityMapper.toDomain(entity));
     }
 
     private void addBarReaders(EquipmentConfiguration configuration) {
