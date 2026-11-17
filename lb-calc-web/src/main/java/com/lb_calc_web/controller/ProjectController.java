@@ -278,17 +278,18 @@ public class ProjectController
         try {
             lc.setId(lcId);
 
-            projectService.saveLCAtProject(
-                    projectId,
-                    alsId,
-                    lcId,
-                    lc
-            );
+            ALSDTO savedALS =
+                    projectService.saveLCAtProject(
+                            projectId,
+                            alsId,
+                            lcId,
+                            lc
+                    );
 
             return "redirect:/projects/"
                     + projectId
                     + "/alss/"
-                    + alsId;
+                    + savedALS.getId();
 
         } catch (ValidationSizeException e) {
 
@@ -388,17 +389,18 @@ public class ProjectController
         try {
             lbc.setId(lbcId);
 
-            projectService.saveLBCAtProject(
-                    projectId,
-                    alsId,
-                    lbcId,
-                    lbc
-            );
+            ALSDTO savedALS =
+                    projectService.saveLBCAtProject(
+                            projectId,
+                            alsId,
+                            lbcId,
+                            lbc
+                    );
 
             return "redirect:/projects/"
                     + projectId
                     + "/alss/"
-                    + alsId;
+                    + savedALS.getId();
 
         } catch (ValidationSizeException e) {
             model.addAttribute(
@@ -486,17 +488,18 @@ public class ProjectController
         try {
             lb.setId(lbId);
 
-            projectService.saveLBAtProject(
-                    projectId,
-                    alsId,
-                    lbId,
-                    lb
-            );
+            ALSDTO savedALS =
+                    projectService.saveLBAtProject(
+                            projectId,
+                            alsId,
+                            lbId,
+                            lb
+                    );
 
             return "redirect:/projects/"
                     + projectId
                     + "/alss/"
-                    + alsId;
+                    + savedALS.getId();
 
         } catch (ValidationSizeException e) {
 
