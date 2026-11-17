@@ -230,7 +230,7 @@ public class ProjectService {
                     null
             );
             throw new ValidationSizeException(validationResult);
-        } catch (IllegalArgumentException exception) {
+        } catch (IllegalArgumentException | NullPointerException exception) {
             ValidationResult validationResult =
                     new ValidationResult("Project", dto.getId());
             validationResult.addError(
