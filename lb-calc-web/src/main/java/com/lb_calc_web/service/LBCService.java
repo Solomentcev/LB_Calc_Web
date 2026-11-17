@@ -153,17 +153,9 @@ public class LBCService {
                 getEnumList("lbc.print-options.default", PrintOption.class)
         );
 
-        LBC domain;
-        try {
-            applyTypeConfiguration(dto);
-            domain = LBCDtoMapper.toDomain(dto);
-        } catch (IllegalArgumentException | NullPointerException exception) {
-            throw createMappingValidationException(
-                    "LBC",
-                    dto.getId(),
-                    exception
-            );
-        }
+        applyTypeConfiguration(dto);
+
+        LBC domain = LBCDtoMapper.toDomain(dto);
         LBCDTO result = LBCDtoMapper.toDto(domain);
         result.setId(0L);
         return addLBCImage(result);
@@ -214,9 +206,17 @@ public class LBCService {
                 dto.getType()
         );
 
-        applyTypeConfiguration(dto);
-
-        LBC domain = LBCDtoMapper.toDomain(dto);
+        LBC domain;
+        try {
+            applyTypeConfiguration(dto);
+            domain = LBCDtoMapper.toDomain(dto);
+        } catch (IllegalArgumentException | NullPointerException exception) {
+            throw createMappingValidationException(
+                    "LBC",
+                    dto.getId(),
+                    exception
+            );
+        }
 
         ValidationResult validationResult =
                 sizeValidator.validateLBC(domain);
