@@ -453,28 +453,38 @@ class PersistenceIntegrationTest {
             Project restoredProject =
                     ProjectEntityMapper.toDomain(restoredEntity);
 
-            ALS originalConfiguration = com.lb_calc_web.mapper.dto.ALSDtoMapper
-                    .toDomain(repeatedALS);
-            ALS independentConfiguration = com.lb_calc_web.mapper.dto.ALSDtoMapper
-                    .toDomain(independentALS);
+            ALS originalConfiguration = ALSDtoMapper.toDomain(repeatedALS);
+            ALS independentConfiguration = ALSDtoMapper.toDomain(independentALS);
+            ALS changedLCConfiguration = ALSDtoMapper.toDomain(changedWithLC);
+            ALS changedLBCConfiguration = ALSDtoMapper.toDomain(changedWithLBC);
 
             assertEquals(1, restoredProject.getQuantity(originalConfiguration));
-            assertEquals(1, restoredProject.getQuantity(independentConfiguration));
+            assertEquals(0, restoredProject.getQuantity(independentConfiguration));
+            assertEquals(1, restoredProject.getQuantity(changedLCConfiguration));
+            assertEquals(1, restoredProject.getQuantity(changedLBCConfiguration));
             assertEquals(3, restoredEntity.getAlsEntries().size());
 
-            ALSEntity changedEntity = restoredEntity.getAlsEntries().stream()
-                    .map(entry -> entry.getAls())
-                    .filter(entity -> !entity.getId().equals(selectedAlsId)
-                            && !entity.getId().equals(independentAlsId))
+            ALSEntity restoredChangedLCEntity =
+                    alsRepository.findById(changedWithLC.getId()).orElseThrow();
+            ALS restoredChangedLC =
+                    ALSEntityMapper.toDomain(restoredChangedLCEntity);
+            assertEquals(3, restoredChangedLC.getStorageModules().size());
+
+            ProjectDTO restoredDTO = projectService.findById(projectId);
+            ALSDTO persistedLCConfiguration = restoredDTO.getAlsList().stream()
+                    .filter(value -> value.getId().equals(changedWithLC.getId()))
                     .findFirst()
                     .orElseThrow();
+            assertEquals(2, persistedLCConfiguration.getLC().getDisplayQuantity());
 
-            ALS changedConfiguration = ALSEntityMapper.toDomain(changedEntity);
-            assertEquals(3, changedConfiguration.getStorageModules().size());
-            assertEquals(1, restoredProject.getQuantity(changedConfiguration));
-
-            assertTrue(restoredEntity.getAlsEntries().stream()
-                    .anyMatch(entry -> entry.getAls().getId().equals(independentAlsId)));
+            ALSDTO persistedLBCConfiguration = restoredDTO.getAlsList().stream()
+                    .filter(value -> value.getId().equals(changedWithLBC.getId()))
+                    .findFirst()
+                    .orElseThrow();
+            assertEquals(
+                    List.of(AccessMethod.RFID.name()),
+                    persistedLBCConfiguration.getLBC().getAccessMethods()
+            );
         } finally {
             SecurityContextHolder.clearContext();
         }
