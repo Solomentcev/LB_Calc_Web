@@ -265,7 +265,7 @@ public class LCService {
                 .orElse(0);
 
         Optional<LCEntity> existing =
-                lcRepository.findByHeightAndWidthAndDepthAndUpperFrameAndBottomFrameAndColorBodyAndColorDoorAndDisplayAndDisplayQuantityAndBarReaderAndBarReaderQuantityAndPrinterAndPrinterQuantityAndRfidReaderAndRfidReaderQuantityAndPayment(
+                lcRepository.findCandidates(
                         domain.getHeight(),
                         domain.getWidth(),
                         domain.getDepth(),
