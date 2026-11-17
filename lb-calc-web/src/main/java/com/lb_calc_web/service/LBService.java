@@ -209,7 +209,7 @@ public class LBService {
          */
         var typeLb = domain.getTypeLb();
         Optional<LBEntity> existing =
-                lbRepository.findByHeightAndWidthAndDepthAndUpperFrameAndBottomFrameAndTypeAndDeltaWidthAndShelfThickAndServiceZoneWidthAndDoorThicknessAndDirectionDoorOpeningAndCountCellsAndColorBodyAndColorDoor(
+                lbRepository.findCandidates(
                         domain.getHeight(),
                         domain.getWidth(),
                         domain.getDepth(),
