@@ -4,7 +4,6 @@ import com.lb_calc_web.TestDataFactory;
 import com.lb_calc_web.domain.attributes.Colors;
 import com.lb_calc_web.domain.attributes.DirectionDoorOpening;
 import com.lb_calc_web.domain.attributes.Role;
-import com.lb_calc_web.domain.attributes.TypeLb;
 import com.lb_calc_web.domain.model.ALS;
 import com.lb_calc_web.domain.model.Employee;
 import com.lb_calc_web.domain.model.LB;
@@ -28,7 +27,6 @@ class SizeValidatorTest {
     private LC lc;
     private LBC lbc;
     private ALS als;
-    private Project project;
 
     @BeforeEach
     void setUp() {
@@ -38,7 +36,6 @@ class SizeValidatorTest {
         lc = TestDataFactory.validLC(2L);
         lbc = TestDataFactory.validLBC(3L);
         als = TestDataFactory.validALS(4L);
-        project = createProject(5L, als);
     }
 
     @Test
