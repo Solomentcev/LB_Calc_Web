@@ -73,8 +73,11 @@ class LBServiceTest {
                 com.lb_calc_web.mapper.dto.LBDtoMapper.toDomain(dto)
         );
 
-        when(lbRepository.findAll())
-                .thenReturn(List.of(existing));
+        when(lbRepository.findByHeightAndWidthAndDepthAndUpperFrameAndBottomFrameAndTypeAndDeltaWidthAndShelfThickAndServiceZoneWidthAndDoorThicknessAndDirectionDoorOpeningAndCountCellsAndColorBodyAndColorDoor(
+                anyInt(), anyInt(), anyInt(), anyInt(), anyInt(),
+                anyString(), anyInt(), anyInt(), anyInt(), anyInt(),
+                any(), anyInt(), any(), any()
+        )).thenReturn(List.of(existing));
 
         LBDTO result = lbService.saveLB(dto);
 
@@ -90,7 +93,11 @@ class LBServiceTest {
                         com.lb_calc_web.mapper.dto.LBDtoMapper.toDomain(dto)
                 );
 
-        when(lbRepository.findAll()).thenReturn(List.of());
+        when(lbRepository.findByHeightAndWidthAndDepthAndUpperFrameAndBottomFrameAndTypeAndDeltaWidthAndShelfThickAndServiceZoneWidthAndDoorThicknessAndDirectionDoorOpeningAndCountCellsAndColorBodyAndColorDoor(
+                anyInt(), anyInt(), anyInt(), anyInt(), anyInt(),
+                anyString(), anyInt(), anyInt(), anyInt(), anyInt(),
+                any(), anyInt(), any(), any()
+        )).thenReturn(List.of());
         when(lbRepository.save(any(LBEntity.class)))
                 .thenReturn(saved);
 
