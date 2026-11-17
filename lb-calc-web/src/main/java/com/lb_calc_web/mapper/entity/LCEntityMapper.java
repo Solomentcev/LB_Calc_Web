@@ -107,6 +107,7 @@ public final class LCEntityMapper {
         entity.setBarReaders(configuration.getAllEquipment().stream()
                 .filter(BarReader.class::isInstance)
                 .map(BarReader.class::cast)
+                .filter(item -> item != BarReader.NONE)
                 .map(item -> new EquipmentQuantityEmbeddable(
                         item.getCatalogPositionId(), configuration.getQuantity(item)))
                 .collect(Collectors.toSet()));
