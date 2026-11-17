@@ -214,6 +214,32 @@ class SizeValidatorTest {
     }
 
     @Test
+    void validateLB_missingType_shouldStillValidateIndependentDimensions() {
+        lb.setType(null);
+        lb.setHeight(10);
+
+        ValidationResult result = sizeValidator.validateLB(lb);
+
+        assertTrue(result.getErrors().stream()
+                .anyMatch(error -> "type".equals(error.getField())));
+        assertTrue(result.getErrors().stream()
+                .anyMatch(error -> "height".equals(error.getField())));
+    }
+
+    @Test
+    void validateLB_shouldAllowMinimumConstructiveHeight() {
+        lb.setHeight(185);
+        lb.setCountCells(1);
+
+        ValidationResult result = sizeValidator.validateLB(lb);
+
+        assertFalse(result.getErrors().stream()
+                .anyMatch(error -> "height".equals(error.getField())));
+        assertFalse(result.getErrors().stream()
+                .anyMatch(error -> "heightCell".equals(error.getField())));
+    }
+
+    @Test
     void validateLB_invalidHeight_shouldFail() {
         lb.setHeight(10);
 
@@ -311,6 +337,92 @@ class SizeValidatorTest {
                                         )
                         )
         );
+    }
+
+    @Test
+    void validateALS_withLC_shouldRespectMinimumLCHeight() {
+        als.setHeight(599);
+
+        ValidationResult result = sizeValidator.validateALS(als);
+
+        assertTrue(result.getErrors().stream()
+                .anyMatch(error -> "height".equals(error.getField())));
+    }
+
+    @Test
+    void validateALS_bothControlModules_shouldFailStructureValidation() {
+        als.setLBC(TestDataFactory.validLBCDTO(90L));
+
+        ValidationResult result = sizeValidator.validateALS(als);
+
+        assertTrue(result.getErrors().stream()
+                .anyMatch(error -> "controlModule".equals(error.getField())));
+    }
+
+    @Test
+    void validateALS_shouldReportOnlyOneUsableHeightError() {
+        als.setHeight(
+                als.getUpperFrame()
+                        + als.getBottomFrame()
+                        + sizeValidator.getHeightLcPanelMin()
+                        - 1
+        );
+
+        ValidationResult result = sizeValidator.validateALS(als);
+
+        assertEquals(1, result.getErrors().stream()
+                .filter(error -> "heightConsistency".equals(error.getField()))
+                .count());
+    }
+
+    @Test
+    void validateLBC_unknownDisplay_shouldAddValidationError() {
+        lbc.setDisplay("UNKNOWN");
+
+        ValidationResult result = sizeValidator.validateLBC(lbc);
+
+        assertTrue(result.getErrors().stream()
+                .anyMatch(error -> "display".equals(error.getField())));
+    }
+
+    @Test
+    void validateLBC_shouldValidateCellWidthWhenCellCountIsZero() {
+        lbc.setCountCells(0);
+        lbc.setWidth(239);
+
+        ValidationResult result = sizeValidator.validateLBC(lbc);
+
+        assertTrue(result.getErrors().stream()
+                .anyMatch(error -> "widthCell".equals(error.getField())));
+        assertTrue(result.getErrors().stream()
+                .anyMatch(error -> "depthCell".equals(error.getField())));
+    }
+
+    @Test
+    void deepValidateALS_shouldUseCommonDimensionsFromALS() {
+        als.getLbList().get(0).setHeight(10);
+
+        List<ValidationResult> results = sizeValidator.deepValidateALS(als);
+
+        ValidationResult lbResult = results.stream()
+                .filter(result -> "LB".equals(result.getObjectType()))
+                .findFirst()
+                .orElseThrow();
+
+        assertFalse(lbResult.getErrors().stream()
+                .anyMatch(error -> "height".equals(error.getField())));
+    }
+
+    @Test
+    void deepValidateALS_nullLBElement_shouldReturnValidationError() {
+        als.setLbList(java.util.Arrays.asList((LBDTO) null));
+
+        List<ValidationResult> results = sizeValidator.deepValidateALS(als);
+
+        assertTrue(results.stream()
+                .anyMatch(result -> "LB".equals(result.getObjectType())
+                        && result.getErrors().stream()
+                        .anyMatch(error -> "module".equals(error.getField()))));
     }
 
     @Test

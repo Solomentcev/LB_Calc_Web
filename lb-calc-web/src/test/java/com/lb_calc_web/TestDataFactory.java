@@ -20,8 +20,11 @@ import com.lb_calc_web.dto.ProjectDTO;
 import com.lb_calc_web.mapper.dto.ALSDtoMapper;
 import com.lb_calc_web.mapper.dto.LBCDtoMapper;
 import com.lb_calc_web.service.util.ALSImageService;
-import com.lb_calc_web.service.util.SizeValidator;
+import com.lb_calc_web.service.util.ALSSizeValidator;
+import com.lb_calc_web.service.util.ModuleSizeValidator;
+import com.lb_calc_web.service.util.ProjectSizeValidator;
 import com.lb_calc_web.service.util.SizeBounds;
+import com.lb_calc_web.service.util.SizeValidator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,14 +44,14 @@ public final class TestDataFactory {
     }
 
     public static SizeValidator createSizeValidator() {
-        return new SizeValidator(new SizeBounds(
+        SizeBounds bounds = new SizeBounds(
                 20,
                 300,
                 20,
                 300,
                 85,
                 2300,
-                600,
+                125,
                 600,
                 300,
                 1,
@@ -67,7 +70,19 @@ public final class TestDataFactory {
                 100,
                 0,
                 300
-        ));
+        );
+        ModuleSizeValidator moduleValidator =
+                new ModuleSizeValidator(bounds);
+        ALSSizeValidator alsValidator =
+                new ALSSizeValidator(bounds, moduleValidator);
+        ProjectSizeValidator projectValidator =
+                new ProjectSizeValidator(alsValidator);
+
+        return new SizeValidator(
+                moduleValidator,
+                alsValidator,
+                projectValidator
+        );
     }
 
     public static LCDTO validLCDTO(Long id) {
