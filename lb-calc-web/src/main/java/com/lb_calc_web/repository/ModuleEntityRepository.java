@@ -9,8 +9,7 @@ import java.util.List;
 public interface ModuleEntityRepository
         extends JpaRepository<ModuleEntity, Long> {
 
-    List<ModuleEntity> findByHeightAndWidthAndDepth
-            AndUpperFrameAndBottomFrameAndColorBodyAndColorDoor(
+    List<ModuleEntity> findByHeightAndWidthAndDepthAndUpperFrameAndBottomFrameAndColorBodyAndColorDoor(
             int height,
             int width,
             int depth,
