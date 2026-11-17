@@ -809,17 +809,18 @@ public class ProjectService {
                         alsId
                 );
 
-        savedALS.getLbList().stream()
-                .filter(value -> value != null
-                        && Objects.equals(value.getId(), lbId))
-                .findFirst()
-                .orElseThrow(
-                        () -> new NoSuchElementException(
-                                "После сохранения LB с id "
-                                        + lbId
-                                        + " не найден"
-                        )
-                );
+        /*
+         * После изменения конфигурации LB получает новый persistence ID.
+         * Проверять прежний ID нельзя: он идентифицировал исходную запись,
+         * а не новую конфигурацию.
+         */
+        if (savedALS.getLbList() == null
+                || savedALS.getLbList().size() != als.getLbList().size()) {
+            throw new IllegalStateException(
+                    "После сохранения изменился состав LB в ALS"
+            );
+        }
+
         return savedALS;
     }
 
