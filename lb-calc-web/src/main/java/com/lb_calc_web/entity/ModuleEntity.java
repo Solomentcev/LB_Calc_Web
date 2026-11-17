@@ -70,14 +70,14 @@ public abstract class ModuleEntity {
      * Цвет корпуса.
      */
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, length = 50)
     private Colors colorBody;
 
     /**
      * Цвет дверей.
      */
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, length = 50)
     private Colors colorDoor;
 
     /**
