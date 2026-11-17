@@ -31,16 +31,19 @@ public class LCService {
     private static final Logger logger =
             LoggerFactory.getLogger(LCService.class);
 
+    private final FindOrCreateLockService findOrCreateLockService;
     private final LCRepository lcRepository;
     private final Environment environment;
     private final SizeValidator sizeValidator;
 
     public LCService(
             LCRepository lcRepository,
+            FindOrCreateLockService findOrCreateLockService,
             Environment environment,
             SizeValidator sizeValidator
     ) {
         this.lcRepository = lcRepository;
+        this.findOrCreateLockService = findOrCreateLockService;
         this.environment = environment;
         this.sizeValidator = sizeValidator;
     }
@@ -244,6 +247,11 @@ public class LCService {
                     validationResult
             );
         }
+
+        /*
+         * Блокировка удерживается до фиксации результата транзакции.
+         */
+        findOrCreateLockService.acquire();
 
         /*
          * Проверяем, нет ли уже такой конфигурации.

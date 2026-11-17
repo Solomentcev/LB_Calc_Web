@@ -1,4 +1,17 @@
 -- ============================================================
+-- Transactional mutex for configuration Find-or-Create
+-- ============================================================
+
+CREATE TABLE find_or_create_lock (
+    id TINYINT NOT NULL,
+    CONSTRAINT pk_find_or_create_lock PRIMARY KEY (id),
+    CONSTRAINT chk_find_or_create_lock_singleton CHECK (id = 1)
+) ENGINE=InnoDB;
+
+INSERT INTO find_or_create_lock (id) VALUES (1);
+
+
+-- ============================================================
 -- Employee
 -- ============================================================
 

@@ -39,16 +39,19 @@ public class LBCService {
     private static final Logger logger =
             LoggerFactory.getLogger(LBCService.class);
 
+    private final FindOrCreateLockService findOrCreateLockService;
     private final LBCRepository lbcRepository;
     private final Environment environment;
     private final SizeValidator sizeValidator;
 
     public LBCService(
             LBCRepository lbcRepository,
+            FindOrCreateLockService findOrCreateLockService,
             Environment environment,
             SizeValidator sizeValidator
     ) {
         this.lbcRepository = lbcRepository;
+        this.findOrCreateLockService = findOrCreateLockService;
         this.environment = environment;
         this.sizeValidator = sizeValidator;
     }
@@ -239,6 +242,9 @@ public class LBCService {
                     validationResult
             );
         }
+
+        // Блокировка исключает параллельное создание той же конфигурации.
+        findOrCreateLockService.acquire();
 
         var typeLb = domain.getTypeLb();
         Optional<LBCEntity> existing =

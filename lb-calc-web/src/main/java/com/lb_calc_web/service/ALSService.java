@@ -47,6 +47,7 @@ public class ALSService {
     private static final Logger logger =
             LoggerFactory.getLogger(ALSService.class);
 
+    private final FindOrCreateLockService findOrCreateLockService;
     private final ALSRepository alsRepository;
     private final ModuleEntityRepository moduleRepository;
     private final LBService lbService;
@@ -61,6 +62,7 @@ public class ALSService {
             LBService lbService,
             LCService lcService,
             LBCService lbcService,
+            FindOrCreateLockService findOrCreateLockService,
             Environment environment,
             SizeValidator sizeValidator
     ) {
@@ -69,6 +71,7 @@ public class ALSService {
         this.lbService = lbService;
         this.lcService = lcService;
         this.lbcService = lbcService;
+        this.findOrCreateLockService = findOrCreateLockService;
         this.environment = environment;
         this.sizeValidator = sizeValidator;
     }
@@ -249,6 +252,9 @@ public class ALSService {
         }
 
         validate(domain, dto);
+
+        // Блокировка удерживается до завершения транзакции, включая сохранение модулей.
+        findOrCreateLockService.acquire();
 
         Optional<ALSEntity> duplicate =
                 findDuplicate(domain);

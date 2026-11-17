@@ -31,16 +31,19 @@ public class LBService {
     private static final Logger logger =
             LoggerFactory.getLogger(LBService.class);
 
+    private final FindOrCreateLockService findOrCreateLockService;
     private final LBRepository lbRepository;
     private final Environment environment;
     private final SizeValidator sizeValidator;
 
     public LBService(
             LBRepository lbRepository,
+            FindOrCreateLockService findOrCreateLockService,
             Environment environment,
             SizeValidator sizeValidator
     ) {
         this.lbRepository = lbRepository;
+        this.findOrCreateLockService = findOrCreateLockService;
         this.environment = environment;
         this.sizeValidator = sizeValidator;
     }
@@ -207,6 +210,9 @@ public class LBService {
          * Ищем существующий LB по его конфигурации,
          * а не по persistence-id.
          */
+        // Блокировка исключает параллельное создание той же конфигурации.
+        findOrCreateLockService.acquire();
+
         var typeLb = domain.getTypeLb();
         Optional<LBEntity> existing =
                 lbRepository.findCandidates(
