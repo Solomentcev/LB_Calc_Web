@@ -7,12 +7,14 @@ import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Table;
 
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -43,6 +45,16 @@ public class LBCEntity extends StorageModuleEntity {
 
     @Column(name = "bar_reader_quantity", nullable = false)
     private int barReaderQuantity;
+
+    /**
+     * Полный набор установленных сканеров штрихкода с количеством каждой позиции.
+     */
+    @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(
+            name = "lbc_bar_reader",
+            joinColumns = @JoinColumn(name = "lbc_id")
+    )
+    private Set<EquipmentQuantityEmbeddable> barReaders = new HashSet<>();
 
     /**
      * Способ оплаты.
@@ -129,6 +141,17 @@ public class LBCEntity extends StorageModuleEntity {
     }
 
     public int getBarReaderQuantity() { return barReaderQuantity; }
+
+    public Set<EquipmentQuantityEmbeddable> getBarReaders() {
+        return Set.copyOf(barReaders);
+    }
+
+    public void setBarReaders(Set<EquipmentQuantityEmbeddable> barReaders) {
+        this.barReaders.clear();
+        if (barReaders != null) {
+            this.barReaders.addAll(barReaders);
+        }
+    }
 
     public void setBarReaderQuantity(int quantity) {
         this.barReaderQuantity = requireNonNegativeQuantity(quantity);
@@ -241,6 +264,7 @@ public class LBCEntity extends StorageModuleEntity {
                 ", barReader='" + barReader + '\'' +
                 ", displayQuantity=" + displayQuantity +
                 ", barReaderQuantity=" + barReaderQuantity +
+                ", barReaders=" + barReaders +
                 ", printerQuantity=" + printerQuantity +
                 ", rfidReaderQuantity=" + rfidReaderQuantity +
                 ", payment=" + payment +
