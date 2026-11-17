@@ -207,15 +207,27 @@ public class LBService {
          * Ищем существующий LB по его конфигурации,
          * а не по persistence-id.
          */
+        var typeLb = domain.getTypeLb();
         Optional<LBEntity> existing =
-                lbRepository.findAll()
-                        .stream()
-                        .filter(entity -> {
-                            LB existingDomain =
-                                    LBEntityMapper.toDomain(entity);
-
-                            return existingDomain.equals(domain);
-                        })
+                lbRepository.findByHeightAndWidthAndDepthAndUpperFrameAndBottomFrameAndTypeAndDeltaWidthAndShelfThickAndServiceZoneWidthAndDoorThicknessAndDirectionDoorOpeningAndCountCellsAndColorBodyAndColorDoor(
+                        domain.getHeight(),
+                        domain.getWidth(),
+                        domain.getDepth(),
+                        domain.getUpperFrame(),
+                        domain.getBottomFrame(),
+                        typeLb.getType(),
+                        typeLb.getDeltaWidth(),
+                        typeLb.getShelfThick(),
+                        typeLb.getServiceZoneWidth(),
+                        domain.getDoorThickness(),
+                        domain.getDirectionDoorOpening(),
+                        domain.getCountCells(),
+                        domain.getColorBody(),
+                        domain.getColorDoor()
+                ).stream()
+                        .filter(entity ->
+                                LBEntityMapper.toDomain(entity).equals(domain)
+                        )
                         .findFirst();
 
         if (existing.isPresent()) {
