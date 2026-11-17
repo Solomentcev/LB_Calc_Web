@@ -237,9 +237,8 @@ public class Project {
                 "ALS не должен быть null"
         );
 
-        return findQuantity(als) == null
-                ? 0
-                : findQuantity(als);
+        Integer quantity = findQuantity(als);
+        return quantity == null ? 0 : quantity;
     }
 
     /**
@@ -276,6 +275,8 @@ public class Project {
                 name,
                 "Название проекта не должно быть null"
         );
+
+        update();
     }
 
     /**
