@@ -799,19 +799,76 @@ public class ALS {
                 .filter(ControlModule.class::isInstance)
                 .count();
 
-        long storageModules = modules.stream()
-                .filter(StorageModule.class::isInstance)
-                .count();
-
         if (controlModules != 1) {
             throw new IllegalStateException(
                     "ALS должен содержать ровно один модуль управления"
             );
         }
 
-        if (storageModules == 0) {
+        Module controlModule = getControlModuleAsModule();
+
+        if (controlModule instanceof LC) {
+            validateLcComposition();
+            return;
+        }
+
+        if (controlModule instanceof LBC) {
+            validateLbcComposition();
+            return;
+        }
+
+        throw new IllegalStateException(
+                "Неизвестный тип модуля управления ALS"
+        );
+    }
+
+    /**
+     * Проверяет допустимые физические композиции с отдельным LC.
+     *
+     * <p>Разрешены только LC+LB, LB+LC и LB+LC+LB.</p>
+     */
+    private void validateLcComposition() {
+        boolean valid = switch (modules.size()) {
+            case 2 -> modules.get(0) instanceof LC
+                    && modules.get(1) instanceof LB
+                    || modules.get(0) instanceof LB
+                    && modules.get(1) instanceof LC;
+            case 3 -> modules.get(0) instanceof LB
+                    && modules.get(1) instanceof LC
+                    && modules.get(2) instanceof LB;
+            default -> false;
+        };
+
+        if (!valid) {
             throw new IllegalStateException(
-                    "ALS должен содержать хотя бы один модуль хранения"
+                    "Недопустимая композиция ALS с LC. "
+                            + "Разрешены LC+LB, LB+LC и LB+LC+LB"
+            );
+        }
+    }
+
+    /**
+     * Проверяет допустимые физические композиции с комбинированным LBC.
+     *
+     * <p>Разрешены LBC, LBC+LB, LB+LBC и LB+LBC+LB.</p>
+     */
+    private void validateLbcComposition() {
+        boolean valid = switch (modules.size()) {
+            case 1 -> modules.get(0) instanceof LBC;
+            case 2 -> modules.get(0) instanceof LBC
+                    && modules.get(1) instanceof LB
+                    || modules.get(0) instanceof LB
+                    && modules.get(1) instanceof LBC;
+            case 3 -> modules.get(0) instanceof LB
+                    && modules.get(1) instanceof LBC
+                    && modules.get(2) instanceof LB;
+            default -> false;
+        };
+
+        if (!valid) {
+            throw new IllegalStateException(
+                    "Недопустимая композиция ALS с LBC. "
+                            + "Разрешены LBC, LBC+LB, LB+LBC и LB+LBC+LB"
             );
         }
     }
