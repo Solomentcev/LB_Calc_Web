@@ -218,6 +218,12 @@ public class JwtAuthentificationFilter
                         email
                 );
 
+        if (!principal.isEnabled()) {
+            throw new JwtException(
+                    "Учётная запись деактивирована"
+            );
+        }
+
         String newAccessToken =
                 jwtService.generateAccessToken(
                         principal
@@ -266,6 +272,12 @@ public class JwtAuthentificationFilter
                 employeeService.loadUserByUsername(
                         email
                 );
+
+        if (!principal.isEnabled()) {
+            throw new JwtException(
+                    "Учётная запись деактивирована"
+            );
+        }
 
         UsernamePasswordAuthenticationToken authentication =
                 new UsernamePasswordAuthenticationToken(
