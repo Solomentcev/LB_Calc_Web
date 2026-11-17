@@ -119,9 +119,7 @@ public class LC extends Module implements ControlModule {
      */
     @Override
     public List<Equipment> getEquipment() {
-        return controlConfiguration
-                .getEquipmentConfiguration()
-                .getAllEquipment();
+        return controlConfiguration.getAllEquipment();
     }
 
     /**
@@ -140,9 +138,7 @@ public class LC extends Module implements ControlModule {
                 "Оборудование не должно быть null"
         );
 
-        controlConfiguration
-                .getEquipmentConfiguration()
-                .addAdditionalEquipment(equipment);
+        controlConfiguration.addAdditionalEquipment(equipment);
 
         recalculate();
     }
@@ -163,13 +159,7 @@ public class LC extends Module implements ControlModule {
                 "Оборудование не должно быть null"
         );
 
-        controlConfiguration
-                .getEquipmentConfiguration()
-                .removeAdditionalEquipment(equipment);
-
-        controlConfiguration
-                .getEquipmentConfiguration()
-                .removeRequiredEquipment(equipment);
+        controlConfiguration.removeEquipment(equipment);
 
         recalculate();
     }
@@ -302,7 +292,7 @@ public class LC extends Module implements ControlModule {
                 && getColorDoor() == other.getColorDoor()
                 && Objects.equals(
                 controlConfiguration,
-                other.getControlConfiguration()
+                other.controlConfiguration
         );
     }
 
@@ -321,7 +311,7 @@ public class LC extends Module implements ControlModule {
                 getBottomFrame(),
                 getColorBody(),
                 getColorDoor(),
-                getControlConfiguration()
+                controlConfiguration
         );
     }
 
@@ -343,7 +333,7 @@ public class LC extends Module implements ControlModule {
                 ", colorBody=" + getColorBody() +
                 ", colorDoor=" + getColorDoor() +
                 ", controlConfiguration=" +
-                getControlConfiguration() +
+                controlConfiguration +
                 '}';
     }
 }
