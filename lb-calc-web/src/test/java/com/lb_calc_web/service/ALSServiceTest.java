@@ -92,7 +92,7 @@ class ALSServiceTest {
                 ALSEntityMapper::createModuleEntity
         );
 
-        when(alsRepository.findByHeightAndDepthAndUpperFrameAndBottomFrameAndColorBodyAndColorDoor(
+        when(alsRepository.findCandidates(
                 anyInt(), anyInt(), anyInt(), anyInt(), any(), any()
         )).thenReturn(List.of(existing));
 
