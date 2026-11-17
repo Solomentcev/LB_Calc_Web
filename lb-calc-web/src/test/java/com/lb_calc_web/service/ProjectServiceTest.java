@@ -7,6 +7,7 @@ import com.lb_calc_web.dto.EmployeeDTO;
 import com.lb_calc_web.dto.LBCDTO;
 import com.lb_calc_web.dto.ProjectDTO;
 import com.lb_calc_web.entity.ProjectEntity;
+import com.lb_calc_web.handler.ValidationSizeException;
 import com.lb_calc_web.repository.ALSRepository;
 import com.lb_calc_web.repository.EmployeeRepository;
 import com.lb_calc_web.repository.ProjectRepository;
@@ -105,6 +106,37 @@ class ProjectServiceTest {
 
         assertEquals(1, result.getAlsList().size());
         assertSame(als, result.getAlsList().get(0));
+    }
+
+    @Test
+    void saveProject_invalidGeometry_shouldRejectBeforeSavingALS() {
+        EmployeeDTO employee = new EmployeeDTO();
+        employee.setId(1L);
+        employee.setFirstName("Иван");
+        employee.setLastName("Иванов");
+        employee.setEmail("ivan@example.com");
+        employee.setRegistrationDate(
+                java.time.LocalDate.of(2026, 9, 18)
+        );
+        employee.setRole(Role.ROLE_MANAGER);
+
+        when(employeeService.getCurrentEmployee())
+                .thenReturn(employee);
+
+        ProjectDTO project = TestDataFactory.validProject(1L);
+        project.setId(null);
+
+        ALSDTO invalidALS = TestDataFactory.validALSDTO(10L);
+        invalidALS.setHeight(10);
+        project.setAlsList(java.util.List.of(invalidALS));
+
+        assertThrows(
+                ValidationSizeException.class,
+                () -> projectService.saveProject(project)
+        );
+
+        verify(alsService, never()).saveALS(any(ALSDTO.class));
+        verify(projectRepository, never()).save(any(ProjectEntity.class));
     }
 
     @Test
