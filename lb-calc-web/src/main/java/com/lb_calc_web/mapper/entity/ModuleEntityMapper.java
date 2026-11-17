@@ -8,6 +8,7 @@ import com.lb_calc_web.entity.LBEntity;
 import com.lb_calc_web.entity.LBCEntity;
 import com.lb_calc_web.entity.LCEntity;
 import com.lb_calc_web.entity.ModuleEntity;
+import org.hibernate.Hibernate;
 
 import java.util.Objects;
 
@@ -34,21 +35,24 @@ public final class ModuleEntityMapper {
             return null;
         }
 
-        if (entity instanceof LBCEntity lbcEntity) {
+        ModuleEntity concreteEntity =
+                (ModuleEntity) Hibernate.unproxy(entity);
+
+        if (concreteEntity instanceof LBCEntity lbcEntity) {
             return LBCEntityMapper.toDomain(lbcEntity);
         }
 
-        if (entity instanceof LBEntity lbEntity) {
+        if (concreteEntity instanceof LBEntity lbEntity) {
             return LBEntityMapper.toDomain(lbEntity);
         }
 
-        if (entity instanceof LCEntity lcEntity) {
+        if (concreteEntity instanceof LCEntity lcEntity) {
             return LCEntityMapper.toDomain(lcEntity);
         }
 
         throw new IllegalArgumentException(
                 "Неподдерживаемый тип ModuleEntity: "
-                        + entity.getClass().getName()
+                        + concreteEntity.getClass().getName()
         );
     }
 
