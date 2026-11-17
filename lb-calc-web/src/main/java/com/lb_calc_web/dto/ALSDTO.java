@@ -61,6 +61,14 @@ public class ALSDTO {
     @JsonIgnore
     private Map<LBDTO, Integer> quantityLB = new HashMap<>();
 
+    /**
+     * Физический порядок модулей слева направо.
+     *
+     * <p>Если поле отсутствует во входном DTO, порядок восстанавливается
+     * по прежнему контракту из lbList и positionControlModule.</p>
+     */
+    private List<ALSModuleOrderDTO> moduleOrder;
+
     @JsonIgnore
     private String stringALSImage;
 
@@ -216,6 +224,14 @@ public class ALSDTO {
                         : lbList;
     }
 
+    public List<ALSModuleOrderDTO> getModuleOrder() {
+        return moduleOrder;
+    }
+
+    public void setModuleOrder(List<ALSModuleOrderDTO> moduleOrder) {
+        this.moduleOrder = moduleOrder;
+    }
+
     public Map<LBDTO, Integer> getQuantityLB() {
         return quantityLB;
     }
@@ -269,10 +285,8 @@ public class ALSDTO {
                 alsdto.colorBody
         )
                 && Objects.equals(lbList, alsdto.lbList)
-                && Objects.equals(
-                quantityLB,
-                alsdto.quantityLB
-        );
+                && Objects.equals(quantityLB, alsdto.quantityLB)
+                && Objects.equals(moduleOrder, alsdto.moduleOrder);
     }
 
     @Override
@@ -291,7 +305,8 @@ public class ALSDTO {
                 colorDoor,
                 colorBody,
                 lbList,
-                quantityLB
+                quantityLB,
+                moduleOrder
         );
     }
 

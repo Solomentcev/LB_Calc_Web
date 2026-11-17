@@ -801,69 +801,53 @@ public class ALS {
         }
 
         Module controlModule = getControlModuleAsModule();
+        int controlIndex = getControlModuleIndex();
 
-        if (controlModule instanceof LC) {
-            validateLcComposition();
-            return;
-        }
-
-        if (controlModule instanceof LBC) {
-            validateLbcComposition();
-            return;
-        }
-
-        throw new IllegalStateException(
-                "Неизвестный тип модуля управления ALS"
-        );
-    }
-
-    /**
-     * Проверяет допустимые физические композиции с отдельным LC.
-     *
-     * <p>Разрешены только LC+LB, LB+LC и LB+LC+LB.</p>
-     */
-    private void validateLcComposition() {
-        boolean valid = switch (modules.size()) {
-            case 2 -> modules.get(0) instanceof LC
-                    && modules.get(1) instanceof LB
-                    || modules.get(0) instanceof LB
-                    && modules.get(1) instanceof LC;
-            case 3 -> modules.get(0) instanceof LB
-                    && modules.get(1) instanceof LC
-                    && modules.get(2) instanceof LB;
-            default -> false;
-        };
-
-        if (!valid) {
+        if (!(controlModule instanceof LC)
+                && !(controlModule instanceof LBC)) {
             throw new IllegalStateException(
-                    "Недопустимая композиция ALS с LC. "
-                            + "Разрешены LC+LB, LB+LC и LB+LC+LB"
+                    "Неизвестный тип модуля управления ALS"
             );
         }
+
+        for (int index = 0; index < modules.size(); index++) {
+            if (index == controlIndex) {
+                continue;
+            }
+            if (!(modules.get(index) instanceof LB)) {
+                throw new IllegalStateException(
+                        "Все модули хранения, кроме LBC, должны иметь тип LB"
+                );
+            }
+        }
+
+        if (controlModule instanceof LC
+                && modules.stream().noneMatch(LB.class::isInstance)) {
+            throw new IllegalStateException(
+                    "ALS с LC должна содержать хотя бы один модуль LB"
+            );
+        }
+
+        validateCenterBalance(controlIndex);
     }
 
     /**
-     * Проверяет допустимые физические композиции с комбинированным LBC.
+     * Проверяет баланс модулей хранения по сторонам центрального
+     * управляющего модуля.
      *
-     * <p>Разрешены LBC, LBC+LB, LB+LBC и LB+LBC+LB.</p>
+     * @param controlIndex индекс управляющего модуля
      */
-    private void validateLbcComposition() {
-        boolean valid = switch (modules.size()) {
-            case 1 -> modules.get(0) instanceof LBC;
-            case 2 -> modules.get(0) instanceof LBC
-                    && modules.get(1) instanceof LB
-                    || modules.get(0) instanceof LB
-                    && modules.get(1) instanceof LBC;
-            case 3 -> modules.get(0) instanceof LB
-                    && modules.get(1) instanceof LBC
-                    && modules.get(2) instanceof LB;
-            default -> false;
-        };
+    private void validateCenterBalance(int controlIndex) {
+        if (controlIndex == 0 || controlIndex == modules.size() - 1) {
+            return;
+        }
 
-        if (!valid) {
+        int leftCount = controlIndex;
+        int rightCount = modules.size() - controlIndex - 1;
+        if (Math.abs(leftCount - rightCount) > 1) {
             throw new IllegalStateException(
-                    "Недопустимая композиция ALS с LBC. "
-                            + "Разрешены LBC, LBC+LB, LB+LBC и LB+LBC+LB"
+                    "При положении CENTER количество LB слева и справа "
+                            + "не должно различаться более чем на один"
             );
         }
     }

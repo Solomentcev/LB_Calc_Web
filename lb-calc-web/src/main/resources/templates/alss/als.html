@@ -41,7 +41,7 @@
             </div>
             <div class="row mt-3">
                 <div class="col-md-2"><label>Положение control-модуля</label>
-                    <select class="form-control" th:field="*{positionControlModule}">
+                    <select id="positionControlModule" class="form-control" th:field="*{positionControlModule}">
                         <option th:each="position : ${positionControlModuleList}"
                                 th:value="${position}" th:text="${position}"></option>
                     </select>
@@ -72,6 +72,16 @@
                     </select></div>
             </div>
         </div>
+    </div>
+
+    <div id="module-order-fields"
+         th:attr="data-control-type=${als.LBC != null ? 'LBC' : 'LC'}">
+        <input type="hidden" class="module-order-field"
+               th:each="item, itemStat : ${als.moduleOrder}"
+               th:name="|moduleOrder[${itemStat.index}].type|" th:value="${item.type}">
+        <input type="hidden" class="module-order-field"
+               th:each="item, itemStat : ${als.moduleOrder}"
+               th:name="|moduleOrder[${itemStat.index}].index|" th:value="${item.index}">
     </div>
 
     <div th:if="${als.LBC != null}" class="card mb-4">
@@ -208,6 +218,53 @@
     </div>
 </form>
 </div>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const positionSelect = document.getElementById("positionControlModule");
+    const orderFields = document.getElementById("module-order-fields");
+    if (!positionSelect || !orderFields) return;
+
+    positionSelect.addEventListener("change", function () {
+        const lbCount = document.querySelectorAll(
+            'input[name^="lbList["][name$="].id"]'
+        ).length;
+        const controlType = orderFields.dataset.controlType;
+        let position = positionSelect.value;
+
+        if (position === "CENTER" && lbCount === 1) {
+            position = "LEFT";
+            positionSelect.value = position;
+        }
+
+        const leftCount = position === "LEFT" ? 0
+                : position === "RIGHT" ? lbCount
+                : Math.floor(lbCount / 2);
+        const order = [];
+        for (let index = 0; index < leftCount; index++) {
+            order.push({type: "LB", index: index});
+        }
+        order.push({type: controlType, index: 0});
+        for (let index = leftCount; index < lbCount; index++) {
+            order.push({type: "LB", index: index});
+        }
+
+        orderFields.replaceChildren();
+        order.forEach(function (item, index) {
+            const typeInput = document.createElement("input");
+            typeInput.type = "hidden";
+            typeInput.name = "moduleOrder[" + index + "].type";
+            typeInput.value = item.type;
+            const indexInput = document.createElement("input");
+            indexInput.type = "hidden";
+            indexInput.name = "moduleOrder[" + index + "].index";
+            indexInput.value = item.index;
+            orderFields.append(typeInput, indexInput);
+        });
+    });
+});
+</script>
 
 <div th:replace="~{footer :: footer}"></div>
 </body>

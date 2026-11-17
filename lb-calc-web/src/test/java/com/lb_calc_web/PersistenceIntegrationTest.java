@@ -74,6 +74,9 @@ class PersistenceIntegrationTest {
         employeeEntity = employeeRepository.saveAndFlush(employeeEntity);
 
         ALS domainALS = TestDataFactory.validALS(null);
+        domainALS.addStorageModule(TestDataFactory.validLB(301L));
+        domainALS.addStorageModule(TestDataFactory.validLB(302L));
+        domainALS.addStorageModule(TestDataFactory.validLB(303L));
         Map<Module, ModuleEntity> resolvedModules = new HashMap<>();
 
         ALSEntity alsEntity = ALSEntityMapper.toEntity(
@@ -132,13 +135,17 @@ class PersistenceIntegrationTest {
 
         ALSEntity restoredALSEntity =
                 restoredEntity.getAlsEntries().get(0).getAls();
-        assertEquals(3, restoredALSEntity.getModules().size());
+        assertEquals(6, restoredALSEntity.getModules().size());
         for (int index = 0; index < restoredALSEntity.getModules().size(); index++) {
             assertEquals(
                     index,
                     restoredALSEntity.getModules().get(index).getModuleOrder()
             );
         }
+
+        ALS restoredALS = ALSEntityMapper.toDomain(restoredALSEntity);
+        assertEquals(domainALS, restoredALS);
+        assertEquals("CENTER", restoredALS.getPositionControlModule().name());
 
         LCEntity restoredLC = restoredALSEntity.getModules().stream()
                 .map(association ->
