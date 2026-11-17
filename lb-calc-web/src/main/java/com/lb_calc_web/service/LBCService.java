@@ -234,12 +234,58 @@ public class LBCService {
             );
         }
 
+        var typeLb = domain.getTypeLb();
+        var equipment = domain.getControlConfiguration()
+                .getEquipmentConfiguration();
+        Display display = equipment.getAllEquipment().stream()
+                .filter(Display.class::isInstance)
+                .map(Display.class::cast)
+                .findFirst()
+                .orElse(null);
+        BarReader barReader = equipment.getAllEquipment().stream()
+                .filter(BarReader.class::isInstance)
+                .map(BarReader.class::cast)
+                .findFirst()
+                .orElse(null);
+        int printerQuantity = equipment.getAllEquipment().stream()
+                .filter(Printer.class::isInstance)
+                .findFirst()
+                .map(equipment::getQuantity)
+                .orElse(0);
+        int rfidReaderQuantity = equipment.getAllEquipment().stream()
+                .filter(RfidReader.class::isInstance)
+                .findFirst()
+                .map(equipment::getQuantity)
+                .orElse(0);
+
         Optional<LBCEntity> existing =
-                lbcRepository.findAll()
-                        .stream()
+                lbcRepository.findByHeightAndWidthAndDepthAndUpperFrameAndBottomFrameAndColorBodyAndColorDoorAndTypeAndDeltaWidthAndShelfThickAndServiceZoneWidthAndDoorThicknessAndDirectionDoorOpeningAndCountCellsAndDisplayAndDisplayQuantityAndBarReaderAndBarReaderQuantityAndPrinterAndPrinterQuantityAndRfidReaderAndRfidReaderQuantityAndPayment(
+                        domain.getHeight(),
+                        domain.getWidth(),
+                        domain.getDepth(),
+                        domain.getUpperFrame(),
+                        domain.getBottomFrame(),
+                        domain.getColorBody(),
+                        domain.getColorDoor(),
+                        typeLb.getType(),
+                        typeLb.getDeltaWidth(),
+                        typeLb.getShelfThick(),
+                        typeLb.getServiceZoneWidth(),
+                        domain.getDoorThickness(),
+                        domain.getDirectionDoorOpening(),
+                        domain.getCountCells(),
+                        display == null ? null : display.getCatalogPositionId(),
+                        display == null ? 0 : equipment.getQuantity(display),
+                        barReader == null ? null : barReader.getCatalogPositionId(),
+                        barReader == null ? 0 : equipment.getQuantity(barReader),
+                        printerQuantity > 0,
+                        printerQuantity,
+                        rfidReaderQuantity > 0,
+                        rfidReaderQuantity,
+                        domain.getControlConfiguration().getPayment()
+                ).stream()
                         .filter(entity ->
-                                LBCEntityMapper.toDomain(entity)
-                                        .equals(domain)
+                                LBCEntityMapper.toDomain(entity).equals(domain)
                         )
                         .findFirst();
 
