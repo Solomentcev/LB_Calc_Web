@@ -49,8 +49,6 @@ public final class LCEntityMapper {
         if (domain == null || entity == null) {
             throw new IllegalArgumentException("LC и LCEntity не должны быть null");
         }
-        entity.setName(domain.getName());
-        entity.setDescription(domain.getDescription());
         entity.setHeight(domain.getHeight());
         entity.setWidth(domain.getWidth());
         entity.setDepth(domain.getDepth());
