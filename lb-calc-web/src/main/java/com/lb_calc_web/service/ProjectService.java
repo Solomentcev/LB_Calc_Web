@@ -1,5 +1,6 @@
 package com.lb_calc_web.service;
 
+import com.lb_calc_web.domain.attributes.Role;
 import com.lb_calc_web.domain.model.ALS;
 import com.lb_calc_web.domain.model.Employee;
 import com.lb_calc_web.domain.model.LB;
@@ -7,13 +8,12 @@ import com.lb_calc_web.domain.model.LBC;
 import com.lb_calc_web.domain.model.LC;
 import com.lb_calc_web.domain.model.Module;
 import com.lb_calc_web.domain.model.Project;
-import com.lb_calc_web.domain.attributes.Role;
 import com.lb_calc_web.dto.ALSDTO;
+import com.lb_calc_web.dto.EmployeeDTO;
 import com.lb_calc_web.dto.LBCDTO;
 import com.lb_calc_web.dto.LBDTO;
 import com.lb_calc_web.dto.LCDTO;
 import com.lb_calc_web.dto.ProjectDTO;
-import com.lb_calc_web.dto.EmployeeDTO;
 import com.lb_calc_web.dto.validation.ValidationError;
 import com.lb_calc_web.dto.validation.ValidationResult;
 import com.lb_calc_web.entity.ALSEntity;
