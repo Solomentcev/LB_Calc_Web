@@ -91,9 +91,15 @@ public class EmployeeService implements UserDetailsService {
     }
 
     public EmployeeDTO loadUserById(int id) {
+        return loadUserById((long) id);
+    }
 
+    /**
+     * Загружает сотрудника по стабильному идентификатору.
+     */
+    private EmployeeDTO loadUserById(Long id) {
         EmployeeEntity entity = employeeRepository
-                .findById((long) id)
+                .findById(id)
                 .orElseThrow(() ->
                         new NoSuchElementException(
                                 "Пользователь с id=" + id + " не найден"
@@ -260,10 +266,7 @@ public class EmployeeService implements UserDetailsService {
                 authentication.getPrincipal();
 
         if (principal instanceof EmployeePrincipal employeePrincipal) {
-
-            return loadUserByEmail(
-                    employeePrincipal.getUsername()
-            );
+            return loadUserById(employeePrincipal.getId());
         }
 
         return loadUserByEmail(
