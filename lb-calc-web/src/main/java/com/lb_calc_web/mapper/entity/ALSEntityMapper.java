@@ -39,7 +39,7 @@ public final class ALSEntityMapper {
                 .map(ModuleEntityMapper::toDomain)
                 .toList();
 
-        return new ALS(
+        ALS domain = new ALS(
                 entity.getHeight(),
                 entity.getDepth(),
                 entity.getUpperFrame(),
@@ -48,6 +48,16 @@ public final class ALSEntityMapper {
                 entity.getColorDoor(),
                 modules
         );
+
+        if (!domain.getName().equals(entity.getName())
+                || !domain.getDescription().equals(entity.getDescription())
+                || domain.getWidth() != entity.getWidth()) {
+            throw new IllegalStateException(
+                    "Производные характеристики ALS в БД не соответствуют составу модулей"
+            );
+        }
+
+        return domain;
     }
 
     /**
@@ -88,6 +98,9 @@ public final class ALSEntityMapper {
         Objects.requireNonNull(entity, "ALSEntity не должен быть null");
         Objects.requireNonNull(moduleResolver, "moduleResolver не должен быть null");
 
+        entity.setName(domain.getName());
+        entity.setDescription(domain.getDescription());
+        entity.setWidth(domain.getWidth());
         entity.setHeight(domain.getHeight());
         entity.setDepth(domain.getDepth());
         entity.setUpperFrame(domain.getUpperFrame());

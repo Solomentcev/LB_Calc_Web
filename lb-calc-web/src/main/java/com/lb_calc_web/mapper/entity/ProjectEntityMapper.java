@@ -68,7 +68,7 @@ public final class ProjectEntityMapper {
             );
         }
 
-        return Project.restore(
+        Project project = Project.restore(
                 entity.getName(),
                 entity.getCompany(),
                 entity.getCreatedAt(),
@@ -77,6 +77,14 @@ public final class ProjectEntityMapper {
                 updatedBy,
                 quantityALS
         );
+
+        if (!project.getDescription().equals(entity.getDescription())) {
+            throw new IllegalStateException(
+                    "Описание проекта в БД не соответствует его составу"
+            );
+        }
+
+        return project;
     }
 
     /**
@@ -154,6 +162,8 @@ public final class ProjectEntityMapper {
         entity.setName(
                 domain.getName()
         );
+
+        entity.setDescription(domain.getDescription());
 
         entity.setCompany(
                 domain.getCompany()

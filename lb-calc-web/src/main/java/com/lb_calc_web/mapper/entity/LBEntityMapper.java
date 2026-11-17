@@ -37,7 +37,7 @@ public final class LBEntityMapper {
                 entity.getServiceZoneWidth()
         );
 
-        return new LB(
+        LB domain = new LB(
                 entity.getHeight(),
                 entity.getWidth(),
                 entity.getDepth(),
@@ -59,6 +59,18 @@ public final class LBEntityMapper {
                 ),
                 entity.getDoorThickness()
         );
+
+        if (!domain.getName().equals(entity.getName())
+                || !domain.getDescription().equals(entity.getDescription())
+                || domain.getCellHeight() != entity.getHeightCell()
+                || domain.getCellWidth() != entity.getWidthCell()
+                || domain.getCellDepth() != entity.getDepthCell()) {
+            throw new IllegalStateException(
+                    "Производные характеристики LB в БД не соответствуют исходным параметрам"
+            );
+        }
+
+        return domain;
     }
 
     /**
@@ -101,7 +113,16 @@ public final class LBEntityMapper {
         }
 
         /*
-         * Общие параметры ModuleEntity.
+         * Производные характеристики модуля и ячеек.
+         */
+        entity.setName(domain.getName());
+        entity.setDescription(domain.getDescription());
+        entity.setHeightCell(domain.getCellHeight());
+        entity.setWidthCell(domain.getCellWidth());
+        entity.setDepthCell(domain.getCellDepth());
+
+        /*
+         * Исходные параметры ModuleEntity.
          */
         entity.setHeight(domain.getHeight());
         entity.setWidth(domain.getWidth());

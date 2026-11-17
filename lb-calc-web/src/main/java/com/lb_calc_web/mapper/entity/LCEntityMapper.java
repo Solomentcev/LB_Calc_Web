@@ -26,7 +26,7 @@ public final class LCEntityMapper {
                         "Способ оплаты LC не должен быть null"),
                 entity.getAccessMethods(), entity.getPrintOptions(),
                 toEquipmentConfiguration(entity));
-        return new LC(
+        LC domain = new LC(
                 entity.getHeight(), entity.getWidth(), entity.getDepth(),
                 entity.getUpperFrame(), entity.getBottomFrame(),
                 Objects.requireNonNull(entity.getColorBody(),
@@ -34,6 +34,15 @@ public final class LCEntityMapper {
                 Objects.requireNonNull(entity.getColorDoor(),
                         "Цвет дверей LC не должен быть null"),
                 configuration);
+
+        if (!domain.getName().equals(entity.getName())
+                || !domain.getDescription().equals(entity.getDescription())) {
+            throw new IllegalStateException(
+                    "Производные характеристики LC в БД не соответствуют исходным параметрам"
+            );
+        }
+
+        return domain;
     }
 
     public static LCEntity toEntity(LC domain) {
@@ -47,6 +56,8 @@ public final class LCEntityMapper {
         if (domain == null || entity == null) {
             throw new IllegalArgumentException("LC и LCEntity не должны быть null");
         }
+        entity.setName(domain.getName());
+        entity.setDescription(domain.getDescription());
         entity.setHeight(domain.getHeight());
         entity.setWidth(domain.getWidth());
         entity.setDepth(domain.getDepth());
