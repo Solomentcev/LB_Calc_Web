@@ -26,7 +26,15 @@ public class ValidationResult {
         errors.add(new ValidationError(validationResult.getObjectType(), validationResult.getObjectId(), field, message, actual, min, max));
     }
     public void addError(String field, String message, Object actual, Object min, Object max) {
-        errors.add(new ValidationError(field, message, actual, min, max));
+        errors.add(new ValidationError(
+                objectType,
+                objectId,
+                field,
+                message,
+                actual,
+                min,
+                max
+        ));
     }
     public void addErrors(ValidationResult validationResult) {
         errors.addAll(validationResult.getErrors());
