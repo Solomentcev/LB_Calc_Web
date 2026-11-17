@@ -264,7 +264,7 @@ public class LC extends Module implements ControlModule {
                 getBottomFrame(),
                 getColorBody(),
                 getColorDoor(),
-                controlConfiguration.copy()
+                controlConfiguration
         );
     }
 
