@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -285,7 +286,36 @@ public class ProjectEntity {
      * @return managed-коллекция связей с ALS
      */
     public List<ProjectALSEntity> getAlsEntries() {
-        return alsEntries;
+        return Collections.unmodifiableList(alsEntries);
+    }
+
+    /**
+     * Добавляет конфигурацию ALS в проект.
+     *
+     * @param als сохраняемая конфигурация ALS
+     * @param quantity количество экземпляров
+     */
+    public void addAlsEntry(ALSEntity als, int quantity) {
+        ProjectALSEntity entry = new ProjectALSEntity();
+        entry.setProject(this);
+        entry.setAls(Objects.requireNonNull(
+                als,
+                "ALS не должна быть null"
+        ));
+        entry.setQuantity(quantity);
+        alsEntries.add(entry);
+    }
+
+    /**
+     * Удаляет связь проекта с конфигурацией ALS.
+     *
+     * @param entry удаляемая связь
+     */
+    public void removeAlsEntry(ProjectALSEntity entry) {
+        alsEntries.remove(Objects.requireNonNull(
+                entry,
+                "Связь с ALS не должна быть null"
+        ));
     }
 
     /**
