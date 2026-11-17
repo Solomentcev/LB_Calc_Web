@@ -2,7 +2,6 @@ package com.lb_calc_web.mapper.entity;
 
 import com.lb_calc_web.TestDataFactory;
 import com.lb_calc_web.domain.equipment.BarReader;
-import com.lb_calc_web.domain.equipment.EquipmentItem;
 import com.lb_calc_web.domain.model.EquipmentConfiguration;
 import com.lb_calc_web.entity.EquipmentQuantityEmbeddable;
 import com.lb_calc_web.entity.LBCEntity;
@@ -50,7 +49,7 @@ class ControlModuleEquipmentEntityMapperTest {
 
 
     @Test
-    void equipmentPositionIdentity_shouldNotDependOnQuantity() {
+    void equipmentValue_shouldIncludeQuantity() {
         EquipmentQuantityEmbeddable one =
                 new EquipmentQuantityEmbeddable("BAR_READER_1D", 1);
         EquipmentQuantityEmbeddable two =
