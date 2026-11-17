@@ -15,6 +15,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @RestController
 @RequestMapping("/api/v1/employees")
@@ -218,6 +219,21 @@ public class EmployeeRestController {
         }
     }
 
+    @PostMapping("/{id}/activate")
+    public ResponseEntity<?> activateEmployee(
+            @PathVariable Long id
+    ) {
+        try {
+            employeeService.activateById(id);
+            return ResponseEntity.ok(
+                    ApiResponse.success("Employee activated successfully")
+            );
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ApiResponse.error("Сотрудник не найден", e.getMessage()));
+        }
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteEmployee(
             @PathVariable Long id
@@ -225,7 +241,7 @@ public class EmployeeRestController {
 
         try {
 
-            employeeService.deleteById(id);
+            employeeService.deactivateById(id);
 
             return ResponseEntity.ok(
                     ApiResponse.success(
