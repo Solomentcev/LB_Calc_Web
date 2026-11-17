@@ -44,7 +44,8 @@ class JwtAuthentificationFilterTest {
                 10L,
                 email,
                 "HASH",
-                Role.ROLE_MANAGER
+                Role.ROLE_MANAGER,
+                true
         );
     }
 
