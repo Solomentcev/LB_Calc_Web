@@ -120,15 +120,11 @@ public class SizeValidator {
                 continue;
             }
 
-            ValidationResult result;
-
-            if (module instanceof LBC lbc) {
-                result = validateLBC(lbc);
-            } else if (module instanceof LB lb) {
-                result = validateLB(lb);
-            } else {
+            if (!(module instanceof LB lb)) {
                 continue;
             }
+
+            ValidationResult result = validateLB(lb);
 
             List<String> moduleErrors =
                     convertValidationResultToStrings(result);
