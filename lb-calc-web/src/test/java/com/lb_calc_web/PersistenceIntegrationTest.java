@@ -419,6 +419,45 @@ class PersistenceIntegrationTest {
             Long projectId = savedProject.getId();
             Long selectedAlsId = savedProject.getAlsList().get(0).getId();
             Long independentAlsId = savedProject.getAlsList().get(2).getId();
+            LocalDate originalCreatedAt = savedProject.getCreatedAt();
+
+            EmployeeEntity editorEntity = new EmployeeEntity();
+            editorEntity.setFirstName("Тест");
+            editorEntity.setLastName("Project editor");
+            editorEntity.setEmail("project-editor@example.test");
+            editorEntity.setEncryptedPassword("encoded-password");
+            editorEntity.setRegistrationDate(LocalDate.of(2026, 1, 10));
+            editorEntity.setRole(Role.ROLE_ADMIN);
+            editorEntity = employeeRepository.saveAndFlush(editorEntity);
+
+            EmployeePrincipal editorPrincipal = new EmployeePrincipal(
+                    editorEntity.getId(),
+                    editorEntity.getEmail(),
+                    editorEntity.getEncryptedPassword(),
+                    editorEntity.getRole(),
+                    editorEntity.isActive()
+            );
+            SecurityContextHolder.getContext().setAuthentication(
+                    new UsernamePasswordAuthenticationToken(
+                            editorPrincipal,
+                            null,
+                            editorPrincipal.getAuthorities()
+                    )
+            );
+
+            ProjectDTO tamperedProject = projectService.findById(projectId);
+            tamperedProject.setCreatedBy(EmployeeDtoMapper.toDto(
+                    EmployeeEntityMapper.toDomain(editorEntity)
+            ));
+            tamperedProject.setCreatedAt(LocalDate.of(2000, 1, 1));
+            tamperedProject.setUpdatedBy(employeeDTO);
+            tamperedProject.setUpdatedAt(LocalDate.of(2000, 1, 1));
+            ProjectDTO updatedMetadata = projectService.saveProject(tamperedProject);
+
+            assertEquals(employeeEntity.getId(), updatedMetadata.getCreatedBy().getId());
+            assertEquals(originalCreatedAt, updatedMetadata.getCreatedAt());
+            assertEquals(editorEntity.getId(), updatedMetadata.getUpdatedBy().getId());
+            assertEquals(LocalDate.now(), updatedMetadata.getUpdatedAt());
 
             ALSDTO changedALS =
                     projectService.addLBAtProject(projectId, selectedAlsId);
@@ -476,6 +515,11 @@ class PersistenceIntegrationTest {
 
             ProjectEntity restoredEntity =
                     projectRepository.findById(projectId).orElseThrow();
+            assertEquals(employeeEntity.getId(), restoredEntity.getCreatedBy().getId());
+            assertEquals(editorEntity.getId(), restoredEntity.getUpdatedBy().getId());
+            assertEquals(originalCreatedAt, restoredEntity.getCreatedAt());
+            assertEquals(LocalDate.now(), restoredEntity.getUpdatedAt());
+
             Project restoredProject =
                     ProjectEntityMapper.toDomain(restoredEntity);
 
