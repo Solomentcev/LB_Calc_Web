@@ -30,34 +30,60 @@ import java.util.Objects;
  */
 public class ALS {
 
-    /** Наименование ALS, формируемое автоматически. */
+    /**
+     * Наименование ALS.
+     *
+     * <p>Формируется автоматически.</p>
+     */
     private String name;
 
-    /** Описание ALS, формируемое автоматически. */
+    /**
+     * Описание ALS.
+     *
+     * <p>Формируется автоматически.</p>
+     */
     private String description;
 
-    /** Высота ALS, мм. */
+    /**
+     * Высота ALS, мм.
+     */
     private int height;
 
-    /** Общая ширина ALS, мм. */
+    /**
+     * Общая ширина ALS, мм.
+     *
+     * <p>Рассчитывается как сумма ширин модулей.</p>
+     */
     private int width;
 
-    /** Глубина ALS, мм. */
+    /**
+     * Глубина ALS, мм.
+     */
     private int depth;
 
-    /** Размер верхней рамы, мм. */
+    /**
+     * Размер верхней рамы, мм.
+     */
     private int upperFrame;
 
-    /** Размер нижней рамы, мм. */
+    /**
+     * Размер нижней рамы, мм.
+     */
     private int bottomFrame;
 
-    /** Цвет корпуса ALS. */
+    /**
+     * Цвет корпуса ALS.
+     */
     private Colors colorBody;
 
-    /** Цвет дверей ALS. */
+    /**
+     * Цвет дверей ALS.
+     */
     private Colors colorDoor;
 
-    /** Физический порядок модулей слева направо. */
+    /**
+     * Физический порядок модулей слева направо.
+     */
     private final List<Module> modules = new ArrayList<>();
 
     /**
@@ -95,13 +121,18 @@ public class ALS {
                 "Цвет дверей не должен быть null"
         );
 
-        Objects.requireNonNull(modules, "Список модулей не должен быть null");
+        Objects.requireNonNull(
+                modules,
+                "Список модулей не должен быть null"
+        );
 
         for (Module module : modules) {
-            this.modules.add(Objects.requireNonNull(
-                    module,
-                    "Модуль не должен быть null"
-            ).copy());
+            this.modules.add(
+                    Objects.requireNonNull(
+                            module,
+                            "Модуль не должен быть null"
+                    ).copy()
+            );
         }
 
         recalculate();
@@ -110,9 +141,9 @@ public class ALS {
     /**
      * Создаёт полную независимую копию ALS.
      *
-     * <p>Конструктор самостоятельно копирует каждый переданный модуль,
-     * поэтому передача внутреннего списка не нарушает инкапсуляцию
-     * и не требует предварительного копирования.</p>
+     * <p>Каждый модуль и его изменяемое внутреннее состояние
+     * копируются отдельно. Копия может изменяться без влияния
+     * на исходную ALS.</p>
      *
      * @return независимая копия ALS
      */
@@ -128,53 +159,91 @@ public class ALS {
         );
     }
 
-    /** @return наименование ALS */
+    /**
+     * Возвращает наименование ALS.
+     *
+     * @return наименование ALS
+     */
     public String getName() {
         return name;
     }
 
-    /** @return описание ALS */
+    /**
+     * Возвращает описание ALS.
+     *
+     * @return описание ALS
+     */
     public String getDescription() {
         return description;
     }
 
-    /** @return высота ALS, мм */
+    /**
+     * Возвращает высоту ALS.
+     *
+     * @return высота ALS, мм
+     */
     public int getHeight() {
         return height;
     }
 
-    /** @return общая ширина ALS, мм */
+    /**
+     * Возвращает общую ширину ALS.
+     *
+     * @return ширина ALS, мм
+     */
     public int getWidth() {
         return width;
     }
 
-    /** @return глубина ALS, мм */
+    /**
+     * Возвращает глубину ALS.
+     *
+     * @return глубина ALS, мм
+     */
     public int getDepth() {
         return depth;
     }
 
-    /** @return размер верхней рамы, мм */
+    /**
+     * Возвращает размер верхней рамы.
+     *
+     * @return размер верхней рамы, мм
+     */
     public int getUpperFrame() {
         return upperFrame;
     }
 
-    /** @return размер нижней рамы, мм */
+    /**
+     * Возвращает размер нижней рамы.
+     *
+     * @return размер нижней рамы, мм
+     */
     public int getBottomFrame() {
         return bottomFrame;
     }
 
-    /** @return цвет корпуса */
+    /**
+     * Возвращает цвет корпуса.
+     *
+     * @return цвет корпуса
+     */
     public Colors getColorBody() {
         return colorBody;
     }
 
-    /** @return цвет дверей */
+    /**
+     * Возвращает цвет дверей.
+     *
+     * @return цвет дверей
+     */
     public Colors getColorDoor() {
         return colorDoor;
     }
 
     /**
      * Возвращает независимые копии модулей ALS в физическом порядке.
+     *
+     * <p>Изменение возвращённых объектов не влияет на агрегат.</p>
      *
      * @return неизменяемый список копий модулей
      */
@@ -186,6 +255,10 @@ public class ALS {
 
     /**
      * Добавляет независимую копию модуля в конец ALS.
+     *
+     * <p>Для добавления нового модуля хранения с автоматическим
+     * определением стороны следует использовать
+     * {@link #addStorageModule(StorageModule)}.</p>
      *
      * @param module добавляемый модуль
      */
@@ -210,8 +283,14 @@ public class ALS {
      * Добавляет модуль хранения со стороны, определяемой положением
      * управляющего модуля.
      *
+     * <p>Если управляющий модуль находится слева, новый модуль
+     * добавляется справа от него; если справа — слева. При центральном
+     * положении модуль добавляется на менее заполненную сторону.
+     * При равном количестве модулей хранения он добавляется справа.</p>
+     *
      * @param module добавляемый модуль хранения
-     * @throws IllegalArgumentException если передан LBC
+     * @throws IllegalArgumentException если передан не самостоятельный
+     *                                  модуль хранения
      */
     public void addStorageModule(StorageModule module) {
         Objects.requireNonNull(module, "Модуль хранения не должен быть null");
@@ -255,6 +334,10 @@ public class ALS {
     /**
      * Удаляет первый модуль, равный указанному по конфигурации.
      *
+     * <p>Если в ALS присутствуют одинаковые модули и требуется удалить
+     * конкретную физическую позицию, следует использовать
+     * {@link #removeModuleAt(int)}.</p>
+     *
      * @param module конфигурация удаляемого модуля
      * @return {@code true}, если равный модуль найден и удалён
      */
@@ -272,9 +355,14 @@ public class ALS {
     }
 
     /**
-     * Удаляет модуль хранения по его физическому индексу.
+     * Удаляет модуль хранения по его физическому индексу в списке ALS.
+     *
+     * <p>Удаление управляющего модуля запрещено. Для удаления LBC
+     * требуется отдельная доменная операция, поскольку он выполняет
+     * одновременно две роли.</p>
      *
      * @param moduleIndex физический индекс модуля слева направо
+     * @throws IndexOutOfBoundsException если индекс выходит за границы
      * @throws IllegalArgumentException если выбран управляющий модуль
      */
     public void removeModuleAt(int moduleIndex) {
@@ -321,6 +409,9 @@ public class ALS {
      * Выполняет изменение на независимом кандидате и публикует его
      * состояние только после успешной проверки и пересчёта.
      *
+     * <p>При исключении исходный агрегат и его модули остаются
+     * неизменными.</p>
+     *
      * @param operation операция изменения кандидата
      */
     private void mutate(java.util.function.Consumer<ALS> operation) {
@@ -330,7 +421,9 @@ public class ALS {
         replaceState(candidate);
     }
 
-    /** Переносит проверенное состояние кандидата в текущий агрегат. */
+    /**
+     * Переносит проверенное состояние кандидата в текущий агрегат.
+     */
     private void replaceState(ALS candidate) {
         modules.clear();
         candidate.modules.stream()
@@ -344,6 +437,10 @@ public class ALS {
 
     /**
      * Заменяет управляющий модуль, сохраняя его физическую позицию.
+     *
+     * <p>Замена проверяется на независимой копии ALS. Если после замены
+     * нарушается структура агрегата или расчёт характеристик модулей,
+     * исходная конфигурация остаётся неизменной.</p>
      *
      * @param controlModule новый управляющий модуль
      */
@@ -370,7 +467,8 @@ public class ALS {
     /**
      * Возвращает единственный модуль управления.
      *
-     * @return независимая копия модуля управления
+     * @return модуль управления
+     * @throws IllegalStateException если модуль управления отсутствует
      */
     public ControlModule getControlModule() {
         return (ControlModule) getControlModuleAsModule().copy();
@@ -379,7 +477,7 @@ public class ALS {
     /**
      * Возвращает storage-модули в их физическом порядке.
      *
-     * @return неизменяемый список независимых копий storage-модулей
+     * @return неизменяемый список storage-модулей
      */
     public List<StorageModule> getStorageModules() {
         return modules.stream()
@@ -390,7 +488,7 @@ public class ALS {
     }
 
     /**
-     * Возвращает общее количество ячеек без создания копий модулей.
+     * Возвращает общее количество ячеек во всех storage-модулях ALS.
      *
      * @return количество ячеек
      */
@@ -405,11 +503,17 @@ public class ALS {
     /**
      * Возвращает количество модулей, равных указанному модулю.
      *
+     * <p>Сравнение выполняется по {@link Object#equals(Object)}.</p>
+     *
      * @param module модуль для поиска
      * @return количество равных модулей
+     * @throws NullPointerException если модуль не задан
      */
     public int getCountSameModules(Module module) {
-        Objects.requireNonNull(module, "Модуль не должен быть null");
+        Objects.requireNonNull(
+                module,
+                "Модуль не должен быть null"
+        );
 
         return (int) modules.stream()
                 .filter(module::equals)
@@ -418,6 +522,12 @@ public class ALS {
 
     /**
      * Возвращает положение модуля управления.
+     *
+     * <p>Положение определяется индексом control-модуля
+     * в физическом порядке ALS.</p>
+     *
+     * <p>Для ALS, состоящего только из одного LBC, положение
+     * считается центральным.</p>
      *
      * @return положение модуля управления
      */
@@ -451,6 +561,17 @@ public class ALS {
 
     /**
      * Пересчитывает производные характеристики ALS и входящих модулей.
+     *
+     * <p>Последовательность расчёта:</p>
+     * <ol>
+     *     <li>проверяется структура ALS;</li>
+     *     <li>общие параметры ALS передаются модулям;</li>
+     *     <li>определяются направления открытия дверей;</li>
+     *     <li>пересчитываются модули;</li>
+     *     <li>перенумеровываются ячейки;</li>
+     *     <li>пересчитывается общая ширина ALS;</li>
+     *     <li>обновляются наименование и описание ALS.</li>
+     * </ol>
      */
     public void recalculate() {
         validateStructure();
@@ -467,7 +588,9 @@ public class ALS {
         updateNameAndDescription();
     }
 
-    /** Передаёт модулям общие конструктивные параметры ALS. */
+    /**
+     * Передаёт модулям общие конструктивные параметры ALS.
+     */
     private void synchronizeModules() {
         for (Module module : modules) {
             module.setHeight(height);
@@ -479,7 +602,9 @@ public class ALS {
         }
     }
 
-    /** Пересчитывает общую ширину ALS. */
+    /**
+     * Пересчитывает общую ширину ALS.
+     */
     private void recalculateWidth() {
         width = modules.stream()
                 .mapToInt(Module::getWidth)
@@ -487,8 +612,21 @@ public class ALS {
     }
 
     /**
-     * Рассчитывает направления открытия дверей на основании
-     * физического положения модулей.
+     * Рассчитывает направления открытия дверей.
+     *
+     * <p>Для обычных storage-модулей:</p>
+     * <ul>
+     *     <li>слева от control-модуля — двери открываются влево;</li>
+     *     <li>справа от control-модуля — двери открываются вправо.</li>
+     * </ul>
+     *
+     * <p>Для LBC, который одновременно является control- и
+     * storage-модулем:</p>
+     * <ul>
+     *     <li>слева — двери открываются вправо;</li>
+     *     <li>по центру — двери открываются влево;</li>
+     *     <li>справа — двери открываются влево.</li>
+     * </ul>
      */
     private void recalculateDoorDirections() {
         int controlIndex = getControlModuleIndex();
@@ -501,12 +639,17 @@ public class ALS {
                 continue;
             }
 
+            /*
+             * LBC одновременно является ControlModule и StorageModule,
+             * поэтому для него действует отдельное правило.
+             */
             if (module instanceof ControlModule) {
                 switch (position) {
                     case LEFT ->
                             storageModule.setDirectionDoorOpening(
                                     DirectionDoorOpening.RIGHT
                             );
+
                     case CENTER, RIGHT ->
                             storageModule.setDirectionDoorOpening(
                                     DirectionDoorOpening.LEFT
@@ -516,6 +659,10 @@ public class ALS {
                 continue;
             }
 
+            /*
+             * Обычный storage-модуль открывается в сторону,
+             * противоположную положению control-модуля относительно него.
+             */
             if (i < controlIndex) {
                 storageModule.setDirectionDoorOpening(
                         DirectionDoorOpening.LEFT
@@ -532,6 +679,7 @@ public class ALS {
      * Возвращает индекс control-модуля.
      *
      * @return индекс control-модуля
+     * @throws IllegalStateException если control-модуль отсутствует
      */
     private int getControlModuleIndex() {
         for (int i = 0; i < modules.size(); i++) {
@@ -545,7 +693,12 @@ public class ALS {
         );
     }
 
-    /** Нумерует ячейки последовательно слева направо. */
+    /**
+     * Нумерует ячейки последовательно слева направо.
+     *
+     * <p>Нумерация начинается с единицы и зависит от физического
+     * порядка модулей в ALS.</p>
+     */
     private void renumberCells() {
         int number = 1;
 
@@ -560,7 +713,9 @@ public class ALS {
         }
     }
 
-    /** Формирует производные наименование и описание ALS. */
+    /**
+     * Формирует производные наименование и описание ALS.
+     */
     private void updateNameAndDescription() {
         int countCells = getCountCells();
         int storageModuleCount = getStorageModuleCount();
@@ -571,7 +726,7 @@ public class ALS {
 
         description =
                 "АКХ на "
-                        + countCells
+                        + getCountCells()
                         + " ячеек, ВхШхГ, мм: "
                         + height + "x"
                         + width + "x"
@@ -580,8 +735,8 @@ public class ALS {
                         + colorBody + "/"
                         + colorDoor
                         + "; Модулей хранения: "
-                        + storageModuleCount
-                        + " шт.;\\n"
+                        + getStorageModules().size()
+                        + " шт.;\n"
                         + controlModule.getDescription();
     }
 
@@ -599,7 +754,12 @@ public class ALS {
     /**
      * Возвращает control-модуль как базовый Module.
      *
+     * <p>В текущей domain-модели каждый ControlModule также является
+     * Module (LC или LBC), поэтому поиск выполняется среди списка
+     * Module без изменения интерфейса ControlModule.</p>
+     *
      * @return control-модуль
+     * @throws IllegalStateException если control-модуль отсутствует
      */
     private Module getControlModuleAsModule() {
         for (Module module : modules) {
@@ -614,8 +774,12 @@ public class ALS {
     }
 
     /**
-     * Проверяет структуру ALS: один модуль управления и минимум
-     * один модуль хранения.
+     * Проверяет структуру ALS.
+     *
+     * <p>В ALS должен находиться ровно один ControlModule
+     * и хотя бы один StorageModule.</p>
+     *
+     * @throws IllegalStateException если структура ALS недопустима
      */
     private void validateStructure() {
         long controlModules = modules.stream()
@@ -639,6 +803,11 @@ public class ALS {
         }
     }
 
+    /**
+     * Возвращает подробное строковое представление ALS.
+     *
+     * @return строковое представление ALS
+     */
     @Override
     public String toString() {
         return "ALS{" +
@@ -659,6 +828,13 @@ public class ALS {
 
     /**
      * Сравнивает ALS по конфигурации.
+     *
+     * <p>Порядок модулей имеет значение, поскольку определяет
+     * физическую конфигурацию ALS.</p>
+     *
+     * <p>Ширина, наименование, описание и положение control-модуля
+     * отдельно не сравниваются, поскольку являются производными
+     * значениями.</p>
      *
      * @param o объект для сравнения
      * @return {@code true}, если конфигурации ALS совпадают
@@ -682,6 +858,11 @@ public class ALS {
                 && Objects.equals(modules, other.modules);
     }
 
+    /**
+     * Возвращает хэш-код конфигурации ALS.
+     *
+     * @return хэш-код конфигурации
+     */
     @Override
     public int hashCode() {
         return Objects.hash(
