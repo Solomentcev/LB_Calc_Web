@@ -5,6 +5,9 @@ import com.lb_calc_web.domain.model.Employee;
 import com.lb_calc_web.domain.model.Module;
 import com.lb_calc_web.domain.model.Project;
 import com.lb_calc_web.dto.ALSDTO;
+import com.lb_calc_web.dto.EmployeeDTO;
+import com.lb_calc_web.dto.ProjectDTO;
+import com.lb_calc_web.service.ProjectService;
 import com.lb_calc_web.entity.ALSEntity;
 import com.lb_calc_web.entity.EmployeeEntity;
 import com.lb_calc_web.entity.LCEntity;
@@ -30,6 +33,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import com.lb_calc_web.security.EmployeePrincipal;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
@@ -62,6 +68,9 @@ class PersistenceIntegrationTest {
 
     @Autowired
     private ProjectRepository projectRepository;
+
+    @Autowired
+    private ProjectService projectService;
 
     @Test
     void projectAggregate_shouldRoundTripThroughMySqlWithoutLosingAssociations() {
@@ -353,6 +362,95 @@ class PersistenceIntegrationTest {
                         .map(cell -> cell.getNumber())
                         .toList()
         );
+    }
+
+
+    @Test
+    void projectService_shouldReplaceOnlySelectedAlsAndPreserveOtherConfigurations() {
+        EmployeeEntity employeeEntity = new EmployeeEntity();
+        employeeEntity.setFirstName("Тест");
+        employeeEntity.setLastName("ProjectService");
+        employeeEntity.setEmail("project-service@example.test");
+        employeeEntity.setEncryptedPassword("encoded-password");
+        employeeEntity.setRegistrationDate(LocalDate.of(2026, 1, 10));
+        employeeEntity.setRole(Role.ROLE_ADMIN);
+        employeeEntity = employeeRepository.saveAndFlush(employeeEntity);
+
+        EmployeePrincipal principal = new EmployeePrincipal(
+                employeeEntity.getId(),
+                employeeEntity.getEmail(),
+                employeeEntity.getEncryptedPassword(),
+                employeeEntity.getRole(),
+                employeeEntity.isActive()
+        );
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken(
+                        principal,
+                        null,
+                        principal.getAuthorities()
+                )
+        );
+
+        try {
+            ALSDTO repeatedALS = TestDataFactory.validALSDTO(null);
+            ALSDTO independentALS = TestDataFactory.validLBCALSDTO(null);
+
+            EmployeeDTO employeeDTO = EmployeeEntityMapper.toDto(
+                    EmployeeEntityMapper.toDomain(employeeEntity)
+            );
+            ProjectDTO project = new ProjectDTO();
+            project.setName("ProjectService replacement");
+            project.setCompany("Test company");
+            project.setCreatedBy(employeeDTO);
+            project.setUpdatedBy(employeeDTO);
+            project.setCreatedAt(LocalDate.of(2026, 1, 10));
+            project.setUpdatedAt(LocalDate.of(2026, 1, 10));
+            project.setAlsList(List.of(
+                    repeatedALS,
+                    repeatedALS,
+                    independentALS
+            ));
+
+            ProjectDTO savedProject = projectService.saveProject(project);
+            Long projectId = savedProject.getId();
+            Long selectedAlsId = savedProject.getAlsList().get(0).getId();
+            Long independentAlsId = savedProject.getAlsList().get(2).getId();
+
+            projectService.addLBAtProject(projectId, selectedAlsId);
+
+            entityManager.flush();
+            entityManager.clear();
+
+            ProjectEntity restoredEntity =
+                    projectRepository.findById(projectId).orElseThrow();
+            Project restoredProject =
+                    ProjectEntityMapper.toDomain(restoredEntity);
+
+            ALS originalConfiguration = com.lb_calc_web.mapper.dto.ALSDtoMapper
+                    .toDomain(repeatedALS);
+            ALS independentConfiguration = com.lb_calc_web.mapper.dto.ALSDtoMapper
+                    .toDomain(independentALS);
+
+            assertEquals(1, restoredProject.getQuantity(originalConfiguration));
+            assertEquals(1, restoredProject.getQuantity(independentConfiguration));
+            assertEquals(3, restoredEntity.getAlsEntries().size());
+
+            ALSEntity changedEntity = restoredEntity.getAlsEntries().stream()
+                    .map(entry -> entry.getAls())
+                    .filter(entity -> !entity.getId().equals(selectedAlsId)
+                            && !entity.getId().equals(independentAlsId))
+                    .findFirst()
+                    .orElseThrow();
+
+            ALS changedConfiguration = ALSEntityMapper.toDomain(changedEntity);
+            assertEquals(3, changedConfiguration.getStorageModules().size());
+            assertEquals(1, restoredProject.getQuantity(changedConfiguration));
+
+            assertTrue(restoredEntity.getAlsEntries().stream()
+                    .anyMatch(entry -> entry.getAls().getId().equals(independentAlsId)));
+        } finally {
+            SecurityContextHolder.clearContext();
+        }
     }
 
 }
