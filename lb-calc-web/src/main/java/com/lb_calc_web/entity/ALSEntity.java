@@ -235,6 +235,7 @@ public class ALSEntity {
         List<ALSModuleEntity> synchronizedModules = new ArrayList<>();
 
         for (int order = 0; order < desiredModules.size(); order++) {
+            int expectedOrder = order;
             ModuleEntity module = Objects.requireNonNull(
                     desiredModules.get(order),
                     "Модуль не должен быть null"
@@ -242,7 +243,7 @@ public class ALSEntity {
 
             ALSModuleEntity existing = unmatched.stream()
                     .filter(association ->
-                            association.getModuleOrder() == order
+                            association.getModuleOrder() == expectedOrder
                                     && (association.getModule() == module
                                     || association.getModule().equals(module)))
                     .findFirst()
