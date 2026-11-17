@@ -152,7 +152,7 @@ class LCServiceTest {
                         LCDtoMapper.toDomain(dto)
                 );
 
-        when(lcRepository.findByHeightAndWidthAndDepthAndUpperFrameAndBottomFrameAndColorBodyAndColorDoorAndDisplayAndDisplayQuantityAndBarReaderAndBarReaderQuantityAndPrinterAndPrinterQuantityAndRfidReaderAndRfidReaderQuantityAndPayment(
+        when(lcRepository.findCandidates(
                 anyInt(), anyInt(), anyInt(), anyInt(), anyInt(),
                 any(), any(), any(), anyInt(), any(), anyInt(),
                 anyBoolean(), anyInt(), anyBoolean(), anyInt(), any()
@@ -172,7 +172,7 @@ class LCServiceTest {
                         LCDtoMapper.toDomain(dto)
                 );
 
-        when(lcRepository.findByHeightAndWidthAndDepthAndUpperFrameAndBottomFrameAndColorBodyAndColorDoorAndDisplayAndDisplayQuantityAndBarReaderAndBarReaderQuantityAndPrinterAndPrinterQuantityAndRfidReaderAndRfidReaderQuantityAndPayment(
+        when(lcRepository.findCandidates(
                 anyInt(), anyInt(), anyInt(), anyInt(), anyInt(),
                 any(), any(), any(), anyInt(), any(), anyInt(),
                 anyBoolean(), anyInt(), anyBoolean(), anyInt(), any()
