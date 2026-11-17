@@ -263,6 +263,10 @@ public class EmployeeController {
                 "employees",
                 employeeService.getAllProfiles()
         );
+        model.addAttribute(
+                "employeeStatuses",
+                employeeService.getActiveStatuses()
+        );
 
         return "employees/employees";
     }
@@ -354,6 +358,34 @@ public class EmployeeController {
         }
     }
 
+    @PostMapping("/employees/{id}/deactivate")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public String deactivateEmployee(
+            @PathVariable Long id,
+            RedirectAttributes redirectAttributes
+    ) {
+        employeeService.deactivateById(id);
+        redirectAttributes.addFlashAttribute(
+                "successMessage",
+                "Учётная запись деактивирована"
+        );
+        return "redirect:/employees/" + id;
+    }
+
+    @PostMapping("/employees/{id}/activate")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public String activateEmployee(
+            @PathVariable Long id,
+            RedirectAttributes redirectAttributes
+    ) {
+        employeeService.activateById(id);
+        redirectAttributes.addFlashAttribute(
+                "successMessage",
+                "Учётная запись активирована"
+        );
+        return "redirect:/employees/" + id;
+    }
+
     @GetMapping("/employees/{id}")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public String editEmployee(
@@ -377,6 +409,10 @@ public class EmployeeController {
         model.addAttribute(
                 "id",
                 user.getId()
+        );
+        model.addAttribute(
+                "active",
+                employeeService.isActive(user.getId())
         );
 
         return "employees/employee";
