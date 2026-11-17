@@ -21,14 +21,6 @@ public interface LCRepository extends JpaRepository<LCEntity, Long> {
               and entity.bottomFrame = :bottomFrame
               and entity.colorBody = :colorBody
               and entity.colorDoor = :colorDoor
-              and entity.display = :display
-              and entity.displayQuantity = :displayQuantity
-              and (:barReader is null or entity.barReader is not null)
-              and (:barReaderQuantity = 0 or entity.barReaderQuantity > 0)
-              and entity.printer = :printer
-              and entity.printerQuantity = :printerQuantity
-              and entity.rfidReader = :rfidReader
-              and entity.rfidReaderQuantity = :rfidReaderQuantity
               and entity.payment = :payment
             """)
     List<LCEntity> findCandidates(
@@ -39,14 +31,6 @@ public interface LCRepository extends JpaRepository<LCEntity, Long> {
             @Param("bottomFrame") int bottomFrame,
             @Param("colorBody") Colors colorBody,
             @Param("colorDoor") Colors colorDoor,
-            @Param("display") String display,
-            @Param("displayQuantity") int displayQuantity,
-            @Param("barReader") String barReader,
-            @Param("barReaderQuantity") int barReaderQuantity,
-            @Param("printer") boolean printer,
-            @Param("printerQuantity") int printerQuantity,
-            @Param("rfidReader") boolean rfidReader,
-            @Param("rfidReaderQuantity") int rfidReaderQuantity,
             @Param("payment") Payment payment
     );
 }
