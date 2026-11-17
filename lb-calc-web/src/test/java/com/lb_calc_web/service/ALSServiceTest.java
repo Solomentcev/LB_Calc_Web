@@ -88,11 +88,20 @@ class ALSServiceTest {
         ALSDTO als = TestDataFactory.validALSDTO(1L);
         als.setHeight(10);
 
-        assertThrows(
+        ValidationSizeException exception = assertThrows(
                 ValidationSizeException.class,
                 () -> alsService.saveALS(als)
         );
 
+        var alsHeightError = exception.getValidationResult()
+                .getErrors()
+                .stream()
+                .filter(error -> "ALS".equals(error.getObjectType())
+                        && "height".equals(error.getField()))
+                .findFirst()
+                .orElseThrow();
+
+        assertEquals(1L, alsHeightError.getObjectId());
         verify(alsRepository, never()).save(any());
     }
 
