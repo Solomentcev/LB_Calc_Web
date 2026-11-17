@@ -12,6 +12,7 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 
 import java.util.EnumSet;
 import java.util.HashSet;
@@ -52,7 +53,11 @@ public class LBCEntity extends StorageModuleEntity {
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(
             name = "lbc_bar_reader",
-            joinColumns = @JoinColumn(name = "lbc_id")
+            joinColumns = @JoinColumn(name = "lbc_id"),
+            uniqueConstraints = @UniqueConstraint(
+                    name = "uk_lbc_bar_reader",
+                    columnNames = {"lbc_id", "catalog_position_id"}
+            )
     )
     private Set<EquipmentQuantityEmbeddable> barReaders = new HashSet<>();
 
