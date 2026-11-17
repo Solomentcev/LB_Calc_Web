@@ -1264,14 +1264,18 @@ public class ProjectService {
             );
         }
 
+        if (domain.getId() == null) {
+            throw new IllegalArgumentException(
+                    "У сотрудника отсутствует ID"
+            );
+        }
+
         return employeeRepository
-                .findByEmail(
-                        domain.getEmail()
-                )
+                .findById(domain.getId())
                 .orElseThrow(
                         () -> new NoSuchElementException(
-                                "Сотрудник с email "
-                                        + domain.getEmail()
+                                "Сотрудник с ID "
+                                        + domain.getId()
                                         + " не найден"
                         )
                 );
