@@ -87,6 +87,24 @@ docker compose --env-file test.env up -d --build
 
 Flyway автоматически применяет миграции при запуске приложения. V1 создаёт актуальную схему БД с нуля, Hibernate проверяет её соответствие Entity через `ddl-auto=validate`. Не создавать и не изменять таблицы вручную.
 
+Переход со старой схемы на пересобранную V1 требует однократного пересоздания БД, поскольку прежние записи Flyway ссылаются на удалённые V2/V3. Для Docker-окружения DEV, если в нём нет нужных данных:
+
+```bash
+cd environments/dev
+docker compose --env-file dev.env down -v
+docker compose --env-file dev.env up -d --build
+```
+
+Для полного сброса только тестового окружения:
+
+```bash
+cd environments/test
+docker compose --env-file test.env down -v
+docker compose --env-file test.env up -d --build
+```
+
+Команда `down -v` удаляет данные соответствующих Docker volumes. Не выполнять её для окружений, данные которых требуется сохранить. Для внешней MySQL БД необходимо отдельно удалить и создать заново именно целевую БД перед первым запуском новой версии.
+
 Основное приложение DEV:
 
 `http://localhost:8081`
