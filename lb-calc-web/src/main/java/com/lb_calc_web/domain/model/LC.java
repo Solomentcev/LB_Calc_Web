@@ -77,7 +77,7 @@ public class LC extends Module implements ControlModule {
         this.controlConfiguration = Objects.requireNonNull(
                 controlConfiguration,
                 "Конфигурация управления не должна быть null"
-        );
+        ).copy();
 
         recalculate();
     }
@@ -104,7 +104,7 @@ public class LC extends Module implements ControlModule {
         this.controlConfiguration = Objects.requireNonNull(
                 controlConfiguration,
                 "Конфигурация управления не должна быть null"
-        );
+        ).copy();
 
         recalculate();
     }
