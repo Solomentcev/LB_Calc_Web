@@ -620,9 +620,15 @@ public class ALS {
      * Пересчитывает общую ширину ALS.
      */
     private void recalculateWidth() {
+        /*
+         * Суммирование через int-сумму Stream может незаметно
+         * переполниться и дать некорректную ширину ALS.
+         * При переполнении расчёт должен завершиться ошибкой,
+         * а mutate() сохранит исходное состояние агрегата.
+         */
         width = modules.stream()
-                .mapToInt(Module::getWidth)
-                .sum();
+                .map(Module::getWidth)
+                .reduce(0, Math::addExact);
     }
 
     /**
