@@ -125,6 +125,23 @@ class LBServiceTest {
     }
 
     @Test
+    void saveLB_missingRequiredColor_shouldReturnValidationError() {
+        LBDTO dto = TestDataFactory.validLBDTO(41L);
+        dto.setColorBody(null);
+
+        ValidationSizeException exception = assertThrows(
+                ValidationSizeException.class,
+                () -> lbService.saveLB(dto)
+        );
+
+        var error = exception.getValidationResult().getErrors().get(0);
+        assertEquals("LB", error.getObjectType());
+        assertEquals(41L, error.getObjectId());
+        assertEquals("domainModel", error.getField());
+        verify(lbRepository, never()).save(any());
+    }
+
+    @Test
     void findById_existing_shouldReturnDto() {
         LBDTO dto = TestDataFactory.validLBDTO(1L);
         LBEntity entity =
