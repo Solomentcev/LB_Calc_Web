@@ -338,7 +338,7 @@ public class ProjectService {
     @Transactional
     public ProjectDTO addNewALSandSaveProject(Long projectId) {
         ProjectDTO source = findById(projectId);
-        Project domain = ProjectDtoMapper.toDomain(source);
+        Project domain = ProjectDtoMapper.toDomain(source, alsService::toDomain);
 
         domain.addALS(
                 alsService.toDomain(alsService.createALS())
@@ -358,7 +358,7 @@ public class ProjectService {
         ProjectDTO source = findById(projectId);
         ALSDTO selected = findALSInProject(projectId, alsId);
 
-        Project domain = ProjectDtoMapper.toDomain(source);
+        Project domain = ProjectDtoMapper.toDomain(source, alsService::toDomain);
         ALS selectedDomain = alsService.toDomain(selected);
 
         if (domain.getQuantity(selectedDomain) == 0) {
@@ -536,8 +536,8 @@ public class ProjectService {
                         )
                 );
 
-        Project domain = ProjectDtoMapper.toDomain(project);
-        ALS oldConfiguration = ALSDtoMapper.toDomain(selected);
+        Project domain = ProjectDtoMapper.toDomain(project, alsService::toDomain);
+        ALS oldConfiguration = alsService.toDomain(selected);
         ALS newConfiguration = alsService.toDomain(als);
 
         domain.replaceALS(oldConfiguration, newConfiguration);
