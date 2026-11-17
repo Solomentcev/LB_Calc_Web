@@ -4,7 +4,7 @@ import com.lb_calc_web.domain.attributes.AccessMethod;
 import com.lb_calc_web.domain.attributes.Payment;
 import com.lb_calc_web.domain.attributes.PrintOption;
 
-import java.util.Collections;
+import com.lb_calc_web.domain.equipment.Equipment;\n\nimport java.util.Collections;\nimport java.util.List;
 import java.util.EnumSet;
 import java.util.Objects;
 import java.util.Set;
@@ -168,7 +168,55 @@ public class ControlConfiguration {
      * @return конфигурация оборудования
      */
     public EquipmentConfiguration getEquipmentConfiguration() {
-        return equipmentConfiguration;
+        return equipmentConfiguration.copy();
+    }
+
+    /**
+     * Возвращает всё оборудование конфигурации.
+     *
+     * @return неизменяемый список обязательного и дополнительного оборудования
+     */
+    public List<Equipment> getAllEquipment() {
+        return equipmentConfiguration.getAllEquipment();
+    }
+
+    /**
+     * Добавляет оборудование в обязательный набор.
+     *
+     * @param equipment добавляемое оборудование
+     */
+    public void addRequiredEquipment(
+            Equipment equipment
+    ) {
+        equipmentConfiguration.addRequiredEquipment(equipment);
+    }
+
+    /**
+     * Добавляет оборудование в дополнительный набор.
+     *
+     * @param equipment добавляемое оборудование
+     */
+    public void addAdditionalEquipment(
+            com.lb_calc_web.domain.equipment.Equipment equipment
+    ) {
+        equipmentConfiguration.addAdditionalEquipment(equipment);
+    }
+
+    /**
+     * Удаляет оборудование из обязательного и дополнительного наборов.
+     *
+     * @param equipment удаляемое оборудование
+     * @return {@code true}, если оборудование было удалено хотя бы из одного набора
+     */
+    public boolean removeEquipment(
+            com.lb_calc_web.domain.equipment.Equipment equipment
+    ) {
+        boolean removedRequired =
+                equipmentConfiguration.removeRequiredEquipment(equipment);
+        boolean removedAdditional =
+                equipmentConfiguration.removeAdditionalEquipment(equipment);
+
+        return removedRequired || removedAdditional;
     }
 
     /**
