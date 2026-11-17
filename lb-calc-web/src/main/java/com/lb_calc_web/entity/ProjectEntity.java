@@ -45,7 +45,7 @@ public class ProjectEntity {
      * <p>Хранится как TEXT, поскольку длина описания
      * заранее не ограничивается небольшим размером.</p>
      */
-    @Column(columnDefinition = "TEXT")
+    @Transient
     private String description;
 
     /**
