@@ -46,7 +46,7 @@ public class ProjectEntity {
      * <p>Хранится как TEXT, поскольку длина описания
      * заранее не ограничивается небольшим размером.</p>
      */
-    @Transient
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String description;
 
     /**
@@ -162,7 +162,10 @@ public class ProjectEntity {
      * @param description описание
      */
     public void setDescription(String description) {
-        this.description = description;
+        this.description = Objects.requireNonNull(
+                description,
+                "Описание проекта не должно быть null"
+        );
     }
 
     /**

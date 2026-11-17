@@ -5,7 +5,6 @@ import jakarta.persistence.Column;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.MappedSuperclass;
-import jakarta.persistence.Transient;
 
 /**
  * Базовая JPA-модель для модулей хранения.
@@ -75,19 +74,19 @@ public abstract class StorageModuleEntity extends ModuleEntity {
     /**
      * Рассчитанная высота ячейки, мм.
      */
-    @Transient
+    @Column(name = "height_cell", nullable = false)
     private int heightCell;
 
     /**
      * Рассчитанная ширина ячейки, мм.
      */
-    @Transient
+    @Column(name = "width_cell", nullable = false)
     private int widthCell;
 
     /**
      * Рассчитанная глубина ячейки, мм.
      */
-    @Transient
+    @Column(name = "depth_cell", nullable = false)
     private int depthCell;
 
     /**

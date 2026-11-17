@@ -27,13 +27,13 @@ public abstract class ModuleEntity {
     /**
      * Наименование модуля.
      */
-    @Transient
+    @Column(nullable = false)
     private String name;
 
     /**
      * Описание модуля.
      */
-    @Transient
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String description;
 
     /**
@@ -106,7 +106,10 @@ public abstract class ModuleEntity {
     }
 
     public void setDescription(String description) {
-        this.description = description;
+        this.description = Objects.requireNonNull(
+                description,
+                "Описание модуля не должно быть null"
+        );
     }
 
     public int getHeight() {

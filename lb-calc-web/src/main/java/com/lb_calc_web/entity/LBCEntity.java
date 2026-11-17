@@ -48,7 +48,7 @@ public class LBCEntity extends StorageModuleEntity {
      * Способ оплаты.
      */
     @Enumerated(EnumType.STRING)
-    @Column(name = "payment")
+    @Column(name = "payment", nullable = false)
     private Payment payment;
 
 
@@ -118,7 +118,10 @@ public class LBCEntity extends StorageModuleEntity {
     }
 
     public void setPayment(Payment payment) {
-        this.payment = payment;
+        this.payment = Objects.requireNonNull(
+                payment,
+                "Способ оплаты не должен быть null"
+        );
     }
 
 

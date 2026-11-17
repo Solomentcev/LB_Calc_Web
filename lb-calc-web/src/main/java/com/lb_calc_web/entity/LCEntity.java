@@ -46,7 +46,7 @@ public class LCEntity extends ModuleEntity {
      * Способ оплаты.
      */
     @Enumerated(EnumType.STRING)
-    @Column(name = "payment")
+    @Column(name = "payment", nullable = false)
     private Payment payment;
 
 
@@ -116,7 +116,10 @@ public class LCEntity extends ModuleEntity {
     }
 
     public void setPayment(Payment payment) {
-        this.payment = payment;
+        this.payment = Objects.requireNonNull(
+                payment,
+                "Способ оплаты не должен быть null"
+        );
     }
 
 

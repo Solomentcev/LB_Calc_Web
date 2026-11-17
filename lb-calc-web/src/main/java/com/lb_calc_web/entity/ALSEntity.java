@@ -30,13 +30,13 @@ public class ALSEntity {
     /**
      * Наименование ALS.
      */
-    @Transient
+    @Column(nullable = false)
     private String name;
 
     /**
      * Описание ALS.
      */
-    @Transient
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String description;
 
     /**
@@ -51,7 +51,7 @@ public class ALSEntity {
      * <p>Рассчитывается доменной моделью
      * как сумма ширин модулей.</p>
      */
-    @Transient
+    @Column(nullable = false)
     private int width;
 
     /**
@@ -126,7 +126,10 @@ public class ALSEntity {
     }
 
     public void setDescription(String description) {
-        this.description = description;
+        this.description = Objects.requireNonNull(
+                description,
+                "Описание ALS не должно быть null"
+        );
     }
 
     public int getHeight() {
