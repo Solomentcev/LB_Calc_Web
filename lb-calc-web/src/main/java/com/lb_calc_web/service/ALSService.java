@@ -217,7 +217,7 @@ public class ALSService {
 
         ALS domain;
         try {
-            domain = ALSDtoMapper.toDomain(dto);
+            domain = toDomain(dto);
         } catch (IllegalStateException exception) {
             var validationResult =
                     new com.lb_calc_web.dto.validation.ValidationResult(
@@ -320,8 +320,8 @@ public class ALSService {
                 Colors.valueOf(dto.getColorDoor())
         );
 
-        var domain = ALSDtoMapper.toDomain(dto);
-        domain.addStorageModule(LBDtoMapper.toDomain(lbDto));
+        var domain = toDomain(dto);
+        domain.addStorageModule(LBDtoMapper.toDomain(lbDto, TypeLbFactory.forLB(environment, lbDto.getType())));
 
         return ALSDtoMapper.toDto(domain);
     }
@@ -347,7 +347,7 @@ public class ALSService {
             );
         }
 
-        var domain = ALSDtoMapper.toDomain(dto);
+        var domain = toDomain(dto);
         int moduleIndex = findPhysicalLbIndex(domain, lbIndex);
         domain.removeModuleAt(moduleIndex);
 
@@ -379,11 +379,11 @@ public class ALSService {
             );
         }
 
-        var domain = ALSDtoMapper.toDomain(als);
+        var domain = toDomain(als);
         int moduleIndex = findPhysicalLbIndex(domain, lbIndex);
         domain.replaceModuleAt(
                 moduleIndex,
-                LBDtoMapper.toDomain(lb)
+                LBDtoMapper.toDomain(lb, TypeLbFactory.forLB(environment, lb.getType()))
         );
 
         return ALSDtoMapper.toDto(domain);
@@ -422,7 +422,7 @@ public class ALSService {
         Objects.requireNonNull(als, "ALS не должен быть null");
         Objects.requireNonNull(lc, "LC не должен быть null");
 
-        var domain = ALSDtoMapper.toDomain(als);
+        var domain = toDomain(als);
         domain.replaceControlModule(LCDtoMapper.toDomain(lc));
 
         return ALSDtoMapper.toDto(domain);
@@ -435,8 +435,8 @@ public class ALSService {
         Objects.requireNonNull(als, "ALS не должен быть null");
         Objects.requireNonNull(lbc, "LBC не должен быть null");
 
-        var domain = ALSDtoMapper.toDomain(als);
-        domain.replaceControlModule(LBCDtoMapper.toDomain(lbc));
+        var domain = toDomain(als);
+        domain.replaceControlModule(LBCDtoMapper.toDomain(lbc, TypeLbFactory.forLBC(environment, lbc.getType())));
 
         return ALSDtoMapper.toDto(domain);
     }
@@ -674,7 +674,7 @@ public class ALSService {
                 "ALS не должен быть null"
         );
 
-        var domain = ALSDtoMapper.toDomain(dto);
+        var domain = toDomain(dto);
         ALSDTO calculated = ALSDtoMapper.toDto(domain);
 
         dto.setName(calculated.getName());
