@@ -152,8 +152,11 @@ class LCServiceTest {
                         LCDtoMapper.toDomain(dto)
                 );
 
-        when(lcRepository.findAll())
-                .thenReturn(List.of(existing));
+        when(lcRepository.findByHeightAndWidthAndDepthAndUpperFrameAndBottomFrameAndColorBodyAndColorDoorAndDisplayAndDisplayQuantityAndBarReaderAndBarReaderQuantityAndPrinterAndPrinterQuantityAndRfidReaderAndRfidReaderQuantityAndPayment(
+                anyInt(), anyInt(), anyInt(), anyInt(), anyInt(),
+                any(), any(), any(), anyInt(), any(), anyInt(),
+                anyBoolean(), anyInt(), anyBoolean(), anyInt(), any()
+        )).thenReturn(List.of(existing));
 
         LCDTO result = lcService.saveLC(dto);
 
@@ -169,7 +172,11 @@ class LCServiceTest {
                         LCDtoMapper.toDomain(dto)
                 );
 
-        when(lcRepository.findAll()).thenReturn(List.of());
+        when(lcRepository.findByHeightAndWidthAndDepthAndUpperFrameAndBottomFrameAndColorBodyAndColorDoorAndDisplayAndDisplayQuantityAndBarReaderAndBarReaderQuantityAndPrinterAndPrinterQuantityAndRfidReaderAndRfidReaderQuantityAndPayment(
+                anyInt(), anyInt(), anyInt(), anyInt(), anyInt(),
+                any(), any(), any(), anyInt(), any(), anyInt(),
+                anyBoolean(), anyInt(), anyBoolean(), anyInt(), any()
+        )).thenReturn(List.of());
         when(lcRepository.save(any(LCEntity.class)))
                 .thenReturn(saved);
 
