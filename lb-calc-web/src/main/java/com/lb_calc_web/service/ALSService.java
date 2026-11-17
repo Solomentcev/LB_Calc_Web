@@ -685,7 +685,7 @@ public class ALSService {
         }
 
         List<ModuleEntity> candidates =
-                moduleRepository.findByHeightAndWidthAndDepthAndUpperFrameAndBottomFrameAndColorBodyAndColorDoor(
+                moduleRepository.findCandidates(
                         domainModule.getHeight(),
                         domainModule.getWidth(),
                         domainModule.getDepth(),
