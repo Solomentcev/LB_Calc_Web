@@ -29,13 +29,13 @@ public class ALSEntity {
     /**
      * Наименование ALS.
      */
-    @Column(nullable = false)
+    @Transient
     private String name;
 
     /**
      * Описание ALS.
      */
-    @Column(columnDefinition = "TEXT")
+    @Transient
     private String description;
 
     /**
@@ -50,7 +50,7 @@ public class ALSEntity {
      * <p>Рассчитывается доменной моделью
      * как сумма ширин модулей.</p>
      */
-    @Column(nullable = false)
+    @Transient
     private int width;
 
     /**
