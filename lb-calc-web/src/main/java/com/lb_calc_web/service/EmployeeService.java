@@ -63,7 +63,8 @@ public class EmployeeService implements UserDetailsService {
                 entity.getId(),
                 entity.getEmail(),
                 entity.getEncryptedPassword(),
-                entity.getRole()
+                entity.getRole(),
+                entity.isActive()
         );
     }
 
@@ -172,21 +173,36 @@ public class EmployeeService implements UserDetailsService {
         return toDto(saved);
     }
 
+    /**
+     * Деактивирует учётную запись без удаления сотрудника из БД.
+     *
+     * <p>Сохранение записи необходимо для внешних ключей проектов,
+     * в которых сотрудник указан автором или последним редактором.</p>
+     *
+     * @param id идентификатор сотрудника
+     */
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @Transactional
     public void deleteById(Long id) {
+        EmployeeEntity entity = employeeRepository
+                .findById(id)
+                .orElseThrow(() ->
+                        new NoSuchElementException(
+                                "Сотрудник с id=" + id + " не найден"
+                        )
+                );
 
-        if (!employeeRepository.existsById(id)) {
-            throw new NoSuchElementException(
-                    "Сотрудник с id=" + id + " не найден"
-            );
+        if (!entity.isActive()) {
+            return;
         }
 
+        entity.setActive(false);
+        employeeRepository.save(entity);
+
         logger.info(
-                "Удаление сотрудника id={}",
+                "Деактивирована учётная запись сотрудника id={}",
                 id
         );
-
-        employeeRepository.deleteById(id);
     }
 
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
