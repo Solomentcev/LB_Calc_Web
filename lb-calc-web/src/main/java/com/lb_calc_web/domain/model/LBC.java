@@ -82,9 +82,12 @@ public class LBC extends StorageModule implements ControlModule {
     }
 
     /**
-     * Возвращает конфигурацию управления LBC.
+     * Возвращает независимую копию конфигурации управления LBC.
      *
-     * @return конфигурация управления
+     * <p>Изменение возвращённого объекта не влияет на состояние модуля.
+     * Для изменения конфигурации следует использовать методы самого модуля.</p>
+     *
+     * @return копия конфигурации управления
      */
     @Override
     public ControlConfiguration getControlConfiguration() {
