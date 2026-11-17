@@ -58,6 +58,10 @@ class LCServiceTest {
         assertEquals(1940, result.getHeight());
         assertEquals(500, result.getDepth());
         assertEquals("LC10", result.getDisplay());
+        assertEquals(1, result.getDisplayQuantity());
+        assertEquals(0, result.getBarReaderQuantity());
+        assertEquals(0, result.getPrinterQuantity());
+        assertEquals(1, result.getRfidReaderQuantity());
         assertTrue(result.getWidth() > 0);
         assertNotNull(result.getDescription());
     }
