@@ -118,9 +118,7 @@ public class LBC extends StorageModule implements ControlModule {
      */
     @Override
     public List<Equipment> getEquipment() {
-        return controlConfiguration
-                .getEquipmentConfiguration()
-                .getAllEquipment();
+        return controlConfiguration.getAllEquipment();
     }
 
     /**
@@ -133,14 +131,12 @@ public class LBC extends StorageModule implements ControlModule {
      */
     @Override
     public void addEquipment(Equipment equipment) {
-        controlConfiguration
-                .getEquipmentConfiguration()
-                .addAdditionalEquipment(
-                        Objects.requireNonNull(
-                                equipment,
-                                "Оборудование не должно быть null"
-                        )
-                );
+        controlConfiguration.addAdditionalEquipment(
+                Objects.requireNonNull(
+                        equipment,
+                        "Оборудование не должно быть null"
+                )
+        );
 
         recalculate();
     }
@@ -161,13 +157,7 @@ public class LBC extends StorageModule implements ControlModule {
                 "Оборудование не должно быть null"
         );
 
-        controlConfiguration
-                .getEquipmentConfiguration()
-                .removeAdditionalEquipment(equipment);
-
-        controlConfiguration
-                .getEquipmentConfiguration()
-                .removeRequiredEquipment(equipment);
+        controlConfiguration.removeEquipment(equipment);
 
         recalculate();
     }
@@ -295,7 +285,7 @@ public class LBC extends StorageModule implements ControlModule {
                 && getColorDoor() == other.getColorDoor()
                 && Objects.equals(
                 controlConfiguration,
-                other.getControlConfiguration()
+                other.controlConfiguration
         );
     }
 
@@ -318,7 +308,7 @@ public class LBC extends StorageModule implements ControlModule {
                 getDirectionDoorOpening(),
                 getColorBody(),
                 getColorDoor(),
-                getControlConfiguration()
+                controlConfiguration
         );
     }
 
@@ -348,7 +338,7 @@ public class LBC extends StorageModule implements ControlModule {
                 ", colorBody=" + getColorBody() +
                 ", colorDoor=" + getColorDoor() +
                 ", controlConfiguration=" +
-                getControlConfiguration() +
+                controlConfiguration +
                 '}';
     }
 }
