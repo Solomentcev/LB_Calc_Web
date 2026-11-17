@@ -141,8 +141,8 @@ public final class LCDtoMapper {
         ControlConfiguration controlConfiguration =
                 new ControlConfiguration(
                         Payment.valueOf(dto.getPayment()),
-                        accessMethods,
-                        printOptions,
+                        toAccessMethods(dto.getAccessMethods()),
+                        toPrintOptions(dto.getPrintOptions()),
                         equipmentConfiguration
                 );
 
