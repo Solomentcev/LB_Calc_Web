@@ -27,13 +27,13 @@ public abstract class ModuleEntity {
     /**
      * Наименование модуля.
      */
-    @Column(nullable = false)
+    @Transient
     private String name;
 
     /**
      * Описание модуля.
      */
-    @Column(columnDefinition = "TEXT")
+    @Transient
     private String description;
 
     /**
