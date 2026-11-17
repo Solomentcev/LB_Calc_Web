@@ -736,7 +736,7 @@ public class ALS {
                         + colorDoor
                         + "; Модулей хранения: "
                         + storageModuleCount
-                        + " шт.;\\n"
+                        + " шт.;\n"
                         + controlModule.getDescription();
     }
     /**
