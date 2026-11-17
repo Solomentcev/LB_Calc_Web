@@ -28,19 +28,29 @@ class ControlEquipmentResolverTest {
     }
 
     @Test
-    void resolve_shouldSupportLegacyDtoWithoutQuantities() {
-        EquipmentConfiguration result = ControlEquipmentResolver.resolve(
-                Display.LC10.getName(), null,
-                BarReader.NONE.getName(), null,
-                true, null,
-                false, null,
-                "LC"
+    void resolve_shouldRejectMissingEquipmentQuantity() {
+        assertThrows(IllegalArgumentException.class, () ->
+                ControlEquipmentResolver.resolve(
+                        Display.LC10.getName(), null,
+                        BarReader.NONE.getName(), 0,
+                        false, 0,
+                        false, 0,
+                        "LC"
+                )
         );
+    }
 
-        assertEquals(1, result.getQuantity(Display.LC10));
-        assertEquals(0, result.getQuantity(BarReader.NONE));
-        assertEquals(1, result.getQuantity(new Printer()));
-        assertEquals(0, result.getQuantity(new RfidReader()));
+    @Test
+    void resolve_shouldRejectInconsistentPresenceFlag() {
+        assertThrows(IllegalArgumentException.class, () ->
+                ControlEquipmentResolver.resolve(
+                        Display.LC10.getName(), 1,
+                        BarReader.NONE.getName(), 0,
+                        true, 0,
+                        false, 0,
+                        "LC"
+                )
+        );
     }
 
     @Test
