@@ -253,7 +253,15 @@ public final class ALSDtoMapper {
 
             case RIGHT -> index = modules.size();
 
-            case CENTER -> index = modules.size() / 2;
+            case CENTER -> {
+                if (modules.size() == 1) {
+                    throw new IllegalStateException(
+                            "Положение CENTER недопустимо для ALS с одним LB"
+                    );
+                }
+
+                index = modules.size() / 2;
+            }
 
             default -> throw new IllegalStateException(
                     "Неизвестное положение модуля управления: " + controlPosition
