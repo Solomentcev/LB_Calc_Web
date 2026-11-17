@@ -102,6 +102,24 @@ class SizeValidatorTest {
     }
 
     @Test
+    void validateLC_widthBelowEquipmentRequirement_shouldFail() {
+        LC narrowLC = new LC(
+                lc.getHeight(),
+                100,
+                lc.getDepth(),
+                lc.getUpperFrame(),
+                lc.getBottomFrame(),
+                lc.getColorBody(),
+                lc.getColorDoor(),
+                lc.getControlConfiguration().copy()
+        );
+
+        ValidationResult result = sizeValidator.validateLC(narrowLC);
+
+        assertHasError(result, "width");
+    }
+
+    @Test
     void validateLBC_valid_shouldPass() {
         assertTrue(sizeValidator.validateLBC(lbc).isValid());
     }
@@ -159,6 +177,15 @@ class SizeValidatorTest {
 
         assertFalse(hasError(result, "height"));
         assertFalse(hasError(result, "heightCell"));
+    }
+
+    @Test
+    void validateLB_zeroDoorThickness_shouldFail() {
+        LB invalidLB = createLB(1940, 500, 3, 0);
+
+        ValidationResult result = sizeValidator.validateLB(invalidLB);
+
+        assertHasError(result, "doorThickness");
     }
 
     @Test
