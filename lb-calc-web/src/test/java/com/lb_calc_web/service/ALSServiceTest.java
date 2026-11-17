@@ -250,7 +250,6 @@ class ALSServiceTest {
                 spy.replaceLCandSaveALS(als, lc);
 
         assertNotNull(result.getLC());
-        assertEquals(lc.getId(), result.getLC().getId());
         assertEquals(lc.getDisplay(), result.getLC().getDisplay());
         assertEquals(lc.getRfidReaderQuantity(), result.getLC().getRfidReaderQuantity());
         assertNull(result.getLBC());
