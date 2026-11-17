@@ -52,9 +52,9 @@ class ProjectEntityMapperTest {
         );
 
         assertEquals(1, entity.getAlsEntries().size());
-        assertEquals(2, entity.getAlsEntries().getFirst().getQuantity());
-        assertSame(entity, entity.getAlsEntries().getFirst().getProject());
-        assertSame(alsEntity, entity.getAlsEntries().getFirst().getAls());
+        assertEquals(2, entity.getAlsEntries().get(0).getQuantity());
+        assertSame(entity, entity.getAlsEntries().get(0).getProject());
+        assertSame(alsEntity, entity.getAlsEntries().get(0).getAls());
 
         Project restored = ProjectEntityMapper.toDomain(entity);
 
@@ -94,7 +94,7 @@ class ProjectEntityMapperTest {
                 ignored -> alsEntity
         );
 
-        var association = entity.getAlsEntries().getFirst();
+        var association = entity.getAlsEntries().get(0);
 
         Project changed = Project.restore(
                 "Обновлённый проект",
@@ -114,7 +114,7 @@ class ProjectEntityMapperTest {
         );
 
         assertEquals(1, entity.getAlsEntries().size());
-        assertSame(association, entity.getAlsEntries().getFirst());
+        assertSame(association, entity.getAlsEntries().get(0));
         assertEquals(3, association.getQuantity());
     }
 }
