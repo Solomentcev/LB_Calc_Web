@@ -489,7 +489,7 @@ class PersistenceIntegrationTest {
                     .findFirst()
                     .orElseThrow();
             assertEquals(
-                    List.of(AccessMethod.RFID.name()),
+                    regeneratedLBC.getLBC().getAccessMethods(),
                     persistedLBCConfiguration.getLBC().getAccessMethods()
             );
         } finally {
