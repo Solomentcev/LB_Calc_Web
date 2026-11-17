@@ -15,6 +15,7 @@ import com.lb_calc_web.entity.LBCEntity;
 import com.lb_calc_web.entity.ModuleEntity;
 import com.lb_calc_web.entity.ProjectEntity;
 import com.lb_calc_web.mapper.dto.ALSDtoMapper;
+import com.lb_calc_web.mapper.dto.EmployeeDtoMapper;
 import com.lb_calc_web.mapper.entity.ALSEntityMapper;
 import com.lb_calc_web.mapper.entity.EmployeeEntityMapper;
 import com.lb_calc_web.mapper.entity.ModuleEntityMapper;
@@ -395,7 +396,7 @@ class PersistenceIntegrationTest {
             ALSDTO repeatedALS = TestDataFactory.validALSDTO(null);
             ALSDTO independentALS = TestDataFactory.validLBCALSDTO(null);
 
-            EmployeeDTO employeeDTO = EmployeeEntityMapper.toDto(
+            EmployeeDTO employeeDTO = EmployeeDtoMapper.toDto(
                     EmployeeEntityMapper.toDomain(employeeEntity)
             );
             ProjectDTO project = new ProjectDTO();
