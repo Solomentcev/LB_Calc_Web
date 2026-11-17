@@ -100,6 +100,10 @@ public final class TestDataFactory {
         lc.setPayment(Payment.NONE.name());
         lc.setPrinter(false);
         lc.setRfidReader(true);
+        lc.setDisplayQuantity(1);
+        lc.setBarReaderQuantity(0);
+        lc.setPrinterQuantity(0);
+        lc.setRfidReaderQuantity(1);
 
         lc.setColorBody(Colors.Blue.name());
         lc.setColorDoor(Colors.White.name());
@@ -178,6 +182,10 @@ public final class TestDataFactory {
         lbc.setPayment(Payment.NONE.name());
         lbc.setPrinter(false);
         lbc.setRfidReader(true);
+        lbc.setDisplayQuantity(1);
+        lbc.setBarReaderQuantity(0);
+        lbc.setPrinterQuantity(0);
+        lbc.setRfidReaderQuantity(1);
         lbc.setAccessMethods(List.of());
         lbc.setPrintOptions(List.of());
 
@@ -202,12 +210,12 @@ public final class TestDataFactory {
         als.setColorDoor(Colors.White.name());
         als.setPositionControlModule("CENTER");
 
-        LCDTO lc = validLCDTO(id + 100L);
+        LCDTO lc = validLCDTO(offsetId(id, 100L));
         als.setLC(lc);
 
         List<LBDTO> lbList = new ArrayList<>();
-        LBDTO lb1 = validLBDTO(id + 200L);
-        LBDTO lb2 = validLBDTO(id + 201L);
+        LBDTO lb1 = validLBDTO(offsetId(id, 200L));
+        LBDTO lb2 = validLBDTO(offsetId(id, 201L));
 
         lbList.add(lb1);
         lbList.add(lb2);
@@ -258,7 +266,7 @@ public final class TestDataFactory {
         als.setColorBody(Colors.Blue.name());
         als.setColorDoor(Colors.White.name());
         als.setPositionControlModule("CENTER");
-        als.setLBC(validLBCDTO(id + 100L));
+        als.setLBC(validLBCDTO(offsetId(id, 100L)));
 
         als.setCountCells(
                 als.getLBC().getCountCells()
@@ -290,6 +298,10 @@ public final class TestDataFactory {
         return ALSDtoMapper.toDomain(
                 validALSDTO(id)
         );
+    }
+
+    private static Long offsetId(Long id, long offset) {
+        return id == null ? null : id + offset;
     }
 
     public static ProjectDTO validProject(Long id) {
