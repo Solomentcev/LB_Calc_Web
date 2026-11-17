@@ -659,7 +659,8 @@ public class ALSService {
             List<ModuleEntity> cache
     ) {
         for (ModuleEntity entity : cache) {
-            if (domainModule.equals(ModuleEntityMapper.toDomain(entity))) {
+            if (isSameModuleType(domainModule, entity)
+                    && domainModule.equals(ModuleEntityMapper.toDomain(entity))) {
                 return entity;
             }
         }
@@ -678,7 +679,8 @@ public class ALSService {
         cache.addAll(candidates);
 
         for (ModuleEntity entity : candidates) {
-            if (domainModule.equals(ModuleEntityMapper.toDomain(entity))) {
+            if (isSameModuleType(domainModule, entity)
+                    && domainModule.equals(ModuleEntityMapper.toDomain(entity))) {
                 return entity;
             }
         }
@@ -696,6 +698,22 @@ public class ALSService {
         cache.add(saved);
 
         return saved;
+    }
+
+    /**
+     * Проверяет соответствие конкретного типа доменного модуля типу Entity.
+     *
+     * <p>Общий запрос кандидатов возвращает разные типы модулей
+     * с одинаковыми базовыми размерами. Восстанавливать нужно только
+     * сущности того же конкретного типа.</p>
+     */
+    private boolean isSameModuleType(
+            com.lb_calc_web.domain.model.Module domainModule,
+            ModuleEntity entity
+    ) {
+        return (domainModule instanceof LBC && entity instanceof LBCEntity)
+                || (domainModule instanceof LB && entity instanceof LBEntity)
+                || (domainModule instanceof LC && entity instanceof LCEntity);
     }
 
     /**
