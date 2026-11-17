@@ -58,19 +58,8 @@ public class LC extends Module implements ControlModule {
         setUpperFrame(upperFrame);
         setBottomFrame(bottomFrame);
 
-        setColorBody(
-                Objects.requireNonNull(
-                        colorBody,
-                        "Цвет корпуса не должен быть null"
-                )
-        );
-
-        setColorDoor(
-                Objects.requireNonNull(
-                        colorDoor,
-                        "Цвет дверей не должен быть null"
-                )
-        );
+        setColorBody(colorBody);
+        setColorDoor(colorDoor);
 
         this.controlConfiguration = Objects.requireNonNull(
                 controlConfiguration,
