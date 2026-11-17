@@ -147,6 +147,7 @@ public final class LCDtoMapper {
 
         if (displayQuantity > 0) {
             addDisplay(dto.getDisplay(), equipment);
+            repeatEquipment(equipment, Display.class, displayQuantity);
         }
         if (barReaderQuantity > 0) {
             addBarReader(dto.getBarReader(), equipment);
