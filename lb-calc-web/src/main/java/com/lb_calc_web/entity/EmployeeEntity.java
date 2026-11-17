@@ -77,6 +77,10 @@ public class EmployeeEntity {
     @Column(nullable = false)
     private Role role;
 
+    /** Признак активности учётной записи. */
+    @Column(name = "is_active", nullable = false)
+    private boolean active = true;
+
     /**
      * Конструктор для JPA.
      */
@@ -146,6 +150,14 @@ public class EmployeeEntity {
         return role;
     }
 
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
+    }
+
     public void setRole(Role role) {
         this.role = Objects.requireNonNull(
                 role,
@@ -187,6 +199,7 @@ public class EmployeeEntity {
                 ", encryptedPassword='[PROTECTED]'" +
                 ", registrationDate=" + registrationDate +
                 ", role=" + role +
+                ", active=" + active +
                 '}';
     }
 }
