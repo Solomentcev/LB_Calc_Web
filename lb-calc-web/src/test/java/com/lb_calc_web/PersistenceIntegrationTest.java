@@ -8,6 +8,7 @@ import com.lb_calc_web.dto.ALSDTO;
 import com.lb_calc_web.dto.EmployeeDTO;
 import com.lb_calc_web.dto.LCDTO;
 import com.lb_calc_web.dto.LBCDTO;
+import com.lb_calc_web.dto.LBDTO;
 import com.lb_calc_web.dto.ProjectDTO;
 import com.lb_calc_web.service.ProjectService;
 import com.lb_calc_web.entity.ALSEntity;
@@ -422,6 +423,23 @@ class PersistenceIntegrationTest {
             ALSDTO changedALS =
                     projectService.addLBAtProject(projectId, selectedAlsId);
 
+            LBDTO changedLB = changedALS.getLbList().get(0);
+            changedLB.setCountCells(4);
+            changedALS = projectService.saveLBAtProject(
+                    projectId,
+                    changedALS.getId(),
+                    changedLB.getId(),
+                    changedLB
+            );
+
+            Long removedLBId = changedALS.getLbList().get(1).getId();
+            changedALS = projectService.deleteLBatProject(
+                    projectId,
+                    changedALS.getId(),
+                    removedLBId
+            );
+            assertEquals(2, changedALS.getLbList().size());
+
             LCDTO changedLC = changedALS.getLC();
             changedLC.setBarReader(BarReader.READER_1D.getName());
             changedLC.setBarReaderQuantity(1);
@@ -477,7 +495,14 @@ class PersistenceIntegrationTest {
                     alsRepository.findById(changedWithLC.getId()).orElseThrow();
             ALS restoredChangedLC =
                     ALSEntityMapper.toDomain(restoredChangedLCEntity);
-            assertEquals(3, restoredChangedLC.getStorageModules().size());
+            assertEquals(2, restoredChangedLC.getStorageModules().size());
+            assertEquals(
+                    List.of(1, 2, 3, 4, 5, 6, 7),
+                    restoredChangedLC.getStorageModules().stream()
+                            .flatMap(storageModule -> storageModule.getCells().stream())
+                            .map(cell -> cell.getNumber())
+                            .toList()
+            );
 
             ProjectDTO restoredDTO = projectService.findById(projectId);
             ALSDTO persistedLCConfiguration = restoredDTO.getAlsList().stream()
