@@ -26,7 +26,7 @@ public final class EquipmentCatalog {
                         "Неизвестный идентификатор позиции оборудования: " + id));
     }
 
-    /** Разрешает ID каталога или прежнее отображаемое имя. */
+    /** Находит позицию по ID каталога или имени, используемому DTO. */
     public static Equipment resolve(String idOrLegacyName) {
         if (idOrLegacyName == null || idOrLegacyName.isBlank()) return null;
         if (Display.NONE_ID.equals(idOrLegacyName)
