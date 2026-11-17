@@ -45,6 +45,11 @@ public class LBCDTO {
     private boolean printer;
     private boolean rfidReader;
 
+    private Integer displayQuantity;
+    private Integer barReaderQuantity;
+    private Integer printerQuantity;
+    private Integer rfidReaderQuantity;
+
     private List<String> accessMethods = new ArrayList<>();
     private List<String> printOptions = new ArrayList<>();
 
@@ -254,6 +259,15 @@ public class LBCDTO {
         this.rfidReader = rfidReader;
     }
 
+    public Integer getDisplayQuantity() { return displayQuantity; }
+    public void setDisplayQuantity(Integer value) { displayQuantity = value; }
+    public Integer getBarReaderQuantity() { return barReaderQuantity; }
+    public void setBarReaderQuantity(Integer value) { barReaderQuantity = value; }
+    public Integer getPrinterQuantity() { return printerQuantity; }
+    public void setPrinterQuantity(Integer value) { printerQuantity = value; }
+    public Integer getRfidReaderQuantity() { return rfidReaderQuantity; }
+    public void setRfidReaderQuantity(Integer value) { rfidReaderQuantity = value; }
+
     public List<String> getAccessMethods() {
         return accessMethods;
     }
@@ -309,6 +323,10 @@ public class LBCDTO {
                 && depthCell == lbcdto.depthCell
                 && printer == lbcdto.printer
                 && rfidReader == lbcdto.rfidReader
+                && Objects.equals(displayQuantity, lbcdto.displayQuantity)
+                && Objects.equals(barReaderQuantity, lbcdto.barReaderQuantity)
+                && Objects.equals(printerQuantity, lbcdto.printerQuantity)
+                && Objects.equals(rfidReaderQuantity, lbcdto.rfidReaderQuantity)
                 && Objects.equals(type, lbcdto.type)
                 && Objects.equals(
                 directionDoorOpening,
@@ -348,6 +366,10 @@ public class LBCDTO {
                 payment,
                 printer,
                 rfidReader,
+                displayQuantity,
+                barReaderQuantity,
+                printerQuantity,
+                rfidReaderQuantity,
                 accessMethods,
                 printOptions
         );
@@ -381,6 +403,10 @@ public class LBCDTO {
                 ", payment='" + payment + '\'' +
                 ", printer=" + printer +
                 ", rfidReader=" + rfidReader +
+                ", displayQuantity=" + displayQuantity +
+                ", barReaderQuantity=" + barReaderQuantity +
+                ", printerQuantity=" + printerQuantity +
+                ", rfidReaderQuantity=" + rfidReaderQuantity +
                 ", accessMethods=" + accessMethods +
                 ", printOptions=" + printOptions +
                 '}';

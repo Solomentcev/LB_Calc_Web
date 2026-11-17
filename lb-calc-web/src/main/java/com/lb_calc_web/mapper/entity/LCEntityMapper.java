@@ -1,12 +1,10 @@
 package com.lb_calc_web.mapper.entity;
 
-import com.lb_calc_web.domain.attributes.AccessMethod;
-import com.lb_calc_web.domain.attributes.Colors;
 import com.lb_calc_web.domain.attributes.Payment;
-import com.lb_calc_web.domain.attributes.PrintOption;
 import com.lb_calc_web.domain.equipment.BarReader;
 import com.lb_calc_web.domain.equipment.Display;
 import com.lb_calc_web.domain.equipment.Equipment;
+import com.lb_calc_web.domain.equipment.EquipmentCatalog;
 import com.lb_calc_web.domain.equipment.Printer;
 import com.lb_calc_web.domain.equipment.RfidReader;
 import com.lb_calc_web.domain.model.ControlConfiguration;
@@ -14,269 +12,107 @@ import com.lb_calc_web.domain.model.EquipmentConfiguration;
 import com.lb_calc_web.domain.model.LC;
 import com.lb_calc_web.entity.LCEntity;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-/**
- * Маппер между LCEntity и доменной моделью LC.
- *
- * <p>Отвечает только за преобразование persistence-модели
- * в domain-модель и обратно.</p>
- */
+/** Преобразует LC между доменной и persistence-моделями. */
 public final class LCEntityMapper {
+    private LCEntityMapper() { }
 
-    private LCEntityMapper() {
-    }
-
-    /**
-     * Entity -> Domain.
-     *
-     * <p>Производные поля name и description из Entity
-     * не переносятся. Domain формирует их самостоятельно.</p>
-     */
     public static LC toDomain(LCEntity entity) {
-        if (entity == null) {
-            return null;
-        }
-
-        Payment payment = Objects.requireNonNull(
-                entity.getPayment(),
-                "Способ оплаты LC не должен быть null"
-        );
-
-        EquipmentConfiguration equipmentConfiguration =
-                toEquipmentConfiguration(entity);
-
-        ControlConfiguration controlConfiguration =
-                new ControlConfiguration(
-                        payment,
-                        entity.getAccessMethods(),
-                        entity.getPrintOptions(),
-                        equipmentConfiguration
-                );
-
+        if (entity == null) return null;
+        ControlConfiguration configuration = new ControlConfiguration(
+                Objects.requireNonNull(entity.getPayment(),
+                        "Способ оплаты LC не должен быть null"),
+                entity.getAccessMethods(), entity.getPrintOptions(),
+                toEquipmentConfiguration(entity));
         return new LC(
-                entity.getHeight(),
-                entity.getWidth(),
-                entity.getDepth(),
-                entity.getUpperFrame(),
-                entity.getBottomFrame(),
-                Objects.requireNonNull(
-                        entity.getColorBody(),
-                        "Цвет корпуса LC не должен быть null"
-                ),
-                Objects.requireNonNull(
-                        entity.getColorDoor(),
-                        "Цвет дверей LC не должен быть null"
-                ),
-                controlConfiguration
-        );
+                entity.getHeight(), entity.getWidth(), entity.getDepth(),
+                entity.getUpperFrame(), entity.getBottomFrame(),
+                Objects.requireNonNull(entity.getColorBody(),
+                        "Цвет корпуса LC не должен быть null"),
+                Objects.requireNonNull(entity.getColorDoor(),
+                        "Цвет дверей LC не должен быть null"),
+                configuration);
     }
 
-    /**
-     * Domain -> новая Entity.
-     */
     public static LCEntity toEntity(LC domain) {
-        if (domain == null) {
-            return null;
-        }
-
+        if (domain == null) return null;
         LCEntity entity = new LCEntity();
-
         updateEntity(domain, entity);
-
         return entity;
     }
 
-    /**
-     * Обновляет существующую Entity данными Domain.
-     *
-     * <p>Идентификатор Entity не изменяется.</p>
-     */
-    public static void updateEntity(
-            LC domain,
-            LCEntity entity
-    ) {
-        if (domain == null) {
-            throw new IllegalArgumentException(
-                    "LC не должен быть null"
-            );
+    public static void updateEntity(LC domain, LCEntity entity) {
+        if (domain == null || entity == null) {
+            throw new IllegalArgumentException("LC и LCEntity не должны быть null");
         }
-
-        if (entity == null) {
-            throw new IllegalArgumentException(
-                    "LCEntity не должен быть null"
-            );
-        }
-
-        /*
-         * Общие параметры ModuleEntity.
-         */
         entity.setName(domain.getName());
         entity.setDescription(domain.getDescription());
-
         entity.setHeight(domain.getHeight());
         entity.setWidth(domain.getWidth());
         entity.setDepth(domain.getDepth());
-
         entity.setUpperFrame(domain.getUpperFrame());
         entity.setBottomFrame(domain.getBottomFrame());
-
         entity.setColorBody(domain.getColorBody());
         entity.setColorDoor(domain.getColorDoor());
 
-        /*
-         * Конфигурация управления.
-         */
-        ControlConfiguration configuration =
-                domain.getControlConfiguration();
-
+        ControlConfiguration configuration = domain.getControlConfiguration();
         entity.setPayment(configuration.getPayment());
-
-        entity.setAccessMethods(
-                configuration.getAccessMethods()
-        );
-
-        entity.setPrintOptions(
-                configuration.getPrintOptions()
-        );
-
-        /*
-         * Оборудование.
-         */
-        updateEquipment(configuration, entity);
+        entity.setAccessMethods(configuration.getAccessMethods());
+        entity.setPrintOptions(configuration.getPrintOptions());
+        updateEquipment(configuration.getEquipmentConfiguration(), entity);
     }
 
-    /**
-     * Восстанавливает EquipmentConfiguration из Entity.
-     */
-    private static EquipmentConfiguration toEquipmentConfiguration(
-            LCEntity entity
-    ) {
-        List<Equipment> required = new ArrayList<>();
-
-        addDisplay(entity.getDisplay(), required);
-        addBarReader(entity.getBarReader(), required);
-
-        if (entity.isPrinter()) {
-            required.add(new Printer());
-        }
-
-        if (entity.isRfidReader()) {
-            required.add(new RfidReader());
-        }
-
-        /*
-         * Entity не хранит разделение на required/additional.
-         * Поэтому всё сохранённое оборудование восстанавливаем
-         * как часть текущей конфигурации.
-         */
-        return new EquipmentConfiguration(
-                required,
-                List.of()
-        );
+    private static EquipmentConfiguration toEquipmentConfiguration(LCEntity entity) {
+        EquipmentConfiguration result = new EquipmentConfiguration(List.of(), List.of());
+        addPersistedEquipment(entity.getDisplay(), entity.getDisplayQuantity(), result);
+        addPersistedEquipment(entity.getBarReader(), entity.getBarReaderQuantity(), result);
+        addPersistedEquipment(Printer.CATALOG_POSITION_ID,
+                entity.getPrinterQuantity() > 0 ? entity.getPrinterQuantity()
+                        : entity.isPrinter() ? 1 : 0, result);
+        addPersistedEquipment(RfidReader.CATALOG_POSITION_ID,
+                entity.getRfidReaderQuantity() > 0 ? entity.getRfidReaderQuantity()
+                        : entity.isRfidReader() ? 1 : 0, result);
+        return result;
     }
 
-    /**
-     * Записывает конфигурацию оборудования в Entity.
-     */
-    private static void updateEquipment(
-            ControlConfiguration configuration,
-            LCEntity entity
-    ) {
-        List<Equipment> equipment =
-                configuration.getEquipmentConfiguration()
-                        .getAllEquipment();
-
-        Display display = equipment.stream()
-                .filter(Display.class::isInstance)
-                .map(Display.class::cast)
-                .filter(value -> value != Display.NONE)
-                .findFirst()
-                .orElse(null);
-
-        BarReader barReader = equipment.stream()
-                .filter(BarReader.class::isInstance)
-                .map(BarReader.class::cast)
-                .filter(value -> value != BarReader.NONE)
-                .findFirst()
-                .orElse(null);
-
-        boolean printer = equipment.stream()
-                .anyMatch(Printer.class::isInstance);
-
-        boolean rfidReader = equipment.stream()
-                .anyMatch(RfidReader.class::isInstance);
-
-        entity.setDisplay(
-                display != null
-                        ? display.getName()
-                        : null
-        );
-
-        entity.setBarReader(
-                barReader != null
-                        ? barReader.getName()
-                        : null
-        );
-
-        entity.setPrinter(printer);
-        entity.setRfidReader(rfidReader);
+    private static void addPersistedEquipment(String idOrName, int quantity,
+                                               EquipmentConfiguration target) {
+        if (idOrName == null || idOrName.isBlank() || quantity == 0) return;
+        Equipment equipment = EquipmentCatalog.resolve(idOrName);
+        if (equipment == Display.NONE || equipment == BarReader.NONE) return;
+        target.addRequiredEquipment(equipment, quantity);
     }
 
-    private static void addDisplay(
-            String name,
-            List<Equipment> equipment
-    ) {
-        if (name == null || name.isBlank()) {
-            return;
-        }
+    private static void updateEquipment(EquipmentConfiguration configuration,
+                                        LCEntity entity) {
+        Equipment display = findEquipment(configuration, Display.class);
+        Equipment reader = findEquipment(configuration, BarReader.class);
+        int printerQuantity = quantity(configuration, Printer.CATALOG_POSITION_ID);
+        int rfidQuantity = quantity(configuration, RfidReader.CATALOG_POSITION_ID);
 
-        if (name.equals(Display.NONE.getName())) {
-            return;
-        }
-
-        for (Display display : List.of(
-                Display.LC10,
-                Display.LC17,
-                Display.LC19
-        )) {
-            if (display.getName().equals(name)) {
-                equipment.add(display);
-                return;
-            }
-        }
-
-        throw new IllegalArgumentException(
-                "Неизвестный дисплей LC: " + name
-        );
+        entity.setDisplay(display == null ? null : display.getCatalogPositionId());
+        entity.setDisplayQuantity(display == null ? 0 : configuration.getQuantity(display));
+        entity.setBarReader(reader == null ? null : reader.getCatalogPositionId());
+        entity.setBarReaderQuantity(reader == null ? 0 : configuration.getQuantity(reader));
+        entity.setPrinterQuantity(printerQuantity);
+        entity.setRfidReaderQuantity(rfidQuantity);
+        entity.setPrinter(printerQuantity > 0);
+        entity.setRfidReader(rfidQuantity > 0);
     }
 
-    private static void addBarReader(
-            String name,
-            List<Equipment> equipment
-    ) {
-        if (name == null || name.isBlank()) {
-            return;
-        }
+    private static Equipment findEquipment(EquipmentConfiguration configuration,
+                                           Class<? extends Equipment> type) {
+        return configuration.getAllEquipment().stream()
+                .filter(type::isInstance)
+                .filter(item -> item != Display.NONE && item != BarReader.NONE)
+                .findFirst().orElse(null);
+    }
 
-        if (name.equals(BarReader.NONE.getName())) {
-            return;
-        }
-
-        for (BarReader reader : List.of(
-                BarReader.READER_1D,
-                BarReader.READER_2D
-        )) {
-            if (reader.getName().equals(name)) {
-                equipment.add(reader);
-                return;
-            }
-        }
-
-        throw new IllegalArgumentException(
-                "Неизвестный сканер штрихкода LC: " + name
-        );
+    private static int quantity(EquipmentConfiguration configuration, String id) {
+        return configuration.getAllEquipment().stream()
+                .filter(item -> item.getCatalogPositionId().equals(id))
+                .findFirst().map(configuration::getQuantity).orElse(0);
     }
 }

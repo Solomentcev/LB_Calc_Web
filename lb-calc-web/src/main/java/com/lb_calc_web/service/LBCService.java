@@ -298,6 +298,10 @@ public class LBCService {
         target.setPayment(source.getPayment());
         target.setPrinter(source.isPrinter());
         target.setRfidReader(source.isRfidReader());
+        target.setDisplayQuantity(source.getDisplayQuantity());
+        target.setBarReaderQuantity(source.getBarReaderQuantity());
+        target.setPrinterQuantity(source.getPrinterQuantity());
+        target.setRfidReaderQuantity(source.getRfidReaderQuantity());
         target.setAccessMethods(source.getAccessMethods());
         target.setPrintOptions(source.getPrintOptions());
         target.setStringLBCImage(source.getStringLBCImage());

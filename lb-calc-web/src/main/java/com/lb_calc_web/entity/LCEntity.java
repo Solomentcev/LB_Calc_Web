@@ -36,6 +36,12 @@ public class LCEntity extends ModuleEntity {
     @Column(name = "bar_reader")
     private String barReader;
 
+    @Column(name = "display_quantity", nullable = false)
+    private int displayQuantity;
+
+    @Column(name = "bar_reader_quantity", nullable = false)
+    private int barReaderQuantity;
+
     /**
      * Способ оплаты.
      */
@@ -54,6 +60,12 @@ public class LCEntity extends ModuleEntity {
      */
     @Column(name = "rfid_reader", nullable = false)
     private boolean rfidReader;
+
+    @Column(name = "printer_quantity", nullable = false)
+    private int printerQuantity;
+
+    @Column(name = "rfid_reader_quantity", nullable = false)
+    private int rfidReaderQuantity;
 
     /**
      * Допустимые способы доступа.
@@ -103,6 +115,18 @@ public class LCEntity extends ModuleEntity {
         this.barReader = barReader;
     }
 
+    public int getDisplayQuantity() { return displayQuantity; }
+
+    public void setDisplayQuantity(int quantity) {
+        this.displayQuantity = requireNonNegativeQuantity(quantity);
+    }
+
+    public int getBarReaderQuantity() { return barReaderQuantity; }
+
+    public void setBarReaderQuantity(int quantity) {
+        this.barReaderQuantity = requireNonNegativeQuantity(quantity);
+    }
+
     public Payment getPayment() {
         return payment;
     }
@@ -125,6 +149,28 @@ public class LCEntity extends ModuleEntity {
 
     public void setRfidReader(boolean rfidReader) {
         this.rfidReader = rfidReader;
+    }
+
+    public int getPrinterQuantity() { return printerQuantity; }
+
+    public void setPrinterQuantity(int quantity) {
+        this.printerQuantity = requireNonNegativeQuantity(quantity);
+        this.printer = quantity > 0;
+    }
+
+    public int getRfidReaderQuantity() { return rfidReaderQuantity; }
+
+    public void setRfidReaderQuantity(int quantity) {
+        this.rfidReaderQuantity = requireNonNegativeQuantity(quantity);
+        this.rfidReader = quantity > 0;
+    }
+
+    private int requireNonNegativeQuantity(int quantity) {
+        if (quantity < 0) {
+            throw new IllegalArgumentException(
+                    "Количество оборудования не может быть отрицательным");
+        }
+        return quantity;
     }
 
     public Set<AccessMethod> getAccessMethods() {
@@ -166,6 +212,10 @@ public class LCEntity extends ModuleEntity {
                 ", colorDoor=" + getColorDoor() +
                 ", display='" + display + '\'' +
                 ", barReader='" + barReader + '\'' +
+                ", displayQuantity=" + displayQuantity +
+                ", barReaderQuantity=" + barReaderQuantity +
+                ", printerQuantity=" + printerQuantity +
+                ", rfidReaderQuantity=" + rfidReaderQuantity +
                 ", payment=" + payment +
                 ", printer=" + printer +
                 ", rfidReader=" + rfidReader +

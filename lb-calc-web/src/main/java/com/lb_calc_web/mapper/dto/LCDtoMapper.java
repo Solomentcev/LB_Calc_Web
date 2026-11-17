@@ -101,9 +101,21 @@ public final class LCDtoMapper {
         );
 
         dto.setRfidReader(
-                equipment.stream()
-                        .anyMatch(RfidReader.class::isInstance)
+                equipment.stream().anyMatch(RfidReader.class::isInstance)
         );
+
+        EquipmentConfiguration equipmentConfiguration =
+                configuration.getEquipmentConfiguration();
+        dto.setDisplayQuantity(display == null ? 0
+                : equipmentConfiguration.getQuantity(display));
+        dto.setBarReaderQuantity(barReader == null ? 0
+                : equipmentConfiguration.getQuantity(barReader));
+        dto.setPrinterQuantity(equipment.stream()
+                .filter(Printer.class::isInstance).findFirst()
+                .map(equipmentConfiguration::getQuantity).orElse(0));
+        dto.setRfidReaderQuantity(equipment.stream()
+                .filter(RfidReader.class::isInstance).findFirst()
+                .map(equipmentConfiguration::getQuantity).orElse(0));
 
         return dto;
     }
@@ -115,16 +127,33 @@ public final class LCDtoMapper {
 
         List<Equipment> equipment = new ArrayList<>();
 
-        addDisplay(dto.getDisplay(), equipment);
-        addBarReader(dto.getBarReader(), equipment);
+        int displayQuantity = dto.getDisplayQuantity() == null
+                ? (dto.getDisplay() == null || dto.getDisplay().isBlank()
+                    || Display.NONE.getName().equals(dto.getDisplay()) ? 0 : 1)
+                : dto.getDisplayQuantity();
+        int barReaderQuantity = dto.getBarReaderQuantity() == null
+                ? (dto.getBarReader() == null || dto.getBarReader().isBlank()
+                    || BarReader.NONE.getName().equals(dto.getBarReader()) ? 0 : 1)
+                : dto.getBarReaderQuantity();
+        int printerQuantity = dto.getPrinterQuantity() == null
+                ? (dto.isPrinter() ? 1 : 0) : dto.getPrinterQuantity();
+        int rfidReaderQuantity = dto.getRfidReaderQuantity() == null
+                ? (dto.isRfidReader() ? 1 : 0) : dto.getRfidReaderQuantity();
 
-        if (dto.isPrinter()) {
-            equipment.add(new Printer());
-        }
+        requireNonNegativeQuantity(displayQuantity);
+        requireNonNegativeQuantity(barReaderQuantity);
+        requireNonNegativeQuantity(printerQuantity);
+        requireNonNegativeQuantity(rfidReaderQuantity);
 
-        if (dto.isRfidReader()) {
-            equipment.add(new RfidReader());
+        if (displayQuantity > 0) {
+            addDisplay(dto.getDisplay(), equipment);
         }
+        if (barReaderQuantity > 0) {
+            addBarReader(dto.getBarReader(), equipment);
+            repeatEquipment(equipment, BarReader.class, barReaderQuantity);
+        }
+        addEquipmentCopies(equipment, new Printer(), printerQuantity);
+        addEquipmentCopies(equipment, new RfidReader(), rfidReaderQuantity);
 
         EquipmentConfiguration equipmentConfiguration =
                 new EquipmentConfiguration(
@@ -194,6 +223,38 @@ public final class LCDtoMapper {
         }
 
         return result;
+    }
+
+    private static void requireNonNegativeQuantity(int quantity) {
+        if (quantity < 0) {
+            throw new IllegalArgumentException(
+                    "Количество оборудования не может быть отрицательным");
+        }
+    }
+
+    private static void repeatEquipment(
+            List<Equipment> equipment,
+            Class<? extends Equipment> type,
+            int quantity
+    ) {
+        Equipment position = equipment.stream()
+                .filter(type::isInstance)
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Не удалось определить позицию оборудования"));
+        for (int i = 1; i < quantity; i++) {
+            equipment.add(position);
+        }
+    }
+
+    private static void addEquipmentCopies(
+            List<Equipment> equipment,
+            Equipment position,
+            int quantity
+    ) {
+        for (int i = 0; i < quantity; i++) {
+            equipment.add(position);
+        }
     }
 
     private static void addDisplay(

@@ -1,258 +1,178 @@
 package com.lb_calc_web.domain.model;
 
+import com.lb_calc_web.domain.equipment.Display;
 import com.lb_calc_web.domain.equipment.Equipment;
+import com.lb_calc_web.domain.equipment.EquipmentItem;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
  * Конфигурация оборудования модуля управления.
- *
- * <p>Разделяет оборудование на две группы:</p>
- * <ul>
- *     <li>обязательное оборудование;</li>
- *     <li>дополнительное оборудование.</li>
- * </ul>
- *
- * <p>Класс не содержит настроек приложения и не знает о Spring.
- * Значения по умолчанию могут быть загружены конфигурационным
- * слоем приложения и переданы в конструктор.</p>
+ * Позиции идентифицируются ID каталога, количество хранится отдельно.
  */
 public class EquipmentConfiguration {
+    private final Map<Equipment, Integer> requiredEquipment;
+    private final Map<Equipment, Integer> additionalEquipment;
 
-    /**
-     * Оборудование, обязательное для конфигурации модуля.
-     */
-    private final List<Equipment> requiredEquipment;
-
-    /**
-     * Дополнительное оборудование.
-     */
-    private final List<Equipment> additionalEquipment;
-
-    /**
-     * Создаёт конфигурацию оборудования.
-     *
-     * <p>Если один из списков не задан, вместо него используется
-     * пустой список.</p>
-     *
-     * @param requiredEquipment обязательное оборудование
-     * @param additionalEquipment дополнительное оборудование
-     */
-    public EquipmentConfiguration(
-            List<Equipment> requiredEquipment,
-            List<Equipment> additionalEquipment
-    ) {
-        this.requiredEquipment = copyEquipment(
-                requiredEquipment,
-                "Обязательное оборудование"
-        );
-
-        this.additionalEquipment = copyEquipment(
-                additionalEquipment,
-                "Дополнительное оборудование"
-        );
+    public EquipmentConfiguration(List<Equipment> requiredEquipment,
+                                  List<Equipment> additionalEquipment) {
+        this.requiredEquipment = copyEquipment(requiredEquipment, "Обязательное оборудование");
+        this.additionalEquipment = copyEquipment(additionalEquipment, "Дополнительное оборудование");
+        validateGroups();
     }
 
-    /**
-     * Создаёт независимый список оборудования и проверяет его элементы.
-     *
-     * @param source исходный список
-     * @param listName название списка для сообщения об ошибке
-     * @return независимый список оборудования
-     */
-    private List<Equipment> copyEquipment(
-            List<Equipment> source,
-            String listName
-    ) {
-        List<Equipment> result = new ArrayList<>();
-
-        if (source == null) {
-            return result;
-        }
-
+    private Map<Equipment, Integer> copyEquipment(List<Equipment> source, String listName) {
+        Map<Equipment, Integer> result = new LinkedHashMap<>();
+        if (source == null) return result;
         for (Equipment equipment : source) {
-            result.add(
-                    Objects.requireNonNull(
-                            equipment,
-                            listName + " не должно содержать null"
-                    )
-            );
+            Equipment position = Objects.requireNonNull(
+                    equipment, listName + " не должно содержать null");
+            result.merge(position, 1, Integer::sum);
         }
-
+        validateDisplayQuantity(result);
         return result;
     }
 
-    /**
-     * Создаёт независимую копию конфигурации оборудования.
-     *
-     * <p>Объекты оборудования неизменяемы, поэтому копируются
-     * списки, а экземпляры оборудования безопасно переиспользуются.</p>
-     *
-     * @return независимая копия конфигурации
-     */
+    private void validateDisplayQuantity(Map<Equipment, Integer> positions) {
+        positions.forEach((position, quantity) -> {
+            if (position instanceof Display && quantity > 1) {
+                throw new IllegalArgumentException(
+                        "Количество дисплеев в модуле должно быть равно 1");
+            }
+        });
+    }
+
+    private void validateGroups() {
+        for (Equipment equipment : requiredEquipment.keySet()) {
+            if (additionalEquipment.containsKey(equipment)) {
+                throw new IllegalArgumentException(
+                        "Позиция оборудования не может одновременно быть обязательной " +
+                                "и дополнительной: " + equipment.getCatalogPositionId());
+            }
+        }
+    }
+
+    public static EquipmentConfiguration fromItems(List<EquipmentItem> required,
+                                                   List<EquipmentItem> additional) {
+        EquipmentConfiguration result = new EquipmentConfiguration(List.of(), List.of());
+        if (required != null) {
+            required.forEach(item -> result.addRequiredEquipment(item.equipment(), item.quantity()));
+        }
+        if (additional != null) {
+            additional.forEach(item -> result.addAdditionalEquipment(item.equipment(), item.quantity()));
+        }
+        return result;
+    }
+
     public EquipmentConfiguration copy() {
-        return new EquipmentConfiguration(
-                requiredEquipment,
-                additionalEquipment
-        );
+        return fromItems(getRequiredItems(), getAdditionalItems());
     }
 
-    /**
-     * Возвращает обязательное оборудование.
-     *
-     * <p>Возвращается представление списка только для чтения.</p>
-     *
-     * @return список обязательного оборудования
-     */
     public List<Equipment> getRequiredEquipment() {
-        return Collections.unmodifiableList(requiredEquipment);
+        return List.copyOf(requiredEquipment.keySet());
     }
 
-    /**
-     * Возвращает дополнительное оборудование.
-     *
-     * <p>Возвращается представление списка только для чтения.</p>
-     *
-     * @return список дополнительного оборудования
-     */
     public List<Equipment> getAdditionalEquipment() {
-        return Collections.unmodifiableList(additionalEquipment);
+        return List.copyOf(additionalEquipment.keySet());
     }
 
-    /**
-     * Возвращает всё оборудование конфигурации.
-     *
-     * <p>Сначала возвращается обязательное оборудование,
-     * затем дополнительное.</p>
-     *
-     * @return неизменяемый список всего оборудования
-     */
+    /** Возвращает уникальные позиции без разворачивания количества. */
     public List<Equipment> getAllEquipment() {
-        List<Equipment> equipment =
-                new ArrayList<>(requiredEquipment);
-
-        equipment.addAll(additionalEquipment);
-
-        return Collections.unmodifiableList(equipment);
+        List<Equipment> result = new ArrayList<>(requiredEquipment.keySet());
+        result.addAll(additionalEquipment.keySet());
+        return List.copyOf(result);
     }
 
-    /**
-     * Добавляет оборудование в список обязательного оборудования.
-     *
-     * @param equipment добавляемое оборудование
-     * @throws NullPointerException если оборудование не задано
-     */
+    public List<EquipmentItem> getRequiredItems() { return toItems(requiredEquipment); }
+    public List<EquipmentItem> getAdditionalItems() { return toItems(additionalEquipment); }
+
+    public List<EquipmentItem> getAllItems() {
+        List<EquipmentItem> result = new ArrayList<>(getRequiredItems());
+        result.addAll(getAdditionalItems());
+        return List.copyOf(result);
+    }
+
+    private List<EquipmentItem> toItems(Map<Equipment, Integer> source) {
+        return source.entrySet().stream()
+                .map(entry -> new EquipmentItem(entry.getKey(), entry.getValue()))
+                .toList();
+    }
+
+    public int getQuantity(Equipment equipment) {
+        Objects.requireNonNull(equipment, "Оборудование не должно быть null");
+        return requiredEquipment.getOrDefault(
+                equipment, additionalEquipment.getOrDefault(equipment, 0));
+    }
+
     public void addRequiredEquipment(Equipment equipment) {
-        requiredEquipment.add(
-                Objects.requireNonNull(
-                        equipment,
-                        "Оборудование не должно быть null"
-                )
-        );
+        addRequiredEquipment(equipment, 1);
     }
 
-    /**
-     * Добавляет оборудование в список дополнительного оборудования.
-     *
-     * @param equipment добавляемое оборудование
-     * @throws NullPointerException если оборудование не задано
-     */
+    public void addRequiredEquipment(Equipment equipment, int quantity) {
+        addEquipment(requiredEquipment, additionalEquipment, equipment, quantity);
+    }
+
     public void addAdditionalEquipment(Equipment equipment) {
-        additionalEquipment.add(
-                Objects.requireNonNull(
-                        equipment,
-                        "Оборудование не должно быть null"
-                )
-        );
+        addAdditionalEquipment(equipment, 1);
     }
 
-    /**
-     * Удаляет оборудование из списка обязательного оборудования.
-     *
-     * <p>Если оборудование отсутствует, список не изменяется.</p>
-     *
-     * @param equipment удаляемое оборудование
-     * @return {@code true}, если оборудование было удалено
-     */
+    public void addAdditionalEquipment(Equipment equipment, int quantity) {
+        addEquipment(additionalEquipment, requiredEquipment, equipment, quantity);
+    }
+
+    private void addEquipment(Map<Equipment, Integer> target,
+                              Map<Equipment, Integer> other,
+                              Equipment equipment, int quantity) {
+        Equipment position = Objects.requireNonNull(
+                equipment, "Оборудование не должно быть null");
+        if (quantity < 1) {
+            throw new IllegalArgumentException(
+                    "Количество оборудования должно быть не меньше 1");
+        }
+        if (other.containsKey(position)) {
+            throw new IllegalArgumentException(
+                    "Позиция уже добавлена в другую группу оборудования: " +
+                            position.getCatalogPositionId());
+        }
+        int newQuantity = target.getOrDefault(position, 0) + quantity;
+        if (position instanceof Display && newQuantity > 1) {
+            throw new IllegalArgumentException(
+                    "Количество дисплеев в модуле должно быть равно 1");
+        }
+        target.put(position, newQuantity);
+    }
+
     public boolean removeRequiredEquipment(Equipment equipment) {
         return requiredEquipment.remove(
-                Objects.requireNonNull(
-                        equipment,
-                        "Оборудование не должно быть null"
-                )
-        );
+                Objects.requireNonNull(equipment, "Оборудование не должно быть null")) != null;
     }
 
-    /**
-     * Удаляет оборудование из списка дополнительного оборудования.
-     *
-     * <p>Если оборудование отсутствует, список не изменяется.</p>
-     *
-     * @param equipment удаляемое оборудование
-     * @return {@code true}, если оборудование было удалено
-     */
     public boolean removeAdditionalEquipment(Equipment equipment) {
         return additionalEquipment.remove(
-                Objects.requireNonNull(
-                        equipment,
-                        "Оборудование не должно быть null"
-                )
-        );
+                Objects.requireNonNull(equipment, "Оборудование не должно быть null")) != null;
     }
 
-    /**
-     * Сравнивает конфигурации оборудования.
-     *
-     * <p>Списки сравниваются с учётом их порядка.</p>
-     *
-     * @param o объект для сравнения
-     * @return {@code true}, если конфигурации оборудования совпадают
-     */
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-
-        if (!(o instanceof EquipmentConfiguration other)) {
-            return false;
-        }
-
-        return Objects.equals(
-                requiredEquipment,
-                other.requiredEquipment
-        ) && Objects.equals(
-                additionalEquipment,
-                other.additionalEquipment
-        );
+        if (this == o) return true;
+        if (!(o instanceof EquipmentConfiguration other)) return false;
+        return requiredEquipment.equals(other.requiredEquipment)
+                && additionalEquipment.equals(other.additionalEquipment);
     }
 
-    /**
-     * Возвращает хэш-код конфигурации оборудования.
-     *
-     * @return хэш-код конфигурации
-     */
     @Override
     public int hashCode() {
-        return Objects.hash(
-                requiredEquipment,
-                additionalEquipment
-        );
+        return Objects.hash(requiredEquipment, additionalEquipment);
     }
 
-    /**
-     * Возвращает подробное строковое представление конфигурации.
-     *
-     * @return строковое представление конфигурации оборудования
-     */
     @Override
     public String toString() {
         return "EquipmentConfiguration{" +
-                "requiredEquipment=" + requiredEquipment +
-                ", additionalEquipment=" + additionalEquipment +
-                '}';
+                "requiredEquipment=" + getRequiredItems() +
+                ", additionalEquipment=" + getAdditionalItems() + '}';
     }
 }

@@ -26,6 +26,11 @@ public class LCDTO {
     private boolean printer;
     private boolean rfidReader;
 
+    private Integer displayQuantity;
+    private Integer barReaderQuantity;
+    private Integer printerQuantity;
+    private Integer rfidReaderQuantity;
+
     private String colorBody;
     private String colorDoor;
 
@@ -158,6 +163,15 @@ public class LCDTO {
         this.colorDoor = colorDoor;
     }
 
+    public Integer getDisplayQuantity() { return displayQuantity; }
+    public void setDisplayQuantity(Integer value) { displayQuantity = value; }
+    public Integer getBarReaderQuantity() { return barReaderQuantity; }
+    public void setBarReaderQuantity(Integer value) { barReaderQuantity = value; }
+    public Integer getPrinterQuantity() { return printerQuantity; }
+    public void setPrinterQuantity(Integer value) { printerQuantity = value; }
+    public Integer getRfidReaderQuantity() { return rfidReaderQuantity; }
+    public void setRfidReaderQuantity(Integer value) { rfidReaderQuantity = value; }
+
     public List<String> getAccessMethods() {
         return accessMethods;
     }
@@ -205,6 +219,10 @@ public class LCDTO {
                 && bottomFrame == lcdto.bottomFrame
                 && printer == lcdto.printer
                 && rfidReader == lcdto.rfidReader
+                && Objects.equals(displayQuantity, lcdto.displayQuantity)
+                && Objects.equals(barReaderQuantity, lcdto.barReaderQuantity)
+                && Objects.equals(printerQuantity, lcdto.printerQuantity)
+                && Objects.equals(rfidReaderQuantity, lcdto.rfidReaderQuantity)
                 && Objects.equals(display, lcdto.display)
                 && Objects.equals(barReader, lcdto.barReader)
                 && Objects.equals(payment, lcdto.payment)
@@ -250,6 +268,10 @@ public class LCDTO {
                 ", payment='" + payment + '\'' +
                 ", printer=" + printer +
                 ", rfidReader=" + rfidReader +
+                ", displayQuantity=" + displayQuantity +
+                ", barReaderQuantity=" + barReaderQuantity +
+                ", printerQuantity=" + printerQuantity +
+                ", rfidReaderQuantity=" + rfidReaderQuantity +
                 ", colorBody='" + colorBody + '\'' +
                 ", colorDoor='" + colorDoor + '\'' +
                 ", accessMethods=" + accessMethods +
