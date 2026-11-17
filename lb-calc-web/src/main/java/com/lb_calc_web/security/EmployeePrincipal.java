@@ -27,15 +27,6 @@ public final class EmployeePrincipal implements UserDetails {
             Long id,
             String email,
             String encryptedPassword,
-            Role role
-    ) {
-        this(id, email, encryptedPassword, role, true);
-    }
-
-    public EmployeePrincipal(
-            Long id,
-            String email,
-            String encryptedPassword,
             Role role,
             boolean active
     ) {
