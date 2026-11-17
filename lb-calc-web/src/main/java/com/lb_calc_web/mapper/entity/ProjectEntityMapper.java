@@ -64,7 +64,7 @@ public final class ProjectEntityMapper {
             quantityALS.merge(
                     als,
                     entry.getQuantity(),
-                    Integer::sum
+                    Math::addExact
             );
         }
 
