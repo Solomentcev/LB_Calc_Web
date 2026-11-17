@@ -154,8 +154,7 @@ class LCServiceTest {
 
         when(lcRepository.findCandidates(
                 anyInt(), anyInt(), anyInt(), anyInt(), anyInt(),
-                any(), any(), any(), anyInt(), any(), anyInt(),
-                anyBoolean(), anyInt(), anyBoolean(), anyInt(), any()
+                any(), any(), any()
         )).thenReturn(List.of(existing));
 
         LCDTO result = lcService.saveLC(dto);
@@ -174,8 +173,7 @@ class LCServiceTest {
 
         when(lcRepository.findCandidates(
                 anyInt(), anyInt(), anyInt(), anyInt(), anyInt(),
-                any(), any(), any(), anyInt(), any(), anyInt(),
-                anyBoolean(), anyInt(), anyBoolean(), anyInt(), any()
+                any(), any(), any()
         )).thenReturn(List.of());
         when(lcRepository.save(any(LCEntity.class)))
                 .thenReturn(saved);
