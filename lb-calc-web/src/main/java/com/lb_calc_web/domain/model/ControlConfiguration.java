@@ -4,8 +4,11 @@ import com.lb_calc_web.domain.attributes.AccessMethod;
 import com.lb_calc_web.domain.attributes.Payment;
 import com.lb_calc_web.domain.attributes.PrintOption;
 
-import com.lb_calc_web.domain.equipment.Equipment;\n\nimport java.util.Collections;\nimport java.util.List;
+import com.lb_calc_web.domain.equipment.Equipment;
+
+import java.util.Collections;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
