@@ -197,7 +197,7 @@ public class ControlConfiguration {
      * @param equipment добавляемое оборудование
      */
     public void addAdditionalEquipment(
-            com.lb_calc_web.domain.equipment.Equipment equipment
+            Equipment equipment
     ) {
         equipmentConfiguration.addAdditionalEquipment(equipment);
     }
