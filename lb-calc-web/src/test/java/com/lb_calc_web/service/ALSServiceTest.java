@@ -240,7 +240,7 @@ class ALSServiceTest {
     @Test
     void replaceLCandSaveALS_shouldReplaceControlModule() {
         ALSDTO als = TestDataFactory.validALSDTO(1L);
-        LCDTO lc = TestDataFactory.validLCDTO(2L);
+        LCDTO lc = TestDataFactory.validLCDTO(als.getLC().getId());
 
         ALSService spy = spy(alsService);
         doReturn(als).when(spy).saveALS(any(ALSDTO.class));
