@@ -103,9 +103,6 @@ public final class LBEntityMapper {
         /*
          * Общие параметры ModuleEntity.
          */
-        entity.setName(domain.getName());
-        entity.setDescription(domain.getDescription());
-
         entity.setHeight(domain.getHeight());
         entity.setWidth(domain.getWidth());
         entity.setDepth(domain.getDepth());
@@ -136,12 +133,5 @@ public final class LBEntityMapper {
 
         entity.setCountCells(domain.getCountCells());
 
-        /*
-         * Производные размеры ячеек сохраняем в БД,
-         * чтобы Entity отражала состояние Domain.
-         */
-        entity.setHeightCell(domain.getCellHeight());
-        entity.setWidthCell(domain.getCellWidth());
-        entity.setDepthCell(domain.getCellDepth());
     }
 }
