@@ -259,7 +259,7 @@ public class LBCService {
                 .orElse(0);
 
         Optional<LBCEntity> existing =
-                lbcRepository.findByHeightAndWidthAndDepthAndUpperFrameAndBottomFrameAndColorBodyAndColorDoorAndTypeAndDeltaWidthAndShelfThickAndServiceZoneWidthAndDoorThicknessAndDirectionDoorOpeningAndCountCellsAndDisplayAndDisplayQuantityAndBarReaderAndBarReaderQuantityAndPrinterAndPrinterQuantityAndRfidReaderAndRfidReaderQuantityAndPayment(
+                lbcRepository.findCandidates(
                         domain.getHeight(),
                         domain.getWidth(),
                         domain.getDepth(),
