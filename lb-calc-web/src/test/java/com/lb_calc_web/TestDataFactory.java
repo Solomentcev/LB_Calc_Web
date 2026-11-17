@@ -314,8 +314,8 @@ public final class TestDataFactory {
 
         project.setAlsList(
                 List.of(
-                        validALSDTO(id + 1L),
-                        validALSDTO(id + 2L)
+                        validALSDTO(offsetId(id, 1L)),
+                        validALSDTO(offsetId(id, 2L))
                 )
         );
 
