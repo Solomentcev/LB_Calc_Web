@@ -6,6 +6,11 @@ import java.util.List;
 
 public interface ControlModule {
 
+    /**
+     * Возвращает независимую копию конфигурации управления.
+     *
+     * @return копия конфигурации, изменение которой не влияет на модуль
+     */
     ControlConfiguration getControlConfiguration();
 
     List<Equipment> getEquipment();
