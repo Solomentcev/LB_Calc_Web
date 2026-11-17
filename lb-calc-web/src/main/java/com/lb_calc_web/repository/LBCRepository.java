@@ -10,13 +10,7 @@ import java.util.List;
 
 public interface LBCRepository extends JpaRepository<LBCEntity, Long> {
 
-    List<LBCEntity> findByHeightAndWidthAndDepth
-            AndUpperFrameAndBottomFrameAndColorBodyAndColorDoor
-            AndTypeAndDeltaWidthAndShelfThickAndServiceZoneWidth
-            AndDoorThicknessAndDirectionDoorOpeningAndCountCells
-            AndDisplayAndDisplayQuantityAndBarReaderAndBarReaderQuantity
-            AndPrinterAndPrinterQuantityAndRfidReaderAndRfidReaderQuantity
-            AndPayment(
+    List<LBCEntity> findByHeightAndWidthAndDepthAndUpperFrameAndBottomFrameAndColorBodyAndColorDoorAndTypeAndDeltaWidthAndShelfThickAndServiceZoneWidthAndDoorThicknessAndDirectionDoorOpeningAndCountCellsAndDisplayAndDisplayQuantityAndBarReaderAndBarReaderQuantityAndPrinterAndPrinterQuantityAndRfidReaderAndRfidReaderQuantityAndPayment(
             int height,
             int width,
             int depth,
