@@ -607,10 +607,7 @@ public class ProjectService {
                 findById(projectId);
 
         ALSDTO als =
-                findALSInProject(
-                        projectId,
-                        alsId
-                );
+                findALSInProject(project, alsId);
 
         findLCInProject(
                 project,
@@ -679,10 +676,7 @@ public class ProjectService {
                 findById(projectId);
 
         ALSDTO als =
-                findALSInProject(
-                        projectId,
-                        alsId
-                );
+                findALSInProject(project, alsId);
 
         findLBCInProject(
                 project,
@@ -719,10 +713,7 @@ public class ProjectService {
                 findById(projectId);
 
         ALSDTO als =
-                findALSInProject(
-                        projectId,
-                        alsId
-                );
+                findALSInProject(project, alsId);
 
         ALSDTO updatedALS =
                 alsService.replaceWithNewLBC(als);
@@ -777,10 +768,7 @@ public class ProjectService {
                 findById(projectId);
 
         ALSDTO als =
-                findALSInProject(
-                        projectId,
-                        alsId
-                );
+                findALSInProject(project, alsId);
 
         findLBInProject(
                 project,
@@ -827,11 +815,7 @@ public class ProjectService {
         ProjectDTO project =
                 findById(projectId);
 
-        findLBInProject(
-                projectId,
-                alsId,
-                lbId
-        );
+        findLBInProject(project, alsId, lbId);
 
         ALSDTO als =
                 alsService.deleteLB(
