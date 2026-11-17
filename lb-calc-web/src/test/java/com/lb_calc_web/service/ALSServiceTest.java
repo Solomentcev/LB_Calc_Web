@@ -102,6 +102,15 @@ class ALSServiceTest {
                 .orElseThrow();
 
         assertEquals(1L, alsHeightError.getObjectId());
+
+        var lbError = exception.getValidationResult()
+                .getErrors()
+                .stream()
+                .filter(error -> "LB".equals(error.getObjectType()))
+                .findFirst()
+                .orElseThrow();
+
+        assertEquals(201L, lbError.getObjectId());
         verify(alsRepository, never()).save(any());
     }
 
