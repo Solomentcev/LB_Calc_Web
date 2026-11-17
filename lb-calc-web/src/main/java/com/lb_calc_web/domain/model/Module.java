@@ -2,6 +2,8 @@ package com.lb_calc_web.domain.model;
 
 import com.lb_calc_web.domain.attributes.Colors;
 
+import java.util.Objects;
+
 public abstract class Module {
 
     private String name;
@@ -78,7 +80,10 @@ public abstract class Module {
     }
 
     protected void setColorBody(Colors colorBody) {
-        this.colorBody = colorBody;
+        this.colorBody = Objects.requireNonNull(
+                colorBody,
+                "Цвет корпуса не должен быть null"
+        );
     }
 
     public Colors getColorDoor() {
@@ -86,7 +91,10 @@ public abstract class Module {
     }
 
     protected void setColorDoor(Colors colorDoor) {
-        this.colorDoor = colorDoor;
+        this.colorDoor = Objects.requireNonNull(
+                colorDoor,
+                "Цвет дверей не должен быть null"
+        );
     }
 
     /**
