@@ -89,7 +89,7 @@ public class LC extends Module implements ControlModule {
      */
     @Override
     public ControlConfiguration getControlConfiguration() {
-        return controlConfiguration;
+        return controlConfiguration.copy();
     }
 
     /**
