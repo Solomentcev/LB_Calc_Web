@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
@@ -216,12 +217,57 @@ public class ALSEntity {
     }
 
     /**
-     * Удаляет все связи ALS с модулями.
+     * Синхронизирует связи с модулями, сохраняя неизменившиеся позиции.
      *
-     * <p>Коллекция остаётся тем же JPA-managed экземпляром.</p>
+     * <p>Связи, у которых изменился модуль или его физическая позиция,
+     * заменяются. Это исключает промежуточные конфликты уникального
+     * ограничения {@code (als_id, module_order)} при перестановке.</p>
+     *
+     * @param desiredModules модули в физическом порядке слева направо
      */
-    public void clearModules() {
-        modules.clear();
+    public void synchronizeModules(List<ModuleEntity> desiredModules) {
+        Objects.requireNonNull(
+                desiredModules,
+                "Список модулей не должен быть null"
+        );
+
+        List<ALSModuleEntity> unmatched = new ArrayList<>(modules);
+        List<ALSModuleEntity> synchronizedModules = new ArrayList<>();
+
+        for (int order = 0; order < desiredModules.size(); order++) {
+            ModuleEntity module = Objects.requireNonNull(
+                    desiredModules.get(order),
+                    "Модуль не должен быть null"
+            );
+
+            ALSModuleEntity existing = unmatched.stream()
+                    .filter(association ->
+                            association.getModuleOrder() == order
+                                    && (association.getModule() == module
+                                    || association.getModule().equals(module)))
+                    .findFirst()
+                    .orElse(null);
+
+            if (existing != null) {
+                unmatched.remove(existing);
+                synchronizedModules.add(existing);
+                continue;
+            }
+
+            ALSModuleEntity association = new ALSModuleEntity();
+            association.setAls(this);
+            association.setModule(module);
+            association.setModuleOrder(order);
+            synchronizedModules.add(association);
+        }
+
+        modules.removeAll(unmatched);
+        for (ALSModuleEntity association : synchronizedModules) {
+            if (!modules.contains(association)) {
+                modules.add(association);
+            }
+        }
+        modules.sort(Comparator.comparingInt(ALSModuleEntity::getModuleOrder));
     }
 
     @Override

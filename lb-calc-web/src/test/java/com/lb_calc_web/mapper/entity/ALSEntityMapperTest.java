@@ -3,6 +3,8 @@ package com.lb_calc_web.mapper.entity;
 import com.lb_calc_web.TestDataFactory;
 import com.lb_calc_web.domain.model.ALS;
 import com.lb_calc_web.entity.ALSEntity;
+
+import java.util.List;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -28,6 +30,32 @@ class ALSEntityMapperTest {
 
         assertEquals(domain, restored);
         assertEquals(domain.getModules(), restored.getModules());
+    }
+
+    @Test
+    void updateEntity_shouldReuseUnchangedModuleAssociations() {
+        ALS domain = TestDataFactory.validALS(null);
+        ALSEntity entity = ALSEntityMapper.toEntity(
+                domain,
+                ModuleEntityMapper::toEntity
+        );
+
+        var originalAssociations = List.copyOf(entity.getModules());
+
+        ALSEntityMapper.updateEntity(
+                domain,
+                entity,
+                module -> originalAssociations.stream()
+                        .map(com.lb_calc_web.entity.ALSModuleEntity::getModule)
+                        .filter(existing -> ModuleEntityMapper.toDomain(existing).equals(module))
+                        .findFirst()
+                        .orElseThrow()
+        );
+
+        assertEquals(originalAssociations.size(), entity.getModules().size());
+        for (int i = 0; i < originalAssociations.size(); i++) {
+            assertSame(originalAssociations.get(i), entity.getModules().get(i));
+        }
     }
 
     @Test

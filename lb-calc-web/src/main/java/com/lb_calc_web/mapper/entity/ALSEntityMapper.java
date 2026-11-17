@@ -108,17 +108,14 @@ public final class ALSEntityMapper {
         entity.setColorBody(domain.getColorBody());
         entity.setColorDoor(domain.getColorDoor());
 
-        entity.clearModules();
+        List<ModuleEntity> moduleEntities = domain.getModules().stream()
+                .map(module -> Objects.requireNonNull(
+                        moduleResolver.apply(module),
+                        "moduleResolver вернул null"
+                ))
+                .toList();
 
-        List<Module> modules = domain.getModules();
-        for (int i = 0; i < modules.size(); i++) {
-            ModuleEntity moduleEntity = Objects.requireNonNull(
-                    moduleResolver.apply(modules.get(i)),
-                    "moduleResolver вернул null"
-            );
-
-            entity.addModule(moduleEntity, i);
-        }
+        entity.synchronizeModules(moduleEntities);
     }
 
     /**
