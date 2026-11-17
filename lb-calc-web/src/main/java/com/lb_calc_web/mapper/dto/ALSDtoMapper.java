@@ -112,12 +112,22 @@ public final class ALSDtoMapper {
 
         if (dto.getLbList() != null) {
             for (LBDTO lbDto : dto.getLbList()) {
-                if (lbDto != null) {
-                    storageModules.add(
-                            LBDtoMapper.toDomain(lbDto)
+                if (lbDto == null) {
+                    throw new IllegalStateException(
+                            "Список LB содержит пустой элемент"
                     );
                 }
+
+                storageModules.add(
+                        LBDtoMapper.toDomain(lbDto)
+                );
             }
+        }
+
+        if (dto.getLC() != null && dto.getLBC() != null) {
+            throw new IllegalStateException(
+                    "ALS не может одновременно содержать LC и LBC"
+            );
         }
 
         Module controlModule;

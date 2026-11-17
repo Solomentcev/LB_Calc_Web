@@ -2,6 +2,10 @@ package com.lb_calc_web.service;
 
 import com.lb_calc_web.domain.model.ALS;
 import com.lb_calc_web.domain.model.Employee;
+import com.lb_calc_web.domain.model.LB;
+import com.lb_calc_web.domain.model.LBC;
+import com.lb_calc_web.domain.model.LC;
+import com.lb_calc_web.domain.model.Module;
 import com.lb_calc_web.domain.model.Project;
 import com.lb_calc_web.dto.ALSDTO;
 import com.lb_calc_web.dto.LBCDTO;
@@ -176,9 +180,9 @@ public class ProjectService {
      *
      * 1. Загружаем существующий проект, если это update.
      * 2. Устанавливаем серверные metadata.
-     * 3. Сохраняем ALS и получаем реальные ID.
-     * 4. Валидируем проект.
-     * 5. DTO -> domain.
+     * 3. Преобразуем DTO в доменный проект.
+     * 4. Валидируем доменную модель до сохранения новых ALS.
+     * 5. Сохраняем ALS и получаем реальные ID.
      * 6. Разрешаем ALS -> ALSEntity.
      * 7. Domain -> ProjectEntity.
      * 8. Сохраняем ProjectEntity.
@@ -209,10 +213,37 @@ public class ProjectService {
         );
 
         /*
-         * Сначала проверяем весь проект. До успешной валидации
-         * не создаём и не связываем новые конфигурации ALS.
+         * Сначала преобразуем DTO в доменный агрегат и проверяем его.
+         * До успешной валидации не сохраняем новые конфигурации ALS.
          */
-        validateProject(dto);
+        Project domain;
+        try {
+            domain = ProjectDtoMapper.toDomain(dto);
+        } catch (IllegalStateException exception) {
+            ValidationResult validationResult =
+                    new ValidationResult("Project", dto.getId());
+            validationResult.addError(
+                    "alsStructure",
+                    exception.getMessage(),
+                    null,
+                    null,
+                    null
+            );
+            throw new ValidationSizeException(validationResult);
+        } catch (IllegalArgumentException exception) {
+            ValidationResult validationResult =
+                    new ValidationResult("Project", dto.getId());
+            validationResult.addError(
+                    "projectData",
+                    exception.getMessage(),
+                    null,
+                    null,
+                    null
+            );
+            throw new ValidationSizeException(validationResult);
+        }
+
+        validateProject(domain, dto);
 
         List<ALSDTO> savedALS =
                 saveALS(
@@ -220,11 +251,6 @@ public class ProjectService {
                 );
 
         dto.setAlsList(savedALS);
-
-        Project domain =
-                ProjectDtoMapper.toDomain(
-                        dto
-                );
 
         Function<ALS, ALSEntity> alsResolver =
                 resolveALSEntities(
@@ -1051,13 +1077,10 @@ public class ProjectService {
                 );
     }
 
-    private void validateProject(
-            ProjectDTO dto
-    ) {
+    private void validateProject(Project domain, ProjectDTO source) {
         List<ValidationResult> results =
-                sizeValidator.validateProject(
-                        dto
-                );
+                sizeValidator.validateProject(domain);
+        assignValidationObjectIds(results, domain, source);
 
         List<ValidationError> errors =
                 results.stream()
@@ -1079,7 +1102,7 @@ public class ProjectService {
         ValidationResult combined =
                 new ValidationResult(
                         "Project",
-                        dto.getId()
+                        null
                 );
 
         errors.forEach(
@@ -1089,6 +1112,76 @@ public class ProjectService {
         throw new ValidationSizeException(
                 combined
         );
+    }
+
+    /**
+     * Сопоставляет результаты доменной проверки с persistence ID из исходного DTO.
+     */
+    private void assignValidationObjectIds(
+            List<ValidationResult> results,
+            Project domain,
+            ProjectDTO source
+    ) {
+        int resultIndex = 0;
+
+        for (ALS als : domain.getQuantityALS().keySet()) {
+            ALSDTO sourceALS = findSourceALS(source, als);
+
+            if (resultIndex >= results.size()) {
+                return;
+            }
+            results.get(resultIndex++).setObjectId(
+                    sourceALS == null ? null : sourceALS.getId()
+            );
+
+            List<LBDTO> sourceLBs = sourceALS == null
+                    || sourceALS.getLbList() == null
+                    ? List.of()
+                    : sourceALS.getLbList().stream()
+                            .filter(Objects::nonNull)
+                            .toList();
+
+            int lbIndex = 0;
+
+            for (Module module : als.getModules()) {
+                Long moduleId = null;
+
+                if (module instanceof LBC && sourceALS != null
+                        && sourceALS.getLBC() != null) {
+                    moduleId = sourceALS.getLBC().getId();
+                } else if (module instanceof LC && sourceALS != null
+                        && sourceALS.getLC() != null) {
+                    moduleId = sourceALS.getLC().getId();
+                } else if (module instanceof LB) {
+                    if (lbIndex < sourceLBs.size()) {
+                        moduleId = sourceLBs.get(lbIndex).getId();
+                    }
+                    lbIndex++;
+                }
+
+                if (resultIndex < results.size()) {
+                    results.get(resultIndex).setObjectId(moduleId);
+                }
+                resultIndex++;
+            }
+        }
+    }
+
+    /**
+     * Находит исходный DTO уникальной конфигурации ALS.
+     */
+    private ALSDTO findSourceALS(ProjectDTO source, ALS target) {
+        if (source.getAlsList() == null) {
+            return null;
+        }
+
+        return source.getAlsList().stream()
+                .filter(Objects::nonNull)
+                .filter(candidate ->
+                        ALSDtoMapper.toDomain(candidate).equals(target)
+                )
+                .findFirst()
+                .orElse(null);
     }
 
     /**

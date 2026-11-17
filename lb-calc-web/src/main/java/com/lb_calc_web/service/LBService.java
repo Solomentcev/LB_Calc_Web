@@ -171,10 +171,14 @@ public class LBService {
         applyTypeConfiguration(dto);
 
         /*
-         * Проверяем размеры до преобразования в Domain.
+         * Преобразуем входные данные в доменную модель.
+         * Геометрическая валидация выполняется только над Domain.
          */
+        LB domain = LBDtoMapper.toDomain(dto);
+
         ValidationResult validationResult =
-                sizeValidator.validateLB(dto);
+                sizeValidator.validateLB(domain);
+        validationResult.setObjectId(dto.getId());
 
         if (!validationResult.isValid()) {
             logger.warn(
@@ -186,12 +190,6 @@ public class LBService {
                     validationResult
             );
         }
-
-        /*
-         * Основная бизнес-модель.
-         * Здесь выполняется расчёт производных характеристик.
-         */
-        LB domain = LBDtoMapper.toDomain(dto);
 
         /*
          * Ищем существующий LB по его конфигурации,

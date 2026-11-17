@@ -201,7 +201,6 @@ public class LBC extends StorageModule implements ControlModule {
     @Override
     public void recalculate() {
         recalculateCells();
-        validateWidth();
 
         setName(
                 "Комбинированный модуль на "
@@ -226,30 +225,6 @@ public class LBC extends StorageModule implements ControlModule {
                 getColorDoor(),
                 getDoorThickness()
         ));
-    }
-
-    /**
-     * Проверяет, что ширина LBC достаточна для установленного оборудования.
-     *
-     * @throws IllegalStateException если ширина модуля меньше
-     *                               максимальной ширины оборудования
-     */
-    private void validateWidth() {
-        int requiredWidth = getEquipment().stream()
-                .mapToInt(Equipment::getWidth)
-                .max()
-                .orElse(0);
-
-        if (getWidth() < requiredWidth) {
-            throw new IllegalStateException(
-                    String.format(
-                            "Ширина LBC %d мм меньше минимально необходимой "
-                                    + "ширины оборудования %d мм",
-                            getWidth(),
-                            requiredWidth
-                    )
-            );
-        }
     }
 
     /**

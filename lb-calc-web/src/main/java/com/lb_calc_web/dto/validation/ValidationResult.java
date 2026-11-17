@@ -47,7 +47,12 @@ public class ValidationResult {
     public void setObjectType(String objectType) { this.objectType = objectType; }
 
     public Long getObjectId() { return objectId; }
-    public void setObjectId(Long objectId) { this.objectId = objectId; }
+    public void setObjectId(Long objectId) {
+        this.objectId = objectId;
+        if (errors != null) {
+            errors.forEach(error -> error.setObjectId(objectId));
+        }
+    }
 
     public List<ValidationError> getErrors() { return errors; }
     public void setErrors(List<ValidationError> errors) { this.errors = errors; }

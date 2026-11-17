@@ -208,8 +208,11 @@ public class LBCService {
 
         applyTypeConfiguration(dto);
 
+        LBC domain = LBCDtoMapper.toDomain(dto);
+
         ValidationResult validationResult =
-                sizeValidator.validateLBC(dto);
+                sizeValidator.validateLBC(domain);
+        validationResult.setObjectId(dto.getId());
 
         if (!validationResult.isValid()) {
             logger.warn(
@@ -221,8 +224,6 @@ public class LBCService {
                     validationResult
             );
         }
-
-        LBC domain = LBCDtoMapper.toDomain(dto);
 
         Optional<LBCEntity> existing =
                 lbcRepository.findAll()

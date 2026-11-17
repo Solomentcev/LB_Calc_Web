@@ -188,8 +188,8 @@ public class LCService {
      * Сохранить LC.
      *
      * <p>Перед сохранением выполняется:
-     * валидация DTO,
-     * преобразование в Domain,
+     * преобразование DTO в Domain,
+     * геометрическая валидация доменной модели,
      * проверка наличия аналогичной конфигурации,
      * преобразование Domain -> Entity.</p>
      */
@@ -206,11 +206,17 @@ public class LCService {
                 dto.getDisplay()
         );
 
+        /*
+         * DTO преобразуется в доменную модель до геометрической проверки.
+         * Домен также выполняет собственные расчёты и проверки инвариантов.
+         */
+        LC domain = LCDtoMapper.toDomain(dto);
+
         ValidationResult validationResult =
-                sizeValidator.validateLC(dto);
+                sizeValidator.validateLC(domain);
+        validationResult.setObjectId(dto.getId());
 
         if (!validationResult.isValid()) {
-
             logger.warn(
                     "LC не прошёл валидацию: {}",
                     validationResult.getErrors()
@@ -220,16 +226,6 @@ public class LCService {
                     validationResult
             );
         }
-
-        /*
-         * DTO -> Domain.
-         *
-         * Здесь Domain:
-         * - создаёт конфигурацию оборудования;
-         * - проверяет ширину;
-         * - формирует name/description.
-         */
-        LC domain = LCDtoMapper.toDomain(dto);
 
         /*
          * Проверяем, нет ли уже такой конфигурации.

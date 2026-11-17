@@ -1,7 +1,7 @@
 package com.lb_calc_web.service.util;
 
-import com.lb_calc_web.dto.ALSDTO;
-import com.lb_calc_web.dto.ProjectDTO;
+import com.lb_calc_web.domain.model.ALS;
+import com.lb_calc_web.domain.model.Project;
 import com.lb_calc_web.dto.validation.ValidationResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Проверяет геометрическую корректность всех ALS, входящих в проект.
+ * Проверяет геометрическую корректность доменного проекта и входящих в него ALS.
  */
 @Component
 public class ProjectSizeValidator {
@@ -25,8 +25,15 @@ public class ProjectSizeValidator {
         this.alsValidator = alsValidator;
     }
 
-    public List<ValidationResult> validateProject(ProjectDTO project) {
+    /**
+     * Проверяет все уникальные конфигурации ALS, входящие в доменный проект.
+     *
+     * <p>Количество экземпляров не влияет на геометрическую корректность
+     * конфигурации, поэтому каждая уникальная ALS проверяется один раз.</p>
+     */
+    public List<ValidationResult> validateProject(Project project) {
         List<ValidationResult> results = new ArrayList<>();
+
         if (project == null) {
             ValidationResult invalid = new ValidationResult("Project", null);
             invalid.addError(invalid, "project", "Проект не задан",
@@ -35,33 +42,33 @@ public class ProjectSizeValidator {
             return results;
         }
 
-        List<ALSDTO> alsList = project.getAlsList();
-        if (alsList == null) {
-            ValidationResult invalid = new ValidationResult("Project", project.getId());
-            invalid.addError(invalid, "alsList", "Список ALS не задан",
-                    null, null, null);
-            results.add(invalid);
-            return results;
-        }
+        Map<ALS, Integer> configurations = project.getQuantityALS();
 
-        logger.info("Валидация проекта (id:{} ALS count:{})",
-                project.getId(), alsList.size());
+        logger.info(
+                "Валидация доменного проекта. Уникальных конфигураций ALS: {}",
+                configurations.size()
+        );
 
-        for (int i = 0; i < alsList.size(); i++) {
-            ALSDTO als = alsList.get(i);
+        for (ALS als : configurations.keySet()) {
+
             if (als == null) {
                 ValidationResult invalid = new ValidationResult("ALS", null);
                 invalid.addError(invalid, "als",
-                        "Список проекта содержит пустую конфигурацию ALS",
-                        i, null, null);
+                        "Проект содержит пустую конфигурацию ALS",
+                        null, null, null);
                 results.add(invalid);
-            } else {
-                results.addAll(alsValidator.deepValidateALS(als));
+                continue;
             }
+
+            results.addAll(alsValidator.deepValidateALS(als));
         }
 
-        logger.info("Валидация проекта завершена. Всего результатов: {}. Ошибок: {}",
-                results.size(), results.stream().filter(r -> !r.isValid()).count());
+        logger.info(
+                "Валидация доменного проекта завершена. Всего результатов: {}. Ошибок: {}",
+                results.size(),
+                results.stream().filter(result -> !result.isValid()).count()
+        );
+
         return results;
     }
 }

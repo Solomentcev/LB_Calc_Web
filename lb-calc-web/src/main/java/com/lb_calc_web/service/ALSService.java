@@ -1,7 +1,11 @@
 package com.lb_calc_web.service;
 
 import com.lb_calc_web.domain.attributes.Colors;
+import com.lb_calc_web.domain.model.ALS;
 import com.lb_calc_web.domain.model.LB;
+import com.lb_calc_web.domain.model.LBC;
+import com.lb_calc_web.domain.model.LC;
+import com.lb_calc_web.domain.model.Module;
 import com.lb_calc_web.dto.ALSDTO;
 import com.lb_calc_web.dto.LBCDTO;
 import com.lb_calc_web.dto.LBDTO;
@@ -209,9 +213,40 @@ public class ALSService {
                 dto.getName()
         );
 
-        validate(dto);
+        ALS domain;
+        try {
+            domain = ALSDtoMapper.toDomain(dto);
+        } catch (IllegalStateException exception) {
+            var validationResult =
+                    new com.lb_calc_web.dto.validation.ValidationResult(
+                            "ALS",
+                            dto.getId()
+                    );
+            validationResult.addError(
+                    "structure",
+                    exception.getMessage(),
+                    null,
+                    null,
+                    null
+            );
+            throw new ValidationSizeException(validationResult);
+        } catch (IllegalArgumentException exception) {
+            var validationResult =
+                    new com.lb_calc_web.dto.validation.ValidationResult(
+                            "ALS",
+                            dto.getId()
+                    );
+            validationResult.addError(
+                    "domainModel",
+                    exception.getMessage(),
+                    null,
+                    null,
+                    null
+            );
+            throw new ValidationSizeException(validationResult);
+        }
 
-        var domain = ALSDtoMapper.toDomain(dto);
+        validate(domain, dto);
 
         Optional<ALSEntity> duplicate =
                 findDuplicate(domain);
@@ -462,37 +497,69 @@ public class ALSService {
         return saveALS(replaceWithNewLBC(findById(alsId)));
     }
 
-    private void validate(
-            ALSDTO dto
-    ) {
-        var results =
-                sizeValidator.deepValidateALS(
-                        dto
-                );
+    private void validate(ALS domain, ALSDTO source) {
+        var results = sizeValidator.deepValidateALS(domain);
+        assignValidationObjectIds(results, domain, source);
 
         var errors = results.stream()
                 .filter(result -> !result.isValid())
-                .flatMap(
-                        result ->
-                                result.getErrors()
-                                        .stream()
-                )
+                .flatMap(result -> result.getErrors().stream())
                 .toList();
 
         if (!errors.isEmpty()) {
             var validationResult =
                     new com.lb_calc_web.dto.validation.ValidationResult(
                             "ALS",
-                            dto.getId()
+                            null
                     );
 
-            errors.forEach(
-                    validationResult::addError
-            );
+            errors.forEach(validationResult::addError);
 
-            throw new ValidationSizeException(
-                    validationResult
-            );
+            throw new ValidationSizeException(validationResult);
+        }
+    }
+
+    /**
+     * Добавляет persistence ID к результатам, не включая их в доменные модели.
+     */
+    private void assignValidationObjectIds(
+            List<com.lb_calc_web.dto.validation.ValidationResult> results,
+            ALS domain,
+            ALSDTO source
+    ) {
+        if (results.isEmpty()) {
+            return;
+        }
+
+        results.get(0).setObjectId(source.getId());
+
+        List<LBDTO> sourceLBs = source.getLbList() == null
+                ? List.of()
+                : source.getLbList().stream()
+                        .filter(Objects::nonNull)
+                        .toList();
+
+        int resultIndex = 1;
+        int lbIndex = 0;
+
+        for (Module module : domain.getModules()) {
+            Long moduleId = null;
+
+            if (module instanceof LBC && source.getLBC() != null) {
+                moduleId = source.getLBC().getId();
+            } else if (module instanceof LC && source.getLC() != null) {
+                moduleId = source.getLC().getId();
+            } else if (module instanceof LB) {
+                if (lbIndex < sourceLBs.size()) {
+                    moduleId = sourceLBs.get(lbIndex).getId();
+                }
+                lbIndex++;
+            }
+
+            if (resultIndex < results.size()) {
+                results.get(resultIndex).setObjectId(moduleId);
+            }
+            resultIndex++;
         }
     }
 

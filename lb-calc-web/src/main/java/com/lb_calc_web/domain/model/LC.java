@@ -189,43 +189,12 @@ public class LC extends Module implements ControlModule {
     /**
      * Пересчитывает производные характеристики LC.
      *
-     * <p>При пересчёте проверяется, что заданная ширина LC достаточна
-     * для установленного оборудования, после чего обновляются
-     * наименование и описание.</p>
-     *
-     * @throws IllegalStateException если ширина LC меньше минимально
-     *                               необходимой ширины оборудования
+     * <p>При пересчёте обновляются производные наименование и описание.
+     * Допустимость геометрических параметров проверяется валидатором.</p>
      */
     @Override
     public void recalculate() {
-        validateWidth();
         updateNameAndDescription();
-    }
-
-    /**
-     * Проверяет достаточность заданной ширины LC.
-     *
-     * <p>Ширина LC может быть больше требуемой ширины оборудования,
-     * но не может быть меньше неё.</p>
-     *
-     * @throws IllegalStateException если заданная ширина недостаточна
-     */
-    private void validateWidth() {
-        int requiredWidth = getEquipment().stream()
-                .mapToInt(Equipment::getWidth)
-                .max()
-                .orElse(0);
-
-        if (getWidth() < requiredWidth) {
-            throw new IllegalStateException(
-                    String.format(
-                            "Ширина LC %d мм меньше минимально необходимой "
-                                    + "ширины оборудования %d мм",
-                            getWidth(),
-                            requiredWidth
-                    )
-            );
-        }
     }
 
     /**

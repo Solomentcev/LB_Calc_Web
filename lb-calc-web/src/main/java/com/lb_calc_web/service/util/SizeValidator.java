@@ -1,10 +1,11 @@
 package com.lb_calc_web.service.util;
 
-import com.lb_calc_web.dto.ALSDTO;
-import com.lb_calc_web.dto.LBCDTO;
-import com.lb_calc_web.dto.LBDTO;
-import com.lb_calc_web.dto.LCDTO;
-import com.lb_calc_web.dto.ProjectDTO;
+import com.lb_calc_web.domain.model.ALS;
+import com.lb_calc_web.domain.model.LB;
+import com.lb_calc_web.domain.model.LBC;
+import com.lb_calc_web.domain.model.LC;
+import com.lb_calc_web.domain.model.Project;
+import com.lb_calc_web.domain.model.StorageModule;
 import com.lb_calc_web.dto.validation.ValidationResult;
 import org.springframework.stereotype.Component;
 
@@ -12,10 +13,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Единая точка доступа к проверкам геометрии ALS и её модулей.
+ * Единая точка доступа к геометрической валидации доменных моделей.
  *
- * <p>Реализация проверок разделена между валидаторами модулей,
- * ALS и проекта. Класс сохраняет прежний публичный контракт сервисов.</p>
+ * <p>Фасад не зависит от DTO и делегирует проверки специализированным
+ * валидаторам модулей, ALS и проекта.</p>
  */
 @Component
 public class SizeValidator {
@@ -39,108 +40,135 @@ public class SizeValidator {
     }
 
     public void validateRange(
-            ValidationResult result, String fieldName, int value,
-            int min, int max, String fieldLabel
+            ValidationResult result,
+            String fieldName,
+            int value,
+            int min,
+            int max,
+            String fieldLabel
     ) {
-        moduleValidator.validateRange(result, fieldName, value, min, max, fieldLabel);
+        moduleValidator.validateRange(
+                result, fieldName, value, min, max, fieldLabel
+        );
     }
 
     public void validateLBCellCount(
-            ValidationResult result, LBDTO lb,
-            com.lb_calc_web.domain.attributes.TypeLb typeLb
+            ValidationResult result,
+            StorageModule module
     ) {
-        moduleValidator.validateLBCellCount(result, lb, typeLb);
+        moduleValidator.validateLBCellCount(result, module);
     }
 
-    public ValidationResult validateLB(LBDTO lb) {
+    public ValidationResult validateLB(LB lb) {
         return moduleValidator.validateLB(lb);
     }
 
-    public ValidationResult validateLC(LCDTO lc) {
+    public ValidationResult validateLC(LC lc) {
         return moduleValidator.validateLC(lc);
     }
 
-    public ValidationResult validateLBC(LBCDTO lbc) {
+    public ValidationResult validateLBC(LBC lbc) {
         return moduleValidator.validateLBC(lbc);
     }
 
-    public ValidationResult validateALS(ALSDTO als) {
+    public ValidationResult validateALS(ALS als) {
         return alsValidator.validateALS(als);
     }
 
-    public List<ValidationResult> deepValidateALS(ALSDTO als) {
+    public List<ValidationResult> deepValidateALS(ALS als) {
         return alsValidator.deepValidateALS(als);
     }
 
-    public List<ValidationResult> validateProject(ProjectDTO project) {
+    public List<ValidationResult> validateProject(Project project) {
         return projectValidator.validateProject(project);
     }
 
-    private List<String> convertValidationResultToStrings(ValidationResult result) {
-        return result.getErrors().stream()
-                .map(Object::toString)
-                .toList();
-    }
-
-    public List<String> getErrorValidateALSSizesList(ALSDTO als) {
+    /**
+     * Возвращает текстовые ошибки геометрии ALS.
+     */
+    public List<String> getErrorValidateALSSizesList(ALS als) {
         return convertValidationResultToStrings(validateALS(als));
     }
 
-    public List<String> getErrorValidateLCSizesList(LCDTO lc) {
+    /**
+     * Возвращает текстовые ошибки геометрии LC.
+     */
+    public List<String> getErrorValidateLCSizesList(LC lc) {
         return convertValidationResultToStrings(validateLC(lc));
     }
 
-    public List<String> getErrorValidateLBCSizesList(LBCDTO lbc) {
+    /**
+     * Возвращает текстовые ошибки геометрии LBC.
+     */
+    public List<String> getErrorValidateLBCSizesList(LBC lbc) {
         return convertValidationResultToStrings(validateLBC(lbc));
     }
 
-    public List<List<String>> getErrorValidateLBSizesLists(ALSDTO als) {
+    /**
+     * Возвращает ошибки каждого физического storage-модуля ALS.
+     */
+    public List<List<String>> getErrorValidateLBSizesLists(ALS als) {
         List<List<String>> errors = new ArrayList<>();
-        if (als == null || als.getLbList() == null) {
+
+        if (als == null) {
             return errors;
         }
-        for (LBDTO lb : als.getLbList()) {
-            List<String> moduleErrors = getErrorValidateLBSizesList(lb);
+
+        for (StorageModule module : als.getStorageModules()) {
+            // LBC уже проверяется как управляющий модуль и не дублируется в списке LB.
+            if (module instanceof LBC) {
+                continue;
+            }
+
+            ValidationResult result;
+
+            if (module instanceof LBC lbc) {
+                result = validateLBC(lbc);
+            } else if (module instanceof LB lb) {
+                result = validateLB(lb);
+            } else {
+                continue;
+            }
+
+            List<String> moduleErrors =
+                    convertValidationResultToStrings(result);
             if (!moduleErrors.isEmpty()) {
                 errors.add(moduleErrors);
             }
         }
+
         return errors;
     }
 
-    public List<String> getErrorValidateLBSizesList(LBDTO lb) {
+    /**
+     * Возвращает текстовые ошибки геометрии LB.
+     */
+    public List<String> getErrorValidateLBSizesList(LB lb) {
         return convertValidationResultToStrings(validateLB(lb));
     }
 
     /**
-     * Сохраняет прежнюю вложенную структуру результата, не дублируя LBC:
-     * он одновременно control- и storage-модуль, но является одним объектом.
+     * Сохраняет прежнюю вложенную структуру ошибок проекта,
+     * используя только доменные модели.
      */
     public List<List<List<List<String>>>> getErrorValidateProjectSizeList(
-            ProjectDTO project
+            Project project
     ) {
         List<List<List<List<String>>>> result = new ArrayList<>();
-        if (project == null || project.getAlsList() == null) {
+
+        if (project == null) {
             return result;
         }
 
-        int validCount = 0;
-        for (ALSDTO als : project.getAlsList()) {
-            if (als == null) {
-                result.add(List.of(List.of(List.of("Конфигурация ALS не задана"))));
-                continue;
-            }
-
+        for (ALS als : project.getQuantityALS().keySet()) {
             List<String> alsErrors = getErrorValidateALSSizesList(als);
             List<String> controlErrors = new ArrayList<>();
-            if (als.getLC() != null) {
-                controlErrors.addAll(getErrorValidateLCSizesList(als.getLC()));
-            }
-            if (als.getLBC() != null) {
-                controlErrors.addAll(getErrorValidateLBCSizesList(als.getLBC()));
-            }
 
-            List<List<String>> lbErrors = getErrorValidateLBSizesLists(als);
+            if (als.getControlModule() instanceof LC lc) {
+                controlErrors.addAll(getErrorValidateLCSizesList(lc));
+            } else if (als.getControlModule() instanceof LBC lbc) {
+                controlErrors.addAll(getErrorValidateLBCSizesList(lbc));
+            }
 
             List<List<String>> alsErrorsNested = new ArrayList<>();
             List<List<String>> controlErrorsNested = new ArrayList<>();
@@ -150,17 +178,24 @@ public class SizeValidator {
             List<List<List<String>>> alsResult = new ArrayList<>();
             alsResult.add(alsErrorsNested);
             alsResult.add(controlErrorsNested);
-            alsResult.add(lbErrors);
+            alsResult.add(getErrorValidateLBSizesLists(als));
             result.add(alsResult);
-
-            if (alsErrors.isEmpty() && controlErrors.isEmpty() && lbErrors.isEmpty()) {
-                validCount++;
-            }
         }
 
-        if (validCount == result.size()) {
+        if (result.stream().allMatch(alsResult ->
+                alsResult.stream().flatMap(List::stream)
+                        .allMatch(List::isEmpty))) {
             result.clear();
         }
+
         return result;
+    }
+
+    private List<String> convertValidationResultToStrings(
+            ValidationResult result
+    ) {
+        return result.getErrors().stream()
+                .map(Object::toString)
+                .toList();
     }
 }

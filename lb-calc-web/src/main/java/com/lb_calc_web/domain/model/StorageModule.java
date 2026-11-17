@@ -24,6 +24,8 @@ import java.util.Objects;
  */
 public abstract class StorageModule extends Module {
 
+    private static final int MAX_SUPPORTED_CELLS = 20;
+
     /**
      * Конструктивный тип модуля хранения.
      */
@@ -67,16 +69,8 @@ public abstract class StorageModule extends Module {
      *
      * @param doorThickness толщина дверцы, используемая
      *                      при расчёте глубины ячейки, мм
-     * @throws IllegalArgumentException если толщина дверцы
-     *                                  меньше или равна нулю
      */
     protected StorageModule(int doorThickness) {
-        if (doorThickness <= 0) {
-            throw new IllegalArgumentException(
-                    "Толщина дверцы должна быть положительной"
-            );
-        }
-
         this.doorThickness = doorThickness;
     }
 
@@ -193,7 +187,8 @@ public abstract class StorageModule extends Module {
      * После изменения конфигурации выполняется пересчёт модуля.</p>
      *
      * @param countCells новое количество ячеек
-     * @throws IllegalArgumentException если количество меньше единицы
+     * @throws IllegalArgumentException если количество отрицательное
+     *                                  или превышает поддерживаемый предел
      */
     public void setCountCells(int countCells) {
         setCells(createCells(countCells));
@@ -226,12 +221,20 @@ public abstract class StorageModule extends Module {
      *
      * @param countCells количество ячеек
      * @return список новых ячеек
-     * @throws IllegalArgumentException если количество меньше единицы
+     * @throws IllegalArgumentException если количество отрицательное
+     *                                  или превышает технический предел
      */
     protected List<StorageCell> createCells(int countCells) {
-        if (countCells < 1) {
+        if (countCells < 0) {
             throw new IllegalArgumentException(
-                    "Количество ячеек должно быть больше нуля"
+                    "Количество ячеек не может быть отрицательным"
+            );
+        }
+
+        if (countCells > MAX_SUPPORTED_CELLS) {
+            throw new IllegalArgumentException(
+                    "Количество ячеек не должно превышать "
+                            + MAX_SUPPORTED_CELLS
             );
         }
 
@@ -250,32 +253,14 @@ public abstract class StorageModule extends Module {
      * @param cellHeight высота ячейки, мм
      * @param cellWidth ширина ячейки, мм
      * @param cellDepth глубина ячейки, мм
-     * @throws IllegalArgumentException если один из размеров
-     *                                  меньше или равен нулю
+     *
+     * <p>Допустимость рассчитанных размеров проверяется валидатором.</p>
      */
     protected void setCellDimensions(
             int cellHeight,
             int cellWidth,
             int cellDepth
     ) {
-        if (cellHeight <= 0) {
-            throw new IllegalArgumentException(
-                    "Высота ячейки должна быть положительной"
-            );
-        }
-
-        if (cellWidth <= 0) {
-            throw new IllegalArgumentException(
-                    "Ширина ячейки должна быть положительной"
-            );
-        }
-
-        if (cellDepth <= 0) {
-            throw new IllegalArgumentException(
-                    "Глубина ячейки должна быть положительной"
-            );
-        }
-
         this.cellHeight = cellHeight;
         this.cellWidth = cellWidth;
         this.cellDepth = cellDepth;
@@ -295,17 +280,13 @@ public abstract class StorageModule extends Module {
      *     <li>толщину дверцы.</li>
      * </ul>
      *
-     * @throws IllegalStateException если отсутствуют ячейки
-     *                               или конструктивный тип
+     * <p>Метод рассчитывает значения даже при некорректной геометрии.
+     * Бизнес-ограничения проверяются ModuleSizeValidator.</p>
+     *
+     * @throws IllegalStateException если не задан конструктивный тип
      */
     protected void recalculateStorageCells() {
         int countCells = getCountCells();
-
-        if (countCells == 0) {
-            throw new IllegalStateException(
-                    "Модуль хранения должен содержать хотя бы одну ячейку"
-            );
-        }
 
         if (typeLb == null) {
             throw new IllegalStateException(
@@ -313,49 +294,45 @@ public abstract class StorageModule extends Module {
             );
         }
 
-        if (countCells > 20) {
-            throw new IllegalStateException(
-                    "Количество ячеек не должно превышать 20: "
-                            + countCells
-            );
-        }
-
-        int cellWidth =
-                getWidth()
+        int cellWidth = toIntSaturated(
+                (long) getWidth()
                         - typeLb.getDeltaWidth()
-                        - typeLb.getServiceZoneWidth();
+                        - typeLb.getServiceZoneWidth()
+        );
 
-        int cellDepth =
-                getDepth() - doorThickness;
+        int cellDepth = toIntSaturated(
+                (long) getDepth() - doorThickness
+        );
 
-        long usableHeight =
-                (long) getHeight()
+        long usableHeight = countCells == 0
+                ? 0
+                : (long) getHeight()
                         - getUpperFrame()
                         - getBottomFrame()
-                        - ((long) (countCells - 1)
-                        * typeLb.getShelfThick());
+                        - (long) (countCells - 1) * typeLb.getShelfThick();
 
-        int cellHeight =
-                (int) (usableHeight / countCells);
+        int cellHeight = countCells == 0
+                ? 0
+                : toIntSaturated(usableHeight / countCells);
 
-        if (cellHeight < 85) {
-            throw new IllegalStateException(
-                    String.format(
-                            "Высота ячейки %d мм меньше минимально "
-                                    + "допустимой 85 мм "
-                                    + "(модуль: %d мм, ячеек: %d)",
-                            cellHeight,
-                            getHeight(),
-                            countCells
-                    )
-            );
+        /*
+         * Расчёт не блокирует создание доменной модели с некорректной
+         * геометрией. Допустимость размеров проверяет ModuleSizeValidator.
+         */
+        setCellDimensions(cellHeight, cellWidth, cellDepth);
+    }
+
+    /**
+     * Ограничивает результат вычисления диапазоном int без переполнения.
+     */
+    private int toIntSaturated(long value) {
+        if (value > Integer.MAX_VALUE) {
+            return Integer.MAX_VALUE;
         }
-
-        setCellDimensions(
-                cellHeight,
-                cellWidth,
-                cellDepth
-        );
+        if (value < Integer.MIN_VALUE) {
+            return Integer.MIN_VALUE;
+        }
+        return (int) value;
     }
 
     /**

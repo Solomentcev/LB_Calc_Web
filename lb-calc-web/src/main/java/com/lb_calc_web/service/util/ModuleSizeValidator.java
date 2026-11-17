@@ -1,19 +1,19 @@
 package com.lb_calc_web.service.util;
 
 import com.lb_calc_web.domain.attributes.TypeLb;
-import com.lb_calc_web.domain.equipment.Display;
-import com.lb_calc_web.dto.LBCDTO;
-import com.lb_calc_web.dto.LBDTO;
-import com.lb_calc_web.dto.LCDTO;
+import com.lb_calc_web.domain.equipment.Equipment;
+import com.lb_calc_web.domain.model.LB;
+import com.lb_calc_web.domain.model.LBC;
+import com.lb_calc_web.domain.model.LC;
+import com.lb_calc_web.domain.model.StorageModule;
 import com.lb_calc_web.dto.validation.ValidationResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 
 /**
- * Проверяет геометрические параметры отдельных модулей хранения и управления.
+ * Проверяет геометрические параметры доменных моделей модулей.
  */
 @Component
 public class ModuleSizeValidator {
@@ -47,8 +47,12 @@ public class ModuleSizeValidator {
     }
 
     private void validateRange(
-            ValidationResult result, String fieldName, long value,
-            long min, long max, String fieldLabel
+            ValidationResult result,
+            String fieldName,
+            long value,
+            long min,
+            long max,
+            String fieldLabel
     ) {
         if (value < min) {
             addError(result, fieldName, fieldLabel + " меньше допустимой",
@@ -60,201 +64,257 @@ public class ModuleSizeValidator {
     }
 
     /**
-     * Проверяет геометрию LB с размерами, указанными в самом DTO.
+     * Проверяет геометрию доменной модели LB.
      */
-    public ValidationResult validateLB(LBDTO lb) {
+    public ValidationResult validateLB(LB lb) {
         if (lb == null) {
-            return invalidResult("LB", null, "module", "Модуль LB не задан");
+            return invalidResult("LB", "module", "Модуль LB не задан");
         }
-        return validateLB(lb, lb.getHeight(), lb.getDepth(),
-                lb.getUpperFrame(), lb.getBottomFrame(), true);
+
+        return validateLB(
+                lb, lb.getHeight(), lb.getDepth(),
+                lb.getUpperFrame(), lb.getBottomFrame(), true
+        );
     }
 
     ValidationResult validateLB(
-            LBDTO lb, int height, int depth, int upperFrame,
+            LB lb, int height, int depth, int upperFrame,
             int bottomFrame, boolean validateCommonDimensions
     ) {
         if (lb == null) {
-            return invalidResult("LB", null, "module", "Модуль LB не задан");
+            return invalidResult("LB", "module", "Модуль LB не задан");
         }
 
-        ValidationResult result = new ValidationResult("LB", lb.getId());
-        logger.info("Валидация размеров LB (id:{} type:{})", lb.getId(), lb.getType());
-
-        if (validateCommonDimensions) {
-            validateFrames(result, upperFrame, bottomFrame);
-        }
-
-        if (validateCommonDimensions) {
-            long heightMin = Math.max((long) bounds.getHeightMin(),
-                    (long) bounds.getHeightCellMin() + upperFrame + bottomFrame);
-            validateRange(result, "height", height, heightMin,
-                    bounds.getHeightMax(), "Высота модуля");
-            validateRange(result, "depth", depth, bounds.getDepthMin(),
-                    bounds.getDepthMax(), "Глубина модуля");
-        }
-
-        long widthMin = (long) bounds.getWidthCellMin()
-                + lb.getDeltaWidth() + lb.getServiceZoneWidth();
-        validateRange(result, "width", lb.getWidth(), widthMin,
-                bounds.getWidthMax(), "Ширина модуля");
-        validateRange(result, "doorThickness", lb.getDoorThickness(),
-                bounds.getDoorThicknessMin(), bounds.getDoorThicknessMax(),
-                "Толщина дверцы");
-
-        TypeLb typeLb = validateType(result, lb.getType(),
-                lb.getDeltaWidth(), lb.getShelfThick(),
-                lb.getServiceZoneWidth(), "LB");
-        if (typeLb == null) {
-            logValidationResult(result);
-            return result;
-        }
-
-        validateLBCellCount(result, height, upperFrame, bottomFrame,
-                lb.getCountCells(), typeLb);
-        validateStorageCellDimensions(result, height, depth, upperFrame,
-                bottomFrame, lb.getWidth(), lb.getDoorThickness(),
-                lb.getCountCells(), typeLb);
-
-        logValidationResult(result);
-        return result;
+        return validateStorageModule(
+                "LB", lb, height, depth, upperFrame, bottomFrame,
+                validateCommonDimensions, false
+        );
     }
 
     /**
-     * Проверяет геометрию LBC с размерами, указанными в самом DTO.
+     * Проверяет геометрию доменной модели LBC.
      */
-    public ValidationResult validateLBC(LBCDTO lbc) {
+    public ValidationResult validateLBC(LBC lbc) {
         if (lbc == null) {
-            return invalidResult("LBC", null, "module", "Модуль LBC не задан");
+            return invalidResult("LBC", "module", "Модуль LBC не задан");
         }
-        return validateLBC(lbc, lbc.getHeight(), lbc.getDepth(),
-                lbc.getUpperFrame(), lbc.getBottomFrame(), true);
+
+        return validateLBC(
+                lbc, lbc.getHeight(), lbc.getDepth(),
+                lbc.getUpperFrame(), lbc.getBottomFrame(), true
+        );
     }
 
     ValidationResult validateLBC(
-            LBCDTO lbc, int height, int depth, int upperFrame,
+            LBC lbc, int height, int depth, int upperFrame,
             int bottomFrame, boolean validateCommonDimensions
     ) {
         if (lbc == null) {
-            return invalidResult("LBC", null, "module", "Модуль LBC не задан");
+            return invalidResult("LBC", "module", "Модуль LBC не задан");
         }
 
-        ValidationResult result = new ValidationResult("LBC", lbc.getId());
-        logger.info("Валидация размеров LBC (id:{} type:{})", lbc.getId(), lbc.getType());
+        return validateStorageModule(
+                "LBC", lbc, height, depth, upperFrame, bottomFrame,
+                validateCommonDimensions, true
+        );
+    }
+
+    /**
+     * Проверяет геометрию доменной модели LC.
+     */
+    public ValidationResult validateLC(LC lc) {
+        if (lc == null) {
+            return invalidResult("LC", "module", "Модуль LC не задан");
+        }
+
+        return validateLC(
+                lc, lc.getHeight(), lc.getDepth(),
+                lc.getUpperFrame(), lc.getBottomFrame(), true
+        );
+    }
+
+    ValidationResult validateLC(
+            LC lc, int height, int depth, int upperFrame,
+            int bottomFrame, boolean validateCommonDimensions
+    ) {
+        if (lc == null) {
+            return invalidResult("LC", "module", "Модуль LC не задан");
+        }
+
+        ValidationResult result = new ValidationResult("LC", null);
+        logger.info("Валидация размеров доменной модели LC");
+
+        long requiredWidth = lc.getEquipment().stream()
+                .mapToLong(Equipment::getWidth)
+                .max()
+                .orElse(0L);
+        validateRange(result, "width", lc.getWidth(),
+                requiredWidth, bounds.getWidthMax(), "Ширина модуля");
 
         if (validateCommonDimensions) {
             validateFrames(result, upperFrame, bottomFrame);
-        }
-
-        if (validateCommonDimensions) {
-            long heightMin = Math.max((long) bounds.getHeightMin(),
-                    (long) bounds.getHeightCellMin() + upperFrame + bottomFrame);
-            validateRange(result, "height", height, heightMin,
-                    bounds.getHeightMax(), "Высота модуля");
-            validateRange(result, "depth", depth, bounds.getDepthMin(),
-                    bounds.getDepthMax(), "Глубина модуля");
+            validateRange(result, "height", height,
+                    bounds.getHeightLcMin(), bounds.getHeightMax(),
+                    "Высота модуля");
+            validateRange(result, "depth", depth,
+                    bounds.getDepthMin(), bounds.getDepthMax(),
+                    "Глубина модуля");
 
             long usableHeight = (long) height - upperFrame - bottomFrame;
             if (usableHeight < bounds.getHeightLcPanelMin()) {
                 addError(result, "heightConsistency",
-                        "Полезная высота слишком мала для панели управления LBC",
+                        "Полезная высота слишком мала для панели управления",
                         usableHeight, bounds.getHeightLcPanelMin(),
                         bounds.getHeightMax());
             }
         }
 
-        long storageWidthMin = (long) bounds.getWidthCellMin()
-                + lbc.getDeltaWidth() + lbc.getServiceZoneWidth();
-        int controlWidthMin = requiredLBCControlWidth(result, lbc.getDisplay());
-        validateRange(result, "width", lbc.getWidth(),
-                Math.max(storageWidthMin, controlWidthMin),
-                bounds.getWidthMax(), "Ширина модуля");
-        validateRange(result, "doorThickness", lbc.getDoorThickness(),
-                bounds.getDoorThicknessMin(), bounds.getDoorThicknessMax(),
-                "Толщина дверцы");
+        logValidationResult(result);
+        return result;
+    }
 
-        TypeLb typeLb = validateType(result, lbc.getType(),
-                lbc.getDeltaWidth(), lbc.getShelfThick(),
-                lbc.getServiceZoneWidth(), "LBC");
+    /**
+     * Проверяет количество ячеек доменного модуля хранения.
+     */
+    public void validateLBCellCount(
+            ValidationResult result,
+            StorageModule module
+    ) {
+        if (module == null) {
+            addError(result, "module",
+                    "Модуль хранения не задан", null, null, null);
+            return;
+        }
+
+        TypeLb typeLb = module.getTypeLb();
         if (typeLb == null) {
+            addError(result, "type",
+                    "Тип модуля хранения не задан", null, null, null);
+            return;
+        }
+
+        validateLBCellCount(
+                result,
+                module.getHeight(),
+                module.getUpperFrame(),
+                module.getBottomFrame(),
+                module.getCountCells(),
+                typeLb
+        );
+    }
+
+    /**
+     * Проверяет геометрию доменного модуля хранения.
+     *
+     * @param objectType тип проверяемого модуля
+     * @param module доменная модель модуля хранения
+     * @param height высота с учётом общих размеров ALS
+     * @param depth глубина с учётом общих размеров ALS
+     * @param upperFrame верхняя рама с учётом общих размеров ALS
+     * @param bottomFrame нижняя рама с учётом общих размеров ALS
+     * @param validateCommonDimensions признак проверки общих размеров
+     * @param controlModule признак совмещения с модулем управления
+     */
+    private ValidationResult validateStorageModule(
+            String objectType,
+            StorageModule module,
+            int height,
+            int depth,
+            int upperFrame,
+            int bottomFrame,
+            boolean validateCommonDimensions,
+            boolean controlModule
+    ) {
+        ValidationResult result = new ValidationResult(objectType, null);
+        TypeLb typeLb = module.getTypeLb();
+
+        logger.info("Валидация размеров доменной модели {}", objectType);
+
+        if (validateCommonDimensions) {
+            validateFrames(result, upperFrame, bottomFrame);
+
+            long heightMin = Math.max(
+                    (long) bounds.getHeightMin(),
+                    (long) bounds.getHeightCellMin()
+                            + upperFrame + bottomFrame
+            );
+            validateRange(result, "height", height, heightMin,
+                    bounds.getHeightMax(), "Высота модуля");
+            validateRange(result, "depth", depth,
+                    bounds.getDepthMin(), bounds.getDepthMax(),
+                    "Глубина модуля");
+
+            if (controlModule) {
+                long usableHeight = (long) height
+                        - upperFrame - bottomFrame;
+                if (usableHeight < bounds.getHeightLcPanelMin()) {
+                    addError(result, "heightConsistency",
+                            "Полезная высота слишком мала для панели управления LBC",
+                            usableHeight, bounds.getHeightLcPanelMin(),
+                            bounds.getHeightMax());
+                }
+            }
+        }
+
+        if (typeLb == null) {
+            addError(result, "type",
+                    "Тип модуля хранения не задан", null, null, null);
+            validateRange(result, "width", module.getWidth(),
+                    (long) bounds.getWidthCellMin(),
+                    bounds.getWidthMax(), "Ширина модуля");
+            validateRange(result, "doorThickness",
+                    module.getDoorThickness(),
+                    bounds.getDoorThicknessMin(),
+                    bounds.getDoorThicknessMax(),
+                    "Толщина дверцы");
             logValidationResult(result);
             return result;
         }
 
-        validateLBCellCount(result, height, upperFrame, bottomFrame,
-                lbc.getCountCells(), typeLb);
-        validateStorageCellDimensions(result, height, depth, upperFrame,
-                bottomFrame, lbc.getWidth(), lbc.getDoorThickness(),
-                lbc.getCountCells(), typeLb);
+        validateType(result, typeLb, objectType);
+
+        long storageWidthMin = (long) bounds.getWidthCellMin()
+                + typeLb.getDeltaWidth()
+                + typeLb.getServiceZoneWidth();
+        long requiredWidth = storageWidthMin;
+
+        if (module instanceof LBC lbc) {
+            requiredWidth = Math.max(
+                    requiredWidth,
+                    requiredLBCControlWidth(lbc)
+            );
+        }
+
+        validateRange(result, "width", module.getWidth(),
+                requiredWidth, bounds.getWidthMax(), "Ширина модуля");
+        validateRange(result, "doorThickness", module.getDoorThickness(),
+                bounds.getDoorThicknessMin(),
+                bounds.getDoorThicknessMax(), "Толщина дверцы");
+
+        validateLBCellCount(
+                result, height, upperFrame, bottomFrame,
+                module.getCountCells(), typeLb
+        );
+        validateStorageCellDimensions(
+                result, height, depth, upperFrame, bottomFrame,
+                module.getWidth(), module.getDoorThickness(),
+                module.getCountCells(), typeLb
+        );
 
         logValidationResult(result);
         return result;
-    }
-
-    /**
-     * Проверяет геометрию LC с размерами, указанными в самом DTO.
-     */
-    public ValidationResult validateLC(LCDTO lc) {
-        if (lc == null) {
-            return invalidResult("LC", null, "module", "Модуль LC не задан");
-        }
-        return validateLC(lc, lc.getHeight(), lc.getDepth(),
-                lc.getUpperFrame(), lc.getBottomFrame(), true);
-    }
-
-    ValidationResult validateLC(
-            LCDTO lc, int height, int depth, int upperFrame,
-            int bottomFrame, boolean validateCommonDimensions
-    ) {
-        if (lc == null) {
-            return invalidResult("LC", null, "module", "Модуль LC не задан");
-        }
-
-        ValidationResult result = new ValidationResult("LC", lc.getId());
-        logger.info("Валидация размеров LC (id:{})", lc.getId());
-
-        if (validateCommonDimensions) {
-            validateFrames(result, upperFrame, bottomFrame);
-            validateRange(result, "height", height, bounds.getHeightLcMin(),
-                    bounds.getHeightMax(), "Высота модуля");
-            validateRange(result, "depth", depth, bounds.getDepthMin(),
-                    bounds.getDepthMax(), "Глубина модуля");
-        }
-
-        long usableHeight = (long) height - upperFrame - bottomFrame;
-        if (validateCommonDimensions
-                && usableHeight < bounds.getHeightLcPanelMin()) {
-            addError(result, "heightConsistency",
-                    "Полезная высота слишком мала для панели управления",
-                    usableHeight, bounds.getHeightLcPanelMin(), bounds.getHeightMax());
-        }
-
-        logValidationResult(result);
-        return result;
-    }
-
-    /**
-     * Проверяет количество ячеек LB/LBC с учётом доступной высоты.
-     */
-    public void validateLBCellCount(
-            ValidationResult result,
-            LBDTO lb,
-            TypeLb typeLb
-    ) {
-        if (lb == null) {
-            addError(result, "module", "Модуль LB не задан", null, null, null);
-            return;
-        }
-        validateLBCellCount(result, lb.getHeight(), lb.getUpperFrame(),
-                lb.getBottomFrame(), lb.getCountCells(), typeLb);
     }
 
     private void validateLBCellCount(
-            ValidationResult result, int height, int upperFrame,
-            int bottomFrame, int countCells, TypeLb typeLb
+            ValidationResult result,
+            int height,
+            int upperFrame,
+            int bottomFrame,
+            int countCells,
+            TypeLb typeLb
     ) {
         long usableHeight = (long) height - upperFrame - bottomFrame;
-        if (usableHeight <= 0 || typeLb == null) {
+        if (usableHeight <= 0) {
             return;
         }
 
@@ -267,19 +327,27 @@ public class ModuleSizeValidator {
         long calculatedMax = (usableHeight + typeLb.getShelfThick())
                 / denominator;
         int max = (int) Math.min(calculatedMax, bounds.getCountCellsMax());
+
         validateRange(result, "countCells", countCells,
                 bounds.getCountCellsMin(), max, "Количество ячеек");
     }
 
     private void validateStorageCellDimensions(
-            ValidationResult result, int height, int depth,
-            int upperFrame, int bottomFrame, int width,
-            int doorThickness, int countCells, TypeLb typeLb
+            ValidationResult result,
+            int height,
+            int depth,
+            int upperFrame,
+            int bottomFrame,
+            int width,
+            int doorThickness,
+            int countCells,
+            TypeLb typeLb
     ) {
         if (countCells > 0) {
-            double heightCell = ((double) height - upperFrame - bottomFrame
-                    - (long) (countCells - 1) * typeLb.getShelfThick())
-                    / countCells;
+            long usableHeight = (long) height - upperFrame - bottomFrame
+                    - (long) (countCells - 1) * typeLb.getShelfThick();
+            double heightCell = (double) usableHeight / countCells;
+
             if (heightCell < bounds.getHeightCellMin()) {
                 addError(result, "heightCell",
                         "Высота ячейки меньше допустимой",
@@ -288,73 +356,58 @@ public class ModuleSizeValidator {
             }
         }
 
-        // Ширина и глубина не зависят от количества ячеек.
         long depthCell = (long) depth - doorThickness;
         validateRange(result, "depthCell", depthCell,
                 bounds.getDepthCellMin(), bounds.getDepthCellMax(),
                 "Глубина ячейки");
 
-        long widthCell = (long) width - typeLb.getDeltaWidth()
+        long widthCell = (long) width
+                - typeLb.getDeltaWidth()
                 - typeLb.getServiceZoneWidth();
         long widthCellMax = (long) bounds.getWidthMax()
-                - typeLb.getDeltaWidth() - typeLb.getServiceZoneWidth();
+                - typeLb.getDeltaWidth()
+                - typeLb.getServiceZoneWidth();
+
         validateRange(result, "widthCell", widthCell,
-                bounds.getWidthCellMin(), widthCellMax, "Ширина ячейки");
+                bounds.getWidthCellMin(), widthCellMax,
+                "Ширина ячейки");
     }
 
-    private TypeLb validateType(
-            ValidationResult result, String type, int deltaWidth,
-            int shelfThick, int serviceZoneWidth, String moduleType
+    private void validateType(
+            ValidationResult result,
+            TypeLb typeLb,
+            String moduleType
     ) {
-        validateRange(result, "deltaWidth", deltaWidth,
-                bounds.getTypeDeltaWidthMin(), bounds.getTypeDeltaWidthMax(),
-                "Добавочная ширина");
-        validateRange(result, "shelfThick", shelfThick,
-                bounds.getTypeShelfThickMin(), bounds.getTypeShelfThickMax(),
-                "Толщина полки");
-        validateRange(result, "serviceZoneWidth", serviceZoneWidth,
+        validateRange(result, "deltaWidth", typeLb.getDeltaWidth(),
+                bounds.getTypeDeltaWidthMin(),
+                bounds.getTypeDeltaWidthMax(), "Добавочная ширина");
+        validateRange(result, "shelfThick", typeLb.getShelfThick(),
+                bounds.getTypeShelfThickMin(),
+                bounds.getTypeShelfThickMax(), "Толщина полки");
+        validateRange(result, "serviceZoneWidth",
+                typeLb.getServiceZoneWidth(),
                 bounds.getTypeServiceZoneWidthMin(),
-                bounds.getTypeServiceZoneWidthMax(), "Ширина сервисной зоны");
+                bounds.getTypeServiceZoneWidthMax(),
+                "Ширина сервисной зоны");
 
-        if (type == null || type.isBlank()) {
-            addError(result, "type", "Тип модуля не указан", null, null, null);
-            return null;
-        }
-
-        try {
-            return new TypeLb(type, deltaWidth, shelfThick, serviceZoneWidth);
-        } catch (IllegalArgumentException exception) {
+        if (typeLb.getType().isBlank()) {
             addError(result, "type",
-                    "Некорректные параметры типа " + moduleType + ": "
-                            + exception.getMessage(),
+                    "Тип модуля " + moduleType + " не указан",
                     null, null, null);
-            return null;
         }
     }
 
-    private int requiredLBCControlWidth(
-            ValidationResult result, String displayName
-    ) {
-        if (displayName == null || displayName.isBlank()
-                || displayName.equals(Display.NONE.getName())) {
-            return 0;
-        }
-
-        return List.of(Display.LC10, Display.LC17, Display.LC19)
-                .stream()
-                .filter(display -> display.getName().equals(displayName))
-                .mapToInt(Display::getWidth)
-                .findFirst()
-                .orElseGet(() -> {
-                    addError(result, "display",
-                            "Неизвестная модель дисплея LBC",
-                            displayName, null, null);
-                    return 0;
-                });
+    private long requiredLBCControlWidth(LBC lbc) {
+        return lbc.getEquipment().stream()
+                .mapToLong(Equipment::getWidth)
+                .max()
+                .orElse(0L);
     }
 
     private void validateFrames(
-            ValidationResult result, int upperFrame, int bottomFrame
+            ValidationResult result,
+            int upperFrame,
+            int bottomFrame
     ) {
         validateRange(result, "upperFrame", upperFrame,
                 bounds.getUpperFrameMin(), bounds.getUpperFrameMax(),
@@ -365,29 +418,34 @@ public class ModuleSizeValidator {
     }
 
     private ValidationResult invalidResult(
-            String type, Long id, String field, String message
+            String type,
+            String field,
+            String message
     ) {
-        ValidationResult result = new ValidationResult(type, id);
+        ValidationResult result = new ValidationResult(type, null);
         addError(result, field, message, null, null, null);
         return result;
     }
 
     private void addError(
-            ValidationResult result, String field, String message,
-            Object actual, Object min, Object max
+            ValidationResult result,
+            String field,
+            String message,
+            Object actual,
+            Object min,
+            Object max
     ) {
         result.addError(result, field, message, actual, min, max);
     }
 
     private void logValidationResult(ValidationResult result) {
         if (result.isValid()) {
-            logger.info("{} (id:{}) - ошибок не найдено",
-                    result.getObjectType(), result.getObjectId());
+            logger.info("{} - ошибок не найдено", result.getObjectType());
             return;
         }
 
-        logger.warn("{} (id:{}) - найдено {} ошибок",
-                result.getObjectType(), result.getObjectId(), result.getErrorCount());
+        logger.warn("{} - найдено {} ошибок",
+                result.getObjectType(), result.getErrorCount());
         result.getErrors().forEach(error -> logger.warn("  - {}", error));
     }
 }
