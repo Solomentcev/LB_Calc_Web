@@ -435,15 +435,21 @@ public class Project {
         StringBuilder builder =
                 new StringBuilder();
 
-        for (Map.Entry<ALS, Integer> entry :
-                quantityALS.entrySet()) {
-
-            builder
-                    .append(entry.getKey().getName())
-                    .append(" - ")
-                    .append(entry.getValue())
-                    .append(" шт.\n");
-        }
+        quantityALS.entrySet().stream()
+                .sorted(
+                        java.util.Comparator
+                                .comparing((Map.Entry<ALS, Integer> entry) ->
+                                        entry.getKey().getName())
+                                .thenComparing(entry ->
+                                        entry.getKey().getDescription())
+                                .thenComparingInt(Map.Entry::getValue)
+                )
+                .forEach(entry ->
+                        builder.append(entry.getKey().getName())
+                                .append(" - ")
+                                .append(entry.getValue())
+                                .append(" шт.\n")
+                );
 
         description =
                 builder.toString();
