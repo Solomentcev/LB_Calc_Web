@@ -5,7 +5,7 @@ import com.lb_calc_web.dto.ALSDTO;
 import com.lb_calc_web.dto.LBCDTO;
 import com.lb_calc_web.dto.LBDTO;
 import com.lb_calc_web.dto.LCDTO;
-import com.lb_calc_web.dto.validation.ValidationResult;
+import com.lb_calc_web.handler.ValidationSizeException;
 import com.lb_calc_web.entity.ALSEntity;
 import com.lb_calc_web.repository.ALSRepository;
 import com.lb_calc_web.repository.ModuleEntityRepository;
@@ -89,7 +89,7 @@ class ALSServiceTest {
         als.setHeight(10);
 
         assertThrows(
-                RuntimeException.class,
+                ValidationSizeException.class,
                 () -> alsService.saveALS(als)
         );
 
