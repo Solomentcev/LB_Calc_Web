@@ -126,7 +126,8 @@ public class LCService {
                 Display.NONE.getName().equals(displayName) ? 0 : 1
         );
         dto.setBarReaderQuantity(
-                BarReader.NONE.getName().equals(dto.getBarReader()) ? 0 : 1
+                (BarReader.NONE.getName().equals(dto.getBarReader())
+                        || BarReader.NONE_ID.equals(dto.getBarReader())) ? 0 : 1
         );
         dto.setPrinterQuantity(dto.isPrinter() ? 1 : 0);
         dto.setRfidReaderQuantity(dto.isRfidReader() ? 1 : 0);
