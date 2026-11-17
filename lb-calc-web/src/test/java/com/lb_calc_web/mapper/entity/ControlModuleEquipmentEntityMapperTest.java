@@ -3,8 +3,12 @@ package com.lb_calc_web.mapper.entity;
 import com.lb_calc_web.TestDataFactory;
 import com.lb_calc_web.domain.equipment.BarReader;
 import com.lb_calc_web.domain.model.EquipmentConfiguration;
+import com.lb_calc_web.entity.EquipmentQuantityEmbeddable;
 import com.lb_calc_web.entity.LBCEntity;
 import com.lb_calc_web.entity.LCEntity;
+
+import java.util.HashSet;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -33,6 +37,19 @@ class ControlModuleEquipmentEntityMapperTest {
 
         assertEquals(2, entity.getBarReaders().size());
         assertEquals(domain, restored);
+    }
+
+
+    @Test
+    void equipmentPositionIdentity_shouldNotDependOnQuantity() {
+        EquipmentQuantityEmbeddable one =
+                new EquipmentQuantityEmbeddable("BAR_READER_1D", 1);
+        EquipmentQuantityEmbeddable two =
+                new EquipmentQuantityEmbeddable("BAR_READER_1D", 2);
+
+        assertEquals(one, two);
+        assertEquals(one.hashCode(), two.hashCode());
+        assertEquals(1, new HashSet<>(List.of(one, two)).size());
     }
 
     private void addBarReaders(EquipmentConfiguration configuration) {
