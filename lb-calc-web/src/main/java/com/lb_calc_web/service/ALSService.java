@@ -748,6 +748,7 @@ public class ALSService {
         dto.setPositionControlModule(
                 calculated.getPositionControlModule()
         );
+        dto.setModuleOrder(calculated.getModuleOrder());
     }
 
     /**

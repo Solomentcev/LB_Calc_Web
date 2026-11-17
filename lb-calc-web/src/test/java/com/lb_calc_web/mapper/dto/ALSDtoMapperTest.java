@@ -37,6 +37,36 @@ class ALSDtoMapperTest {
     }
 
     @Test
+    void toDtoAndBack_shouldPreservePhysicalOrderForLbcWithMultipleStorageModules() {
+        ALS source = new ALS(
+                1940,
+                500,
+                50,
+                50,
+                TestDataFactory.validALS(5L).getColorBody(),
+                TestDataFactory.validALS(5L).getColorDoor(),
+                List.of(
+                        TestDataFactory.validLB(501L),
+                        TestDataFactory.validLB(502L),
+                        TestDataFactory.validLBC(503L),
+                        TestDataFactory.validLB(504L),
+                        TestDataFactory.validLB(505L)
+                )
+        );
+
+        ALSDTO dto = ALSDtoMapper.toDto(source);
+
+        assertEquals("CENTER", dto.getPositionControlModule());
+        assertEquals(
+                List.of("LB", "LB", "LBC", "LB", "LB"),
+                dto.getModuleOrder().stream()
+                        .map(ALSModuleOrderDTO::getType)
+                        .toList()
+        );
+        assertEquals(source, ALSDtoMapper.toDomain(dto));
+    }
+
+    @Test
     void toDomain_shouldSupportLegacyDtoWithoutModuleOrder() {
         ALSDTO dto = TestDataFactory.validALSDTO(2L);
         dto.setModuleOrder(null);
