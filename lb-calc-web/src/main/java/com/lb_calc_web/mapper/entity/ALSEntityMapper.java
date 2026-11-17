@@ -3,7 +3,6 @@ package com.lb_calc_web.mapper.entity;
 import com.lb_calc_web.domain.model.ALS;
 import com.lb_calc_web.domain.model.Module;
 import com.lb_calc_web.entity.ALSEntity;
-import com.lb_calc_web.entity.ALSModuleEntity;
 import com.lb_calc_web.entity.ModuleEntity;
 
 import java.util.Comparator;
@@ -99,7 +98,7 @@ public final class ALSEntityMapper {
         entity.setColorBody(domain.getColorBody());
         entity.setColorDoor(domain.getColorDoor());
 
-        entity.getModules().clear();
+        entity.clearModules();
 
         List<Module> modules = domain.getModules();
         for (int i = 0; i < modules.size(); i++) {
@@ -108,11 +107,7 @@ public final class ALSEntityMapper {
                     "moduleResolver вернул null"
             );
 
-            ALSModuleEntity association = new ALSModuleEntity();
-            association.setAls(entity);
-            association.setModule(moduleEntity);
-            association.setModuleOrder(i);
-            entity.getModules().add(association);
+            entity.addModule(moduleEntity, i);
         }
     }
 
