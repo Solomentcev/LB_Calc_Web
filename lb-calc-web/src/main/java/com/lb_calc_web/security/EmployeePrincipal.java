@@ -21,12 +21,23 @@ public final class EmployeePrincipal implements UserDetails {
     private final String email;
     private final String encryptedPassword;
     private final Role role;
+    private final boolean active;
 
     public EmployeePrincipal(
             Long id,
             String email,
             String encryptedPassword,
             Role role
+    ) {
+        this(id, email, encryptedPassword, role, true);
+    }
+
+    public EmployeePrincipal(
+            Long id,
+            String email,
+            String encryptedPassword,
+            Role role,
+            boolean active
     ) {
         this.id = Objects.requireNonNull(id, "ID сотрудника не должен быть null");
         this.email = Objects.requireNonNull(email, "Email не должен быть null");
@@ -38,6 +49,7 @@ public final class EmployeePrincipal implements UserDetails {
                 role,
                 "Роль не должна быть null"
         );
+        this.active = active;
     }
 
     /**
@@ -111,7 +123,7 @@ public final class EmployeePrincipal implements UserDetails {
      */
     @Override
     public boolean isEnabled() {
-        return true;
+        return active;
     }
 
     @Override
@@ -120,6 +132,7 @@ public final class EmployeePrincipal implements UserDetails {
                 "id=" + id +
                 ", email='" + email + '\'' +
                 ", role=" + role +
+                ", active=" + active +
                 '}';
     }
 }
