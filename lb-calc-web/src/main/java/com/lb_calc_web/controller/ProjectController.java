@@ -191,16 +191,17 @@ public class ProjectController
             ProjectDTO project =
                     projectService.findById(projectId);
 
-            projectService.replaceALSandSaveProject(
-                    project,
-                    als,
-                    alsId
-            );
+            ALSDTO savedALS =
+                    projectService.replaceALSandSaveProject(
+                            project,
+                            als,
+                            alsId
+                    );
 
             return "redirect:/projects/"
                     + projectId
                     + "/alss/"
-                    + alsId;
+                    + savedALS.getId();
 
         } catch (ValidationSizeException e) {
 
