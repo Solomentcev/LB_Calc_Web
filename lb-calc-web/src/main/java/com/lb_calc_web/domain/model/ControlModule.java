@@ -44,9 +44,9 @@ public interface ControlModule {
                 .map(ControlModule::formatEquipmentItem)
                 .collect(Collectors.joining(", "));
 
-        return "Способы доступа: " + accessMethods + ";\\n"
-                + "Печать: " + printOptions + ";\\n"
-                + "Оплата: " + configuration.getPayment() + ";\\n"
+        return "Способы доступа: " + accessMethods + ";\n"
+                + "Печать: " + printOptions + ";\n"
+                + "Оплата: " + configuration.getPayment() + ";\n"
                 + "Оборудование: " + equipment;
     }
 
