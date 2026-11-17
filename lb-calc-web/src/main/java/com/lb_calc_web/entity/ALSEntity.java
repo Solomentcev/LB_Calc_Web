@@ -4,6 +4,7 @@ import com.lb_calc_web.domain.attributes.Colors;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -185,7 +186,7 @@ public class ALSEntity {
     }
 
     public List<ALSModuleEntity> getModules() {
-        return modules;
+        return Collections.unmodifiableList(modules);
     }
 
     /**
