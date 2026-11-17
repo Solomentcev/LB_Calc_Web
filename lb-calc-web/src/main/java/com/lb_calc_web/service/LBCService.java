@@ -9,7 +9,6 @@ import com.lb_calc_web.domain.attributes.TypeLb;
 import com.lb_calc_web.domain.attributes.DirectionDoorOpening;
 import com.lb_calc_web.domain.equipment.BarReader;
 import com.lb_calc_web.domain.equipment.Display;
-import com.lb_calc_web.domain.equipment.Equipment;
 import com.lb_calc_web.domain.equipment.Printer;
 import com.lb_calc_web.domain.equipment.RfidReader;
 import com.lb_calc_web.dto.LBCDTO;
