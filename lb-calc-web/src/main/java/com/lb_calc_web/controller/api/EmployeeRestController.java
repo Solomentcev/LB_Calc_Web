@@ -249,15 +249,29 @@ public class EmployeeRestController {
                     )
             );
 
-        } catch (Exception e) {
+        } catch (NoSuchElementException e) {
 
             return ResponseEntity
-                    .status(
-                            HttpStatus.INTERNAL_SERVER_ERROR
-                    )
+                    .status(HttpStatus.NOT_FOUND)
                     .body(
                             ApiResponse.error(
-                                    "Ошибка удаления сотрудника",
+                                    "Сотрудник не найден",
+                                    e.getMessage()
+                            )
+                    );
+        } catch (Exception e) {
+
+            logger.error(
+                    "Ошибка деактивации сотрудника id={}",
+                    id,
+                    e
+            );
+
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(
+                            ApiResponse.error(
+                                    "Ошибка деактивации сотрудника",
                                     e.getMessage()
                             )
                     );
