@@ -118,27 +118,4 @@ public final class ALSEntityMapper {
         entity.synchronizeModules(moduleEntities);
     }
 
-    /**
-     * Преобразует сущность конкретного модуля в доменную модель.
-     *
-     * @param entity JPA-сущность модуля
-     * @return доменный модуль
-     * @deprecated Используйте {@link ModuleEntityMapper#toDomain(ModuleEntity)}.
-     */
-    @Deprecated
-    public static Module toDomainModule(ModuleEntity entity) {
-        return ModuleEntityMapper.toDomain(entity);
-    }
-
-    /**
-     * Создаёт новую сущность конкретного типа модуля.
-     *
-     * @param module доменный модуль
-     * @return новая JPA-сущность
-     * @deprecated Используйте {@link ModuleEntityMapper#toEntity(Module)}.
-     */
-    @Deprecated
-    public static ModuleEntity createModuleEntity(Module module) {
-        return ModuleEntityMapper.toEntity(module);
-    }
 }

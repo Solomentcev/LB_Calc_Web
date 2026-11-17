@@ -563,16 +563,6 @@ public class ALS {
     }
 
     /**
-     * Обратная совместимость со старым именем.
-     */
-    @Deprecated
-    public com.lb_calc_web.domain.attributes.PositionLC getPositionLC() {
-        return com.lb_calc_web.domain.attributes.PositionLC.valueOf(
-                getPositionControlModule().name()
-        );
-    }
-
-    /**
      * Пересчитывает производные характеристики ALS и входящих модулей.
      *
      * <p>Последовательность расчёта:</p>
@@ -895,7 +885,7 @@ public class ALS {
                 ", bottomFrame=" + bottomFrame +
                 ", colorBody=" + colorBody +
                 ", colorDoor=" + colorDoor +
-                ", positionLC=" + getPositionLC() +
+                ", positionLC=" + getPositionControlModule() +
                 ", countCells=" + getCountCells() +
                 ", modules=" + modules +
                 '}';

@@ -701,7 +701,7 @@ public class ALSService {
         for (ModuleEntity entity : candidates) {
             try {
                 if (domainModule.equals(
-                        ALSEntityMapper.toDomainModule(entity)
+                        ModuleEntityMapper.toDomain(entity)
                 )) {
                     return entity;
                 }
