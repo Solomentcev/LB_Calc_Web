@@ -230,7 +230,7 @@ public class AuthService {
 
         EmployeeDTO result =
                 employeeService.loadUserById(
-                        saved.getId().intValue()
+                        saved.getId()
                 );
 
         publishEvent(
@@ -283,7 +283,7 @@ public class AuthService {
 
         EmployeeDTO result =
                 employeeService.loadUserById(
-                        saved.getId().intValue()
+                        saved.getId()
                 );
 
         publishEvent(
