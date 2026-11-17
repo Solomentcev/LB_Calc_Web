@@ -118,6 +118,11 @@ public class LCEntity extends ModuleEntity {
     public int getDisplayQuantity() { return displayQuantity; }
 
     public void setDisplayQuantity(int quantity) {
+        if (quantity > 1) {
+            throw new IllegalArgumentException(
+                    "Количество дисплеев в модуле должно быть равно 1"
+            );
+        }
         this.displayQuantity = requireNonNegativeQuantity(quantity);
     }
 
