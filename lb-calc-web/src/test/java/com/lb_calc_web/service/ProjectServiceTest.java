@@ -130,11 +130,20 @@ class ProjectServiceTest {
         invalidALS.setHeight(10);
         project.setAlsList(java.util.List.of(invalidALS));
 
-        assertThrows(
+        ValidationSizeException exception = assertThrows(
                 ValidationSizeException.class,
                 () -> projectService.saveProject(project)
         );
 
+        var alsHeightError = exception.getValidationResult()
+                .getErrors()
+                .stream()
+                .filter(error -> "ALS".equals(error.getObjectType())
+                        && "height".equals(error.getField()))
+                .findFirst()
+                .orElseThrow();
+
+        assertEquals(10L, alsHeightError.getObjectId());
         verify(alsService, never()).saveALS(any(ALSDTO.class));
         verify(projectRepository, never()).save(any(ProjectEntity.class));
     }
