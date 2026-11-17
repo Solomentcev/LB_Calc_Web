@@ -1,16 +1,22 @@
 package com.lb_calc_web.service.util;
 
 import com.lb_calc_web.TestDataFactory;
+import com.lb_calc_web.domain.attributes.Colors;
+import com.lb_calc_web.domain.attributes.DirectionDoorOpening;
+import com.lb_calc_web.domain.attributes.Role;
 import com.lb_calc_web.domain.attributes.TypeLb;
-import com.lb_calc_web.dto.ALSDTO;
-import com.lb_calc_web.dto.LBCDTO;
-import com.lb_calc_web.dto.LBDTO;
-import com.lb_calc_web.dto.LCDTO;
-import com.lb_calc_web.dto.ProjectDTO;
+import com.lb_calc_web.domain.model.ALS;
+import com.lb_calc_web.domain.model.Employee;
+import com.lb_calc_web.domain.model.LB;
+import com.lb_calc_web.domain.model.LBC;
+import com.lb_calc_web.domain.model.LC;
+import com.lb_calc_web.domain.model.Project;
 import com.lb_calc_web.dto.validation.ValidationResult;
+import com.lb_calc_web.mapper.dto.ALSDtoMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -18,21 +24,21 @@ import static org.junit.jupiter.api.Assertions.*;
 class SizeValidatorTest {
 
     private SizeValidator sizeValidator;
-    private LBDTO lb;
-    private LCDTO lc;
-    private LBCDTO lbc;
-    private ALSDTO als;
-    private ProjectDTO project;
+    private LB lb;
+    private LC lc;
+    private LBC lbc;
+    private ALS als;
+    private Project project;
 
     @BeforeEach
     void setUp() {
         sizeValidator = TestDataFactory.createSizeValidator();
 
-        lb = TestDataFactory.validLBDTO(1L);
-        lc = TestDataFactory.validLCDTO(2L);
-        lbc = TestDataFactory.validLBCDTO(3L);
-        als = TestDataFactory.validALSDTO(4L);
-        project = TestDataFactory.validProject(5L);
+        lb = TestDataFactory.validLB(1L);
+        lc = TestDataFactory.validLC(2L);
+        lbc = TestDataFactory.validLBC(3L);
+        als = TestDataFactory.validALS(4L);
+        project = createProject(5L, als);
     }
 
     @Test
@@ -40,12 +46,7 @@ class SizeValidatorTest {
         ValidationResult result = new ValidationResult();
 
         sizeValidator.validateRange(
-                result,
-                "height",
-                100,
-                50,
-                200,
-                "Высота"
+                result, "height", 100, 50, 200, "Высота"
         );
 
         assertTrue(result.isValid());
@@ -56,18 +57,10 @@ class SizeValidatorTest {
         ValidationResult result = new ValidationResult();
 
         sizeValidator.validateRange(
-                result,
-                "height",
-                40,
-                50,
-                200,
-                "Высота"
+                result, "height", 40, 50, 200, "Высота"
         );
 
-        assertEquals(
-                "height",
-                result.getErrors().get(0).getField()
-        );
+        assertEquals("height", result.getErrors().get(0).getField());
     }
 
     @Test
@@ -75,300 +68,166 @@ class SizeValidatorTest {
         ValidationResult result = new ValidationResult();
 
         sizeValidator.validateRange(
-                result,
-                "height",
-                210,
-                50,
-                200,
-                "Высота"
+                result, "height", 210, 50, 200, "Высота"
         );
 
-        assertEquals(
-                "height",
-                result.getErrors().get(0).getField()
-        );
+        assertEquals("height", result.getErrors().get(0).getField());
     }
 
     @Test
     void validateLB_valid_shouldPass() {
-        ValidationResult result =
-                sizeValidator.validateLB(lb);
-
-        assertTrue(result.isValid());
+        assertTrue(sizeValidator.validateLB(lb).isValid());
     }
 
     @Test
     void validateLB_widthShouldIncludeServiceZoneWidth() {
-        lb.setWidth(239);
+        LB invalidLB = createLB(1940, 159, 3, 20);
 
-        ValidationResult result = sizeValidator.validateLB(lb);
+        ValidationResult result = sizeValidator.validateLB(invalidLB);
 
-        assertTrue(
-                result.getErrors().stream()
-                        .anyMatch(error -> "width".equals(error.getField()))
-        );
-        assertTrue(
-                result.getErrors().stream()
-                        .anyMatch(error -> "widthCell".equals(error.getField()))
-        );
+        assertHasError(result, "width");
+        assertHasError(result, "widthCell");
     }
 
     @Test
     void validateLBC_widthShouldIncludeServiceZoneWidth() {
-        lbc.setWidth(239);
+        LBC invalidLBC = createLBC(1940, 159, 3, 20);
 
-        ValidationResult result = sizeValidator.validateLBC(lbc);
+        ValidationResult result = sizeValidator.validateLBC(invalidLBC);
 
-        assertTrue(
-                result.getErrors().stream()
-                        .anyMatch(error -> "width".equals(error.getField()))
-        );
-        assertTrue(
-                result.getErrors().stream()
-                        .anyMatch(error -> "widthCell".equals(error.getField()))
-        );
+        assertHasError(result, "width");
+        assertHasError(result, "widthCell");
     }
 
     @Test
     void validateLC_valid_shouldPass() {
-        ValidationResult result =
-                sizeValidator.validateLC(lc);
-
-        assertTrue(result.isValid());
+        assertTrue(sizeValidator.validateLC(lc).isValid());
     }
 
     @Test
     void validateLBC_valid_shouldPass() {
-        ValidationResult result =
-                sizeValidator.validateLBC(lbc);
-
-        assertTrue(result.isValid());
+        assertTrue(sizeValidator.validateLBC(lbc).isValid());
     }
 
     @Test
     void validateLBC_smallHeight_shouldFail() {
-        lbc.setHeight(
-                lbc.getUpperFrame()
-                        + lbc.getBottomFrame()
-                        + sizeValidator.getHeightLcPanelMin()
-                        - 10
-        );
+        LBC invalidLBC = createLBC(349, 500, 3, 20);
 
-        ValidationResult result =
-                sizeValidator.validateLBC(lbc);
+        ValidationResult result = sizeValidator.validateLBC(invalidLBC);
 
         assertFalse(result.isValid());
+        assertHasError(result, "heightConsistency");
     }
 
     @Test
     void validateALS_validWithLC_shouldPass() {
-        ValidationResult result =
-                sizeValidator.validateALS(als);
-
-        assertTrue(result.isValid());
+        assertTrue(sizeValidator.validateALS(als).isValid());
     }
 
     @Test
     void validateALS_validWithLBC_shouldPass() {
-        ALSDTO lbcAls =
-                TestDataFactory.validLBCALSDTO(20L);
+        ALS lbcALS = validLBCALS(20L);
 
-        ValidationResult result =
-                sizeValidator.validateALS(lbcAls);
-
-        assertTrue(result.isValid());
+        assertTrue(sizeValidator.validateALS(lbcALS).isValid());
     }
 
     @Test
-    void validateALS_missingControlModule_shouldFail() {
-        als.setLC(null);
-        als.setLBC(null);
-
-        ValidationResult result =
-                sizeValidator.validateALS(als);
-
-        assertFalse(result.isValid());
-        assertTrue(
-                result.getErrors()
-                        .stream()
-                        .anyMatch(
-                                error ->
-                                        "controlModule".equals(
-                                                error.getField()
-                                        )
-                        )
+    void validateALS_withoutControlModule_shouldBeRejectedByDomain() {
+        assertThrows(
+                IllegalStateException.class,
+                () -> new ALS(
+                        1940,
+                        500,
+                        50,
+                        50,
+                        Colors.Blue,
+                        Colors.White,
+                        List.of(lb)
+                )
         );
     }
 
     @Test
-    void validateALS_LBCWithoutLBList_shouldStillPassConsistency() {
-        ALSDTO lbcAls =
-                TestDataFactory.validLBCALSDTO(21L);
+    void validateALS_LBCWithoutSeparateLB_shouldPass() {
+        ALS lbcALS = validLBCALS(21L);
 
-        lbcAls.setLbList(List.of());
-
-        ValidationResult result =
-                sizeValidator.validateALS(lbcAls);
-
-        assertTrue(result.isValid());
-    }
-
-    @Test
-    void validateLB_missingType_shouldStillValidateIndependentDimensions() {
-        lb.setType(null);
-        lb.setHeight(10);
-
-        ValidationResult result = sizeValidator.validateLB(lb);
-
-        assertTrue(result.getErrors().stream()
-                .anyMatch(error -> "type".equals(error.getField())));
-        assertTrue(result.getErrors().stream()
-                .anyMatch(error -> "height".equals(error.getField())));
+        assertTrue(sizeValidator.validateALS(lbcALS).isValid());
     }
 
     @Test
     void validateLB_shouldAllowMinimumConstructiveHeight() {
-        lb.setHeight(185);
-        lb.setCountCells(1);
+        LB minimumHeightLB = createLB(185, 500, 1, 20);
 
-        ValidationResult result = sizeValidator.validateLB(lb);
+        ValidationResult result = sizeValidator.validateLB(minimumHeightLB);
 
-        assertFalse(result.getErrors().stream()
-                .anyMatch(error -> "height".equals(error.getField())));
-        assertFalse(result.getErrors().stream()
-                .anyMatch(error -> "heightCell".equals(error.getField())));
+        assertFalse(hasError(result, "height"));
+        assertFalse(hasError(result, "heightCell"));
     }
 
     @Test
     void validateLB_invalidHeight_shouldFail() {
-        lb.setHeight(10);
+        LB invalidLB = createLB(10, 500, 3, 20);
 
-        ValidationResult result =
-                sizeValidator.validateLB(lb);
+        ValidationResult result = sizeValidator.validateLB(invalidLB);
 
         assertFalse(result.isValid());
-        assertTrue(
-                result.getErrors()
-                        .stream()
-                        .anyMatch(
-                                error ->
-                                        "height".equals(
-                                                error.getField()
-                                        )
-                        )
-        );
+        assertHasError(result, "height");
     }
 
     @Test
     void validateLC_smallPanel_shouldFail() {
-        lc.setHeight(
-                lc.getUpperFrame()
-                        + lc.getBottomFrame()
-                        + sizeValidator.getHeightLcPanelMin()
-                        - 1
-        );
+        LC invalidLC = createLC(349);
 
-        ValidationResult result =
-                sizeValidator.validateLC(lc);
+        ValidationResult result = sizeValidator.validateLC(invalidLC);
 
         assertFalse(result.isValid());
-        assertTrue(
-                result.getErrors()
-                        .stream()
-                        .anyMatch(
-                                error ->
-                                        "heightConsistency".equals(
-                                                error.getField()
-                                        )
-                        )
-        );
+        assertHasError(result, "heightConsistency");
     }
 
     @Test
     void validateProject_withLBC_shouldCollectLBCResult() {
-        ProjectDTO lbcProject = new ProjectDTO();
-        lbcProject.setId(30L);
-        lbcProject.getAlsList().add(
-                TestDataFactory.validLBCALSDTO(31L)
-        );
+        Project lbcProject = createProject(30L, validLBCALS(31L));
 
         List<ValidationResult> results =
-                sizeValidator.validateProject(
-                        lbcProject
-                );
+                sizeValidator.validateProject(lbcProject);
 
-        assertTrue(
-                results.stream()
-                        .anyMatch(
-                                result ->
-                                        "LBC".equals(
-                                                result.getObjectType()
-                                        )
-                        )
-        );
+        assertTrue(results.stream()
+                .anyMatch(result -> "LBC".equals(result.getObjectType())));
     }
 
     @Test
     void getErrorValidateLBCSizesList_shouldReturnErrors() {
-        lbc.setHeight(10);
+        LBC invalidLBC = createLBC(10, 500, 3, 20);
 
         List<String> errors =
-                sizeValidator.getErrorValidateLBCSizesList(
-                        lbc
-                );
+                sizeValidator.getErrorValidateLBCSizesList(invalidLBC);
 
         assertFalse(errors.isEmpty());
     }
 
     @Test
     void deepValidateALS_shouldIncludeLBC() {
-        ALSDTO lbcAls =
-                TestDataFactory.validLBCALSDTO(40L);
-
         List<ValidationResult> results =
-                sizeValidator.deepValidateALS(lbcAls);
+                sizeValidator.deepValidateALS(validLBCALS(40L));
 
-        assertTrue(
-                results.stream()
-                        .anyMatch(
-                                result ->
-                                        "LBC".equals(
-                                                result.getObjectType()
-                                        )
-                        )
-        );
+        assertTrue(results.stream()
+                .anyMatch(result -> "LBC".equals(result.getObjectType())));
     }
 
     @Test
     void validateALS_withLC_shouldRespectMinimumLCHeight() {
-        als.setHeight(599);
+        ALS shortALS = createALS(599, als);
 
-        ValidationResult result = sizeValidator.validateALS(als);
+        ValidationResult result = sizeValidator.validateALS(shortALS);
 
-        assertTrue(result.getErrors().stream()
-                .anyMatch(error -> "height".equals(error.getField())));
-    }
-
-    @Test
-    void validateALS_bothControlModules_shouldFailStructureValidation() {
-        als.setLBC(TestDataFactory.validLBCDTO(90L));
-
-        ValidationResult result = sizeValidator.validateALS(als);
-
-        assertTrue(result.getErrors().stream()
-                .anyMatch(error -> "controlModule".equals(error.getField())));
+        assertHasError(result, "height");
     }
 
     @Test
     void validateALS_shouldReportOnlyOneUsableHeightError() {
-        als.setHeight(
-                als.getUpperFrame()
-                        + als.getBottomFrame()
-                        + sizeValidator.getHeightLcPanelMin()
-                        - 1
-        );
+        ALS shortALS = createALS(349, als);
 
-        ValidationResult result = sizeValidator.validateALS(als);
+        ValidationResult result = sizeValidator.validateALS(shortALS);
 
         assertEquals(1, result.getErrors().stream()
                 .filter(error -> "heightConsistency".equals(error.getField()))
@@ -376,65 +235,141 @@ class SizeValidatorTest {
     }
 
     @Test
-    void validateLBC_unknownDisplay_shouldAddValidationError() {
-        lbc.setDisplay("UNKNOWN");
+    void validateLBC_shouldValidateCellCountAndWidthWhenCountIsZero() {
+        LBC zeroCellLBC = createLBC(1940, 159, 0, 20);
 
-        ValidationResult result = sizeValidator.validateLBC(lbc);
+        ValidationResult result = sizeValidator.validateLBC(zeroCellLBC);
 
-        assertTrue(result.getErrors().stream()
-                .anyMatch(error -> "display".equals(error.getField())));
-    }
-
-    @Test
-    void validateLBC_shouldValidateCellWidthWhenCellCountIsZero() {
-        lbc.setCountCells(0);
-        lbc.setWidth(239);
-
-        ValidationResult result = sizeValidator.validateLBC(lbc);
-
-        assertTrue(result.getErrors().stream()
-                .anyMatch(error -> "widthCell".equals(error.getField())));
-        assertTrue(result.getErrors().stream()
-                .anyMatch(error -> "depthCell".equals(error.getField())));
+        assertHasError(result, "countCells");
+        assertHasError(result, "widthCell");
     }
 
     @Test
     void deepValidateALS_shouldUseCommonDimensionsFromALS() {
-        als.getLbList().get(0).setHeight(10);
+        ALS shortALS = createALS(10, als);
 
-        List<ValidationResult> results = sizeValidator.deepValidateALS(als);
+        List<ValidationResult> results =
+                sizeValidator.deepValidateALS(shortALS);
 
         ValidationResult lbResult = results.stream()
                 .filter(result -> "LB".equals(result.getObjectType()))
                 .findFirst()
                 .orElseThrow();
 
-        assertFalse(lbResult.getErrors().stream()
-                .anyMatch(error -> "height".equals(error.getField())));
-    }
-
-    @Test
-    void deepValidateALS_nullLBElement_shouldReturnValidationError() {
-        als.setLbList(java.util.Arrays.asList((LBDTO) null));
-
-        List<ValidationResult> results = sizeValidator.deepValidateALS(als);
-
-        assertTrue(results.stream()
-                .anyMatch(result -> "LB".equals(result.getObjectType())
-                        && result.getErrors().stream()
-                        .anyMatch(error -> "module".equals(error.getField()))));
+        assertFalse(hasError(lbResult, "height"));
+        assertTrue(hasError(lbResult, "heightCell"));
     }
 
     @Test
     void validateLBCellCount_shouldRespectConfiguredBounds() {
         ValidationResult result = new ValidationResult();
 
-        sizeValidator.validateLBCellCount(
-                result,
-                lb,
-                new TypeLb("TYPE1", 100, 5, 40)
-        );
+        sizeValidator.validateLBCellCount(result, lb);
 
         assertTrue(result.isValid());
+    }
+
+    private LB createLB(
+            int height,
+            int width,
+            int countCells,
+            int doorThickness
+    ) {
+        LB source = TestDataFactory.validLB(1L);
+
+        return new LB(
+                height,
+                width,
+                source.getDepth(),
+                source.getUpperFrame(),
+                source.getBottomFrame(),
+                source.getColorBody(),
+                source.getColorDoor(),
+                source.getTypeLb(),
+                countCells,
+                DirectionDoorOpening.LEFT,
+                doorThickness
+        );
+    }
+
+    private LC createLC(int height) {
+        return new LC(
+                height,
+                lc.getWidth(),
+                lc.getDepth(),
+                lc.getUpperFrame(),
+                lc.getBottomFrame(),
+                lc.getColorBody(),
+                lc.getColorDoor(),
+                lc.getControlConfiguration().copy()
+        );
+    }
+
+    private LBC createLBC(
+            int height,
+            int width,
+            int countCells,
+            int doorThickness
+    ) {
+        return new LBC(
+                height,
+                width,
+                lbc.getDepth(),
+                lbc.getUpperFrame(),
+                lbc.getBottomFrame(),
+                lbc.getColorBody(),
+                lbc.getColorDoor(),
+                lbc.getTypeLb(),
+                countCells,
+                DirectionDoorOpening.LEFT,
+                doorThickness,
+                lbc.getControlConfiguration().copy()
+        );
+    }
+
+    private ALS createALS(int height, ALS source) {
+        return new ALS(
+                height,
+                source.getDepth(),
+                source.getUpperFrame(),
+                source.getBottomFrame(),
+                source.getColorBody(),
+                source.getColorDoor(),
+                source.getModules()
+        );
+    }
+
+    private ALS validLBCALS(Long id) {
+        return ALSDtoMapper.toDomain(
+                TestDataFactory.validLBCALSDTO(id)
+        );
+    }
+
+    private Project createProject(Long id, ALS configuration) {
+        Employee employee = new Employee(
+                "Тест",
+                "Тестов",
+                "test" + id + "@example.com",
+                LocalDate.of(2026, 1, 1),
+                Role.ROLE_MANAGER
+        );
+
+        Project result = new Project(
+                "TEST_" + id,
+                "TEST_COMPANY",
+                LocalDate.of(2026, 1, 1),
+                employee
+        );
+        result.addALS(configuration);
+        return result;
+    }
+
+    private void assertHasError(ValidationResult result, String field) {
+        assertTrue(hasError(result, field), "Ожидалась ошибка поля " + field);
+    }
+
+    private boolean hasError(ValidationResult result, String field) {
+        return result.getErrors().stream()
+                .anyMatch(error -> field.equals(error.getField()));
     }
 }
