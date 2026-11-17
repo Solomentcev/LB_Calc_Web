@@ -291,7 +291,7 @@ public class LBC extends StorageModule implements ControlModule {
                 && getColorBody() == other.getColorBody()
                 && getColorDoor() == other.getColorDoor()
                 && Objects.equals(
-                getControlConfiguration(),
+                controlConfiguration,
                 other.getControlConfiguration()
         );
     }
