@@ -28,7 +28,7 @@ CREATE TABLE module (
                         id BIGINT NOT NULL AUTO_INCREMENT,
 
                         name VARCHAR(255) NOT NULL,
-                        description TEXT,
+                        description TEXT NOT NULL,
 
                         height INT NOT NULL,
                         width INT NOT NULL,
@@ -51,13 +51,7 @@ CREATE TABLE module (
 
 CREATE TABLE lc (
                     id BIGINT NOT NULL,
-
-                    display VARCHAR(255),
-                    bar_reader VARCHAR(255),
-                    payment VARCHAR(50),
-
-                    printer BOOLEAN NOT NULL,
-                    rfid_reader BOOLEAN NOT NULL,
+                    payment VARCHAR(50) NOT NULL,
 
                     CONSTRAINT pk_lc
                         PRIMARY KEY (id),
@@ -66,6 +60,28 @@ CREATE TABLE lc (
                         FOREIGN KEY (id)
                             REFERENCES module (id)
                             ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+
+-- ============================================================
+-- LC equipment
+-- ============================================================
+
+CREATE TABLE lc_equipment (
+                              lc_id BIGINT NOT NULL,
+                              catalog_position_id VARCHAR(255) NOT NULL,
+                              quantity INT NOT NULL,
+
+                              CONSTRAINT uk_lc_equipment
+                                  UNIQUE (lc_id, catalog_position_id),
+
+                              CONSTRAINT chk_lc_equipment_quantity
+                                  CHECK (quantity >= 1),
+
+                              CONSTRAINT fk_lc_equipment_lc
+                                  FOREIGN KEY (lc_id)
+                                      REFERENCES lc (id)
+                                      ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
 
@@ -119,12 +135,7 @@ CREATE TABLE lbc (
                      width_cell INT NOT NULL,
                      depth_cell INT NOT NULL,
 
-                     display VARCHAR(255),
-                     bar_reader VARCHAR(255),
-                     payment VARCHAR(50),
-
-                     printer BOOLEAN NOT NULL,
-                     rfid_reader BOOLEAN NOT NULL,
+                     payment VARCHAR(50) NOT NULL,
 
                      CONSTRAINT pk_lbc
                          PRIMARY KEY (id),
@@ -133,6 +144,28 @@ CREATE TABLE lbc (
                          FOREIGN KEY (id)
                              REFERENCES module (id)
                              ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+
+-- ============================================================
+-- LBC equipment
+-- ============================================================
+
+CREATE TABLE lbc_equipment (
+                              lbc_id BIGINT NOT NULL,
+                              catalog_position_id VARCHAR(255) NOT NULL,
+                              quantity INT NOT NULL,
+
+                              CONSTRAINT uk_lbc_equipment
+                                  UNIQUE (lbc_id, catalog_position_id),
+
+                              CONSTRAINT chk_lbc_equipment_quantity
+                                  CHECK (quantity >= 1),
+
+                              CONSTRAINT fk_lbc_equipment_lbc
+                                  FOREIGN KEY (lbc_id)
+                                      REFERENCES lbc (id)
+                                      ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
 
