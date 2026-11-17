@@ -423,14 +423,15 @@ class PersistenceIntegrationTest {
                     projectService.addLBAtProject(projectId, selectedAlsId);
 
             LCDTO changedLC = changedALS.getLC();
-            changedLC.setDisplayQuantity(2);
+            changedLC.setBarReader(BarReader.READER_1D.getName());
+            changedLC.setBarReaderQuantity(1);
             ALSDTO changedWithLC = projectService.saveLCAtProject(
                     projectId,
                     changedALS.getId(),
                     changedLC.getId(),
                     changedLC
             );
-            assertEquals(2, changedWithLC.getLC().getDisplayQuantity());
+            assertEquals(1, changedWithLC.getLC().getBarReaderQuantity());
 
             LBCDTO changedLBC = savedProject.getAlsList().get(2).getLBC();
             changedLBC.setAccessMethods(List.of(AccessMethod.RFID.name()));
@@ -475,7 +476,7 @@ class PersistenceIntegrationTest {
                     .filter(value -> value.getId().equals(changedWithLC.getId()))
                     .findFirst()
                     .orElseThrow();
-            assertEquals(2, persistedLCConfiguration.getLC().getDisplayQuantity());
+            assertEquals(1, persistedLCConfiguration.getLC().getBarReaderQuantity());
 
             ALSDTO persistedLBCConfiguration = restoredDTO.getAlsList().stream()
                     .filter(value -> value.getId().equals(changedWithLBC.getId()))
