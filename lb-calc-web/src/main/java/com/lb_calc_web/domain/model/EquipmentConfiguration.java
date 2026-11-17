@@ -31,7 +31,7 @@ public class EquipmentConfiguration {
         for (Equipment equipment : source) {
             Equipment position = Objects.requireNonNull(
                     equipment, listName + " не должно содержать null");
-            result.merge(position, 1, Integer::sum);
+            result.merge(position, 1, EquipmentConfiguration::sumQuantities);
         }
         validateDisplayQuantity(result);
         return result;
@@ -138,12 +138,31 @@ public class EquipmentConfiguration {
                     "Позиция уже добавлена в другую группу оборудования: " +
                             position.getCatalogPositionId());
         }
-        int newQuantity = target.getOrDefault(position, 0) + quantity;
+        int newQuantity = sumQuantities(target.getOrDefault(position, 0), quantity);
         if (position instanceof Display && newQuantity > 1) {
             throw new IllegalArgumentException(
                     "Количество дисплеев в модуле должно быть равно 1");
         }
         target.put(position, newQuantity);
+    }
+
+    /**
+     * Складывает количества без переполнения целочисленного диапазона.
+     *
+     * @param current текущее количество
+     * @param additional добавляемое количество
+     * @return итоговое количество
+     * @throws IllegalArgumentException если сумма превышает диапазон int
+     */
+    private static int sumQuantities(int current, int additional) {
+        try {
+            return Math.addExact(current, additional);
+        } catch (ArithmeticException exception) {
+            throw new IllegalArgumentException(
+                    "Количество оборудования превышает допустимый диапазон",
+                    exception
+            );
+        }
     }
 
     public boolean removeRequiredEquipment(Equipment equipment) {
