@@ -2,10 +2,7 @@ package com.lb_calc_web.service;
 
 import com.lb_calc_web.domain.attributes.Colors;
 import com.lb_calc_web.domain.attributes.Payment;
-import com.lb_calc_web.domain.equipment.BarReader;
 import com.lb_calc_web.domain.equipment.Display;
-import com.lb_calc_web.domain.equipment.Printer;
-import com.lb_calc_web.domain.equipment.RfidReader;
 import com.lb_calc_web.domain.model.LC;
 import com.lb_calc_web.dto.LCDTO;
 import com.lb_calc_web.dto.validation.ValidationResult;
@@ -241,29 +238,6 @@ public class LCService {
         /*
          * Проверяем, нет ли уже такой конфигурации.
          */
-        var equipment = domain.getControlConfiguration()
-                .getEquipmentConfiguration();
-        Display display = equipment.getAllEquipment().stream()
-                .filter(Display.class::isInstance)
-                .map(Display.class::cast)
-                .findFirst()
-                .orElse(null);
-        BarReader barReader = equipment.getAllEquipment().stream()
-                .filter(BarReader.class::isInstance)
-                .map(BarReader.class::cast)
-                .findFirst()
-                .orElse(null);
-        int printerQuantity = equipment.getAllEquipment().stream()
-                .filter(Printer.class::isInstance)
-                .findFirst()
-                .map(equipment::getQuantity)
-                .orElse(0);
-        int rfidReaderQuantity = equipment.getAllEquipment().stream()
-                .filter(RfidReader.class::isInstance)
-                .findFirst()
-                .map(equipment::getQuantity)
-                .orElse(0);
-
         Optional<LCEntity> existing =
                 lcRepository.findCandidates(
                         domain.getHeight(),
@@ -273,14 +247,6 @@ public class LCService {
                         domain.getBottomFrame(),
                         domain.getColorBody(),
                         domain.getColorDoor(),
-                        display == null ? null : display.getCatalogPositionId(),
-                        display == null ? 0 : equipment.getQuantity(display),
-                        barReader == null ? null : barReader.getCatalogPositionId(),
-                        barReader == null ? 0 : equipment.getQuantity(barReader),
-                        printerQuantity > 0,
-                        printerQuantity,
-                        rfidReaderQuantity > 0,
-                        rfidReaderQuantity,
                         domain.getControlConfiguration().getPayment()
                 ).stream()
                         .filter(entity ->
