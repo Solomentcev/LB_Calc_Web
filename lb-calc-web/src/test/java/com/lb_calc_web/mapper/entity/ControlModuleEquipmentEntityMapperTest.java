@@ -43,7 +43,14 @@ class ControlModuleEquipmentEntityMapperTest {
         LBCEntity entity = LBCEntityMapper.toEntity(domain);
         var restored = LBCEntityMapper.toDomain(entity);
 
-        assertEquals(2, entity.getBarReaders().size());
+        assertEquals(
+                domain.getControlConfiguration().getEquipmentConfiguration()
+                        .getAllItems().size(),
+                entity.getEquipment().size()
+        );
+        assertEquals(2, entity.getEquipment().stream()
+                .filter(item -> item.getCatalogPositionId().startsWith("BAR_READER"))
+                .count());
         assertEquals(domain, restored);
     }
 
