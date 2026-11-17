@@ -134,7 +134,7 @@ public class Project {
         quantityALS.merge(
                 als.copy(),
                 1,
-                Integer::sum
+                Math::addExact
         );
 
         update();
@@ -209,6 +209,14 @@ public class Project {
             );
         }
 
+        /*
+         * Проверяем переполнение до изменения исходного состава.
+         * Это сохраняет атомарность операции замены.
+         */
+        if (!oldALS.equals(newALS)) {
+            Math.addExact(getQuantity(newALS), 1);
+        }
+
         if (quantity > 1) {
             replaceQuantity(oldALS, quantity - 1);
         } else {
@@ -218,7 +226,7 @@ public class Project {
         quantityALS.merge(
                 newALS.copy(),
                 1,
-                Integer::sum
+                Math::addExact
         );
 
         update();
@@ -544,7 +552,7 @@ public class Project {
             project.quantityALS.merge(
                     als.copy(),
                     quantity,
-                    Integer::sum
+                    Math::addExact
             );
         }
 
