@@ -64,7 +64,7 @@ public abstract class StorageModuleEntity extends ModuleEntity {
      * Направление открытия дверцы.
      */
     @Enumerated(EnumType.STRING)
-    @Column(name = "direction_door_opening", nullable = false)
+    @Column(name = "direction_door_opening", nullable = false, length = 50)
     private DirectionDoorOpening directionDoorOpening;
 
     /**
