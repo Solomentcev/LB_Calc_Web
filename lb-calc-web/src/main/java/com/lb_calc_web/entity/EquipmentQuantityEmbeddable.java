@@ -46,11 +46,12 @@ public class EquipmentQuantityEmbeddable {
     public boolean equals(Object object) {
         if (this == object) return true;
         if (!(object instanceof EquipmentQuantityEmbeddable other)) return false;
-        return Objects.equals(catalogPositionId, other.catalogPositionId);
+        return quantity == other.quantity
+                && Objects.equals(catalogPositionId, other.catalogPositionId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(catalogPositionId);
+        return Objects.hash(catalogPositionId, quantity);
     }
 }
