@@ -1,0 +1,120 @@
+package com.lb_calc_web.mapper.entity;
+
+import com.lb_calc_web.TestDataFactory;
+import com.lb_calc_web.domain.attributes.Role;
+import com.lb_calc_web.domain.model.ALS;
+import com.lb_calc_web.domain.model.Employee;
+import com.lb_calc_web.domain.model.Project;
+import com.lb_calc_web.entity.ALSEntity;
+import com.lb_calc_web.entity.EmployeeEntity;
+import com.lb_calc_web.entity.ProjectEntity;
+import org.junit.jupiter.api.Test;
+
+import java.time.LocalDate;
+import java.util.Map;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+class ProjectEntityMapperTest {
+
+    @Test
+    void roundTrip_shouldPreserveProjectFieldsAndAggregatedAlsQuantity() {
+        LocalDate createdAt = LocalDate.of(2026, 10, 1);
+        Employee employee = new Employee(
+                "Иван",
+                "Иванов",
+                "ivanov@example.com",
+                createdAt,
+                Role.ROLE_MANAGER
+        );
+
+        ALS als = TestDataFactory.validALS(null);
+        Project domain = new Project(
+                "Проект",
+                "Компания",
+                createdAt,
+                employee
+        );
+        domain.addALS(als);
+        domain.addALS(als);
+
+        EmployeeEntity employeeEntity = EmployeeEntityMapper.toEntity(employee);
+        employeeEntity.setEncryptedPassword("HASH");
+        ALSEntity alsEntity = ALSEntityMapper.toEntity(
+                als,
+                ModuleEntityMapper::toEntity
+        );
+
+        ProjectEntity entity = ProjectEntityMapper.toEntity(
+                domain,
+                ignored -> employeeEntity,
+                ignored -> alsEntity
+        );
+
+        assertEquals(1, entity.getAlsEntries().size());
+        assertEquals(2, entity.getAlsEntries().getFirst().getQuantity());
+        assertSame(entity, entity.getAlsEntries().getFirst().getProject());
+        assertSame(alsEntity, entity.getAlsEntries().getFirst().getAls());
+
+        Project restored = ProjectEntityMapper.toDomain(entity);
+
+        assertEquals(domain.getName(), restored.getName());
+        assertEquals(domain.getCompany(), restored.getCompany());
+        assertEquals(domain.getCreatedAt(), restored.getCreatedAt());
+        assertEquals(domain.getUpdatedAt(), restored.getUpdatedAt());
+        assertEquals(2, restored.getQuantity(als));
+        assertEquals(domain.getDescription(), restored.getDescription());
+    }
+
+    @Test
+    void updateEntity_shouldReuseExistingProjectAlsAssociation() {
+        LocalDate createdAt = LocalDate.of(2026, 10, 1);
+        Employee employee = new Employee(
+                "Иван",
+                "Иванов",
+                "ivanov@example.com",
+                createdAt,
+                Role.ROLE_MANAGER
+        );
+        EmployeeEntity employeeEntity = EmployeeEntityMapper.toEntity(employee);
+        employeeEntity.setEncryptedPassword("HASH");
+
+        ALS als = TestDataFactory.validALS(null);
+        ALSEntity alsEntity = ALSEntityMapper.toEntity(
+                als,
+                ModuleEntityMapper::toEntity
+        );
+
+        Project initial = new Project("Проект", "Компания", createdAt, employee);
+        initial.addALS(als);
+
+        ProjectEntity entity = ProjectEntityMapper.toEntity(
+                initial,
+                ignored -> employeeEntity,
+                ignored -> alsEntity
+        );
+
+        var association = entity.getAlsEntries().getFirst();
+
+        Project changed = Project.restore(
+                "Обновлённый проект",
+                "Компания",
+                createdAt,
+                employee,
+                LocalDate.of(2026, 10, 2),
+                employee,
+                Map.of(als, 3)
+        );
+
+        ProjectEntityMapper.updateEntity(
+                changed,
+                entity,
+                ignored -> employeeEntity,
+                ignored -> alsEntity
+        );
+
+        assertEquals(1, entity.getAlsEntries().size());
+        assertSame(association, entity.getAlsEntries().getFirst());
+        assertEquals(3, association.getQuantity());
+    }
+}
