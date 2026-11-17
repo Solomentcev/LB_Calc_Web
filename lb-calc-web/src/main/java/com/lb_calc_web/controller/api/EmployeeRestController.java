@@ -229,7 +229,7 @@ public class EmployeeRestController {
 
             return ResponseEntity.ok(
                     ApiResponse.success(
-                            "Employee deleted successfully"
+                            "Employee deactivated successfully"
                     )
             );
 
