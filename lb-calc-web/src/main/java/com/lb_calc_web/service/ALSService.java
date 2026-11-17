@@ -632,20 +632,9 @@ public class ALSService {
                         domain.getColorBody(),
                         domain.getColorDoor()
                 ).stream()
-                .filter(entity -> {
-                    try {
-                        return domain.equals(
-                                ALSEntityMapper.toDomain(entity)
-                        );
-                    } catch (RuntimeException e) {
-                        logger.warn(
-                                "Не удалось сравнить ALS id={}",
-                                entity.getId(),
-                                e
-                        );
-                        return false;
-                    }
-                })
+                .filter(entity ->
+                        domain.equals(ALSEntityMapper.toDomain(entity))
+                )
                 .findFirst();
     }
 
@@ -670,18 +659,8 @@ public class ALSService {
             List<ModuleEntity> cache
     ) {
         for (ModuleEntity entity : cache) {
-            try {
-                if (domainModule.equals(
-                        ModuleEntityMapper.toDomain(entity)
-                )) {
-                    return entity;
-                }
-            } catch (RuntimeException e) {
-                logger.warn(
-                        "Не удалось преобразовать ModuleEntity id={}",
-                        entity.getId(),
-                        e
-                );
+            if (domainModule.equals(ModuleEntityMapper.toDomain(entity))) {
+                return entity;
             }
         }
 
@@ -699,18 +678,8 @@ public class ALSService {
         cache.addAll(candidates);
 
         for (ModuleEntity entity : candidates) {
-            try {
-                if (domainModule.equals(
-                        ModuleEntityMapper.toDomain(entity)
-                )) {
-                    return entity;
-                }
-            } catch (RuntimeException e) {
-                logger.warn(
-                        "Не удалось преобразовать ModuleEntity id={}",
-                        entity.getId(),
-                        e
-                );
+            if (domainModule.equals(ModuleEntityMapper.toDomain(entity))) {
+                return entity;
             }
         }
 
