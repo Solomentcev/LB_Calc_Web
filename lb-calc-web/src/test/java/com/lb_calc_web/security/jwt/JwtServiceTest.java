@@ -65,7 +65,8 @@ class JwtServiceTest {
                         10L,
                         "test@mail.com",
                         "HASH",
-                        Role.ROLE_ADMIN
+                        Role.ROLE_ADMIN,
+                        true
                 );
     }
 
