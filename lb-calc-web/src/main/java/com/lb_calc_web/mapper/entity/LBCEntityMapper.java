@@ -54,8 +54,6 @@ public final class LBCEntityMapper {
         if (domain == null || entity == null) {
             throw new IllegalArgumentException("LBC и LBCEntity не должны быть null");
         }
-        entity.setName(domain.getName());
-        entity.setDescription(domain.getDescription());
         entity.setHeight(domain.getHeight());
         entity.setWidth(domain.getWidth());
         entity.setDepth(domain.getDepth());
@@ -73,9 +71,6 @@ public final class LBCEntityMapper {
         entity.setDoorThickness(domain.getDoorThickness());
         entity.setDirectionDoorOpening(domain.getDirectionDoorOpening());
         entity.setCountCells(domain.getCountCells());
-        entity.setHeightCell(domain.getCellHeight());
-        entity.setWidthCell(domain.getCellWidth());
-        entity.setDepthCell(domain.getCellDepth());
 
         ControlConfiguration configuration = domain.getControlConfiguration();
         entity.setPayment(configuration.getPayment());
