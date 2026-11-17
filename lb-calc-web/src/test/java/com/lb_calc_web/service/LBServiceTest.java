@@ -73,7 +73,7 @@ class LBServiceTest {
                 com.lb_calc_web.mapper.dto.LBDtoMapper.toDomain(dto)
         );
 
-        when(lbRepository.findByHeightAndWidthAndDepthAndUpperFrameAndBottomFrameAndTypeAndDeltaWidthAndShelfThickAndServiceZoneWidthAndDoorThicknessAndDirectionDoorOpeningAndCountCellsAndColorBodyAndColorDoor(
+        when(lbRepository.findCandidates(
                 anyInt(), anyInt(), anyInt(), anyInt(), anyInt(),
                 anyString(), anyInt(), anyInt(), anyInt(), anyInt(),
                 any(), anyInt(), any(), any()
@@ -93,7 +93,7 @@ class LBServiceTest {
                         com.lb_calc_web.mapper.dto.LBDtoMapper.toDomain(dto)
                 );
 
-        when(lbRepository.findByHeightAndWidthAndDepthAndUpperFrameAndBottomFrameAndTypeAndDeltaWidthAndShelfThickAndServiceZoneWidthAndDoorThicknessAndDirectionDoorOpeningAndCountCellsAndColorBodyAndColorDoor(
+        when(lbRepository.findCandidates(
                 anyInt(), anyInt(), anyInt(), anyInt(), anyInt(),
                 anyString(), anyInt(), anyInt(), anyInt(), anyInt(),
                 any(), anyInt(), any(), any()
