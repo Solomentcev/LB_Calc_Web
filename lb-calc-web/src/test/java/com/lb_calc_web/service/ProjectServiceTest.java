@@ -186,6 +186,12 @@ class ProjectServiceTest {
     @Test
     void deleteById_existing_shouldDelete() {
         ProjectEntity entity = new ProjectEntity();
+        EmployeeDTO admin = new EmployeeDTO();
+        admin.setId(1L);
+        admin.setRole(Role.ROLE_ADMIN);
+
+        when(employeeService.getCurrentEmployee())
+                .thenReturn(admin);
         when(projectRepository.findById(10L))
                 .thenReturn(Optional.of(entity));
 
