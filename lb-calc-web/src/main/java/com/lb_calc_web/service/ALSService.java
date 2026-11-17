@@ -230,7 +230,7 @@ public class ALSService {
                     null
             );
             throw new ValidationSizeException(validationResult);
-        } catch (IllegalArgumentException exception) {
+        } catch (IllegalArgumentException | NullPointerException exception) {
             var validationResult =
                     new com.lb_calc_web.dto.validation.ValidationResult(
                             "ALS",
