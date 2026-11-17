@@ -89,7 +89,7 @@ public abstract class StorageModule extends Module {
      * @param typeLb конструктивный тип
      * @throws NullPointerException если тип не задан
      */
-    public void setTypeLb(TypeLb typeLb) {
+    void setTypeLb(TypeLb typeLb) {
         this.typeLb = Objects.requireNonNull(
                 typeLb,
                 "Тип модуля хранения не может быть null"
@@ -147,7 +147,7 @@ public abstract class StorageModule extends Module {
      * @param directionDoorOpening направление открытия дверей
      * @throws NullPointerException если направление не задано
      */
-    public void setDirectionDoorOpening(
+    void setDirectionDoorOpening(
             DirectionDoorOpening directionDoorOpening
     ) {
         this.directionDoorOpening = Objects.requireNonNull(
