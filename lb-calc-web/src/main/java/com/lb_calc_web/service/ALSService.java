@@ -623,8 +623,14 @@ public class ALSService {
     private Optional<ALSEntity> findDuplicate(
             com.lb_calc_web.domain.model.ALS domain
     ) {
-        return alsRepository.findAll()
-                .stream()
+        return alsRepository.findByHeightAndDepthAndUpperFrameAndBottomFrameAndColorBodyAndColorDoor(
+                        domain.getHeight(),
+                        domain.getDepth(),
+                        domain.getUpperFrame(),
+                        domain.getBottomFrame(),
+                        domain.getColorBody(),
+                        domain.getColorDoor()
+                ).stream()
                 .filter(entity -> {
                     try {
                         return domain.equals(
@@ -646,7 +652,7 @@ public class ALSService {
             com.lb_calc_web.domain.model.ALS domain
     ) {
         List<ModuleEntity> moduleCache =
-                moduleRepository.findAll();
+                new ArrayList<>();
 
         return ALSEntityMapper.toEntity(
                 domain,
@@ -663,6 +669,35 @@ public class ALSService {
             List<ModuleEntity> cache
     ) {
         for (ModuleEntity entity : cache) {
+            try {
+                if (domainModule.equals(
+                        ALSEntityMapper.toDomainModule(entity)
+                )) {
+                    return entity;
+                }
+            } catch (RuntimeException e) {
+                logger.warn(
+                        "Не удалось преобразовать ModuleEntity id={}",
+                        entity.getId(),
+                        e
+                );
+            }
+        }
+
+        List<ModuleEntity> candidates =
+                moduleRepository.findByHeightAndWidthAndDepthAndUpperFrameAndBottomFrameAndColorBodyAndColorDoor(
+                        domainModule.getHeight(),
+                        domainModule.getWidth(),
+                        domainModule.getDepth(),
+                        domainModule.getUpperFrame(),
+                        domainModule.getBottomFrame(),
+                        domainModule.getColorBody(),
+                        domainModule.getColorDoor()
+                );
+
+        cache.addAll(candidates);
+
+        for (ModuleEntity entity : candidates) {
             try {
                 if (domainModule.equals(
                         ALSEntityMapper.toDomainModule(entity)
