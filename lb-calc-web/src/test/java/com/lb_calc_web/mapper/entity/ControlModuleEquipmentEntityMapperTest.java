@@ -2,27 +2,32 @@ package com.lb_calc_web.mapper.entity;
 
 import com.lb_calc_web.TestDataFactory;
 import com.lb_calc_web.domain.equipment.BarReader;
+import com.lb_calc_web.domain.model.ControlConfiguration;
 import com.lb_calc_web.domain.model.EquipmentConfiguration;
+import com.lb_calc_web.domain.model.LBC;
+import com.lb_calc_web.domain.model.LC;
 import com.lb_calc_web.entity.EquipmentQuantityEmbeddable;
 import com.lb_calc_web.entity.LBCEntity;
 import com.lb_calc_web.entity.LCEntity;
+import org.junit.jupiter.api.Test;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Проверяет сохранение физического состава оборудования LC/LBC.
+ */
 class ControlModuleEquipmentEntityMapperTest {
 
     @Test
     void lc_shouldPreserveAllEquipmentPositionsAndQuantities() {
-        var domain = TestDataFactory.validLC(1L);
-        addBarReaders(domain.getControlConfiguration().getEquipmentConfiguration());
+        LC domain = withBarReaders(TestDataFactory.validLC(1L), 1);
 
         LCEntity entity = LCEntityMapper.toEntity(domain);
-        var restored = LCEntityMapper.toDomain(entity);
+        LC restored = LCEntityMapper.toDomain(entity);
 
         assertEquals(
                 domain.getControlConfiguration().getEquipmentConfiguration()
@@ -37,11 +42,10 @@ class ControlModuleEquipmentEntityMapperTest {
 
     @Test
     void lbc_shouldPreserveAllEquipmentPositionsAndQuantities() {
-        var domain = TestDataFactory.validLBC(1L);
-        addBarReaders(domain.getControlConfiguration().getEquipmentConfiguration());
+        LBC domain = withBarReaders(TestDataFactory.validLBC(1L), 1);
 
         LBCEntity entity = LBCEntityMapper.toEntity(domain);
-        var restored = LBCEntityMapper.toDomain(entity);
+        LBC restored = LBCEntityMapper.toDomain(entity);
 
         assertEquals(
                 domain.getControlConfiguration().getEquipmentConfiguration()
@@ -54,15 +58,11 @@ class ControlModuleEquipmentEntityMapperTest {
         assertEquals(domain, restored);
     }
 
-
     @Test
     void lbc_shouldPersistEveryEquipmentPositionAndQuantity() {
-        var domain = TestDataFactory.validLBC(1L);
+        LBC domain = withBarReaders(TestDataFactory.validLBC(1L), 3);
         EquipmentConfiguration configuration =
                 domain.getControlConfiguration().getEquipmentConfiguration();
-
-        configuration.addRequiredEquipment(BarReader.READER_1D, 2);
-        configuration.addAdditionalEquipment(BarReader.READER_2D, 3);
 
         LBCEntity entity = LBCEntityMapper.toEntity(domain);
 
@@ -105,12 +105,9 @@ class ControlModuleEquipmentEntityMapperTest {
 
     @Test
     void lc_shouldPersistEveryEquipmentPositionAndQuantity() {
-        var domain = TestDataFactory.validLC(1L);
+        LC domain = withBarReaders(TestDataFactory.validLC(1L), 3);
         EquipmentConfiguration configuration =
                 domain.getControlConfiguration().getEquipmentConfiguration();
-
-        configuration.addRequiredEquipment(BarReader.READER_1D, 2);
-        configuration.addAdditionalEquipment(BarReader.READER_2D, 3);
 
         LCEntity entity = LCEntityMapper.toEntity(domain);
 
@@ -128,8 +125,63 @@ class ControlModuleEquipmentEntityMapperTest {
         assertEquals(domain, LCEntityMapper.toDomain(entity));
     }
 
-    private void addBarReaders(EquipmentConfiguration configuration) {
-        configuration.addRequiredEquipment(BarReader.READER_1D, 2);
-        configuration.addAdditionalEquipment(BarReader.READER_2D, 1);
+    private LC withBarReaders(LC source, int secondReaderQuantity) {
+        EquipmentConfiguration equipment =
+                source.getControlConfiguration().getEquipmentConfiguration();
+        equipment.addRequiredEquipment(BarReader.READER_1D, 2);
+        equipment.addAdditionalEquipment(
+                BarReader.READER_2D,
+                secondReaderQuantity
+        );
+
+        ControlConfiguration configuration = new ControlConfiguration(
+                source.getControlConfiguration().getPayment(),
+                source.getControlConfiguration().getAccessMethods(),
+                source.getControlConfiguration().getPrintOptions(),
+                equipment
+        );
+
+        return new LC(
+                source.getHeight(),
+                source.getWidth(),
+                source.getDepth(),
+                source.getUpperFrame(),
+                source.getBottomFrame(),
+                source.getColorBody(),
+                source.getColorDoor(),
+                configuration
+        );
+    }
+
+    private LBC withBarReaders(LBC source, int secondReaderQuantity) {
+        EquipmentConfiguration equipment =
+                source.getControlConfiguration().getEquipmentConfiguration();
+        equipment.addRequiredEquipment(BarReader.READER_1D, 2);
+        equipment.addAdditionalEquipment(
+                BarReader.READER_2D,
+                secondReaderQuantity
+        );
+
+        ControlConfiguration configuration = new ControlConfiguration(
+                source.getControlConfiguration().getPayment(),
+                source.getControlConfiguration().getAccessMethods(),
+                source.getControlConfiguration().getPrintOptions(),
+                equipment
+        );
+
+        return new LBC(
+                source.getHeight(),
+                source.getWidth(),
+                source.getDepth(),
+                source.getUpperFrame(),
+                source.getBottomFrame(),
+                source.getColorBody(),
+                source.getColorDoor(),
+                source.getTypeLb(),
+                source.getCountCells(),
+                source.getDirectionDoorOpening(),
+                source.getDoorThickness(),
+                configuration
+        );
     }
 }
