@@ -34,6 +34,7 @@ class EmployeeEntityMapperTest {
                 entity.getRegistrationDate()
         );
         assertEquals(Role.ROLE_MANAGER, entity.getRole());
+        assertTrue(entity.isActive());
         assertNull(entity.getEncryptedPassword());
     }
 
