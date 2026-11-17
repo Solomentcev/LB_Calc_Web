@@ -165,9 +165,11 @@ public class ControlConfiguration {
     }
 
     /**
-     * Возвращает конфигурацию оборудования.
+     * Возвращает независимую копию конфигурации оборудования.
      *
-     * @return конфигурация оборудования
+     * <p>Изменение возвращённого объекта не влияет на текущую конфигурацию.</p>
+     *
+     * @return копия конфигурации оборудования
      */
     public EquipmentConfiguration getEquipmentConfiguration() {
         return equipmentConfiguration.copy();
