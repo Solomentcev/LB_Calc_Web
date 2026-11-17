@@ -39,6 +39,7 @@ class LBServiceTest {
                 .withProperty("size.count.cells.default", "3")
                 .withProperty("size.door.thickness.default", "20")
                 .withProperty("lb.type.default", "TYPE1")
+                .withProperty("lb.direction.default", "RIGHT")
                 .withProperty("lb.type.TYPE1.delta-width", "100")
                 .withProperty("lb.type.TYPE1.shelf-thick", "5")
                 .withProperty("lb.type.TYPE1.service-zone-width", "40");
@@ -59,6 +60,7 @@ class LBServiceTest {
         assertEquals(1940, result.getHeight());
         assertEquals(500, result.getWidth());
         assertEquals("TYPE1", result.getType());
+        assertEquals("RIGHT", result.getDirectionDoorOpening());
         assertTrue(result.getHeightCell() > 0);
         assertTrue(result.getDepthCell() > 0);
         assertNotNull(result.getDescription());
