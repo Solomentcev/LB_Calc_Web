@@ -115,7 +115,7 @@ public class ALSController extends BaseCatalogController {
         model.addAttribute("als", als);
         model.addAttribute(
                 "lbc",
-                als.getLBC()
+                alsService.findLBCInALS(als, lbcId)
         );
 
         return "alss/alss_lbc";
