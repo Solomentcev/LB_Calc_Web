@@ -19,6 +19,7 @@ import static org.mockito.Mockito.*;
 
 class LBCServiceTest {
 
+    private FindOrCreateLockService findOrCreateLockService;
     private LBCRepository lbcRepository;
     private MockEnvironment environment;
     private LBCService lbcService;
@@ -27,6 +28,8 @@ class LBCServiceTest {
     void setUp() {
 
         lbcRepository = mock(LBCRepository.class);
+
+        findOrCreateLockService = mock(FindOrCreateLockService.class);
 
         environment = new MockEnvironment()
                 .withProperty("size.height.default", "1940")
@@ -52,6 +55,7 @@ class LBCServiceTest {
         lbcService =
                 new LBCService(
                         lbcRepository,
+                        findOrCreateLockService,
                         environment,
                         TestDataFactory.createSizeValidator()
                 );

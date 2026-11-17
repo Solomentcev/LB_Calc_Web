@@ -23,6 +23,7 @@ import static org.mockito.Mockito.*;
 
 class ALSServiceTest {
 
+    private FindOrCreateLockService findOrCreateLockService;
     private ALSRepository alsRepository;
     private ModuleEntityRepository moduleRepository;
     private LBService lbService;
@@ -39,6 +40,8 @@ class ALSServiceTest {
         lbService = mock(LBService.class);
         lcService = mock(LCService.class);
         lbcService = mock(LBCService.class);
+
+        findOrCreateLockService = mock(FindOrCreateLockService.class);
 
         environment = new MockEnvironment()
                 .withProperty("size.height.default", "1940")
@@ -60,6 +63,7 @@ class ALSServiceTest {
                         lbService,
                         lcService,
                         lbcService,
+                        findOrCreateLockService,
                         environment,
                         TestDataFactory.createSizeValidator()
                 );
