@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class ControlModuleEquipmentEntityMapperTest {
 
     @Test
-    void lc_shouldPreserveAllBarReaderPositionsAndQuantities() {
+    void lc_shouldPreserveAllEquipmentPositionsAndQuantities() {
         var domain = TestDataFactory.validLC(1L);
         addBarReaders(domain.getControlConfiguration().getEquipmentConfiguration());
 
@@ -36,7 +36,7 @@ class ControlModuleEquipmentEntityMapperTest {
     }
 
     @Test
-    void lbc_shouldPreserveAllBarReaderPositionsAndQuantities() {
+    void lbc_shouldPreserveAllEquipmentPositionsAndQuantities() {
         var domain = TestDataFactory.validLBC(1L);
         addBarReaders(domain.getControlConfiguration().getEquipmentConfiguration());
 
@@ -54,6 +54,38 @@ class ControlModuleEquipmentEntityMapperTest {
         assertEquals(domain, restored);
     }
 
+
+    @Test
+    void lbc_shouldPersistEveryEquipmentPositionAndQuantity() {
+        var domain = TestDataFactory.validLBC(1L);
+        EquipmentConfiguration configuration =
+                domain.getControlConfiguration().getEquipmentConfiguration();
+
+        configuration.addRequiredEquipment(BarReader.READER_1D, 2);
+        configuration.addAdditionalEquipment(BarReader.READER_2D, 3);
+
+        LBCEntity entity = LBCEntityMapper.toEntity(domain);
+
+        assertEquals(
+                configuration.getAllItems().size(),
+                entity.getEquipment().size()
+        );
+        assertEquals(
+                2,
+                entity.getEquipment().stream()
+                        .filter(item -> item.getCatalogPositionId()
+                                .equals(BarReader.READER_1D_ID))
+                        .findFirst().orElseThrow().getQuantity()
+        );
+        assertEquals(
+                3,
+                entity.getEquipment().stream()
+                        .filter(item -> item.getCatalogPositionId()
+                                .equals(BarReader.READER_2D_ID))
+                        .findFirst().orElseThrow().getQuantity()
+        );
+        assertEquals(domain, LBCEntityMapper.toDomain(entity));
+    }
 
     @Test
     void equipmentValue_shouldIncludeQuantity() {
