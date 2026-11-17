@@ -31,8 +31,8 @@ public interface LBCRepository extends JpaRepository<LBCEntity, Long> {
               and entity.countCells = :countCells
               and entity.display = :display
               and entity.displayQuantity = :displayQuantity
-              and entity.barReader = :barReader
-              and entity.barReaderQuantity = :barReaderQuantity
+              and (:barReader is null or entity.barReader is not null)
+              and (:barReaderQuantity = 0 or entity.barReaderQuantity > 0)
               and entity.printer = :printer
               and entity.printerQuantity = :printerQuantity
               and entity.rfidReader = :rfidReader
