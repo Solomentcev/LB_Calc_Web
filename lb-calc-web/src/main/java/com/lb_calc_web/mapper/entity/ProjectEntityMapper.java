@@ -155,10 +155,6 @@ public final class ProjectEntityMapper {
                 domain.getName()
         );
 
-        entity.setDescription(
-                domain.getDescription()
-        );
-
         entity.setCompany(
                 domain.getCompany()
         );
