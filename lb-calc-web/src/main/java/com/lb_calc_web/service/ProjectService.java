@@ -601,7 +601,7 @@ public class ProjectService {
      * Сохраняет LC конкретного ALS конкретного проекта.
      */
     @Transactional
-    public LCDTO saveLCAtProject(
+    public ALSDTO saveLCAtProject(
             Long projectId,
             Long alsId,
             Long lcId,
@@ -637,10 +637,11 @@ public class ProjectService {
                         lc
                 );
 
-        return Objects.requireNonNull(
+        Objects.requireNonNull(
                 updatedALS.getLC(),
                 "После сохранения LC отсутствует в ALS"
         );
+        return updatedALS;
     }
 
     /**
@@ -672,7 +673,7 @@ public class ProjectService {
      * Сохраняет LBC конкретного ALS конкретного проекта.
      */
     @Transactional
-    public LBCDTO saveLBCAtProject(
+    public ALSDTO saveLBCAtProject(
             Long projectId,
             Long alsId,
             Long lbcId,
@@ -708,10 +709,11 @@ public class ProjectService {
                         lbc
                 );
 
-        return Objects.requireNonNull(
+        Objects.requireNonNull(
                 updatedALS.getLBC(),
                 "После сохранения LBC отсутствует в ALS"
         );
+        return updatedALS;
     }
 
     /**
@@ -769,7 +771,7 @@ public class ProjectService {
      * Сохраняет LB конкретного ALS конкретного проекта.
      */
     @Transactional
-    public LBDTO saveLBAtProject(
+    public ALSDTO saveLBAtProject(
             Long projectId,
             Long alsId,
             Long lbId,
@@ -807,7 +809,7 @@ public class ProjectService {
                         alsId
                 );
 
-        return savedALS.getLbList().stream()
+        savedALS.getLbList().stream()
                 .filter(value -> value != null
                         && Objects.equals(value.getId(), lbId))
                 .findFirst()
@@ -818,6 +820,7 @@ public class ProjectService {
                                         + " не найден"
                         )
                 );
+        return savedALS;
     }
 
     /**
