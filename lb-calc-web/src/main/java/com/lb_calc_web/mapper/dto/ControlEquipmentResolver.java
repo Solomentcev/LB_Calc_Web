@@ -96,6 +96,11 @@ final class ControlEquipmentResolver {
         }
 
         Equipment equipment = EquipmentCatalog.resolve(nameOrId);
+        if (equipment == null) {
+            throw new IllegalArgumentException(
+                    "Не указана позиция оборудования для количества " + quantity
+            );
+        }
         if (equipment.equals(none)) {
             throw new IllegalArgumentException(
                     "Количество оборудования типа «" + none.getName()
