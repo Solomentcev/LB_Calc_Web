@@ -1,7 +1,10 @@
 package com.lb_calc_web.service;
 
 import com.lb_calc_web.TestDataFactory;
+import com.lb_calc_web.dto.ALSDTO;
 import com.lb_calc_web.dto.LBDTO;
+import com.lb_calc_web.dto.LBCDTO;
+import com.lb_calc_web.dto.LCDTO;
 import com.lb_calc_web.repository.LBRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +41,15 @@ class FindOrCreateLockIntegrationTest {
 
     @Autowired
     private LBRepository lbRepository;
+
+    @Autowired
+    private ALSService alsService;
+
+    @Autowired
+    private LCService lcService;
+
+    @Autowired
+    private LBCService lbcService;
 
     @Test
     void acquire_shouldSerializeConcurrentTransactions() throws Exception {
@@ -85,6 +97,19 @@ class FindOrCreateLockIntegrationTest {
             releaseFirst.countDown();
             executor.shutdownNow();
         }
+    }
+
+    @Test
+    void saveConfigurations_shouldExecuteLockingCandidateQueries() {
+        ALSDTO als = alsService.saveALS(TestDataFactory.validALSDTO(0L));
+        ALSDTO lbcAls = alsService.saveALS(TestDataFactory.validLBCALSDTO(0L));
+        LCDTO lc = lcService.saveLC(TestDataFactory.validLCDTO(0L));
+        LBCDTO lbc = lbcService.saveLBC(TestDataFactory.validLBCDTO(0L));
+
+        assertTrue(als.getId() > 0);
+        assertTrue(lbcAls.getId() > 0);
+        assertTrue(lc.getId() > 0);
+        assertTrue(lbc.getId() > 0);
     }
 
     @Test
