@@ -6,6 +6,8 @@ import com.lb_calc_web.domain.model.Module;
 import com.lb_calc_web.domain.model.Project;
 import com.lb_calc_web.dto.ALSDTO;
 import com.lb_calc_web.dto.EmployeeDTO;
+import com.lb_calc_web.dto.LCDTO;
+import com.lb_calc_web.dto.LBCDTO;
 import com.lb_calc_web.dto.ProjectDTO;
 import com.lb_calc_web.service.ProjectService;
 import com.lb_calc_web.entity.ALSEntity;
@@ -417,7 +419,31 @@ class PersistenceIntegrationTest {
             Long selectedAlsId = savedProject.getAlsList().get(0).getId();
             Long independentAlsId = savedProject.getAlsList().get(2).getId();
 
-            projectService.addLBAtProject(projectId, selectedAlsId);
+            ALSDTO changedALS =
+                    projectService.addLBAtProject(projectId, selectedAlsId);
+
+            LCDTO changedLC = changedALS.getLC();
+            changedLC.setDisplayQuantity(2);
+            ALSDTO changedWithLC = projectService.saveLCAtProject(
+                    projectId,
+                    changedALS.getId(),
+                    changedLC.getId(),
+                    changedLC
+            );
+            assertEquals(2, changedWithLC.getLC().getDisplayQuantity());
+
+            LBCDTO changedLBC = independentALS.getLBC();
+            changedLBC.setAccessMethods(List.of(AccessMethod.RFID.name()));
+            ALSDTO changedWithLBC = projectService.saveLBCAtProject(
+                    projectId,
+                    independentAlsId,
+                    changedLBC.getId(),
+                    changedLBC
+            );
+            assertEquals(
+                    List.of(AccessMethod.RFID.name()),
+                    changedWithLBC.getLBC().getAccessMethods()
+            );
 
             entityManager.flush();
             entityManager.clear();
