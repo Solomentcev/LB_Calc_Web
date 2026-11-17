@@ -1,13 +1,11 @@
 package com.lb_calc_web.domain.model;
 
 import com.lb_calc_web.domain.attributes.Colors;
-import com.lb_calc_web.domain.attributes.Payment;
 import com.lb_calc_web.domain.equipment.Display;
 import com.lb_calc_web.domain.equipment.Equipment;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * Модуль управления LC.
@@ -204,23 +202,7 @@ public class LC extends Module implements ControlModule {
                 ? display.getName()
                 : "Без дисплея";
 
-        String accessMethods = controlConfiguration
-                .getAccessMethods()
-                .stream()
-                .map(Enum::name)
-                .collect(Collectors.joining(", ", "[", "]"));
-
-        String printOptions = controlConfiguration
-                .getPrintOptions()
-                .stream()
-                .map(Enum::name)
-                .collect(Collectors.joining(", ", "[", "]"));
-
-        String equipment = getEquipment().stream()
-                .map(Equipment::getName)
-                .collect(Collectors.joining(", "));
-
-        Payment payment = controlConfiguration.getPayment();
+        String controlDescription = getControlDescription();
 
         setName("Модуль управления " + displayName);
 
@@ -233,10 +215,7 @@ public class LC extends Module implements ControlModule {
                         + "Рамы (верх/низ, мм): "
                         + getUpperFrame() + "/"
                         + getBottomFrame() + ";\n"
-                        + "Способы доступа: " + accessMethods + ";\n"
-                        + "Печать: " + printOptions + ";\n"
-                        + "Оплата: " + payment + ";\n"
-                        + "Оборудование: " + equipment + ";\n"
+                        + controlDescription + ";\n"
                         + "Цвет корпуса: " + getColorBody() + ";\n"
                         + "Цвет дверей: " + getColorDoor()
         );

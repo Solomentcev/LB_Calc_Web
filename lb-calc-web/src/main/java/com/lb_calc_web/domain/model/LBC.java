@@ -217,7 +217,7 @@ public class LBC extends StorageModule implements ControlModule {
                 getColorBody(),
                 getColorDoor(),
                 getDoorThickness()
-        ));
+        ) + ";\n" + getControlDescription());
     }
 
     /**
