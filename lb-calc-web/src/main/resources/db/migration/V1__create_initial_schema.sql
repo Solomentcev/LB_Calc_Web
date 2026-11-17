@@ -112,7 +112,10 @@ CREATE TABLE lb (
                     CONSTRAINT fk_lb_module
                         FOREIGN KEY (id)
                             REFERENCES module (id)
-                            ON DELETE CASCADE
+                            ON DELETE CASCADE,
+
+                    CONSTRAINT chk_lb_count_cells
+                        CHECK (count_cells BETWEEN 0 AND 20)
 ) ENGINE=InnoDB;
 
 
@@ -144,7 +147,10 @@ CREATE TABLE lbc (
                      CONSTRAINT fk_lbc_module
                          FOREIGN KEY (id)
                              REFERENCES module (id)
-                             ON DELETE CASCADE
+                             ON DELETE CASCADE,
+
+                     CONSTRAINT chk_lbc_count_cells
+                         CHECK (count_cells BETWEEN 0 AND 20)
 ) ENGINE=InnoDB;
 
 
