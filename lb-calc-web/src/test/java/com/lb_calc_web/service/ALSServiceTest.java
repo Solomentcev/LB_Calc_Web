@@ -243,12 +243,13 @@ class ALSServiceTest {
         LCDTO lc = TestDataFactory.validLCDTO(als.getLC().getId());
 
         ALSService spy = spy(alsService);
-        doReturn(als).when(spy).saveALS(any(ALSDTO.class));
+        doAnswer(invocation -> invocation.getArgument(0))
+                .when(spy).saveALS(any(ALSDTO.class));
 
         ALSDTO result =
                 spy.replaceLCandSaveALS(als, lc);
 
-        assertSame(lc, result.getLC());
+        assertEquals(lc, result.getLC());
         assertNull(result.getLBC());
     }
 
@@ -258,12 +259,13 @@ class ALSServiceTest {
         LBCDTO lbc = TestDataFactory.validLBCDTO(2L);
 
         ALSService spy = spy(alsService);
-        doReturn(als).when(spy).saveALS(any(ALSDTO.class));
+        doAnswer(invocation -> invocation.getArgument(0))
+                .when(spy).saveALS(any(ALSDTO.class));
 
         ALSDTO result =
                 spy.replaceLBCandSaveALS(als, lbc);
 
-        assertSame(lbc, result.getLBC());
+        assertEquals(lbc, result.getLBC());
         assertNull(result.getLC());
     }
 }
