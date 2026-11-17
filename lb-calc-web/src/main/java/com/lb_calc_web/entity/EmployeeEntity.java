@@ -74,7 +74,7 @@ public class EmployeeEntity {
      * Роль сотрудника.
      */
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, length = 50)
     private Role role;
 
     /** Признак активности учётной записи. */
