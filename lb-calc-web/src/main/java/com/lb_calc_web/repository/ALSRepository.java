@@ -8,8 +8,7 @@ import java.util.List;
 
 public interface ALSRepository extends JpaRepository<ALSEntity, Long> {
 
-    List<ALSEntity> findByHeightAndDepthAndUpperFrameAndBottomFrame
-            AndColorBodyAndColorDoor(
+    List<ALSEntity> findByHeightAndDepthAndUpperFrameAndBottomFrameAndColorBodyAndColorDoor(
             int height,
             int depth,
             int upperFrame,
