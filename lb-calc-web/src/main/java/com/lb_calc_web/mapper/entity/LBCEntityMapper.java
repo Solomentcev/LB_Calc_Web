@@ -11,9 +11,12 @@ import com.lb_calc_web.domain.model.ControlConfiguration;
 import com.lb_calc_web.domain.model.EquipmentConfiguration;
 import com.lb_calc_web.domain.model.LBC;
 import com.lb_calc_web.entity.LBCEntity;
+import com.lb_calc_web.entity.EquipmentQuantityEmbeddable;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /** Преобразует LBC между доменной и persistence-моделями. */
 public final class LBCEntityMapper {
@@ -85,7 +88,13 @@ public final class LBCEntityMapper {
     private static EquipmentConfiguration toEquipmentConfiguration(LBCEntity entity) {
         EquipmentConfiguration result = new EquipmentConfiguration(List.of(), List.of());
         addPersistedEquipment(entity.getDisplay(), entity.getDisplayQuantity(), result);
-        addPersistedEquipment(entity.getBarReader(), entity.getBarReaderQuantity(), result);
+        if (entity.getBarReaders().isEmpty()) {
+            // Обратная совместимость с записями старого формата.
+            addPersistedEquipment(entity.getBarReader(), entity.getBarReaderQuantity(), result);
+        } else {
+            entity.getBarReaders().forEach(item ->
+                    addPersistedEquipment(item.getCatalogPositionId(), item.getQuantity(), result));
+        }
         addPersistedEquipment(Printer.CATALOG_POSITION_ID,
                 entity.getPrinterQuantity() > 0 ? entity.getPrinterQuantity()
                         : entity.isPrinter() ? 1 : 0, result);
@@ -114,6 +123,12 @@ public final class LBCEntityMapper {
         entity.setDisplayQuantity(display == null ? 0 : configuration.getQuantity(display));
         entity.setBarReader(reader == null ? null : reader.getCatalogPositionId());
         entity.setBarReaderQuantity(reader == null ? 0 : configuration.getQuantity(reader));
+        entity.setBarReaders(configuration.getAllEquipment().stream()
+                .filter(BarReader.class::isInstance)
+                .map(BarReader.class::cast)
+                .map(item -> new EquipmentQuantityEmbeddable(
+                        item.getCatalogPositionId(), configuration.getQuantity(item)))
+                .collect(Collectors.toSet()));
         entity.setPrinterQuantity(printerQuantity);
         entity.setRfidReaderQuantity(rfidQuantity);
         entity.setPrinter(printerQuantity > 0);
