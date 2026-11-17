@@ -1,5 +1,8 @@
 package com.lb_calc_web.service;
 
+import com.lb_calc_web.TestDataFactory;
+import com.lb_calc_web.dto.LBDTO;
+import com.lb_calc_web.repository.LBRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -28,6 +31,12 @@ class FindOrCreateLockIntegrationTest {
 
     @Autowired
     private PlatformTransactionManager transactionManager;
+
+    @Autowired
+    private LBService lbService;
+
+    @Autowired
+    private LBRepository lbRepository;
 
     @Test
     void acquire_shouldSerializeConcurrentTransactions() throws Exception {
@@ -73,6 +82,59 @@ class FindOrCreateLockIntegrationTest {
             second.get(5, TimeUnit.SECONDS);
         } finally {
             releaseFirst.countDown();
+            executor.shutdownNow();
+        }
+    }
+
+    @Test
+    void saveLB_shouldReuseConfigurationWhenSnapshotPredatesLock() throws Exception {
+        TransactionTemplate transactionTemplate =
+                new TransactionTemplate(transactionManager);
+
+        LBDTO firstDto = TestDataFactory.validLBDTO(0L);
+        firstDto.setColorBody("Red");
+        firstDto.setColorDoor("Green");
+
+        LBDTO secondDto = TestDataFactory.validLBDTO(0L);
+        secondDto.setColorBody("Red");
+        secondDto.setColorDoor("Green");
+
+        CountDownLatch firstLocked = new CountDownLatch(1);
+        CountDownLatch secondSnapshotReady = new CountDownLatch(1);
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+
+        try {
+            Future<LBDTO> first = executor.submit(() ->
+                    transactionTemplate.execute(status -> {
+                        lockService.acquire();
+                        firstLocked.countDown();
+                        await(secondSnapshotReady);
+                        return lbService.saveLB(firstDto);
+                    })
+            );
+
+            assertTrue(firstLocked.await(5, TimeUnit.SECONDS));
+
+            Future<LBDTO> second = executor.submit(() ->
+                    transactionTemplate.execute(status -> {
+                        // Создаём REPEATABLE READ snapshot до ожидания mutex.
+                        lbRepository.count();
+                        secondSnapshotReady.countDown();
+                        return lbService.saveLB(secondDto);
+                    })
+            );
+
+            LBDTO firstResult = first.get(10, TimeUnit.SECONDS);
+            LBDTO secondResult = second.get(10, TimeUnit.SECONDS);
+
+            assertTrue(firstResult.getId() > 0);
+            assertEquals(
+                    firstResult.getId(),
+                    secondResult.getId(),
+                    "Вторая транзакция должна переиспользовать запись первой"
+            );
+        } finally {
+            secondSnapshotReady.countDown();
             executor.shutdownNow();
         }
     }

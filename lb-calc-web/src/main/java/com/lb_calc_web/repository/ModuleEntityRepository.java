@@ -2,7 +2,9 @@ package com.lb_calc_web.repository;
 
 import com.lb_calc_web.domain.attributes.Colors;
 import com.lb_calc_web.entity.ModuleEntity;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -11,6 +13,7 @@ import java.util.List;
 public interface ModuleEntityRepository
         extends JpaRepository<ModuleEntity, Long> {
 
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("""
             select entity
             from ModuleEntity entity
