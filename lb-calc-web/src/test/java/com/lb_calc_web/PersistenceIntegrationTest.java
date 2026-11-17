@@ -316,6 +316,43 @@ class PersistenceIntegrationTest {
                 .anyMatch(entry -> entry.getAls().getId().equals(changedAlsId)));
         assertTrue(restoredEntity.getAlsEntries().stream()
                 .anyMatch(entry -> entry.getAls().getId().equals(otherAlsId)));
+
+        ALSEntity restoredOriginalEntity =
+                alsRepository.findById(originalAlsId).orElseThrow();
+        ALSEntity restoredChangedEntity =
+                alsRepository.findById(changedAlsId).orElseThrow();
+
+        Set<Long> originalModuleIds = restoredOriginalEntity.getModules().stream()
+                .map(association -> association.getModule().getId())
+                .collect(java.util.stream.Collectors.toSet());
+        Set<Long> changedModuleIds = restoredChangedEntity.getModules().stream()
+                .map(association -> association.getModule().getId())
+                .collect(java.util.stream.Collectors.toSet());
+
+        assertEquals(
+                2,
+                originalModuleIds.stream()
+                        .filter(changedModuleIds::contains)
+                        .count()
+        );
+
+        ALS restoredChangedALS =
+                ALSEntityMapper.toDomain(restoredChangedEntity);
+        assertEquals(
+                List.of("LEFT", "RIGHT"),
+                restoredChangedALS.getStorageModules().stream()
+                        .map(storageModule ->
+                                storageModule.getDirectionDoorOpening().name())
+                        .toList()
+        );
+        assertEquals(
+                List.of(1, 2, 3, 4, 5, 6, 7),
+                restoredChangedALS.getStorageModules().stream()
+                        .flatMap(storageModule ->
+                                storageModule.getCells().stream())
+                        .map(cell -> cell.getNumber())
+                        .toList()
+        );
     }
 
 }
