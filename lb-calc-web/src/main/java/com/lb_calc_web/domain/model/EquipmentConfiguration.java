@@ -82,6 +82,27 @@ public class EquipmentConfiguration {
         }
     }
 
+    /**
+     * Проверяет добавление новой позиции дисплея к существующей комплектации.
+     */
+    private void validateSingleDisplay(
+            Map<Equipment, Integer> first,
+            Map<Equipment, Integer> second,
+            Equipment candidate
+    ) {
+        long displayPositions = java.util.stream.Stream.concat(
+                        first.keySet().stream(),
+                        second.keySet().stream()
+                )
+                .filter(Display.class::isInstance)
+                .count();
+
+        if (candidate instanceof Display && displayPositions >= 1) {
+            throw new IllegalArgumentException(
+                    "В модуле управления может быть установлен только один дисплей");
+        }
+    }
+
     public static EquipmentConfiguration fromItems(List<EquipmentItem> required,
                                                    List<EquipmentItem> additional) {
         EquipmentConfiguration result = new EquipmentConfiguration(List.of(), List.of());
@@ -173,7 +194,7 @@ public class EquipmentConfiguration {
         }
 
         if (position instanceof Display && currentQuantity == 0) {
-            validateSingleDisplay(target, other);
+            validateSingleDisplay(target, other, position);
         }
 
         target.put(position, newQuantity);
