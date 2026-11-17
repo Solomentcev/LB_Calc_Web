@@ -177,41 +177,17 @@ public final class LBCDtoMapper {
             );
         }
 
-        List<Equipment> equipment = new ArrayList<>();
-
-        int displayQuantity = dto.getDisplayQuantity() == null
-                ? (dto.getDisplay() == null || dto.getDisplay().isBlank()
-                    || Display.NONE.getName().equals(dto.getDisplay()) ? 0 : 1)
-                : dto.getDisplayQuantity();
-        int barReaderQuantity = dto.getBarReaderQuantity() == null
-                ? (dto.getBarReader() == null || dto.getBarReader().isBlank()
-                    || BarReader.NONE.getName().equals(dto.getBarReader()) ? 0 : 1)
-                : dto.getBarReaderQuantity();
-        int printerQuantity = dto.getPrinterQuantity() == null
-                ? (dto.isPrinter() ? 1 : 0) : dto.getPrinterQuantity();
-        int rfidReaderQuantity = dto.getRfidReaderQuantity() == null
-                ? (dto.isRfidReader() ? 1 : 0) : dto.getRfidReaderQuantity();
-
-        requireNonNegativeQuantity(displayQuantity);
-        requireNonNegativeQuantity(barReaderQuantity);
-        requireNonNegativeQuantity(printerQuantity);
-        requireNonNegativeQuantity(rfidReaderQuantity);
-
-        if (displayQuantity > 0) {
-            addDisplay(dto.getDisplay(), equipment);
-            repeatEquipment(equipment, Display.class, displayQuantity);
-        }
-        if (barReaderQuantity > 0) {
-            addBarReader(dto.getBarReader(), equipment);
-            repeatEquipment(equipment, BarReader.class, barReaderQuantity);
-        }
-        addEquipmentCopies(equipment, new Printer(), printerQuantity);
-        addEquipmentCopies(equipment, new RfidReader(), rfidReaderQuantity);
-
         EquipmentConfiguration equipmentConfiguration =
-                new EquipmentConfiguration(
-                        equipment,
-                        List.of()
+                ControlEquipmentResolver.resolve(
+                dto.getDisplay(),
+                dto.getDisplayQuantity(),
+                dto.getBarReader(),
+                dto.getBarReaderQuantity(),
+                dto.isPrinter(),
+                dto.getPrinterQuantity(),
+                dto.isRfidReader(),
+                dto.getRfidReaderQuantity(),
+                "LBC"
                 );
 
         ControlConfiguration controlConfiguration =
