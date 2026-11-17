@@ -220,6 +220,21 @@ class SizeValidatorTest {
     }
 
     @Test
+    void validateProject_shouldValidateRepeatedALSConfigurationOnlyOnce() {
+        Project project = createProject(32L, als);
+        project.addALS(als);
+
+        List<ValidationResult> results =
+                sizeValidator.validateProject(project);
+
+        assertEquals(2, project.getQuantity(als));
+        assertEquals(
+                sizeValidator.deepValidateALS(als).size(),
+                results.size()
+        );
+    }
+
+    @Test
     void getErrorValidateLBCSizesList_shouldReturnErrors() {
         LBC invalidLBC = createLBC(10, 500, 3, 20);
 
