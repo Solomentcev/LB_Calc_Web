@@ -7,8 +7,10 @@ import com.lb_calc_web.domain.model.Project;
 import com.lb_calc_web.entity.ALSEntity;
 import com.lb_calc_web.entity.EmployeeEntity;
 import com.lb_calc_web.entity.LCEntity;
+import com.lb_calc_web.entity.LBCEntity;
 import com.lb_calc_web.entity.ModuleEntity;
 import com.lb_calc_web.entity.ProjectEntity;
+import com.lb_calc_web.mapper.dto.ALSDtoMapper;
 import com.lb_calc_web.mapper.entity.ALSEntityMapper;
 import com.lb_calc_web.mapper.entity.EmployeeEntityMapper;
 import com.lb_calc_web.mapper.entity.ModuleEntityMapper;
@@ -17,7 +19,10 @@ import com.lb_calc_web.repository.ALSRepository;
 import com.lb_calc_web.repository.EmployeeRepository;
 import com.lb_calc_web.repository.ModuleEntityRepository;
 import com.lb_calc_web.repository.ProjectRepository;
+import com.lb_calc_web.domain.attributes.AccessMethod;
+import com.lb_calc_web.domain.attributes.PrintOption;
 import com.lb_calc_web.domain.attributes.Role;
+import com.lb_calc_web.domain.equipment.BarReader;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +33,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -141,5 +148,51 @@ class PersistenceIntegrationTest {
 
         assertEquals(2, restoredLC.getEquipment().size());
         assertEquals(alsId, restoredALSEntity.getId());
+    }
+
+    @Test
+    void lbcAggregate_shouldRoundTripEquipmentQuantitiesAndControlOptions() {
+        var lbcALS = TestDataFactory.validLBCALSDTO(2L);
+        lbcALS.getLBC().setBarReader(BarReader.READER_1D.getName());
+        lbcALS.getLBC().setBarReaderQuantity(2);
+        lbcALS.getLBC().setAccessMethods(List.of(AccessMethod.RFID.name()));
+        lbcALS.getLBC().setPrintOptions(List.of(PrintOption.BARCODE.name()));
+
+        ALS domainALS = ALSDtoMapper.toDomain(lbcALS);
+        Map<Module, ModuleEntity> resolvedModules = new HashMap<>();
+
+        ALSEntity alsEntity = ALSEntityMapper.toEntity(
+                domainALS,
+                module -> resolvedModules.computeIfAbsent(
+                        module,
+                        candidate -> moduleRepository.saveAndFlush(
+                                ModuleEntityMapper.toEntity(candidate)
+                        )
+                )
+        );
+        Long alsId = alsRepository.saveAndFlush(alsEntity).getId();
+
+        entityManager.clear();
+
+        ALSEntity restoredEntity = alsRepository.findById(alsId).orElseThrow();
+        ALS restoredALS = ALSEntityMapper.toDomain(restoredEntity);
+        LBCEntity restoredLBC = (LBCEntity) restoredEntity
+                .getModules()
+                .get(0)
+                .getModule();
+
+        assertEquals(domainALS, restoredALS);
+        assertEquals(3, restoredLBC.getEquipment().size());
+        assertEquals(
+                2,
+                restoredLBC.getEquipment().stream()
+                        .filter(item -> BarReader.READER_1D_ID.equals(
+                                item.getCatalogPositionId()))
+                        .findFirst()
+                        .orElseThrow()
+                        .getQuantity()
+        );
+        assertEquals(Set.of(AccessMethod.RFID), restoredLBC.getAccessMethods());
+        assertEquals(Set.of(PrintOption.BARCODE), restoredLBC.getPrintOptions());
     }
 }
