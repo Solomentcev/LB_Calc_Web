@@ -188,11 +188,30 @@ public class ALSEntity {
         return modules;
     }
 
-    public void setModules(List<ALSModuleEntity> modules) {
-        this.modules = Objects.requireNonNull(
-                modules,
-                "Список модулей ALS не должен быть null"
-        );
+    /**
+     * Добавляет модуль в указанную физическую позицию ALS.
+     *
+     * @param module модуль
+     * @param moduleOrder позиция слева направо, начиная с нуля
+     */
+    public void addModule(ModuleEntity module, int moduleOrder) {
+        ALSModuleEntity association = new ALSModuleEntity();
+        association.setAls(this);
+        association.setModule(Objects.requireNonNull(
+                module,
+                "Модуль не должен быть null"
+        ));
+        association.setModuleOrder(moduleOrder);
+        modules.add(association);
+    }
+
+    /**
+     * Удаляет все связи ALS с модулями.
+     *
+     * <p>Коллекция остаётся тем же JPA-managed экземпляром.</p>
+     */
+    public void clearModules() {
+        modules.clear();
     }
 
     @Override
