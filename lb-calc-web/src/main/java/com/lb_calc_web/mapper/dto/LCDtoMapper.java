@@ -14,7 +14,6 @@ import com.lb_calc_web.domain.model.EquipmentConfiguration;
 import com.lb_calc_web.domain.model.LC;
 import com.lb_calc_web.dto.LCDTO;
 
-import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
@@ -194,93 +193,6 @@ public final class LCDtoMapper {
         }
 
         return result;
-    }
-
-    private static void requireNonNegativeQuantity(int quantity) {
-        if (quantity < 0) {
-            throw new IllegalArgumentException(
-                    "Количество оборудования не может быть отрицательным");
-        }
-    }
-
-    private static void repeatEquipment(
-            List<Equipment> equipment,
-            Class<? extends Equipment> type,
-            int quantity
-    ) {
-        Equipment position = equipment.stream()
-                .filter(type::isInstance)
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "Не удалось определить позицию оборудования"));
-        for (int i = 1; i < quantity; i++) {
-            equipment.add(position);
-        }
-    }
-
-    private static void addEquipmentCopies(
-            List<Equipment> equipment,
-            Equipment position,
-            int quantity
-    ) {
-        for (int i = 0; i < quantity; i++) {
-            equipment.add(position);
-        }
-    }
-
-    private static void addDisplay(
-            String name,
-            List<Equipment> equipment
-    ) {
-        if (name == null || name.isBlank()) {
-            return;
-        }
-
-        if (name.equals(Display.NONE.getName())) {
-            return;
-        }
-
-        for (Display display : List.of(
-                Display.LC10,
-                Display.LC17,
-                Display.LC19
-        )) {
-            if (display.getName().equals(name)) {
-                equipment.add(display);
-                return;
-            }
-        }
-
-        throw new IllegalArgumentException(
-                "Неизвестный дисплей LC: " + name
-        );
-    }
-
-    private static void addBarReader(
-            String name,
-            List<Equipment> equipment
-    ) {
-        if (name == null || name.isBlank()) {
-            return;
-        }
-
-        if (name.equals(BarReader.NONE.getName())) {
-            return;
-        }
-
-        for (BarReader reader : List.of(
-                BarReader.READER_1D,
-                BarReader.READER_2D
-        )) {
-            if (reader.getName().equals(name)) {
-                equipment.add(reader);
-                return;
-            }
-        }
-
-        throw new IllegalArgumentException(
-                "Неизвестный сканер штрихкода LC: " + name
-        );
     }
 
     public static List<LCDTO> toDtoList(
