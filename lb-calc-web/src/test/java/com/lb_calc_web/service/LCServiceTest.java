@@ -163,6 +163,19 @@ class LCServiceTest {
     }
 
     @Test
+    void saveLC_widthBelowEquipmentRequirement_shouldThrowValidationException() {
+        LCDTO dto = TestDataFactory.validLCDTO(1L);
+        dto.setWidth(100);
+
+        assertThrows(
+                ValidationSizeException.class,
+                () -> lcService.saveLC(dto)
+        );
+
+        verify(lcRepository, never()).save(any());
+    }
+
+    @Test
     void saveLC_invalid_shouldThrowValidationException() {
         LCDTO dto = TestDataFactory.validLCDTO(1L);
         dto.setHeight(10);
