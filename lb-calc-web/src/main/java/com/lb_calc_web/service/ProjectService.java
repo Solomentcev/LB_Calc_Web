@@ -441,21 +441,19 @@ public class ProjectService {
             Long alsId,
             Long lcId
     ) {
-        ALSDTO als = findALSInProject(project, alsId);
+        return findLCInProject(findById(projectId), alsId, lcId);
+    }
 
-        LCDTO lc =
-                als.getLC();
+    private LCDTO findLCInProject(
+            ProjectDTO project,
+            Long alsId,
+            Long lcId
+    ) {
+        LCDTO lc = findALSInProject(project, alsId).getLC();
 
-        if (lc == null
-                || !Objects.equals(
-                lc.getId(),
-                lcId
-        )) {
+        if (lc == null || !Objects.equals(lc.getId(), lcId)) {
             throw new NoSuchElementException(
-                    "LC с id "
-                            + lcId
-                            + " не найден в ALS "
-                            + alsId
+                    "LC с id " + lcId + " не найден в ALS " + alsId
             );
         }
 
@@ -471,25 +469,19 @@ public class ProjectService {
             Long alsId,
             Long lbcId
     ) {
-        ALSDTO als =
-                findALSInProject(
-                        projectId,
-                        alsId
-                );
+        return findLBCInProject(findById(projectId), alsId, lbcId);
+    }
 
-        LBCDTO lbc =
-                als.getLBC();
+    private LBCDTO findLBCInProject(
+            ProjectDTO project,
+            Long alsId,
+            Long lbcId
+    ) {
+        LBCDTO lbc = findALSInProject(project, alsId).getLBC();
 
-        if (lbc == null
-                || !Objects.equals(
-                lbc.getId(),
-                lbcId
-        )) {
+        if (lbc == null || !Objects.equals(lbc.getId(), lbcId)) {
             throw new NoSuchElementException(
-                    "LBC с id "
-                            + lbcId
-                            + " не найден в ALS "
-                            + alsId
+                    "LBC с id " + lbcId + " не найден в ALS " + alsId
             );
         }
 
@@ -505,29 +497,22 @@ public class ProjectService {
             Long alsId,
             Long lbId
     ) {
-        ALSDTO als =
-                findALSInProject(
-                        projectId,
-                        alsId
-                );
+        return findLBInProject(findById(projectId), alsId, lbId);
+    }
 
-        return als.getLbList()
+    private LBDTO findLBInProject(
+            ProjectDTO project,
+            Long alsId,
+            Long lbId
+    ) {
+        return findALSInProject(project, alsId)
+                .getLbList()
                 .stream()
-                .filter(
-                        lb ->
-                                lb != null
-                                        && Objects.equals(
-                                        lb.getId(),
-                                        lbId
-                                )
-                )
+                .filter(lb -> lb != null && Objects.equals(lb.getId(), lbId))
                 .findFirst()
                 .orElseThrow(
                         () -> new NoSuchElementException(
-                                "LB с id "
-                                        + lbId
-                                        + " не найден в ALS "
-                                        + alsId
+                                "LB с id " + lbId + " не найден в ALS " + alsId
                         )
                 );
     }
