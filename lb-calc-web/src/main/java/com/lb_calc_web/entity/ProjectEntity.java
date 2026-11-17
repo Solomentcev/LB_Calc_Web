@@ -296,12 +296,20 @@ public class ProjectEntity {
      * @param quantity количество экземпляров
      */
     public void addAlsEntry(ALSEntity als, int quantity) {
-        ProjectALSEntity entry = new ProjectALSEntity();
-        entry.setProject(this);
-        entry.setAls(Objects.requireNonNull(
+        ALSEntity target = Objects.requireNonNull(
                 als,
                 "ALS не должна быть null"
-        ));
+        );
+
+        if (alsEntries.stream().anyMatch(entry -> entry.getAls().equals(target))) {
+            throw new IllegalArgumentException(
+                    "Конфигурация ALS уже добавлена в проект"
+            );
+        }
+
+        ProjectALSEntity entry = new ProjectALSEntity();
+        entry.setProject(this);
+        entry.setAls(target);
         entry.setQuantity(quantity);
         alsEntries.add(entry);
     }
