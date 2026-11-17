@@ -97,7 +97,7 @@ public class EmployeeService implements UserDetailsService {
     /**
      * Загружает сотрудника по стабильному идентификатору.
      */
-    private EmployeeDTO loadUserById(Long id) {
+    public EmployeeDTO loadUserById(Long id) {
         EmployeeEntity entity = employeeRepository
                 .findById(id)
                 .orElseThrow(() ->
