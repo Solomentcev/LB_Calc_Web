@@ -234,19 +234,15 @@ public final class ProjectEntityMapper {
             }
         }
 
-        entity.getAlsEntries().removeAll(entriesToRemove);
+        entriesToRemove.forEach(entity::removeAlsEntry);
 
         for (Map.Entry<Long, Integer> entry :
                 desiredQuantities.entrySet()) {
 
-            ProjectALSEntity projectAls =
-                    new ProjectALSEntity();
-
-            projectAls.setProject(entity);
-            projectAls.setAls(desiredALSEntities.get(entry.getKey()));
-            projectAls.setQuantity(entry.getValue());
-
-            entity.getAlsEntries().add(projectAls);
+            entity.addAlsEntry(
+                    desiredALSEntities.get(entry.getKey()),
+                    entry.getValue()
+            );
         }
     }
 }
