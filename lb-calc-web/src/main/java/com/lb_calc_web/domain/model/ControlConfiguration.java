@@ -78,7 +78,7 @@ public class ControlConfiguration {
         this.equipmentConfiguration = Objects.requireNonNull(
                 equipmentConfiguration,
                 "Конфигурация оборудования не должна быть null"
-        );
+        ).copy();
     }
 
     /**
