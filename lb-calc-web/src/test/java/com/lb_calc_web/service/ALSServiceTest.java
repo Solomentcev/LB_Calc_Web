@@ -8,6 +8,7 @@ import com.lb_calc_web.dto.LCDTO;
 import com.lb_calc_web.handler.ValidationSizeException;
 import com.lb_calc_web.entity.ALSEntity;
 import com.lb_calc_web.mapper.entity.ALSEntityMapper;
+import com.lb_calc_web.mapper.entity.ModuleEntityMapper;
 import com.lb_calc_web.repository.ALSRepository;
 import com.lb_calc_web.repository.ModuleEntityRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -101,6 +102,52 @@ class ALSServiceTest {
         assertNotNull(result);
         verify(alsRepository, never()).save(any());
         verify(alsRepository, never()).findAll();
+    }
+
+    @Test
+    void saveALS_shouldPropagateInvalidPersistedAlsCandidate() {
+        ALSDTO dto = TestDataFactory.validALSDTO(1L);
+        ALSEntity existing = ALSEntityMapper.toEntity(
+                TestDataFactory.validALS(1L),
+                ALSEntityMapper::createModuleEntity
+        );
+        existing.setWidth(existing.getWidth() + 1);
+
+        when(alsRepository.findCandidates(
+                anyInt(), anyInt(), anyInt(), anyInt(), any(), any()
+        )).thenReturn(List.of(existing));
+
+        assertThrows(
+                IllegalStateException.class,
+                () -> alsService.saveALS(dto)
+        );
+
+        verify(alsRepository, never()).save(any());
+        verifyNoInteractions(moduleRepository);
+    }
+
+    @Test
+    void saveALS_shouldPropagateInvalidPersistedModuleCandidate() {
+        ALSDTO dto = TestDataFactory.validALSDTO(1L);
+        var existingModule = ModuleEntityMapper.toEntity(
+                TestDataFactory.validLC(null)
+        );
+        existingModule.setDescription("Устаревшее описание");
+
+        when(alsRepository.findCandidates(
+                anyInt(), anyInt(), anyInt(), anyInt(), any(), any()
+        )).thenReturn(List.of());
+        when(moduleRepository.findCandidates(
+                anyInt(), anyInt(), anyInt(), anyInt(), anyInt(), any(), any()
+        )).thenReturn(List.of(existingModule));
+
+        assertThrows(
+                IllegalStateException.class,
+                () -> alsService.saveALS(dto)
+        );
+
+        verify(alsRepository, never()).save(any());
+        verify(moduleRepository, never()).save(any());
     }
 
     @Test
