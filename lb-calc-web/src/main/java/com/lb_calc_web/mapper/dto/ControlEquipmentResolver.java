@@ -15,8 +15,8 @@ import java.util.List;
 /**
  * Преобразует поля оборудования DTO в единую доменную конфигурацию.
  *
- * <p>Используется мапперами LC и LBC, чтобы одинаково обрабатывать
- * каталожные позиции и совместимость со старыми DTO без количеств.</p>
+ * <p>Используется мапперами LC и LBC для единого преобразования
+ * каталожных позиций и их явно заданного количества.</p>
  */
 final class ControlEquipmentResolver {
 
@@ -34,22 +34,24 @@ final class ControlEquipmentResolver {
             Integer rfidReaderQuantity,
             String moduleType
     ) {
-        int resolvedDisplayQuantity = resolveQuantity(
+        int resolvedDisplayQuantity = requireQuantity(
                 displayQuantity,
-                isAbsent(displayName, Display.NONE),
-                1
+                "дисплея"
         );
-        int resolvedBarReaderQuantity = resolveQuantity(
+        int resolvedBarReaderQuantity = requireQuantity(
                 barReaderQuantity,
-                isAbsent(barReaderName, BarReader.NONE),
-                1
+                "сканера штрихкода"
         );
-        int resolvedPrinterQuantity = resolveQuantity(
-                printerQuantity, !printer, 1
+        int resolvedPrinterQuantity = requireQuantity(
+                printerQuantity,
+                "принтера"
         );
-        int resolvedRfidReaderQuantity = resolveQuantity(
-                rfidReaderQuantity, !rfidReader, 1
+        int resolvedRfidReaderQuantity = requireQuantity(
+                rfidReaderQuantity,
+                "RFID-считывателя"
         );
+        validatePresence(printer, resolvedPrinterQuantity, "принтера");
+        validatePresence(rfidReader, resolvedRfidReaderQuantity, "RFID-считывателя");
 
         List<EquipmentItem> items = new ArrayList<>();
         addItem(items, displayName, resolvedDisplayQuantity, Display.NONE, moduleType);
@@ -60,21 +62,31 @@ final class ControlEquipmentResolver {
         return EquipmentConfiguration.fromItems(items, List.of());
     }
 
-    private static int resolveQuantity(
-            Integer quantity,
-            boolean legacyAbsent,
-            int legacyPresentQuantity
-    ) {
-        int result = quantity == null
-                ? (legacyAbsent ? 0 : legacyPresentQuantity)
-                : quantity;
-
-        if (result < 0) {
+    private static int requireQuantity(Integer quantity, String equipmentName) {
+        if (quantity == null) {
+            throw new IllegalArgumentException(
+                    "Количество " + equipmentName + " должно быть задано"
+            );
+        }
+        if (quantity < 0) {
             throw new IllegalArgumentException(
                     "Количество оборудования не может быть отрицательным"
             );
         }
-        return result;
+        return quantity;
+    }
+
+    private static void validatePresence(
+            boolean present,
+            int quantity,
+            String equipmentName
+    ) {
+        if (present != (quantity > 0)) {
+            throw new IllegalArgumentException(
+                    "Признак наличия " + equipmentName
+                            + " не соответствует его количеству"
+            );
+        }
     }
 
     private static boolean isAbsent(String value, Equipment none) {
