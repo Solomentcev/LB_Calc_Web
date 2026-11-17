@@ -153,9 +153,17 @@ public class LBCService {
                 getEnumList("lbc.print-options.default", PrintOption.class)
         );
 
-        applyTypeConfiguration(dto);
-
-        LBC domain = LBCDtoMapper.toDomain(dto);
+        LBC domain;
+        try {
+            applyTypeConfiguration(dto);
+            domain = LBCDtoMapper.toDomain(dto);
+        } catch (IllegalArgumentException | NullPointerException exception) {
+            throw createMappingValidationException(
+                    "LBC",
+                    dto.getId(),
+                    exception
+            );
+        }
         LBCDTO result = LBCDtoMapper.toDto(domain);
         result.setId(0L);
         return addLBCImage(result);
@@ -399,5 +407,25 @@ public class LBCService {
                 key,
                 Integer.class
         );
+    }
+
+    /**
+     * Преобразует ошибку входных данных в единый результат валидации.
+     */
+    private ValidationSizeException createMappingValidationException(
+            String objectType,
+            Long objectId,
+            RuntimeException exception
+    ) {
+        ValidationResult result =
+                new ValidationResult(objectType, objectId);
+        result.addError(
+                "domainModel",
+                exception.getMessage(),
+                null,
+                null,
+                null
+        );
+        return new ValidationSizeException(result);
     }
 }
