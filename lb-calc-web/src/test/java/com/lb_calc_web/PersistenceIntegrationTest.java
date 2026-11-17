@@ -24,6 +24,7 @@ import com.lb_calc_web.domain.attributes.PrintOption;
 import com.lb_calc_web.domain.attributes.Role;
 import com.lb_calc_web.domain.equipment.BarReader;
 import jakarta.persistence.EntityManager;
+import org.hibernate.Hibernate;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -140,7 +141,8 @@ class PersistenceIntegrationTest {
         }
 
         LCEntity restoredLC = restoredALSEntity.getModules().stream()
-                .map(association -> association.getModule())
+                .map(association ->
+                        (ModuleEntity) Hibernate.unproxy(association.getModule()))
                 .filter(LCEntity.class::isInstance)
                 .map(LCEntity.class::cast)
                 .findFirst()
@@ -176,10 +178,9 @@ class PersistenceIntegrationTest {
 
         ALSEntity restoredEntity = alsRepository.findById(alsId).orElseThrow();
         ALS restoredALS = ALSEntityMapper.toDomain(restoredEntity);
-        LBCEntity restoredLBC = (LBCEntity) restoredEntity
-                .getModules()
-                .get(0)
-                .getModule();
+        LBCEntity restoredLBC = (LBCEntity) Hibernate.unproxy(
+                restoredEntity.getModules().get(0).getModule()
+        );
 
         assertEquals(domainALS, restoredALS);
         assertEquals(3, restoredLBC.getEquipment().size());
