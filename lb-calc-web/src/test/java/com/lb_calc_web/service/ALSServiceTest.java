@@ -249,7 +249,10 @@ class ALSServiceTest {
         ALSDTO result =
                 spy.replaceLCandSaveALS(als, lc);
 
-        assertEquals(lc, result.getLC());
+        assertNotNull(result.getLC());
+        assertEquals(lc.getId(), result.getLC().getId());
+        assertEquals(lc.getDisplay(), result.getLC().getDisplay());
+        assertEquals(lc.getRfidReaderQuantity(), result.getLC().getRfidReaderQuantity());
         assertNull(result.getLBC());
     }
 
@@ -265,7 +268,11 @@ class ALSServiceTest {
         ALSDTO result =
                 spy.replaceLBCandSaveALS(als, lbc);
 
-        assertEquals(lbc, result.getLBC());
+        assertNotNull(result.getLBC());
+        assertEquals(lbc.getType(), result.getLBC().getType());
+        assertEquals(lbc.getCountCells(), result.getLBC().getCountCells());
+        assertEquals(2, result.getLbList().size());
+        assertNull(result.getLC());
         assertNull(result.getLC());
     }
 }
