@@ -763,6 +763,8 @@ public class ALSService {
                         ALSEntityMapper.toDomain(entity)
                 );
 
+        dto.setId(entity.getId());
+
         enrichModuleIds(
                 dto,
                 entity
