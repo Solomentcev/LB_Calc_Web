@@ -3,7 +3,6 @@ package com.lb_calc_web.domain.model;
 import com.lb_calc_web.domain.attributes.AccessMethod;
 import com.lb_calc_web.domain.attributes.Payment;
 import com.lb_calc_web.domain.attributes.PrintOption;
-
 import com.lb_calc_web.domain.equipment.Equipment;
 
 import java.util.Collections;
@@ -130,7 +129,7 @@ public class ControlConfiguration {
                 payment,
                 accessMethods,
                 printOptions,
-                equipmentConfiguration.copy()
+                equipmentConfiguration
         );
     }
 
@@ -212,8 +211,13 @@ public class ControlConfiguration {
      * @return {@code true}, если оборудование было удалено хотя бы из одного набора
      */
     public boolean removeEquipment(
-            com.lb_calc_web.domain.equipment.Equipment equipment
+            Equipment equipment
     ) {
+        Objects.requireNonNull(
+                equipment,
+                "Оборудование не должно быть null"
+        );
+
         boolean removedRequired =
                 equipmentConfiguration.removeRequiredEquipment(equipment);
         boolean removedAdditional =
