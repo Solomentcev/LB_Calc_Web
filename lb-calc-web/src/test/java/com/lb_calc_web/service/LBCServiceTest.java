@@ -68,6 +68,10 @@ class LBCServiceTest {
         assertEquals(3, result.getCountCells());
         assertEquals("TYPE1", result.getType());
         assertEquals("LC10", result.getDisplay());
+        assertEquals(1, result.getDisplayQuantity());
+        assertEquals(0, result.getBarReaderQuantity());
+        assertEquals(0, result.getPrinterQuantity());
+        assertEquals(1, result.getRfidReaderQuantity());
         assertNotNull(result.getStringLBCImage());
     }
 
