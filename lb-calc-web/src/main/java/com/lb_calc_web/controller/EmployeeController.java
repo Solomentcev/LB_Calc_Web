@@ -443,6 +443,10 @@ public class EmployeeController {
                 "id",
                 employeeUpd.getId()
         );
+        model.addAttribute(
+                "active",
+                employeeService.isActive((long) id)
+        );
 
         if (bindingResult.hasErrors()) {
             return "employees/employee";
