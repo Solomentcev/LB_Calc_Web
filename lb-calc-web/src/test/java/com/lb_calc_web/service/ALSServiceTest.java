@@ -132,6 +132,16 @@ class ALSServiceTest {
     }
 
     @Test
+    void findLBCInALS_shouldRejectIdNotBelongingToALS() {
+        ALSDTO als = TestDataFactory.validLBCALSDTO(1L);
+
+        assertThrows(
+                java.util.NoSuchElementException.class,
+                () -> alsService.findLBCInALS(als, 999L)
+        );
+    }
+
+    @Test
     void replaceLC_shouldRejectModuleIdNotBelongingToALS() {
         ALSDTO als = TestDataFactory.validALSDTO(1L);
         LCDTO anotherLC = TestDataFactory.validLCDTO(999L);
