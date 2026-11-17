@@ -17,6 +17,8 @@ public final class EquipmentCatalog {
 
     public static Equipment findByCatalogPositionId(String id) {
         if (id == null || id.isBlank()) return null;
+        if (Display.NONE_ID.equals(id)) return Display.NONE;
+        if (BarReader.NONE_ID.equals(id)) return BarReader.NONE;
         return POSITIONS.stream()
                 .filter(item -> item.getCatalogPositionId().equals(id))
                 .findFirst()
@@ -27,6 +29,14 @@ public final class EquipmentCatalog {
     /** Разрешает ID каталога или прежнее отображаемое имя. */
     public static Equipment resolve(String idOrLegacyName) {
         if (idOrLegacyName == null || idOrLegacyName.isBlank()) return null;
+        if (Display.NONE_ID.equals(idOrLegacyName)
+                || Display.NONE.getName().equals(idOrLegacyName)) {
+            return Display.NONE;
+        }
+        if (BarReader.NONE_ID.equals(idOrLegacyName)
+                || BarReader.NONE.getName().equals(idOrLegacyName)) {
+            return BarReader.NONE;
+        }
         return POSITIONS.stream()
                 .filter(item -> item.getCatalogPositionId().equals(idOrLegacyName)
                         || item.getName().equals(idOrLegacyName))
