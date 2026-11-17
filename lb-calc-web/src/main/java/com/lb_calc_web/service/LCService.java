@@ -4,7 +4,6 @@ import com.lb_calc_web.domain.attributes.Colors;
 import com.lb_calc_web.domain.attributes.Payment;
 import com.lb_calc_web.domain.equipment.BarReader;
 import com.lb_calc_web.domain.equipment.Display;
-import com.lb_calc_web.domain.equipment.Equipment;
 import com.lb_calc_web.domain.equipment.Printer;
 import com.lb_calc_web.domain.equipment.RfidReader;
 import com.lb_calc_web.domain.model.LC;
