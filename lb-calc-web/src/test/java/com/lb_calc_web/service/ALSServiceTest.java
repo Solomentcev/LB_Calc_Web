@@ -143,6 +143,19 @@ class ALSServiceTest {
     }
 
     @Test
+    void replaceWithNewLBC_shouldReplaceExistingLBC() {
+        ALSDTO als = TestDataFactory.validLBCALSDTO(1L);
+        when(lbcService.createLBC(
+                anyInt(), anyInt(), anyInt(), anyInt(), any(), any()
+        )).thenReturn(TestDataFactory.validLBCDTO(0L));
+
+        ALSDTO result = alsService.replaceWithNewLBC(als);
+
+        assertNotNull(result.getLBC());
+        assertNull(result.getLC());
+    }
+
+    @Test
     void replaceLBC_shouldRejectModuleIdNotBelongingToALS() {
         ALSDTO als = TestDataFactory.validLBCALSDTO(1L);
         LBCDTO anotherLBC = TestDataFactory.validLBCDTO(999L);
