@@ -501,6 +501,20 @@ public class ALS {
     }
 
     /**
+     * Возвращает минимальную глубину ячейки среди модулей хранения ALS.
+     *
+     * @return минимальная глубина ячейки, мм, или {@code 0}, если ячеек нет
+     */
+    public int getDepthCell() {
+        return modules.stream()
+                .filter(StorageModule.class::isInstance)
+                .map(StorageModule.class::cast)
+                .mapToInt(StorageModule::getCellDepth)
+                .min()
+                .orElse(0);
+    }
+
+    /**
      * Возвращает количество модулей, равных указанному модулю.
      *
      * <p>Сравнение выполняется по {@link Object#equals(Object)}.</p>
