@@ -54,6 +54,32 @@ public class EquipmentConfiguration {
                                 "и дополнительной: " + equipment.getCatalogPositionId());
             }
         }
+
+        validateSingleDisplay(requiredEquipment, additionalEquipment);
+    }
+
+    /**
+     * Проверяет, что в конфигурации установлено не более одного дисплея.
+     *
+     * @param first первая группа оборудования
+     * @param second вторая группа оборудования
+     * @throws IllegalArgumentException если выбрано несколько разных дисплеев
+     */
+    private void validateSingleDisplay(
+            Map<Equipment, Integer> first,
+            Map<Equipment, Integer> second
+    ) {
+        long displayPositions = java.util.stream.Stream.concat(
+                        first.keySet().stream(),
+                        second.keySet().stream()
+                )
+                .filter(Display.class::isInstance)
+                .count();
+
+        if (displayPositions > 1) {
+            throw new IllegalArgumentException(
+                    "В модуле управления может быть установлен только один дисплей");
+        }
     }
 
     public static EquipmentConfiguration fromItems(List<EquipmentItem> required,
@@ -138,11 +164,18 @@ public class EquipmentConfiguration {
                     "Позиция уже добавлена в другую группу оборудования: " +
                             position.getCatalogPositionId());
         }
-        int newQuantity = sumQuantities(target.getOrDefault(position, 0), quantity);
+        int currentQuantity = target.getOrDefault(position, 0);
+        int newQuantity = sumQuantities(currentQuantity, quantity);
+
         if (position instanceof Display && newQuantity > 1) {
             throw new IllegalArgumentException(
                     "Количество дисплеев в модуле должно быть равно 1");
         }
+
+        if (position instanceof Display && currentQuantity == 0) {
+            validateSingleDisplay(target, other);
+        }
+
         target.put(position, newQuantity);
     }
 
