@@ -7,7 +7,9 @@ import com.lb_calc_web.dto.EmployeeDTO;
 import com.lb_calc_web.dto.LBCDTO;
 import com.lb_calc_web.dto.LBDTO;
 import com.lb_calc_web.dto.ProjectDTO;
+import com.lb_calc_web.entity.EmployeeEntity;
 import com.lb_calc_web.entity.ProjectEntity;
+import org.springframework.security.access.AccessDeniedException;
 import com.lb_calc_web.handler.ValidationSizeException;
 import com.lb_calc_web.repository.ALSRepository;
 import com.lb_calc_web.repository.EmployeeRepository;
@@ -283,4 +285,51 @@ class ProjectServiceTest {
                 )
         );
     }
+
+    @Test
+    void saveProject_managerNotOwner_shouldRejectBeforeSavingALS() {
+        ProjectEntity existing = mock(ProjectEntity.class);
+        EmployeeEntity owner = mock(EmployeeEntity.class);
+        when(existing.getCreatedBy()).thenReturn(owner);
+        when(owner.getId()).thenReturn(10L);
+        when(projectRepository.findById(1L)).thenReturn(Optional.of(existing));
+
+        EmployeeDTO manager = new EmployeeDTO();
+        manager.setId(11L);
+        manager.setRole(Role.ROLE_MANAGER);
+        when(employeeService.getCurrentEmployee()).thenReturn(manager);
+
+        ProjectDTO project = new ProjectDTO();
+        project.setId(1L);
+
+        assertThrows(
+                AccessDeniedException.class,
+                () -> projectService.saveProject(project)
+        );
+
+        verify(alsService, never()).saveALS(any(ALSDTO.class));
+        verify(projectRepository, never()).save(any(ProjectEntity.class));
+    }
+
+    @Test
+    void deleteById_managerNotOwner_shouldReject() {
+        ProjectEntity existing = mock(ProjectEntity.class);
+        EmployeeEntity owner = mock(EmployeeEntity.class);
+        when(existing.getCreatedBy()).thenReturn(owner);
+        when(owner.getId()).thenReturn(10L);
+        when(projectRepository.findById(1L)).thenReturn(Optional.of(existing));
+
+        EmployeeDTO manager = new EmployeeDTO();
+        manager.setId(11L);
+        manager.setRole(Role.ROLE_MANAGER);
+        when(employeeService.getCurrentEmployee()).thenReturn(manager);
+
+        assertThrows(
+                AccessDeniedException.class,
+                () -> projectService.deleteById(1L)
+        );
+
+        verify(projectRepository, never()).delete(any(ProjectEntity.class));
+    }
+
 }
