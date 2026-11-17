@@ -88,10 +88,7 @@ public final class ALSEntityMapper {
         Objects.requireNonNull(entity, "ALSEntity не должен быть null");
         Objects.requireNonNull(moduleResolver, "moduleResolver не должен быть null");
 
-        entity.setName(domain.getName());
-        entity.setDescription(domain.getDescription());
         entity.setHeight(domain.getHeight());
-        entity.setWidth(domain.getWidth());
         entity.setDepth(domain.getDepth());
         entity.setUpperFrame(domain.getUpperFrame());
         entity.setBottomFrame(domain.getBottomFrame());
