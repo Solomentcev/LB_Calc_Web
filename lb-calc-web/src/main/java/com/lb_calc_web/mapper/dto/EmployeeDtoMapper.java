@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * Маппер между Domain Employee и DTO.
+ * Маппер между доменной моделью Employee и DTO.
  */
 public final class EmployeeDtoMapper {
 
@@ -22,6 +22,7 @@ public final class EmployeeDtoMapper {
         }
 
         return new Employee(
+                dto.getId(),
                 dto.getFirstName(),
                 dto.getLastName(),
                 dto.getEmail(),
@@ -37,16 +38,13 @@ public final class EmployeeDtoMapper {
 
         EmployeeDTO dto = new EmployeeDTO();
 
+        dto.setId(domain.getId());
         dto.setFirstName(domain.getFirstName());
         dto.setLastName(domain.getLastName());
         dto.setEmail(domain.getEmail());
         dto.setRegistrationDate(domain.getRegistrationDate());
         dto.setRole(domain.getRole());
 
-        /*
-         * id и пароль отсутствуют в Domain Employee,
-         * поэтому здесь они намеренно не заполняются.
-         */
         return dto;
     }
 
@@ -74,6 +72,7 @@ public final class EmployeeDtoMapper {
 
         ProfileDTO dto = new ProfileDTO();
 
+        dto.setId(domain.getId());
         dto.setFirstName(domain.getFirstName());
         dto.setLastName(domain.getLastName());
         dto.setEmail(domain.getEmail());
