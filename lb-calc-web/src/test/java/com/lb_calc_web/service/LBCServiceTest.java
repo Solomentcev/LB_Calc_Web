@@ -81,8 +81,12 @@ class LBCServiceTest {
                         TestDataFactory.validLBC(1L)
                 );
 
-        when(lbcRepository.findAll())
-                .thenReturn(List.of());
+        when(lbcRepository.findByHeightAndWidthAndDepthAndUpperFrameAndBottomFrameAndColorBodyAndColorDoorAndTypeAndDeltaWidthAndShelfThickAndServiceZoneWidthAndDoorThicknessAndDirectionDoorOpeningAndCountCellsAndDisplayAndDisplayQuantityAndBarReaderAndBarReaderQuantityAndPrinterAndPrinterQuantityAndRfidReaderAndRfidReaderQuantityAndPayment(
+                anyInt(), anyInt(), anyInt(), anyInt(), anyInt(),
+                any(), any(), anyString(), anyInt(), anyInt(), anyInt(),
+                anyInt(), any(), anyInt(), any(), anyInt(), any(), anyInt(),
+                anyBoolean(), anyInt(), anyBoolean(), anyInt(), any()
+        )).thenReturn(List.of());
 
         when(lbcRepository.save(any(LBCEntity.class)))
                 .thenReturn(saved);
@@ -105,8 +109,12 @@ class LBCServiceTest {
                         TestDataFactory.validLBC(1L)
                 );
 
-        when(lbcRepository.findAll())
-                .thenReturn(List.of(existing));
+        when(lbcRepository.findByHeightAndWidthAndDepthAndUpperFrameAndBottomFrameAndColorBodyAndColorDoorAndTypeAndDeltaWidthAndShelfThickAndServiceZoneWidthAndDoorThicknessAndDirectionDoorOpeningAndCountCellsAndDisplayAndDisplayQuantityAndBarReaderAndBarReaderQuantityAndPrinterAndPrinterQuantityAndRfidReaderAndRfidReaderQuantityAndPayment(
+                anyInt(), anyInt(), anyInt(), anyInt(), anyInt(),
+                any(), any(), anyString(), anyInt(), anyInt(), anyInt(),
+                anyInt(), any(), anyInt(), any(), anyInt(), any(), anyInt(),
+                anyBoolean(), anyInt(), anyBoolean(), anyInt(), any()
+        )).thenReturn(List.of(existing));
 
         LBCDTO result =
                 lbcService.saveLBC(dto);
