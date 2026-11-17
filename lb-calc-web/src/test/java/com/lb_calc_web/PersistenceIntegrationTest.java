@@ -4,6 +4,7 @@ import com.lb_calc_web.domain.model.ALS;
 import com.lb_calc_web.domain.model.Employee;
 import com.lb_calc_web.domain.model.Module;
 import com.lb_calc_web.domain.model.Project;
+import com.lb_calc_web.dto.ALSDTO;
 import com.lb_calc_web.entity.ALSEntity;
 import com.lb_calc_web.entity.EmployeeEntity;
 import com.lb_calc_web.entity.LCEntity;
@@ -20,6 +21,7 @@ import com.lb_calc_web.repository.EmployeeRepository;
 import com.lb_calc_web.repository.ModuleEntityRepository;
 import com.lb_calc_web.repository.ProjectRepository;
 import com.lb_calc_web.domain.attributes.AccessMethod;
+import com.lb_calc_web.domain.attributes.DirectionDoorOpening;
 import com.lb_calc_web.domain.attributes.PrintOption;
 import com.lb_calc_web.domain.attributes.Role;
 import com.lb_calc_web.domain.equipment.BarReader;
@@ -206,7 +208,11 @@ class PersistenceIntegrationTest {
 
     @Test
     void updatingAlsModuleOrder_shouldPersistReorderedAssociations() {
-        ALS domainALS = TestDataFactory.validALS(null);
+        ALSDTO sourceDTO = TestDataFactory.validALSDTO(null);
+        sourceDTO.getLbList().get(1).setDirectionDoorOpening(
+                DirectionDoorOpening.RIGHT.name()
+        );
+        ALS domainALS = ALSDtoMapper.toDomain(sourceDTO);
         Map<Module, ModuleEntity> resolvedModules = new HashMap<>();
 
         ALSEntity alsEntity = ALSEntityMapper.toEntity(
@@ -224,7 +230,7 @@ class PersistenceIntegrationTest {
         List<ModuleEntity> reorderedModules = alsEntity.getModules().stream()
                 .map(com.lb_calc_web.entity.ALSModuleEntity::getModule)
                 .collect(java.util.stream.Collectors.toCollection(java.util.ArrayList::new));
-        java.util.Collections.swap(reorderedModules, 0, 1);
+        java.util.Collections.swap(reorderedModules, 0, 2);
 
         alsEntity.synchronizeModules(reorderedModules);
         alsRepository.saveAndFlush(alsEntity);
@@ -240,6 +246,121 @@ class PersistenceIntegrationTest {
                     restored.getModules().get(index).getModule().getId()
             );
         }
+    }
+
+    @Test
+    void replacingOneAlsInProject_shouldPreserveOtherInstancesAndConfigurations() {
+        EmployeeEntity employeeEntity = new EmployeeEntity();
+        employeeEntity.setFirstName("Тест");
+        employeeEntity.setLastName("ALS replacement");
+        employeeEntity.setEmail("als-replacement@example.test");
+        employeeEntity.setEncryptedPassword("encoded-password");
+        employeeEntity.setRegistrationDate(LocalDate.of(2026, 1, 10));
+        employeeEntity.setRole(Role.ROLE_ADMIN);
+        employeeEntity = employeeRepository.saveAndFlush(employeeEntity);
+
+        ALS originalALS = TestDataFactory.validALS(null);
+        ALS otherALS = ALSDtoMapper.toDomain(
+                TestDataFactory.validLBCALSDTO(null)
+        );
+
+        ALSDTO changedDTO = TestDataFactory.validALSDTO(null);
+        changedDTO.getLbList().get(1).setDirectionDoorOpening(
+                DirectionDoorOpening.RIGHT.name()
+        );
+        ALS changedALS = ALSDtoMapper.toDomain(changedDTO);
+
+        Map<Module, ModuleEntity> resolvedModules = new HashMap<>();
+        java.util.function.Function<Module, ModuleEntity> moduleResolver =
+                module -> resolvedModules.computeIfAbsent(
+                        module,
+                        candidate -> moduleRepository.saveAndFlush(
+                                ModuleEntityMapper.toEntity(candidate)
+                        )
+                );
+
+        ALSEntity originalEntity = alsRepository.saveAndFlush(
+                ALSEntityMapper.toEntity(originalALS, moduleResolver)
+        );
+        ALSEntity otherEntity = alsRepository.saveAndFlush(
+                ALSEntityMapper.toEntity(otherALS, moduleResolver)
+        );
+
+        Project domainProject = new Project(
+                "ALS replacement",
+                "Test company",
+                LocalDate.of(2026, 1, 10),
+                EmployeeEntityMapper.toDomain(employeeEntity)
+        );
+        domainProject.addALS(originalALS);
+        domainProject.addALS(originalALS);
+        domainProject.addALS(otherALS);
+
+        ProjectEntity projectEntity = ProjectEntityMapper.toEntity(
+                domainProject,
+                employee -> employeeRepository.findById(employee.getId())
+                        .orElseThrow(),
+                als -> als.equals(originalALS) ? originalEntity : otherEntity
+        );
+        Long projectId = projectRepository.saveAndFlush(projectEntity).getId();
+        Long originalAlsId = originalEntity.getId();
+        Long otherAlsId = otherEntity.getId();
+
+        ALSEntity changedEntity = alsRepository.saveAndFlush(
+                ALSEntityMapper.toEntity(changedALS, moduleResolver)
+        );
+        Long changedAlsId = changedEntity.getId();
+
+        entityManager.clear();
+
+        ProjectEntity managedProjectEntity =
+                projectRepository.findById(projectId).orElseThrow();
+        Project restoredProject = ProjectEntityMapper.toDomain(
+                managedProjectEntity
+        );
+        restoredProject.replaceALS(originalALS, changedALS);
+
+        Map<Long, ALSEntity> persistedConfigurations = Map.of(
+                originalAlsId, alsRepository.findById(originalAlsId).orElseThrow(),
+                otherAlsId, alsRepository.findById(otherAlsId).orElseThrow(),
+                changedAlsId, alsRepository.findById(changedAlsId).orElseThrow()
+        );
+
+        ProjectEntityMapper.updateEntity(
+                restoredProject,
+                managedProjectEntity,
+                employee -> employeeRepository.findById(employee.getId())
+                        .orElseThrow(),
+                als -> {
+                    if (als.equals(originalALS)) {
+                        return persistedConfigurations.get(originalAlsId);
+                    }
+                    if (als.equals(otherALS)) {
+                        return persistedConfigurations.get(otherAlsId);
+                    }
+                    if (als.equals(changedALS)) {
+                        return persistedConfigurations.get(changedAlsId);
+                    }
+                    throw new IllegalStateException("Неизвестная конфигурация ALS");
+                }
+        );
+        projectRepository.saveAndFlush(managedProjectEntity);
+        entityManager.clear();
+
+        ProjectEntity restoredEntity =
+                projectRepository.findById(projectId).orElseThrow();
+        Project finalProject = ProjectEntityMapper.toDomain(restoredEntity);
+
+        assertEquals(1, finalProject.getQuantity(originalALS));
+        assertEquals(1, finalProject.getQuantity(changedALS));
+        assertEquals(1, finalProject.getQuantity(otherALS));
+        assertEquals(3, restoredEntity.getAlsEntries().size());
+        assertTrue(restoredEntity.getAlsEntries().stream()
+                .anyMatch(entry -> entry.getAls().getId().equals(originalAlsId)));
+        assertTrue(restoredEntity.getAlsEntries().stream()
+                .anyMatch(entry -> entry.getAls().getId().equals(changedAlsId)));
+        assertTrue(restoredEntity.getAlsEntries().stream()
+                .anyMatch(entry -> entry.getAls().getId().equals(otherAlsId)));
     }
 
 }
