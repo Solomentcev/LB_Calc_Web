@@ -9,7 +9,6 @@ import com.lb_calc_web.entity.LBEntity;
 import com.lb_calc_web.entity.LBCEntity;
 import com.lb_calc_web.entity.LCEntity;
 import com.lb_calc_web.entity.ModuleEntity;
-import com.lb_calc_web.entity.StorageModuleEntity;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
