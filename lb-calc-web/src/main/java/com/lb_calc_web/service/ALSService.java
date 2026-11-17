@@ -22,6 +22,7 @@ import com.lb_calc_web.mapper.dto.LBDtoMapper;
 import com.lb_calc_web.mapper.dto.LCDtoMapper;
 import com.lb_calc_web.mapper.dto.LBCDtoMapper;
 import com.lb_calc_web.mapper.entity.ALSEntityMapper;
+import com.lb_calc_web.mapper.entity.ModuleEntityMapper;
 import com.lb_calc_web.repository.ALSRepository;
 import com.lb_calc_web.repository.ModuleEntityRepository;
 import com.lb_calc_web.service.util.ALSImageService;
@@ -671,7 +672,7 @@ public class ALSService {
         for (ModuleEntity entity : cache) {
             try {
                 if (domainModule.equals(
-                        ALSEntityMapper.toDomainModule(entity)
+                        ModuleEntityMapper.toDomain(entity)
                 )) {
                     return entity;
                 }
@@ -714,7 +715,7 @@ public class ALSService {
         }
 
         ModuleEntity newEntity =
-                ALSEntityMapper.createModuleEntity(
+                ModuleEntityMapper.toEntity(
                         domainModule
                 );
 
