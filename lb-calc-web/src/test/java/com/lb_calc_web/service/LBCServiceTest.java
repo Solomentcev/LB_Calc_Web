@@ -81,7 +81,7 @@ class LBCServiceTest {
                         TestDataFactory.validLBC(1L)
                 );
 
-        when(lbcRepository.findByHeightAndWidthAndDepthAndUpperFrameAndBottomFrameAndColorBodyAndColorDoorAndTypeAndDeltaWidthAndShelfThickAndServiceZoneWidthAndDoorThicknessAndDirectionDoorOpeningAndCountCellsAndDisplayAndDisplayQuantityAndBarReaderAndBarReaderQuantityAndPrinterAndPrinterQuantityAndRfidReaderAndRfidReaderQuantityAndPayment(
+        when(lbcRepository.findCandidates(
                 anyInt(), anyInt(), anyInt(), anyInt(), anyInt(),
                 any(), any(), anyString(), anyInt(), anyInt(), anyInt(),
                 anyInt(), any(), anyInt(), any(), anyInt(), any(), anyInt(),
@@ -109,7 +109,7 @@ class LBCServiceTest {
                         TestDataFactory.validLBC(1L)
                 );
 
-        when(lbcRepository.findByHeightAndWidthAndDepthAndUpperFrameAndBottomFrameAndColorBodyAndColorDoorAndTypeAndDeltaWidthAndShelfThickAndServiceZoneWidthAndDoorThicknessAndDirectionDoorOpeningAndCountCellsAndDisplayAndDisplayQuantityAndBarReaderAndBarReaderQuantityAndPrinterAndPrinterQuantityAndRfidReaderAndRfidReaderQuantityAndPayment(
+        when(lbcRepository.findCandidates(
                 anyInt(), anyInt(), anyInt(), anyInt(), anyInt(),
                 any(), any(), anyString(), anyInt(), anyInt(), anyInt(),
                 anyInt(), any(), anyInt(), any(), anyInt(), any(), anyInt(),
