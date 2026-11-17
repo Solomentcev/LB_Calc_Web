@@ -5,6 +5,7 @@ import com.lb_calc_web.domain.equipment.Equipment;
 import com.lb_calc_web.domain.equipment.EquipmentItem;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -131,6 +132,7 @@ public class EquipmentConfiguration {
     public List<Equipment> getAllEquipment() {
         List<Equipment> result = new ArrayList<>(requiredEquipment.keySet());
         result.addAll(additionalEquipment.keySet());
+        result.sort(Comparator.comparing(Equipment::getCatalogPositionId));
         return List.copyOf(result);
     }
 
@@ -140,6 +142,9 @@ public class EquipmentConfiguration {
     public List<EquipmentItem> getAllItems() {
         List<EquipmentItem> result = new ArrayList<>(getRequiredItems());
         result.addAll(getAdditionalItems());
+        result.sort(Comparator.comparing(
+                item -> item.equipment().getCatalogPositionId()
+        ));
         return List.copyOf(result);
     }
 
