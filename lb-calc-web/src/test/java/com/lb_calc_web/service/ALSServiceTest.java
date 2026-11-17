@@ -132,6 +132,28 @@ class ALSServiceTest {
     }
 
     @Test
+    void replaceLC_shouldRejectModuleIdNotBelongingToALS() {
+        ALSDTO als = TestDataFactory.validALSDTO(1L);
+        LCDTO anotherLC = TestDataFactory.validLCDTO(999L);
+
+        assertThrows(
+                java.util.NoSuchElementException.class,
+                () -> alsService.replaceLC(als, anotherLC)
+        );
+    }
+
+    @Test
+    void replaceLBC_shouldRejectModuleIdNotBelongingToALS() {
+        ALSDTO als = TestDataFactory.validLBCALSDTO(1L);
+        LBCDTO anotherLBC = TestDataFactory.validLBCDTO(999L);
+
+        assertThrows(
+                java.util.NoSuchElementException.class,
+                () -> alsService.replaceLBC(als, anotherLBC)
+        );
+    }
+
+    @Test
     void replaceLCandSaveALS_shouldReplaceControlModule() {
         ALSDTO als = TestDataFactory.validLBCALSDTO(1L);
         LCDTO lc = TestDataFactory.validLCDTO(2L);
