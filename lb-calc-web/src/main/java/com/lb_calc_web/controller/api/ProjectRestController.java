@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/v1/projects")
@@ -400,13 +401,14 @@ public class ProjectRestController {
         try {
             lc.setId(lcId);
 
-            LCDTO saved =
+            ALSDTO savedALS =
                     projectService.saveLCAtProject(
                             projectId,
                             alsId,
                             lcId,
                             lc
                     );
+            LCDTO saved = savedALS.getLC();
 
             return ResponseEntity.ok(
                     ApiResponse.success(
@@ -512,13 +514,14 @@ public class ProjectRestController {
         try {
             lbc.setId(lbcId);
 
-            LBCDTO saved =
+            ALSDTO savedALS =
                     projectService.saveLBCAtProject(
                             projectId,
                             alsId,
                             lbcId,
                             lbc
                     );
+            LBCDTO saved = savedALS.getLBC();
 
             return ResponseEntity.ok(
                     ApiResponse.success(
@@ -586,13 +589,32 @@ public class ProjectRestController {
         try {
             lb.setId(lbId);
 
-            LBDTO saved =
+            ALSDTO currentALS =
+                    projectService.findALSInProject(
+                            projectId,
+                            alsId
+                    );
+            int lbIndex = -1;
+            for (int index = 0; index < currentALS.getLbList().size(); index++) {
+                if (Objects.equals(currentALS.getLbList().get(index).getId(), lbId)) {
+                    lbIndex = index;
+                    break;
+                }
+            }
+            if (lbIndex < 0) {
+                throw new NoSuchElementException(
+                        "LB с id " + lbId + " не найден в ALS " + alsId
+                );
+            }
+
+            ALSDTO savedALS =
                     projectService.saveLBAtProject(
                             projectId,
                             alsId,
                             lbId,
                             lb
                     );
+            LBDTO saved = savedALS.getLbList().get(lbIndex);
 
             return ResponseEntity.ok(
                     ApiResponse.success(
