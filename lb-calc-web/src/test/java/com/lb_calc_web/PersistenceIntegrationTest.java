@@ -432,7 +432,7 @@ class PersistenceIntegrationTest {
             );
             assertEquals(2, changedWithLC.getLC().getDisplayQuantity());
 
-            LBCDTO changedLBC = independentALS.getLBC();
+            LBCDTO changedLBC = savedProject.getAlsList().get(2).getLBC();
             changedLBC.setAccessMethods(List.of(AccessMethod.RFID.name()));
             ALSDTO changedWithLBC = projectService.saveLBCAtProject(
                     projectId,
