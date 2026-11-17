@@ -2,6 +2,7 @@ package com.lb_calc_web.mapper.dto;
 
 import com.lb_calc_web.domain.attributes.Colors;
 import com.lb_calc_web.domain.attributes.PositionControlModule;
+import com.lb_calc_web.domain.attributes.TypeLb;
 import com.lb_calc_web.domain.model.ALS;
 import com.lb_calc_web.domain.model.LB;
 import com.lb_calc_web.domain.model.LBC;
@@ -9,6 +10,9 @@ import com.lb_calc_web.domain.model.LC;
 import com.lb_calc_web.domain.model.Module;
 import com.lb_calc_web.dto.ALSDTO;
 import com.lb_calc_web.dto.LBDTO;
+import com.lb_calc_web.dto.LBCDTO;
+
+import java.util.function.Function;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -96,6 +100,27 @@ public final class ALSDtoMapper {
     }
 
     public static ALS toDomain(ALSDTO dto) {
+        return toDomain(
+                dto,
+                type -> new TypeLb(type, 0, 0, 0),
+                type -> new TypeLb(type, 0, 0, 0)
+        );
+    }
+
+    /**
+     * Преобразует DTO в ALS, используя конструктивные типы,
+     * разрешённые application-слоем.
+     *
+     * @param dto транспортное представление ALS
+     * @param lbTypeResolver разрешает тип обычного модуля хранения
+     * @param lbcTypeResolver разрешает тип комбинированного модуля
+     * @return доменная конфигурация ALS
+     */
+    public static ALS toDomain(
+            ALSDTO dto,
+            Function<String, TypeLb> lbTypeResolver,
+            Function<String, TypeLb> lbcTypeResolver
+    ) {
         if (dto == null) {
             return null;
         }
@@ -119,7 +144,7 @@ public final class ALSDtoMapper {
                 }
 
                 storageModules.add(
-                        LBDtoMapper.toDomain(lbDto)
+                        LBDtoMapper.toDomain(lbDto, lbTypeResolver.apply(lbDto.getType()))
                 );
             }
         }
@@ -134,7 +159,8 @@ public final class ALSDtoMapper {
 
         if (dto.getLBC() != null) {
             controlModule = LBCDtoMapper.toDomain(
-                    dto.getLBC()
+                    dto.getLBC(),
+                    lbcTypeResolver.apply(dto.getLBC().getType())
             );
         } else if (dto.getLC() != null) {
             controlModule = LCDtoMapper.toDomain(

@@ -6,6 +6,7 @@ import com.lb_calc_web.domain.model.LB;
 import com.lb_calc_web.domain.model.LBC;
 import com.lb_calc_web.domain.model.LC;
 import com.lb_calc_web.domain.model.Module;
+import com.lb_calc_web.domain.attributes.TypeLb;
 import com.lb_calc_web.dto.ALSDTO;
 import com.lb_calc_web.dto.LBCDTO;
 import com.lb_calc_web.dto.LBDTO;
@@ -26,6 +27,7 @@ import com.lb_calc_web.repository.ALSRepository;
 import com.lb_calc_web.repository.ModuleEntityRepository;
 import com.lb_calc_web.service.util.ALSImageService;
 import com.lb_calc_web.service.util.SizeValidator;
+import com.lb_calc_web.service.util.TypeLbFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.env.Environment;
@@ -495,6 +497,19 @@ public class ALSService {
     @Transactional
     public ALSDTO replaceWithNewLBCandSaveALS(Long alsId) {
         return saveALS(replaceWithNewLBC(findById(alsId)));
+    }
+
+    /**
+     * Преобразует входное представление ALS в доменную модель.
+     * Конструктивные параметры типов берутся из конфигурации приложения,
+     * а не из значений, переданных клиентом.
+     */
+    private ALS toDomain(ALSDTO dto) {
+        return ALSDtoMapper.toDomain(
+                dto,
+                type -> TypeLbFactory.forLB(environment, type),
+                type -> TypeLbFactory.forLBC(environment, type)
+        );
     }
 
     private void validate(ALS domain, ALSDTO source) {
