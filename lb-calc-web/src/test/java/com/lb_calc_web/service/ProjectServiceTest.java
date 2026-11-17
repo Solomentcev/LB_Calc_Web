@@ -149,6 +149,40 @@ class ProjectServiceTest {
     }
 
     @Test
+    void saveProject_invalidDomainMapping_shouldRejectBeforeSavingALS() {
+        EmployeeDTO employee = new EmployeeDTO();
+        employee.setId(1L);
+        employee.setFirstName("Иван");
+        employee.setLastName("Иванов");
+        employee.setEmail("ivan@example.com");
+        employee.setRegistrationDate(
+                java.time.LocalDate.of(2026, 9, 18)
+        );
+        employee.setRole(Role.ROLE_MANAGER);
+
+        when(employeeService.getCurrentEmployee())
+                .thenReturn(employee);
+
+        ProjectDTO project = TestDataFactory.validProject(1L);
+        project.setId(null);
+
+        ALSDTO invalidALS = TestDataFactory.validALSDTO(11L);
+        invalidALS.setColorBody(null);
+        project.setAlsList(java.util.List.of(invalidALS));
+
+        ValidationSizeException exception = assertThrows(
+                ValidationSizeException.class,
+                () -> projectService.saveProject(project)
+        );
+
+        var error = exception.getValidationResult().getErrors().get(0);
+        assertEquals("Project", error.getObjectType());
+        assertEquals("projectData", error.getField());
+        verify(alsService, never()).saveALS(any(ALSDTO.class));
+        verify(projectRepository, never()).save(any(ProjectEntity.class));
+    }
+
+    @Test
     void deleteById_existing_shouldDelete() {
         ProjectEntity entity = new ProjectEntity();
         when(projectRepository.findById(10L))
