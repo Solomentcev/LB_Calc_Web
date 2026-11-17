@@ -101,6 +101,26 @@ class EmployeeEntityMapperTest {
     }
 
     @Test
+    void updateEntity_shouldKeepExistingRegistrationDate() {
+        EmployeeEntity entity = new EmployeeEntity();
+        LocalDate registrationDate = LocalDate.of(2025, 3, 12);
+        entity.setRegistrationDate(registrationDate);
+
+        Employee domain =
+                new Employee(
+                        "Иван",
+                        "Иванов",
+                        "ivanov@example.com",
+                        LocalDate.of(2026, 9, 18),
+                        Role.ROLE_MANAGER
+                );
+
+        EmployeeEntityMapper.updateEntity(domain, entity);
+
+        assertEquals(registrationDate, entity.getRegistrationDate());
+    }
+
+    @Test
     void nullArguments_shouldBeHandledAsDefinedByMapperContract() {
         assertNull(
                 EmployeeEntityMapper.toEntity(null)
