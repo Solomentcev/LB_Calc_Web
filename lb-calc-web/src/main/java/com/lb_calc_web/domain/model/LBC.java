@@ -88,7 +88,7 @@ public class LBC extends StorageModule implements ControlModule {
      */
     @Override
     public ControlConfiguration getControlConfiguration() {
-        return controlConfiguration;
+        return controlConfiguration.copy();
     }
 
     /**
