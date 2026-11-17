@@ -157,7 +157,10 @@ public abstract class ModuleEntity {
     }
 
     public void setColorBody(Colors colorBody) {
-        this.colorBody = colorBody;
+        this.colorBody = Objects.requireNonNull(
+                colorBody,
+                "Цвет корпуса не должен быть null"
+        );
     }
 
     public Colors getColorDoor() {
@@ -165,7 +168,10 @@ public abstract class ModuleEntity {
     }
 
     public void setColorDoor(Colors colorDoor) {
-        this.colorDoor = colorDoor;
+        this.colorDoor = Objects.requireNonNull(
+                colorDoor,
+                "Цвет дверей не должен быть null"
+        );
     }
 
     @Override

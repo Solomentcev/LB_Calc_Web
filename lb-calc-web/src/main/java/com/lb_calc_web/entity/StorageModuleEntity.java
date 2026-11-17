@@ -6,6 +6,8 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.MappedSuperclass;
 
+import java.util.Objects;
+
 /**
  * Базовая JPA-модель для модулей хранения.
  *
@@ -100,6 +102,10 @@ public abstract class StorageModuleEntity extends ModuleEntity {
     }
 
     public void setType(String type) {
+        Objects.requireNonNull(type, "Тип модуля не должен быть null");
+        if (type.isBlank()) {
+            throw new IllegalArgumentException("Тип модуля не должен быть пустым");
+        }
         this.type = type;
     }
 
@@ -142,7 +148,10 @@ public abstract class StorageModuleEntity extends ModuleEntity {
     public void setDirectionDoorOpening(
             DirectionDoorOpening directionDoorOpening
     ) {
-        this.directionDoorOpening = directionDoorOpening;
+        this.directionDoorOpening = Objects.requireNonNull(
+                directionDoorOpening,
+                "Направление открытия дверей не должно быть null"
+        );
     }
 
     public int getCountCells() {
@@ -150,6 +159,11 @@ public abstract class StorageModuleEntity extends ModuleEntity {
     }
 
     public void setCountCells(int countCells) {
+        if (countCells < 0 || countCells > 20) {
+            throw new IllegalArgumentException(
+                    "Количество ячеек должно быть от 0 до 20"
+            );
+        }
         this.countCells = countCells;
     }
 

@@ -9,6 +9,7 @@ import com.lb_calc_web.entity.LBEntity;
 import com.lb_calc_web.entity.LBCEntity;
 import com.lb_calc_web.entity.LCEntity;
 import com.lb_calc_web.entity.ModuleEntity;
+import com.lb_calc_web.entity.StorageModuleEntity;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -82,6 +83,34 @@ class ModuleEntityMapperTest {
                 IllegalStateException.class,
                 () -> ModuleEntityMapper.toDomain(entity)
         );
+    }
+
+    @Test
+    void storageEntity_shouldRejectInvalidRequiredFields() {
+        LBEntity entity = new LBEntity();
+
+        assertThrows(NullPointerException.class, () -> entity.setType(null));
+        assertThrows(IllegalArgumentException.class, () -> entity.setType(" "));
+        assertThrows(
+                NullPointerException.class,
+                () -> entity.setDirectionDoorOpening(null)
+        );
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> entity.setCountCells(21)
+        );
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> entity.setCountCells(-1)
+        );
+    }
+
+    @Test
+    void moduleEntity_shouldRejectMissingColors() {
+        ModuleEntity entity = new LBEntity();
+
+        assertThrows(NullPointerException.class, () -> entity.setColorBody(null));
+        assertThrows(NullPointerException.class, () -> entity.setColorDoor(null));
     }
 
     @Test

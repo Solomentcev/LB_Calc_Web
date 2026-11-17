@@ -178,7 +178,10 @@ public class ALSEntity {
     }
 
     public void setColorBody(Colors colorBody) {
-        this.colorBody = colorBody;
+        this.colorBody = Objects.requireNonNull(
+                colorBody,
+                "Цвет корпуса не должен быть null"
+        );
     }
 
     public Colors getColorDoor() {
@@ -186,7 +189,10 @@ public class ALSEntity {
     }
 
     public void setColorDoor(Colors colorDoor) {
-        this.colorDoor = colorDoor;
+        this.colorDoor = Objects.requireNonNull(
+                colorDoor,
+                "Цвет дверей не должен быть null"
+        );
     }
 
     public List<ALSModuleEntity> getModules() {
