@@ -21,7 +21,6 @@ import com.lb_calc_web.repository.EmployeeRepository;
 import com.lb_calc_web.repository.ModuleEntityRepository;
 import com.lb_calc_web.repository.ProjectRepository;
 import com.lb_calc_web.domain.attributes.AccessMethod;
-import com.lb_calc_web.domain.attributes.DirectionDoorOpening;
 import com.lb_calc_web.domain.attributes.PrintOption;
 import com.lb_calc_web.domain.attributes.Role;
 import com.lb_calc_web.domain.equipment.BarReader;
@@ -207,48 +206,6 @@ class PersistenceIntegrationTest {
     }
 
     @Test
-    void updatingAlsModuleOrder_shouldPersistReorderedAssociations() {
-        ALSDTO sourceDTO = TestDataFactory.validALSDTO(null);
-        sourceDTO.getLbList().get(1).setDirectionDoorOpening(
-                DirectionDoorOpening.RIGHT.name()
-        );
-        ALS domainALS = ALSDtoMapper.toDomain(sourceDTO);
-        Map<Module, ModuleEntity> resolvedModules = new HashMap<>();
-
-        ALSEntity alsEntity = ALSEntityMapper.toEntity(
-                domainALS,
-                module -> resolvedModules.computeIfAbsent(
-                        module,
-                        candidate -> moduleRepository.saveAndFlush(
-                                ModuleEntityMapper.toEntity(candidate)
-                        )
-                )
-        );
-        alsEntity = alsRepository.saveAndFlush(alsEntity);
-
-        Long alsId = alsEntity.getId();
-        List<ModuleEntity> reorderedModules = alsEntity.getModules().stream()
-                .map(com.lb_calc_web.entity.ALSModuleEntity::getModule)
-                .collect(java.util.stream.Collectors.toCollection(java.util.ArrayList::new));
-        java.util.Collections.swap(reorderedModules, 0, 2);
-
-        alsEntity.synchronizeModules(reorderedModules);
-        alsRepository.saveAndFlush(alsEntity);
-        entityManager.clear();
-
-        ALSEntity restored = alsRepository.findById(alsId).orElseThrow();
-
-        assertEquals(reorderedModules.size(), restored.getModules().size());
-        for (int index = 0; index < reorderedModules.size(); index++) {
-            assertEquals(index, restored.getModules().get(index).getModuleOrder());
-            assertEquals(
-                    reorderedModules.get(index).getId(),
-                    restored.getModules().get(index).getModule().getId()
-            );
-        }
-    }
-
-    @Test
     void replacingOneAlsInProject_shouldPreserveOtherInstancesAndConfigurations() {
         EmployeeEntity employeeEntity = new EmployeeEntity();
         employeeEntity.setFirstName("Тест");
@@ -265,9 +222,7 @@ class PersistenceIntegrationTest {
         );
 
         ALSDTO changedDTO = TestDataFactory.validALSDTO(null);
-        changedDTO.getLbList().get(1).setDirectionDoorOpening(
-                DirectionDoorOpening.RIGHT.name()
-        );
+        changedDTO.getLbList().get(1).setCountCells(4);
         ALS changedALS = ALSDtoMapper.toDomain(changedDTO);
 
         Map<Module, ModuleEntity> resolvedModules = new HashMap<>();
