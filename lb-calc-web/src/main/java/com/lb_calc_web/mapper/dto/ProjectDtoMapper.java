@@ -304,7 +304,7 @@ public final class ProjectDtoMapper {
             result.merge(
                     als,
                     1,
-                    Integer::sum
+                    Math::addExact
             );
         }
 
