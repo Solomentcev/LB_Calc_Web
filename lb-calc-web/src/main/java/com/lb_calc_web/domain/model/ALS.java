@@ -726,7 +726,7 @@ public class ALS {
 
         description =
                 "АКХ на "
-                        + getCountCells()
+                        + countCells
                         + " ячеек, ВхШхГ, мм: "
                         + height + "x"
                         + width + "x"
@@ -735,11 +735,10 @@ public class ALS {
                         + colorBody + "/"
                         + colorDoor
                         + "; Модулей хранения: "
-                        + getStorageModules().size()
-                        + " шт.;\n"
+                        + storageModuleCount
+                        + " шт.;\\n"
                         + controlModule.getDescription();
     }
-
     /**
      * Возвращает количество storage-модулей без создания их копий.
      *
