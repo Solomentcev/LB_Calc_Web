@@ -119,6 +119,19 @@ class LBCServiceTest {
     }
 
     @Test
+    void saveLBC_widthBelowEquipmentRequirement_shouldThrowValidationException() {
+        LBCDTO dto = TestDataFactory.validLBCDTO(1L);
+        dto.setWidth(159);
+
+        assertThrows(
+                ValidationSizeException.class,
+                () -> lbcService.saveLBC(dto)
+        );
+
+        verify(lbcRepository, never()).save(any());
+    }
+
+    @Test
     void saveLBC_invalid_shouldThrowValidationException() {
         LBCDTO dto =
                 TestDataFactory.validLBCDTO(1L);
