@@ -206,6 +206,7 @@ class ProjectServiceTest {
         project.setId(1L);
 
         ALSDTO als = TestDataFactory.validALSDTO(10L);
+        project.getAlsList().add(als);
         Long oldLbId = als.getLbList().get(0).getId();
         LBDTO requestedLB = TestDataFactory.validLBDTO(oldLbId);
 
@@ -218,8 +219,6 @@ class ProjectServiceTest {
 
         ProjectService spy = spy(projectService);
         doReturn(project).when(spy).findById(1L);
-        doReturn(als).when(spy).findALSInProject(1L, 10L);
-        doReturn(requestedLB).when(spy).findLBInProject(1L, 10L, oldLbId);
         when(alsService.replaceLB(als, requestedLB)).thenReturn(updatedALS);
         doReturn(savedALS).when(spy).replaceALSandSaveProject(
                 project,
