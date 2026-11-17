@@ -15,7 +15,6 @@ import com.lb_calc_web.entity.EquipmentQuantityEmbeddable;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 /** Преобразует LBC между доменной и persistence-моделями. */
