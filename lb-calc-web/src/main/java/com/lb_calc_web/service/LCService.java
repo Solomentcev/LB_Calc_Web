@@ -206,11 +206,16 @@ public class LCService {
                 dto.getDisplay()
         );
 
-        /*
-         * DTO преобразуется в доменную модель до геометрической проверки.
-         * Домен также выполняет собственные расчёты и проверки инвариантов.
-         */
-        LC domain = LCDtoMapper.toDomain(dto);
+        LC domain;
+        try {
+            domain = LCDtoMapper.toDomain(dto);
+        } catch (IllegalArgumentException | NullPointerException exception) {
+            throw createMappingValidationException(
+                    "LC",
+                    dto.getId(),
+                    exception
+            );
+        }
 
         ValidationResult validationResult =
                 sizeValidator.validateLC(domain);
@@ -336,5 +341,25 @@ public class LCService {
         return Colors.valueOf(
                 environment.getRequiredProperty(key)
         );
+    }
+
+    /**
+     * Преобразует ошибку входных данных в единый результат валидации.
+     */
+    private ValidationSizeException createMappingValidationException(
+            String objectType,
+            Long objectId,
+            RuntimeException exception
+    ) {
+        ValidationResult result =
+                new ValidationResult(objectType, objectId);
+        result.addError(
+                "domainModel",
+                exception.getMessage(),
+                null,
+                null,
+                null
+        );
+        return new ValidationSizeException(result);
     }
 }
