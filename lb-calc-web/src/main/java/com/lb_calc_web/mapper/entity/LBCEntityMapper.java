@@ -5,8 +5,6 @@ import com.lb_calc_web.domain.equipment.BarReader;
 import com.lb_calc_web.domain.equipment.Display;
 import com.lb_calc_web.domain.equipment.Equipment;
 import com.lb_calc_web.domain.equipment.EquipmentCatalog;
-import com.lb_calc_web.domain.equipment.Printer;
-import com.lb_calc_web.domain.equipment.RfidReader;
 import com.lb_calc_web.domain.model.ControlConfiguration;
 import com.lb_calc_web.domain.model.EquipmentConfiguration;
 import com.lb_calc_web.domain.model.LBC;
@@ -81,66 +79,38 @@ public final class LBCEntityMapper {
 
     private static EquipmentConfiguration toEquipmentConfiguration(LBCEntity entity) {
         EquipmentConfiguration result = new EquipmentConfiguration(List.of(), List.of());
-        addPersistedEquipment(entity.getDisplay(), entity.getDisplayQuantity(), result);
-        if (entity.getBarReaders().isEmpty()) {
-            // Обратная совместимость с записями старого формата.
-            addPersistedEquipment(entity.getBarReader(), entity.getBarReaderQuantity(), result);
-        } else {
-            entity.getBarReaders().forEach(item ->
-                    addPersistedEquipment(item.getCatalogPositionId(), item.getQuantity(), result));
-        }
-        addPersistedEquipment(Printer.CATALOG_POSITION_ID,
-                entity.getPrinterQuantity() > 0 ? entity.getPrinterQuantity()
-                        : entity.isPrinter() ? 1 : 0, result);
-        addPersistedEquipment(RfidReader.CATALOG_POSITION_ID,
-                entity.getRfidReaderQuantity() > 0 ? entity.getRfidReaderQuantity()
-                        : entity.isRfidReader() ? 1 : 0, result);
+        entity.getEquipment().forEach(item ->
+                addPersistedEquipment(
+                        item.getCatalogPositionId(),
+                        item.getQuantity(),
+                        result
+                )
+        );
         return result;
     }
 
-    private static void addPersistedEquipment(String idOrName, int quantity,
-                                               EquipmentConfiguration target) {
-        if (idOrName == null || idOrName.isBlank() || quantity == 0) return;
-        Equipment equipment = EquipmentCatalog.resolve(idOrName);
-        if (equipment == Display.NONE || equipment == BarReader.NONE) return;
+    private static void addPersistedEquipment(
+            String catalogPositionId,
+            int quantity,
+            EquipmentConfiguration target
+    ) {
+        Equipment equipment = EquipmentCatalog.findByCatalogPositionId(catalogPositionId);
+        if (equipment == Display.NONE || equipment == BarReader.NONE) {
+            return;
+        }
         target.addRequiredEquipment(equipment, quantity);
     }
 
-    private static void updateEquipment(EquipmentConfiguration configuration,
-                                        LBCEntity entity) {
-        Equipment display = findEquipment(configuration, Display.class);
-        Equipment reader = findEquipment(configuration, BarReader.class);
-        int printerQuantity = quantity(configuration, Printer.CATALOG_POSITION_ID);
-        int rfidQuantity = quantity(configuration, RfidReader.CATALOG_POSITION_ID);
-
-        entity.setDisplay(display == null ? null : display.getCatalogPositionId());
-        entity.setDisplayQuantity(display == null ? 0 : configuration.getQuantity(display));
-        entity.setBarReader(reader == null ? null : reader.getCatalogPositionId());
-        entity.setBarReaderQuantity(reader == null ? 0 : configuration.getQuantity(reader));
-        entity.setBarReaders(configuration.getAllEquipment().stream()
-                .filter(BarReader.class::isInstance)
-                .map(BarReader.class::cast)
-                .filter(item -> item != BarReader.NONE)
-                .map(item -> new EquipmentQuantityEmbeddable(
-                        item.getCatalogPositionId(), configuration.getQuantity(item)))
-                .collect(Collectors.toSet()));
-        entity.setPrinterQuantity(printerQuantity);
-        entity.setRfidReaderQuantity(rfidQuantity);
-        entity.setPrinter(printerQuantity > 0);
-        entity.setRfidReader(rfidQuantity > 0);
-    }
-
-    private static Equipment findEquipment(EquipmentConfiguration configuration,
-                                           Class<? extends Equipment> type) {
-        return configuration.getAllEquipment().stream()
-                .filter(type::isInstance)
+    private static void updateEquipment(
+            EquipmentConfiguration configuration,
+            LBCEntity entity
+    ) {
+        entity.setEquipment(configuration.getAllEquipment().stream()
                 .filter(item -> item != Display.NONE && item != BarReader.NONE)
-                .findFirst().orElse(null);
-    }
-
-    private static int quantity(EquipmentConfiguration configuration, String id) {
-        return configuration.getAllEquipment().stream()
-                .filter(item -> item.getCatalogPositionId().equals(id))
-                .findFirst().map(configuration::getQuantity).orElse(0);
+                .map(item -> new EquipmentQuantityEmbeddable(
+                        item.getCatalogPositionId(),
+                        configuration.getQuantity(item)
+                ))
+                .collect(Collectors.toSet()));
     }
 }
