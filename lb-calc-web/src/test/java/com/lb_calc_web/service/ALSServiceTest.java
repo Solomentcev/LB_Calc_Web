@@ -106,6 +106,23 @@ class ALSServiceTest {
     }
 
     @Test
+    void saveALS_missingRequiredColor_shouldReturnValidationError() {
+        ALSDTO als = TestDataFactory.validALSDTO(51L);
+        als.setColorBody(null);
+
+        ValidationSizeException exception = assertThrows(
+                ValidationSizeException.class,
+                () -> alsService.saveALS(als)
+        );
+
+        var error = exception.getValidationResult().getErrors().get(0);
+        assertEquals("ALS", error.getObjectType());
+        assertEquals(51L, error.getObjectId());
+        assertEquals("domainModel", error.getField());
+        verify(alsRepository, never()).save(any());
+    }
+
+    @Test
     void replaceLCandSaveALS_shouldReplaceControlModule() {
         ALSDTO als = TestDataFactory.validLBCALSDTO(1L);
         LCDTO lc = TestDataFactory.validLCDTO(2L);
