@@ -417,6 +417,14 @@ public class ALSService {
         Objects.requireNonNull(als, "ALS не должен быть null");
         Objects.requireNonNull(lc, "LC не должен быть null");
 
+        if (als.getLC() != null
+                && !Objects.equals(als.getLC().getId(), lc.getId())) {
+            throw new NoSuchElementException(
+                    "LC с id " + lc.getId()
+                            + " не найден в ALS " + als.getId()
+            );
+        }
+
         var domain = toDomain(als);
         domain.replaceControlModule(LCDtoMapper.toDomain(lc));
 
@@ -429,6 +437,14 @@ public class ALSService {
     public ALSDTO replaceLBC(ALSDTO als, LBCDTO lbc) {
         Objects.requireNonNull(als, "ALS не должен быть null");
         Objects.requireNonNull(lbc, "LBC не должен быть null");
+
+        if (als.getLBC() != null
+                && !Objects.equals(als.getLBC().getId(), lbc.getId())) {
+            throw new NoSuchElementException(
+                    "LBC с id " + lbc.getId()
+                            + " не найден в ALS " + als.getId()
+            );
+        }
 
         var domain = toDomain(als);
         domain.replaceControlModule(LBCDtoMapper.toDomain(lbc, TypeLbFactory.forLBC(environment, lbc.getType())));
@@ -450,6 +466,10 @@ public class ALSService {
                 Colors.valueOf(als.getColorBody()),
                 Colors.valueOf(als.getColorDoor())
         );
+
+        if (als.getLBC() != null) {
+            lbc.setId(als.getLBC().getId());
+        }
 
         return replaceLBC(als, lbc);
     }
