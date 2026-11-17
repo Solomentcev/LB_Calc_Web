@@ -95,6 +95,12 @@ public class AuthService {
             );
         }
 
+        if (!principal.isEnabled()) {
+            throw new AuthException(
+                    "Учётная запись деактивирована"
+            );
+        }
+
         if (!passwordEncoder.matches(
                 loginRequest.getPassword(),
                 principal.getPassword()
@@ -154,6 +160,12 @@ public class AuthService {
 
         EmployeePrincipal principal =
                 employeeService.loadUserByUsername(email);
+
+        if (!principal.isEnabled()) {
+            throw new IllegalStateException(
+                    "Учётная запись деактивирована"
+            );
+        }
 
         String accessToken =
                 jwtService.generateAccessToken(principal);
