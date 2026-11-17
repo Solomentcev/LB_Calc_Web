@@ -222,6 +222,33 @@ public abstract class StorageModule extends Module {
     }
 
     /**
+     * Переносит номера ячеек в независимую копию storage-модуля.
+     *
+     * <p>Номера назначаются агрегатом ALS, но являются частью текущего
+     * состояния копируемого модуля. При включении копии в другой ALS
+     * агрегат назначит номера заново.</p>
+     *
+     * @param source исходный модуль
+     * @throws IllegalArgumentException если количество ячеек различается
+     */
+    protected final void copyCellNumbersFrom(StorageModule source) {
+        Objects.requireNonNull(source, "Исходный модуль не должен быть null");
+
+        if (cells.size() != source.cells.size()) {
+            throw new IllegalArgumentException(
+                    "Количество ячеек копии не совпадает с исходным модулем"
+            );
+        }
+
+        for (int i = 0; i < cells.size(); i++) {
+            int number = source.cells.get(i).getNumber();
+            if (number > 0) {
+                cells.get(i).setNumber(number);
+            }
+        }
+    }
+
+    /**
      * Создаёт список пустых ячеек.
      *
      * <p>Номера ячеек не задаются. Их нумерацию выполняет ALS.</p>

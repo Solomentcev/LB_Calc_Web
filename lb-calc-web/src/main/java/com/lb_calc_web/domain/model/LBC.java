@@ -227,7 +227,7 @@ public class LBC extends StorageModule implements ControlModule {
      */
     @Override
     public LBC copy() {
-        return new LBC(
+        LBC copy = new LBC(
                 getHeight(),
                 getWidth(),
                 getDepth(),
@@ -241,6 +241,8 @@ public class LBC extends StorageModule implements ControlModule {
                 getDoorThickness(),
                 controlConfiguration
         );
+        copy.copyCellNumbersFrom(this);
+        return copy;
     }
 
     /**

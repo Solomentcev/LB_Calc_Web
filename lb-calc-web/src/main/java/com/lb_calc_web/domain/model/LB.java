@@ -115,7 +115,7 @@ public class LB extends StorageModule {
      */
     @Override
     public LB copy() {
-        return new LB(
+        LB copy = new LB(
                 getHeight(),
                 getWidth(),
                 getDepth(),
@@ -128,6 +128,8 @@ public class LB extends StorageModule {
                 getDirectionDoorOpening(),
                 getDoorThickness()
         );
+        copy.copyCellNumbersFrom(this);
+        return copy;
     }
 
     /**
