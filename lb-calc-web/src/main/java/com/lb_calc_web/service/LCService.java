@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Comparator;
 import java.util.List;
@@ -143,6 +144,7 @@ public class LCService {
     /**
      * Получить все LC.
      */
+    @Transactional(readOnly = true)
     public List<LCDTO> findAll() {
 
         logger.info("Получение списка LC");
@@ -164,6 +166,7 @@ public class LCService {
     /**
      * Получить LC по ID.
      */
+    @Transactional(readOnly = true)
     public LCDTO findById(Long id) {
 
         logger.info(
@@ -193,6 +196,7 @@ public class LCService {
      * проверка наличия аналогичной конфигурации,
      * преобразование Domain -> Entity.</p>
      */
+    @Transactional
     public LCDTO saveLC(LCDTO dto) {
 
         Objects.requireNonNull(
