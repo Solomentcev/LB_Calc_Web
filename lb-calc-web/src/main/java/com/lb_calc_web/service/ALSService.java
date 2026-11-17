@@ -623,7 +623,7 @@ public class ALSService {
     private Optional<ALSEntity> findDuplicate(
             com.lb_calc_web.domain.model.ALS domain
     ) {
-        return alsRepository.findByHeightAndDepthAndUpperFrameAndBottomFrameAndColorBodyAndColorDoor(
+        return alsRepository.findCandidates(
                         domain.getHeight(),
                         domain.getDepth(),
                         domain.getUpperFrame(),
