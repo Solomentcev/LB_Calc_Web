@@ -5,6 +5,7 @@ import com.lb_calc_web.domain.attributes.Colors;
 import com.lb_calc_web.domain.attributes.Payment;
 import com.lb_calc_web.domain.attributes.PrintOption;
 import com.lb_calc_web.domain.model.LBC;
+import com.lb_calc_web.domain.attributes.TypeLb;
 import com.lb_calc_web.domain.attributes.DirectionDoorOpening;
 import com.lb_calc_web.domain.equipment.BarReader;
 import com.lb_calc_web.domain.equipment.Display;
@@ -20,6 +21,7 @@ import com.lb_calc_web.mapper.entity.LBCEntityMapper;
 import com.lb_calc_web.repository.LBCRepository;
 import com.lb_calc_web.service.util.LBCImageService;
 import com.lb_calc_web.service.util.SizeValidator;
+import com.lb_calc_web.service.util.TypeLbFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.env.Environment;
@@ -150,9 +152,8 @@ public class LBCService {
                 getEnumList("lbc.print-options.default", PrintOption.class)
         );
 
-        applyTypeConfiguration(dto);
-
-        LBC domain = LBCDtoMapper.toDomain(dto);
+        TypeLb typeLb = TypeLbFactory.forLBC(environment, dto.getType());
+        LBC domain = LBCDtoMapper.toDomain(dto, typeLb);
         LBCDTO result = LBCDtoMapper.toDto(domain);
         result.setId(0L);
         return addLBCImage(result);
@@ -208,9 +209,8 @@ public class LBCService {
 
         LBC domain;
         try {
-            LBCDTO configuredDto = copy(dto);
-            applyTypeConfiguration(configuredDto);
-            domain = LBCDtoMapper.toDomain(configuredDto);
+            TypeLb typeLb = TypeLbFactory.forLBC(environment, dto.getType());
+            domain = LBCDtoMapper.toDomain(dto, typeLb);
         } catch (IllegalArgumentException | NullPointerException exception) {
             throw createMappingValidationException(
                     "LBC",
@@ -264,104 +264,6 @@ public class LBCService {
         );
 
         return toDto(saved);
-    }
-
-    /**
-     * Создаёт независимую копию входного DTO.
-     *
-     * <p>Применение параметров типа не должно изменять DTO вызывающего кода.</p>
-     */
-    private LBCDTO copy(LBCDTO source) {
-        LBCDTO target = new LBCDTO();
-        target.setId(source.getId());
-        target.setName(source.getName());
-        target.setDescription(source.getDescription());
-        target.setType(source.getType());
-        target.setHeight(source.getHeight());
-        target.setWidth(source.getWidth());
-        target.setDepth(source.getDepth());
-        target.setUpperFrame(source.getUpperFrame());
-        target.setBottomFrame(source.getBottomFrame());
-        target.setShelfThick(source.getShelfThick());
-        target.setDeltaWidth(source.getDeltaWidth());
-        target.setServiceZoneWidth(source.getServiceZoneWidth());
-        target.setDoorThickness(source.getDoorThickness());
-        target.setCountCells(source.getCountCells());
-        target.setHeightCell(source.getHeightCell());
-        target.setWidthCell(source.getWidthCell());
-        target.setDepthCell(source.getDepthCell());
-        target.setDirectionDoorOpening(source.getDirectionDoorOpening());
-        target.setColorBody(source.getColorBody());
-        target.setColorDoor(source.getColorDoor());
-        target.setDisplay(source.getDisplay());
-        target.setBarReader(source.getBarReader());
-        target.setPayment(source.getPayment());
-        target.setPrinter(source.isPrinter());
-        target.setRfidReader(source.isRfidReader());
-        target.setDisplayQuantity(source.getDisplayQuantity());
-        target.setBarReaderQuantity(source.getBarReaderQuantity());
-        target.setPrinterQuantity(source.getPrinterQuantity());
-        target.setRfidReaderQuantity(source.getRfidReaderQuantity());
-        target.setAccessMethods(source.getAccessMethods());
-        target.setPrintOptions(source.getPrintOptions());
-        target.setStringLBCImage(source.getStringLBCImage());
-        return target;
-    }
-
-    /**
-     * Применяет конструктивные параметры выбранного типа LBC.
-     * Геометрия хранения у LBC использует ту же типовую конфигурацию,
-     * что и LB.
-     */
-    private void applyTypeConfiguration(LBCDTO dto) {
-        String type = dto.getType();
-
-        if (type == null || type.isBlank()) {
-            throw new IllegalArgumentException(
-                    "Тип LBC не указан"
-            );
-        }
-
-        String prefix = "lbc.type." + type;
-        String fallbackPrefix = "lb.type." + type;
-
-        dto.setDeltaWidth(
-                requiredIntWithFallback(
-                        prefix + ".delta-width",
-                        fallbackPrefix + ".delta-width"
-                )
-        );
-
-        dto.setShelfThick(
-                requiredIntWithFallback(
-                        prefix + ".shelf-thick",
-                        fallbackPrefix + ".shelf-thick"
-                )
-        );
-
-        dto.setServiceZoneWidth(
-                requiredIntWithFallback(
-                        prefix + ".service-zone-width",
-                        fallbackPrefix + ".service-zone-width"
-                )
-        );
-    }
-
-    private int requiredIntWithFallback(
-            String primary,
-            String fallback
-    ) {
-        if (environment.containsProperty(primary)) {
-            return environment.getRequiredProperty(
-                    primary,
-                    Integer.class
-            );
-        }
-
-        return environment.getRequiredProperty(
-                fallback,
-                Integer.class
-        );
     }
 
     private LBCDTO toDto(LBCEntity entity) {

@@ -158,6 +158,20 @@ public final class LBCDtoMapper {
                 dto.getServiceZoneWidth()
         );
 
+        return toDomain(dto, typeLb);
+    }
+
+    /**
+     * Преобразует DTO в доменную модель с конструктивным типом,
+     * разрешённым application-слоем.
+     */
+    public static LBC toDomain(LBCDTO dto, TypeLb typeLb) {
+        if (dto == null) {
+            return null;
+        }
+
+        java.util.Objects.requireNonNull(typeLb, "Тип LBC не должен быть null");
+
         List<Equipment> equipment = new ArrayList<>();
 
         int displayQuantity = dto.getDisplayQuantity() == null

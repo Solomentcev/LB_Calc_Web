@@ -91,6 +91,20 @@ public final class LBDtoMapper {
                 dto.getServiceZoneWidth()
         );
 
+        return toDomain(dto, typeLb);
+    }
+
+    /**
+     * Преобразует DTO в доменную модель с конструктивным типом,
+     * разрешённым application-слоем.
+     */
+    public static LB toDomain(LBDTO dto, TypeLb typeLb) {
+        if (dto == null) {
+            return null;
+        }
+
+        Objects.requireNonNull(typeLb, "Тип LB не должен быть null");
+
         return new LB(
                 dto.getHeight(),
                 dto.getWidth(),

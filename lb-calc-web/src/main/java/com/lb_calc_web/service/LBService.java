@@ -3,6 +3,7 @@ package com.lb_calc_web.service;
 import com.lb_calc_web.domain.attributes.Colors;
 import com.lb_calc_web.domain.attributes.DirectionDoorOpening;
 import com.lb_calc_web.domain.model.LB;
+import com.lb_calc_web.domain.attributes.TypeLb;
 import com.lb_calc_web.dto.LBDTO;
 import com.lb_calc_web.dto.validation.ValidationResult;
 import com.lb_calc_web.entity.LBEntity;
@@ -11,6 +12,7 @@ import com.lb_calc_web.mapper.dto.LBDtoMapper;
 import com.lb_calc_web.mapper.entity.LBEntityMapper;
 import com.lb_calc_web.repository.LBRepository;
 import com.lb_calc_web.service.util.SizeValidator;
+import com.lb_calc_web.service.util.TypeLbFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.env.Environment;
@@ -103,9 +105,8 @@ public class LBService {
         dto.setColorBody(colorBody.name());
         dto.setColorDoor(colorDoor.name());
 
-        applyTypeConfiguration(dto);
-
-        LB domain = LBDtoMapper.toDomain(dto);
+        TypeLb typeLb = TypeLbFactory.forLB(environment, dto.getType());
+        LB domain = LBDtoMapper.toDomain(dto, typeLb);
 
         return LBDtoMapper.toDto(domain);
     }
@@ -174,9 +175,8 @@ public class LBService {
          */
         LB domain;
         try {
-            LBDTO configuredDto = copy(dto);
-            applyTypeConfiguration(configuredDto);
-            domain = LBDtoMapper.toDomain(configuredDto);
+            TypeLb typeLb = TypeLbFactory.forLB(environment, dto.getType());
+            domain = LBDtoMapper.toDomain(dto, typeLb);
         } catch (IllegalArgumentException | NullPointerException exception) {
             throw createMappingValidationException(
                     "LB",
@@ -240,66 +240,6 @@ public class LBService {
         );
 
         return toDto(saved);
-    }
-
-    /**
-     * Создаёт независимую копию входного DTO.
-     *
-     * <p>Сервис не изменяет объект, переданный вызывающим кодом.</p>
-     */
-    private LBDTO copy(LBDTO source) {
-        LBDTO target = new LBDTO();
-        target.setId(source.getId());
-        target.setName(source.getName());
-        target.setDescription(source.getDescription());
-        target.setType(source.getType());
-        target.setHeight(source.getHeight());
-        target.setWidth(source.getWidth());
-        target.setDepth(source.getDepth());
-        target.setUpperFrame(source.getUpperFrame());
-        target.setBottomFrame(source.getBottomFrame());
-        target.setShelfThick(source.getShelfThick());
-        target.setDeltaWidth(source.getDeltaWidth());
-        target.setServiceZoneWidth(source.getServiceZoneWidth());
-        target.setDoorThickness(source.getDoorThickness());
-        target.setCountCells(source.getCountCells());
-        target.setHeightCell(source.getHeightCell());
-        target.setWidthCell(source.getWidthCell());
-        target.setDepthCell(source.getDepthCell());
-        target.setDirectionDoorOpening(source.getDirectionDoorOpening());
-        target.setColorBody(source.getColorBody());
-        target.setColorDoor(source.getColorDoor());
-        target.setStringLBImage(source.getStringLBImage());
-        return target;
-    }
-
-    /**
-     * Применяет параметры выбранного типа LB
-     * из configuration properties.
-     */
-    private void applyTypeConfiguration(LBDTO dto) {
-        String type = dto.getType();
-
-        if (type == null || type.isBlank()) {
-            throw new IllegalArgumentException(
-                    "Тип LB не указан"
-            );
-        }
-
-        String prefix = "lb.type." + type;
-
-        int deltaWidth =
-                requiredInt(prefix + ".delta-width");
-
-        int shelfThick =
-                requiredInt(prefix + ".shelf-thick");
-
-        int serviceZoneWidth =
-                requiredInt(prefix + ".service-zone-width");
-
-        dto.setDeltaWidth(deltaWidth);
-        dto.setShelfThick(shelfThick);
-        dto.setServiceZoneWidth(serviceZoneWidth);
     }
 
     /**
