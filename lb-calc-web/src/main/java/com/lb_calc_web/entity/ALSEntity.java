@@ -196,6 +196,12 @@ public class ALSEntity {
      * @param moduleOrder позиция слева направо, начиная с нуля
      */
     public void addModule(ModuleEntity module, int moduleOrder) {
+        if (moduleOrder != modules.size()) {
+            throw new IllegalArgumentException(
+                    "Порядок добавляемого модуля должен соответствовать его позиции в ALS"
+            );
+        }
+
         ALSModuleEntity association = new ALSModuleEntity();
         association.setAls(this);
         association.setModule(Objects.requireNonNull(
