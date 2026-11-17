@@ -7,6 +7,7 @@ import com.lb_calc_web.domain.attributes.PrintOption;
 import com.lb_calc_web.domain.model.LBC;
 import com.lb_calc_web.domain.attributes.TypeLb;
 import com.lb_calc_web.domain.attributes.DirectionDoorOpening;
+import com.lb_calc_web.domain.equipment.BarReader;
 import com.lb_calc_web.domain.equipment.Display;
 import com.lb_calc_web.dto.LBCDTO;
 import com.lb_calc_web.dto.validation.ValidationResult;
@@ -140,6 +141,15 @@ public class LBCService {
         dto.setRfidReader(
                 requiredBoolean("lbc.rfid-reader.default")
         );
+
+        dto.setDisplayQuantity(
+                Display.NONE.getName().equals(displayName) ? 0 : 1
+        );
+        dto.setBarReaderQuantity(
+                BarReader.NONE.getName().equals(dto.getBarReader()) ? 0 : 1
+        );
+        dto.setPrinterQuantity(dto.isPrinter() ? 1 : 0);
+        dto.setRfidReaderQuantity(dto.isRfidReader() ? 1 : 0);
 
         dto.setAccessMethods(
                 getEnumList("lbc.access-methods.default", AccessMethod.class)
