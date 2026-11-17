@@ -53,13 +53,13 @@ public class ALSSizeValidator {
                 && lbList.stream().anyMatch(module -> module != null);
         boolean hasStorage = hasLB || hasLBC;
 
-        int heightMin = bounds.getHeightMin();
+        long heightMin = bounds.getHeightMin();
         if (hasLC) {
             heightMin = Math.max(heightMin, bounds.getHeightLcMin());
         }
         if (hasLB || hasLBC) {
             heightMin = Math.max(heightMin,
-                    bounds.getHeightCellMin()
+                    (long) bounds.getHeightCellMin()
                             + als.getUpperFrame()
                             + als.getBottomFrame());
         }
@@ -153,6 +153,13 @@ public class ALSSizeValidator {
     private void validateRange(
             ValidationResult result, String field, int value,
             int min, int max, String label
+    ) {
+        validateRange(result, field, (long) value, min, max, label);
+    }
+
+    private void validateRange(
+            ValidationResult result, String field, long value,
+            long min, long max, String label
     ) {
         if (value < min) {
             addError(result, field, label + " меньше допустимой", value, min, max);

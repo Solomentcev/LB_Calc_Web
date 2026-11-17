@@ -42,6 +42,14 @@ public class ModuleSizeValidator {
             int max,
             String fieldLabel
     ) {
+        validateRange(result, fieldName, (long) value,
+                min, max, fieldLabel);
+    }
+
+    private void validateRange(
+            ValidationResult result, String fieldName, long value,
+            long min, long max, String fieldLabel
+    ) {
         if (value < min) {
             addError(result, fieldName, fieldLabel + " меньше допустимой",
                     value, min, max);
@@ -78,15 +86,15 @@ public class ModuleSizeValidator {
         }
 
         if (validateCommonDimensions) {
-            int heightMin = Math.max(bounds.getHeightMin(),
-                    bounds.getHeightCellMin() + upperFrame + bottomFrame);
+            long heightMin = Math.max((long) bounds.getHeightMin(),
+                    (long) bounds.getHeightCellMin() + upperFrame + bottomFrame);
             validateRange(result, "height", height, heightMin,
                     bounds.getHeightMax(), "Высота модуля");
             validateRange(result, "depth", depth, bounds.getDepthMin(),
                     bounds.getDepthMax(), "Глубина модуля");
         }
 
-        int widthMin = bounds.getWidthCellMin()
+        long widthMin = (long) bounds.getWidthCellMin()
                 + lb.getDeltaWidth() + lb.getServiceZoneWidth();
         validateRange(result, "width", lb.getWidth(), widthMin,
                 bounds.getWidthMax(), "Ширина модуля");
@@ -139,14 +147,14 @@ public class ModuleSizeValidator {
         }
 
         if (validateCommonDimensions) {
-            int heightMin = Math.max(bounds.getHeightMin(),
-                    bounds.getHeightCellMin() + upperFrame + bottomFrame);
+            long heightMin = Math.max((long) bounds.getHeightMin(),
+                    (long) bounds.getHeightCellMin() + upperFrame + bottomFrame);
             validateRange(result, "height", height, heightMin,
                     bounds.getHeightMax(), "Высота модуля");
             validateRange(result, "depth", depth, bounds.getDepthMin(),
                     bounds.getDepthMax(), "Глубина модуля");
 
-            int usableHeight = height - upperFrame - bottomFrame;
+            long usableHeight = (long) height - upperFrame - bottomFrame;
             if (usableHeight < bounds.getHeightLcPanelMin()) {
                 addError(result, "heightConsistency",
                         "Полезная высота слишком мала для панели управления LBC",
@@ -155,7 +163,7 @@ public class ModuleSizeValidator {
             }
         }
 
-        int storageWidthMin = bounds.getWidthCellMin()
+        long storageWidthMin = (long) bounds.getWidthCellMin()
                 + lbc.getDeltaWidth() + lbc.getServiceZoneWidth();
         int controlWidthMin = requiredLBCControlWidth(result, lbc.getDisplay());
         validateRange(result, "width", lbc.getWidth(),
@@ -213,7 +221,7 @@ public class ModuleSizeValidator {
                     bounds.getDepthMax(), "Глубина модуля");
         }
 
-        int usableHeight = height - upperFrame - bottomFrame;
+        long usableHeight = (long) height - upperFrame - bottomFrame;
         if (validateCommonDimensions
                 && usableHeight < bounds.getHeightLcPanelMin()) {
             addError(result, "heightConsistency",
@@ -281,14 +289,14 @@ public class ModuleSizeValidator {
         }
 
         // Ширина и глубина не зависят от количества ячеек.
-        int depthCell = depth - doorThickness;
+        long depthCell = (long) depth - doorThickness;
         validateRange(result, "depthCell", depthCell,
                 bounds.getDepthCellMin(), bounds.getDepthCellMax(),
                 "Глубина ячейки");
 
-        int widthCell = width - typeLb.getDeltaWidth()
+        long widthCell = (long) width - typeLb.getDeltaWidth()
                 - typeLb.getServiceZoneWidth();
-        int widthCellMax = bounds.getWidthMax()
+        long widthCellMax = (long) bounds.getWidthMax()
                 - typeLb.getDeltaWidth() - typeLb.getServiceZoneWidth();
         validateRange(result, "widthCell", widthCell,
                 bounds.getWidthCellMin(), widthCellMax, "Ширина ячейки");
