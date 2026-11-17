@@ -102,8 +102,18 @@ public final class ALSDtoMapper {
     public static ALS toDomain(ALSDTO dto) {
         return toDomain(
                 dto,
-                type -> new TypeLb(type, 0, 0, 0),
-                type -> new TypeLb(type, 0, 0, 0)
+                lbDto -> new TypeLb(
+                        lbDto.getType(),
+                        lbDto.getDeltaWidth(),
+                        lbDto.getShelfThick(),
+                        lbDto.getServiceZoneWidth()
+                ),
+                lbcDto -> new TypeLb(
+                        lbcDto.getType(),
+                        lbcDto.getDeltaWidth(),
+                        lbcDto.getShelfThick(),
+                        lbcDto.getServiceZoneWidth()
+                )
         );
     }
 
@@ -118,8 +128,8 @@ public final class ALSDtoMapper {
      */
     public static ALS toDomain(
             ALSDTO dto,
-            Function<String, TypeLb> lbTypeResolver,
-            Function<String, TypeLb> lbcTypeResolver
+            Function<LBDTO, TypeLb> lbTypeResolver,
+            Function<LBCDTO, TypeLb> lbcTypeResolver
     ) {
         if (dto == null) {
             return null;
@@ -144,7 +154,7 @@ public final class ALSDtoMapper {
                 }
 
                 storageModules.add(
-                        LBDtoMapper.toDomain(lbDto, lbTypeResolver.apply(lbDto.getType()))
+                        LBDtoMapper.toDomain(lbDto, lbTypeResolver.apply(lbDto))
                 );
             }
         }
@@ -160,7 +170,7 @@ public final class ALSDtoMapper {
         if (dto.getLBC() != null) {
             controlModule = LBCDtoMapper.toDomain(
                     dto.getLBC(),
-                    lbcTypeResolver.apply(dto.getLBC().getType())
+                    lbcTypeResolver.apply(dto.getLBC())
             );
         } else if (dto.getLC() != null) {
             controlModule = LCDtoMapper.toDomain(

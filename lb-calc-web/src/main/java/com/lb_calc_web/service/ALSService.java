@@ -507,8 +507,8 @@ public class ALSService {
     private ALS toDomain(ALSDTO dto) {
         return ALSDtoMapper.toDomain(
                 dto,
-                type -> TypeLbFactory.forLB(environment, type),
-                type -> TypeLbFactory.forLBC(environment, type)
+                lbDto -> TypeLbFactory.forLB(environment, lbDto.getType()),
+                lbcDto -> TypeLbFactory.forLBC(environment, lbcDto.getType())
         );
     }
 
