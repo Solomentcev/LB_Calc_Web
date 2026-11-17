@@ -373,7 +373,7 @@ public class ProjectService {
             Long alsId
     ) {
         ProjectDTO source = findById(projectId);
-        ALSDTO selected = findALSInProject(projectId, alsId);
+        ALSDTO selected = findALSInProject(source, alsId);
 
         Project domain = ProjectDtoMapper.toDomain(source, alsService::toDomain);
         ALS selectedDomain = alsService.toDomain(selected);
@@ -398,9 +398,19 @@ public class ProjectService {
             Long projectId,
             Long alsId
     ) {
-        ProjectDTO project =
-                findById(projectId);
+        return findALSInProject(
+                findById(projectId),
+                alsId
+        );
+    }
 
+    /**
+     * Находит конфигурацию ALS в уже загруженном проекте.
+     */
+    private ALSDTO findALSInProject(
+            ProjectDTO project,
+            Long alsId
+    ) {
         return project.getAlsList()
                 .stream()
                 .filter(
@@ -417,7 +427,7 @@ public class ProjectService {
                                 "ALS с id "
                                         + alsId
                                         + " не найден в проекте "
-                                        + projectId
+                                        + project.getId()
                         )
                 );
     }
@@ -431,11 +441,7 @@ public class ProjectService {
             Long alsId,
             Long lcId
     ) {
-        ALSDTO als =
-                findALSInProject(
-                        projectId,
-                        alsId
-                );
+        ALSDTO als = findALSInProject(project, alsId);
 
         LCDTO lc =
                 als.getLC();
@@ -622,7 +628,7 @@ public class ProjectService {
                 );
 
         findLCInProject(
-                projectId,
+                project,
                 alsId,
                 lcId
         );
@@ -694,7 +700,7 @@ public class ProjectService {
                 );
 
         findLBCInProject(
-                projectId,
+                project,
                 alsId,
                 lbcId
         );
@@ -755,7 +761,7 @@ public class ProjectService {
                 findById(projectId);
 
         ALSDTO currentALS =
-                findALSInProject(projectId, alsId);
+                findALSInProject(project, alsId);
 
         ALSDTO als =
                 alsService.addNewLB(currentALS);
@@ -792,7 +798,7 @@ public class ProjectService {
                 );
 
         findLBInProject(
-                projectId,
+                project,
                 alsId,
                 lbId
         );
@@ -844,7 +850,7 @@ public class ProjectService {
 
         ALSDTO als =
                 alsService.deleteLB(
-                        findALSInProject(projectId, alsId),
+                        findALSInProject(project, alsId),
                         lbId
                 );
 
