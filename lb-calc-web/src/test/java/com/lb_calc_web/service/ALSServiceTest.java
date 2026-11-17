@@ -90,7 +90,7 @@ class ALSServiceTest {
         ALSDTO dto = TestDataFactory.validALSDTO(1L);
         ALSEntity existing = ALSEntityMapper.toEntity(
                 TestDataFactory.validALS(1L),
-                ALSEntityMapper::createModuleEntity
+                ModuleEntityMapper::toEntity
         );
 
         when(alsRepository.findCandidates(
@@ -109,7 +109,7 @@ class ALSServiceTest {
         ALSDTO dto = TestDataFactory.validALSDTO(1L);
         ALSEntity existing = ALSEntityMapper.toEntity(
                 TestDataFactory.validALS(1L),
-                ALSEntityMapper::createModuleEntity
+                ModuleEntityMapper::toEntity
         );
         existing.setWidth(existing.getWidth() + 1);
 
