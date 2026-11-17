@@ -41,9 +41,7 @@ public final class ALSDtoMapper {
         dto.setUpperFrame(domain.getUpperFrame());
         dto.setBottomFrame(domain.getBottomFrame());
 
-        dto.setDepthCell(
-                calculateDepthCell(domain)
-        );
+        dto.setDepthCell(domain.getDepthCell());
 
         dto.setCountCells(
                 domain.getCountCells()
@@ -270,15 +268,5 @@ public final class ALSDtoMapper {
         return modules;
     }
 
-    private static int calculateDepthCell(
-            ALS domain
-    ) {
-        return domain.getStorageModules()
-                .stream()
-                .mapToInt(storageModule ->
-                        storageModule.getCellDepth()
-                )
-                .min()
-                .orElse(0);
-    }
+
 }
