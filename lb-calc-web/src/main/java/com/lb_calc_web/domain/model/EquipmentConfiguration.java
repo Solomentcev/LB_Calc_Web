@@ -156,17 +156,28 @@ public class EquipmentConfiguration {
                 Objects.requireNonNull(equipment, "Оборудование не должно быть null")) != null;
     }
 
+    /**
+     * Возвращает состав оборудования без учёта группы, в которой
+     * позиция была сформирована. Группа нужна для правил изменения
+     * конфигурации, но не меняет физическую комплектацию модуля.
+     */
+    private Map<Equipment, Integer> getEquipmentQuantities() {
+        Map<Equipment, Integer> result =
+                new LinkedHashMap<>(requiredEquipment);
+        result.putAll(additionalEquipment);
+        return result;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof EquipmentConfiguration other)) return false;
-        return requiredEquipment.equals(other.requiredEquipment)
-                && additionalEquipment.equals(other.additionalEquipment);
+        return getEquipmentQuantities().equals(other.getEquipmentQuantities());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(requiredEquipment, additionalEquipment);
+        return getEquipmentQuantities().hashCode();
     }
 
     @Override
