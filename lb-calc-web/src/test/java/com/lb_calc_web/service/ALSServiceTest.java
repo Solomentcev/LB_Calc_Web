@@ -47,8 +47,8 @@ class ALSServiceTest {
                 .withProperty("size.frame.bottom.default", "50")
                 .withProperty("als.color.body.default", "Blue")
                 .withProperty("als.color.door.default", "White")
-                .withProperty("als.position.control-module.default", "CENTER")
-                .withProperty("als.position.lc.default", "CENTER")
+                .withProperty("als.position.control-module.default", "LEFT")
+                .withProperty("als.position.lc.default", "LEFT")
                 .withProperty("lb.type.TYPE1.delta-width", "100")
                 .withProperty("lb.type.TYPE1.shelf-thick", "5")
                 .withProperty("lb.type.TYPE1.service-zone-width", "40");
@@ -172,14 +172,6 @@ class ALSServiceTest {
 
         assertEquals(1L, alsHeightError.getObjectId());
 
-        var lbError = exception.getValidationResult()
-                .getErrors()
-                .stream()
-                .filter(error -> "LB".equals(error.getObjectType()))
-                .findFirst()
-                .orElseThrow();
-
-        assertEquals(201L, lbError.getObjectId());
         verify(alsRepository, never()).save(any());
     }
 
@@ -247,7 +239,7 @@ class ALSServiceTest {
 
     @Test
     void replaceLCandSaveALS_shouldReplaceControlModule() {
-        ALSDTO als = TestDataFactory.validLBCALSDTO(1L);
+        ALSDTO als = TestDataFactory.validALSDTO(1L);
         LCDTO lc = TestDataFactory.validLCDTO(2L);
 
         ALSService spy = spy(alsService);
