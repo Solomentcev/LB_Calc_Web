@@ -277,4 +277,58 @@ class ALSServiceTest {
         assertEquals(2, result.getLbList().size());
         assertNull(result.getLC());
     }
+
+    @Test
+    void addNewLB_shouldAddModuleAndRecalculateComposition() {
+        ALSDTO source = TestDataFactory.validALSDTO(1L);
+        when(lbService.createLB(
+                anyInt(), anyInt(), anyInt(), anyInt(), any(), any()
+        )).thenReturn(TestDataFactory.validLBDTO(99L));
+
+        ALSDTO result = alsService.addNewLB(source);
+
+        assertEquals(3, result.getLbList().size());
+        assertEquals(4, result.getModuleOrder().size());
+        assertEquals(9, result.getCountCells());
+        assertEquals("CENTER", result.getPositionControlModule());
+    }
+
+    @Test
+    void deleteLB_shouldRemoveOnlySelectedModule() {
+        ALSDTO source = TestDataFactory.validALSDTO(1L);
+        Long selectedLbId = source.getLbList().get(0).getId();
+
+        ALSDTO result = alsService.deleteLB(source, selectedLbId);
+
+        assertEquals(1, result.getLbList().size());
+        assertEquals(2, result.getModuleOrder().size());
+        assertEquals(3, result.getCountCells());
+        assertEquals("LEFT", result.getPositionControlModule());
+    }
+
+    @Test
+    void replaceLB_shouldChangeSelectedModuleConfiguration() {
+        ALSDTO source = TestDataFactory.validALSDTO(1L);
+        Long selectedLbId = source.getLbList().get(1).getId();
+        LBDTO replacement = TestDataFactory.validLBDTO(selectedLbId);
+        replacement.setCountCells(4);
+
+        ALSDTO result = alsService.replaceLB(source, replacement);
+
+        assertEquals(2, result.getLbList().size());
+        assertEquals(3, result.getModuleOrder().size());
+        assertEquals(7, result.getCountCells());
+    }
+
+    @Test
+    void replaceLB_unknownId_shouldThrow() {
+        ALSDTO source = TestDataFactory.validALSDTO(1L);
+        LBDTO replacement = TestDataFactory.validLBDTO(999L);
+
+        assertThrows(
+                java.util.NoSuchElementException.class,
+                () -> alsService.replaceLB(source, replacement)
+        );
+    }
+
 }
