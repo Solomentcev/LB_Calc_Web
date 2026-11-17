@@ -104,6 +104,11 @@ public final class LBDtoMapper {
         }
 
         Objects.requireNonNull(typeLb, "Тип LB не должен быть null");
+        if (!Objects.equals(dto.getType(), typeLb.getType())) {
+            throw new IllegalArgumentException(
+                    "Переданный конструктивный тип не соответствует типу DTO LB"
+            );
+        }
 
         return new LB(
                 dto.getHeight(),

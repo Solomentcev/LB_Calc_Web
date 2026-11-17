@@ -171,6 +171,11 @@ public final class LBCDtoMapper {
         }
 
         java.util.Objects.requireNonNull(typeLb, "Тип LBC не должен быть null");
+        if (!java.util.Objects.equals(dto.getType(), typeLb.getType())) {
+            throw new IllegalArgumentException(
+                    "Переданный конструктивный тип не соответствует типу DTO LBC"
+            );
+        }
 
         List<Equipment> equipment = new ArrayList<>();
 
