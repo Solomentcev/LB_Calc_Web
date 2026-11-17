@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Comparator;
 import java.util.List;
@@ -112,6 +113,7 @@ public class LBService {
     /**
      * Получить все LB.
      */
+    @Transactional(readOnly = true)
     public List<LBDTO> findAll() {
         logger.info("Получение списка LB");
 
@@ -132,6 +134,7 @@ public class LBService {
     /**
      * Получить LB по идентификатору.
      */
+    @Transactional(readOnly = true)
     public LBDTO findById(Long id) {
         logger.info("Поиск LB по id={}", id);
 
@@ -153,6 +156,7 @@ public class LBService {
      * <p>Если аналогичный LB уже существует в БД,
      * возвращается существующая запись.</p>
      */
+    @Transactional
     public LBDTO saveLB(LBDTO dto) {
         Objects.requireNonNull(
                 dto,
@@ -170,8 +174,9 @@ public class LBService {
          */
         LB domain;
         try {
-            applyTypeConfiguration(dto);
-            domain = LBDtoMapper.toDomain(dto);
+            LBDTO configuredDto = copy(dto);
+            applyTypeConfiguration(configuredDto);
+            domain = LBDtoMapper.toDomain(configuredDto);
         } catch (IllegalArgumentException | NullPointerException exception) {
             throw createMappingValidationException(
                     "LB",
@@ -235,6 +240,37 @@ public class LBService {
         );
 
         return toDto(saved);
+    }
+
+    /**
+     * Создаёт независимую копию входного DTO.
+     *
+     * <p>Сервис не изменяет объект, переданный вызывающим кодом.</p>
+     */
+    private LBDTO copy(LBDTO source) {
+        LBDTO target = new LBDTO();
+        target.setId(source.getId());
+        target.setName(source.getName());
+        target.setDescription(source.getDescription());
+        target.setType(source.getType());
+        target.setHeight(source.getHeight());
+        target.setWidth(source.getWidth());
+        target.setDepth(source.getDepth());
+        target.setUpperFrame(source.getUpperFrame());
+        target.setBottomFrame(source.getBottomFrame());
+        target.setShelfThick(source.getShelfThick());
+        target.setDeltaWidth(source.getDeltaWidth());
+        target.setServiceZoneWidth(source.getServiceZoneWidth());
+        target.setDoorThickness(source.getDoorThickness());
+        target.setCountCells(source.getCountCells());
+        target.setHeightCell(source.getHeightCell());
+        target.setWidthCell(source.getWidthCell());
+        target.setDepthCell(source.getDepthCell());
+        target.setDirectionDoorOpening(source.getDirectionDoorOpening());
+        target.setColorBody(source.getColorBody());
+        target.setColorDoor(source.getColorDoor());
+        target.setStringLBImage(source.getStringLBImage());
+        return target;
     }
 
     /**
