@@ -73,6 +73,33 @@ class ALSEntityMapperTest {
     }
 
     @Test
+    void updateEntity_shouldReplaceAssociationsWhenPhysicalOrderChanges() {
+        ALSEntity entity = ALSEntityMapper.toEntity(
+                TestDataFactory.validALS(null),
+                ModuleEntityMapper::toEntity
+        );
+        var originalAssociations = List.copyOf(entity.getModules());
+        List<com.lb_calc_web.entity.ModuleEntity> reversedModules =
+                originalAssociations.stream()
+                        .map(com.lb_calc_web.entity.ALSModuleEntity::getModule)
+                        .collect(java.util.stream.Collectors.collectingAndThen(
+                                java.util.stream.Collectors.toList(),
+                                list -> {
+                                    java.util.Collections.reverse(list);
+                                    return list;
+                                }
+                        ));
+
+        entity.synchronizeModules(reversedModules);
+
+        assertEquals(originalAssociations.size(), entity.getModules().size());
+        for (int i = 0; i < entity.getModules().size(); i++) {
+            assertEquals(i, entity.getModules().get(i).getModuleOrder());
+            assertNotSame(originalAssociations.get(i), entity.getModules().get(i));
+        }
+    }
+
+    @Test
     void toEntity_shouldResolveEachModuleExactlyOnce() {
         ALS domain = TestDataFactory.validALS(null);
         int[] resolvedModules = {0};

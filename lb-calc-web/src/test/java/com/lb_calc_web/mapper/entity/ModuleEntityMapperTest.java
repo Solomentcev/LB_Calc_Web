@@ -46,6 +46,32 @@ class ModuleEntityMapperTest {
     }
 
     @Test
+    void toDomain_shouldRejectStaleLcDescription() {
+        LCEntity entity = (LCEntity) ModuleEntityMapper.toEntity(
+                TestDataFactory.validLC(null)
+        );
+        entity.setDescription("Устаревшее описание");
+
+        assertThrows(
+                IllegalStateException.class,
+                () -> ModuleEntityMapper.toDomain(entity)
+        );
+    }
+
+    @Test
+    void toDomain_shouldRejectStaleLbcCellDimensions() {
+        LBCEntity entity = (LBCEntity) ModuleEntityMapper.toEntity(
+                TestDataFactory.validLBC(null)
+        );
+        entity.setDepthCell(entity.getDepthCell() + 1);
+
+        assertThrows(
+                IllegalStateException.class,
+                () -> ModuleEntityMapper.toDomain(entity)
+        );
+    }
+
+    @Test
     void toDomain_shouldRejectStaleDerivedCellDimensions() {
         LBEntity entity = (LBEntity) ModuleEntityMapper.toEntity(
                 TestDataFactory.validLB(null)
