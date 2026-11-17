@@ -296,6 +296,90 @@ class JwtAuthentificationFilterTest {
     }
 
     @Test
+    void deactivatedEmployee_shouldRejectAccessAndRefreshTokens()
+            throws Exception {
+
+        MockHttpServletRequest request =
+                new MockHttpServletRequest(
+                        "GET",
+                        "/api/v1/lbcs"
+                );
+        MockHttpServletResponse response =
+                new MockHttpServletResponse();
+
+        request.addHeader(
+                "Authorization",
+                "Bearer access-ok"
+        );
+        request.addHeader(
+                "Refresh-Token",
+                "refresh-ok"
+        );
+
+        Claims accessClaims =
+                claims(
+                        "disabled@test.local",
+                        "access",
+                        new Date(
+                                System.currentTimeMillis()
+                                        + 60_000
+                        )
+                );
+
+        Claims refreshClaims =
+                claims(
+                        "disabled@test.local",
+                        "refresh",
+                        new Date(
+                                System.currentTimeMillis()
+                                        + 60_000
+                        )
+                );
+
+        EmployeePrincipal inactivePrincipal =
+                new EmployeePrincipal(
+                        10L,
+                        "disabled@test.local",
+                        "HASH",
+                        Role.ROLE_MANAGER,
+                        false
+                );
+
+        when(jwtService.getAccessClaims("access-ok"))
+                .thenReturn(accessClaims);
+        when(jwtService.isAccess(accessClaims))
+                .thenReturn(true);
+        when(jwtService.isExpired(accessClaims))
+                .thenReturn(false);
+        when(jwtService.getRefreshClaims("refresh-ok"))
+                .thenReturn(refreshClaims);
+        when(jwtService.isRefresh(refreshClaims))
+                .thenReturn(true);
+        when(jwtService.isExpired(refreshClaims))
+                .thenReturn(false);
+        when(employeeService.loadUserByUsername("disabled@test.local"))
+                .thenReturn(inactivePrincipal);
+
+        filter.doFilter(request, response, chain);
+
+        assertNull(
+                SecurityContextHolder
+                        .getContext()
+                        .getAuthentication()
+        );
+        assertTrue(
+                java.util.Arrays.stream(response.getCookies())
+                        .filter(cookie ->
+                                "jwtAccess".equals(cookie.getName())
+                                        || "jwtRefresh".equals(cookie.getName()))
+                        .allMatch(cookie -> cookie.getMaxAge() == 0)
+        );
+        verify(jwtService, never()).generateAccessToken(inactivePrincipal);
+        verify(jwtService, never()).generateRefreshToken(inactivePrincipal);
+        verify(chain).doFilter(request, response);
+    }
+
+    @Test
     void invalidRefresh_shouldClearAuthenticationAndCookies()
             throws Exception {
 
