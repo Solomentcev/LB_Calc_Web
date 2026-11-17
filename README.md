@@ -66,22 +66,36 @@ LB Calc Web → Kafka → Notification Service → Email
 ./mvnw clean package
 ```
 
-Запуск Docker-окружения:
+Запуск Docker-окружения разработки:
 
 ```bash
 cd environments/dev
 docker compose --env-file dev.env up -d --build
 ```
 
-Основное приложение:
+Тестовое окружение использует отдельную БД `lb_calc_web_test`, отдельный Docker volume и отдельные порты. Оно не должно подключаться к БД разработки.
+
+Подготовка и запуск тестового окружения:
+
+```bash
+cp environments/test/test.env.example environments/test/test.env
+cd environments/test
+docker compose --env-file test.env up -d --build
+```
+
+При необходимости запуск тестов из IntelliJ IDEA выполняется с профилем `test`. По умолчанию он подключается к `localhost:3308/lb_calc_web_test`; параметры подключения можно переопределить переменными `DB_URL`, `DB_USERNAME` и `DB_PASSWORD`.
+
+Flyway автоматически применяет миграции при запуске приложения. V1 создаёт актуальную схему БД с нуля, Hibernate проверяет её соответствие Entity через `ddl-auto=validate`. Не создавать и не изменять таблицы вручную.
+
+Основное приложение DEV:
 
 `http://localhost:8081`
 
-Notification Service:
+Notification Service DEV:
 
 `http://localhost:8082`
 
-При запуске приложений из IntelliJ IDEA Kafka доступна по адресу:
+Kafka DEV при запуске приложения из IntelliJ IDEA:
 
 `localhost:29092`
 
