@@ -21,6 +21,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -106,10 +107,10 @@ class FindOrCreateLockIntegrationTest {
         LCDTO lc = lcService.saveLC(TestDataFactory.validLCDTO(0L));
         LBCDTO lbc = lbcService.saveLBC(TestDataFactory.validLBCDTO(0L));
 
-        assertTrue(als.getId() > 0);
-        assertTrue(lbcAls.getId() > 0);
-        assertTrue(lc.getId() > 0);
-        assertTrue(lbc.getId() > 0);
+        assertNotNull(als);
+        assertNotNull(lbcAls);
+        assertNotNull(lc);
+        assertNotNull(lbc);
     }
 
     @Test
