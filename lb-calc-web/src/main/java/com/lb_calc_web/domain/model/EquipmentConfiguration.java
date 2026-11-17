@@ -45,13 +45,44 @@ public class EquipmentConfiguration {
             List<Equipment> requiredEquipment,
             List<Equipment> additionalEquipment
     ) {
-        this.requiredEquipment = requiredEquipment == null
-                ? new ArrayList<>()
-                : new ArrayList<>(requiredEquipment);
+        this.requiredEquipment = copyEquipment(
+                requiredEquipment,
+                "Обязательное оборудование"
+        );
 
-        this.additionalEquipment = additionalEquipment == null
-                ? new ArrayList<>()
-                : new ArrayList<>(additionalEquipment);
+        this.additionalEquipment = copyEquipment(
+                additionalEquipment,
+                "Дополнительное оборудование"
+        );
+    }
+
+    /**
+     * Создаёт независимый список оборудования и проверяет его элементы.
+     *
+     * @param source исходный список
+     * @param listName название списка для сообщения об ошибке
+     * @return независимый список оборудования
+     */
+    private List<Equipment> copyEquipment(
+            List<Equipment> source,
+            String listName
+    ) {
+        List<Equipment> result = new ArrayList<>();
+
+        if (source == null) {
+            return result;
+        }
+
+        for (Equipment equipment : source) {
+            result.add(
+                    Objects.requireNonNull(
+                            equipment,
+                            listName + " не должно содержать null"
+                    )
+            );
+        }
+
+        return result;
     }
 
     /**
@@ -147,7 +178,12 @@ public class EquipmentConfiguration {
      * @return {@code true}, если оборудование было удалено
      */
     public boolean removeRequiredEquipment(Equipment equipment) {
-        return requiredEquipment.remove(equipment);
+        return requiredEquipment.remove(
+                Objects.requireNonNull(
+                        equipment,
+                        "Оборудование не должно быть null"
+                )
+        );
     }
 
     /**
@@ -159,7 +195,12 @@ public class EquipmentConfiguration {
      * @return {@code true}, если оборудование было удалено
      */
     public boolean removeAdditionalEquipment(Equipment equipment) {
-        return additionalEquipment.remove(equipment);
+        return additionalEquipment.remove(
+                Objects.requireNonNull(
+                        equipment,
+                        "Оборудование не должно быть null"
+                )
+        );
     }
 
     /**
