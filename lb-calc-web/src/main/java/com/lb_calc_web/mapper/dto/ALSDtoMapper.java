@@ -135,6 +135,15 @@ public final class ALSDtoMapper {
             return null;
         }
 
+        java.util.Objects.requireNonNull(
+                lbTypeResolver,
+                "lbTypeResolver не должен быть null"
+        );
+        java.util.Objects.requireNonNull(
+                lbcTypeResolver,
+                "lbcTypeResolver не должен быть null"
+        );
+
         Colors colorBody = Colors.valueOf(
                 dto.getColorBody()
         );
