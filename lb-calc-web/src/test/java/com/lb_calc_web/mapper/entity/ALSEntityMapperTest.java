@@ -79,24 +79,21 @@ class ALSEntityMapperTest {
                 ModuleEntityMapper::toEntity
         );
         var originalAssociations = List.copyOf(entity.getModules());
-        List<com.lb_calc_web.entity.ModuleEntity> reversedModules =
-                originalAssociations.stream()
-                        .map(com.lb_calc_web.entity.ALSModuleEntity::getModule)
-                        .collect(java.util.stream.Collectors.collectingAndThen(
-                                java.util.stream.Collectors.toList(),
-                                list -> {
-                                    java.util.Collections.reverse(list);
-                                    return list;
-                                }
-                        ));
+        List<com.lb_calc_web.entity.ModuleEntity> reorderedModules = List.of(
+                originalAssociations.get(1).getModule(),
+                originalAssociations.get(0).getModule(),
+                originalAssociations.get(2).getModule()
+        );
 
-        entity.synchronizeModules(reversedModules);
+        entity.synchronizeModules(reorderedModules);
 
         assertEquals(originalAssociations.size(), entity.getModules().size());
         for (int i = 0; i < entity.getModules().size(); i++) {
             assertEquals(i, entity.getModules().get(i).getModuleOrder());
-            assertNotSame(originalAssociations.get(i), entity.getModules().get(i));
         }
+        assertNotSame(originalAssociations.get(0), entity.getModules().get(0));
+        assertNotSame(originalAssociations.get(1), entity.getModules().get(1));
+        assertSame(originalAssociations.get(2), entity.getModules().get(2));
     }
 
     @Test
