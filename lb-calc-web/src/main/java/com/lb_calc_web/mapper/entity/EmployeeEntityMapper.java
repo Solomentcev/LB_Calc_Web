@@ -3,22 +3,25 @@ package com.lb_calc_web.mapper.entity;
 import com.lb_calc_web.domain.model.Employee;
 import com.lb_calc_web.entity.EmployeeEntity;
 
+import java.util.Objects;
+
 /**
  * Маппер между JPA-сущностью сотрудника и доменной моделью.
  *
- * <p>Маппинг не переносит технические данные persistence/security-слоя:
- * идентификатор и хэш пароля остаются в {@link EmployeeEntity}.</p>
+ * <p>Идентификатор сотрудника переносится в доменную модель,
+ * поскольку он является стабильной идентичностью сотрудника.
+ * Хэш пароля остаётся исключительно в persistence/security-слое.</p>
  */
 public final class EmployeeEntityMapper {
 
-    public EmployeeEntityMapper() {
+    private EmployeeEntityMapper() {
     }
 
     /**
      * Преобразует JPA-сущность в доменную модель.
      *
      * @param entity JPA-сущность сотрудника
-     * @return доменный сотрудник
+     * @return доменный сотрудник или null, если передан null
      */
     public static Employee toDomain(EmployeeEntity entity) {
         if (entity == null) {
@@ -26,6 +29,7 @@ public final class EmployeeEntityMapper {
         }
 
         return new Employee(
+                entity.getId(),
                 entity.getFirstName(),
                 entity.getLastName(),
                 entity.getEmail(),
@@ -37,19 +41,24 @@ public final class EmployeeEntityMapper {
     /**
      * Создаёт новую JPA-сущность из доменного объекта.
      *
-     * <p>Идентификатор и passwordHash здесь намеренно не заполняются.
-     * Они относятся к persistence/security-слою.</p>
+     * <p>Идентификатор назначается базой данных, а хэш пароля
+     * устанавливается отдельным security-сценарием.</p>
      *
      * @param domain доменный сотрудник
-     * @return новая JPA-сущность
+     * @return новая JPA-сущность или null, если передан null
      */
     public static EmployeeEntity toEntity(Employee domain) {
         if (domain == null) {
             return null;
         }
 
-        EmployeeEntity entity = new EmployeeEntity();
+        if (domain.getId() != null) {
+            throw new IllegalArgumentException(
+                    "Нельзя создавать новую EmployeeEntity из уже сохранённого сотрудника"
+            );
+        }
 
+        EmployeeEntity entity = new EmployeeEntity();
         updateEntity(domain, entity);
 
         return entity;
@@ -58,7 +67,7 @@ public final class EmployeeEntityMapper {
     /**
      * Обновляет существующую JPA-сущность данными доменной модели.
      *
-     * <p>Идентификатор и passwordHash существующей сущности сохраняются.</p>
+     * <p>Идентификатор и хэш пароля существующей сущности сохраняются.</p>
      *
      * @param domain доменная модель
      * @param entity существующая JPA-сущность
@@ -67,15 +76,19 @@ public final class EmployeeEntityMapper {
             Employee domain,
             EmployeeEntity entity
     ) {
-        if (domain == null) {
-            throw new IllegalArgumentException(
-                    "Доменный сотрудник не должен быть null"
-            );
-        }
+        Objects.requireNonNull(
+                domain,
+                "Доменный сотрудник не должен быть null"
+        );
+        Objects.requireNonNull(
+                entity,
+                "EmployeeEntity не должен быть null"
+        );
 
-        if (entity == null) {
+        if (domain.getId() != null
+                && !domain.getId().equals(entity.getId())) {
             throw new IllegalArgumentException(
-                    "EmployeeEntity не должен быть null"
+                    "ID доменного сотрудника не совпадает с ID EmployeeEntity"
             );
         }
 
