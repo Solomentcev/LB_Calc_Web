@@ -249,7 +249,7 @@ CREATE TABLE als (
                      id BIGINT NOT NULL AUTO_INCREMENT,
 
                      name VARCHAR(255) NOT NULL,
-                     description TEXT,
+                     description TEXT NOT NULL,
 
                      height INT NOT NULL,
                      width INT NOT NULL,
@@ -307,7 +307,7 @@ CREATE TABLE project (
                          id BIGINT NOT NULL AUTO_INCREMENT,
 
                          name VARCHAR(255) NOT NULL,
-                         description TEXT,
+                         description TEXT NOT NULL,
                          company VARCHAR(255) NOT NULL,
 
                          created_at DATE NOT NULL,
