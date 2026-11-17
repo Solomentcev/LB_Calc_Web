@@ -74,7 +74,7 @@ public class LBC extends StorageModule implements ControlModule {
         this.controlConfiguration = Objects.requireNonNull(
                 controlConfiguration,
                 "Конфигурация управления не должна быть null"
-        );
+        ).copy();
 
         setCells(createCells(countCells));
 
@@ -103,7 +103,7 @@ public class LBC extends StorageModule implements ControlModule {
         this.controlConfiguration = Objects.requireNonNull(
                 controlConfiguration,
                 "Конфигурация управления не должна быть null"
-        );
+        ).copy();
 
         recalculate();
     }
