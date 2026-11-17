@@ -6,21 +6,19 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
-import java.util.Arrays;
-
 @ControllerAdvice
 public class LBCalcExceptionHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(
             LBCalcExceptionHandler.class);
-    @ExceptionHandler()
-    public String handleException(Throwable e, Model model){
-        LOGGER.warn("%s %s %s".formatted(e.getMessage(), e.getCause(), e.getClass().getName()));
-        model.addAttribute("error",e.getMessage()+"\n"+
-                e.getCause()+"\n"+
-                e.getClass().getName()+"\n"
-                );
+
+    @ExceptionHandler
+    public String handleException(Throwable e, Model model) {
+        LOGGER.error("Непредвиденная ошибка при обработке запроса", e);
+        model.addAttribute(
+                "error",
+                "Произошла непредвиденная ошибка. Повторите попытку позже."
+        );
 
         return "error";
     }
-
 }
