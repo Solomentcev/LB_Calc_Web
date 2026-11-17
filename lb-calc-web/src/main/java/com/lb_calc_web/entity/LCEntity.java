@@ -17,6 +17,7 @@ import jakarta.persistence.UniqueConstraint;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.Objects;
 
 /**
  * JPA-сущность модуля управления LC.
@@ -150,10 +151,28 @@ public class LCEntity extends ModuleEntity {
     }
 
     public void setBarReaders(Set<EquipmentQuantityEmbeddable> barReaders) {
-        this.barReaders.clear();
-        if (barReaders != null) {
-            this.barReaders.addAll(barReaders);
+        Objects.requireNonNull(
+                barReaders,
+                "Список сканеров не должен быть null"
+        );
+
+        Set<String> catalogPositionIds = new HashSet<>();
+        for (EquipmentQuantityEmbeddable item : barReaders) {
+            Objects.requireNonNull(
+                    item,
+                    "Позиция сканера не должна быть null"
+            );
+
+            if (!catalogPositionIds.add(item.getCatalogPositionId())) {
+                throw new IllegalArgumentException(
+                        "Позиция сканера не может быть указана несколько раз: "
+                                + item.getCatalogPositionId()
+                );
+            }
         }
+
+        this.barReaders.clear();
+        this.barReaders.addAll(barReaders);
     }
 
     public void setBarReaderQuantity(int quantity) {
