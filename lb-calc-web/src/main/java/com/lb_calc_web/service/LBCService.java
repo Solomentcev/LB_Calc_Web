@@ -27,6 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -161,6 +162,7 @@ public class LBCService {
         return addLBCImage(result);
     }
 
+    @Transactional(readOnly = true)
     public List<LBCDTO> findAll() {
         logger.info("Получение списка LBC");
 
@@ -178,6 +180,7 @@ public class LBCService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public LBCDTO findById(Long id) {
         logger.info("Поиск LBC по id={}", id);
 
@@ -194,6 +197,7 @@ public class LBCService {
         return toDto(entity);
     }
 
+    @Transactional
     public LBCDTO saveLBC(LBCDTO dto) {
         Objects.requireNonNull(
                 dto,
@@ -208,8 +212,9 @@ public class LBCService {
 
         LBC domain;
         try {
-            applyTypeConfiguration(dto);
-            domain = LBCDtoMapper.toDomain(dto);
+            LBCDTO configuredDto = copy(dto);
+            applyTypeConfiguration(configuredDto);
+            domain = LBCDtoMapper.toDomain(configuredDto);
         } catch (IllegalArgumentException | NullPointerException exception) {
             throw createMappingValidationException(
                     "LBC",
@@ -263,6 +268,44 @@ public class LBCService {
         );
 
         return toDto(saved);
+    }
+
+    /**
+     * Создаёт независимую копию входного DTO.
+     *
+     * <p>Применение параметров типа не должно изменять DTO вызывающего кода.</p>
+     */
+    private LBCDTO copy(LBCDTO source) {
+        LBCDTO target = new LBCDTO();
+        target.setId(source.getId());
+        target.setName(source.getName());
+        target.setDescription(source.getDescription());
+        target.setType(source.getType());
+        target.setHeight(source.getHeight());
+        target.setWidth(source.getWidth());
+        target.setDepth(source.getDepth());
+        target.setUpperFrame(source.getUpperFrame());
+        target.setBottomFrame(source.getBottomFrame());
+        target.setShelfThick(source.getShelfThick());
+        target.setDeltaWidth(source.getDeltaWidth());
+        target.setServiceZoneWidth(source.getServiceZoneWidth());
+        target.setDoorThickness(source.getDoorThickness());
+        target.setCountCells(source.getCountCells());
+        target.setHeightCell(source.getHeightCell());
+        target.setWidthCell(source.getWidthCell());
+        target.setDepthCell(source.getDepthCell());
+        target.setDirectionDoorOpening(source.getDirectionDoorOpening());
+        target.setColorBody(source.getColorBody());
+        target.setColorDoor(source.getColorDoor());
+        target.setDisplay(source.getDisplay());
+        target.setBarReader(source.getBarReader());
+        target.setPayment(source.getPayment());
+        target.setPrinter(source.isPrinter());
+        target.setRfidReader(source.isRfidReader());
+        target.setAccessMethods(source.getAccessMethods());
+        target.setPrintOptions(source.getPrintOptions());
+        target.setStringLBCImage(source.getStringLBCImage());
+        return target;
     }
 
     /**
