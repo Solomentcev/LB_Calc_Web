@@ -99,7 +99,10 @@ public class LBService {
         );
 
         dto.setDirectionDoorOpening(
-                DirectionDoorOpening.LEFT.name()
+                environment.getProperty(
+                        "lb.direction.default",
+                        DirectionDoorOpening.LEFT.name()
+                )
         );
 
         dto.setColorBody(colorBody.name());
