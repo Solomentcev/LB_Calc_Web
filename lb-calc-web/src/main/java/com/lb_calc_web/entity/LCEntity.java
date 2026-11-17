@@ -12,6 +12,7 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 
 import java.util.EnumSet;
 import java.util.HashSet;
@@ -50,7 +51,11 @@ public class LCEntity extends ModuleEntity {
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(
             name = "lc_bar_reader",
-            joinColumns = @JoinColumn(name = "lc_id")
+            joinColumns = @JoinColumn(name = "lc_id"),
+            uniqueConstraints = @UniqueConstraint(
+                    name = "uk_lc_bar_reader",
+                    columnNames = {"lc_id", "catalog_position_id"}
+            )
     )
     private Set<EquipmentQuantityEmbeddable> barReaders = new HashSet<>();
 
