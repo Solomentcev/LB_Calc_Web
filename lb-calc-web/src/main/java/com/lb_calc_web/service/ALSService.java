@@ -277,11 +277,7 @@ public class ALSService {
                 saved.getId()
         );
 
-        return addALSImage(
-                ALSDtoMapper.toDto(
-                        ALSEntityMapper.toDomain(saved)
-                )
-        );
+        return toDto(saved);
     }
 
     @Transactional
