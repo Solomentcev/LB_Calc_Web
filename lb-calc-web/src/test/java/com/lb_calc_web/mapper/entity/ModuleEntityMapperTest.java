@@ -46,6 +46,19 @@ class ModuleEntityMapperTest {
     }
 
     @Test
+    void toDomain_shouldRejectStaleDerivedCellDimensions() {
+        LBEntity entity = (LBEntity) ModuleEntityMapper.toEntity(
+                TestDataFactory.validLB(null)
+        );
+        entity.setWidthCell(entity.getWidthCell() + 1);
+
+        assertThrows(
+                IllegalStateException.class,
+                () -> ModuleEntityMapper.toDomain(entity)
+        );
+    }
+
+    @Test
     void toDomain_shouldReturnNullForNullEntity() {
         assertNull(ModuleEntityMapper.toDomain(null));
     }

@@ -67,6 +67,34 @@ class ProjectEntityMapperTest {
     }
 
     @Test
+    void toDomain_shouldRejectStaleDerivedDescription() {
+        LocalDate createdAt = LocalDate.of(2026, 10, 1);
+        Employee employee = new Employee(
+                "Иван",
+                "Иванов",
+                "ivanov@example.com",
+                createdAt,
+                Role.ROLE_MANAGER
+        );
+        Project domain = new Project("Проект", "Компания", createdAt, employee);
+        EmployeeEntity employeeEntity = EmployeeEntityMapper.toEntity(employee);
+        employeeEntity.setEncryptedPassword("HASH");
+        ProjectEntity entity = ProjectEntityMapper.toEntity(
+                domain,
+                ignored -> employeeEntity,
+                ignored -> {
+                    throw new AssertionError("ALS не ожидается");
+                }
+        );
+        entity.setDescription("Устаревшее описание");
+
+        assertThrows(
+                IllegalStateException.class,
+                () -> ProjectEntityMapper.toDomain(entity)
+        );
+    }
+
+    @Test
     void updateEntity_shouldReuseExistingProjectAlsAssociation() {
         LocalDate createdAt = LocalDate.of(2026, 10, 1);
         Employee employee = new Employee(

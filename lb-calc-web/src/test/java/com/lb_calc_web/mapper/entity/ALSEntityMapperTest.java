@@ -59,6 +59,20 @@ class ALSEntityMapperTest {
     }
 
     @Test
+    void toDomain_shouldRejectStaleDerivedWidth() {
+        ALSEntity entity = ALSEntityMapper.toEntity(
+                TestDataFactory.validALS(null),
+                ModuleEntityMapper::toEntity
+        );
+        entity.setWidth(entity.getWidth() + 1);
+
+        assertThrows(
+                IllegalStateException.class,
+                () -> ALSEntityMapper.toDomain(entity)
+        );
+    }
+
+    @Test
     void toEntity_shouldResolveEachModuleExactlyOnce() {
         ALS domain = TestDataFactory.validALS(null);
         int[] resolvedModules = {0};
