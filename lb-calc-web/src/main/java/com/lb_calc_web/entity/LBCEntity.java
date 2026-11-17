@@ -148,6 +148,11 @@ public class LBCEntity extends StorageModuleEntity {
 
     public void setPrinter(boolean printer) {
         this.printer = printer;
+        if (!printer) {
+            this.printerQuantity = 0;
+        } else if (printerQuantity == 0) {
+            this.printerQuantity = 1;
+        }
     }
 
     public boolean isRfidReader() {
@@ -156,6 +161,11 @@ public class LBCEntity extends StorageModuleEntity {
 
     public void setRfidReader(boolean rfidReader) {
         this.rfidReader = rfidReader;
+        if (!rfidReader) {
+            this.rfidReaderQuantity = 0;
+        } else if (rfidReaderQuantity == 0) {
+            this.rfidReaderQuantity = 1;
+        }
     }
 
     public int getPrinterQuantity() { return printerQuantity; }
