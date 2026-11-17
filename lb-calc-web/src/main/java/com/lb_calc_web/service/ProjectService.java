@@ -7,11 +7,13 @@ import com.lb_calc_web.domain.model.LBC;
 import com.lb_calc_web.domain.model.LC;
 import com.lb_calc_web.domain.model.Module;
 import com.lb_calc_web.domain.model.Project;
+import com.lb_calc_web.domain.attributes.Role;
 import com.lb_calc_web.dto.ALSDTO;
 import com.lb_calc_web.dto.LBCDTO;
 import com.lb_calc_web.dto.LBDTO;
 import com.lb_calc_web.dto.LCDTO;
 import com.lb_calc_web.dto.ProjectDTO;
+import com.lb_calc_web.dto.EmployeeDTO;
 import com.lb_calc_web.dto.validation.ValidationError;
 import com.lb_calc_web.dto.validation.ValidationResult;
 import com.lb_calc_web.entity.ALSEntity;
@@ -31,6 +33,7 @@ import com.lb_calc_web.service.util.SizeValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.env.Environment;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -206,9 +209,18 @@ public class ProjectService {
                         dto.getId()
                 );
 
+        EmployeeDTO currentEmployee =
+                employeeService.getCurrentEmployee();
+
+        assertCanModifyProject(
+                existing,
+                currentEmployee
+        );
+
         prepareMetadata(
                 dto,
-                existing
+                existing,
+                currentEmployee
         );
 
         /*
@@ -315,6 +327,11 @@ public class ProjectService {
                                                 + " не найден"
                                 )
                         );
+
+        assertCanModifyProject(
+                entity,
+                employeeService.getCurrentEmployee()
+        );
 
         projectRepository.delete(entity);
     }
@@ -874,6 +891,49 @@ public class ProjectService {
     }
 
     /**
+     * Проверяет право текущего сотрудника изменять проект.
+     *
+     * <p>Администратор может изменять любой проект.
+     * Менеджер может изменять только проекты, которые он создал.</p>
+     *
+     * @param project существующий проект или {@code null} при создании
+     * @param currentEmployee текущий сотрудник
+     * @throws AccessDeniedException если изменение запрещено
+     */
+    private void assertCanModifyProject(
+            ProjectEntity project,
+            EmployeeDTO currentEmployee
+    ) {
+        if (project == null) {
+            return;
+        }
+
+        if (currentEmployee == null
+                || currentEmployee.getRole() == null) {
+            throw new AccessDeniedException(
+                    "Недостаточно прав для изменения проекта"
+            );
+        }
+
+        if (currentEmployee.getRole() == Role.ROLE_ADMIN) {
+            return;
+        }
+
+        boolean isOwner =
+                currentEmployee.getRole() == Role.ROLE_MANAGER
+                        && Objects.equals(
+                                currentEmployee.getId(),
+                                project.getCreatedBy().getId()
+                        );
+
+        if (!isOwner) {
+            throw new AccessDeniedException(
+                    "Менеджер может изменять только собственные проекты"
+            );
+        }
+    }
+
+    /**
      * Metadata проекта контролируются сервером.
      *
      * CREATE:
@@ -887,11 +947,9 @@ public class ProjectService {
      */
     private void prepareMetadata(
             ProjectDTO dto,
-            ProjectEntity existing
+            ProjectEntity existing,
+            EmployeeDTO currentEmployee
     ) {
-        var currentEmployee =
-                employeeService.getCurrentEmployee();
-
         dto.setUpdatedBy(
                 currentEmployee
         );
