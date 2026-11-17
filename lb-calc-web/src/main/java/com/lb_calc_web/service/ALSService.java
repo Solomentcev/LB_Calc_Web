@@ -411,6 +411,25 @@ public class ALSService {
     }
 
     /**
+     * Находит LBC по идентификатору внутри уже загруженной ALS.
+     */
+    public LBCDTO findLBCInALS(
+            ALSDTO als,
+            Long lbcId
+    ) {
+        Objects.requireNonNull(als, "ALS не должен быть null");
+
+        LBCDTO lbc = als.getLBC();
+        if (lbc == null || !Objects.equals(lbc.getId(), lbcId)) {
+            throw new NoSuchElementException(
+                    "LBC с id " + lbcId + " не найден в ALS " + als.getId()
+            );
+        }
+
+        return lbc;
+    }
+
+    /**
      * Формирует ALS с заменённым управляющим модулем LC без сохранения.
      */
     public ALSDTO replaceLC(ALSDTO als, LCDTO lc) {
