@@ -29,14 +29,6 @@ public interface LBCRepository extends JpaRepository<LBCEntity, Long> {
               and entity.doorThickness = :doorThickness
               and entity.directionDoorOpening = :directionDoorOpening
               and entity.countCells = :countCells
-              and entity.display = :display
-              and entity.displayQuantity = :displayQuantity
-              and (:barReader is null or entity.barReader is not null)
-              and (:barReaderQuantity = 0 or entity.barReaderQuantity > 0)
-              and entity.printer = :printer
-              and entity.printerQuantity = :printerQuantity
-              and entity.rfidReader = :rfidReader
-              and entity.rfidReaderQuantity = :rfidReaderQuantity
               and entity.payment = :payment
             """)
     List<LBCEntity> findCandidates(
@@ -54,14 +46,6 @@ public interface LBCRepository extends JpaRepository<LBCEntity, Long> {
             @Param("doorThickness") int doorThickness,
             @Param("directionDoorOpening") DirectionDoorOpening directionDoorOpening,
             @Param("countCells") int countCells,
-            @Param("display") String display,
-            @Param("displayQuantity") int displayQuantity,
-            @Param("barReader") String barReader,
-            @Param("barReaderQuantity") int barReaderQuantity,
-            @Param("printer") boolean printer,
-            @Param("printerQuantity") int printerQuantity,
-            @Param("rfidReader") boolean rfidReader,
-            @Param("rfidReaderQuantity") int rfidReaderQuantity,
             @Param("payment") Payment payment
     );
 }
