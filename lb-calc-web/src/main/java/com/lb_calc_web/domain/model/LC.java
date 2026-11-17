@@ -298,7 +298,7 @@ public class LC extends Module implements ControlModule {
                 && getColorBody() == other.getColorBody()
                 && getColorDoor() == other.getColorDoor()
                 && Objects.equals(
-                getControlConfiguration(),
+                controlConfiguration,
                 other.getControlConfiguration()
         );
     }
