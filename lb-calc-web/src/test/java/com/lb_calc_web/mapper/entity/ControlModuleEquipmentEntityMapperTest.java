@@ -9,6 +9,7 @@ import com.lb_calc_web.entity.LCEntity;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -47,9 +48,13 @@ class ControlModuleEquipmentEntityMapperTest {
         EquipmentQuantityEmbeddable two =
                 new EquipmentQuantityEmbeddable("BAR_READER_1D", 2);
 
-        assertEquals(one, two);
-        assertEquals(one.hashCode(), two.hashCode());
-        assertEquals(1, new HashSet<>(List.of(one, two)).size());
+        assertNotEquals(one, two);
+        assertEquals(2, new HashSet<>(List.of(one, two)).size());
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> new LCEntity().setBarReaders(Set.of(one, two))
+        );
     }
 
     private void addBarReaders(EquipmentConfiguration configuration) {
