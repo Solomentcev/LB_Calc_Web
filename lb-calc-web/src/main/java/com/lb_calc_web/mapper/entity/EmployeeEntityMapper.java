@@ -3,8 +3,6 @@ package com.lb_calc_web.mapper.entity;
 import com.lb_calc_web.domain.model.Employee;
 import com.lb_calc_web.entity.EmployeeEntity;
 
-import java.util.Objects;
-
 /**
  * Маппер между JPA-сущностью сотрудника и доменной моделью.
  *
@@ -76,14 +74,11 @@ public final class EmployeeEntityMapper {
             Employee domain,
             EmployeeEntity entity
     ) {
-        Objects.requireNonNull(
-                domain,
-                "Доменный сотрудник не должен быть null"
-        );
-        Objects.requireNonNull(
-                entity,
-                "EmployeeEntity не должен быть null"
-        );
+        if (domain == null || entity == null) {
+            throw new IllegalArgumentException(
+                    "Employee и EmployeeEntity не должны быть null"
+            );
+        }
 
         if (domain.getId() != null
                 && !domain.getId().equals(entity.getId())) {
