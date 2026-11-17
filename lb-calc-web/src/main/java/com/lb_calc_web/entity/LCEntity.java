@@ -46,7 +46,7 @@ public class LCEntity extends ModuleEntity {
      * Способ оплаты.
      */
     @Enumerated(EnumType.STRING)
-    @Column(name = "payment", nullable = false)
+    @Column(name = "payment", nullable = false, length = 50)
     private Payment payment;
 
 
@@ -60,7 +60,7 @@ public class LCEntity extends ModuleEntity {
             joinColumns = @JoinColumn(name = "lc_id")
     )
     @Enumerated(EnumType.STRING)
-    @Column(name = "access_method")
+    @Column(name = "access_method", nullable = false, length = 50)
     private Set<AccessMethod> accessMethods =
             EnumSet.noneOf(AccessMethod.class);
 
@@ -73,7 +73,7 @@ public class LCEntity extends ModuleEntity {
             joinColumns = @JoinColumn(name = "lc_id")
     )
     @Enumerated(EnumType.STRING)
-    @Column(name = "print_option")
+    @Column(name = "print_option", nullable = false, length = 50)
     private Set<PrintOption> printOptions =
             EnumSet.noneOf(PrintOption.class);
 
