@@ -176,33 +176,76 @@ public class EmployeeService implements UserDetailsService {
     /**
      * Деактивирует учётную запись без удаления сотрудника из БД.
      *
-     * <p>Сохранение записи необходимо для внешних ключей проектов,
-     * в которых сотрудник указан автором или последним редактором.</p>
+     * <p>Запись сохраняется, чтобы не нарушать ссылки проектов
+     * на создателя и последнего редактора.</p>
      *
      * @param id идентификатор сотрудника
      */
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @Transactional
-    public void deleteById(Long id) {
-        EmployeeEntity entity = employeeRepository
-                .findById(id)
+    public void deactivateById(Long id) {
+        EmployeeEntity entity = getRequiredEntity(id);
+
+        if (entity.isActive()) {
+            entity.setActive(false);
+            employeeRepository.save(entity);
+        }
+
+        logger.info("Учётная запись сотрудника деактивирована: id={}", id);
+    }
+
+    /**
+     * Повторно активирует ранее деактивированную учётную запись.
+     *
+     * @param id идентификатор сотрудника
+     */
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @Transactional
+    public void activateById(Long id) {
+        EmployeeEntity entity = getRequiredEntity(id);
+
+        if (!entity.isActive()) {
+            entity.setActive(true);
+            employeeRepository.save(entity);
+        }
+
+        logger.info("Учётная запись сотрудника активирована: id={}", id);
+    }
+
+    /**
+     * Возвращает состояние активности учётной записи.
+     *
+     * @param id идентификатор сотрудника
+     * @return {@code true}, если учётная запись активна
+     */
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @Transactional(readOnly = true)
+    public boolean isActive(Long id) {
+        return getRequiredEntity(id).isActive();
+    }
+
+    /**
+     * Возвращает состояния активности сотрудников по их ID.
+     *
+     * @return соответствие ID сотрудника признаку активности
+     */
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @Transactional(readOnly = true)
+    public java.util.Map<Long, Boolean> getActiveStatuses() {
+        return employeeRepository.findAll().stream()
+                .collect(java.util.stream.Collectors.toMap(
+                        EmployeeEntity::getId,
+                        EmployeeEntity::isActive
+                ));
+    }
+
+    private EmployeeEntity getRequiredEntity(Long id) {
+        return employeeRepository.findById(id)
                 .orElseThrow(() ->
                         new NoSuchElementException(
                                 "Сотрудник с id=" + id + " не найден"
                         )
                 );
-
-        if (!entity.isActive()) {
-            return;
-        }
-
-        entity.setActive(false);
-        employeeRepository.save(entity);
-
-        logger.info(
-                "Деактивирована учётная запись сотрудника id={}",
-                id
-        );
     }
 
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
