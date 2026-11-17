@@ -7,6 +7,7 @@ import com.lb_calc_web.dto.LBDTO;
 import com.lb_calc_web.dto.LCDTO;
 import com.lb_calc_web.handler.ValidationSizeException;
 import com.lb_calc_web.entity.ALSEntity;
+import com.lb_calc_web.mapper.entity.ALSEntityMapper;
 import com.lb_calc_web.repository.ALSRepository;
 import com.lb_calc_web.repository.ModuleEntityRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -81,6 +82,25 @@ class ALSServiceTest {
         assertNull(result.getLBC());
         assertEquals(1, result.getLbList().size());
         assertNotNull(result.getStringALSImage());
+    }
+
+    @Test
+    void saveALS_shouldReturnExistingByConfiguration() {
+        ALSDTO dto = TestDataFactory.validALSDTO(1L);
+        ALSEntity existing = ALSEntityMapper.toEntity(
+                TestDataFactory.validALS(1L),
+                ALSEntityMapper::createModuleEntity
+        );
+
+        when(alsRepository.findByHeightAndDepthAndUpperFrameAndBottomFrameAndColorBodyAndColorDoor(
+                anyInt(), anyInt(), anyInt(), anyInt(), any(), any()
+        )).thenReturn(List.of(existing));
+
+        ALSDTO result = alsService.saveALS(dto);
+
+        assertNotNull(result);
+        verify(alsRepository, never()).save(any());
+        verify(alsRepository, never()).findAll();
     }
 
     @Test
