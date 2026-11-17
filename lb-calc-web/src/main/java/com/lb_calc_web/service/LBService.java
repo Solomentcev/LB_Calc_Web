@@ -168,13 +168,17 @@ public class LBService {
         /*
          * Параметры конструктивного типа берём из конфигурации.
          */
-        applyTypeConfiguration(dto);
-
-        /*
-         * Преобразуем входные данные в доменную модель.
-         * Геометрическая валидация выполняется только над Domain.
-         */
-        LB domain = LBDtoMapper.toDomain(dto);
+        LB domain;
+        try {
+            applyTypeConfiguration(dto);
+            domain = LBDtoMapper.toDomain(dto);
+        } catch (IllegalArgumentException | NullPointerException exception) {
+            throw createMappingValidationException(
+                    "LB",
+                    dto.getId(),
+                    exception
+            );
+        }
 
         ValidationResult validationResult =
                 sizeValidator.validateLB(domain);
@@ -291,5 +295,25 @@ public class LBService {
                 key,
                 Integer.class
         );
+    }
+
+    /**
+     * Преобразует ошибку входных данных в единый результат валидации.
+     */
+    private ValidationSizeException createMappingValidationException(
+            String objectType,
+            Long objectId,
+            RuntimeException exception
+    ) {
+        ValidationResult result =
+                new ValidationResult(objectType, objectId);
+        result.addError(
+                "domainModel",
+                exception.getMessage(),
+                null,
+                null,
+                null
+        );
+        return new ValidationSizeException(result);
     }
 }
