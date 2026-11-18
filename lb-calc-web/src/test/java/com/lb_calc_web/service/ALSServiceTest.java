@@ -245,6 +245,29 @@ class ALSServiceTest {
     }
 
     @Test
+    void replaceLBC_shouldRestoreExistingCatalogSelectionsThroughCatalogService() {
+        ALSDTO als = TestDataFactory.validLBCALSDTO(1L);
+        als.getLBC().setEquipmentSelections(List.of(
+                new com.lb_calc_web.dto.EquipmentSelectionDTO("CUSTOM_MODEM", 1)
+        ));
+        when(equipmentCatalogService.resolveForExistingConfiguration(
+                eq("CUSTOM_MODEM"), anySet()
+        )).thenReturn(new com.lb_calc_web.domain.equipment.CatalogEquipment(
+                "CUSTOM_MODEM", "MODEM", "Модем", "", 0, 0, 0,
+                0, 0, 0, false, false, false, false
+        ));
+
+        LBCDTO replacement = TestDataFactory.validLBCDTO(1L);
+
+        ALSDTO result = alsService.replaceLBC(als, replacement);
+
+        assertNotNull(result.getLBC());
+        verify(equipmentCatalogService).resolveForExistingConfiguration(
+                eq("CUSTOM_MODEM"), anySet()
+        );
+    }
+
+    @Test
     void replaceLBC_shouldRejectModuleIdNotBelongingToALS() {
         ALSDTO als = TestDataFactory.validLBCALSDTO(1L);
         LBCDTO anotherLBC = TestDataFactory.validLBCDTO(999L);
