@@ -1,7 +1,7 @@
 package com.lb_calc_web.service;
 
 import com.lb_calc_web.domain.attributes.AccessMethod;
-import com.lb_calc_web.domain.attributes.PrintOption;
+import com.lb_calc_web.domain.attributes.Payment;
 import com.lb_calc_web.domain.equipment.Equipment;
 import com.lb_calc_web.domain.equipment.EquipmentItem;
 import com.lb_calc_web.domain.model.ControlConfiguration;
@@ -32,6 +32,8 @@ public class EquipmentRequirementResolver {
 
         boolean requiresBarcode = configuration.getAccessMethods().contains(AccessMethod.BARCODE);
         boolean requiresQrCode = configuration.getAccessMethods().contains(AccessMethod.QR_CODE);
+        boolean requiresPin = configuration.getAccessMethods().contains(AccessMethod.PIN);
+        boolean requiresRfid = configuration.getAccessMethods().contains(AccessMethod.RFID);
         if (requiresBarcode || requiresQrCode) {
             Predicate<Equipment> barcodeCompatibility = equipment ->
                     (!requiresBarcode || equipment.supportsBarcode1d()
@@ -43,14 +45,26 @@ public class EquipmentRequirementResolver {
             ensureEquipment(selected, "BAR_READER", barcodeCompatibility, message);
         }
 
-        if (configuration.getAccessMethods().contains(AccessMethod.RFID)) {
+        if (requiresRfid) {
             ensureEquipment(selected, "RFID_READER", Equipment::supportsRfid,
                     "Для доступа по RFID нужен совместимый RFID-считыватель");
         }
 
-        if (!configuration.getPrintOptions().isEmpty()) {
+        if (requiresPin) {
+            if (!requiresRfid && !requiresBarcode && !requiresQrCode) {
+                throw new IllegalArgumentException(
+                        "PIN не может быть единственным способом доступа: выберите RFID, штрихкод или QR-код");
+            }
+            ensureEquipment(selected, "DISPLAY", Equipment::isDisplay,
+                    "Для доступа по PIN нужен дисплей");
+        }
+
+        boolean requiresPrinter = configuration.getPayment() != Payment.NONE
+                || !configuration.getPrintOptions().isEmpty()
+                || requiresBarcode || requiresQrCode || requiresPin;
+        if (requiresPrinter) {
             ensureEquipment(selected, "PRINTER", Equipment::supportsPrint,
-                    "Для выбранных вариантов печати нужен совместимый принтер");
+                    "Для выбранных функций нужен совместимый принтер");
         }
 
         return new ControlConfiguration(
