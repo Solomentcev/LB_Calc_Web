@@ -3,6 +3,8 @@ package com.lb_calc_web.service;
 import com.lb_calc_web.TestDataFactory;
 import com.lb_calc_web.domain.attributes.Role;
 import com.lb_calc_web.dto.ALSDTO;
+import com.lb_calc_web.domain.attributes.TypeLb;
+import com.lb_calc_web.mapper.dto.ALSConfigurationMapper;
 import com.lb_calc_web.dto.EmployeeDTO;
 import com.lb_calc_web.dto.LBCDTO;
 import com.lb_calc_web.dto.LBDTO;
@@ -40,6 +42,16 @@ class ProjectServiceTest {
         alsRepository = mock(ALSRepository.class);
         employeeRepository = mock(EmployeeRepository.class);
         alsService = mock(ALSService.class);
+        when(alsService.restoreDomain(any(ALSDTO.class))).thenAnswer(invocation -> {
+            ALSDTO dto = invocation.getArgument(0);
+            return ALSConfigurationMapper.toDomain(
+                    dto,
+                    value -> new TypeLb(value.getType(), value.getDeltaWidth(),
+                            value.getShelfThick(), value.getServiceZoneWidth()),
+                    value -> new TypeLb(value.getType(), value.getDeltaWidth(),
+                            value.getShelfThick(), value.getServiceZoneWidth())
+            );
+        });
         employeeService = mock(EmployeeService.class);
 
         environment = new MockEnvironment()
