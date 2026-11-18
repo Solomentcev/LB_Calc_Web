@@ -1,6 +1,11 @@
 package com.lb_calc_web.service;
 
 import com.lb_calc_web.entity.EquipmentCatalogEntity;
+import com.lb_calc_web.domain.equipment.CatalogEquipment;
+import com.lb_calc_web.domain.equipment.Equipment;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import com.lb_calc_web.repository.EquipmentCatalogRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +24,30 @@ public class EquipmentCatalogService {
 
     public List<EquipmentCatalogEntity> findAll() {
         return repository.findAllByOrderByCategoryAscNameAsc();
+    }
+
+    public Map<String, Equipment> findDomainCatalog() {
+        return repository.findAll().stream().collect(Collectors.toUnmodifiableMap(
+                EquipmentCatalogEntity::getCatalogPositionId, this::toDomain));
+    }
+
+    public Equipment resolve(String idOrName) {
+        if (idOrName == null || idOrName.isBlank()) return null;
+        return repository.findById(idOrName).map(this::toDomain).orElseGet(() ->
+                repository.findAll().stream()
+                        .filter(item -> item.getName().equalsIgnoreCase(idOrName))
+                        .findFirst().map(this::toDomain)
+                        .orElseThrow(() -> new IllegalArgumentException(
+                                "Позиция оборудования не найдена в каталоге: " + idOrName)));
+    }
+
+    /** Преобразует запись каталога в независимую доменную позицию. */
+    public Equipment toDomain(EquipmentCatalogEntity item) {
+        return new CatalogEquipment(item.getCatalogPositionId(), item.getCategory(),
+                item.getName(), item.getDescription(), item.getWidth(), item.getHeight(),
+                item.getDepth(), item.getMinimumModuleWidth(), item.getDisplayWidth(),
+                item.getDisplayHeight(), item.isSupportsBarcode1d(),
+                item.isSupportsBarcode2d(), item.isSupportsRfid(), item.isSupportsPrint());
     }
 
     public List<EquipmentCatalogEntity> findActive() {

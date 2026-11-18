@@ -20,6 +20,8 @@ public abstract class Equipment {
 
     public String getCatalogPositionId() { return catalogPositionId; }
     public String getName() { return name; }
+    public boolean isDisplay() { return false; }
+    public String getCategory() { return "OTHER"; }
     public abstract int getWidth();
     public abstract int getHeight();
     public abstract int getDepth();

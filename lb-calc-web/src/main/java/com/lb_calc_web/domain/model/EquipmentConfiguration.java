@@ -40,7 +40,7 @@ public class EquipmentConfiguration {
 
     private void validateDisplayQuantity(Map<Equipment, Integer> positions) {
         positions.forEach((position, quantity) -> {
-            if (position instanceof Display && quantity > 1) {
+            if (position isDisplay() && quantity > 1) {
                 throw new IllegalArgumentException(
                         "Количество дисплеев в модуле должно быть равно 1");
             }
@@ -98,7 +98,7 @@ public class EquipmentConfiguration {
                 .filter(Display.class::isInstance)
                 .count();
 
-        if (candidate instanceof Display && displayPositions >= 1) {
+        if (candidate isDisplay() && displayPositions >= 1) {
             throw new IllegalArgumentException(
                     "В модуле управления может быть установлен только один дисплей");
         }
@@ -193,12 +193,12 @@ public class EquipmentConfiguration {
         int currentQuantity = target.getOrDefault(position, 0);
         int newQuantity = sumQuantities(currentQuantity, quantity);
 
-        if (position instanceof Display && newQuantity > 1) {
+        if (position isDisplay() && newQuantity > 1) {
             throw new IllegalArgumentException(
                     "Количество дисплеев в модуле должно быть равно 1");
         }
 
-        if (position instanceof Display && currentQuantity == 0) {
+        if (position isDisplay() && currentQuantity == 0) {
             validateSingleDisplay(target, other, position);
         }
 
