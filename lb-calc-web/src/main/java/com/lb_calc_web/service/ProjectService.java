@@ -24,6 +24,7 @@ import com.lb_calc_web.helper.ExcellHelper;
 import com.lb_calc_web.mapper.dto.EmployeeDtoMapper;
 import com.lb_calc_web.mapper.dto.ProjectDtoMapper;
 import com.lb_calc_web.mapper.dto.ALSConfigurationMapper;
+import com.lb_calc_web.service.util.TypeLbFactory;
 import com.lb_calc_web.mapper.entity.EmployeeEntityMapper;
 import com.lb_calc_web.mapper.entity.ProjectEntityMapper;
 import com.lb_calc_web.repository.ALSRepository;
@@ -229,7 +230,9 @@ public class ProjectService {
          */
         Project domain;
         try {
-            domain = ProjectDtoMapper.toDomain(dto, dto -> ALSConfigurationMapper.toDomain(dto, environment));
+            domain = ProjectDtoMapper.toDomain(dto, dto -> ALSConfigurationMapper.toDomain(dto,
+                lbDto -> TypeLbFactory.forLB(environment, lbDto.getType()),
+                lbcDto -> TypeLbFactory.forLBC(environment, lbcDto.getType())));
         } catch (IllegalStateException exception) {
             ValidationResult validationResult =
                     new ValidationResult("Project", dto.getId());
@@ -269,7 +272,9 @@ public class ProjectService {
          * Повторно собираем Project, чтобы его ALS совпадали с теми,
          * для которых ниже разрешаются persistence-сущности.
          */
-        domain = ProjectDtoMapper.toDomain(dto, dto -> ALSConfigurationMapper.toDomain(dto, environment));
+        domain = ProjectDtoMapper.toDomain(dto, dto -> ALSConfigurationMapper.toDomain(dto,
+                lbDto -> TypeLbFactory.forLB(environment, lbDto.getType()),
+                lbcDto -> TypeLbFactory.forLBC(environment, lbcDto.getType())));
 
         Function<ALS, ALSEntity> alsResolver =
                 resolveALSEntities(
@@ -355,13 +360,19 @@ public class ProjectService {
     @Transactional
     public ProjectDTO addNewALSandSaveProject(Long projectId) {
         ProjectDTO source = findById(projectId);
-        Project domain = ProjectDtoMapper.toDomain(source, dto -> ALSConfigurationMapper.toDomain(dto, environment));
+        Project domain = ProjectDtoMapper.toDomain(source, dto -> ALSConfigurationMapper.toDomain(dto,
+                lbDto -> TypeLbFactory.forLB(environment, lbDto.getType()),
+                lbcDto -> TypeLbFactory.forLBC(environment, lbcDto.getType())));
 
         domain.addALS(
-                ALSConfigurationMapper.toDomain(alsService.createALS(), environment)
+                ALSConfigurationMapper.toDomain(alsService.createALS(),
+                lbDto -> TypeLbFactory.forLB(environment, lbDto.getType()),
+                lbcDto -> TypeLbFactory.forLBC(environment, lbcDto.getType()))
         );
 
-        return saveProject(ProjectDtoMapper.toDto(domain, source, dto -> ALSConfigurationMapper.toDomain(dto, environment)));
+        return saveProject(ProjectDtoMapper.toDto(domain, source, dto -> ALSConfigurationMapper.toDomain(dto,
+                lbDto -> TypeLbFactory.forLB(environment, lbDto.getType()),
+                lbcDto -> TypeLbFactory.forLBC(environment, lbcDto.getType()))));
     }
 
     /**
@@ -375,8 +386,12 @@ public class ProjectService {
         ProjectDTO source = findById(projectId);
         ALSDTO selected = findALSInProject(source, alsId);
 
-        Project domain = ProjectDtoMapper.toDomain(source, dto -> ALSConfigurationMapper.toDomain(dto, environment));
-        ALS selectedDomain = ALSConfigurationMapper.toDomain(selected, environment);
+        Project domain = ProjectDtoMapper.toDomain(source, dto -> ALSConfigurationMapper.toDomain(dto,
+                lbDto -> TypeLbFactory.forLB(environment, lbDto.getType()),
+                lbcDto -> TypeLbFactory.forLBC(environment, lbcDto.getType())));
+        ALS selectedDomain = ALSConfigurationMapper.toDomain(selected,
+                lbDto -> TypeLbFactory.forLB(environment, lbDto.getType()),
+                lbcDto -> TypeLbFactory.forLBC(environment, lbcDto.getType()));
 
         if (domain.getQuantity(selectedDomain) == 0) {
             throw new NoSuchElementException(
@@ -387,7 +402,9 @@ public class ProjectService {
 
         domain.removeALS(selectedDomain);
 
-        return saveProject(ProjectDtoMapper.toDto(domain, source, dto -> ALSConfigurationMapper.toDomain(dto, environment)));
+        return saveProject(ProjectDtoMapper.toDto(domain, source, dto -> ALSConfigurationMapper.toDomain(dto,
+                lbDto -> TypeLbFactory.forLB(environment, lbDto.getType()),
+                lbcDto -> TypeLbFactory.forLBC(environment, lbcDto.getType()))));
     }
 
     /**
@@ -544,17 +561,27 @@ public class ProjectService {
                         )
                 );
 
-        Project domain = ProjectDtoMapper.toDomain(project, dto -> ALSConfigurationMapper.toDomain(dto, environment));
-        ALS oldConfiguration = ALSConfigurationMapper.toDomain(selected, environment);
-        ALS newConfiguration = ALSConfigurationMapper.toDomain(als, environment);
+        Project domain = ProjectDtoMapper.toDomain(project, dto -> ALSConfigurationMapper.toDomain(dto,
+                lbDto -> TypeLbFactory.forLB(environment, lbDto.getType()),
+                lbcDto -> TypeLbFactory.forLBC(environment, lbcDto.getType())));
+        ALS oldConfiguration = ALSConfigurationMapper.toDomain(selected,
+                lbDto -> TypeLbFactory.forLB(environment, lbDto.getType()),
+                lbcDto -> TypeLbFactory.forLBC(environment, lbcDto.getType()));
+        ALS newConfiguration = ALSConfigurationMapper.toDomain(als,
+                lbDto -> TypeLbFactory.forLB(environment, lbDto.getType()),
+                lbcDto -> TypeLbFactory.forLBC(environment, lbcDto.getType()));
 
         domain.replaceALS(oldConfiguration, newConfiguration);
 
-        ProjectDTO savedProject = saveProject(ProjectDtoMapper.toDto(domain, project, dto -> ALSConfigurationMapper.toDomain(dto, environment)));
+        ProjectDTO savedProject = saveProject(ProjectDtoMapper.toDto(domain, project, dto -> ALSConfigurationMapper.toDomain(dto,
+                lbDto -> TypeLbFactory.forLB(environment, lbDto.getType()),
+                lbcDto -> TypeLbFactory.forLBC(environment, lbcDto.getType()))));
 
         return savedProject.getAlsList().stream()
                 .filter(value -> value != null
-                        && ALSConfigurationMapper.toDomain(value, environment).equals(newConfiguration))
+                        && ALSConfigurationMapper.toDomain(value,
+                lbDto -> TypeLbFactory.forLB(environment, lbDto.getType()),
+                lbcDto -> TypeLbFactory.forLBC(environment, lbcDto.getType())).equals(newConfiguration))
                 .findFirst()
                 .orElseThrow(
                         () -> new IllegalStateException(
@@ -1072,14 +1099,18 @@ public class ProjectService {
         return ProjectEntityMapper.createAlsResolver(
                 savedALS,
                 entitiesById,
-                dto -> ALSConfigurationMapper.toDomain(dto, environment)
+                dto -> ALSConfigurationMapper.toDomain(dto,
+                lbDto -> TypeLbFactory.forLB(environment, lbDto.getType()),
+                lbcDto -> TypeLbFactory.forLBC(environment, lbcDto.getType()))
         );
     }
 
     private void validateProject(Project domain, ProjectDTO source) {
         List<ValidationResult> results =
                 sizeValidator.validateProject(domain);
-        ProjectDtoMapper.assignValidationObjectIds(results, domain, source, dto -> ALSConfigurationMapper.toDomain(dto, environment));
+        ProjectDtoMapper.assignValidationObjectIds(results, domain, source, dto -> ALSConfigurationMapper.toDomain(dto,
+                lbDto -> TypeLbFactory.forLB(environment, lbDto.getType()),
+                lbcDto -> TypeLbFactory.forLBC(environment, lbcDto.getType())));
 
         List<ValidationError> errors =
                 results.stream()

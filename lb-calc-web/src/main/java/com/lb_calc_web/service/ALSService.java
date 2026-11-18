@@ -88,7 +88,7 @@ public class ALSService {
                                 ALSEntity::getId
                         )
                 )
-                .map(entity -> addALSImage(ALSDtoMapper.toDto(entity)))
+                .map(entity -> addALSImage(ALSEntityMapper.toDto(entity)))
                 .toList();
     }
 
@@ -190,7 +190,9 @@ public class ALSService {
 
         als.getLbList().add(lb);
 
-        ALSDtoMapper.updateCalculatedFields(als, ALSConfigurationMapper.toDomain(als, environment));
+        ALSDtoMapper.updateCalculatedFields(als, ALSConfigurationMapper.toDomain(als,
+                lbDto -> TypeLbFactory.forLB(environment, lbDto.getType()),
+                lbcDto -> TypeLbFactory.forLBC(environment, lbcDto.getType())));
 
         als.setStringALSImage(
                 ALSImageService.getStringALSImage(
@@ -221,7 +223,9 @@ public class ALSService {
 
         ALS domain;
         try {
-            domain = ALSConfigurationMapper.toDomain(dto, environment);
+            domain = ALSConfigurationMapper.toDomain(dto,
+                lbDto -> TypeLbFactory.forLB(environment, lbDto.getType()),
+                lbcDto -> TypeLbFactory.forLBC(environment, lbcDto.getType()));
         } catch (IllegalStateException exception) {
             var validationResult =
                     new com.lb_calc_web.dto.validation.ValidationResult(
@@ -266,7 +270,7 @@ public class ALSService {
                     duplicate.get().getId()
             );
 
-            return addALSImage(ALSDtoMapper.toDto(duplicate.get()));
+            return addALSImage(ALSEntityMapper.toDto(duplicate.get()));
         }
 
         /*
@@ -285,7 +289,7 @@ public class ALSService {
                 saved.getId()
         );
 
-        return addALSImage(ALSDtoMapper.toDto(saved));
+        return addALSImage(ALSEntityMapper.toDto(saved));
     }
 
     @Transactional
@@ -323,7 +327,9 @@ public class ALSService {
                 Colors.valueOf(dto.getColorDoor())
         );
 
-        var domain = ALSConfigurationMapper.toDomain(dto, environment);
+        var domain = ALSConfigurationMapper.toDomain(dto,
+                lbDto -> TypeLbFactory.forLB(environment, lbDto.getType()),
+                lbcDto -> TypeLbFactory.forLBC(environment, lbcDto.getType()));
         domain.addStorageModule(LBDtoMapper.toDomain(lbDto, TypeLbFactory.forLB(environment, lbDto.getType())));
 
         return ALSDtoMapper.toDto(domain);
@@ -350,7 +356,9 @@ public class ALSService {
             );
         }
 
-        var domain = ALSConfigurationMapper.toDomain(dto, environment);
+        var domain = ALSConfigurationMapper.toDomain(dto,
+                lbDto -> TypeLbFactory.forLB(environment, lbDto.getType()),
+                lbcDto -> TypeLbFactory.forLBC(environment, lbcDto.getType()));
         int moduleIndex = ALSDtoMapper.findPhysicalLbIndex(domain, lbIndex);
         domain.removeModuleAt(moduleIndex);
 
@@ -382,7 +390,9 @@ public class ALSService {
             );
         }
 
-        var domain = ALSConfigurationMapper.toDomain(als, environment);
+        var domain = ALSConfigurationMapper.toDomain(als,
+                lbDto -> TypeLbFactory.forLB(environment, lbDto.getType()),
+                lbcDto -> TypeLbFactory.forLBC(environment, lbcDto.getType()));
         int moduleIndex = findPhysicalLbIndex(domain, lbIndex);
         domain.replaceModuleAt(
                 moduleIndex,
@@ -429,7 +439,9 @@ public class ALSService {
             );
         }
 
-        var domain = ALSConfigurationMapper.toDomain(als, environment);
+        var domain = ALSConfigurationMapper.toDomain(als,
+                lbDto -> TypeLbFactory.forLB(environment, lbDto.getType()),
+                lbcDto -> TypeLbFactory.forLBC(environment, lbcDto.getType()));
         domain.replaceControlModule(LCDtoMapper.toDomain(lc));
 
         return ALSDtoMapper.toDto(domain);
@@ -450,7 +462,9 @@ public class ALSService {
             );
         }
 
-        var domain = ALSConfigurationMapper.toDomain(als, environment);
+        var domain = ALSConfigurationMapper.toDomain(als,
+                lbDto -> TypeLbFactory.forLB(environment, lbDto.getType()),
+                lbcDto -> TypeLbFactory.forLBC(environment, lbcDto.getType()));
         domain.replaceControlModule(LBCDtoMapper.toDomain(lbc, TypeLbFactory.forLBC(environment, lbc.getType())));
 
         return ALSDtoMapper.toDto(domain);

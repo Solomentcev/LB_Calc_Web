@@ -9,6 +9,7 @@ import com.lb_calc_web.entity.LBEntity;
 import com.lb_calc_web.entity.LBCEntity;
 import com.lb_calc_web.entity.LCEntity;
 import com.lb_calc_web.dto.ALSDTO;
+import com.lb_calc_web.mapper.dto.ALSDtoMapper;
 
 import java.util.Comparator;
 import java.util.List;
@@ -145,5 +146,18 @@ public final class ALSEntityMapper {
 
         entity.synchronizeModules(moduleEntities);
     }
+
+
+    /**
+     * Преобразует persistence-сущность ALS в DTO с восстановлением ID.
+     */
+    public static ALSDTO toDto(ALSEntity entity) {
+        if (entity == null) return null;
+        ALSDTO dto = ALSDtoMapper.toDto(toDomain(entity));
+        dto.setId(entity.getId());
+        enrichModuleIds(dto, entity);
+        return dto;
+    }
+
 
 }

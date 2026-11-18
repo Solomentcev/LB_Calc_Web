@@ -1,15 +1,16 @@
 package com.lb_calc_web.mapper.dto;
 
+import com.lb_calc_web.domain.attributes.TypeLb;
 import com.lb_calc_web.domain.model.ALS;
 import com.lb_calc_web.dto.ALSDTO;
-import com.lb_calc_web.service.util.TypeLbFactory;
-import org.springframework.core.env.Environment;
+import com.lb_calc_web.dto.LBCDTO;
+import com.lb_calc_web.dto.LBDTO;
 
 import java.util.Objects;
+import java.util.function.Function;
 
 /**
- * Преобразует DTO конфигурации ALS в доменную модель,
- * разрешая конструктивные типы модулей из конфигурации приложения.
+ * Преобразует DTO ALS в доменную модель с переданными конфигурациями типов модулей.
  */
 public final class ALSConfigurationMapper {
 
@@ -17,18 +18,18 @@ public final class ALSConfigurationMapper {
     }
 
     /**
-     * Преобразует DTO в доменную ALS с доверенными типами модулей.
-     *
-     * @param dto DTO конфигурации
-     * @param environment конфигурация приложения
+     * @param dto DTO конфигурации ALS
+     * @param lbTypeResolver разрешает конструктивный тип LB
+     * @param lbcTypeResolver разрешает конструктивный тип LBC
      * @return доменная конфигурация ALS
      */
-    public static ALS toDomain(ALSDTO dto, Environment environment) {
-        Objects.requireNonNull(environment, "Environment не должен быть null");
-        return ALSDtoMapper.toDomain(
-                dto,
-                lbDto -> TypeLbFactory.forLB(environment, lbDto.getType()),
-                lbcDto -> TypeLbFactory.forLBC(environment, lbcDto.getType())
-        );
+    public static ALS toDomain(
+            ALSDTO dto,
+            Function<LBDTO, TypeLb> lbTypeResolver,
+            Function<LBCDTO, TypeLb> lbcTypeResolver
+    ) {
+        Objects.requireNonNull(lbTypeResolver, "lbTypeResolver не должен быть null");
+        Objects.requireNonNull(lbcTypeResolver, "lbcTypeResolver не должен быть null");
+        return ALSDtoMapper.toDomain(dto, lbTypeResolver, lbcTypeResolver);
     }
 }

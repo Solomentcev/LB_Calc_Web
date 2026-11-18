@@ -13,8 +13,6 @@ import com.lb_calc_web.dto.ALSModuleOrderDTO;
 import com.lb_calc_web.dto.LBDTO;
 import com.lb_calc_web.dto.LBCDTO;
 import com.lb_calc_web.dto.validation.ValidationResult;
-import com.lb_calc_web.entity.ALSEntity;
-import com.lb_calc_web.mapper.entity.ALSEntityMapper;
 
 import java.util.function.Function;
 
@@ -91,17 +89,6 @@ public final class ALSDtoMapper {
         dto.setQuantityLB(quantityLB);
         dto.setModuleOrder(moduleOrder);
 
-        return dto;
-    }
-
-    /**
-     * Преобразует persistence-сущность ALS в DTO с восстановлением ID.
-     */
-    public static ALSDTO toDto(ALSEntity entity) {
-        if (entity == null) return null;
-        ALSDTO dto = toDto(ALSEntityMapper.toDomain(entity));
-        dto.setId(entity.getId());
-        ALSEntityMapper.enrichModuleIds(dto, entity);
         return dto;
     }
 
