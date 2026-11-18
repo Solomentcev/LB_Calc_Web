@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
 
 /** Управляет каталогом оборудования и его доступностью для новых конфигураций. */
 @Service
@@ -70,6 +71,28 @@ public class EquipmentCatalogService {
         }
         throw new IllegalArgumentException(
                 "Активная позиция оборудования не найдена в каталоге: " + idOrName);
+    }
+
+    /**
+     * Разрешает позицию для редактирования существующей конфигурации.
+     * Деактивированная модель допускается только если она уже присутствовала
+     * в исходной сохранённой комплектации.
+     */
+    public Equipment resolveForExistingConfiguration(String idOrName, Set<String> existingIds) {
+        if (idOrName == null || idOrName.isBlank()) return null;
+        if (existingIds != null && !existingIds.isEmpty()) {
+            List<Equipment> retained = existingIds.stream()
+                    .map(this::resolveById)
+                    .filter(item -> item.getCatalogPositionId().equals(idOrName)
+                            || item.getName().equalsIgnoreCase(idOrName))
+                    .toList();
+            if (retained.size() == 1) return retained.get(0);
+            if (retained.size() > 1) {
+                throw new IllegalArgumentException(
+                        "Позиция оборудования неоднозначна в исходной конфигурации: " + idOrName);
+            }
+        }
+        return resolve(idOrName);
     }
 
     /** Преобразует запись каталога в независимую доменную позицию. */

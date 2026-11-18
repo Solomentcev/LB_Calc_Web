@@ -25,6 +25,8 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+import java.util.HashSet;
 
 @Service
 public class LCService {
@@ -235,7 +237,8 @@ public class LCService {
 
         LC domain;
         try {
-            domain = LCDtoMapper.toDomain(dto, equipmentCatalogService::resolve);
+            Set<String> retainedEquipmentIds = findRetainedEquipmentIds(dto.getId());
+domain = LCDtoMapper.toDomain(dto, id -> equipmentCatalogService.resolveForExistingConfiguration(id, retainedEquipmentIds));
             domain.setControlConfiguration(
                     equipmentRequirementResolver.resolve(domain.getControlConfiguration())
             );
@@ -352,6 +355,19 @@ public class LCService {
         return Colors.valueOf(
                 environment.getRequiredProperty(key)
         );
+    }
+
+    private Set<String> findRetainedEquipmentIds(Long moduleId) {
+        if (moduleId == null || moduleId <= 0) {
+            return Set.of();
+        }
+        return lcRepository.findById(moduleId)
+                .map(entity -> {
+                    Set<String> ids = new HashSet<>();
+                    entity.getEquipment().forEach(item -> ids.add(item.getCatalogPositionId()));
+                    return Set.copyOf(ids);
+                })
+                .orElseGet(Set::of);
     }
 
     /**

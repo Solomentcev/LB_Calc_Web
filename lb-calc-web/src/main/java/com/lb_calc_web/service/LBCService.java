@@ -33,6 +33,8 @@ import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.HashSet;
+import java.util.Set;
 
 @Service
 public class LBCService {
@@ -230,7 +232,8 @@ public class LBCService {
         LBC domain;
         try {
             TypeLb typeLb = TypeLbFactory.forLBC(environment, dto.getType());
-            domain = LBCDtoMapper.toDomain(dto, typeLb, equipmentCatalogService::resolve);
+            Set<String> retainedEquipmentIds = findRetainedEquipmentIds(dto.getId());
+domain = LBCDtoMapper.toDomain(dto, typeLb, id -> equipmentCatalogService.resolveForExistingConfiguration(id, retainedEquipmentIds));
             domain.setControlConfiguration(
                     equipmentRequirementResolver.resolve(domain.getControlConfiguration())
             );
@@ -371,6 +374,19 @@ public class LBCService {
                 key,
                 Integer.class
         );
+    }
+
+    private Set<String> findRetainedEquipmentIds(Long moduleId) {
+        if (moduleId == null || moduleId <= 0) {
+            return Set.of();
+        }
+        return lbcRepository.findById(moduleId)
+                .map(entity -> {
+                    Set<String> ids = new HashSet<>();
+                    entity.getEquipment().forEach(item -> ids.add(item.getCatalogPositionId()));
+                    return Set.copyOf(ids);
+                })
+                .orElseGet(Set::of);
     }
 
     /**
