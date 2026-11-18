@@ -91,6 +91,8 @@ public class EquipmentRequirementResolver {
         }
 
         if (requiresBarcode || requiresQrCode) {
+            ensureSingleEquipment(selected, "BAR_READER",
+                    "Для выбранных способов доступа нужен один сканер штрихкодов");
             Predicate<Equipment> barcodeCompatibility = equipment ->
                     (!requiresBarcode || equipment.supportsBarcode1d()
                             || equipment.supportsBarcode2d())
@@ -102,6 +104,8 @@ public class EquipmentRequirementResolver {
         }
 
         if (requiresRfid) {
+            ensureSingleEquipment(selected, "RFID_READER",
+                    "Для доступа по RFID нужен один RFID-считыватель");
             ensureEquipment(selected, "RFID_READER", Equipment::supportsRfid,
                     "Для доступа по RFID нужен совместимый RFID-считыватель");
         }
@@ -116,6 +120,8 @@ public class EquipmentRequirementResolver {
         }
 
         if (requiresPrinter) {
+            ensureSingleEquipment(selected, "PRINTER",
+                    "Для выбранных функций нужен один принтер");
             ensureEquipment(selected, "PRINTER", Equipment::supportsPrint,
                     "Для выбранных функций нужен совместимый принтер");
         }
