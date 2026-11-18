@@ -1,7 +1,6 @@
 package com.lb_calc_web.domain.model;
 
 import com.lb_calc_web.domain.attributes.Colors;
-import com.lb_calc_web.domain.equipment.Display;
 import com.lb_calc_web.domain.equipment.Equipment;
 
 import java.util.List;

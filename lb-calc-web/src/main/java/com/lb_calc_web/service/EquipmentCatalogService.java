@@ -6,7 +6,6 @@ import com.lb_calc_web.domain.equipment.Equipment;
 import com.lb_calc_web.domain.equipment.Display;
 import com.lb_calc_web.domain.equipment.BarReader;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import com.lb_calc_web.repository.EquipmentCatalogRepository;
 import org.springframework.stereotype.Service;
