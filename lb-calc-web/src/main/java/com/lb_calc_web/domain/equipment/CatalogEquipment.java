@@ -36,6 +36,9 @@ public final class CatalogEquipment extends Equipment {
 
     @Override public String getCategory() { return category; }
     @Override public boolean isDisplay() { return "DISPLAY".equals(category); }
+    @Override public boolean isBarReader() { return "BAR_READER".equals(category); }
+    @Override public boolean isPrinter() { return "PRINTER".equals(category); }
+    @Override public boolean isRfidReader() { return "RFID_READER".equals(category); }
     @Override public int getWidth() { return isDisplay() ? minimumModuleWidth : width; }
     @Override public int getHeight() { return isDisplay() ? displayHeight : height; }
     @Override public int getDepth() { return depth; }

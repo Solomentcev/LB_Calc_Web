@@ -24,6 +24,9 @@ public class Display extends Equipment {
         this.minimumModuleWidth = minimumModuleWidth;
     }
 
+    @Override public boolean isDisplay() { return true; }
+    @Override public String getCategory() { return "DISPLAY"; }
+
     public int getDisplayWidth() { return displayWidth; }
     public int getDisplayHeight() { return displayHeight; }
     public int getMinimumModuleWidth() { return minimumModuleWidth; }

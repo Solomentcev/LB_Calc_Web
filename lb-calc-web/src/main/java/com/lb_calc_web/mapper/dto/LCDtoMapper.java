@@ -70,17 +70,15 @@ public final class LCDtoMapper {
                 configuration.getEquipmentConfiguration()
                         .getAllEquipment();
 
-        Display display = equipment.stream()
-                .filter(Display.class::isInstance)
-                .map(Display.class::cast)
-                .filter(value -> value != Display.NONE)
+        Equipment display = equipment.stream()
+                .filter(Equipment::isDisplay)
+                .filter(value -> !Display.NONE_ID.equals(value.getCatalogPositionId()))
                 .findFirst()
                 .orElse(null);
 
-        BarReader barReader = equipment.stream()
-                .filter(BarReader.class::isInstance)
-                .map(BarReader.class::cast)
-                .filter(value -> value != BarReader.NONE)
+        Equipment barReader = equipment.stream()
+                .filter(Equipment::isBarReader)
+                .filter(value -> !BarReader.NONE_ID.equals(value.getCatalogPositionId()))
                 .findFirst()
                 .orElse(null);
 
@@ -98,11 +96,11 @@ public final class LCDtoMapper {
 
         dto.setPrinter(
                 equipment.stream()
-                        .anyMatch(Printer.class::isInstance)
+                        .anyMatch(Equipment::isPrinter)
         );
 
         dto.setRfidReader(
-                equipment.stream().anyMatch(RfidReader.class::isInstance)
+                equipment.stream().anyMatch(Equipment::isRfidReader)
         );
 
         EquipmentConfiguration equipmentConfiguration =
@@ -112,10 +110,10 @@ public final class LCDtoMapper {
         dto.setBarReaderQuantity(barReader == null ? 0
                 : equipmentConfiguration.getQuantity(barReader));
         dto.setPrinterQuantity(equipment.stream()
-                .filter(Printer.class::isInstance).findFirst()
+                .filter(Equipment::isPrinter).findFirst()
                 .map(equipmentConfiguration::getQuantity).orElse(0));
         dto.setRfidReaderQuantity(equipment.stream()
-                .filter(RfidReader.class::isInstance).findFirst()
+                .filter(Equipment::isRfidReader).findFirst()
                 .map(equipmentConfiguration::getQuantity).orElse(0));
 
         return dto;
