@@ -109,7 +109,7 @@ public class ALSService {
                                 )
                         );
 
-        return addALSImage(ALSDtoMapper.toDto(entity));
+        return addALSImage(ALSEntityMapper.toDto(entity));
     }
 
     /**
