@@ -18,6 +18,7 @@ import com.lb_calc_web.entity.LCEntity;
 import com.lb_calc_web.entity.ModuleEntity;
 import com.lb_calc_web.handler.ValidationSizeException;
 import com.lb_calc_web.mapper.dto.ALSDtoMapper;
+import com.lb_calc_web.mapper.dto.ALSConfigurationMapper;
 import com.lb_calc_web.mapper.dto.LBDtoMapper;
 import com.lb_calc_web.mapper.dto.LCDtoMapper;
 import com.lb_calc_web.mapper.dto.LBCDtoMapper;
@@ -538,19 +539,6 @@ public class ALSService {
     @Transactional
     public ALSDTO replaceWithNewLBCandSaveALS(Long alsId) {
         return saveALS(replaceWithNewLBC(findById(alsId)));
-    }
-
-    /**
-     * Преобразует входное представление ALS в доменную модель.
-     * Конструктивные параметры типов берутся из конфигурации приложения,
-     * а не из значений, переданных клиентом.
-     */
-    ALS toDomain(ALSDTO dto) {
-        return ALSDtoMapper.toDomain(
-                dto,
-                lbDto -> TypeLbFactory.forLB(environment, lbDto.getType()),
-                lbcDto -> TypeLbFactory.forLBC(environment, lbcDto.getType())
-        );
     }
 
     private void validate(ALS domain, ALSDTO source) {

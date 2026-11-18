@@ -23,6 +23,7 @@ import com.lb_calc_web.handler.ValidationSizeException;
 import com.lb_calc_web.helper.ExcellHelper;
 import com.lb_calc_web.mapper.dto.EmployeeDtoMapper;
 import com.lb_calc_web.mapper.dto.ProjectDtoMapper;
+import com.lb_calc_web.mapper.dto.ALSConfigurationMapper;
 import com.lb_calc_web.mapper.entity.EmployeeEntityMapper;
 import com.lb_calc_web.mapper.entity.ProjectEntityMapper;
 import com.lb_calc_web.repository.ALSRepository;
@@ -228,7 +229,7 @@ public class ProjectService {
          */
         Project domain;
         try {
-            domain = ProjectDtoMapper.toDomain(dto, alsService::toDomain);
+            domain = ProjectDtoMapper.toDomain(dto, dto -> ALSConfigurationMapper.toDomain(dto, environment));
         } catch (IllegalStateException exception) {
             ValidationResult validationResult =
                     new ValidationResult("Project", dto.getId());
@@ -268,7 +269,7 @@ public class ProjectService {
          * Повторно собираем Project, чтобы его ALS совпадали с теми,
          * для которых ниже разрешаются persistence-сущности.
          */
-        domain = ProjectDtoMapper.toDomain(dto, alsService::toDomain);
+        domain = ProjectDtoMapper.toDomain(dto, dto -> ALSConfigurationMapper.toDomain(dto, environment));
 
         Function<ALS, ALSEntity> alsResolver =
                 resolveALSEntities(
@@ -354,13 +355,13 @@ public class ProjectService {
     @Transactional
     public ProjectDTO addNewALSandSaveProject(Long projectId) {
         ProjectDTO source = findById(projectId);
-        Project domain = ProjectDtoMapper.toDomain(source, alsService::toDomain);
+        Project domain = ProjectDtoMapper.toDomain(source, dto -> ALSConfigurationMapper.toDomain(dto, environment));
 
         domain.addALS(
-                alsService.toDomain(alsService.createALS())
+                ALSConfigurationMapper.toDomain(alsService.createALS())
         );
 
-        return saveProject(ProjectDtoMapper.toDto(domain, source, alsService::toDomain));
+        return saveProject(ProjectDtoMapper.toDto(domain, source, dto -> ALSConfigurationMapper.toDomain(dto, environment)));
     }
 
     /**
@@ -374,8 +375,8 @@ public class ProjectService {
         ProjectDTO source = findById(projectId);
         ALSDTO selected = findALSInProject(source, alsId);
 
-        Project domain = ProjectDtoMapper.toDomain(source, alsService::toDomain);
-        ALS selectedDomain = alsService.toDomain(selected);
+        Project domain = ProjectDtoMapper.toDomain(source, dto -> ALSConfigurationMapper.toDomain(dto, environment));
+        ALS selectedDomain = ALSConfigurationMapper.toDomain(selected);
 
         if (domain.getQuantity(selectedDomain) == 0) {
             throw new NoSuchElementException(
@@ -543,9 +544,9 @@ public class ProjectService {
                         )
                 );
 
-        Project domain = ProjectDtoMapper.toDomain(project, alsService::toDomain);
-        ALS oldConfiguration = alsService.toDomain(selected);
-        ALS newConfiguration = alsService.toDomain(als);
+        Project domain = ProjectDtoMapper.toDomain(project, dto -> ALSConfigurationMapper.toDomain(dto, environment));
+        ALS oldConfiguration = ALSConfigurationMapper.toDomain(selected);
+        ALS newConfiguration = ALSConfigurationMapper.toDomain(als);
 
         domain.replaceALS(oldConfiguration, newConfiguration);
 
@@ -553,7 +554,7 @@ public class ProjectService {
 
         return savedProject.getAlsList().stream()
                 .filter(value -> value != null
-                        && alsService.toDomain(value).equals(newConfiguration))
+                        && ALSConfigurationMapper.toDomain(value).equals(newConfiguration))
                 .findFirst()
                 .orElseThrow(
                         () -> new IllegalStateException(
@@ -1068,35 +1069,17 @@ public class ProjectService {
             }
         }
 
-        List<Map.Entry<ALS, ALSEntity>> resolved = new ArrayList<>();
-
-        for (ALSDTO dto : savedALS) {
-            ALS domain = alsService.toDomain(dto);
-            ALSEntity entity = entitiesById.get(dto.getId());
-
-            boolean alreadyResolved = resolved.stream()
-                    .anyMatch(entry -> entry.getKey().equals(domain));
-
-            if (!alreadyResolved) {
-                resolved.add(Map.entry(domain, entity));
-            }
-        }
-
-        return requested -> resolved.stream()
-                .filter(entry -> entry.getKey().equals(requested))
-                .map(Map.Entry::getValue)
-                .findFirst()
-                .orElseThrow(
-                        () -> new NoSuchElementException(
-                                "Для конфигурации ALS не найдена сохранённая сущность"
-                        )
-                );
+        return ProjectEntityMapper.createAlsResolver(
+                savedALS,
+                entitiesById,
+                dto -> ALSConfigurationMapper.toDomain(dto, environment)
+        );
     }
 
     private void validateProject(Project domain, ProjectDTO source) {
         List<ValidationResult> results =
                 sizeValidator.validateProject(domain);
-        ProjectDtoMapper.assignValidationObjectIds(results, domain, source, alsService::toDomain);
+        ProjectDtoMapper.assignValidationObjectIds(results, domain, source, dto -> ALSConfigurationMapper.toDomain(dto, environment));
 
         List<ValidationError> errors =
                 results.stream()
