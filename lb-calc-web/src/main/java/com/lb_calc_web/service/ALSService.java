@@ -459,9 +459,9 @@ public class ALSService {
             );
         }
 
-        var domain = ALSConfigurationMapper.toDomain(als,
-                candidateLbDto -> TypeLbFactory.forLB(environment, candidateLbDto.getType()),
-                candidateLbcDto -> TypeLbFactory.forLBC(environment, candidateLbcDto.getType()));
+        // Используем общий путь восстановления ALS: он разрешает позиции
+        // каталога и историческое оборудование так же, как при обычном сохранении.
+        var domain = toDomain(als);
         domain.replaceControlModule(toDomain(lbc));
 
         return ALSDtoMapper.toDto(domain);
