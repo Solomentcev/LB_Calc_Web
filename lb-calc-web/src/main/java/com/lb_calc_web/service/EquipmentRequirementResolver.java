@@ -128,6 +128,24 @@ public class EquipmentRequirementResolver {
         );
     }
 
+    /**
+     * Проверяет, что для категории выбрана одна каталожная позиция
+     * в количестве одной единицы, либо добавляет модель по умолчанию.
+     */
+    private void ensureSingleEquipment(List<EquipmentItem> selected, String category,
+                                       String errorMessage) {
+        List<EquipmentItem> categoryItems = selected.stream()
+                .filter(item -> category.equals(item.equipment().getCategory()))
+                .toList();
+
+        if (categoryItems.size() > 1
+                || (!categoryItems.isEmpty() && categoryItems.get(0).quantity() != 1)) {
+            throw new IllegalArgumentException(
+                    "Для категории " + category + " допускается ровно одна позиция в количестве 1");
+        }
+        ensureEquipment(selected, category, equipment -> true, errorMessage);
+    }
+
     private void ensureEquipment(List<EquipmentItem> selected, String category,
                                  Predicate<Equipment> compatibility, String errorMessage) {
         List<Equipment> categoryItems = selected.stream()
