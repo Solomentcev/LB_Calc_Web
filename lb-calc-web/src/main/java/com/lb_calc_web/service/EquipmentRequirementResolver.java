@@ -9,7 +9,9 @@ import com.lb_calc_web.domain.model.EquipmentConfiguration;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Predicate;
 
 /**
@@ -29,13 +31,26 @@ public class EquipmentRequirementResolver {
     }
 
     public ControlConfiguration resolve(ControlConfiguration configuration) {
-        List<EquipmentItem> selected = new ArrayList<>(
-                configuration.getEquipmentConfiguration().getAllItems());
-
         boolean requiresBarcode = configuration.getAccessMethods().contains(AccessMethod.BARCODE);
         boolean requiresQrCode = configuration.getAccessMethods().contains(AccessMethod.QR_CODE);
         boolean requiresPin = configuration.getAccessMethods().contains(AccessMethod.PIN);
         boolean requiresRfid = configuration.getAccessMethods().contains(AccessMethod.RFID);
+
+        Set<String> requiredCategories = new HashSet<>();
+        if (requiresBarcode || requiresQrCode) requiredCategories.add("BAR_READER");
+        if (requiresRfid) requiredCategories.add("RFID_READER");
+        if (requiresPin) requiredCategories.add("DISPLAY");
+
+        boolean requiresPrinter = configuration.getPayment() != Payment.NONE
+                || !configuration.getPrintOptions().isEmpty()
+                || requiresBarcode || requiresQrCode || requiresPin;
+        if (requiresPrinter) requiredCategories.add("PRINTER");
+
+        List<EquipmentItem> selected = configuration.getEquipmentConfiguration().getAllItems()
+                .stream()
+                .filter(item -> requiredCategories.contains(item.equipment().getCategory()))
+                .collect(java.util.stream.Collectors.toCollection(ArrayList::new));
+
         if (requiresBarcode || requiresQrCode) {
             Predicate<Equipment> barcodeCompatibility = equipment ->
                     (!requiresBarcode || equipment.supportsBarcode1d()
@@ -61,9 +76,6 @@ public class EquipmentRequirementResolver {
                     "Для доступа по PIN нужен дисплей");
         }
 
-        boolean requiresPrinter = configuration.getPayment() != Payment.NONE
-                || !configuration.getPrintOptions().isEmpty()
-                || requiresBarcode || requiresQrCode || requiresPin;
         if (requiresPrinter) {
             ensureEquipment(selected, "PRINTER", Equipment::supportsPrint,
                     "Для выбранных функций нужен совместимый принтер");
