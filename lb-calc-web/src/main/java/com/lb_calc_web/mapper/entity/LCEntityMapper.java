@@ -1,6 +1,8 @@
 package com.lb_calc_web.mapper.entity;
 
 import com.lb_calc_web.domain.attributes.Payment;
+import com.lb_calc_web.mapper.dto.LCDtoMapper;
+import com.lb_calc_web.dto.LCDTO;
 import com.lb_calc_web.domain.equipment.BarReader;
 import com.lb_calc_web.domain.equipment.Display;
 import com.lb_calc_web.domain.equipment.Equipment;
@@ -109,4 +111,15 @@ public final class LCEntityMapper {
                 ))
                 .collect(Collectors.toSet()));
     }
+
+    /**
+     * Преобразует LCEntity в DTO, восстанавливая persistence ID.
+     */
+    public static LCDTO toDto(LCEntity entity) {
+        if (entity == null) return null;
+        LCDTO dto = LCDtoMapper.toDto(toDomain(entity));
+        dto.setId(entity.getId());
+        return dto;
+    }
+
 }

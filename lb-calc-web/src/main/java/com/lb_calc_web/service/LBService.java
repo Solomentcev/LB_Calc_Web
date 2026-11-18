@@ -134,7 +134,7 @@ public class LBService {
                                 )
                         )
                 )
-                .map(this::toDto)
+                .map(LBEntityMapper::toDto)
                 .toList();
     }
 
@@ -154,7 +154,7 @@ public class LBService {
                         )
                 );
 
-        return toDto(entity);
+        return LBEntityMapper.toDto(entity);
     }
 
     /**
@@ -242,7 +242,7 @@ public class LBService {
                     existing.get().getId()
             );
 
-            return toDto(existing.get());
+            return LBEntityMapper.toDto(existing.get());
         }
 
         /*
@@ -260,27 +260,7 @@ public class LBService {
                 saved.getId()
         );
 
-        return toDto(saved);
-    }
-
-    /**
-     * Entity -> DTO через Domain.
-     */
-    private LBDTO toDto(LBEntity entity) {
-        LB domain =
-                LBEntityMapper.toDomain(entity);
-
-        LBDTO dto =
-                LBDtoMapper.toDto(domain);
-
-        /*
-         * ID относится к persistence-слою,
-         * поэтому Domain его не содержит.
-         * Добавляем его после domain-маппинга.
-         */
-        dto.setId(entity.getId());
-
-        return dto;
+        return LBEntityMapper.toDto(saved);
     }
 
     /**

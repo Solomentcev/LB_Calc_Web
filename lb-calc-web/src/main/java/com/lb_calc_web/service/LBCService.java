@@ -183,7 +183,7 @@ public class LBCService {
                                 )
                         )
                 )
-                .map(this::toDto)
+                .map(entity -> addLBCImage(LBCEntityMapper.toDto(entity)))
                 .toList();
     }
 
@@ -201,7 +201,7 @@ public class LBCService {
                                 )
                         );
 
-        return toDto(entity);
+        return addLBCImage(LBCEntityMapper.toDto(entity));
     }
 
     @Transactional
@@ -277,7 +277,7 @@ public class LBCService {
                     existing.get().getId()
             );
 
-            return toDto(existing.get());
+            return addLBCImage(LBCEntityMapper.toDto(existing.get()));
         }
 
         LBCEntity entity =
@@ -291,19 +291,7 @@ public class LBCService {
                 saved.getId()
         );
 
-        return toDto(saved);
-    }
-
-    private LBCDTO toDto(LBCEntity entity) {
-        LBC domain =
-                LBCEntityMapper.toDomain(entity);
-
-        LBCDTO dto =
-                LBCDtoMapper.toDto(domain);
-
-        dto.setId(entity.getId());
-
-        return addLBCImage(dto);
+        return addLBCImage(LBCEntityMapper.toDto(saved));
     }
 
     private LBCDTO addLBCImage(LBCDTO dto) {

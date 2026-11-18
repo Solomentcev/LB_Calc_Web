@@ -172,7 +172,7 @@ public class LCService {
                                 )
                         )
                 )
-                .map(this::toDto)
+                .map(LCEntityMapper::toDto)
                 .toList();
     }
 
@@ -197,7 +197,7 @@ public class LCService {
                                 )
                         );
 
-        return toDto(entity);
+        return LCEntityMapper.toDto(entity);
     }
 
     /**
@@ -280,7 +280,7 @@ public class LCService {
                     existing.get().getId()
             );
 
-            return toDto(existing.get());
+            return LCEntityMapper.toDto(existing.get());
         }
 
         /*
@@ -297,27 +297,7 @@ public class LCService {
                 saved.getId()
         );
 
-        return toDto(saved);
-    }
-
-    /**
-     * Entity -> Domain -> DTO.
-     */
-    private LCDTO toDto(LCEntity entity) {
-
-        LC domain =
-                LCEntityMapper.toDomain(entity);
-
-        LCDTO dto =
-                LCDtoMapper.toDto(domain);
-
-        /*
-         * ID относится к persistence-слою,
-         * поэтому добавляем его после domain-маппинга.
-         */
-        dto.setId(entity.getId());
-
-        return dto;
+        return LCEntityMapper.toDto(saved);
     }
 
     /**
