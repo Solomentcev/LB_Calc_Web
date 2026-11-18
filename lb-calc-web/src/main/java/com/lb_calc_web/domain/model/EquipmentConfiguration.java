@@ -193,12 +193,12 @@ public class EquipmentConfiguration {
         int currentQuantity = target.getOrDefault(position, 0);
         int newQuantity = sumQuantities(currentQuantity, quantity);
 
-        if (position isDisplay() && newQuantity > 1) {
+        if (position.isDisplay() && newQuantity > 1) {
             throw new IllegalArgumentException(
                     "Количество дисплеев в модуле должно быть равно 1");
         }
 
-        if (position isDisplay() && currentQuantity == 0) {
+        if (position.isDisplay() && currentQuantity == 0) {
             validateSingleDisplay(target, other, position);
         }
 
