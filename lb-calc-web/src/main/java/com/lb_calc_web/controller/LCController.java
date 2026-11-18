@@ -1,5 +1,6 @@
 package com.lb_calc_web.controller;
 
+import com.lb_calc_web.domain.attributes.AccessMethod;
 import com.lb_calc_web.domain.attributes.Colors;
 import com.lb_calc_web.domain.attributes.Payment;
 import com.lb_calc_web.domain.equipment.BarReader;
@@ -30,6 +31,9 @@ public class LCController {
 
     private final List<Payment> paymentList =
             Arrays.asList(Payment.values());
+
+    private final List<AccessMethod> accessMethodList =
+            Arrays.asList(AccessMethod.values());
 
     private final List<String> displayList =
             List.of(
@@ -143,6 +147,14 @@ public class LCController {
     @ModelAttribute("paymentList")
     public List<Payment> paymentList() {
         return paymentList;
+    }
+
+    /**
+     * Список способов доступа.
+     */
+    @ModelAttribute("accessMethodList")
+    public List<AccessMethod> accessMethodList() {
+        return accessMethodList;
     }
 
     /**
