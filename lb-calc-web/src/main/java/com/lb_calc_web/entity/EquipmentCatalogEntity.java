@@ -57,6 +57,9 @@ public class EquipmentCatalogEntity {
     @Column(name = "active", nullable = false)
     private boolean active = true;
 
+    @Column(name = "is_default", nullable = false)
+    private boolean defaultPosition;
+
     protected EquipmentCatalogEntity() { }
 
     public EquipmentCatalogEntity(String id, String category, String name, String description,
@@ -104,6 +107,8 @@ public class EquipmentCatalogEntity {
     public boolean isSupportsRfid() { return supportsRfid; }
     public boolean isSupportsPrint() { return supportsPrint; }
     public boolean isActive() { return active; }
+    public boolean isDefaultPosition() { return defaultPosition; }
+    public void setDefaultPosition(boolean value) { this.defaultPosition = value; }
 
     public void update(String category, String name, String description, int width, int height,
                        int depth, int displayWidth, int displayHeight, int minimumModuleWidth,

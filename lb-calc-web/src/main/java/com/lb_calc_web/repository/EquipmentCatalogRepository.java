@@ -11,6 +11,8 @@ public interface EquipmentCatalogRepository extends JpaRepository<EquipmentCatal
     List<EquipmentCatalogEntity> findAllByOrderByCategoryAscNameAsc();
     List<EquipmentCatalogEntity> findAllByActiveTrueOrderByCategoryAscNameAsc();
     List<EquipmentCatalogEntity> findAllByCategoryAndActiveTrueOrderByNameAsc(String category);
+    List<EquipmentCatalogEntity> findAllByCategoryAndActiveTrueAndDefaultPositionTrueOrderByNameAsc(
+            String category);
 
     @Query(value = """
             SELECT EXISTS (
