@@ -2,6 +2,7 @@ package com.lb_calc_web.mapper.entity;
 
 import com.lb_calc_web.domain.model.ALS;
 import com.lb_calc_web.domain.model.Module;
+import com.lb_calc_web.domain.equipment.Equipment;
 import com.lb_calc_web.entity.ALSEntity;
 import com.lb_calc_web.entity.ALSModuleEntity;
 import com.lb_calc_web.entity.ModuleEntity;
@@ -34,15 +35,24 @@ public final class ALSEntityMapper {
      * @return доменный агрегат
      */
     public static ALS toDomain(ALSEntity entity) {
+        return toDomain(entity, id -> {
+            throw new IllegalStateException(
+                    "Для восстановления ALS требуется разрешитель оборудования из каталога");
+        });
+    }
+
+    public static ALS toDomain(ALSEntity entity,
+                               Function<String, Equipment> equipmentResolver) {
         Objects.requireNonNull(
                 entity,
                 "ALSEntity не должен быть null"
         );
+        Objects.requireNonNull(equipmentResolver, "equipmentResolver не должен быть null");
 
         List<Module> modules = entity.getModules().stream()
                 .sorted(Comparator.comparingInt(ALSModuleEntity::getModuleOrder))
                 .map(ALSModuleEntity::getModule)
-                .map(ModuleEntityMapper::toDomain)
+                .map(module -> ModuleEntityMapper.toDomain(module, equipmentResolver))
                 .toList();
 
         ALS domain = new ALS(
@@ -154,6 +164,15 @@ public final class ALSEntityMapper {
     public static ALSDTO toDto(ALSEntity entity) {
         if (entity == null) return null;
         ALSDTO dto = ALSDtoMapper.toDto(toDomain(entity));
+        dto.setId(entity.getId());
+        enrichModuleIds(dto, entity);
+        return dto;
+    }
+
+    public static ALSDTO toDto(ALSEntity entity,
+                               Function<String, Equipment> equipmentResolver) {
+        if (entity == null) return null;
+        ALSDTO dto = ALSDtoMapper.toDto(toDomain(entity, equipmentResolver));
         dto.setId(entity.getId());
         enrichModuleIds(dto, entity);
         return dto;

@@ -4,6 +4,8 @@ import com.lb_calc_web.domain.model.LB;
 import com.lb_calc_web.domain.model.LBC;
 import com.lb_calc_web.domain.model.LC;
 import com.lb_calc_web.domain.model.Module;
+import com.lb_calc_web.domain.equipment.Equipment;
+import com.lb_calc_web.domain.equipment.EquipmentCatalog;
 import com.lb_calc_web.entity.LBEntity;
 import com.lb_calc_web.entity.LBCEntity;
 import com.lb_calc_web.entity.LCEntity;
@@ -11,6 +13,7 @@ import com.lb_calc_web.entity.ModuleEntity;
 import org.hibernate.Hibernate;
 
 import java.util.Objects;
+import java.util.function.Function;
 
 /**
  * Преобразует полиморфную иерархию модулей между доменной
@@ -31,15 +34,21 @@ public final class ModuleEntityMapper {
      * @return доменная модель или null, если передан null
      */
     public static Module toDomain(ModuleEntity entity) {
+        return toDomain(entity, EquipmentCatalog::findByCatalogPositionId);
+    }
+
+    public static Module toDomain(ModuleEntity entity,
+                                  Function<String, Equipment> equipmentResolver) {
         if (entity == null) {
             return null;
         }
+        Objects.requireNonNull(equipmentResolver, "equipmentResolver не должен быть null");
 
         ModuleEntity concreteEntity =
                 (ModuleEntity) Hibernate.unproxy(entity);
 
         if (concreteEntity instanceof LBCEntity lbcEntity) {
-            return LBCEntityMapper.toDomain(lbcEntity);
+            return LBCEntityMapper.toDomain(lbcEntity, equipmentResolver);
         }
 
         if (concreteEntity instanceof LBEntity lbEntity) {
@@ -47,7 +56,7 @@ public final class ModuleEntityMapper {
         }
 
         if (concreteEntity instanceof LCEntity lcEntity) {
-            return LCEntityMapper.toDomain(lcEntity);
+            return LCEntityMapper.toDomain(lcEntity, equipmentResolver);
         }
 
         throw new IllegalArgumentException(
