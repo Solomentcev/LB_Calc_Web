@@ -9,6 +9,7 @@ import com.lb_calc_web.domain.attributes.TypeLb;
 import com.lb_calc_web.domain.attributes.DirectionDoorOpening;
 import com.lb_calc_web.domain.equipment.BarReader;
 import com.lb_calc_web.domain.equipment.Display;
+import com.lb_calc_web.domain.equipment.Equipment;
 import com.lb_calc_web.dto.LBCDTO;
 import com.lb_calc_web.dto.validation.ValidationResult;
 import com.lb_calc_web.entity.LBCEntity;
@@ -313,23 +314,13 @@ public class LBCService {
         return dto;
     }
 
-    private Display findDisplay(String name) {
-        return List.of(
-                        Display.NONE,
-                        Display.LC10,
-                        Display.LC17,
-                        Display.LC19
-                )
-                .stream()
-                .filter(display ->
-                        display.getName().equals(name)
-                )
-                .findFirst()
-                .orElseThrow(
-                        () -> new IllegalArgumentException(
-                                "Неизвестный дисплей LBC: " + name
-                        )
-                );
+    private Equipment findDisplay(String idOrName) {
+        Equipment equipment = equipmentCatalogService.resolve(idOrName);
+        if (equipment == null || !equipment.isDisplay()) {
+            throw new IllegalArgumentException(
+                    "В каталоге отсутствует дисплей LBC: " + idOrName);
+        }
+        return equipment;
     }
 
     private boolean requiredBoolean(String key) {

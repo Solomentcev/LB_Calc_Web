@@ -4,6 +4,7 @@ import com.lb_calc_web.domain.attributes.Colors;
 import com.lb_calc_web.domain.attributes.Payment;
 import com.lb_calc_web.domain.equipment.BarReader;
 import com.lb_calc_web.domain.equipment.Display;
+import com.lb_calc_web.domain.equipment.Equipment;
 import com.lb_calc_web.domain.model.LC;
 import com.lb_calc_web.dto.LCDTO;
 import com.lb_calc_web.dto.validation.ValidationResult;
@@ -315,22 +316,13 @@ public class LCService {
     /**
      * Получение Display по имени.
      */
-    private Display findDisplay(String name) {
-
-        for (Display display : List.of(
-                Display.NONE,
-                Display.LC10,
-                Display.LC17,
-                Display.LC19
-        )) {
-            if (display.getName().equals(name)) {
-                return display;
-            }
+    private Equipment findDisplay(String idOrName) {
+        Equipment equipment = equipmentCatalogService.resolve(idOrName);
+        if (equipment == null || !equipment.isDisplay()) {
+            throw new IllegalArgumentException(
+                    "В каталоге отсутствует дисплей LC: " + idOrName);
         }
-
-        throw new IllegalArgumentException(
-                "Неизвестный дисплей LC: " + name
-        );
+        return equipment;
     }
 
     /**
