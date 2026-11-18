@@ -10,10 +10,12 @@ import com.lb_calc_web.domain.attributes.DirectionDoorOpening;
 import com.lb_calc_web.domain.equipment.BarReader;
 import com.lb_calc_web.domain.equipment.Display;
 import com.lb_calc_web.domain.equipment.Equipment;
+import com.lb_calc_web.dto.EquipmentSelectionDTO;
 import com.lb_calc_web.dto.LBCDTO;
 import com.lb_calc_web.dto.validation.ValidationResult;
 import com.lb_calc_web.entity.LBCEntity;
 import com.lb_calc_web.handler.ValidationSizeException;
+import com.lb_calc_web.mapper.dto.EquipmentSelectionMapper;
 import com.lb_calc_web.mapper.dto.LBCDtoMapper;
 import com.lb_calc_web.mapper.entity.LBCEntityMapper;
 import com.lb_calc_web.repository.LBCRepository;
@@ -232,6 +234,19 @@ public class LBCService {
         try {
             TypeLb typeLb = TypeLbFactory.forLBC(environment, dto.getType());
             Set<String> retainedEquipmentIds = findRetainedEquipmentIds(dto.getId());
+            if (dto.getEquipmentSelections() == null && dto.getId() != null && dto.getId() > 0) {
+                lbcRepository.findById(dto.getId()).ifPresent(entity ->
+                        dto.setEquipmentSelections(EquipmentSelectionMapper.mergeDisplaySelection(
+                                entity.getEquipment().stream()
+                                        .map(item -> new EquipmentSelectionDTO(
+                                                item.getCatalogPositionId(), item.getQuantity()))
+                                        .toList(),
+                                dto.getDisplay(),
+                                dto.getDisplayQuantity(),
+                                id -> equipmentCatalogService.resolveForExistingConfiguration(
+                                        id, retainedEquipmentIds)
+                        )));
+            }
             domain = LBCDtoMapper.toDomain(dto, typeLb, id -> equipmentCatalogService.resolveForExistingConfiguration(id, retainedEquipmentIds));
             domain.setControlConfiguration(
                     equipmentRequirementResolver.resolve(domain.getControlConfiguration())
