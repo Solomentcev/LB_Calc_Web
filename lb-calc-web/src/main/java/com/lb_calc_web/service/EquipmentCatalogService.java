@@ -19,7 +19,12 @@ import java.util.Set;
 @Transactional(readOnly = true)
 public class EquipmentCatalogService {
     private static final Set<String> SUPPORTED_CATEGORIES =
-            Set.of("DISPLAY", "BAR_READER", "PRINTER", "RFID_READER");
+            Set.of(
+                    "DISPLAY", "BAR_READER", "PRINTER", "RFID_READER",
+                    "COMPUTER", "LOCK_CONTROLLER", "POWER_SUPPLY", "UPS",
+                    "PAYMENT_TERMINAL", "CASH_ACCEPTOR",
+                    "MODEM", "ROUTER", "ANTENNA"
+            );
     private final EquipmentCatalogRepository repository;
 
     public EquipmentCatalogService(EquipmentCatalogRepository repository) {
@@ -181,6 +186,9 @@ public class EquipmentCatalogService {
             case "BAR_READER" -> (barcode1d || barcode2d) && !rfid && !print;
             case "PRINTER" -> print && !barcode1d && !barcode2d && !rfid;
             case "RFID_READER" -> rfid && !barcode1d && !barcode2d && !print;
+            case "COMPUTER", "LOCK_CONTROLLER", "POWER_SUPPLY", "UPS",
+                    "PAYMENT_TERMINAL", "CASH_ACCEPTOR", "MODEM", "ROUTER", "ANTENNA" ->
+                    !barcode1d && !barcode2d && !rfid && !print;
             default -> false;
         };
         if (!valid) {

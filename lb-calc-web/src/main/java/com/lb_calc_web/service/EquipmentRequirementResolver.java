@@ -15,15 +15,27 @@ import java.util.Set;
 import java.util.function.Predicate;
 
 /**
- * Подбирает активные модели оборудования под функции модуля управления.
+ * Формирует обязательную комплектацию управляющего модуля
+ * по базовым требованиям и выбранной функциональности.
  *
- * <p>PIN требует дисплей и дополнительный способ доступа. Для вариантов оплаты
- * подбирается принтер, если он нужен по правилам конфигурации. Специализированное
- * оборудование приёма наличных и банковские терминалы пока не представлены
- * характеристиками каталога и автоматически не подбираются.</p>
+ * <p>Дополнительные позиции, не управляемые функциональными правилами,
+ * сохраняются при изменении конфигурации.</p>
  */
 @Service
 public class EquipmentRequirementResolver {
+    private static final String COMPUTER = "COMPUTER";
+    private static final String LOCK_CONTROLLER = "LOCK_CONTROLLER";
+    private static final String POWER_SUPPLY = "POWER_SUPPLY";
+    private static final String UPS = "UPS";
+    private static final String PAYMENT_TERMINAL = "PAYMENT_TERMINAL";
+    private static final String CASH_ACCEPTOR = "CASH_ACCEPTOR";
+
+    private static final Set<String> MANAGED_CATEGORIES = Set.of(
+            "DISPLAY", "BAR_READER", "PRINTER", "RFID_READER",
+            COMPUTER, LOCK_CONTROLLER, POWER_SUPPLY, UPS,
+            PAYMENT_TERMINAL, CASH_ACCEPTOR
+    );
+
     private final EquipmentCatalogService equipmentCatalogService;
 
     public EquipmentRequirementResolver(EquipmentCatalogService equipmentCatalogService) {
@@ -36,7 +48,18 @@ public class EquipmentRequirementResolver {
         boolean requiresPin = configuration.getAccessMethods().contains(AccessMethod.PIN);
         boolean requiresRfid = configuration.getAccessMethods().contains(AccessMethod.RFID);
 
-        Set<String> requiredCategories = new HashSet<>();
+        Set<String> requiredCategories = new HashSet<>(
+                Set.of(COMPUTER, LOCK_CONTROLLER, POWER_SUPPLY, UPS)
+        );
+
+        if (configuration.getPayment() == Payment.CASHLESS
+                || configuration.getPayment() == Payment.CASH_AND_CARDS) {
+            requiredCategories.add(PAYMENT_TERMINAL);
+        }
+        if (configuration.getPayment() == Payment.CASH_AND_CARDS) {
+            requiredCategories.add(CASH_ACCEPTOR);
+        }
+
         if (requiresBarcode || requiresQrCode) requiredCategories.add("BAR_READER");
         if (requiresRfid) requiredCategories.add("RFID_READER");
         if (requiresPin) requiredCategories.add("DISPLAY");
@@ -46,10 +69,35 @@ public class EquipmentRequirementResolver {
                 || requiresBarcode || requiresQrCode || requiresPin;
         if (requiresPrinter) requiredCategories.add("PRINTER");
 
-        List<EquipmentItem> selected = configuration.getEquipmentConfiguration().getAllItems()
-                .stream()
-                .filter(item -> requiredCategories.contains(item.equipment().getCategory()))
-                .collect(java.util.stream.Collectors.toCollection(ArrayList::new));
+        List<EquipmentItem> selected = new ArrayList<>();
+        List<EquipmentItem> additional = new ArrayList<>();
+
+        for (EquipmentItem item : configuration.getEquipmentConfiguration().getAllItems()) {
+            String category = item.equipment().getCategory();
+            if (!MANAGED_CATEGORIES.contains(category)) {
+                additional.add(item);
+            } else if (requiredCategories.contains(category)) {
+                selected.add(item);
+            }
+        }
+
+        ensureEquipment(selected, COMPUTER, equipment -> true,
+                "Для управляющего модуля нужен компьютер");
+        ensureEquipment(selected, LOCK_CONTROLLER, equipment -> true,
+                "Для управляющего модуля нужен контроллер замков");
+        ensureEquipment(selected, POWER_SUPPLY, equipment -> true,
+                "Для управляющего модуля нужен блок питания");
+        ensureEquipment(selected, UPS, equipment -> true,
+                "Для управляющего модуля нужен источник бесперебойного питания");
+
+        if (requiredCategories.contains(PAYMENT_TERMINAL)) {
+            ensureEquipment(selected, PAYMENT_TERMINAL, equipment -> true,
+                    "Для безналичной оплаты нужен банковский терминал");
+        }
+        if (requiredCategories.contains(CASH_ACCEPTOR)) {
+            ensureEquipment(selected, CASH_ACCEPTOR, equipment -> true,
+                    "Для оплаты наличными нужен купюроприёмник");
+        }
 
         if (requiresBarcode || requiresQrCode) {
             Predicate<Equipment> barcodeCompatibility = equipment ->
@@ -85,7 +133,7 @@ public class EquipmentRequirementResolver {
                 configuration.getPayment(),
                 configuration.getAccessMethods(),
                 configuration.getPrintOptions(),
-                EquipmentConfiguration.fromItems(selected, List.of())
+                EquipmentConfiguration.fromItems(selected, additional)
         );
     }
 
@@ -106,8 +154,8 @@ public class EquipmentRequirementResolver {
 
         Equipment candidate = equipmentCatalogService.findActiveDefault(category);
         if (!compatibility.test(candidate)) {
-            throw new IllegalArgumentException(
-                    errorMessage + ". Активная модель по умолчанию не поддерживает требуемую функцию.");
+            throw new IllegalStateException(
+                    errorMessage + ". Активная модель по умолчанию не соответствует требованию каталога.");
         }
         selected.add(new EquipmentItem(candidate, 1));
     }
