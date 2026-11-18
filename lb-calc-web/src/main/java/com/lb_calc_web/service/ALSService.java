@@ -6,6 +6,7 @@ import com.lb_calc_web.domain.model.LB;
 import com.lb_calc_web.domain.model.LBC;
 import com.lb_calc_web.domain.model.LC;
 import com.lb_calc_web.domain.model.Module;
+import com.lb_calc_web.domain.equipment.Equipment;
 import com.lb_calc_web.dto.ALSDTO;
 import com.lb_calc_web.dto.LBCDTO;
 import com.lb_calc_web.dto.LBDTO;
@@ -41,6 +42,8 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+import java.util.HashSet;
 
 @Service
 public class ALSService {
@@ -56,6 +59,8 @@ public class ALSService {
     private final LBCService lbcService;
     private final Environment environment;
     private final SizeValidator sizeValidator;
+    private final EquipmentCatalogService equipmentCatalogService;
+    private final EquipmentRequirementResolver equipmentRequirementResolver;
 
     public ALSService(
             ALSRepository alsRepository,
@@ -65,7 +70,9 @@ public class ALSService {
             LBCService lbcService,
             FindOrCreateLockService findOrCreateLockService,
             Environment environment,
-            SizeValidator sizeValidator
+            SizeValidator sizeValidator,
+            EquipmentCatalogService equipmentCatalogService,
+            EquipmentRequirementResolver equipmentRequirementResolver
     ) {
         this.alsRepository = alsRepository;
         this.moduleRepository = moduleRepository;
@@ -75,6 +82,8 @@ public class ALSService {
         this.findOrCreateLockService = findOrCreateLockService;
         this.environment = environment;
         this.sizeValidator = sizeValidator;
+        this.equipmentCatalogService = equipmentCatalogService;
+        this.equipmentRequirementResolver = equipmentRequirementResolver;
     }
 
     @Transactional(readOnly = true)
@@ -88,7 +97,7 @@ public class ALSService {
                                 ALSEntity::getId
                         )
                 )
-                .map(entity -> addALSImage(ALSEntityMapper.toDto(entity)))
+                .map(entity -> addALSImage(ALSEntityMapper.toDto(entity, equipmentCatalogService::resolveById)))
                 .toList();
     }
 
@@ -109,7 +118,7 @@ public class ALSService {
                                 )
                         );
 
-        return addALSImage(ALSEntityMapper.toDto(entity));
+        return addALSImage(ALSEntityMapper.toDto(entity, equipmentCatalogService::resolveById));
     }
 
     /**
@@ -190,9 +199,7 @@ public class ALSService {
 
         als.getLbList().add(lb);
 
-        ALSDtoMapper.updateCalculatedFields(als, ALSConfigurationMapper.toDomain(als,
-                candidateLbDto -> TypeLbFactory.forLB(environment, candidateLbDto.getType()),
-                candidateLbcDto -> TypeLbFactory.forLBC(environment, candidateLbcDto.getType())));
+        ALSDtoMapper.updateCalculatedFields(als, toDomain(als));
 
         als.setStringALSImage(
                 ALSImageService.getStringALSImage(
@@ -223,9 +230,7 @@ public class ALSService {
 
         ALS domain;
         try {
-            domain = ALSConfigurationMapper.toDomain(dto,
-                candidateLbDto -> TypeLbFactory.forLB(environment, candidateLbDto.getType()),
-                candidateLbcDto -> TypeLbFactory.forLBC(environment, candidateLbcDto.getType()));
+            domain = toDomain(dto);
         } catch (IllegalStateException exception) {
             var validationResult =
                     new com.lb_calc_web.dto.validation.ValidationResult(
@@ -270,7 +275,7 @@ public class ALSService {
                     duplicate.get().getId()
             );
 
-            return addALSImage(ALSEntityMapper.toDto(duplicate.get()));
+            return addALSImage(ALSEntityMapper.toDto(duplicate.get(), equipmentCatalogService::resolveById));
         }
 
         /*
@@ -327,9 +332,7 @@ public class ALSService {
                 Colors.valueOf(dto.getColorDoor())
         );
 
-        var domain = ALSConfigurationMapper.toDomain(dto,
-                candidateLbDto -> TypeLbFactory.forLB(environment, candidateLbDto.getType()),
-                candidateLbcDto -> TypeLbFactory.forLBC(environment, candidateLbcDto.getType()));
+        var domain = toDomain(dto);
         domain.addStorageModule(LBDtoMapper.toDomain(lbDto, TypeLbFactory.forLB(environment, lbDto.getType())));
 
         return ALSDtoMapper.toDto(domain);
@@ -390,9 +393,7 @@ public class ALSService {
             );
         }
 
-        var domain = ALSConfigurationMapper.toDomain(als,
-                candidateLbDto -> TypeLbFactory.forLB(environment, candidateLbDto.getType()),
-                candidateLbcDto -> TypeLbFactory.forLBC(environment, candidateLbcDto.getType()));
+        var domain = toDomain(als);
         int moduleIndex = ALSDtoMapper.findPhysicalLbIndex(domain, lbIndex);
         domain.replaceModuleAt(
                 moduleIndex,
@@ -442,7 +443,7 @@ public class ALSService {
         var domain = ALSConfigurationMapper.toDomain(als,
                 candidateLbDto -> TypeLbFactory.forLB(environment, candidateLbDto.getType()),
                 candidateLbcDto -> TypeLbFactory.forLBC(environment, candidateLbcDto.getType()));
-        domain.replaceControlModule(LCDtoMapper.toDomain(lc));
+        domain.replaceControlModule(toDomain(lc));
 
         return ALSDtoMapper.toDto(domain);
     }
@@ -465,7 +466,7 @@ public class ALSService {
         var domain = ALSConfigurationMapper.toDomain(als,
                 candidateLbDto -> TypeLbFactory.forLB(environment, candidateLbDto.getType()),
                 candidateLbcDto -> TypeLbFactory.forLBC(environment, candidateLbcDto.getType()));
-        domain.replaceControlModule(LBCDtoMapper.toDomain(lbc, TypeLbFactory.forLBC(environment, lbc.getType())));
+        domain.replaceControlModule(toDomain(lbc));
 
         return ALSDtoMapper.toDto(domain);
     }
@@ -532,6 +533,68 @@ public class ALSService {
         return saveALS(replaceWithNewLBC(findById(alsId)));
     }
 
+    private ALS toDomain(ALSDTO dto) {
+        Set<String> retainedEquipmentIds = findRetainedEquipmentIds(dto);
+        ALS domain = ALSConfigurationMapper.toDomain(
+                dto,
+                candidate -> TypeLbFactory.forLB(environment, candidate.getType()),
+                candidate -> TypeLbFactory.forLBC(environment, candidate.getType()),
+                id -> equipmentCatalogService.resolveForExistingConfiguration(id, retainedEquipmentIds)
+        );
+        for (Module module : domain.getModules()) {
+            if (module instanceof LC lc) {
+                lc.setControlConfiguration(
+                        equipmentRequirementResolver.resolve(lc.getControlConfiguration()));
+            } else if (module instanceof LBC lbc) {
+                lbc.setControlConfiguration(
+                        equipmentRequirementResolver.resolve(lbc.getControlConfiguration()));
+            }
+        }
+        return domain;
+    }
+
+    private LC toDomain(LCDTO dto) {
+        Set<String> retainedEquipmentIds = findRetainedEquipmentIds(dto.getId());
+        LC domain = LCDtoMapper.toDomain(dto,
+                id -> equipmentCatalogService.resolveForExistingConfiguration(id, retainedEquipmentIds));
+        domain.setControlConfiguration(
+                equipmentRequirementResolver.resolve(domain.getControlConfiguration()));
+        return domain;
+    }
+
+    private LBC toDomain(LBCDTO dto) {
+        Set<String> retainedEquipmentIds = findRetainedEquipmentIds(dto.getId());
+        LBC domain = LBCDtoMapper.toDomain(dto,
+                TypeLbFactory.forLBC(environment, dto.getType()),
+                id -> equipmentCatalogService.resolveForExistingConfiguration(id, retainedEquipmentIds));
+        domain.setControlConfiguration(
+                equipmentRequirementResolver.resolve(domain.getControlConfiguration()));
+        return domain;
+    }
+
+    private Set<String> findRetainedEquipmentIds(ALSDTO dto) {
+        Long moduleId = dto.getLC() != null ? dto.getLC().getId()
+                : dto.getLBC() != null ? dto.getLBC().getId() : null;
+        return findRetainedEquipmentIds(moduleId);
+    }
+
+    private Set<String> findRetainedEquipmentIds(Long moduleId) {
+        if (moduleId == null || moduleId <= 0) {
+            return Set.of();
+        }
+        return moduleRepository.findById(moduleId)
+                .map(entity -> {
+                    Set<String> ids = new HashSet<>();
+                    if (entity instanceof LCEntity lcEntity) {
+                        lcEntity.getEquipment().forEach(item -> ids.add(item.getCatalogPositionId()));
+                    } else if (entity instanceof LBCEntity lbcEntity) {
+                        lbcEntity.getEquipment().forEach(item -> ids.add(item.getCatalogPositionId()));
+                    }
+                    return Set.copyOf(ids);
+                })
+                .orElseGet(Set::of);
+    }
+
     private void validate(ALS domain, ALSDTO source) {
         var results = sizeValidator.deepValidateALS(domain);
         ALSDtoMapper.assignValidationObjectIds(results, domain, source);
@@ -577,7 +640,7 @@ public class ALSService {
                         domain.getColorDoor()
                 ).stream()
                 .filter(entity ->
-                        domain.equals(ALSEntityMapper.toDomain(entity))
+                        domain.equals(ALSEntityMapper.toDomain(entity, equipmentCatalogService::resolveById))
                 )
                 .findFirst();
     }
@@ -604,7 +667,7 @@ public class ALSService {
     ) {
         for (ModuleEntity entity : cache) {
             if (isSameModuleType(domainModule, entity)
-                    && domainModule.equals(ModuleEntityMapper.toDomain(entity))) {
+                    && domainModule.equals(ModuleEntityMapper.toDomain(entity, equipmentCatalogService::resolveById))) {
                 return entity;
             }
         }
