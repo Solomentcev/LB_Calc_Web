@@ -46,16 +46,30 @@ public class EquipmentCatalogService {
         if (BarReader.NONE_ID.equals(idOrName) || BarReader.NONE.getName().equals(idOrName)) {
             return BarReader.NONE;
         }
-        return repository.findById(idOrName)
-                .filter(EquipmentCatalogEntity::isActive)
-                .map(this::toDomain)
-                .orElseGet(() -> repository.findAllByActiveTrueOrderByCategoryAscNameAsc()
-                        .stream()
-                        .filter(item -> item.getName().equalsIgnoreCase(idOrName))
-                        .findFirst()
-                        .map(this::toDomain)
-                        .orElseThrow(() -> new IllegalArgumentException(
-                                "Активная позиция оборудования не найдена в каталоге: " + idOrName)));
+
+        var byId = repository.findById(idOrName);
+        if (byId.isPresent()) {
+            EquipmentCatalogEntity item = byId.get();
+            if (!item.isActive()) {
+                throw new IllegalArgumentException(
+                        "Деактивированную позицию нельзя выбрать для новой конфигурации: " + idOrName);
+            }
+            return toDomain(item);
+        }
+
+        List<EquipmentCatalogEntity> matches = repository.findAllByActiveTrueOrderByCategoryAscNameAsc()
+                .stream()
+                .filter(item -> item.getName().equalsIgnoreCase(idOrName))
+                .toList();
+        if (matches.size() == 1) {
+            return toDomain(matches.get(0));
+        }
+        if (matches.size() > 1) {
+            throw new IllegalArgumentException(
+                    "Название оборудования неоднозначно, используйте ID каталога: " + idOrName);
+        }
+        throw new IllegalArgumentException(
+                "Активная позиция оборудования не найдена в каталоге: " + idOrName);
     }
 
     /** Преобразует запись каталога в независимую доменную позицию. */

@@ -60,6 +60,10 @@ final class ControlEquipmentResolver {
                 throw new IllegalArgumentException(
                         "Позиция оборудования не найдена: " + selection.catalogPositionId());
             }
+            if (equipment.equals(Display.NONE) || equipment.equals(BarReader.NONE)) {
+                throw new IllegalArgumentException(
+                        "Служебную позицию «без оборудования» нельзя добавлять в состав комплектации");
+            }
             items.add(new EquipmentItem(equipment, selection.quantity()));
         }
         return EquipmentConfiguration.fromItems(items, List.of());
