@@ -1,10 +1,8 @@
 package com.lb_calc_web.service;
 
-import com.lb_calc_web.domain.model.Employee;
 import com.lb_calc_web.dto.EmployeeDTO;
 import com.lb_calc_web.dto.ProfileDTO;
 import com.lb_calc_web.entity.EmployeeEntity;
-import com.lb_calc_web.mapper.dto.EmployeeDtoMapper;
 import com.lb_calc_web.mapper.entity.EmployeeEntityMapper;
 import com.lb_calc_web.repository.EmployeeRepository;
 import com.lb_calc_web.security.EmployeePrincipal;
@@ -18,7 +16,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -120,9 +117,7 @@ public class EmployeeService implements UserDetailsService {
                         )
                 );
 
-        Employee domain = EmployeeEntityMapper.toDomain(entity);
-
-        return EmployeeDtoMapper.toProfileDto(domain);
+        return EmployeeEntityMapper.toProfileDto(entity);
     }
 
     /**
@@ -255,14 +250,9 @@ public class EmployeeService implements UserDetailsService {
                 Comparator.comparing(EmployeeEntity::getId)
         );
 
-        List<EmployeeDTO> result =
-                new ArrayList<>();
-
-        for (EmployeeEntity entity : entities) {
-            result.add(EmployeeEntityMapper.toDto(entity));
-        }
-
-        return result;
+        return entities.stream()
+                .map(EmployeeEntityMapper::toDto)
+                .toList();
     }
 
     public List<ProfileDTO> getAllProfiles() {
@@ -274,20 +264,9 @@ public class EmployeeService implements UserDetailsService {
                 Comparator.comparing(EmployeeEntity::getId)
         );
 
-        List<ProfileDTO> result =
-                new ArrayList<>();
-
-        for (EmployeeEntity entity : entities) {
-
-            Employee domain =
-                    EmployeeEntityMapper.toDomain(entity);
-
-            result.add(
-                    EmployeeDtoMapper.toProfileDto(domain)
-            );
-        }
-
-        return result;
+        return entities.stream()
+                .map(EmployeeEntityMapper::toProfileDto)
+                .toList();
     }
 
     public boolean existsByEmail(String email) {

@@ -3,6 +3,7 @@ package com.lb_calc_web.mapper.entity;
 import com.lb_calc_web.domain.model.Employee;
 import com.lb_calc_web.entity.EmployeeEntity;
 import com.lb_calc_web.dto.EmployeeDTO;
+import com.lb_calc_web.dto.ProfileDTO;
 import com.lb_calc_web.mapper.dto.EmployeeDtoMapper;
 
 /**
@@ -43,6 +44,13 @@ public final class EmployeeEntityMapper {
      */
     public static EmployeeDTO toDto(EmployeeEntity entity) {
         return EmployeeDtoMapper.toDto(toDomain(entity));
+    }
+
+    /**
+     * Преобразует JPA-сущность сотрудника в DTO профиля.
+     */
+    public static ProfileDTO toProfileDto(EmployeeEntity entity) {
+        return EmployeeDtoMapper.toProfileDto(toDomain(entity));
     }
 
     /**
