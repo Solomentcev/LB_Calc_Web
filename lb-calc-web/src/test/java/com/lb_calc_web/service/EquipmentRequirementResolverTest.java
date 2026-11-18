@@ -62,6 +62,16 @@ class EquipmentRequirementResolverTest {
     }
 
     @Test
+    void resolve_cash_shouldAddCashAcceptorAndPrinterWithoutTerminal() {
+        stubDefaults();
+
+        ControlConfiguration result = resolver.resolve(configuration(Payment.CASH));
+
+        assertCategories(result.getEquipmentConfiguration().getAllEquipment(),
+                "LOCK_CONTROLLER", "CASH_ACCEPTOR", "PRINTER");
+        assertFalse(hasCategory(result, "PAYMENT_TERMINAL"));
+    }
+    @Test
     void resolve_cashAndCards_shouldAddTerminalCashAcceptorAndPrinter() {
         stubDefaults();
 
