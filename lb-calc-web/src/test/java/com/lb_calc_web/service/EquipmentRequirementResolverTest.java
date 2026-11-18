@@ -22,18 +22,14 @@ class EquipmentRequirementResolverTest {
     private final EquipmentRequirementResolver resolver = new EquipmentRequirementResolver(catalog);
 
     @Test
-    void resolve_nonePayment_shouldAddBaseEquipmentWithoutPaymentHardware() {
+    void resolve_nonePayment_shouldAddOnlyMandatoryLockController() {
         stubDefaults();
 
         ControlConfiguration result = resolver.resolve(configuration(Payment.NONE));
 
         assertCategories(result.getEquipmentConfiguration().getAllEquipment(),
-                "COMPUTER", "LOCK_CONTROLLER", "POWER_SUPPLY", "UPS");
-        assertEquals(4, result.getEquipmentConfiguration().getAllItems().stream()
-                .filter(item -> Set.of("COMPUTER", "LOCK_CONTROLLER", "POWER_SUPPLY", "UPS")
-                        .contains(item.equipment().getCategory()))
-                .filter(item -> item.quantity() == 1)
-                .count());
+                "LOCK_CONTROLLER");
+        assertEquals(1, result.getEquipmentConfiguration().getAllItems().size());
         verify(catalog, never()).findActiveDefault("PAYMENT_TERMINAL");
         verify(catalog, never()).findActiveDefault("CASH_ACCEPTOR");
     }
@@ -45,8 +41,7 @@ class EquipmentRequirementResolverTest {
         ControlConfiguration result = resolver.resolve(configuration(Payment.CASHLESS));
 
         assertCategories(result.getEquipmentConfiguration().getAllEquipment(),
-                "COMPUTER", "LOCK_CONTROLLER", "POWER_SUPPLY", "UPS",
-                "PAYMENT_TERMINAL", "PRINTER");
+                "LOCK_CONTROLLER", "PAYMENT_TERMINAL", "PRINTER");
         assertFalse(hasCategory(result, "CASH_ACCEPTOR"));
     }
 
@@ -57,10 +52,29 @@ class EquipmentRequirementResolverTest {
         ControlConfiguration result = resolver.resolve(configuration(Payment.CASH_AND_CARDS));
 
         assertCategories(result.getEquipmentConfiguration().getAllEquipment(),
-                "COMPUTER", "LOCK_CONTROLLER", "POWER_SUPPLY", "UPS",
-                "PAYMENT_TERMINAL", "CASH_ACCEPTOR", "PRINTER");
+                "LOCK_CONTROLLER", "PAYMENT_TERMINAL", "CASH_ACCEPTOR", "PRINTER");
     }
 
+    @Test
+    void resolve_selectedDisplayWithoutPin_shouldPreserveDisplay() {
+        stubDefaults();
+        Equipment display = new CatalogEquipment("DISPLAY_LC17", "DISPLAY",
+                "LC17", "", 0, 0, 0, 450, 338, 270,
+                false, false, false, false);
+        ControlConfiguration source = new ControlConfiguration(
+                Payment.NONE, EnumSet.noneOf(AccessMethod.class), EnumSet.noneOf(
+                com.lb_calc_web.domain.attributes.PrintOption.class),
+                EquipmentConfiguration.fromItems(List.of(
+                        new com.lb_calc_web.domain.equipment.EquipmentItem(display, 1)),
+                        List.of())
+        );
+
+        ControlConfiguration result = resolver.resolve(source);
+
+        assertCategories(result.getEquipmentConfiguration().getAllEquipment(),
+                "LOCK_CONTROLLER", "DISPLAY");
+        assertTrue(result.getEquipmentConfiguration().getAllEquipment().contains(display));
+    }
     @Test
     void resolve_shouldPreserveAdditionalEquipment() {
         stubDefaults();
@@ -87,13 +101,11 @@ class EquipmentRequirementResolverTest {
 
     private void stubDefaults() {
         Map<String, String> categories = Map.of(
-                "COMPUTER", "COMPUTER_STANDARD",
                 "LOCK_CONTROLLER", "LOCK_CONTROLLER_STANDARD",
-                "POWER_SUPPLY", "POWER_SUPPLY_STANDARD",
-                "UPS", "UPS_STANDARD",
                 "PAYMENT_TERMINAL", "PAYMENT_TERMINAL_STANDARD",
                 "CASH_ACCEPTOR", "CASH_ACCEPTOR_STANDARD",
-                "PRINTER", "PRINTER_STANDARD"
+                "PRINTER", "PRINTER_STANDARD",
+                "DISPLAY", "DISPLAY_LC10"
         );
         categories.forEach((category, id) ->
                 when(catalog.findActiveDefault(category)).thenReturn(equipment(category, id)));
