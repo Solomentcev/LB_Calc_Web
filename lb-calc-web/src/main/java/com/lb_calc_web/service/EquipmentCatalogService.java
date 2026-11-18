@@ -208,6 +208,20 @@ public class EquipmentCatalogService {
     }
 
     @Transactional
+    public void delete(String id) {
+        EquipmentCatalogEntity item = get(id);
+        if (repository.isUsedInConfigurations(id)) {
+            throw new IllegalStateException(
+                    "Нельзя удалить позицию оборудования, используемую в конфигурациях: " + id);
+        }
+        if (item.isActive() && item.isDefaultPosition()) {
+            throw new IllegalStateException(
+                    "Перед удалением активной модели по умолчанию назначьте другую модель: " + id);
+        }
+        repository.delete(item);
+    }
+
+    @Transactional
     public EquipmentCatalogEntity setDefault(String id, boolean defaultPosition) {
         EquipmentCatalogEntity item = get(id);
         if (defaultPosition && !item.isActive()) {
