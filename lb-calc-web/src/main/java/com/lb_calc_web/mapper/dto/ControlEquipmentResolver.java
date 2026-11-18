@@ -35,10 +35,18 @@ final class ControlEquipmentResolver {
             boolean printer, Integer printerQuantity,
             boolean rfidReader, Integer rfidReaderQuantity,
             String moduleType, Function<String, Equipment> equipmentResolver) {
-        int displayCount = requireQuantity(displayQuantity, "дисплея");
-        int barReaderCount = requireQuantity(barReaderQuantity, "сканера штрихкода");
-        int printerCount = requireQuantity(printerQuantity, "принтера");
-        int rfidCount = requireQuantity(rfidReaderQuantity, "RFID-считывателя");
+        int displayCount = resolveQuantity(
+                displayQuantity,
+                isSelected(displayName, Display.NONE_ID, Display.NONE.getName()) ? 0 : 1,
+                "дисплея"
+        );
+        int barReaderCount = resolveQuantity(
+                barReaderQuantity,
+                isSelected(barReaderName, BarReader.NONE_ID, BarReader.NONE.getName()) ? 0 : 1,
+                "сканера штрихкода"
+        );
+        int printerCount = resolveQuantity(printerQuantity, printer ? 1 : 0, "принтера");
+        int rfidCount = resolveQuantity(rfidReaderQuantity, rfidReader ? 1 : 0, "RFID-считывателя");
         validatePresence(printer, printerCount, "принтера");
         validatePresence(rfidReader, rfidCount, "RFID-считывателя");
 
@@ -69,10 +77,16 @@ final class ControlEquipmentResolver {
         return EquipmentConfiguration.fromItems(items, List.of());
     }
 
+    private static int resolveQuantity(Integer quantity, int legacyValue, String name) {
+        return quantity == null ? legacyValue : requireQuantity(quantity, name);
+    }
+
+    private static boolean isSelected(String value, String noneId, String noneName) {
+        return value != null && !value.isBlank()
+                && !noneId.equals(value) && !noneName.equals(value);
+    }
+
     private static int requireQuantity(Integer quantity, String name) {
-        if (quantity == null) {
-            throw new IllegalArgumentException("Количество " + name + " должно быть задано");
-        }
         if (quantity < 0) {
             throw new IllegalArgumentException("Количество оборудования не может быть отрицательным");
         }
