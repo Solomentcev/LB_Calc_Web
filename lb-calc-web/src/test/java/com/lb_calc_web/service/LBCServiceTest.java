@@ -56,6 +56,7 @@ class LBCServiceTest {
                 .withProperty("lbc.payment.default", "NONE")
                 .withProperty("lbc.printer.default", "false")
                 .withProperty("lbc.rfid-reader.default", "true")
+                .withProperty("lbc.access-methods.default", "RFID")
                 .withProperty("lbc.color.body.default", "Blue")
                 .withProperty("lbc.color.door.default", "White")
                 .withProperty("lbc.direction.default", "LEFT")
@@ -89,6 +90,7 @@ class LBCServiceTest {
         assertEquals(0, result.getBarReaderQuantity());
         assertEquals(0, result.getPrinterQuantity());
         assertEquals(1, result.getRfidReaderQuantity());
+        assertTrue(result.getAccessMethods().contains("RFID"));
         assertNotNull(result.getStringLBCImage());
     }
 
