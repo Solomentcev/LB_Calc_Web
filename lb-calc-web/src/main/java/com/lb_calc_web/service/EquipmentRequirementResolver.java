@@ -29,7 +29,8 @@ public class EquipmentRequirementResolver {
 
     private static final Set<String> MANAGED_CATEGORIES = Set.of(
             "DISPLAY", "BAR_READER", "PRINTER", "RFID_READER",
-            LOCK_CONTROLLER, PAYMENT_TERMINAL, CASH_ACCEPTOR
+            LOCK_CONTROLLER, PAYMENT_TERMINAL, CASH_ACCEPTOR,
+            "COMPUTER", "POWER_SUPPLY", "UPS"
     );
 
     private final EquipmentCatalogService equipmentCatalogService;
