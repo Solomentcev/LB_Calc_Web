@@ -76,13 +76,11 @@ public class EquipmentRequirementResolver {
             return;
         }
 
-        Equipment candidate = equipmentCatalogService.findActive().stream()
-                .map(equipmentCatalogService::toDomain)
-                .filter(item -> category.equals(item.getCategory()))
-                .filter(compatibility)
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException(
-                        errorMessage + ". В активном каталоге нет подходящей модели."));
+        Equipment candidate = equipmentCatalogService.findActiveDefault(category);
+        if (!compatibility.test(candidate)) {
+            throw new IllegalArgumentException(
+                    errorMessage + ". Активная модель по умолчанию не поддерживает требуемую функцию.");
+        }
         selected.add(new EquipmentItem(candidate, 1));
     }
 }

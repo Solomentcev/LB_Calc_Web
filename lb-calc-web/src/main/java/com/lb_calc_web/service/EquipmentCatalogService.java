@@ -85,6 +85,18 @@ public class EquipmentCatalogService {
         return repository.findAllByActiveTrueOrderByCategoryAscNameAsc();
     }
 
+    public Equipment findActiveDefault(String category) {
+        List<EquipmentCatalogEntity> defaults =
+                repository.findAllByCategoryAndActiveTrueAndDefaultPositionTrueOrderByNameAsc(category);
+        if (defaults.size() != 1) {
+            throw new IllegalStateException(
+                    "Для категории " + category
+                            + " должна быть ровно одна активная модель по умолчанию; найдено: "
+                            + defaults.size());
+        }
+        return toDomain(defaults.get(0));
+    }
+
     public EquipmentCatalogEntity get(String id) {
         return repository.findById(id).orElseThrow(
                 () -> new IllegalArgumentException("Оборудование не найдено: " + id));
@@ -95,6 +107,12 @@ public class EquipmentCatalogService {
         if (repository.existsById(item.getCatalogPositionId())) {
             throw new IllegalArgumentException("ID оборудования уже существует: "
                     + item.getCatalogPositionId());
+        }
+        if (item.isActive() && item.isDefaultPosition()
+                && !repository.findAllByCategoryAndActiveTrueAndDefaultPositionTrueOrderByNameAsc(
+                        item.getCategory()).isEmpty()) {
+            throw new IllegalArgumentException(
+                    "Для категории уже задана активная модель по умолчанию: " + item.getCategory());
         }
         return repository.save(item);
     }
@@ -138,8 +156,33 @@ public class EquipmentCatalogService {
     }
 
     @Transactional
+    public EquipmentCatalogEntity setDefault(String id, boolean defaultPosition) {
+        EquipmentCatalogEntity item = get(id);
+        if (defaultPosition && !item.isActive()) {
+            throw new IllegalArgumentException(
+                    "Деактивированная модель не может быть моделью по умолчанию: " + id);
+        }
+        if (defaultPosition) {
+            repository.findAllByCategoryAndActiveTrueAndDefaultPositionTrueOrderByNameAsc(
+                            item.getCategory())
+                    .stream()
+                    .filter(existing -> !existing.getCatalogPositionId().equals(id))
+                    .forEach(existing -> existing.setDefaultPosition(false));
+            repository.flush();
+        }
+        item.setDefaultPosition(defaultPosition);
+        return item;
+    }
+
+    @Transactional
     public EquipmentCatalogEntity setActive(String id, boolean active) {
         EquipmentCatalogEntity item = get(id);
+        if (active && item.isDefaultPosition()
+                && !repository.findAllByCategoryAndActiveTrueAndDefaultPositionTrueOrderByNameAsc(
+                        item.getCategory()).isEmpty()) {
+            throw new IllegalArgumentException(
+                    "Для категории уже есть активная модель по умолчанию: " + item.getCategory());
+        }
         if (active) item.activate(); else item.deactivate();
         return item;
     }
