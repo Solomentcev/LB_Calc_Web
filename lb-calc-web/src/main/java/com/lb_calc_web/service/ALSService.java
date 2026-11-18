@@ -88,7 +88,7 @@ public class ALSService {
                                 ALSEntity::getId
                         )
                 )
-                .map(this::toDto)
+                .map(entity -> addALSImage(ALSDtoMapper.toDto(entity)))
                 .toList();
     }
 
@@ -109,7 +109,7 @@ public class ALSService {
                                 )
                         );
 
-        return toDto(entity);
+        return addALSImage(ALSDtoMapper.toDto(entity));
     }
 
     /**
@@ -190,7 +190,7 @@ public class ALSService {
 
         als.getLbList().add(lb);
 
-        recalculateDto(als);
+        ALSDtoMapper.updateCalculatedFields(als, ALSConfigurationMapper.toDomain(als, environment));
 
         als.setStringALSImage(
                 ALSImageService.getStringALSImage(
@@ -266,7 +266,7 @@ public class ALSService {
                     duplicate.get().getId()
             );
 
-            return toDto(duplicate.get());
+            return addALSImage(ALSDtoMapper.toDto(duplicate.get()));
         }
 
         /*
@@ -285,7 +285,7 @@ public class ALSService {
                 saved.getId()
         );
 
-        return toDto(saved);
+        return addALSImage(ALSDtoMapper.toDto(saved));
     }
 
     @Transactional
@@ -351,7 +351,7 @@ public class ALSService {
         }
 
         var domain = ALSConfigurationMapper.toDomain(dto, environment);
-        int moduleIndex = findPhysicalLbIndex(domain, lbIndex);
+        int moduleIndex = ALSDtoMapper.findPhysicalLbIndex(domain, lbIndex);
         domain.removeModuleAt(moduleIndex);
 
         return ALSDtoMapper.toDto(domain);
@@ -395,29 +395,6 @@ public class ALSService {
     /**
      * Находит физический индекс LB по его позиции в DTO-списке LB.
      */
-    private int findPhysicalLbIndex(
-            com.lb_calc_web.domain.model.ALS domain,
-            int lbIndex
-    ) {
-        int currentLbIndex = 0;
-        List<com.lb_calc_web.domain.model.Module> modules =
-                domain.getModules();
-
-        for (int i = 0; i < modules.size(); i++) {
-            if (modules.get(i) instanceof LB) {
-                if (currentLbIndex == lbIndex) {
-                    return i;
-                }
-
-                currentLbIndex++;
-            }
-        }
-
-        throw new IllegalStateException(
-                "Не удалось сопоставить LB DTO с модулем доменной ALS"
-        );
-    }
-
     /**
      * Находит LBC по идентификатору внутри уже загруженной ALS.
      */
@@ -543,7 +520,7 @@ public class ALSService {
 
     private void validate(ALS domain, ALSDTO source) {
         var results = sizeValidator.deepValidateALS(domain);
-        assignValidationObjectIds(results, domain, source);
+        ALSDtoMapper.assignValidationObjectIds(results, domain, source);
 
         var errors = results.stream()
                 .filter(result -> !result.isValid())
@@ -566,47 +543,6 @@ public class ALSService {
     /**
      * Добавляет persistence ID к результатам, не включая их в доменные модели.
      */
-    private void assignValidationObjectIds(
-            List<com.lb_calc_web.dto.validation.ValidationResult> results,
-            ALS domain,
-            ALSDTO source
-    ) {
-        if (results.isEmpty()) {
-            return;
-        }
-
-        results.get(0).setObjectId(source.getId());
-
-        List<LBDTO> sourceLBs = source.getLbList() == null
-                ? List.of()
-                : source.getLbList().stream()
-                        .filter(Objects::nonNull)
-                        .toList();
-
-        int resultIndex = 1;
-        int lbIndex = 0;
-
-        for (Module module : domain.getModules()) {
-            Long moduleId = null;
-
-            if (module instanceof LBC && source.getLBC() != null) {
-                moduleId = source.getLBC().getId();
-            } else if (module instanceof LC && source.getLC() != null) {
-                moduleId = source.getLC().getId();
-            } else if (module instanceof LB) {
-                if (lbIndex < sourceLBs.size()) {
-                    moduleId = sourceLBs.get(lbIndex).getId();
-                }
-                lbIndex++;
-            }
-
-            if (resultIndex < results.size()) {
-                results.get(resultIndex).setObjectId(moduleId);
-            }
-            resultIndex++;
-        }
-    }
-
     /**
      * Ищет уже сохранённую конфигурацию с тем же доменным содержимым.
      *
@@ -717,92 +653,6 @@ public class ALSService {
      * выполняются только доменной моделью. DTO получает готовые
      * значения и не содержит самостоятельной бизнес-логики.</p>
      */
-    private void recalculateDto(
-            ALSDTO dto
-    ) {
-        Objects.requireNonNull(
-                dto,
-                "ALS не должен быть null"
-        );
-
-        var domain = ALSConfigurationMapper.toDomain(dto, environment);
-        ALSDTO calculated = ALSDtoMapper.toDto(domain);
-
-        dto.setName(calculated.getName());
-        dto.setDescription(calculated.getDescription());
-        dto.setWidth(calculated.getWidth());
-        dto.setCountCells(calculated.getCountCells());
-        dto.setDepthCell(calculated.getDepthCell());
-        dto.setPositionControlModule(
-                calculated.getPositionControlModule()
-        );
-        dto.setModuleOrder(calculated.getModuleOrder());
-    }
-
-    /**
-     * Entity -> DTO с восстановлением persistence-ID дочерних модулей.
-     *
-     * <p>ID не входят в domain-модель, поэтому обогащение выполняется
-     * здесь, на границе persistence/application.</p>
-     */
-    ALSDTO toDto(ALSEntity entity) {
-        ALSDTO dto =
-                ALSDtoMapper.toDto(
-                        ALSEntityMapper.toDomain(entity)
-                );
-
-        dto.setId(entity.getId());
-
-        enrichModuleIds(
-                dto,
-                entity
-        );
-
-        return addALSImage(dto);
-    }
-
-    void enrichModuleIds(
-            ALSDTO dto,
-            ALSEntity entity
-    ) {
-        int lbIndex = 0;
-
-        List<ALSModuleEntity> associations =
-                entity.getModules()
-                        .stream()
-                        .sorted(
-                                Comparator.comparingInt(
-                                        ALSModuleEntity::getModuleOrder
-                                )
-                        )
-                        .toList();
-
-        for (ALSModuleEntity association : associations) {
-            ModuleEntity module =
-                    association.getModule();
-
-            if (module instanceof LBCEntity
-                    && dto.getLBC() != null) {
-                dto.getLBC().setId(module.getId());
-                continue;
-            }
-
-            if (module instanceof LCEntity
-                    && dto.getLC() != null) {
-                dto.getLC().setId(module.getId());
-                continue;
-            }
-
-            if (module instanceof LBEntity
-                    && dto.getLbList() != null
-                    && lbIndex < dto.getLbList().size()) {
-                dto.getLbList()
-                        .get(lbIndex++)
-                        .setId(module.getId());
-            }
-        }
-    }
-
     private ALSDTO addALSImage(
             ALSDTO dto
     ) {

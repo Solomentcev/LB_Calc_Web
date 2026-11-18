@@ -12,6 +12,9 @@ import com.lb_calc_web.dto.ALSDTO;
 import com.lb_calc_web.dto.ALSModuleOrderDTO;
 import com.lb_calc_web.dto.LBDTO;
 import com.lb_calc_web.dto.LBCDTO;
+import com.lb_calc_web.dto.validation.ValidationResult;
+import com.lb_calc_web.entity.ALSEntity;
+import com.lb_calc_web.mapper.entity.ALSEntityMapper;
 
 import java.util.function.Function;
 
@@ -89,6 +92,71 @@ public final class ALSDtoMapper {
         dto.setModuleOrder(moduleOrder);
 
         return dto;
+    }
+
+    /**
+     * Преобразует persistence-сущность ALS в DTO с восстановлением ID.
+     */
+    public static ALSDTO toDto(ALSEntity entity) {
+        if (entity == null) return null;
+        ALSDTO dto = toDto(ALSEntityMapper.toDomain(entity));
+        dto.setId(entity.getId());
+        ALSEntityMapper.enrichModuleIds(dto, entity);
+        return dto;
+    }
+
+    /**
+     * Переносит вычисленные доменной моделью характеристики в существующий DTO.
+     */
+    public static void updateCalculatedFields(ALSDTO target, ALS domain) {
+        Objects.requireNonNull(target, "Целевой ALSDTO не должен быть null");
+        Objects.requireNonNull(domain, "ALS не должна быть null");
+        ALSDTO calculated = toDto(domain);
+        target.setName(calculated.getName());
+        target.setDescription(calculated.getDescription());
+        target.setWidth(calculated.getWidth());
+        target.setCountCells(calculated.getCountCells());
+        target.setDepthCell(calculated.getDepthCell());
+        target.setPositionControlModule(calculated.getPositionControlModule());
+        target.setModuleOrder(calculated.getModuleOrder());
+    }
+
+    /**
+     * Переносит persistence ID ALS и её модулей в результаты валидации.
+     */
+    public static void assignValidationObjectIds(List<ValidationResult> results, ALS domain, ALSDTO source) {
+        if (results.isEmpty()) return;
+        results.get(0).setObjectId(source.getId());
+        List<LBDTO> sourceLBs = source.getLbList() == null ? List.of()
+                : source.getLbList().stream().filter(Objects::nonNull).toList();
+        int resultIndex = 1, lbIndex = 0;
+        for (Module module : domain.getModules()) {
+            Long moduleId = null;
+            if (module instanceof LBC && source.getLBC() != null) moduleId = source.getLBC().getId();
+            else if (module instanceof LC && source.getLC() != null) moduleId = source.getLC().getId();
+            else if (module instanceof LB) {
+                if (lbIndex < sourceLBs.size()) moduleId = sourceLBs.get(lbIndex).getId();
+                lbIndex++;
+            }
+            if (resultIndex < results.size()) results.get(resultIndex).setObjectId(moduleId);
+            resultIndex++;
+        }
+    }
+
+    /**
+     * Находит физический индекс LB в доменном списке модулей по индексу DTO.
+     */
+    public static int findPhysicalLbIndex(ALS domain, int lbIndex) {
+        Objects.requireNonNull(domain, "ALS не должна быть null");
+        int currentLbIndex = 0;
+        List<Module> modules = domain.getModules();
+        for (int i = 0; i < modules.size(); i++) {
+            if (modules.get(i) instanceof LB) {
+                if (currentLbIndex == lbIndex) return i;
+                currentLbIndex++;
+            }
+        }
+        throw new IllegalStateException("Не удалось сопоставить LB DTO с модулем доменной ALS");
     }
 
     public static ALS toDomain(ALSDTO dto) {
