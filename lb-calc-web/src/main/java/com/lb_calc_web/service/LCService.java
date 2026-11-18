@@ -238,7 +238,7 @@ public class LCService {
         LC domain;
         try {
             Set<String> retainedEquipmentIds = findRetainedEquipmentIds(dto.getId());
-domain = LCDtoMapper.toDomain(dto, id -> equipmentCatalogService.resolveForExistingConfiguration(id, retainedEquipmentIds));
+            domain = LCDtoMapper.toDomain(dto, id -> equipmentCatalogService.resolveForExistingConfiguration(id, retainedEquipmentIds));
             domain.setControlConfiguration(
                     equipmentRequirementResolver.resolve(domain.getControlConfiguration())
             );

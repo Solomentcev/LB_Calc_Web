@@ -32,7 +32,6 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -233,7 +232,7 @@ public class LBCService {
         try {
             TypeLb typeLb = TypeLbFactory.forLBC(environment, dto.getType());
             Set<String> retainedEquipmentIds = findRetainedEquipmentIds(dto.getId());
-domain = LBCDtoMapper.toDomain(dto, typeLb, id -> equipmentCatalogService.resolveForExistingConfiguration(id, retainedEquipmentIds));
+            domain = LBCDtoMapper.toDomain(dto, typeLb, id -> equipmentCatalogService.resolveForExistingConfiguration(id, retainedEquipmentIds));
             domain.setControlConfiguration(
                     equipmentRequirementResolver.resolve(domain.getControlConfiguration())
             );
