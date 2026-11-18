@@ -179,8 +179,7 @@ public final class ALSDtoMapper {
     public static ALS toDomain(
             ALSDTO dto,
             Function<LBDTO, TypeLb> lbTypeResolver,
-            Function<LBCDTO, TypeLb> lbcTypeResolver,
-            Function<String, Equipment> equipmentResolver
+            Function<LBCDTO, TypeLb> lbcTypeResolver
     ) {
         return toDomain(dto, lbTypeResolver, lbcTypeResolver, EquipmentCatalog::resolve);
     }
@@ -259,7 +258,8 @@ public final class ALSDtoMapper {
     private static List<Module> restoreLegacyOrder(
             ALSDTO dto,
             Function<LBDTO, TypeLb> lbTypeResolver,
-            Function<LBCDTO, TypeLb> lbcTypeResolver
+            Function<LBCDTO, TypeLb> lbcTypeResolver,
+            Function<String, Equipment> equipmentResolver
     ) {
         List<LBDTO> lbDtos = dto.getLbList() == null ? List.of() : dto.getLbList();
         List<Module> storageModules = new ArrayList<>();
@@ -283,7 +283,8 @@ public final class ALSDtoMapper {
     private static List<Module> restoreExplicitOrder(
             ALSDTO dto,
             Function<LBDTO, TypeLb> lbTypeResolver,
-            Function<LBCDTO, TypeLb> lbcTypeResolver
+            Function<LBCDTO, TypeLb> lbcTypeResolver,
+            Function<String, Equipment> equipmentResolver
     ) {
         List<LBDTO> lbDtos = dto.getLbList() == null ? List.of() : dto.getLbList();
         boolean[] usedLbIndexes = new boolean[lbDtos.size()];
