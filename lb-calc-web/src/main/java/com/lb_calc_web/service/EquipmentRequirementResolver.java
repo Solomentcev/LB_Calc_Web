@@ -56,7 +56,8 @@ public class EquipmentRequirementResolver {
                 || configuration.getPayment() == Payment.CASH_AND_CARDS) {
             requiredCategories.add(PAYMENT_TERMINAL);
         }
-        if (configuration.getPayment() == Payment.CASH_AND_CARDS) {
+        if (configuration.getPayment() == Payment.CASH
+                || configuration.getPayment() == Payment.CASH_AND_CARDS) {
             requiredCategories.add(CASH_ACCEPTOR);
         }
 
