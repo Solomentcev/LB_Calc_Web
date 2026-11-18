@@ -30,16 +30,17 @@ public class EquipmentRequirementResolver {
         List<EquipmentItem> selected = new ArrayList<>(
                 configuration.getEquipmentConfiguration().getAllItems());
 
-        if (configuration.getAccessMethods().contains(AccessMethod.BARCODE)) {
-            ensureEquipment(selected, "BAR_READER",
-                    equipment -> equipment.supportsBarcode1d()
-                            || equipment.supportsBarcode2d(),
-                    "Для доступа по штрихкоду нужен совместимый сканер");
-        }
-
-        if (configuration.getAccessMethods().contains(AccessMethod.QR_CODE)) {
-            ensureEquipment(selected, "BAR_READER", Equipment::supportsBarcode2d,
-                    "Для доступа по QR-коду нужен 2D-сканер");
+        boolean requiresBarcode = configuration.getAccessMethods().contains(AccessMethod.BARCODE);
+        boolean requiresQrCode = configuration.getAccessMethods().contains(AccessMethod.QR_CODE);
+        if (requiresBarcode || requiresQrCode) {
+            Predicate<Equipment> barcodeCompatibility = equipment ->
+                    (!requiresBarcode || equipment.supportsBarcode1d()
+                            || equipment.supportsBarcode2d())
+                            && (!requiresQrCode || equipment.supportsBarcode2d());
+            String message = requiresQrCode
+                    ? "Для выбранных способов доступа нужен совместимый 2D-сканер"
+                    : "Для доступа по штрихкоду нужен совместимый сканер";
+            ensureEquipment(selected, "BAR_READER", barcodeCompatibility, message);
         }
 
         if (configuration.getAccessMethods().contains(AccessMethod.RFID)) {
