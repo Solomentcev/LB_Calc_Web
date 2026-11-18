@@ -61,14 +61,17 @@ public final class EquipmentSelectionMapper {
             throw new IllegalArgumentException("Количество дисплеев не может быть отрицательным");
         }
 
+        if (Integer.valueOf(0).equals(displayQuantity)) {
+            return List.copyOf(result);
+        }
+
         if (displayName == null || displayName.isBlank()) {
             addAtDisplayPosition(result, existingDisplaySelection, displayIndex);
             return List.copyOf(result);
         }
 
         if (Display.NONE_ID.equals(displayName)
-                || Display.NONE.getName().equals(displayName)
-                || Integer.valueOf(0).equals(displayQuantity)) {
+                || Display.NONE.getName().equals(displayName)) {
             return List.copyOf(result);
         }
 
