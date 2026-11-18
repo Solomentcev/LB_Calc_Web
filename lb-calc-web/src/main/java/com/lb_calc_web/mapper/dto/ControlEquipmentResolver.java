@@ -7,6 +7,7 @@ import com.lb_calc_web.domain.equipment.EquipmentCatalog;
 import com.lb_calc_web.domain.equipment.EquipmentItem;
 import com.lb_calc_web.domain.equipment.Printer;
 import com.lb_calc_web.domain.equipment.RfidReader;
+import com.lb_calc_web.dto.EquipmentSelectionDTO;
 import com.lb_calc_web.domain.model.EquipmentConfiguration;
 
 import java.util.ArrayList;
@@ -46,6 +47,21 @@ final class ControlEquipmentResolver {
         addItem(items, barReaderName, barReaderCount, BarReader.NONE, moduleType, equipmentResolver);
         addCatalogItem(items, Printer.CATALOG_POSITION_ID, printerCount, equipmentResolver);
         addCatalogItem(items, RfidReader.CATALOG_POSITION_ID, rfidCount, equipmentResolver);
+        return EquipmentConfiguration.fromItems(items, List.of());
+    }
+
+    static EquipmentConfiguration resolve(
+            List<EquipmentSelectionDTO> selections,
+            Function<String, Equipment> equipmentResolver) {
+        List<EquipmentItem> items = new ArrayList<>();
+        for (EquipmentSelectionDTO selection : selections) {
+            Equipment equipment = equipmentResolver.apply(selection.catalogPositionId());
+            if (equipment == null) {
+                throw new IllegalArgumentException(
+                        "Позиция оборудования не найдена: " + selection.catalogPositionId());
+            }
+            items.add(new EquipmentItem(equipment, selection.quantity()));
+        }
         return EquipmentConfiguration.fromItems(items, List.of());
     }
 

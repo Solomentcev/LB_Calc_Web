@@ -13,6 +13,7 @@ import com.lb_calc_web.domain.model.ControlConfiguration;
 import com.lb_calc_web.domain.model.EquipmentConfiguration;
 import com.lb_calc_web.domain.model.LC;
 import com.lb_calc_web.dto.LCDTO;
+import com.lb_calc_web.dto.EquipmentSelectionDTO;
 
 import java.util.EnumSet;
 import java.util.List;
@@ -105,6 +106,10 @@ public final class LCDtoMapper {
 
         EquipmentConfiguration equipmentConfiguration =
                 configuration.getEquipmentConfiguration();
+        dto.setEquipmentSelections(equipmentConfiguration.getAllItems().stream()
+                .map(item -> new EquipmentSelectionDTO(
+                        item.equipment().getCatalogPositionId(), item.quantity()))
+                .toList());
         dto.setDisplayQuantity(display == null ? 0
                 : equipmentConfiguration.getQuantity(display));
         dto.setBarReaderQuantity(barReader == null ? 0
@@ -129,18 +134,15 @@ public final class LCDtoMapper {
         }
 
         EquipmentConfiguration equipmentConfiguration =
-                ControlEquipmentResolver.resolve(
-                dto.getDisplay(),
-                dto.getDisplayQuantity(),
-                dto.getBarReader(),
-                dto.getBarReaderQuantity(),
-                dto.isPrinter(),
-                dto.getPrinterQuantity(),
-                dto.isRfidReader(),
-                dto.getRfidReaderQuantity(),
-                "LC",
-                equipmentResolver
-                );
+                dto.getEquipmentSelections() != null
+                        ? ControlEquipmentResolver.resolve(
+                                dto.getEquipmentSelections(), equipmentResolver)
+                        : ControlEquipmentResolver.resolve(
+                                dto.getDisplay(), dto.getDisplayQuantity(),
+                                dto.getBarReader(), dto.getBarReaderQuantity(),
+                                dto.isPrinter(), dto.getPrinterQuantity(),
+                                dto.isRfidReader(), dto.getRfidReaderQuantity(),
+                                "LC", equipmentResolver);
 
         ControlConfiguration controlConfiguration =
                 new ControlConfiguration(
