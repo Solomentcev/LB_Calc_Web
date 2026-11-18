@@ -12,7 +12,7 @@ import java.util.Objects;
 @Table(name = "equipment_catalog")
 public class EquipmentCatalogEntity {
     @Id
-    @Column(name = "catalog_position_id", nullable = false, length = 100)
+    @Column(name = "catalog_position_id", nullable = false, length = 255)
     private String catalogPositionId;
 
     @Column(name = "category", nullable = false, length = 40)
