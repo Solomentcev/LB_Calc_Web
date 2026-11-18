@@ -63,6 +63,61 @@ class EquipmentRequirementResolverTest {
     }
 
     @Test
+    void resolve_barcode_shouldAddCompatibleReaderAndPrinter() {
+        stubDefaults();
+        when(catalog.findActiveDefault("BAR_READER"))
+                .thenReturn(equipment("BAR_READER", "BAR_READER_1D", true, false, false, false));
+
+        ControlConfiguration source = configurationWithAccess(AccessMethod.BARCODE);
+        ControlConfiguration result = resolver.resolve(source);
+
+        assertCategories(result, "BAR_READER", "PRINTER");
+    }
+
+    @Test
+    void resolve_qrCode_shouldRequireTwoDimensionalReaderAndPrinter() {
+        stubDefaults();
+        when(catalog.findActiveDefault("BAR_READER"))
+                .thenReturn(equipment("BAR_READER", "BAR_READER_2D", true, true, false, false));
+
+        ControlConfiguration source = configurationWithAccess(AccessMethod.QR_CODE);
+        ControlConfiguration result = resolver.resolve(source);
+
+        assertCategories(result, "BAR_READER", "PRINTER");
+    }
+
+    @Test
+    void resolve_rfid_shouldAddReaderWithoutPrinter() {
+        stubDefaults();
+        when(catalog.findActiveDefault("RFID_READER"))
+                .thenReturn(equipment("RFID_READER", "RFID_READER_STANDARD", false, false, true, false));
+
+        ControlConfiguration source = configurationWithAccess(AccessMethod.RFID);
+        ControlConfiguration result = resolver.resolve(source);
+
+        assertCategories(result, "RFID_READER");
+    }
+
+    @Test
+    void resolve_pinWithRfid_shouldAddDefaultDisplayAndPrinter() {
+        stubDefaults();
+        when(catalog.findActiveDefault("RFID_READER"))
+                .thenReturn(equipment("RFID_READER", "RFID_READER_STANDARD", false, false, true, false));
+
+        ControlConfiguration source = configurationWithAccess(AccessMethod.PIN, AccessMethod.RFID);
+        ControlConfiguration result = resolver.resolve(source);
+
+        assertCategories(result, "DISPLAY", "RFID_READER", "PRINTER");
+    }
+
+    @Test
+    void resolve_pinWithoutAdditionalAccessMethod_shouldFail() {
+        ControlConfiguration source = configurationWithAccess(AccessMethod.PIN);
+
+        assertThrows(IllegalArgumentException.class, () -> resolver.resolve(source));
+    }
+
+    @Test
     void resolve_selectedDisplayWithoutPin_shouldPreserveDisplay() {
         stubDefaults();
         Equipment display = equipment("DISPLAY", "DISPLAY_LC17");
@@ -97,6 +152,12 @@ class EquipmentRequirementResolverTest {
         assertTrue(result.getEquipmentConfiguration().getRequiredItems().isEmpty());
     }
 
+    private ControlConfiguration configurationWithAccess(AccessMethod... methods) {
+        return new ControlConfiguration(Payment.NONE, EnumSet.copyOf(List.of(methods)),
+                EnumSet.noneOf(PrintOption.class),
+                new EquipmentConfiguration(List.of(), List.of()));
+    }
+
     private ControlConfiguration configuration(Payment payment) {
         return configurationWithEquipment(payment, List.of(), List.of());
     }
@@ -120,8 +181,13 @@ class EquipmentRequirementResolverTest {
     }
 
     private Equipment equipment(String category, String id) {
+        return equipment(category, id, false, false, false, "PRINTER".equals(category));
+    }
+
+    private Equipment equipment(String category, String id, boolean barcode1d,
+                                boolean barcode2d, boolean rfid, boolean print) {
         return new CatalogEquipment(id, category, id, "", 0, 0, 0,
-                0, 0, 0, false, false, false, "PRINTER".equals(category));
+                0, 0, 0, barcode1d, barcode2d, rfid, print);
     }
 
     private boolean hasCategory(ControlConfiguration configuration, String category) {
