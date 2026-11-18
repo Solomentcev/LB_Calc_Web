@@ -37,6 +37,7 @@ public final class EquipmentSelectionMapper {
         List<EquipmentSelectionDTO> result = new ArrayList<>();
         EquipmentSelectionDTO existingDisplaySelection = null;
         Equipment existingDisplay = null;
+        int displayIndex = -1;
 
         for (EquipmentSelectionDTO selection : existingSelections) {
             Equipment equipment = Objects.requireNonNull(
@@ -50,6 +51,7 @@ public final class EquipmentSelectionMapper {
                 }
                 existingDisplaySelection = selection;
                 existingDisplay = equipment;
+                displayIndex = result.size();
             } else {
                 result.add(selection);
             }
@@ -60,9 +62,7 @@ public final class EquipmentSelectionMapper {
         }
 
         if (displayName == null || displayName.isBlank()) {
-            if (existingDisplaySelection != null) {
-                result.add(existingDisplaySelection);
-            }
+            addAtDisplayPosition(result, existingDisplaySelection, displayIndex);
             return List.copyOf(result);
         }
 
@@ -75,7 +75,7 @@ public final class EquipmentSelectionMapper {
         if (existingDisplay != null
                 && (displayName.equals(existingDisplay.getName())
                 || displayName.equals(existingDisplay.getCatalogPositionId()))) {
-            result.add(existingDisplaySelection);
+            addAtDisplayPosition(result, existingDisplaySelection, displayIndex);
             return List.copyOf(result);
         }
 
@@ -88,10 +88,25 @@ public final class EquipmentSelectionMapper {
                     "Выбранная позиция не относится к категории DISPLAY: " + displayName);
         }
 
-        result.add(new EquipmentSelectionDTO(
+        addAtDisplayPosition(result, new EquipmentSelectionDTO(
                 selectedDisplay.getCatalogPositionId(),
                 displayQuantity == null ? 1 : displayQuantity
-        ));
+        ), displayIndex);
         return List.copyOf(result);
+    }
+
+    private static void addAtDisplayPosition(
+            List<EquipmentSelectionDTO> selections,
+            EquipmentSelectionDTO displaySelection,
+            int displayIndex
+    ) {
+        if (displaySelection == null) {
+            return;
+        }
+        if (displayIndex < 0 || displayIndex > selections.size()) {
+            selections.add(displaySelection);
+        } else {
+            selections.add(displayIndex, displaySelection);
+        }
     }
 }
