@@ -15,6 +15,7 @@ import com.lb_calc_web.entity.EquipmentQuantityEmbeddable;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /** Преобразует LBC между доменной и persistence-моделями. */
@@ -22,6 +23,11 @@ public final class LBCEntityMapper {
     private LBCEntityMapper() { }
 
     public static LBC toDomain(LBCEntity entity) {
+        return toDomain(entity, id -> EquipmentCatalog.findByCatalogPositionId(id));
+    }
+
+    public static LBC toDomain(LBCEntity entity,
+                                         Function<String, Equipment> equipmentResolver) {
         if (entity == null) return null;
         TypeLb typeLb = new TypeLb(entity.getType(), entity.getDeltaWidth(),
                 entity.getShelfThick(), entity.getServiceZoneWidth());
@@ -29,7 +35,7 @@ public final class LBCEntityMapper {
                 Objects.requireNonNull(entity.getPayment(),
                         "Способ оплаты LBC не должен быть null"),
                 entity.getAccessMethods(), entity.getPrintOptions(),
-                toEquipmentConfiguration(entity));
+                toEquipmentConfiguration(entity, equipmentResolver));
         LBC domain = new LBC(
                 entity.getHeight(), entity.getWidth(), entity.getDepth(),
                 entity.getUpperFrame(), entity.getBottomFrame(),
@@ -96,13 +102,15 @@ public final class LBCEntityMapper {
         updateEquipment(configuration.getEquipmentConfiguration(), entity);
     }
 
-    private static EquipmentConfiguration toEquipmentConfiguration(LBCEntity entity) {
+    private static EquipmentConfiguration toEquipmentConfiguration(LBCEntity entity,
+                                                                       Function<String, Equipment> equipmentResolver) {
         EquipmentConfiguration result = new EquipmentConfiguration(List.of(), List.of());
         entity.getEquipment().forEach(item ->
                 addPersistedEquipment(
                         item.getCatalogPositionId(),
                         item.getQuantity(),
-                        result
+                        result,
+                        equipmentResolver
                 )
         );
         return result;
@@ -111,9 +119,10 @@ public final class LBCEntityMapper {
     private static void addPersistedEquipment(
             String catalogPositionId,
             int quantity,
-            EquipmentConfiguration target
+            EquipmentConfiguration target,
+            Function<String, Equipment> equipmentResolver
     ) {
-        Equipment equipment = EquipmentCatalog.findByCatalogPositionId(catalogPositionId);
+        Equipment equipment = equipmentResolver.apply(catalogPositionId);
         if (equipment == Display.NONE || equipment == BarReader.NONE) {
             return;
         }
@@ -137,8 +146,13 @@ public final class LBCEntityMapper {
      * Преобразует LBCEntity в DTO, восстанавливая persistence ID.
      */
     public static LBCDTO toDto(LBCEntity entity) {
+        return toDto(entity, id -> EquipmentCatalog.findByCatalogPositionId(id));
+    }
+
+    public static LBCDTO toDto(LBCEntity entity,
+                                   Function<String, Equipment> equipmentResolver) {
         if (entity == null) return null;
-        LBCDTO dto = LBCDtoMapper.toDto(toDomain(entity));
+        LBCDTO dto = LBCDtoMapper.toDto(toDomain(entity, equipmentResolver));
         dto.setId(entity.getId());
         return dto;
     }

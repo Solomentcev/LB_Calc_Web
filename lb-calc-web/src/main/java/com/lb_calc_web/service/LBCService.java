@@ -43,17 +43,20 @@ public class LBCService {
     private final LBCRepository lbcRepository;
     private final Environment environment;
     private final SizeValidator sizeValidator;
+    private final EquipmentCatalogService equipmentCatalogService;
 
     public LBCService(
             LBCRepository lbcRepository,
             FindOrCreateLockService findOrCreateLockService,
             Environment environment,
-            SizeValidator sizeValidator
+            SizeValidator sizeValidator,
+            EquipmentCatalogService equipmentCatalogService
     ) {
         this.lbcRepository = lbcRepository;
         this.findOrCreateLockService = findOrCreateLockService;
         this.environment = environment;
         this.sizeValidator = sizeValidator;
+        this.equipmentCatalogService = equipmentCatalogService;
     }
 
     /**
@@ -183,7 +186,7 @@ public class LBCService {
                                 )
                         )
                 )
-                .map(entity -> addLBCImage(LBCEntityMapper.toDto(entity)))
+                .map(entity -> addLBCImage(LBCEntityMapper.toDto(entity, equipmentCatalogService::resolveById)))
                 .toList();
     }
 
@@ -267,7 +270,7 @@ public class LBCService {
                         domain.getControlConfiguration().getPayment()
                 ).stream()
                         .filter(entity ->
-                                LBCEntityMapper.toDomain(entity).equals(domain)
+                                LBCEntityMapper.toDomain(entity, equipmentCatalogService::resolveById).equals(domain)
                         )
                         .findFirst();
 
@@ -277,7 +280,7 @@ public class LBCService {
                     existing.get().getId()
             );
 
-            return addLBCImage(LBCEntityMapper.toDto(existing.get()));
+            return addLBCImage(LBCEntityMapper.toDto(existing.get(), equipmentCatalogService::resolveById));
         }
 
         LBCEntity entity =

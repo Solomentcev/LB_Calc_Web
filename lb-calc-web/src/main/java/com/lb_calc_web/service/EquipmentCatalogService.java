@@ -31,6 +31,11 @@ public class EquipmentCatalogService {
                 EquipmentCatalogEntity::getCatalogPositionId, this::toDomain));
     }
 
+    public Equipment resolveById(String id) {
+        return repository.findById(id).map(this::toDomain).orElseThrow(() ->
+                new IllegalArgumentException("Позиция оборудования не найдена в каталоге: " + id));
+    }
+
     public Equipment resolve(String idOrName) {
         if (idOrName == null || idOrName.isBlank()) return null;
         return repository.findById(idOrName).map(this::toDomain).orElseGet(() ->

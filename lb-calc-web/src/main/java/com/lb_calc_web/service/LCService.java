@@ -35,17 +35,20 @@ public class LCService {
     private final LCRepository lcRepository;
     private final Environment environment;
     private final SizeValidator sizeValidator;
+    private final EquipmentCatalogService equipmentCatalogService;
 
     public LCService(
             LCRepository lcRepository,
             FindOrCreateLockService findOrCreateLockService,
             Environment environment,
-            SizeValidator sizeValidator
+            SizeValidator sizeValidator,
+            EquipmentCatalogService equipmentCatalogService
     ) {
         this.lcRepository = lcRepository;
         this.findOrCreateLockService = findOrCreateLockService;
         this.environment = environment;
         this.sizeValidator = sizeValidator;
+        this.equipmentCatalogService = equipmentCatalogService;
     }
 
     /**
@@ -172,7 +175,7 @@ public class LCService {
                                 )
                         )
                 )
-                .map(LCEntityMapper::toDto)
+                .map(entity -> LCEntityMapper.toDto(entity, equipmentCatalogService::resolveById))
                 .toList();
     }
 
@@ -197,7 +200,7 @@ public class LCService {
                                 )
                         );
 
-        return LCEntityMapper.toDto(entity);
+        return LCEntityMapper.toDto(entity, equipmentCatalogService::resolveById);
     }
 
     /**
@@ -269,7 +272,7 @@ public class LCService {
                         domain.getControlConfiguration().getPayment()
                 ).stream()
                         .filter(entity ->
-                                LCEntityMapper.toDomain(entity).equals(domain)
+                                LCEntityMapper.toDomain(entity, equipmentCatalogService::resolveById).equals(domain)
                         )
                         .findFirst();
 
@@ -280,7 +283,7 @@ public class LCService {
                     existing.get().getId()
             );
 
-            return LCEntityMapper.toDto(existing.get());
+            return LCEntityMapper.toDto(existing.get(), equipmentCatalogService::resolveById);
         }
 
         /*
