@@ -121,29 +121,14 @@
                 </td>
             </tr>
             <tr>
-                <th>Printer</th>
+                <th>Способы доступа</th>
                 <td>
                     <label>
-                        <input type="checkbox" size="4" th:field="*{printer}">
-                    </label>
-                </td>
-            </tr>
-            <tr>
-                <th>BarReader</th>
-                <td>
-                    <label>
-                        <select th:field="*{barReader}">
-                            <option th:each="barReader:${barReaderList}" th:value="${barReader}" th:text="${barReader}">
+                        <select multiple class="form-control" th:field="*{accessMethods}">
+                            <option th:each="method : ${accessMethodList}"
+                                    th:value="${method}" th:text="${method}">
                             </option>
                         </select>
-                    </label>
-                </td>
-            </tr>
-            <tr>
-                <th>RfidReader</th>
-                <td>
-                    <label>
-                        <input type="checkbox" size="4" th:field="*{rfidReader}">
                     </label>
                 </td>
             </tr>
