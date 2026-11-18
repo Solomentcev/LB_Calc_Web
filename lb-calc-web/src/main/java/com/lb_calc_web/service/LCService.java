@@ -1,5 +1,6 @@
 package com.lb_calc_web.service;
 
+import com.lb_calc_web.domain.attributes.AccessMethod;
 import com.lb_calc_web.domain.attributes.Colors;
 import com.lb_calc_web.domain.attributes.Payment;
 import com.lb_calc_web.domain.equipment.BarReader;
@@ -130,6 +131,8 @@ public class LCService {
                         "lc.rfid-reader.default"
                 )
         );
+
+        dto.setAccessMethods(getEnumList("lc.access-methods.default", AccessMethod.class));
 
         dto.setDisplayQuantity(
                 (Display.NONE_ID.equals(displayName) || Display.NONE.getName().equals(displayName)) ? 0 : 1
@@ -368,6 +371,18 @@ public class LCService {
                     return Set.copyOf(ids);
                 })
                 .orElseGet(Set::of);
+    }
+
+    private <E extends Enum<E>> List<String> getEnumList(String key, Class<E> type) {
+        String value = environment.getProperty(key, "");
+        if (value.isBlank()) {
+            return List.of();
+        }
+        return java.util.Arrays.stream(value.split(","))
+                .map(String::trim)
+                .filter(item -> !item.isBlank())
+                .map(item -> Enum.valueOf(type, item).name())
+                .toList();
     }
 
     /**
