@@ -88,7 +88,12 @@ class EquipmentRequirementResolverTest {
 
         ControlConfiguration result = resolver.resolve(source);
 
-        assertEquals(additional, result.getEquipmentConfiguration().getAdditionalItems());
+        assertEquals(
+                java.util.Set.of("COMPUTER_STANDARD", "POWER_SUPPLY_STANDARD",
+                        "UPS_STANDARD", "LOCK_CONTROLLER_STANDARD"),
+                result.getEquipmentConfiguration().getAdditionalItems().stream()
+                        .map(item -> item.equipment().getCatalogPositionId())
+                        .collect(java.util.stream.Collectors.toSet()));
         assertTrue(result.getEquipmentConfiguration().getRequiredItems().isEmpty());
     }
 
