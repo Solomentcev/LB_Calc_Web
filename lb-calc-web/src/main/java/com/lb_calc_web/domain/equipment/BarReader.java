@@ -13,6 +13,8 @@ public class BarReader extends Equipment {
             new BarReader(READER_2D_ID, "Сканер штрихкода 2D");
 
     private BarReader(String id, String name) { super(id, name); }
+    @Override public boolean isBarReader() { return true; }
+    @Override public String getCategory() { return "BAR_READER"; }
     @Override public int getWidth() { return 0; }
     @Override public int getHeight() { return 0; }
     @Override public int getDepth() { return 0; }

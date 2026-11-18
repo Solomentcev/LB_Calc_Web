@@ -4,6 +4,8 @@ package com.lb_calc_web.domain.equipment;
 public class RfidReader extends Equipment {
     public static final String CATALOG_POSITION_ID = "RFID_READER_STANDARD";
     public RfidReader() { super(CATALOG_POSITION_ID, "RFID-считыватель"); }
+    @Override public boolean isRfidReader() { return true; }
+    @Override public String getCategory() { return "RFID_READER"; }
     @Override public int getWidth() { return 0; }
     @Override public int getHeight() { return 0; }
     @Override public int getDepth() { return 0; }
