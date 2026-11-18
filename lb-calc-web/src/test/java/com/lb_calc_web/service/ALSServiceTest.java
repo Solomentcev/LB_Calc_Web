@@ -257,7 +257,7 @@ class ALSServiceTest {
                 0, 0, 0, false, false, false, false
         ));
 
-        LBCDTO replacement = TestDataFactory.validLBCDTO(1L);
+        LBCDTO replacement = TestDataFactory.validLBCDTO(als.getLBC().getId());
 
         ALSDTO result = alsService.replaceLBC(als, replacement);
 
