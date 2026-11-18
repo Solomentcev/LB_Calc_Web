@@ -35,6 +35,22 @@ class EquipmentRequirementResolverTest {
     }
 
     @Test
+    void resolve_legacyBaseEquipment_shouldRemoveNonFunctionalDefaults() {
+        stubDefaults();
+        ControlConfiguration source = new ControlConfiguration(
+                Payment.NONE, EnumSet.noneOf(AccessMethod.class), EnumSet.noneOf(
+                com.lb_calc_web.domain.attributes.PrintOption.class),
+                EquipmentConfiguration.fromItems(List.of(
+                        new com.lb_calc_web.domain.equipment.EquipmentItem(equipment("COMPUTER", "COMPUTER_STANDARD"), 1),
+                        new com.lb_calc_web.domain.equipment.EquipmentItem(equipment("POWER_SUPPLY", "POWER_SUPPLY_STANDARD"), 1),
+                        new com.lb_calc_web.domain.equipment.EquipmentItem(equipment("UPS", "UPS_STANDARD"), 1)), List.of())
+        );
+
+        ControlConfiguration result = resolver.resolve(source);
+
+        assertCategories(result.getEquipmentConfiguration().getAllEquipment(), "LOCK_CONTROLLER");
+    }
+    @Test
     void resolve_cashless_shouldAddPaymentTerminalAndPrinter() {
         stubDefaults();
 
