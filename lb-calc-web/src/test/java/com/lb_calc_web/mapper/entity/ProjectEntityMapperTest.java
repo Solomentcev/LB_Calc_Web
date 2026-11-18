@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -56,8 +57,19 @@ class ProjectEntityMapperTest {
         assertSame(entity, entity.getAlsEntries().get(0).getProject());
         assertSame(alsEntity, entity.getAlsEntries().get(0).getAls());
 
-        Project restored = ProjectEntityMapper.toDomain(entity);
+        AtomicReference<ALS> mappedAls = new AtomicReference<>();
+        AtomicReference<ALSEntity> mappedAlsEntity = new AtomicReference<>();
 
+        Project restored = ProjectEntityMapper.toDomain(
+                entity,
+                (mappedDomain, mappedEntity) -> {
+                    mappedAls.set(mappedDomain);
+                    mappedAlsEntity.set(mappedEntity);
+                }
+        );
+
+        assertEquals(als, mappedAls.get());
+        assertSame(alsEntity, mappedAlsEntity.get());
         assertEquals(domain.getName(), restored.getName());
         assertEquals(domain.getCompany(), restored.getCompany());
         assertEquals(domain.getCreatedAt(), restored.getCreatedAt());

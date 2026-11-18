@@ -122,10 +122,7 @@ public class EmployeeService implements UserDetailsService {
 
         Employee domain = EmployeeEntityMapper.toDomain(entity);
 
-        ProfileDTO dto = EmployeeDtoMapper.toProfileDto(domain);
-        dto.setId(entity.getId());
-
-        return dto;
+        return EmployeeDtoMapper.toProfileDto(domain);
     }
 
     /**
@@ -285,12 +282,9 @@ public class EmployeeService implements UserDetailsService {
             Employee domain =
                     EmployeeEntityMapper.toDomain(entity);
 
-            ProfileDTO dto =
-                    EmployeeDtoMapper.toProfileDto(domain);
-
-            dto.setId(entity.getId());
-
-            result.add(dto);
+            result.add(
+                    EmployeeDtoMapper.toProfileDto(domain)
+            );
         }
 
         return result;
@@ -338,11 +332,6 @@ public class EmployeeService implements UserDetailsService {
         Employee domain =
                 EmployeeEntityMapper.toDomain(entity);
 
-        EmployeeDTO dto =
-                EmployeeDtoMapper.toDto(domain);
-
-        dto.setId(entity.getId());
-
-        return dto;
+        return EmployeeDtoMapper.toDto(domain);
     }
 }

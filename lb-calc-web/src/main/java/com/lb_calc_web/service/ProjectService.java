@@ -23,7 +23,6 @@ import com.lb_calc_web.handler.ValidationSizeException;
 import com.lb_calc_web.helper.ExcellHelper;
 import com.lb_calc_web.mapper.dto.EmployeeDtoMapper;
 import com.lb_calc_web.mapper.dto.ProjectDtoMapper;
-import com.lb_calc_web.mapper.entity.ALSEntityMapper;
 import com.lb_calc_web.mapper.entity.EmployeeEntityMapper;
 import com.lb_calc_web.mapper.entity.ProjectEntityMapper;
 import com.lb_calc_web.repository.ALSRepository;
@@ -1263,31 +1262,19 @@ public class ProjectService {
     private ProjectDTO toDto(
             ProjectEntity entity
     ) {
+        Map<ALS, Long> alsIds = new LinkedHashMap<>();
+
         Project domain =
                 ProjectEntityMapper.toDomain(
-                        entity
+                        entity,
+                        (als, alsEntity) ->
+                                alsIds.putIfAbsent(als, alsEntity.getId())
                 );
-
-        List<Map.Entry<ALS, Long>> alsIds = new ArrayList<>();
-
-        for (var entry : entity.getAlsEntries()) {
-            ALS als = ALSEntityMapper.toDomain(entry.getAls());
-            boolean alreadyResolved = alsIds.stream()
-                    .anyMatch(value -> value.getKey().equals(als));
-
-            if (!alreadyResolved) {
-                alsIds.add(Map.entry(als, entry.getAls().getId()));
-            }
-        }
 
         ProjectDTO dto =
                 ProjectDtoMapper.toDto(
                         domain,
-                        als -> alsIds.stream()
-                                .filter(entry -> entry.getKey().equals(als))
-                                .map(Map.Entry::getValue)
-                                .findFirst()
-                                .orElse(null)
+                        alsIds::get
                 );
 
         dto.setId(

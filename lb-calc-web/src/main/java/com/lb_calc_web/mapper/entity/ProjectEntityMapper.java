@@ -13,6 +13,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 /**
@@ -35,9 +36,28 @@ public final class ProjectEntityMapper {
     public static Project toDomain(
             ProjectEntity entity
     ) {
+        return toDomain(entity, (als, alsEntity) -> { });
+    }
+
+    /**
+     * Преобразует ProjectEntity в доменный Project и передаёт
+     * соответствие каждой доменной ALS её persistence-сущности.
+     *
+     * @param entity persistence-модель проекта
+     * @param alsObserver обработчик соответствия ALS и ALSEntity
+     * @return доменный проект
+     */
+    public static Project toDomain(
+            ProjectEntity entity,
+            BiConsumer<ALS, ALSEntity> alsObserver
+    ) {
         Objects.requireNonNull(
                 entity,
                 "ProjectEntity не должен быть null"
+        );
+        Objects.requireNonNull(
+                alsObserver,
+                "alsObserver не должен быть null"
         );
 
         Employee createdBy =
@@ -60,6 +80,8 @@ public final class ProjectEntityMapper {
                     ALSEntityMapper.toDomain(
                             entry.getAls()
                     );
+
+            alsObserver.accept(als, entry.getAls());
 
             quantityALS.merge(
                     als,
