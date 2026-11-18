@@ -9,7 +9,7 @@ public record EquipmentItem(Equipment equipment, int quantity) {
         if (quantity < 1) {
             throw new IllegalArgumentException("Количество оборудования должно быть не меньше 1");
         }
-        if (equipment instanceof Display && quantity != 1) {
+        if (equipment.isDisplay() && quantity != 1) {
             throw new IllegalArgumentException("Количество дисплеев в модуле должно быть равно 1");
         }
     }

@@ -46,8 +46,8 @@ public final class CatalogEquipment extends Equipment {
     public int getDisplayWidth() { return displayWidth; }
     public int getDisplayHeight() { return displayHeight; }
     public int getMinimumModuleWidth() { return minimumModuleWidth; }
-    public boolean supportsBarcode1d() { return barcode1d; }
-    public boolean supportsBarcode2d() { return barcode2d; }
-    public boolean supportsRfid() { return rfid; }
-    public boolean supportsPrint() { return print; }
+    @Override public boolean supportsBarcode1d() { return barcode1d; }
+    @Override public boolean supportsBarcode2d() { return barcode2d; }
+    @Override public boolean supportsRfid() { return rfid; }
+    @Override public boolean supportsPrint() { return print; }
 }

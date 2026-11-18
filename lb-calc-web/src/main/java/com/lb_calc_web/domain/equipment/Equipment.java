@@ -25,6 +25,10 @@ public abstract class Equipment {
     public boolean isPrinter() { return false; }
     public boolean isRfidReader() { return false; }
     public String getCategory() { return "OTHER"; }
+    public boolean supportsBarcode1d() { return false; }
+    public boolean supportsBarcode2d() { return false; }
+    public boolean supportsRfid() { return false; }
+    public boolean supportsPrint() { return false; }
     public abstract int getWidth();
     public abstract int getHeight();
     public abstract int getDepth();
