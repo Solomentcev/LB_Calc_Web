@@ -2,8 +2,10 @@ package com.lb_calc_web.service;
 
 import com.lb_calc_web.domain.attributes.AccessMethod;
 import com.lb_calc_web.domain.attributes.Payment;
+import com.lb_calc_web.domain.attributes.PrintOption;
 import com.lb_calc_web.domain.equipment.CatalogEquipment;
 import com.lb_calc_web.domain.equipment.Equipment;
+import com.lb_calc_web.domain.equipment.EquipmentItem;
 import com.lb_calc_web.domain.model.ControlConfiguration;
 import com.lb_calc_web.domain.model.EquipmentConfiguration;
 import org.junit.jupiter.api.Test;
@@ -11,7 +13,6 @@ import org.junit.jupiter.api.Test;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -22,42 +23,23 @@ class EquipmentRequirementResolverTest {
     private final EquipmentRequirementResolver resolver = new EquipmentRequirementResolver(catalog);
 
     @Test
-    void resolve_nonePayment_shouldAddOnlyMandatoryLockController() {
+    void resolve_nonePaymentAndNoAccess_shouldNotAddFunctionalEquipment() {
         stubDefaults();
 
         ControlConfiguration result = resolver.resolve(configuration(Payment.NONE));
 
-        assertCategories(result.getEquipmentConfiguration().getAllEquipment(),
-                "LOCK_CONTROLLER");
-        assertEquals(1, result.getEquipmentConfiguration().getAllItems().size());
+        assertTrue(result.getEquipmentConfiguration().getAllItems().isEmpty());
         verify(catalog, never()).findActiveDefault("PAYMENT_TERMINAL");
         verify(catalog, never()).findActiveDefault("CASH_ACCEPTOR");
     }
 
-    @Test
-    void resolve_legacyBaseEquipment_shouldRemoveNonFunctionalDefaults() {
-        stubDefaults();
-        ControlConfiguration source = new ControlConfiguration(
-                Payment.NONE, EnumSet.noneOf(AccessMethod.class), EnumSet.noneOf(
-                com.lb_calc_web.domain.attributes.PrintOption.class),
-                EquipmentConfiguration.fromItems(List.of(
-                        new com.lb_calc_web.domain.equipment.EquipmentItem(equipment("COMPUTER", "COMPUTER_STANDARD"), 1),
-                        new com.lb_calc_web.domain.equipment.EquipmentItem(equipment("POWER_SUPPLY", "POWER_SUPPLY_STANDARD"), 1),
-                        new com.lb_calc_web.domain.equipment.EquipmentItem(equipment("UPS", "UPS_STANDARD"), 1)), List.of())
-        );
-
-        ControlConfiguration result = resolver.resolve(source);
-
-        assertCategories(result.getEquipmentConfiguration().getAllEquipment(), "LOCK_CONTROLLER");
-    }
     @Test
     void resolve_cashless_shouldAddPaymentTerminalAndPrinter() {
         stubDefaults();
 
         ControlConfiguration result = resolver.resolve(configuration(Payment.CASHLESS));
 
-        assertCategories(result.getEquipmentConfiguration().getAllEquipment(),
-                "LOCK_CONTROLLER", "PAYMENT_TERMINAL", "PRINTER");
+        assertCategories(result, "PAYMENT_TERMINAL", "PRINTER");
         assertFalse(hasCategory(result, "CASH_ACCEPTOR"));
     }
 
@@ -67,67 +49,62 @@ class EquipmentRequirementResolverTest {
 
         ControlConfiguration result = resolver.resolve(configuration(Payment.CASH));
 
-        assertCategories(result.getEquipmentConfiguration().getAllEquipment(),
-                "LOCK_CONTROLLER", "CASH_ACCEPTOR", "PRINTER");
+        assertCategories(result, "CASH_ACCEPTOR", "PRINTER");
         assertFalse(hasCategory(result, "PAYMENT_TERMINAL"));
     }
+
     @Test
     void resolve_cashAndCards_shouldAddTerminalCashAcceptorAndPrinter() {
         stubDefaults();
 
         ControlConfiguration result = resolver.resolve(configuration(Payment.CASH_AND_CARDS));
 
-        assertCategories(result.getEquipmentConfiguration().getAllEquipment(),
-                "LOCK_CONTROLLER", "PAYMENT_TERMINAL", "CASH_ACCEPTOR", "PRINTER");
+        assertCategories(result, "PAYMENT_TERMINAL", "CASH_ACCEPTOR", "PRINTER");
     }
 
     @Test
     void resolve_selectedDisplayWithoutPin_shouldPreserveDisplay() {
         stubDefaults();
-        Equipment display = new CatalogEquipment("DISPLAY_LC17", "DISPLAY",
-                "LC17", "", 0, 0, 0, 450, 338, 270,
-                false, false, false, false);
-        ControlConfiguration source = new ControlConfiguration(
-                Payment.NONE, EnumSet.noneOf(AccessMethod.class), EnumSet.noneOf(
-                com.lb_calc_web.domain.attributes.PrintOption.class),
-                EquipmentConfiguration.fromItems(List.of(
-                        new com.lb_calc_web.domain.equipment.EquipmentItem(display, 1)),
-                        List.of())
-        );
+        Equipment display = equipment("DISPLAY", "DISPLAY_LC17");
+        ControlConfiguration source = configurationWithEquipment(
+                Payment.NONE, List.of(new EquipmentItem(display, 1)), List.of());
 
         ControlConfiguration result = resolver.resolve(source);
 
-        assertCategories(result.getEquipmentConfiguration().getAllEquipment(),
-                "LOCK_CONTROLLER", "DISPLAY");
+        assertCategories(result, "DISPLAY");
         assertTrue(result.getEquipmentConfiguration().getAllEquipment().contains(display));
     }
+
     @Test
-    void resolve_shouldPreserveAdditionalEquipment() {
+    void resolve_shouldPreserveEquipmentOutsideFunctionalCategories() {
         stubDefaults();
-        Equipment modem = equipment("MODEM", "MODEM_OPTIONAL");
-        ControlConfiguration source = new ControlConfiguration(
-                Payment.NONE, EnumSet.noneOf(AccessMethod.class), EnumSet.noneOf(
-                com.lb_calc_web.domain.attributes.PrintOption.class),
-                EquipmentConfiguration.fromItems(List.of(), List.of(
-                        new com.lb_calc_web.domain.equipment.EquipmentItem(modem, 1)))
+        List<EquipmentItem> additional = List.of(
+                new EquipmentItem(equipment("COMPUTER", "COMPUTER_STANDARD"), 1),
+                new EquipmentItem(equipment("POWER_SUPPLY", "POWER_SUPPLY_STANDARD"), 1),
+                new EquipmentItem(equipment("UPS", "UPS_STANDARD"), 1),
+                new EquipmentItem(equipment("LOCK_CONTROLLER", "LOCK_CONTROLLER_STANDARD"), 1)
         );
+        ControlConfiguration source = configurationWithEquipment(Payment.NONE, List.of(), additional);
 
         ControlConfiguration result = resolver.resolve(source);
 
-        assertEquals(1, result.getEquipmentConfiguration().getAdditionalItems().size());
-        assertEquals("MODEM_OPTIONAL", result.getEquipmentConfiguration()
-                .getAdditionalItems().get(0).equipment().getCatalogPositionId());
+        assertEquals(additional, result.getEquipmentConfiguration().getAdditionalItems());
+        assertTrue(result.getEquipmentConfiguration().getRequiredItems().isEmpty());
     }
 
     private ControlConfiguration configuration(Payment payment) {
+        return configurationWithEquipment(payment, List.of(), List.of());
+    }
+
+    private ControlConfiguration configurationWithEquipment(
+            Payment payment, List<EquipmentItem> required, List<EquipmentItem> additional) {
         return new ControlConfiguration(payment, EnumSet.noneOf(AccessMethod.class),
-                EnumSet.noneOf(com.lb_calc_web.domain.attributes.PrintOption.class),
-                new EquipmentConfiguration(List.of(), List.of()));
+                EnumSet.noneOf(PrintOption.class),
+                EquipmentConfiguration.fromItems(required, additional));
     }
 
     private void stubDefaults() {
         Map<String, String> categories = Map.of(
-                "LOCK_CONTROLLER", "LOCK_CONTROLLER_STANDARD",
                 "PAYMENT_TERMINAL", "PAYMENT_TERMINAL_STANDARD",
                 "CASH_ACCEPTOR", "CASH_ACCEPTOR_STANDARD",
                 "PRINTER", "PRINTER_STANDARD",
@@ -147,7 +124,8 @@ class EquipmentRequirementResolverTest {
                 .anyMatch(item -> category.equals(item.getCategory()));
     }
 
-    private void assertCategories(List<Equipment> equipment, String... expected) {
+    private void assertCategories(ControlConfiguration configuration, String... expected) {
+        List<Equipment> equipment = configuration.getEquipmentConfiguration().getAllEquipment();
         assertEquals(expected.length, equipment.size());
         for (String category : expected) {
             assertTrue(equipment.stream().anyMatch(item -> category.equals(item.getCategory())),
