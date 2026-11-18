@@ -118,6 +118,41 @@ class EquipmentRequirementResolverTest {
     }
 
     @Test
+    void resolve_shouldPreserveManuallySelectedCompatiblePaymentTerminal() {
+        stubDefaults();
+        Equipment terminal = equipment("PAYMENT_TERMINAL", "PAYMENT_TERMINAL_CUSTOM");
+        ControlConfiguration source = configurationWithEquipment(
+                Payment.CASHLESS,
+                List.of(new EquipmentItem(terminal, 1)),
+                List.of()
+        );
+
+        ControlConfiguration result = resolver.resolve(source);
+
+        assertTrue(result.getEquipmentConfiguration().getAllEquipment().contains(terminal));
+        assertCategories(result, "PAYMENT_TERMINAL", "PRINTER");
+    }
+
+    @Test
+    void resolve_shouldRemoveEquipmentNoLongerRequiredAfterPaymentChange() {
+        stubDefaults();
+        Equipment terminal = equipment("PAYMENT_TERMINAL", "PAYMENT_TERMINAL_CUSTOM");
+        Equipment printer = equipment("PRINTER", "PRINTER_CUSTOM");
+        Equipment modem = equipment("MODEM", "MODEM_CUSTOM");
+        ControlConfiguration source = configurationWithEquipment(
+                Payment.CASH,
+                List.of(new EquipmentItem(terminal, 1), new EquipmentItem(printer, 1)),
+                List.of(new EquipmentItem(modem, 1))
+        );
+
+        ControlConfiguration result = resolver.resolve(source);
+
+        assertCategories(result, "CASH_ACCEPTOR", "PRINTER", "MODEM");
+        assertFalse(hasCategory(result, "PAYMENT_TERMINAL"));
+        assertTrue(result.getEquipmentConfiguration().getAdditionalEquipment().contains(modem));
+    }
+
+    @Test
     void resolve_selectedDisplayWithoutPin_shouldPreserveDisplay() {
         stubDefaults();
         Equipment display = equipment("DISPLAY", "DISPLAY_LC17");
