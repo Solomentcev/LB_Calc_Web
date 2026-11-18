@@ -44,19 +44,22 @@ public class LBCService {
     private final Environment environment;
     private final SizeValidator sizeValidator;
     private final EquipmentCatalogService equipmentCatalogService;
+    private final EquipmentRequirementResolver equipmentRequirementResolver;
 
     public LBCService(
             LBCRepository lbcRepository,
             FindOrCreateLockService findOrCreateLockService,
             Environment environment,
             SizeValidator sizeValidator,
-            EquipmentCatalogService equipmentCatalogService
+            EquipmentCatalogService equipmentCatalogService,
+            EquipmentRequirementResolver equipmentRequirementResolver
     ) {
         this.lbcRepository = lbcRepository;
         this.findOrCreateLockService = findOrCreateLockService;
         this.environment = environment;
         this.sizeValidator = sizeValidator;
         this.equipmentCatalogService = equipmentCatalogService;
+        this.equipmentRequirementResolver = equipmentRequirementResolver;
     }
 
     /**
@@ -167,6 +170,9 @@ public class LBCService {
 
         TypeLb typeLb = TypeLbFactory.forLBC(environment, dto.getType());
         LBC domain = LBCDtoMapper.toDomain(dto, typeLb, equipmentCatalogService::resolve);
+        domain.setControlConfiguration(
+                equipmentRequirementResolver.resolve(domain.getControlConfiguration())
+        );
         LBCDTO result = LBCDtoMapper.toDto(domain);
         result.setId(0L);
         return addLBCImage(result);
@@ -224,6 +230,9 @@ public class LBCService {
         try {
             TypeLb typeLb = TypeLbFactory.forLBC(environment, dto.getType());
             domain = LBCDtoMapper.toDomain(dto, typeLb, equipmentCatalogService::resolve);
+            domain.setControlConfiguration(
+                    equipmentRequirementResolver.resolve(domain.getControlConfiguration())
+            );
         } catch (IllegalArgumentException | NullPointerException exception) {
             throw createMappingValidationException(
                     "LBC",

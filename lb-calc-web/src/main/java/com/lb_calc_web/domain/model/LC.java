@@ -181,9 +181,8 @@ public class LC extends Module implements ControlModule {
      * Обновляет производные наименование и описание LC.
      */
     private void updateNameAndDescription() {
-        Display display = getEquipment().stream()
-                .filter(Display.class::isInstance)
-                .map(Display.class::cast)
+        Equipment display = getEquipment().stream()
+                .filter(Equipment::isDisplay)
                 .findFirst()
                 .orElse(null);
 

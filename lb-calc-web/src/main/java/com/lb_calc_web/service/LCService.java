@@ -36,19 +36,22 @@ public class LCService {
     private final Environment environment;
     private final SizeValidator sizeValidator;
     private final EquipmentCatalogService equipmentCatalogService;
+    private final EquipmentRequirementResolver equipmentRequirementResolver;
 
     public LCService(
             LCRepository lcRepository,
             FindOrCreateLockService findOrCreateLockService,
             Environment environment,
             SizeValidator sizeValidator,
-            EquipmentCatalogService equipmentCatalogService
+            EquipmentCatalogService equipmentCatalogService,
+            EquipmentRequirementResolver equipmentRequirementResolver
     ) {
         this.lcRepository = lcRepository;
         this.findOrCreateLockService = findOrCreateLockService;
         this.environment = environment;
         this.sizeValidator = sizeValidator;
         this.equipmentCatalogService = equipmentCatalogService;
+        this.equipmentRequirementResolver = equipmentRequirementResolver;
     }
 
     /**
@@ -150,6 +153,9 @@ public class LCService {
          * описания и проверку ширины.
          */
         LC domain = LCDtoMapper.toDomain(dto, equipmentCatalogService::resolve);
+        domain.setControlConfiguration(
+                equipmentRequirementResolver.resolve(domain.getControlConfiguration())
+        );
 
         LCDTO result = LCDtoMapper.toDto(domain);
         result.setId(0L);
@@ -229,6 +235,9 @@ public class LCService {
         LC domain;
         try {
             domain = LCDtoMapper.toDomain(dto, equipmentCatalogService::resolve);
+            domain.setControlConfiguration(
+                    equipmentRequirementResolver.resolve(domain.getControlConfiguration())
+            );
         } catch (IllegalArgumentException | NullPointerException exception) {
             throw createMappingValidationException(
                     "LC",
