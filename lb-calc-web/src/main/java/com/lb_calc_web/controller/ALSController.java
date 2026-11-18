@@ -61,6 +61,15 @@ public class ALSController extends BaseCatalogController {
             Model model
     ) {
         try {
+            // Главная форма ALS редактирует параметры агрегата, но не состав LC/LBC.
+            // Восстанавливаем управляющий модуль из БД, чтобы форма не теряла
+            // каталожное оборудование, которое не редактируется на этой странице.
+            if (als.getId() != null && als.getId() > 0) {
+                ALSDTO persisted = alsService.findById(als.getId());
+                als.setLC(persisted.getLC());
+                als.setLBC(persisted.getLBC());
+            }
+
             ALSDTO saved =
                     alsService.saveALS(als);
 
