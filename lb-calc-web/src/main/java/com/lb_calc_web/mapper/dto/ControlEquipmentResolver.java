@@ -43,10 +43,10 @@ final class ControlEquipmentResolver {
         validatePresence(rfidReader, rfidCount, "RFID-считывателя");
 
         List<EquipmentItem> items = new ArrayList<>();
-        addItem(items, displayName, displayCount, Display.NONE, moduleType, equipmentResolver);
-        addItem(items, barReaderName, barReaderCount, BarReader.NONE, moduleType, equipmentResolver);
-        addCatalogItem(items, Printer.CATALOG_POSITION_ID, printerCount, equipmentResolver);
-        addCatalogItem(items, RfidReader.CATALOG_POSITION_ID, rfidCount, equipmentResolver);
+        addItem(items, displayName, displayCount, Display.NONE, "DISPLAY", moduleType, equipmentResolver);
+        addItem(items, barReaderName, barReaderCount, BarReader.NONE, "BAR_READER", moduleType, equipmentResolver);
+        addCatalogItem(items, Printer.CATALOG_POSITION_ID, printerCount, "PRINTER", equipmentResolver);
+        addCatalogItem(items, RfidReader.CATALOG_POSITION_ID, rfidCount, "RFID_READER", equipmentResolver);
         return EquipmentConfiguration.fromItems(items, List.of());
     }
 
@@ -87,7 +87,7 @@ final class ControlEquipmentResolver {
     }
 
     private static void addItem(List<EquipmentItem> items, String idOrName, int quantity,
-                                Equipment none, String moduleType,
+                                Equipment none, String expectedCategory, String moduleType,
                                 Function<String, Equipment> equipmentResolver) {
         if (quantity == 0) return;
         if (idOrName == null || idOrName.isBlank()) {
@@ -95,7 +95,8 @@ final class ControlEquipmentResolver {
                     "Не указана позиция оборудования для количества " + quantity);
         }
         Equipment equipment = equipmentResolver.apply(idOrName);
-        if (equipment == null || equipment.equals(none)) {
+        if (equipment == null || equipment.equals(none)
+                || !expectedCategory.equals(equipment.getCategory())) {
             throw new IllegalArgumentException(
                     "Некорректная позиция оборудования для модуля " + moduleType);
         }
@@ -103,11 +104,13 @@ final class ControlEquipmentResolver {
     }
 
     private static void addCatalogItem(List<EquipmentItem> items, String id, int quantity,
+                                       String expectedCategory,
                                        Function<String, Equipment> equipmentResolver) {
         if (quantity == 0) return;
         Equipment equipment = equipmentResolver.apply(id);
-        if (equipment == null) {
-            throw new IllegalArgumentException("В каталоге отсутствует оборудование: " + id);
+        if (equipment == null || !expectedCategory.equals(equipment.getCategory())) {
+            throw new IllegalArgumentException("В каталоге отсутствует совместимое оборудование категории "
+                    + expectedCategory + ": " + id);
         }
         items.add(new EquipmentItem(equipment, quantity));
     }

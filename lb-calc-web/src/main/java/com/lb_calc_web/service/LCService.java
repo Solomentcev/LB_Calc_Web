@@ -130,7 +130,7 @@ public class LCService {
         );
 
         dto.setDisplayQuantity(
-                Display.NONE.getName().equals(displayName) ? 0 : 1
+                (Display.NONE_ID.equals(displayName) || Display.NONE.getName().equals(displayName)) ? 0 : 1
         );
         dto.setBarReaderQuantity(
                 (BarReader.NONE.getName().equals(dto.getBarReader())
