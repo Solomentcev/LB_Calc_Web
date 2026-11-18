@@ -13,6 +13,7 @@ import com.lb_calc_web.mapper.entity.ModuleEntityMapper;
 import com.lb_calc_web.repository.ALSRepository;
 import com.lb_calc_web.repository.ModuleEntityRepository;
 import com.lb_calc_web.domain.equipment.EquipmentCatalog;
+import com.lb_calc_web.domain.equipment.EquipmentCatalog;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.env.MockEnvironment;
@@ -35,6 +36,8 @@ class ALSServiceTest {
     private ALSService alsService;
     private EquipmentCatalogService equipmentCatalogService;
     private EquipmentRequirementResolver equipmentRequirementResolver;
+    private EquipmentCatalogService equipmentCatalogService;
+    private EquipmentRequirementResolver equipmentRequirementResolver;
 
     @BeforeEach
     void setUp() {
@@ -46,6 +49,14 @@ class ALSServiceTest {
         lbcService = mock(LBCService.class);
 
         findOrCreateLockService = mock(FindOrCreateLockService.class);
+        equipmentCatalogService = mock(EquipmentCatalogService.class);
+        equipmentRequirementResolver = mock(EquipmentRequirementResolver.class);
+        when(equipmentCatalogService.resolveForExistingConfiguration(anyString(), anySet()))
+                .thenAnswer(invocation -> EquipmentCatalog.resolve(invocation.getArgument(0)));
+        when(equipmentCatalogService.resolveById(anyString()))
+                .thenAnswer(invocation -> EquipmentCatalog.findByCatalogPositionId(invocation.getArgument(0)));
+        when(equipmentRequirementResolver.resolve(any()))
+                .thenAnswer(invocation -> invocation.getArgument(0));
         equipmentCatalogService = mock(EquipmentCatalogService.class);
         equipmentRequirementResolver = mock(EquipmentRequirementResolver.class);
         when(equipmentCatalogService.resolveForExistingConfiguration(anyString(), anySet()))
