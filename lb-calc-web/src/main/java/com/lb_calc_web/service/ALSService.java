@@ -294,7 +294,7 @@ public class ALSService {
                 saved.getId()
         );
 
-        return addALSImage(ALSEntityMapper.toDto(saved));
+        return addALSImage(ALSEntityMapper.toDto(saved, equipmentCatalogService::resolveById));
     }
 
     @Transactional
@@ -359,9 +359,7 @@ public class ALSService {
             );
         }
 
-        var domain = ALSConfigurationMapper.toDomain(dto,
-                candidateLbDto -> TypeLbFactory.forLB(environment, candidateLbDto.getType()),
-                candidateLbcDto -> TypeLbFactory.forLBC(environment, candidateLbcDto.getType()));
+        var domain = toDomain(dto);
         int moduleIndex = ALSDtoMapper.findPhysicalLbIndex(domain, lbIndex);
         domain.removeModuleAt(moduleIndex);
 
@@ -440,9 +438,7 @@ public class ALSService {
             );
         }
 
-        var domain = ALSConfigurationMapper.toDomain(als,
-                candidateLbDto -> TypeLbFactory.forLB(environment, candidateLbDto.getType()),
-                candidateLbcDto -> TypeLbFactory.forLBC(environment, candidateLbcDto.getType()));
+        var domain = toDomain(als);
         domain.replaceControlModule(toDomain(lc));
 
         return ALSDtoMapper.toDto(domain);
@@ -687,7 +683,7 @@ public class ALSService {
 
         for (ModuleEntity entity : candidates) {
             if (isSameModuleType(domainModule, entity)
-                    && domainModule.equals(ModuleEntityMapper.toDomain(entity))) {
+                    && domainModule.equals(ModuleEntityMapper.toDomain(entity, equipmentCatalogService::resolveById))) {
                 return entity;
             }
         }
