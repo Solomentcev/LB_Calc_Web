@@ -28,16 +28,32 @@ class ControlEquipmentResolverTest {
     }
 
     @Test
-    void resolve_shouldRejectMissingEquipmentQuantity() {
-        assertThrows(IllegalArgumentException.class, () ->
-                ControlEquipmentResolver.resolve(
-                        Display.LC10.getName(), null,
-                        BarReader.NONE.getName(), 0,
-                        false, 0,
-                        false, 0,
-                        "LC"
-                )
+    void resolve_shouldInferLegacyQuantitiesWhenFieldsAreMissing() {
+        EquipmentConfiguration result = ControlEquipmentResolver.resolve(
+                Display.LC17.getName(), null,
+                BarReader.READER_2D.getName(), null,
+                true, null,
+                true, null,
+                "LC"
         );
+
+        assertEquals(1, result.getQuantity(Display.LC17));
+        assertEquals(1, result.getQuantity(BarReader.READER_2D));
+        assertEquals(1, result.getQuantity(new Printer()));
+        assertEquals(1, result.getQuantity(new RfidReader()));
+    }
+
+    @Test
+    void resolve_shouldTreatMissingLegacyQuantitiesAsAbsentWhenEquipmentIsNotSelected() {
+        EquipmentConfiguration result = ControlEquipmentResolver.resolve(
+                Display.NONE.getName(), null,
+                BarReader.NONE.getName(), null,
+                false, null,
+                false, null,
+                "LC"
+        );
+
+        assertTrue(result.getAllItems().isEmpty());
     }
 
     @Test
