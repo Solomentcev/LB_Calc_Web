@@ -3,6 +3,8 @@ package com.lb_calc_web.mapper.entity;
 import com.lb_calc_web.domain.model.ALS;
 import com.lb_calc_web.domain.model.Employee;
 import com.lb_calc_web.domain.model.Project;
+import com.lb_calc_web.domain.equipment.Equipment;
+import com.lb_calc_web.domain.equipment.EquipmentCatalog;
 import com.lb_calc_web.entity.ALSEntity;
 import com.lb_calc_web.entity.EmployeeEntity;
 import com.lb_calc_web.entity.ProjectALSEntity;
@@ -40,7 +42,8 @@ public final class ProjectEntityMapper {
     public static Project toDomain(
             ProjectEntity entity
     ) {
-        return toDomain(entity, (als, alsEntity) -> { });
+        return toDomain(entity, (als, alsEntity) -> { },
+                EquipmentCatalog::findByCatalogPositionId);
     }
 
     /**
@@ -59,10 +62,23 @@ public final class ProjectEntityMapper {
                 entity,
                 "ProjectEntity не должен быть null"
         );
+        return toDomain(entity, alsObserver, EquipmentCatalog::findByCatalogPositionId);
+    }
+
+    public static Project toDomain(
+            ProjectEntity entity,
+            BiConsumer<ALS, ALSEntity> alsObserver,
+            Function<String, Equipment> equipmentResolver
+    ) {
+        Objects.requireNonNull(
+                entity,
+                "ProjectEntity не должен быть null"
+        );
         Objects.requireNonNull(
                 alsObserver,
                 "alsObserver не должен быть null"
         );
+        Objects.requireNonNull(equipmentResolver, "equipmentResolver не должен быть null");
 
         Employee createdBy =
                 EmployeeEntityMapper.toDomain(
@@ -81,9 +97,7 @@ public final class ProjectEntityMapper {
                 entity.getAlsEntries()) {
 
             ALS als =
-                    ALSEntityMapper.toDomain(
-                            entry.getAls()
-                    );
+                    ALSEntityMapper.toDomain(entry.getAls(), equipmentResolver);
 
             alsObserver.accept(als, entry.getAls());
 
@@ -117,10 +131,16 @@ public final class ProjectEntityMapper {
      * Преобразует ProjectEntity в DTO, включая идентификаторы ALS и модулей.
      */
     public static ProjectDTO toDto(ProjectEntity entity) {
+        return toDto(entity, EquipmentCatalog::findByCatalogPositionId);
+    }
+
+    public static ProjectDTO toDto(ProjectEntity entity,
+                                   Function<String, Equipment> equipmentResolver) {
         Objects.requireNonNull(entity, "ProjectEntity не должен быть null");
         Map<ALS, Long> alsIds = new LinkedHashMap<>();
         Project domain = toDomain(entity,
-                (als, alsEntity) -> alsIds.putIfAbsent(als, alsEntity.getId()));
+                (als, alsEntity) -> alsIds.putIfAbsent(als, alsEntity.getId()),
+                equipmentResolver);
         ProjectDTO dto = ProjectDtoMapper.toDto(domain, alsIds::get);
         dto.setId(entity.getId());
 

@@ -62,6 +62,7 @@ public class ProjectService {
     private final EmployeeService employeeService;
     private final Environment environment;
     private final SizeValidator sizeValidator;
+    private final EquipmentCatalogService equipmentCatalogService;
 
     public ProjectService(
             ProjectRepository projectRepository,
@@ -70,7 +71,8 @@ public class ProjectService {
             ALSService alsService,
             EmployeeService employeeService,
             Environment environment,
-            SizeValidator sizeValidator
+            SizeValidator sizeValidator,
+            EquipmentCatalogService equipmentCatalogService
     ) {
         this.projectRepository = projectRepository;
         this.alsRepository = alsRepository;
@@ -79,6 +81,7 @@ public class ProjectService {
         this.employeeService = employeeService;
         this.environment = environment;
         this.sizeValidator = sizeValidator;
+        this.equipmentCatalogService = equipmentCatalogService;
     }
 
     @Transactional(readOnly = true)
@@ -88,7 +91,7 @@ public class ProjectService {
         return projectRepository
                 .findAllWithUsers()
                 .stream()
-                .map(ProjectEntityMapper::toDto)
+                .map(entity -> ProjectEntityMapper.toDto(entity, equipmentCatalogService::resolveById))
                 .toList();
     }
 
@@ -109,7 +112,7 @@ public class ProjectService {
                                 )
                         );
 
-        return ProjectEntityMapper.toDto(entity);
+        return ProjectEntityMapper.toDto(entity, equipmentCatalogService::resolveById);
     }
 
     /**
@@ -305,7 +308,7 @@ public class ProjectService {
                 saved.getId()
         );
 
-        return ProjectEntityMapper.toDto(saved);
+        return ProjectEntityMapper.toDto(saved, equipmentCatalogService::resolveById);
     }
 
     @Transactional
