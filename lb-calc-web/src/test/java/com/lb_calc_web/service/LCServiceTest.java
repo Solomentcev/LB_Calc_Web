@@ -86,6 +86,38 @@ class LCServiceTest {
     }
 
     @Test
+    void saveLC_shouldPreserveExistingCatalogEquipmentWhenFormOmitsSelections() {
+        LCEntity existing = new LCEntity();
+        existing.setEquipment(java.util.Set.of(
+                new com.lb_calc_web.entity.EquipmentQuantityEmbeddable("DISPLAY_LC17", 1),
+                new com.lb_calc_web.entity.EquipmentQuantityEmbeddable("MODEM_CUSTOM", 2)
+        ));
+        when(lcRepository.findById(1L)).thenReturn(Optional.of(existing));
+        com.lb_calc_web.domain.equipment.CatalogEquipment modem =
+                new com.lb_calc_web.domain.equipment.CatalogEquipment(
+                        "MODEM_CUSTOM", "MODEM", "Модем", "", 0, 0, 0,
+                        0, 0, 0, false, false, false, false
+                );
+        when(equipmentCatalogService.resolveForExistingConfiguration(anyString(), anySet()))
+                .thenAnswer(invocation -> {
+                    String id = invocation.getArgument(0);
+                    return "MODEM_CUSTOM".equals(id)
+                            ? modem
+                            : EquipmentCatalog.resolve(id);
+                });
+
+        LCDTO dto = TestDataFactory.validLCDTO(1L);
+        dto.setColorBody(null);
+
+        assertThrows(ValidationSizeException.class, () -> lcService.saveLC(dto));
+
+        verify(equipmentCatalogService, atLeastOnce())
+                .resolveForExistingConfiguration(eq("MODEM_CUSTOM"), anySet());
+        verify(equipmentCatalogService, atLeastOnce())
+                .resolveForExistingConfiguration(eq("LC10"), anySet());
+    }
+
+    @Test
     void saveLC_missingRequiredColor_shouldReturnValidationError() {
         LCDTO dto = TestDataFactory.validLCDTO(42L);
         dto.setColorBody(null);
