@@ -1,5 +1,6 @@
 package com.lb_calc_web.controller.api;
 
+import com.lb_calc_web.dto.EquipmentCatalogDTO;
 import com.lb_calc_web.entity.EquipmentCatalogEntity;
 import com.lb_calc_web.service.EquipmentCatalogService;
 import org.springframework.http.HttpStatus;
@@ -20,25 +21,52 @@ public class EquipmentCatalogRestController {
     }
 
     @GetMapping
-    public List<EquipmentCatalogEntity> findAll(
+    public List<EquipmentCatalogDTO> findAll(
             @RequestParam(defaultValue = "false") boolean activeOnly) {
-        return activeOnly ? service.findActive() : service.findAll();
+        List<EquipmentCatalogEntity> items = activeOnly
+                ? service.findActive() : service.findAll();
+        return items.stream().map(this::toDto).toList();
     }
 
     @GetMapping("/{id}")
-    public EquipmentCatalogEntity get(@PathVariable String id) {
-        return service.get(id);
+    public EquipmentCatalogDTO get(@PathVariable String id) {
+        return toDto(service.get(id));
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public EquipmentCatalogEntity create(@RequestBody EquipmentCatalogEntity item) {
-        return service.create(item);
+    public EquipmentCatalogDTO create(@RequestBody EquipmentCatalogDTO dto) {
+        return toDto(service.create(toEntity(dto)));
+    }
+
+    @PutMapping("/{id}")
+    public EquipmentCatalogDTO update(@PathVariable String id,
+                                      @RequestBody EquipmentCatalogDTO dto) {
+        return toDto(service.update(id, dto.category(), dto.name(), dto.description(),
+                dto.width(), dto.height(), dto.depth(), dto.displayWidth(),
+                dto.displayHeight(), dto.minimumModuleWidth(), dto.supportsBarcode1d(),
+                dto.supportsBarcode2d(), dto.supportsRfid(), dto.supportsPrint()));
     }
 
     @PatchMapping("/{id}/active")
-    public EquipmentCatalogEntity setActive(@PathVariable String id,
-                                             @RequestParam boolean active) {
-        return service.setActive(id, active);
+    public EquipmentCatalogDTO setActive(@PathVariable String id,
+                                         @RequestParam boolean active) {
+        return toDto(service.setActive(id, active));
+    }
+
+    private EquipmentCatalogDTO toDto(EquipmentCatalogEntity item) {
+        return new EquipmentCatalogDTO(item.getCatalogPositionId(), item.getCategory(),
+                item.getName(), item.getDescription(), item.getWidth(), item.getHeight(),
+                item.getDepth(), item.getDisplayWidth(), item.getDisplayHeight(),
+                item.getMinimumModuleWidth(), item.isSupportsBarcode1d(),
+                item.isSupportsBarcode2d(), item.isSupportsRfid(), item.isSupportsPrint(),
+                item.isActive());
+    }
+
+    private EquipmentCatalogEntity toEntity(EquipmentCatalogDTO dto) {
+        return new EquipmentCatalogEntity(dto.catalogPositionId(), dto.category(), dto.name(),
+                dto.description(), dto.width(), dto.height(), dto.depth(), dto.displayWidth(),
+                dto.displayHeight(), dto.minimumModuleWidth(), dto.supportsBarcode1d(),
+                dto.supportsBarcode2d(), dto.supportsRfid(), dto.supportsPrint(), dto.active());
     }
 }
