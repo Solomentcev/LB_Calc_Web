@@ -38,12 +38,16 @@ public class EquipmentCatalogService {
 
     public Equipment resolve(String idOrName) {
         if (idOrName == null || idOrName.isBlank()) return null;
-        return repository.findById(idOrName).map(this::toDomain).orElseGet(() ->
-                repository.findAll().stream()
+        return repository.findById(idOrName)
+                .filter(EquipmentCatalogEntity::isActive)
+                .map(this::toDomain)
+                .orElseGet(() -> repository.findAllByActiveTrueOrderByCategoryAscNameAsc()
+                        .stream()
                         .filter(item -> item.getName().equalsIgnoreCase(idOrName))
-                        .findFirst().map(this::toDomain)
+                        .findFirst()
+                        .map(this::toDomain)
                         .orElseThrow(() -> new IllegalArgumentException(
-                                "Позиция оборудования не найдена в каталоге: " + idOrName)));
+                                "Активная позиция оборудования не найдена в каталоге: " + idOrName)));
     }
 
     /** Преобразует запись каталога в независимую доменную позицию. */
