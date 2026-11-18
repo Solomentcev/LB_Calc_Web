@@ -158,6 +158,14 @@
             <input type="hidden" th:field="*{lc.printer}">
             <input type="hidden" th:field="*{lc.barReader}">
             <input type="hidden" th:field="*{lc.rfidReader}">
+            <input type="hidden"
+                   th:each="method, methodStat : ${als.LC.accessMethods}"
+                   th:name="|lc.accessMethods[${methodStat.index}]|"
+                   th:value="${method}">
+            <input type="hidden"
+                   th:each="option, optionStat : ${als.LC.printOptions}"
+                   th:name="|lc.printOptions[${optionStat.index}]|"
+                   th:value="${option}">
             <div class="row">
                 <div class="col-md-2"><strong>ID:</strong> <span th:text="${als.LC.id}"></span></div>
                 <div class="col-md-3"><strong>Display:</strong> <span th:text="${als.LC.display}"></span></div>
