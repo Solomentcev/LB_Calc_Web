@@ -36,8 +36,8 @@ class EquipmentSelectionMapperTest {
                 existing, "LC19", null, resolver);
 
         assertEquals(List.of(
-                new EquipmentSelectionDTO("MODEM_CUSTOM", 2),
-                new EquipmentSelectionDTO("DISPLAY_LC19", 1)
+                new EquipmentSelectionDTO("DISPLAY_LC19", 1),
+                new EquipmentSelectionDTO("MODEM_CUSTOM", 2)
         ), result);
     }
 
