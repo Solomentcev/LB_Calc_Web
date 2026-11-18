@@ -86,7 +86,7 @@ final class ControlEquipmentResolver {
                 && !noneId.equals(value) && !noneName.equals(value);
     }
 
-    private static int requireQuantity(Integer quantity, String name) {
+    private static int requireQuantity(int quantity, String name) {
         if (quantity < 0) {
             throw new IllegalArgumentException("Количество оборудования не может быть отрицательным");
         }
