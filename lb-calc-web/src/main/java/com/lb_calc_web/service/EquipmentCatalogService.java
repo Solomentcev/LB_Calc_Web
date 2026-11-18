@@ -18,13 +18,6 @@ import java.util.Set;
 @Service
 @Transactional(readOnly = true)
 public class EquipmentCatalogService {
-    private static final Set<String> SUPPORTED_CATEGORIES =
-            Set.of(
-                    "DISPLAY", "BAR_READER", "PRINTER", "RFID_READER",
-                    "COMPUTER", "LOCK_CONTROLLER", "POWER_SUPPLY", "UPS",
-                    "PAYMENT_TERMINAL", "CASH_ACCEPTOR",
-                    "MODEM", "ROUTER", "ANTENNA"
-            );
     private final EquipmentCatalogRepository repository;
 
     public EquipmentCatalogService(EquipmentCatalogRepository repository) {

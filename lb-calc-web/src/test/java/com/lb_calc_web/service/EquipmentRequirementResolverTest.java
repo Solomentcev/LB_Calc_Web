@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -28,10 +29,11 @@ class EquipmentRequirementResolverTest {
 
         assertCategories(result.getEquipmentConfiguration().getAllEquipment(),
                 "COMPUTER", "LOCK_CONTROLLER", "POWER_SUPPLY", "UPS");
-        assertEquals(1, result.getEquipmentConfiguration().getAllItems().stream()
+        assertEquals(4, result.getEquipmentConfiguration().getAllItems().stream()
                 .filter(item -> Set.of("COMPUTER", "LOCK_CONTROLLER", "POWER_SUPPLY", "UPS")
                         .contains(item.equipment().getCategory()))
-                .mapToInt(com.lb_calc_web.domain.equipment.EquipmentItem::quantity).sum());
+                .filter(item -> item.quantity() == 1)
+                .count());
         verify(catalog, never()).findActiveDefault("PAYMENT_TERMINAL");
         verify(catalog, never()).findActiveDefault("CASH_ACCEPTOR");
     }
