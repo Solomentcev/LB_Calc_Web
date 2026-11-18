@@ -106,9 +106,35 @@ public class EquipmentCatalogService {
                                          boolean barcode1d, boolean barcode2d,
                                          boolean rfid, boolean print) {
         EquipmentCatalogEntity item = get(id);
+        if (repository.isUsedInConfigurations(id)
+                && hasPhysicalCharacteristicsChanged(item, category, width, height, depth,
+                displayWidth, displayHeight, minimumModuleWidth,
+                barcode1d, barcode2d, rfid, print)) {
+            throw new IllegalStateException(
+                    "Нельзя изменять категорию, габариты и совместимость оборудования, "
+                            + "которое используется в сохранённых конфигурациях: " + id);
+        }
         item.update(category, name, description, width, height, depth, displayWidth,
                 displayHeight, minimumModuleWidth, barcode1d, barcode2d, rfid, print);
         return item;
+    }
+
+    private boolean hasPhysicalCharacteristicsChanged(
+            EquipmentCatalogEntity item, String category,
+            int width, int height, int depth,
+            int displayWidth, int displayHeight, int minimumModuleWidth,
+            boolean barcode1d, boolean barcode2d, boolean rfid, boolean print) {
+        return !item.getCategory().equals(category)
+                || item.getWidth() != width
+                || item.getHeight() != height
+                || item.getDepth() != depth
+                || item.getDisplayWidth() != displayWidth
+                || item.getDisplayHeight() != displayHeight
+                || item.getMinimumModuleWidth() != minimumModuleWidth
+                || item.isSupportsBarcode1d() != barcode1d
+                || item.isSupportsBarcode2d() != barcode2d
+                || item.isSupportsRfid() != rfid
+                || item.isSupportsPrint() != print;
     }
 
     @Transactional
