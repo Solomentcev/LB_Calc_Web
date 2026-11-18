@@ -7,6 +7,7 @@ import com.lb_calc_web.handler.ValidationSizeException;
 import com.lb_calc_web.mapper.dto.LCDtoMapper;
 import com.lb_calc_web.mapper.entity.LCEntityMapper;
 import com.lb_calc_web.repository.LCRepository;
+import com.lb_calc_web.domain.equipment.EquipmentCatalog;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.env.MockEnvironment;
@@ -24,6 +25,7 @@ class LCServiceTest {
     private LCRepository lcRepository;
     private MockEnvironment environment;
     private LCService lcService;
+    private EquipmentCatalogService equipmentCatalogService;
 
     @BeforeEach
     void setUp() {
@@ -31,6 +33,11 @@ class LCServiceTest {
         lcRepository = mock(LCRepository.class);
 
         findOrCreateLockService = mock(FindOrCreateLockService.class);
+        equipmentCatalogService = mock(EquipmentCatalogService.class);
+        when(equipmentCatalogService.resolve(anyString()))
+                .thenAnswer(invocation -> EquipmentCatalog.resolve(invocation.getArgument(0)));
+        when(equipmentCatalogService.resolveById(anyString()))
+                .thenAnswer(invocation -> EquipmentCatalog.findByCatalogPositionId(invocation.getArgument(0)));
 
         environment = new MockEnvironment()
                 .withProperty("size.height.default", "1940")
@@ -50,7 +57,8 @@ class LCServiceTest {
                         lcRepository,
                         findOrCreateLockService,
                         environment,
-                        TestDataFactory.createSizeValidator()
+                        TestDataFactory.createSizeValidator(),
+                        equipmentCatalogService
                 );
     }
 

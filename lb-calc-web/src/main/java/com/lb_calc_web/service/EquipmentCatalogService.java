@@ -3,6 +3,8 @@ package com.lb_calc_web.service;
 import com.lb_calc_web.entity.EquipmentCatalogEntity;
 import com.lb_calc_web.domain.equipment.CatalogEquipment;
 import com.lb_calc_web.domain.equipment.Equipment;
+import com.lb_calc_web.domain.equipment.Display;
+import com.lb_calc_web.domain.equipment.BarReader;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -38,6 +40,12 @@ public class EquipmentCatalogService {
 
     public Equipment resolve(String idOrName) {
         if (idOrName == null || idOrName.isBlank()) return null;
+        if (Display.NONE_ID.equals(idOrName) || Display.NONE.getName().equals(idOrName)) {
+            return Display.NONE;
+        }
+        if (BarReader.NONE_ID.equals(idOrName) || BarReader.NONE.getName().equals(idOrName)) {
+            return BarReader.NONE;
+        }
         return repository.findById(idOrName)
                 .filter(EquipmentCatalogEntity::isActive)
                 .map(this::toDomain)
