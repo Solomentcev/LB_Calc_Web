@@ -178,8 +178,8 @@ public class EquipmentCatalogService {
 
     private void validateCatalogData(String category, boolean barcode1d,
                                       boolean barcode2d, boolean rfid, boolean print) {
-        if (!SUPPORTED_CATEGORIES.contains(category)) {
-            throw new IllegalArgumentException("Неподдерживаемая категория оборудования: " + category);
+        if (category == null || category.isBlank()) {
+            throw new IllegalArgumentException("Категория оборудования обязательна");
         }
         boolean valid = switch (category) {
             case "DISPLAY" -> !barcode1d && !barcode2d && !rfid && !print;
@@ -189,7 +189,7 @@ public class EquipmentCatalogService {
             case "COMPUTER", "LOCK_CONTROLLER", "POWER_SUPPLY", "UPS",
                     "PAYMENT_TERMINAL", "CASH_ACCEPTOR", "MODEM", "ROUTER", "ANTENNA" ->
                     !barcode1d && !barcode2d && !rfid && !print;
-            default -> false;
+            default -> !barcode1d && !barcode2d && !rfid && !print;
         };
         if (!valid) {
             throw new IllegalArgumentException(

@@ -28,6 +28,10 @@ class EquipmentRequirementResolverTest {
 
         assertCategories(result.getEquipmentConfiguration().getAllEquipment(),
                 "COMPUTER", "LOCK_CONTROLLER", "POWER_SUPPLY", "UPS");
+        assertEquals(1, result.getEquipmentConfiguration().getAllItems().stream()
+                .filter(item -> Set.of("COMPUTER", "LOCK_CONTROLLER", "POWER_SUPPLY", "UPS")
+                        .contains(item.equipment().getCategory()))
+                .mapToInt(com.lb_calc_web.domain.equipment.EquipmentItem::quantity).sum());
         verify(catalog, never()).findActiveDefault("PAYMENT_TERMINAL");
         verify(catalog, never()).findActiveDefault("CASH_ACCEPTOR");
     }

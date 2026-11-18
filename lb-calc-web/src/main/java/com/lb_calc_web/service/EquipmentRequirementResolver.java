@@ -81,21 +81,17 @@ public class EquipmentRequirementResolver {
             }
         }
 
-        ensureEquipment(selected, COMPUTER, equipment -> true,
-                "Для управляющего модуля нужен компьютер");
-        ensureEquipment(selected, LOCK_CONTROLLER, equipment -> true,
-                "Для управляющего модуля нужен контроллер замков");
-        ensureEquipment(selected, POWER_SUPPLY, equipment -> true,
-                "Для управляющего модуля нужен блок питания");
-        ensureEquipment(selected, UPS, equipment -> true,
-                "Для управляющего модуля нужен источник бесперебойного питания");
+        ensureSingleEquipment(selected, COMPUTER, "Для управляющего модуля нужен компьютер");
+        ensureSingleEquipment(selected, LOCK_CONTROLLER, "Для управляющего модуля нужен контроллер замков");
+        ensureSingleEquipment(selected, POWER_SUPPLY, "Для управляющего модуля нужен блок питания");
+        ensureSingleEquipment(selected, UPS, "Для управляющего модуля нужен источник бесперебойного питания");
 
         if (requiredCategories.contains(PAYMENT_TERMINAL)) {
-            ensureEquipment(selected, PAYMENT_TERMINAL, equipment -> true,
+            ensureSingleEquipment(selected, PAYMENT_TERMINAL,
                     "Для безналичной оплаты нужен банковский терминал");
         }
         if (requiredCategories.contains(CASH_ACCEPTOR)) {
-            ensureEquipment(selected, CASH_ACCEPTOR, equipment -> true,
+            ensureSingleEquipment(selected, CASH_ACCEPTOR,
                     "Для оплаты наличными нужен купюроприёмник");
         }
 
@@ -135,6 +131,24 @@ public class EquipmentRequirementResolver {
                 configuration.getPrintOptions(),
                 EquipmentConfiguration.fromItems(selected, additional)
         );
+    }
+
+    /**
+     * Проверяет обязательное аппаратное устройство, которое устанавливается
+     * в единственном экземпляре в управляющем модуле.
+     */
+    private void ensureSingleEquipment(List<EquipmentItem> selected, String category,
+                                       String errorMessage) {
+        List<EquipmentItem> categoryItems = selected.stream()
+                .filter(item -> category.equals(item.equipment().getCategory()))
+                .toList();
+
+        if (categoryItems.size() > 1
+                || (!categoryItems.isEmpty() && categoryItems.get(0).quantity() != 1)) {
+            throw new IllegalArgumentException(
+                    "Для категории " + category + " допускается ровно одна позиция в количестве 1");
+        }
+        ensureEquipment(selected, category, equipment -> true, errorMessage);
     }
 
     private void ensureEquipment(List<EquipmentItem> selected, String category,
