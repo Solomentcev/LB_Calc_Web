@@ -5,6 +5,8 @@ import com.lb_calc_web.domain.model.ALS;
 import com.lb_calc_web.dto.ALSDTO;
 import com.lb_calc_web.dto.LBCDTO;
 import com.lb_calc_web.dto.LBDTO;
+import com.lb_calc_web.domain.equipment.Equipment;
+import com.lb_calc_web.domain.equipment.EquipmentCatalog;
 
 import java.util.Objects;
 import java.util.function.Function;
@@ -30,6 +32,18 @@ public final class ALSConfigurationMapper {
     ) {
         Objects.requireNonNull(lbTypeResolver, "lbTypeResolver не должен быть null");
         Objects.requireNonNull(lbcTypeResolver, "lbcTypeResolver не должен быть null");
-        return ALSDtoMapper.toDomain(dto, lbTypeResolver, lbcTypeResolver);
+        return ALSDtoMapper.toDomain(dto, lbTypeResolver, lbcTypeResolver, EquipmentCatalog::resolve);
+    }
+
+    public static ALS toDomain(
+            ALSDTO dto,
+            Function<LBDTO, TypeLb> lbTypeResolver,
+            Function<LBCDTO, TypeLb> lbcTypeResolver,
+            Function<String, Equipment> equipmentResolver
+    ) {
+        Objects.requireNonNull(lbTypeResolver, "lbTypeResolver не должен быть null");
+        Objects.requireNonNull(lbcTypeResolver, "lbcTypeResolver не должен быть null");
+        Objects.requireNonNull(equipmentResolver, "equipmentResolver не должен быть null");
+        return ALSDtoMapper.toDomain(dto, lbTypeResolver, lbcTypeResolver, equipmentResolver);
     }
 }

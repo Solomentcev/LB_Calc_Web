@@ -8,6 +8,8 @@ import com.lb_calc_web.domain.model.LB;
 import com.lb_calc_web.domain.model.LBC;
 import com.lb_calc_web.domain.model.LC;
 import com.lb_calc_web.domain.model.Module;
+import com.lb_calc_web.domain.equipment.Equipment;
+import com.lb_calc_web.domain.equipment.EquipmentCatalog;
 import com.lb_calc_web.dto.ALSDTO;
 import com.lb_calc_web.dto.ALSModuleOrderDTO;
 import com.lb_calc_web.dto.LBDTO;
@@ -177,7 +179,17 @@ public final class ALSDtoMapper {
     public static ALS toDomain(
             ALSDTO dto,
             Function<LBDTO, TypeLb> lbTypeResolver,
-            Function<LBCDTO, TypeLb> lbcTypeResolver
+            Function<LBCDTO, TypeLb> lbcTypeResolver,
+            Function<String, Equipment> equipmentResolver
+    ) {
+        return toDomain(dto, lbTypeResolver, lbcTypeResolver, EquipmentCatalog::resolve);
+    }
+
+    public static ALS toDomain(
+            ALSDTO dto,
+            Function<LBDTO, TypeLb> lbTypeResolver,
+            Function<LBCDTO, TypeLb> lbcTypeResolver,
+            Function<String, Equipment> equipmentResolver
     ) {
         if (dto == null) {
             return null;
@@ -190,6 +202,10 @@ public final class ALSDtoMapper {
         java.util.Objects.requireNonNull(
                 lbcTypeResolver,
                 "lbcTypeResolver не должен быть null"
+        );
+        java.util.Objects.requireNonNull(
+                equipmentResolver,
+                "equipmentResolver не должен быть null"
         );
 
         Colors colorBody = Colors.valueOf(
@@ -212,8 +228,8 @@ public final class ALSDtoMapper {
         }
 
         List<Module> modules = dto.getModuleOrder() == null
-                ? restoreLegacyOrder(dto, lbTypeResolver, lbcTypeResolver)
-                : restoreExplicitOrder(dto, lbTypeResolver, lbcTypeResolver);
+                ? restoreLegacyOrder(dto, lbTypeResolver, lbcTypeResolver, equipmentResolver)
+                : restoreExplicitOrder(dto, lbTypeResolver, lbcTypeResolver, equipmentResolver);
 
         ALS domain = new ALS(
                 dto.getHeight(),
@@ -255,8 +271,8 @@ public final class ALSDtoMapper {
         }
 
         Module controlModule = dto.getLBC() != null
-                ? LBCDtoMapper.toDomain(dto.getLBC(), lbcTypeResolver.apply(dto.getLBC()))
-                : LCDtoMapper.toDomain(dto.getLC());
+                ? LBCDtoMapper.toDomain(dto.getLBC(), lbcTypeResolver.apply(dto.getLBC()), equipmentResolver)
+                : LCDtoMapper.toDomain(dto.getLC(), equipmentResolver);
 
         return insertControlModule(storageModules, controlModule, dto.getPositionControlModule());
     }
@@ -296,14 +312,14 @@ public final class ALSDtoMapper {
                         throw new IllegalStateException("moduleOrder содержит недопустимую ссылку на LC");
                     }
                     controlModuleUsed = true;
-                    modules.add(LCDtoMapper.toDomain(dto.getLC()));
+                    modules.add(LCDtoMapper.toDomain(dto.getLC(), equipmentResolver));
                 }
                 case "LBC" -> {
                     if (item.getIndex() != 0 || dto.getLBC() == null || controlModuleUsed) {
                         throw new IllegalStateException("moduleOrder содержит недопустимую ссылку на LBC");
                     }
                     controlModuleUsed = true;
-                    modules.add(LBCDtoMapper.toDomain(dto.getLBC(), lbcTypeResolver.apply(dto.getLBC())));
+                    modules.add(LBCDtoMapper.toDomain(dto.getLBC(), lbcTypeResolver.apply(dto.getLBC()), equipmentResolver));
                 }
                 default -> throw new IllegalStateException("Неизвестный тип модуля в moduleOrder: " + item.getType());
             }
