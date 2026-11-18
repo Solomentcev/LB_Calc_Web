@@ -19,6 +19,8 @@ import com.lb_calc_web.dto.LBCDTO;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Function;
+import com.lb_calc_web.domain.equipment.EquipmentCatalog;
 
 public final class LBCDtoMapper {
 
@@ -165,6 +167,11 @@ public final class LBCDtoMapper {
      * разрешённым application-слоем.
      */
     public static LBC toDomain(LBCDTO dto, TypeLb typeLb) {
+        return toDomain(dto, typeLb, EquipmentCatalog::resolve);
+    }
+
+    public static LBC toDomain(LBCDTO dto, TypeLb typeLb,
+                               Function<String, Equipment> equipmentResolver) {
         if (dto == null) {
             return null;
         }
@@ -186,7 +193,8 @@ public final class LBCDtoMapper {
                 dto.getPrinterQuantity(),
                 dto.isRfidReader(),
                 dto.getRfidReaderQuantity(),
-                "LBC"
+                "LBC",
+                equipmentResolver
                 );
 
         ControlConfiguration controlConfiguration =

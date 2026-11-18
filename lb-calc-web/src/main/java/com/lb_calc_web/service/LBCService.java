@@ -166,7 +166,7 @@ public class LBCService {
         );
 
         TypeLb typeLb = TypeLbFactory.forLBC(environment, dto.getType());
-        LBC domain = LBCDtoMapper.toDomain(dto, typeLb);
+        LBC domain = LBCDtoMapper.toDomain(dto, typeLb, equipmentCatalogService::resolve);
         LBCDTO result = LBCDtoMapper.toDto(domain);
         result.setId(0L);
         return addLBCImage(result);
@@ -204,7 +204,7 @@ public class LBCService {
                                 )
                         );
 
-        return addLBCImage(LBCEntityMapper.toDto(entity));
+        return addLBCImage(LBCEntityMapper.toDto(entity, equipmentCatalogService::resolveById));
     }
 
     @Transactional
@@ -294,7 +294,7 @@ public class LBCService {
                 saved.getId()
         );
 
-        return addLBCImage(LBCEntityMapper.toDto(saved));
+        return addLBCImage(LBCEntityMapper.toDto(saved, equipmentCatalogService::resolveById));
     }
 
     private LBCDTO addLBCImage(LBCDTO dto) {

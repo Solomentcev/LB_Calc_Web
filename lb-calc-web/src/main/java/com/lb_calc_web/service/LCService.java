@@ -149,7 +149,7 @@ public class LCService {
          * Domain выполняет расчёт имени,
          * описания и проверку ширины.
          */
-        LC domain = LCDtoMapper.toDomain(dto);
+        LC domain = LCDtoMapper.toDomain(dto, equipmentCatalogService::resolve);
 
         LCDTO result = LCDtoMapper.toDto(domain);
         result.setId(0L);
@@ -300,7 +300,7 @@ public class LCService {
                 saved.getId()
         );
 
-        return LCEntityMapper.toDto(saved);
+        return LCEntityMapper.toDto(saved, equipmentCatalogService::resolveById);
     }
 
     /**

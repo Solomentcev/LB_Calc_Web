@@ -17,6 +17,8 @@ import com.lb_calc_web.dto.LCDTO;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Function;
+import com.lb_calc_web.domain.equipment.EquipmentCatalog;
 
 public final class LCDtoMapper {
 
@@ -120,6 +122,10 @@ public final class LCDtoMapper {
     }
 
     public static LC toDomain(LCDTO dto) {
+        return toDomain(dto, EquipmentCatalog::resolve);
+    }
+
+    public static LC toDomain(LCDTO dto, Function<String, Equipment> equipmentResolver) {
         if (dto == null) {
             return null;
         }
@@ -134,7 +140,8 @@ public final class LCDtoMapper {
                 dto.getPrinterQuantity(),
                 dto.isRfidReader(),
                 dto.getRfidReaderQuantity(),
-                "LC"
+                "LC",
+                equipmentResolver
                 );
 
         ControlConfiguration controlConfiguration =

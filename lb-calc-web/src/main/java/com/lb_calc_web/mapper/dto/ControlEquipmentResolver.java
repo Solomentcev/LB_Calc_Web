@@ -11,6 +11,7 @@ import com.lb_calc_web.domain.model.EquipmentConfiguration;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 /**
  * Преобразует поля оборудования DTO в единую доменную конфигурацию.
@@ -32,7 +33,19 @@ final class ControlEquipmentResolver {
             Integer printerQuantity,
             boolean rfidReader,
             Integer rfidReaderQuantity,
-            String moduleType
+            String moduleType,
+            Function<String, Equipment> equipmentResolver
+    ) {
+        return resolve(displayName, displayQuantity, barReaderName, barReaderQuantity,
+                printer, printerQuantity, rfidReader, rfidReaderQuantity, moduleType,
+                EquipmentCatalog::resolve);
+    }
+
+    static EquipmentConfiguration resolve(
+            String displayName, Integer displayQuantity, String barReaderName,
+            Integer barReaderQuantity, boolean printer, Integer printerQuantity,
+            boolean rfidReader, Integer rfidReaderQuantity, String moduleType,
+            Function<String, Equipment> equipmentResolver
     ) {
         int resolvedDisplayQuantity = requireQuantity(
                 displayQuantity,
@@ -54,10 +67,10 @@ final class ControlEquipmentResolver {
         validatePresence(rfidReader, resolvedRfidReaderQuantity, "RFID-считывателя");
 
         List<EquipmentItem> items = new ArrayList<>();
-        addItem(items, displayName, resolvedDisplayQuantity, Display.NONE, moduleType);
-        addItem(items, barReaderName, resolvedBarReaderQuantity, BarReader.NONE, moduleType);
-        addCatalogItem(items, Printer.CATALOG_POSITION_ID, resolvedPrinterQuantity);
-        addCatalogItem(items, RfidReader.CATALOG_POSITION_ID, resolvedRfidReaderQuantity);
+        addItem(items, displayName, resolvedDisplayQuantity, Display.NONE, moduleType, equipmentResolver);
+        addItem(items, barReaderName, resolvedBarReaderQuantity, BarReader.NONE, moduleType, equipmentResolver);
+        addCatalogItem(items, Printer.CATALOG_POSITION_ID, resolvedPrinterQuantity, equipmentResolver);
+        addCatalogItem(items, RfidReader.CATALOG_POSITION_ID, resolvedRfidReaderQuantity, equipmentResolver);
 
         return EquipmentConfiguration.fromItems(items, List.of());
     }
@@ -107,7 +120,7 @@ final class ControlEquipmentResolver {
             return;
         }
 
-        Equipment equipment = EquipmentCatalog.resolve(nameOrId);
+        Equipment equipment = equipmentResolver.apply(nameOrId);
         if (equipment == null) {
             throw new IllegalArgumentException(
                     "Не указана позиция оборудования для количества " + quantity
@@ -126,13 +139,14 @@ final class ControlEquipmentResolver {
     private static void addCatalogItem(
             List<EquipmentItem> items,
             String catalogPositionId,
-            int quantity
+            int quantity,
+            Function<String, Equipment> equipmentResolver
     ) {
         if (quantity == 0) {
             return;
         }
         items.add(new EquipmentItem(
-                EquipmentCatalog.findByCatalogPositionId(catalogPositionId),
+                equipmentResolver.apply(catalogPositionId),
                 quantity
         ));
     }
