@@ -74,7 +74,7 @@ public class EquipmentConfiguration {
                         first.keySet().stream(),
                         second.keySet().stream()
                 )
-                .filter(Display.class::isInstance)
+                .filter(Equipment::isDisplay)
                 .count();
 
         if (displayPositions > 1) {
@@ -95,7 +95,7 @@ public class EquipmentConfiguration {
                         first.keySet().stream(),
                         second.keySet().stream()
                 )
-                .filter(Display.class::isInstance)
+                .filter(Equipment::isDisplay)
                 .count();
 
         if (candidate isDisplay() && displayPositions >= 1) {
