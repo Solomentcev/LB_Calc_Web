@@ -230,7 +230,7 @@ public class ProjectService {
          */
         Project domain;
         try {
-            domain = ProjectDtoMapper.toDomain(dto, dto -> ALSConfigurationMapper.toDomain(dto,
+            domain = ProjectDtoMapper.toDomain(dto, alsDto -> ALSConfigurationMapper.toDomain(alsDto,
                 lbDto -> TypeLbFactory.forLB(environment, lbDto.getType()),
                 lbcDto -> TypeLbFactory.forLBC(environment, lbcDto.getType())));
         } catch (IllegalStateException exception) {

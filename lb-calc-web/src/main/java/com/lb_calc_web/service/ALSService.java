@@ -393,7 +393,7 @@ public class ALSService {
         var domain = ALSConfigurationMapper.toDomain(als,
                 lbDto -> TypeLbFactory.forLB(environment, lbDto.getType()),
                 lbcDto -> TypeLbFactory.forLBC(environment, lbcDto.getType()));
-        int moduleIndex = findPhysicalLbIndex(domain, lbIndex);
+        int moduleIndex = ALSDtoMapper.findPhysicalLbIndex(domain, lbIndex);
         domain.replaceModuleAt(
                 moduleIndex,
                 LBDtoMapper.toDomain(lb, TypeLbFactory.forLB(environment, lb.getType()))
