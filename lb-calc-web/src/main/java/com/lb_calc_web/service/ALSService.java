@@ -529,6 +529,14 @@ public class ALSService {
         return saveALS(replaceWithNewLBC(findById(alsId)));
     }
 
+    /**
+     * Восстанавливает доменную ALS для других прикладных сценариев
+     * с учётом каталога оборудования и исторических позиций.
+     */
+    public ALS restoreDomain(ALSDTO dto) {
+        return toDomain(dto);
+    }
+
     private ALS toDomain(ALSDTO dto) {
         Set<String> retainedEquipmentIds = findRetainedEquipmentIds(dto);
         ALS domain = ALSConfigurationMapper.toDomain(
