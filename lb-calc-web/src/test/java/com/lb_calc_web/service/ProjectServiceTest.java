@@ -42,15 +42,11 @@ class ProjectServiceTest {
         alsService = mock(ALSService.class);
         employeeService = mock(EmployeeService.class);
 
-        when(alsService.toDomain(any(ALSDTO.class)))
-                .thenAnswer(invocation ->
-                        com.lb_calc_web.mapper.dto.ALSDtoMapper.toDomain(
-                                invocation.getArgument(0)
-                        )
-                );
-
         environment = new MockEnvironment()
-                .withProperty("project.company.default", "TEST_COMPANY");
+                .withProperty("project.company.default", "TEST_COMPANY")
+                .withProperty("lb.type.TYPE1.delta-width", "100")
+                .withProperty("lb.type.TYPE1.shelf-thick", "5")
+                .withProperty("lb.type.TYPE1.service-zone-width", "40");
 
         projectService =
                 new ProjectService(

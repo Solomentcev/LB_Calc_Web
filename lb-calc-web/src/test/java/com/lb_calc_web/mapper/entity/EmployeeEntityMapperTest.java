@@ -134,7 +134,7 @@ class EmployeeEntityMapperTest {
         assertThrows(
                 IllegalArgumentException.class,
                 () -> EmployeeEntityMapper.updateEntity(
-                        null,
+                        (Employee) null,
                         new EmployeeEntity()
                 )
         );

@@ -136,7 +136,7 @@ class ALSServiceTest {
     @Test
     void saveALS_shouldPropagateInvalidPersistedModuleCandidate() {
         ALSDTO dto = TestDataFactory.validALSDTO(1L);
-        var domainModule = alsService.toDomain(dto).getModules().get(0);
+        var domainModule = com.lb_calc_web.mapper.dto.ALSDtoMapper.toDomain(dto).getModules().get(0);
         var existingModule = ModuleEntityMapper.toEntity(domainModule);
         existingModule.setDescription("Устаревшее описание");
 
