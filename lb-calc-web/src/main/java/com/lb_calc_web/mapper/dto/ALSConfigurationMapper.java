@@ -2,8 +2,6 @@ package com.lb_calc_web.mapper.dto;
 
 import com.lb_calc_web.domain.model.ALS;
 import com.lb_calc_web.dto.ALSDTO;
-import com.lb_calc_web.dto.LBCDTO;
-import com.lb_calc_web.dto.LBDTO;
 import com.lb_calc_web.service.util.TypeLbFactory;
 import org.springframework.core.env.Environment;
 

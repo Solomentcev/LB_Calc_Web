@@ -358,7 +358,7 @@ public class ProjectService {
         Project domain = ProjectDtoMapper.toDomain(source, dto -> ALSConfigurationMapper.toDomain(dto, environment));
 
         domain.addALS(
-                ALSConfigurationMapper.toDomain(alsService.createALS())
+                ALSConfigurationMapper.toDomain(alsService.createALS(), environment)
         );
 
         return saveProject(ProjectDtoMapper.toDto(domain, source, dto -> ALSConfigurationMapper.toDomain(dto, environment)));
@@ -376,7 +376,7 @@ public class ProjectService {
         ALSDTO selected = findALSInProject(source, alsId);
 
         Project domain = ProjectDtoMapper.toDomain(source, dto -> ALSConfigurationMapper.toDomain(dto, environment));
-        ALS selectedDomain = ALSConfigurationMapper.toDomain(selected);
+        ALS selectedDomain = ALSConfigurationMapper.toDomain(selected, environment);
 
         if (domain.getQuantity(selectedDomain) == 0) {
             throw new NoSuchElementException(
@@ -545,8 +545,8 @@ public class ProjectService {
                 );
 
         Project domain = ProjectDtoMapper.toDomain(project, dto -> ALSConfigurationMapper.toDomain(dto, environment));
-        ALS oldConfiguration = ALSConfigurationMapper.toDomain(selected);
-        ALS newConfiguration = ALSConfigurationMapper.toDomain(als);
+        ALS oldConfiguration = ALSConfigurationMapper.toDomain(selected, environment);
+        ALS newConfiguration = ALSConfigurationMapper.toDomain(als, environment);
 
         domain.replaceALS(oldConfiguration, newConfiguration);
 
@@ -554,7 +554,7 @@ public class ProjectService {
 
         return savedProject.getAlsList().stream()
                 .filter(value -> value != null
-                        && ALSConfigurationMapper.toDomain(value).equals(newConfiguration))
+                        && ALSConfigurationMapper.toDomain(value, environment).equals(newConfiguration))
                 .findFirst()
                 .orElseThrow(
                         () -> new IllegalStateException(
