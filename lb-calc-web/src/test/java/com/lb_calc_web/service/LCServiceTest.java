@@ -26,6 +26,7 @@ class LCServiceTest {
     private MockEnvironment environment;
     private LCService lcService;
     private EquipmentCatalogService equipmentCatalogService;
+    private EquipmentRequirementResolver equipmentRequirementResolver;
 
     @BeforeEach
     void setUp() {
@@ -34,6 +35,9 @@ class LCServiceTest {
 
         findOrCreateLockService = mock(FindOrCreateLockService.class);
         equipmentCatalogService = mock(EquipmentCatalogService.class);
+        equipmentRequirementResolver = mock(EquipmentRequirementResolver.class);
+        when(equipmentRequirementResolver.resolve(any()))
+                .thenAnswer(invocation -> invocation.getArgument(0));
         when(equipmentCatalogService.resolve(anyString()))
                 .thenAnswer(invocation -> EquipmentCatalog.resolve(invocation.getArgument(0)));
         when(equipmentCatalogService.resolveById(anyString()))
@@ -58,7 +62,8 @@ class LCServiceTest {
                         findOrCreateLockService,
                         environment,
                         TestDataFactory.createSizeValidator(),
-                        equipmentCatalogService
+                        equipmentCatalogService,
+                        equipmentRequirementResolver
                 );
     }
 
