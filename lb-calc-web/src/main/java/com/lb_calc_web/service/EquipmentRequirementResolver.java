@@ -15,22 +15,19 @@ import java.util.Set;
 import java.util.function.Predicate;
 
 /**
- * Формирует обязательную комплектацию управляющего модуля
- * по базовым требованиям и выбранной функциональности.
+ * Подбирает оборудование управляющего модуля по выбранным функциям.
  *
- * <p>Дополнительные позиции, не управляемые функциональными правилами,
- * сохраняются при изменении конфигурации.</p>
+ * <p>Оборудование, не относящееся к функциональным категориям,
+ * сохраняется без изменений.</p>
  */
 @Service
 public class EquipmentRequirementResolver {
-    private static final String LOCK_CONTROLLER = "LOCK_CONTROLLER";
     private static final String PAYMENT_TERMINAL = "PAYMENT_TERMINAL";
     private static final String CASH_ACCEPTOR = "CASH_ACCEPTOR";
 
     private static final Set<String> MANAGED_CATEGORIES = Set.of(
             "DISPLAY", "BAR_READER", "PRINTER", "RFID_READER",
-            LOCK_CONTROLLER, PAYMENT_TERMINAL, CASH_ACCEPTOR,
-            "COMPUTER", "POWER_SUPPLY", "UPS"
+            PAYMENT_TERMINAL, CASH_ACCEPTOR
     );
 
     private final EquipmentCatalogService equipmentCatalogService;
@@ -45,9 +42,7 @@ public class EquipmentRequirementResolver {
         boolean requiresPin = configuration.getAccessMethods().contains(AccessMethod.PIN);
         boolean requiresRfid = configuration.getAccessMethods().contains(AccessMethod.RFID);
 
-        // Контроллер замков обязателен; остальные позиции определяются функциями
-        // либо остаются дополнительным оборудованием.
-        Set<String> requiredCategories = new HashSet<>(Set.of(LOCK_CONTROLLER));
+        Set<String> requiredCategories = new HashSet<>();
         boolean requiresDisplay = configuration.getEquipmentConfiguration().getAllItems()
                 .stream()
                 .anyMatch(item -> "DISPLAY".equals(item.equipment().getCategory()));
@@ -82,8 +77,6 @@ public class EquipmentRequirementResolver {
             }
         }
 
-        ensureSingleEquipment(selected, LOCK_CONTROLLER,
-                "Для управляющего модуля нужен контроллер замков");
         if (requiresDisplay) {
             ensureSingleEquipment(selected, "DISPLAY", "Для модуля выбран дисплей");
         }
@@ -133,24 +126,6 @@ public class EquipmentRequirementResolver {
                 configuration.getPrintOptions(),
                 EquipmentConfiguration.fromItems(selected, additional)
         );
-    }
-
-    /**
-     * Проверяет обязательное аппаратное устройство, которое устанавливается
-     * в единственном экземпляре в управляющем модуле.
-     */
-    private void ensureSingleEquipment(List<EquipmentItem> selected, String category,
-                                       String errorMessage) {
-        List<EquipmentItem> categoryItems = selected.stream()
-                .filter(item -> category.equals(item.equipment().getCategory()))
-                .toList();
-
-        if (categoryItems.size() > 1
-                || (!categoryItems.isEmpty() && categoryItems.get(0).quantity() != 1)) {
-            throw new IllegalArgumentException(
-                    "Для категории " + category + " допускается ровно одна позиция в количестве 1");
-        }
-        ensureEquipment(selected, category, equipment -> true, errorMessage);
     }
 
     private void ensureEquipment(List<EquipmentItem> selected, String category,
