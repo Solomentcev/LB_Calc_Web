@@ -18,6 +18,8 @@ import java.util.Set;
 @Service
 @Transactional(readOnly = true)
 public class EquipmentCatalogService {
+    private static final Set<String> SUPPORTED_CATEGORIES =
+            Set.of("DISPLAY", "BAR_READER", "PRINTER", "RFID_READER");
     private final EquipmentCatalogRepository repository;
 
     public EquipmentCatalogService(EquipmentCatalogRepository repository) {
@@ -126,6 +128,8 @@ public class EquipmentCatalogService {
 
     @Transactional
     public EquipmentCatalogEntity create(EquipmentCatalogEntity item) {
+        validateCatalogData(item.getCategory(), item.isSupportsBarcode1d(),
+                item.isSupportsBarcode2d(), item.isSupportsRfid(), item.isSupportsPrint());
         if (repository.existsById(item.getCatalogPositionId())) {
             throw new IllegalArgumentException("ID оборудования уже существует: "
                     + item.getCatalogPositionId());
@@ -145,6 +149,7 @@ public class EquipmentCatalogService {
                                          int displayWidth, int displayHeight, int minimumModuleWidth,
                                          boolean barcode1d, boolean barcode2d,
                                          boolean rfid, boolean print) {
+        validateCatalogData(category, barcode1d, barcode2d, rfid, print);
         EquipmentCatalogEntity item = get(id);
         if (item.isActive() && item.isDefaultPosition()
                 && !item.getCategory().equals(category)
@@ -164,6 +169,24 @@ public class EquipmentCatalogService {
         item.update(category, name, description, width, height, depth, displayWidth,
                 displayHeight, minimumModuleWidth, barcode1d, barcode2d, rfid, print);
         return item;
+    }
+
+    private void validateCatalogData(String category, boolean barcode1d,
+                                      boolean barcode2d, boolean rfid, boolean print) {
+        if (!SUPPORTED_CATEGORIES.contains(category)) {
+            throw new IllegalArgumentException("Неподдерживаемая категория оборудования: " + category);
+        }
+        boolean valid = switch (category) {
+            case "DISPLAY" -> !barcode1d && !barcode2d && !rfid && !print;
+            case "BAR_READER" -> (barcode1d || barcode2d) && !rfid && !print;
+            case "PRINTER" -> print && !barcode1d && !barcode2d && !rfid;
+            case "RFID_READER" -> rfid && !barcode1d && !barcode2d && !print;
+            default -> false;
+        };
+        if (!valid) {
+            throw new IllegalArgumentException(
+                    "Характеристики оборудования не соответствуют категории " + category);
+        }
     }
 
     private boolean hasPhysicalCharacteristicsChanged(
