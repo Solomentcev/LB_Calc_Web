@@ -228,7 +228,7 @@ public class LCService {
 
         LC domain;
         try {
-            domain = LCDtoMapper.toDomain(dto);
+            domain = LCDtoMapper.toDomain(dto, equipmentCatalogService::resolve);
         } catch (IllegalArgumentException | NullPointerException exception) {
             throw createMappingValidationException(
                     "LC",

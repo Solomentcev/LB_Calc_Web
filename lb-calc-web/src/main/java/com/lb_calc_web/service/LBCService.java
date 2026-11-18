@@ -223,7 +223,7 @@ public class LBCService {
         LBC domain;
         try {
             TypeLb typeLb = TypeLbFactory.forLBC(environment, dto.getType());
-            domain = LBCDtoMapper.toDomain(dto, typeLb);
+            domain = LBCDtoMapper.toDomain(dto, typeLb, equipmentCatalogService::resolve);
         } catch (IllegalArgumentException | NullPointerException exception) {
             throw createMappingValidationException(
                     "LBC",
