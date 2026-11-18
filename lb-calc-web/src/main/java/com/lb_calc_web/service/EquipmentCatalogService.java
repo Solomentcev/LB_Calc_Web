@@ -150,11 +150,17 @@ public class EquipmentCatalogService {
         validateCatalogData(category, barcode1d, barcode2d, rfid, print);
         EquipmentCatalogEntity item = get(id);
         if (item.isActive() && item.isDefaultPosition()
-                && !item.getCategory().equals(category)
-                && !repository.findAllByCategoryAndActiveTrueAndDefaultPositionTrueOrderByNameAsc(
-                        category).isEmpty()) {
-            throw new IllegalArgumentException(
-                    "Для новой категории уже задана активная модель по умолчанию: " + category);
+                && !item.getCategory().equals(category)) {
+            if (!hasOtherActiveDefault(item.getCategory(), id)) {
+                throw new IllegalStateException(
+                        "Перед переносом модели назначьте другую модель по умолчанию для категории: "
+                                + item.getCategory());
+            }
+            if (!repository.findAllByCategoryAndActiveTrueAndDefaultPositionTrueOrderByNameAsc(
+                    category).isEmpty()) {
+                throw new IllegalArgumentException(
+                        "Для новой категории уже задана активная модель по умолчанию: " + category);
+            }
         }
         if (repository.isUsedInConfigurations(id)
                 && hasImmutableCharacteristicsChanged(item, category, name, width, height, depth,
@@ -209,6 +215,13 @@ public class EquipmentCatalogService {
                 || item.isSupportsPrint() != print;
     }
 
+    private boolean hasOtherActiveDefault(String category, String excludedId) {
+        return repository
+                .findAllByCategoryAndActiveTrueAndDefaultPositionTrueOrderByNameAsc(category)
+                .stream()
+                .anyMatch(item -> !item.getCatalogPositionId().equals(excludedId));
+    }
+
     @Transactional
     public void delete(String id) {
         EquipmentCatalogEntity item = get(id);
@@ -226,6 +239,12 @@ public class EquipmentCatalogService {
     @Transactional
     public EquipmentCatalogEntity setDefault(String id, boolean defaultPosition) {
         EquipmentCatalogEntity item = get(id);
+        if (!defaultPosition && item.isActive() && item.isDefaultPosition()
+                && !hasOtherActiveDefault(item.getCategory(), id)) {
+            throw new IllegalStateException(
+                    "Нельзя снять признак модели по умолчанию с единственной активной модели категории: "
+                            + item.getCategory());
+        }
         if (defaultPosition && !item.isActive()) {
             throw new IllegalArgumentException(
                     "Деактивированная модель не может быть моделью по умолчанию: " + id);
@@ -245,6 +264,12 @@ public class EquipmentCatalogService {
     @Transactional
     public EquipmentCatalogEntity setActive(String id, boolean active) {
         EquipmentCatalogEntity item = get(id);
+        if (!active && item.isActive() && item.isDefaultPosition()
+                && !hasOtherActiveDefault(item.getCategory(), id)) {
+            throw new IllegalStateException(
+                    "Перед деактивацией модели по умолчанию назначьте другую активную модель категории: "
+                            + item.getCategory());
+        }
         if (active && item.isDefaultPosition()
                 && repository.findAllByCategoryAndActiveTrueAndDefaultPositionTrueOrderByNameAsc(
                         item.getCategory()).stream()
