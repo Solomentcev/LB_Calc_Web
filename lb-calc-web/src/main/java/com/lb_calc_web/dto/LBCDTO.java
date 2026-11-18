@@ -50,6 +50,7 @@ public class LBCDTO {
     private Integer printerQuantity;
     private Integer rfidReaderQuantity;
 
+    private List<EquipmentSelectionDTO> equipmentSelections;
     private List<String> accessMethods = new ArrayList<>();
     private List<String> printOptions = new ArrayList<>();
 
@@ -268,6 +269,12 @@ public class LBCDTO {
     public Integer getRfidReaderQuantity() { return rfidReaderQuantity; }
     public void setRfidReaderQuantity(Integer value) { rfidReaderQuantity = value; }
 
+    public List<EquipmentSelectionDTO> getEquipmentSelections() { return equipmentSelections; }
+
+    public void setEquipmentSelections(List<EquipmentSelectionDTO> selections) {
+        this.equipmentSelections = selections == null ? null : new ArrayList<>(selections);
+    }
+
     public List<String> getAccessMethods() {
         return accessMethods;
     }
@@ -337,6 +344,7 @@ public class LBCDTO {
                 && Objects.equals(display, lbcdto.display)
                 && Objects.equals(barReader, lbcdto.barReader)
                 && Objects.equals(payment, lbcdto.payment)
+                && Objects.equals(equipmentSelections, lbcdto.equipmentSelections)
                 && Objects.equals(accessMethods, lbcdto.accessMethods)
                 && Objects.equals(printOptions, lbcdto.printOptions);
     }
@@ -370,6 +378,7 @@ public class LBCDTO {
                 barReaderQuantity,
                 printerQuantity,
                 rfidReaderQuantity,
+                equipmentSelections,
                 accessMethods,
                 printOptions
         );
@@ -407,6 +416,7 @@ public class LBCDTO {
                 ", barReaderQuantity=" + barReaderQuantity +
                 ", printerQuantity=" + printerQuantity +
                 ", rfidReaderQuantity=" + rfidReaderQuantity +
+                ", equipmentSelections=" + equipmentSelections +
                 ", accessMethods=" + accessMethods +
                 ", printOptions=" + printOptions +
                 '}';

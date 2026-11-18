@@ -34,6 +34,7 @@ public class LCDTO {
     private String colorBody;
     private String colorDoor;
 
+    private List<EquipmentSelectionDTO> equipmentSelections;
     private List<String> accessMethods = new ArrayList<>();
     private List<String> printOptions = new ArrayList<>();
 
@@ -172,6 +173,12 @@ public class LCDTO {
     public Integer getRfidReaderQuantity() { return rfidReaderQuantity; }
     public void setRfidReaderQuantity(Integer value) { rfidReaderQuantity = value; }
 
+    public List<EquipmentSelectionDTO> getEquipmentSelections() { return equipmentSelections; }
+
+    public void setEquipmentSelections(List<EquipmentSelectionDTO> selections) {
+        this.equipmentSelections = selections == null ? null : new ArrayList<>(selections);
+    }
+
     public List<String> getAccessMethods() {
         return accessMethods;
     }
@@ -228,6 +235,7 @@ public class LCDTO {
                 && Objects.equals(payment, lcdto.payment)
                 && Objects.equals(colorBody, lcdto.colorBody)
                 && Objects.equals(colorDoor, lcdto.colorDoor)
+                && Objects.equals(equipmentSelections, lcdto.equipmentSelections)
                 && Objects.equals(accessMethods, lcdto.accessMethods)
                 && Objects.equals(printOptions, lcdto.printOptions);
     }
@@ -247,6 +255,7 @@ public class LCDTO {
                 rfidReader,
                 colorBody,
                 colorDoor,
+                equipmentSelections,
                 accessMethods,
                 printOptions
         );
@@ -274,6 +283,7 @@ public class LCDTO {
                 ", rfidReaderQuantity=" + rfidReaderQuantity +
                 ", colorBody='" + colorBody + '\'' +
                 ", colorDoor='" + colorDoor + '\'' +
+                ", equipmentSelections=" + equipmentSelections +
                 ", accessMethods=" + accessMethods +
                 ", printOptions=" + printOptions +
                 '}';
