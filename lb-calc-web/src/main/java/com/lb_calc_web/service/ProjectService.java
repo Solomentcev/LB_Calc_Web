@@ -387,7 +387,7 @@ public class ProjectService {
 
         domain.removeALS(selectedDomain);
 
-        return saveProject(toDto(domain, source));
+        return saveProject(ProjectDtoMapper.toDto(domain, source, dto -> ALSConfigurationMapper.toDomain(dto, environment)));
     }
 
     /**
@@ -550,7 +550,7 @@ public class ProjectService {
 
         domain.replaceALS(oldConfiguration, newConfiguration);
 
-        ProjectDTO savedProject = saveProject(toDto(domain, project));
+        ProjectDTO savedProject = saveProject(ProjectDtoMapper.toDto(domain, project, dto -> ALSConfigurationMapper.toDomain(dto, environment)));
 
         return savedProject.getAlsList().stream()
                 .filter(value -> value != null

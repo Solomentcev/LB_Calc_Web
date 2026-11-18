@@ -221,7 +221,7 @@ public class ALSService {
 
         ALS domain;
         try {
-            domain = toDomain(dto);
+            domain = ALSConfigurationMapper.toDomain(dto, environment);
         } catch (IllegalStateException exception) {
             var validationResult =
                     new com.lb_calc_web.dto.validation.ValidationResult(
@@ -323,7 +323,7 @@ public class ALSService {
                 Colors.valueOf(dto.getColorDoor())
         );
 
-        var domain = toDomain(dto);
+        var domain = ALSConfigurationMapper.toDomain(dto, environment);
         domain.addStorageModule(LBDtoMapper.toDomain(lbDto, TypeLbFactory.forLB(environment, lbDto.getType())));
 
         return ALSDtoMapper.toDto(domain);
@@ -350,7 +350,7 @@ public class ALSService {
             );
         }
 
-        var domain = toDomain(dto);
+        var domain = ALSConfigurationMapper.toDomain(dto, environment);
         int moduleIndex = findPhysicalLbIndex(domain, lbIndex);
         domain.removeModuleAt(moduleIndex);
 
@@ -382,7 +382,7 @@ public class ALSService {
             );
         }
 
-        var domain = toDomain(als);
+        var domain = ALSConfigurationMapper.toDomain(als, environment);
         int moduleIndex = findPhysicalLbIndex(domain, lbIndex);
         domain.replaceModuleAt(
                 moduleIndex,
@@ -452,7 +452,7 @@ public class ALSService {
             );
         }
 
-        var domain = toDomain(als);
+        var domain = ALSConfigurationMapper.toDomain(als, environment);
         domain.replaceControlModule(LCDtoMapper.toDomain(lc));
 
         return ALSDtoMapper.toDto(domain);
@@ -473,7 +473,7 @@ public class ALSService {
             );
         }
 
-        var domain = toDomain(als);
+        var domain = ALSConfigurationMapper.toDomain(als, environment);
         domain.replaceControlModule(LBCDtoMapper.toDomain(lbc, TypeLbFactory.forLBC(environment, lbc.getType())));
 
         return ALSDtoMapper.toDto(domain);
@@ -725,7 +725,7 @@ public class ALSService {
                 "ALS не должен быть null"
         );
 
-        var domain = toDomain(dto);
+        var domain = ALSConfigurationMapper.toDomain(dto, environment);
         ALSDTO calculated = ALSDtoMapper.toDto(domain);
 
         dto.setName(calculated.getName());

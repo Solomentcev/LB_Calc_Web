@@ -107,7 +107,7 @@ public class EmployeeService implements UserDetailsService {
                         )
                 );
 
-        return toDto(entity);
+        return EmployeeEntityMapper.toDto(entity);
     }
 
     public ProfileDTO getProfileById(int id) {
@@ -167,7 +167,7 @@ public class EmployeeService implements UserDetailsService {
         EmployeeEntity saved =
                 employeeRepository.save(entity);
 
-        return toDto(saved);
+        return EmployeeEntityMapper.toDto(saved);
     }
 
     /**
