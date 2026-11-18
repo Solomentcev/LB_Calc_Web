@@ -124,6 +124,13 @@ public class EquipmentCatalogService {
                                          boolean barcode1d, boolean barcode2d,
                                          boolean rfid, boolean print) {
         EquipmentCatalogEntity item = get(id);
+        if (item.isActive() && item.isDefaultPosition()
+                && !item.getCategory().equals(category)
+                && !repository.findAllByCategoryAndActiveTrueAndDefaultPositionTrueOrderByNameAsc(
+                        category).isEmpty()) {
+            throw new IllegalArgumentException(
+                    "Для новой категории уже задана активная модель по умолчанию: " + category);
+        }
         if (repository.isUsedInConfigurations(id)
                 && hasPhysicalCharacteristicsChanged(item, category, width, height, depth,
                 displayWidth, displayHeight, minimumModuleWidth,
@@ -178,8 +185,9 @@ public class EquipmentCatalogService {
     public EquipmentCatalogEntity setActive(String id, boolean active) {
         EquipmentCatalogEntity item = get(id);
         if (active && item.isDefaultPosition()
-                && !repository.findAllByCategoryAndActiveTrueAndDefaultPositionTrueOrderByNameAsc(
-                        item.getCategory()).isEmpty()) {
+                && repository.findAllByCategoryAndActiveTrueAndDefaultPositionTrueOrderByNameAsc(
+                        item.getCategory()).stream()
+                        .anyMatch(existing -> !existing.getCatalogPositionId().equals(id))) {
             throw new IllegalArgumentException(
                     "Для категории уже есть активная модель по умолчанию: " + item.getCategory());
         }
