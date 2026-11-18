@@ -23,17 +23,13 @@ import java.util.function.Predicate;
  */
 @Service
 public class EquipmentRequirementResolver {
-    private static final String COMPUTER = "COMPUTER";
     private static final String LOCK_CONTROLLER = "LOCK_CONTROLLER";
-    private static final String POWER_SUPPLY = "POWER_SUPPLY";
-    private static final String UPS = "UPS";
     private static final String PAYMENT_TERMINAL = "PAYMENT_TERMINAL";
     private static final String CASH_ACCEPTOR = "CASH_ACCEPTOR";
 
     private static final Set<String> MANAGED_CATEGORIES = Set.of(
             "DISPLAY", "BAR_READER", "PRINTER", "RFID_READER",
-            COMPUTER, LOCK_CONTROLLER, POWER_SUPPLY, UPS,
-            PAYMENT_TERMINAL, CASH_ACCEPTOR
+            LOCK_CONTROLLER, PAYMENT_TERMINAL, CASH_ACCEPTOR
     );
 
     private final EquipmentCatalogService equipmentCatalogService;
@@ -48,9 +44,12 @@ public class EquipmentRequirementResolver {
         boolean requiresPin = configuration.getAccessMethods().contains(AccessMethod.PIN);
         boolean requiresRfid = configuration.getAccessMethods().contains(AccessMethod.RFID);
 
-        Set<String> requiredCategories = new HashSet<>(
-                Set.of(COMPUTER, LOCK_CONTROLLER, POWER_SUPPLY, UPS)
-        );
+        // Контроллер замков обязателен; остальные позиции определяются функциями
+        // либо остаются дополнительным оборудованием.
+        Set<String> requiredCategories = new HashSet<>(Set.of(LOCK_CONTROLLER));
+        boolean requiresDisplay = configuration.getEquipmentConfiguration().getAllItems()
+                .stream()
+                .anyMatch(item -> "DISPLAY".equals(item.equipment().getCategory()));
 
         if (configuration.getPayment() == Payment.CASHLESS
                 || configuration.getPayment() == Payment.CASH_AND_CARDS) {
@@ -62,10 +61,10 @@ public class EquipmentRequirementResolver {
 
         if (requiresBarcode || requiresQrCode) requiredCategories.add("BAR_READER");
         if (requiresRfid) requiredCategories.add("RFID_READER");
-        if (requiresPin) requiredCategories.add("DISPLAY");
+        // Дисплей — самостоятельный функциональный выбор; PIN также требует его.
+        if (requiresDisplay || requiresPin) requiredCategories.add("DISPLAY");
 
         boolean requiresPrinter = configuration.getPayment() != Payment.NONE
-                || !configuration.getPrintOptions().isEmpty()
                 || requiresBarcode || requiresQrCode || requiresPin;
         if (requiresPrinter) requiredCategories.add("PRINTER");
 
@@ -81,10 +80,11 @@ public class EquipmentRequirementResolver {
             }
         }
 
-        ensureSingleEquipment(selected, COMPUTER, "Для управляющего модуля нужен компьютер");
-        ensureSingleEquipment(selected, LOCK_CONTROLLER, "Для управляющего модуля нужен контроллер замков");
-        ensureSingleEquipment(selected, POWER_SUPPLY, "Для управляющего модуля нужен блок питания");
-        ensureSingleEquipment(selected, UPS, "Для управляющего модуля нужен источник бесперебойного питания");
+        ensureSingleEquipment(selected, LOCK_CONTROLLER,
+                "Для управляющего модуля нужен контроллер замков");
+        if (requiresDisplay) {
+            ensureSingleEquipment(selected, "DISPLAY", "Для модуля выбран дисплей");
+        }
 
         if (requiredCategories.contains(PAYMENT_TERMINAL)) {
             ensureSingleEquipment(selected, PAYMENT_TERMINAL,
