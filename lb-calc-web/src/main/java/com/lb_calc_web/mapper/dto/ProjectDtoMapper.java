@@ -3,8 +3,13 @@ package com.lb_calc_web.mapper.dto;
 import com.lb_calc_web.domain.model.ALS;
 import com.lb_calc_web.domain.model.Employee;
 import com.lb_calc_web.domain.model.Project;
+import com.lb_calc_web.domain.model.LB;
+import com.lb_calc_web.domain.model.LBC;
+import com.lb_calc_web.domain.model.LC;
+import com.lb_calc_web.domain.model.Module;
 import com.lb_calc_web.dto.ALSDTO;
 import com.lb_calc_web.dto.ProjectDTO;
+import com.lb_calc_web.dto.validation.ValidationResult;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -151,6 +156,80 @@ public final class ProjectDtoMapper {
         );
 
         return dto;
+    }
+
+    /**
+     * Преобразует доменный проект в DTO, сохраняя ID неизменённых ALS.
+     */
+    public static ProjectDTO toDto(
+            Project domain,
+            ProjectDTO source,
+            Function<ALSDTO, ALS> alsMapper
+    ) {
+        Objects.requireNonNull(source, "Исходный ProjectDTO не должен быть null");
+        Objects.requireNonNull(alsMapper, "alsMapper не должен быть null");
+        ProjectDTO dto = toDto(domain, requested ->
+                source.getAlsList() == null ? null : source.getAlsList().stream()
+                        .filter(existing -> existing != null && existing.getId() != null
+                                && Objects.equals(alsMapper.apply(existing), requested))
+                        .map(ALSDTO::getId)
+                        .findFirst()
+                        .orElse(null));
+        dto.setId(source.getId());
+        return dto;
+    }
+
+    /**
+     * Переносит persistence ID из исходного DTO в результаты валидации.
+     */
+    public static void assignValidationObjectIds(
+            List<ValidationResult> results,
+            Project domain,
+            ProjectDTO source,
+            Function<ALSDTO, ALS> alsMapper
+    ) {
+        Objects.requireNonNull(results, "Результаты валидации не должны быть null");
+        Objects.requireNonNull(domain, "Project не должен быть null");
+        Objects.requireNonNull(source, "Исходный ProjectDTO не должен быть null");
+        Objects.requireNonNull(alsMapper, "alsMapper не должен быть null");
+
+        int resultIndex = 0;
+        for (ALS als : domain.getQuantityALS().keySet()) {
+            ALSDTO sourceALS = findSourceALS(source, als, alsMapper);
+            if (resultIndex >= results.size()) return;
+            results.get(resultIndex++).setObjectId(sourceALS == null ? null : sourceALS.getId());
+
+            List<LBDTO> sourceLBs = sourceALS == null || sourceALS.getLbList() == null
+                    ? List.of()
+                    : sourceALS.getLbList().stream().filter(Objects::nonNull).toList();
+            int lbIndex = 0;
+            for (Module module : als.getModules()) {
+                Long moduleId = null;
+                if (module instanceof LBC && sourceALS != null && sourceALS.getLBC() != null) {
+                    moduleId = sourceALS.getLBC().getId();
+                } else if (module instanceof LC && sourceALS != null && sourceALS.getLC() != null) {
+                    moduleId = sourceALS.getLC().getId();
+                } else if (module instanceof LB) {
+                    if (lbIndex < sourceLBs.size()) moduleId = sourceLBs.get(lbIndex).getId();
+                    lbIndex++;
+                }
+                if (resultIndex < results.size()) results.get(resultIndex).setObjectId(moduleId);
+                resultIndex++;
+            }
+        }
+    }
+
+    private static ALSDTO findSourceALS(
+            ProjectDTO source,
+            ALS target,
+            Function<ALSDTO, ALS> alsMapper
+    ) {
+        if (source.getAlsList() == null) return null;
+        return source.getAlsList().stream()
+                .filter(Objects::nonNull)
+                .filter(candidate -> Objects.equals(alsMapper.apply(candidate), target))
+                .findFirst()
+                .orElse(null);
     }
 
     /**

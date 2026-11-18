@@ -88,7 +88,7 @@ public class EmployeeService implements UserDetailsService {
                         )
                 );
 
-        return toDto(entity);
+        return EmployeeEntityMapper.toDto(entity);
     }
 
     public EmployeeDTO loadUserById(int id) {
@@ -259,7 +259,7 @@ public class EmployeeService implements UserDetailsService {
                 new ArrayList<>();
 
         for (EmployeeEntity entity : entities) {
-            result.add(toDto(entity));
+            result.add(EmployeeEntityMapper.toDto(entity));
         }
 
         return result;
@@ -327,11 +327,5 @@ public class EmployeeService implements UserDetailsService {
         );
     }
 
-    private EmployeeDTO toDto(EmployeeEntity entity) {
 
-        Employee domain =
-                EmployeeEntityMapper.toDomain(entity);
-
-        return EmployeeDtoMapper.toDto(domain);
-    }
 }

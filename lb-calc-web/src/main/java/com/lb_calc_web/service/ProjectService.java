@@ -88,7 +88,7 @@ public class ProjectService {
         return projectRepository
                 .findAllWithUsers()
                 .stream()
-                .map(this::toDto)
+                .map(ProjectEntityMapper::toDto)
                 .toList();
     }
 
@@ -109,7 +109,7 @@ public class ProjectService {
                                 )
                         );
 
-        return toDto(entity);
+        return ProjectEntityMapper.toDto(entity);
     }
 
     /**
@@ -305,7 +305,7 @@ public class ProjectService {
                 saved.getId()
         );
 
-        return toDto(saved);
+        return ProjectEntityMapper.toDto(saved);
     }
 
     @Transactional
@@ -360,7 +360,7 @@ public class ProjectService {
                 alsService.toDomain(alsService.createALS())
         );
 
-        return saveProject(toDto(domain, source));
+        return saveProject(ProjectDtoMapper.toDto(domain, source, alsService::toDomain));
     }
 
     /**
@@ -829,27 +829,6 @@ public class ProjectService {
         );
     }
 
-    /**
-     * Преобразует доменный проект в DTO, восстанавливая ID только
-     * для конфигураций, уже присутствующих в исходном представлении.
-     */
-    private ProjectDTO toDto(Project domain, ProjectDTO source) {
-        ProjectDTO dto = ProjectDtoMapper.toDto(
-                domain,
-                requested -> source.getAlsList() == null
-                        ? null
-                        : source.getAlsList().stream()
-                                .filter(existing -> existing != null
-                                        && existing.getId() != null
-                                        && alsService.toDomain(existing).equals(requested))
-                                .map(ALSDTO::getId)
-                                .findFirst()
-                                .orElse(null)
-        );
-
-        dto.setId(source.getId());
-        return dto;
-    }
 
     private ProjectEntity loadExistingProject(
             Long id
@@ -973,13 +952,7 @@ public class ProjectService {
          * При update эти поля не должны приходить
          * от клиента как источник истины.
          */
-        dto.setCreatedBy(
-                EmployeeDtoMapper.toDto(
-                        EmployeeEntityMapper.toDomain(
-                                existing.getCreatedBy()
-                        )
-                )
-        );
+        dto.setCreatedBy(EmployeeEntityMapper.toDto(existing.getCreatedBy()));
 
         dto.setCreatedAt(
                 existing.getCreatedAt()
@@ -1123,7 +1096,7 @@ public class ProjectService {
     private void validateProject(Project domain, ProjectDTO source) {
         List<ValidationResult> results =
                 sizeValidator.validateProject(domain);
-        assignValidationObjectIds(results, domain, source);
+        ProjectDtoMapper.assignValidationObjectIds(results, domain, source, alsService::toDomain);
 
         List<ValidationError> errors =
                 results.stream()
@@ -1158,76 +1131,6 @@ public class ProjectService {
     }
 
     /**
-     * Сопоставляет результаты доменной проверки с persistence ID из исходного DTO.
-     */
-    private void assignValidationObjectIds(
-            List<ValidationResult> results,
-            Project domain,
-            ProjectDTO source
-    ) {
-        int resultIndex = 0;
-
-        for (ALS als : domain.getQuantityALS().keySet()) {
-            ALSDTO sourceALS = findSourceALS(source, als);
-
-            if (resultIndex >= results.size()) {
-                return;
-            }
-            results.get(resultIndex++).setObjectId(
-                    sourceALS == null ? null : sourceALS.getId()
-            );
-
-            List<LBDTO> sourceLBs = sourceALS == null
-                    || sourceALS.getLbList() == null
-                    ? List.of()
-                    : sourceALS.getLbList().stream()
-                            .filter(Objects::nonNull)
-                            .toList();
-
-            int lbIndex = 0;
-
-            for (Module module : als.getModules()) {
-                Long moduleId = null;
-
-                if (module instanceof LBC && sourceALS != null
-                        && sourceALS.getLBC() != null) {
-                    moduleId = sourceALS.getLBC().getId();
-                } else if (module instanceof LC && sourceALS != null
-                        && sourceALS.getLC() != null) {
-                    moduleId = sourceALS.getLC().getId();
-                } else if (module instanceof LB) {
-                    if (lbIndex < sourceLBs.size()) {
-                        moduleId = sourceLBs.get(lbIndex).getId();
-                    }
-                    lbIndex++;
-                }
-
-                if (resultIndex < results.size()) {
-                    results.get(resultIndex).setObjectId(moduleId);
-                }
-                resultIndex++;
-            }
-        }
-    }
-
-    /**
-     * Находит исходный DTO уникальной конфигурации ALS.
-     */
-    private ALSDTO findSourceALS(ProjectDTO source, ALS target) {
-        if (source.getAlsList() == null) {
-            return null;
-        }
-
-        return source.getAlsList().stream()
-                .filter(Objects::nonNull)
-                .filter(candidate ->
-                        alsService.toDomain(candidate).equals(target)
-                )
-                .findFirst()
-                .orElse(null);
-    }
-
-    /**
      * DTO/domain Employee -> JPA EmployeeEntity.
      */
     private EmployeeEntity resolveEmployee(
@@ -1256,61 +1159,6 @@ public class ProjectService {
                 );
     }
 
-    /**
-     * Entity -> DTO.
-     */
-    private ProjectDTO toDto(
-            ProjectEntity entity
-    ) {
-        Map<ALS, Long> alsIds = new LinkedHashMap<>();
-
-        Project domain =
-                ProjectEntityMapper.toDomain(
-                        entity,
-                        (als, alsEntity) ->
-                                alsIds.putIfAbsent(als, alsEntity.getId())
-                );
-
-        ProjectDTO dto =
-                ProjectDtoMapper.toDto(
-                        domain,
-                        alsIds::get
-                );
-
-        dto.setId(
-                entity.getId()
-        );
-
-        Map<Long, ALSEntity> alsEntitiesById =
-                new HashMap<>();
-
-        for (var entry : entity.getAlsEntries()) {
-            alsEntitiesById.put(
-                    entry.getAls().getId(),
-                    entry.getAls()
-            );
-        }
-
-        for (ALSDTO alsDto : dto.getAlsList()) {
-            if (alsDto == null || alsDto.getId() == null) {
-                continue;
-            }
-
-            ALSEntity alsEntity =
-                    alsEntitiesById.get(
-                            alsDto.getId()
-                    );
-
-            if (alsEntity != null) {
-                alsService.enrichModuleIds(
-                        alsDto,
-                        alsEntity
-                );
-            }
-        }
-
-        return dto;
-    }
 
     private String getRequired(
             String key

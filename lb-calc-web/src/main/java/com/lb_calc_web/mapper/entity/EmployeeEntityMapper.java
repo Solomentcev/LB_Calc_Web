@@ -2,6 +2,8 @@ package com.lb_calc_web.mapper.entity;
 
 import com.lb_calc_web.domain.model.Employee;
 import com.lb_calc_web.entity.EmployeeEntity;
+import com.lb_calc_web.dto.EmployeeDTO;
+import com.lb_calc_web.mapper.dto.EmployeeDtoMapper;
 
 /**
  * Маппер между JPA-сущностью сотрудника и доменной моделью.
@@ -34,6 +36,13 @@ public final class EmployeeEntityMapper {
                 entity.getRegistrationDate(),
                 entity.getRole()
         );
+    }
+
+    /**
+     * Преобразует persistence-сущность сотрудника в DTO.
+     */
+    public static EmployeeDTO toDto(EmployeeEntity entity) {
+        return EmployeeDtoMapper.toDto(toDomain(entity));
     }
 
     /**
