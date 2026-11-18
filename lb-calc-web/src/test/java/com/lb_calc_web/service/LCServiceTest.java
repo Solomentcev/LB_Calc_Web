@@ -53,6 +53,7 @@ class LCServiceTest {
                 .withProperty("lc.payment.default", "NONE")
                 .withProperty("lc.printer.default", "false")
                 .withProperty("lc.rfid-reader.default", "true")
+                .withProperty("lc.access-methods.default", "RFID")
                 .withProperty("lc.color.body.default", "Blue")
                 .withProperty("lc.color.door.default", "White");
 
@@ -79,6 +80,7 @@ class LCServiceTest {
         assertEquals(0, result.getBarReaderQuantity());
         assertEquals(0, result.getPrinterQuantity());
         assertEquals(1, result.getRfidReaderQuantity());
+        assertTrue(result.getAccessMethods().contains("RFID"));
         assertTrue(result.getWidth() > 0);
         assertNotNull(result.getDescription());
     }
