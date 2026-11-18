@@ -357,9 +357,7 @@ public class ProjectService {
         Project domain = ProjectDtoMapper.toDomain(source, alsDto -> alsService.restoreDomain(alsDto));
 
         domain.addALS(
-                ALSConfigurationMapper.toDomain(alsService.createALS(),
-                candidateLbDto -> TypeLbFactory.forLB(environment, candidateLbDto.getType()),
-                candidateLbcDto -> TypeLbFactory.forLBC(environment, candidateLbcDto.getType()))
+                alsService.restoreDomain(alsService.createALS())
         );
 
         return saveProject(ProjectDtoMapper.toDto(domain, source, alsDto -> alsService.restoreDomain(alsDto)));
