@@ -8,6 +8,7 @@ import com.lb_calc_web.domain.model.LC;
 import com.lb_calc_web.domain.model.Module;
 import com.lb_calc_web.domain.equipment.Equipment;
 import com.lb_calc_web.dto.ALSDTO;
+import com.lb_calc_web.dto.EquipmentSelectionDTO;
 import com.lb_calc_web.dto.LBCDTO;
 import com.lb_calc_web.dto.LBDTO;
 import com.lb_calc_web.dto.LCDTO;
@@ -19,6 +20,7 @@ import com.lb_calc_web.entity.LCEntity;
 import com.lb_calc_web.entity.ModuleEntity;
 import com.lb_calc_web.handler.ValidationSizeException;
 import com.lb_calc_web.mapper.dto.ALSDtoMapper;
+import com.lb_calc_web.mapper.dto.EquipmentSelectionMapper;
 import com.lb_calc_web.mapper.dto.ALSConfigurationMapper;
 import com.lb_calc_web.mapper.dto.LBDtoMapper;
 import com.lb_calc_web.mapper.dto.LCDtoMapper;
@@ -539,6 +541,12 @@ public class ALSService {
 
     private ALS toDomain(ALSDTO dto) {
         Set<String> retainedEquipmentIds = findRetainedEquipmentIds(dto);
+        if (dto.getLC() != null) {
+            retainEquipmentSelections(dto.getLC(), retainedEquipmentIds);
+        }
+        if (dto.getLBC() != null) {
+            retainEquipmentSelections(dto.getLBC(), retainedEquipmentIds);
+        }
         ALS domain = ALSConfigurationMapper.toDomain(
                 dto,
                 candidate -> TypeLbFactory.forLB(environment, candidate.getType()),
@@ -559,6 +567,7 @@ public class ALSService {
 
     private LC toDomain(LCDTO dto) {
         Set<String> retainedEquipmentIds = findRetainedEquipmentIds(dto.getId());
+        retainEquipmentSelections(dto, retainedEquipmentIds);
         LC domain = LCDtoMapper.toDomain(dto,
                 id -> equipmentCatalogService.resolveForExistingConfiguration(id, retainedEquipmentIds));
         domain.setControlConfiguration(
@@ -568,12 +577,53 @@ public class ALSService {
 
     private LBC toDomain(LBCDTO dto) {
         Set<String> retainedEquipmentIds = findRetainedEquipmentIds(dto.getId());
+        retainEquipmentSelections(dto, retainedEquipmentIds);
         LBC domain = LBCDtoMapper.toDomain(dto,
                 TypeLbFactory.forLBC(environment, dto.getType()),
                 id -> equipmentCatalogService.resolveForExistingConfiguration(id, retainedEquipmentIds));
         domain.setControlConfiguration(
                 equipmentRequirementResolver.resolve(domain.getControlConfiguration()));
         return domain;
+    }
+
+    private void retainEquipmentSelections(LCDTO dto, Set<String> retainedEquipmentIds) {
+        if (dto.getEquipmentSelections() != null || dto.getId() == null || dto.getId() <= 0) {
+            return;
+        }
+        moduleRepository.findById(dto.getId())
+                .filter(LCEntity.class::isInstance)
+                .map(LCEntity.class::cast)
+                .ifPresent(entity -> dto.setEquipmentSelections(
+                        EquipmentSelectionMapper.mergeDisplaySelection(
+                                entity.getEquipment().stream()
+                                        .map(item -> new EquipmentSelectionDTO(
+                                                item.getCatalogPositionId(), item.getQuantity()))
+                                        .toList(),
+                                dto.getDisplay(),
+                                dto.getDisplayQuantity(),
+                                id -> equipmentCatalogService.resolveForExistingConfiguration(
+                                        id, retainedEquipmentIds)
+                        )));
+    }
+
+    private void retainEquipmentSelections(LBCDTO dto, Set<String> retainedEquipmentIds) {
+        if (dto.getEquipmentSelections() != null || dto.getId() == null || dto.getId() <= 0) {
+            return;
+        }
+        moduleRepository.findById(dto.getId())
+                .filter(LBCEntity.class::isInstance)
+                .map(LBCEntity.class::cast)
+                .ifPresent(entity -> dto.setEquipmentSelections(
+                        EquipmentSelectionMapper.mergeDisplaySelection(
+                                entity.getEquipment().stream()
+                                        .map(item -> new EquipmentSelectionDTO(
+                                                item.getCatalogPositionId(), item.getQuantity()))
+                                        .toList(),
+                                dto.getDisplay(),
+                                dto.getDisplayQuantity(),
+                                id -> equipmentCatalogService.resolveForExistingConfiguration(
+                                        id, retainedEquipmentIds)
+                        )));
     }
 
     private Set<String> findRetainedEquipmentIds(ALSDTO dto) {
