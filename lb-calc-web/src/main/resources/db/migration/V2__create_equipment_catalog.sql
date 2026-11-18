@@ -1,7 +1,7 @@
 -- Каталог оборудования. Идентификаторы совпадают с ранее сохранявшимися
 -- catalog_position_id, поэтому существующие конфигурации продолжают разрешаться.
 CREATE TABLE equipment_catalog (
-    catalog_position_id VARCHAR(100) NOT NULL,
+    catalog_position_id VARCHAR(255) NOT NULL,
     category VARCHAR(40) NOT NULL,
     name VARCHAR(255) NOT NULL,
     description TEXT NOT NULL,
