@@ -78,7 +78,7 @@ final class ControlEquipmentResolver {
     }
 
     private static int resolveQuantity(Integer quantity, int legacyValue, String name) {
-        return quantity == null ? legacyValue : requireQuantity(quantity, name);
+        return quantity == null ? legacyValue : requireQuantity(quantity);
     }
 
     private static boolean isSelected(String value, String noneId, String noneName) {
@@ -86,7 +86,7 @@ final class ControlEquipmentResolver {
                 && !noneId.equals(value) && !noneName.equals(value);
     }
 
-    private static int requireQuantity(int quantity, String name) {
+    private static int requireQuantity(int quantity) {
         if (quantity < 0) {
             throw new IllegalArgumentException("Количество оборудования не может быть отрицательным");
         }
