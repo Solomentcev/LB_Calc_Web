@@ -4,6 +4,7 @@ import com.lb_calc_web.TestDataFactory;
 import com.lb_calc_web.domain.attributes.Role;
 import com.lb_calc_web.dto.ALSDTO;
 import com.lb_calc_web.domain.attributes.TypeLb;
+import com.lb_calc_web.domain.equipment.EquipmentCatalog;
 import com.lb_calc_web.mapper.dto.ALSConfigurationMapper;
 import com.lb_calc_web.dto.EmployeeDTO;
 import com.lb_calc_web.dto.LBCDTO;
@@ -35,6 +36,7 @@ class ProjectServiceTest {
     private EmployeeService employeeService;
     private MockEnvironment environment;
     private ProjectService projectService;
+    private EquipmentCatalogService equipmentCatalogService;
 
     @BeforeEach
     void setUp() {
@@ -53,6 +55,9 @@ class ProjectServiceTest {
             );
         });
         employeeService = mock(EmployeeService.class);
+        equipmentCatalogService = mock(EquipmentCatalogService.class);
+        when(equipmentCatalogService.resolveById(anyString()))
+                .thenAnswer(invocation -> EquipmentCatalog.findByCatalogPositionId(invocation.getArgument(0)));
 
         environment = new MockEnvironment()
                 .withProperty("project.company.default", "TEST_COMPANY")
@@ -68,7 +73,8 @@ class ProjectServiceTest {
                         alsService,
                         employeeService,
                         environment,
-                        TestDataFactory.createSizeValidator()
+                        TestDataFactory.createSizeValidator(),
+                        equipmentCatalogService
                 );
     }
 
