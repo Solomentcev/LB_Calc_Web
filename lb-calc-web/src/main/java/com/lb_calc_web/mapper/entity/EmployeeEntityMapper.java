@@ -80,6 +80,16 @@ public final class EmployeeEntityMapper {
     }
 
     /**
+     * Обновляет JPA-сущность данными DTO сотрудника.
+     */
+    public static void updateEntity(EmployeeDTO dto, EmployeeEntity entity) {
+        if (dto == null) {
+            throw new IllegalArgumentException("EmployeeDTO не должен быть null");
+        }
+        updateEntity(EmployeeDtoMapper.toDomain(dto), entity);
+    }
+
+    /**
      * Обновляет существующую JPA-сущность данными доменной модели.
      *
      * <p>Идентификатор и хэш пароля существующей сущности сохраняются.</p>

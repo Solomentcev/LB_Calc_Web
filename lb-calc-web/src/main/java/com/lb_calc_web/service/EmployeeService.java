@@ -153,13 +153,7 @@ public class EmployeeService implements UserDetailsService {
                         )
                 );
 
-        Employee domain =
-                EmployeeDtoMapper.toDomain(employeeDTO);
-
-        EmployeeEntityMapper.updateEntity(
-                domain,
-                entity
-        );
+        EmployeeEntityMapper.updateEntity(employeeDTO, entity);
 
         EmployeeEntity saved =
                 employeeRepository.save(entity);
