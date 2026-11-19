@@ -228,6 +228,11 @@ public class ALSRestController {
                                     e.getMessage()
                             )
                     );
+
+        } catch (IllegalStateException e) {
+
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(ApiResponse.error(e.getMessage()));
         }
     }
 }
