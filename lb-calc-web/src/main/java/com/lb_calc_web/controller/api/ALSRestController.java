@@ -177,6 +177,7 @@ public class ALSRestController {
     ) {
 
             ALSDTO als = alsService.findById(alsId);
+            alsService.findLBCInALS(als, lbcId);
             lbc.setId(lbcId);
 
             ALSDTO saved = alsService.replaceLBCandSaveALS(als, lbc);
