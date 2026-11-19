@@ -43,8 +43,8 @@ public final class CatalogEquipment extends Equipment {
     @Override public int getHeight() { return isDisplay() ? displayHeight : height; }
     @Override public int getDepth() { return depth; }
     @Override public String getDescription() { return description; }
-    public int getDisplayWidth() { return displayWidth; }
-    public int getDisplayHeight() { return displayHeight; }
+    @Override public int getDisplayWidth() { return displayWidth; }
+    @Override public int getDisplayHeight() { return displayHeight; }
     public int getMinimumModuleWidth() { return minimumModuleWidth; }
     @Override public boolean supportsBarcode1d() { return barcode1d; }
     @Override public boolean supportsBarcode2d() { return barcode2d; }
