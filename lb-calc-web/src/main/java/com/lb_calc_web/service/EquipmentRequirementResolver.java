@@ -77,7 +77,7 @@ public class EquipmentRequirementResolver {
             }
         }
 
-        if (requiresDisplay) {
+        if (requiresDisplay || requiresPin) {
             ensureSingleEquipment(selected, "DISPLAY", "Для модуля выбран дисплей");
         }
 
