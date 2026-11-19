@@ -13,6 +13,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.HttpStatusEntryPoint;
+import org.springframework.http.HttpStatus;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -79,6 +81,8 @@ class EmployeeRestControllerSecurityTest {
         SecurityFilterChain testSecurityFilterChain(HttpSecurity http) throws Exception {
             return http.csrf(AbstractHttpConfigurer::disable)
                     .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
+                    .exceptionHandling(exception -> exception.authenticationEntryPoint(
+                            new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
                     .build();
         }
     }
