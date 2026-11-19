@@ -430,31 +430,40 @@ public class AuthService {
     }
 
     private void sendEvent(UserEvent event, UserEventType type, Long userId) {
-        CompletableFuture<SendResult<String, UserEvent>> future =
-                kafkaTemplate.send(
-                        userEventsTopic,
-                        String.valueOf(userId),
-                        event
-                );
-
-        future.whenComplete(
-                (sendResult, throwable) -> {
-                    if (throwable != null) {
-                        logger.error(
-                                "Ошибка отправки события Kafka type={}, userId={}: {}",
-                                type,
-                                userId,
-                                throwable.getMessage()
-                        );
-                        return;
-                    }
-
-                    logger.debug(
-                            "Kafka event sent type={}, userId={}",
-                            type,
-                            userId
+        try {
+            CompletableFuture<SendResult<String, UserEvent>> future =
+                    kafkaTemplate.send(
+                            userEventsTopic,
+                            String.valueOf(userId),
+                            event
                     );
-                }
-        );
-    }
+
+            future.whenComplete(
+                    (sendResult, throwable) -> {
+                        if (throwable != null) {
+                            logger.error(
+                                    "Ошибка отправки события Kafka type={}, userId={}",
+                                    type,
+                                    userId,
+                                    throwable
+                            );
+                            return;
+                        }
+
+                        logger.debug(
+                                "Kafka event sent type={}, userId={}",
+                                type,
+                                userId
+                        );
+                    }
+            );
+        } catch (RuntimeException exception) {
+            logger.error(
+                    "Не удалось инициировать отправку события Kafka type={}, userId={}",
+                    type,
+                    userId,
+                    exception
+            );
+        }
+    }}
 }
