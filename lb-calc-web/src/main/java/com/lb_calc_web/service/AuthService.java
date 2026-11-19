@@ -153,7 +153,9 @@ public class AuthService {
                 jwtService.getRefreshClaims(refreshToken);
 
         if (!jwtService.isRefresh(claims)) {
-            return new JwtResponse(null, null);
+            throw new io.jsonwebtoken.JwtException(
+                    "Передан токен неверного типа: ожидается refresh token"
+            );
         }
 
         String email = claims.getSubject();
