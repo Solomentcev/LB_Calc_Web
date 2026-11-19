@@ -7,9 +7,9 @@ import com.lb_calc_web.domain.attributes.Payment;
 import com.lb_calc_web.domain.attributes.PrintOption;
 import com.lb_calc_web.domain.attributes.PositionControlModule;
 import com.lb_calc_web.domain.attributes.PositionLC;
+import com.lb_calc_web.service.EquipmentCatalogService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.ModelAttribute;
-import com.lb_calc_web.service.EquipmentCatalogService;
 
 import java.util.Arrays;
 import java.util.List;
@@ -18,7 +18,9 @@ public abstract class BaseCatalogController {
 
     private final EquipmentCatalogService equipmentCatalogService;
 
-    protected BaseCatalogController(EquipmentCatalogService equipmentCatalogService) {
+    protected BaseCatalogController(
+            EquipmentCatalogService equipmentCatalogService
+    ) {
         this.equipmentCatalogService = equipmentCatalogService;
     }
 
