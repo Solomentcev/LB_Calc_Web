@@ -44,6 +44,9 @@ public class EquipmentCatalogService {
     public Function<String, Equipment> findDomainCatalogResolver() {
         Map<String, Equipment> catalog = findDomainCatalog();
         return id -> {
+            if (id == null || id.isBlank()) {
+                throw new IllegalArgumentException("ID позиции оборудования не должен быть пустым");
+            }
             Equipment equipment = catalog.get(id);
             if (equipment == null) {
                 throw new IllegalArgumentException(
@@ -96,16 +99,20 @@ public class EquipmentCatalogService {
                 return toDomain(byId);
             }
 
-            List<EquipmentCatalogEntity> matches = new ArrayList<>(
-                    activeByName.getOrDefault(idOrName.toLowerCase(java.util.Locale.ROOT), List.of())
-            );
-            catalog.values().stream()
+            List<EquipmentCatalogEntity> retainedMatches = catalog.values().stream()
                     .filter(item -> retained.contains(item.getCatalogPositionId()))
                     .filter(item -> item.getName().equalsIgnoreCase(idOrName))
-                    .filter(item -> matches.stream().noneMatch(
-                            match -> match.getCatalogPositionId().equals(item.getCatalogPositionId())))
-                    .forEach(matches::add);
+                    .toList();
+            if (retainedMatches.size() == 1) {
+                return toDomain(retainedMatches.get(0));
+            }
+            if (retainedMatches.size() > 1) {
+                throw new IllegalArgumentException(
+                        "Название оборудования неоднозначно в исходной конфигурации: " + idOrName);
+            }
 
+            List<EquipmentCatalogEntity> matches = activeByName.getOrDefault(
+                    idOrName.toLowerCase(java.util.Locale.ROOT), List.of());
             if (matches.size() == 1) {
                 return toDomain(matches.get(0));
             }
