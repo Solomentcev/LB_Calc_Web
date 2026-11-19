@@ -68,7 +68,9 @@ class AuthServiceTest {
             authService.publishEvent(UserEventType.USER_REGISTERED, 42L, "user@example.com");
             verifyNoInteractions(kafkaTemplate);
 
-            TransactionSynchronizationUtils.invokeAfterCommit();
+            TransactionSynchronizationUtils.invokeAfterCommit(
+                    TransactionSynchronizationManager.getSynchronizations()
+            );
 
             verify(kafkaTemplate).send(eq("user-events"), eq("42"), any(UserEvent.class));
         } finally {
@@ -94,6 +96,7 @@ class AuthServiceTest {
         try {
             authService.publishEvent(UserEventType.USER_REGISTERED, 42L, "user@example.com");
             TransactionSynchronizationUtils.invokeAfterCompletion(
+                    TransactionSynchronizationManager.getSynchronizations(),
                     org.springframework.transaction.support.TransactionSynchronization.STATUS_ROLLED_BACK
             );
             verifyNoInteractions(kafkaTemplate);
