@@ -42,6 +42,10 @@ class LCServiceTest {
                 .thenAnswer(invocation -> EquipmentCatalog.resolve(invocation.getArgument(0)));
         when(equipmentCatalogService.resolveById(anyString()))
                 .thenAnswer(invocation -> EquipmentCatalog.findByCatalogPositionId(invocation.getArgument(0)));
+        when(equipmentCatalogService.findDomainCatalogResolver())
+                .thenReturn(EquipmentCatalog::findByCatalogPositionId);
+        when(equipmentCatalogService.findExistingConfigurationResolver(anySet()))
+                .thenReturn(EquipmentCatalog::resolve);
 
         environment = new MockEnvironment()
                 .withProperty("size.height.default", "1940")
@@ -98,8 +102,8 @@ class LCServiceTest {
                         "MODEM_CUSTOM", "MODEM", "Модем", "", 0, 0, 0,
                         0, 0, 0, false, false, false, false
                 );
-        when(equipmentCatalogService.resolveForExistingConfiguration(anyString(), anySet()))
-                .thenAnswer(invocation -> {
+        when(equipmentCatalogService.findExistingConfigurationResolver(anySet()))
+                .thenAnswer(invocation -> id -> {
                     String id = invocation.getArgument(0);
                     return "MODEM_CUSTOM".equals(id)
                             ? modem
@@ -111,10 +115,7 @@ class LCServiceTest {
 
         assertThrows(ValidationSizeException.class, () -> lcService.saveLC(dto));
 
-        verify(equipmentCatalogService, atLeastOnce())
-                .resolveForExistingConfiguration(eq("MODEM_CUSTOM"), anySet());
-        verify(equipmentCatalogService, atLeastOnce())
-                .resolveForExistingConfiguration(eq("LC10"), anySet());
+        verify(equipmentCatalogService).findExistingConfigurationResolver(anySet());
         verify(lcRepository, times(1)).findById(1L);
     }
 
