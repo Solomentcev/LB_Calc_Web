@@ -1,6 +1,8 @@
 package com.lb_calc_web.handler;
 
 import com.lb_calc_web.controller.api.response.ApiResponse;
+import io.jsonwebtoken.JwtException;
+import jakarta.security.auth.message.AuthException;
 import jakarta.validation.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,6 +34,21 @@ public class RestExceptionHandler {
 
     private static final Logger LOGGER =
             LoggerFactory.getLogger(RestExceptionHandler.class);
+
+
+    @ExceptionHandler(AuthException.class)
+    public ResponseEntity<ApiResponse<Void>> handleAuthenticationFailure(
+            AuthException exception
+    ) {
+        return response(HttpStatus.UNAUTHORIZED, "Неверные учётные данные");
+    }
+
+    @ExceptionHandler(JwtException.class)
+    public ResponseEntity<ApiResponse<Void>> handleInvalidToken(
+            JwtException exception
+    ) {
+        return response(HttpStatus.UNAUTHORIZED, "Недействительный или просроченный токен");
+    }
 
     @ExceptionHandler(NoSuchElementException.class)
     public ResponseEntity<ApiResponse<Void>> handleNotFound(
