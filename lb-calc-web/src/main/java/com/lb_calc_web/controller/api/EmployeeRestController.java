@@ -8,25 +8,17 @@ import com.lb_calc_web.dto.ProfileDTO;
 import com.lb_calc_web.service.AuthService;
 import com.lb_calc_web.service.EmployeeService;
 import jakarta.validation.Valid;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 
 @RestController
 @RequestMapping("/api/v1/employees")
 @PreAuthorize("hasAuthority('ROLE_ADMIN')")
 public class EmployeeRestController {
-
-    private static final Logger logger =
-            LoggerFactory.getLogger(
-                    EmployeeRestController.class
-            );
 
     private final EmployeeService employeeService;
     private final AuthService authService;
@@ -42,7 +34,7 @@ public class EmployeeRestController {
     @GetMapping
     public ResponseEntity<?> getAllEmployees() {
 
-        try {
+        
 
             List<EmployeeDTO> employees =
                     employeeService.findAll();
@@ -51,24 +43,7 @@ public class EmployeeRestController {
                     ApiResponse.success(employees)
             );
 
-        } catch (Exception e) {
-
-            logger.error(
-                    "Ошибка получения сотрудников",
-                    e
-            );
-
-            return ResponseEntity
-                    .status(
-                            HttpStatus.INTERNAL_SERVER_ERROR
-                    )
-                    .body(
-                            ApiResponse.error(
-                                    "Ошибка получения сотрудников",
-                                    e.getMessage()
-                            )
-                    );
-        }
+        
     }
 
     /**
@@ -86,7 +61,7 @@ public class EmployeeRestController {
             @PathVariable Long id
     ) {
 
-        try {
+        
 
             EmployeeDTO employee =
                     employeeService.loadUserById(id);
@@ -95,17 +70,7 @@ public class EmployeeRestController {
                     ApiResponse.success(employee)
             );
 
-        } catch (NoSuchElementException e) {
-
-            return ResponseEntity
-                    .status(HttpStatus.NOT_FOUND)
-                    .body(
-                            ApiResponse.error(
-                                    "Сотрудник не найден",
-                                    e.getMessage()
-                            )
-                    );
-        }
+        
     }
 
     @PostMapping
@@ -115,7 +80,7 @@ public class EmployeeRestController {
             CreateEmployeeDTO createEmployeeDTO
     ) {
 
-        try {
+        
 
             EmployeeDTO employee =
                     authService.createEmployee(
@@ -130,34 +95,7 @@ public class EmployeeRestController {
                             )
                     );
 
-        } catch (IllegalArgumentException e) {
-
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .body(
-                            ApiResponse.error(
-                                    e.getMessage()
-                            )
-                    );
-
-        } catch (Exception e) {
-
-            logger.error(
-                    "Ошибка создания сотрудника",
-                    e
-            );
-
-            return ResponseEntity
-                    .status(
-                            HttpStatus.INTERNAL_SERVER_ERROR
-                    )
-                    .body(
-                            ApiResponse.error(
-                                    "Ошибка создания сотрудника",
-                                    e.getMessage()
-                            )
-                    );
-        }
+        
     }
 
     @PutMapping("/{id}")
@@ -166,7 +104,7 @@ public class EmployeeRestController {
             @RequestBody @Valid ProfileDTO employeeUpd
     ) {
 
-        try {
+        
 
             EmployeeDTO employee =
                     employeeService.loadUserById(id);
@@ -210,49 +148,19 @@ public class EmployeeRestController {
                     ApiResponse.success(saved)
             );
 
-        } catch (NoSuchElementException e) {
-
-            return ResponseEntity
-                    .status(HttpStatus.NOT_FOUND)
-                    .body(ApiResponse.error("Сотрудник не найден", e.getMessage()));
-
-        } catch (IllegalArgumentException e) {
-
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .body(ApiResponse.error(e.getMessage()));
-
-        } catch (Exception e) {
-
-            logger.error(
-                    "Ошибка обновления сотрудника",
-                    e
-            );
-
-            return ResponseEntity
-                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(
-                            ApiResponse.error(
-                                    "Ошибка обновления сотрудника",
-                                    e.getMessage()
-                            )
-                    );
-        }
+        
     }
 
     @PostMapping("/{id}/activate")
     public ResponseEntity<?> activateEmployee(
             @PathVariable Long id
     ) {
-        try {
+        
             employeeService.activateById(id);
             return ResponseEntity.ok(
                     ApiResponse.success("Employee activated successfully")
             );
-        } catch (NoSuchElementException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(ApiResponse.error("Сотрудник не найден", e.getMessage()));
-        }
+        
     }
 
     @DeleteMapping("/{id}")
@@ -260,7 +168,7 @@ public class EmployeeRestController {
             @PathVariable Long id
     ) {
 
-        try {
+        
 
             employeeService.deactivateById(id);
 
@@ -270,33 +178,7 @@ public class EmployeeRestController {
                     )
             );
 
-        } catch (NoSuchElementException e) {
-
-            return ResponseEntity
-                    .status(HttpStatus.NOT_FOUND)
-                    .body(
-                            ApiResponse.error(
-                                    "Сотрудник не найден",
-                                    e.getMessage()
-                            )
-                    );
-        } catch (Exception e) {
-
-            logger.error(
-                    "Ошибка деактивации сотрудника id={}",
-                    id,
-                    e
-            );
-
-            return ResponseEntity
-                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(
-                            ApiResponse.error(
-                                    "Ошибка деактивации сотрудника",
-                                    e.getMessage()
-                            )
-                    );
-        }
+        
     }
 
     /**
@@ -305,14 +187,11 @@ public class EmployeeRestController {
     @GetMapping("/me")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> getCurrentProfile() {
-        try {
+        
             return ResponseEntity.ok(
                     ApiResponse.success(employeeService.getCurrentEmployee())
             );
-        } catch (NoSuchElementException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(ApiResponse.error(e.getMessage()));
-        }
+        
     }
 
     /**
@@ -334,14 +213,11 @@ public class EmployeeRestController {
     public ResponseEntity<?> getProfileById(
             @PathVariable int id
     ) {
-        try {
+        
             return ResponseEntity.ok(
                     ApiResponse.success(employeeService.getProfileById(id))
             );
-        } catch (NoSuchElementException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(ApiResponse.error("Сотрудник не найден", e.getMessage()));
-        }
+        
     }
 
     /**
@@ -357,19 +233,13 @@ public class EmployeeRestController {
                     .body(ApiResponse.error("Пароли не совпадают"));
         }
 
-        try {
+        
             EmployeeDTO currentEmployee = employeeService.getCurrentEmployee();
             authService.changePassword(currentEmployee.getId(), passwordDTO.getPassword());
             return ResponseEntity.ok(
                     ApiResponse.success("Пароль успешно изменён")
             );
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest()
-                    .body(ApiResponse.error(e.getMessage()));
-        } catch (NoSuchElementException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(ApiResponse.error(e.getMessage()));
-        }
+        
     }
 
     /**
@@ -385,15 +255,12 @@ public class EmployeeRestController {
                     .body(ApiResponse.error("Пароли не совпадают"));
         }
 
-        try {
+        
             authService.changePassword(id, passwordDTO.getPassword());
             return ResponseEntity.ok(
                     ApiResponse.success("Пароль успешно изменён")
             );
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest()
-                    .body(ApiResponse.error(e.getMessage()));
-        }
+        
     }
 
 }
