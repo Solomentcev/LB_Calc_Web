@@ -58,6 +58,8 @@ class ProjectServiceTest {
         equipmentCatalogService = mock(EquipmentCatalogService.class);
         when(equipmentCatalogService.resolveById(anyString()))
                 .thenAnswer(invocation -> EquipmentCatalog.findByCatalogPositionId(invocation.getArgument(0)));
+        when(equipmentCatalogService.findDomainCatalogResolver())
+                .thenReturn(EquipmentCatalog::findByCatalogPositionId);
 
         environment = new MockEnvironment()
                 .withProperty("project.company.default", "TEST_COMPANY")
