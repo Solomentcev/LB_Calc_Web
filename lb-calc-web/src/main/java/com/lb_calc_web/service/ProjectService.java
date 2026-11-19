@@ -323,6 +323,9 @@ public class ProjectService {
                 "Удаление проекта(id={})...",
                 id
         );
+        if (id == null || id <= 0) {
+            throw new NoSuchElementException("Проект с id " + id + " не найден");
+        }
 
         ProjectEntity entity =
                 projectRepository.findById(id)
