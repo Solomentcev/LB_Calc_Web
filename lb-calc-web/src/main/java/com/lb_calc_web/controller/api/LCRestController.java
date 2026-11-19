@@ -49,7 +49,7 @@ public class LCRestController {
 
         logger.info("GET /api/v1/lcs");
 
-        try {
+        
             List<LCDTO> lcList =
                     lcService.findAll();
 
@@ -57,22 +57,7 @@ public class LCRestController {
                     ApiResponse.success(lcList)
             );
 
-        } catch (Exception e) {
-
-            logger.error(
-                    "Ошибка при получении списка LC",
-                    e
-            );
-
-            return ResponseEntity
-                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(
-                            ApiResponse.error(
-                                    "Ошибка при получении списка LC",
-                                    e.getMessage()
-                            )
-                    );
-        }
+        
     }
 
     /**
@@ -96,7 +81,7 @@ public class LCRestController {
                 id
         );
 
-        try {
+        
             LCDTO lc =
                     lcService.findById(id);
 
@@ -104,38 +89,7 @@ public class LCRestController {
                     ApiResponse.success(lc)
             );
 
-        } catch (NoSuchElementException e) {
-
-            logger.warn(
-                    "LC с id={} не найден",
-                    id
-            );
-
-            return ResponseEntity
-                    .status(HttpStatus.NOT_FOUND)
-                    .body(
-                            ApiResponse.error(
-                                    "LC с id=" + id + " не найден"
-                            )
-                    );
-
-        } catch (Exception e) {
-
-            logger.error(
-                    "Ошибка при получении LC id={}",
-                    id,
-                    e
-            );
-
-            return ResponseEntity
-                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(
-                            ApiResponse.error(
-                                    "Ошибка при получении LC",
-                                    e.getMessage()
-                            )
-                    );
-        }
+        
     }
 
     /**
@@ -152,7 +106,7 @@ public class LCRestController {
                 "GET /api/v1/lcs/create"
         );
 
-        try {
+        
             LCDTO lc =
                     lcService.createLC();
 
@@ -160,22 +114,7 @@ public class LCRestController {
                     ApiResponse.success(lc)
             );
 
-        } catch (Exception e) {
-
-            logger.error(
-                    "Ошибка при создании шаблона LC",
-                    e
-            );
-
-            return ResponseEntity
-                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(
-                            ApiResponse.error(
-                                    "Ошибка при создании шаблона LC",
-                                    e.getMessage()
-                            )
-                    );
-        }
+        
     }
 
     /**
@@ -195,7 +134,7 @@ public class LCRestController {
                 dto != null ? dto.getDisplay() : null
         );
 
-        try {
+        
 
             LCDTO saved =
                     lcService.saveLC(dto);
@@ -207,71 +146,6 @@ public class LCRestController {
                     )
             );
 
-        } catch (ValidationSizeException e) {
-
-            logger.warn(
-                    "LC не прошёл валидацию: {}",
-                    e.getErrors()
-            );
-
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .body(
-                            ApiResponse.error(
-                                    "LC не прошёл валидацию",
-                                    e.getErrors()
-                            )
-                    );
-
-        } catch (IllegalArgumentException e) {
-
-            logger.warn(
-                    "Некорректные параметры LC: {}",
-                    e.getMessage()
-            );
-
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .body(
-                            ApiResponse.error(
-                                    e.getMessage()
-                            )
-                    );
-
-        } catch (IllegalStateException e) {
-
-            /*
-             * Например:
-             * ширина LC меньше минимальной ширины оборудования.
-             */
-            logger.warn(
-                    "Некорректное состояние LC: {}",
-                    e.getMessage()
-            );
-
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .body(
-                            ApiResponse.error(
-                                    e.getMessage()
-                            )
-                    );
-
-        } catch (Exception e) {
-
-            logger.error(
-                    "Ошибка при сохранении LC",
-                    e
-            );
-
-            return ResponseEntity
-                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(
-                            ApiResponse.error(
-                                    "Ошибка при сохранении LC",
-                                    e.getMessage()
-                            )
-                    );
-        }
+        
     }
 }
