@@ -2,7 +2,6 @@ package com.lb_calc_web.controller.api;
 
 import com.lb_calc_web.controller.api.response.ApiResponse;
 import com.lb_calc_web.dto.LBDTO;
-import com.lb_calc_web.handler.ValidationSizeException;
 import com.lb_calc_web.service.LBService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -10,13 +9,11 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 
 @RestController
 @RequestMapping("/api/v1/lbs")
@@ -49,14 +46,14 @@ public class LBRestController {
 
         logger.info("GET /api/v1/lbs");
 
-        
+
             List<LBDTO> lbList = lbService.findAll();
 
             return ResponseEntity.ok(
                     ApiResponse.success(lbList)
             );
 
-        
+
     }
 
     /**
@@ -77,14 +74,14 @@ public class LBRestController {
 
         logger.info("GET /api/v1/lbs/{}", id);
 
-        
+
             LBDTO lb = lbService.findById(id);
 
             return ResponseEntity.ok(
                     ApiResponse.success(lb)
             );
 
-        
+
     }
 
     /**
@@ -100,14 +97,14 @@ public class LBRestController {
 
         logger.info("GET /api/v1/lbs/create");
 
-        
+
             LBDTO lb = lbService.createLB();
 
             return ResponseEntity.ok(
                     ApiResponse.success(lb)
             );
 
-        
+
     }
 
     /**
@@ -127,7 +124,7 @@ public class LBRestController {
                 dto != null ? dto.getType() : null
         );
 
-        
+
             LBDTO saved = lbService.saveLB(dto);
 
             return ResponseEntity.ok(
@@ -137,6 +134,6 @@ public class LBRestController {
                     )
             );
 
-        
+
     }
 }
