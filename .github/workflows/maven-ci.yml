@@ -38,4 +38,4 @@ jobs:
           cache: maven
 
       - name: Run full test suite
-        run: mvn -B test
+        run: mvn -B clean verify
