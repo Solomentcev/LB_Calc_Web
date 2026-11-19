@@ -101,7 +101,7 @@ class LCServiceTest {
                         0, 0, 0, false, false, false, false
                 );
         when(equipmentCatalogService.findExistingConfigurationResolver(anySet()))
-                .thenAnswer(invocation -> id -> "MODEM_CUSTOM".equals(id)
+                .thenReturn(id -> "MODEM_CUSTOM".equals(id)
                         ? modem
                         : EquipmentCatalog.resolve(id));
 
