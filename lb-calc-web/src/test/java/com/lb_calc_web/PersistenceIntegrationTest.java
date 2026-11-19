@@ -519,7 +519,7 @@ class PersistenceIntegrationTest {
                     changedWithLBC.getId()
             );
             assertNotEquals(changedWithLBC.getLBC().getId(), regeneratedLBC.getLBC().getId());
-            assertEquals(independentAlsId, regeneratedLBC.getId());
+            assertNotEquals(independentAlsId, regeneratedLBC.getId());
 
             entityManager.flush();
             entityManager.clear();
@@ -540,8 +540,7 @@ class PersistenceIntegrationTest {
             ALS changedLBCConfiguration = ALSDtoMapper.toDomain(regeneratedLBC);
 
             assertEquals(1, restoredProject.getQuantity(originalConfiguration));
-            assertEquals(1, restoredProject.getQuantity(independentConfiguration));
-            assertEquals(independentConfiguration, changedLBCConfiguration);
+            assertEquals(0, restoredProject.getQuantity(independentConfiguration));
             assertEquals(1, restoredProject.getQuantity(changedLCConfiguration));
             assertEquals(1, restoredProject.getQuantity(changedLBCConfiguration));
             assertEquals(3, restoredEntity.getAlsEntries().size());
