@@ -38,12 +38,12 @@ final class ControlEquipmentResolver {
             String moduleType, Function<String, Equipment> equipmentResolver) {
         int displayCount = resolveQuantity(
                 displayQuantity,
-                isSelected(displayName, Display.NONE_ID, Display.NONE.getName()) ? 0 : 1,
+                isSelected(displayName, Display.NONE_ID, Display.NONE.getName()) ? 1 : 0,
                 "дисплея"
         );
         int barReaderCount = resolveQuantity(
                 barReaderQuantity,
-                isSelected(barReaderName, BarReader.NONE_ID, BarReader.NONE.getName()) ? 0 : 1,
+                isSelected(barReaderName, BarReader.NONE_ID, BarReader.NONE.getName()) ? 1 : 0,
                 "сканера штрихкода"
         );
         int printerCount = resolveQuantity(printerQuantity, printer ? 1 : 0, "принтера");
