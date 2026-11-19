@@ -4,12 +4,13 @@
 <head th:replace="~{fragments/common :: head('Автоматические камеры хранения')}"></head>
 <body>
 <div th:replace="~{header :: header}"></div>
-<div class="container-fluid">
+<div class="container">
     <h1>Автоматические камеры хранения</h1>
     <a th:href="@{/alss/create}" class="btn btn-primary btn-sm mb-3">Создать АКХ </a>
     <a th:href="@{/}" class="btn btn-primary btn-sm mb-3">Назад</a>
-    <br/><br/>
-    <table border="1" class="table table-striped table-responsive-md">
+    
+    <div class="table-responsive">
+    <table class="table table-striped">
         <thead>
         <tr>
             <th>ID</th>
@@ -38,11 +39,12 @@
             <td th:text="${als.getColorDoor()}">ColorDoor</td>
 
             <td>
-                <a th:href="@{/alss/{id}(id=${als.getId()})}" class="btn btn-primary">Редактировать</a>
+                <a th:href="@{/alss/{id}(id=${als.getId()})}" class="btn btn-primary btn-sm">Редактировать</a>
             </td>
         </tr>
         </tbody>
     </table>
+        </div>
 </div>
 <div th:replace="~{footer :: footer}"></div>
 </body>
