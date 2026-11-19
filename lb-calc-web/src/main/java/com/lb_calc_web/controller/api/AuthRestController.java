@@ -63,10 +63,8 @@ public class AuthRestController {
     public ResponseEntity<?> refresh(@RequestHeader(value = "Refresh-Token", required = false) String refreshToken) {
         logger.debug("Token refresh attempt");
 
-        if (refreshToken == null || refreshToken.trim().isEmpty()) {
-            logger.warn("Refresh token is missing");
-            ApiResponse<Void> errorResponse = ApiResponse.error("Refresh token is missing");
-                       return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        if (refreshToken == null || refreshToken.isBlank()) {
+            throw new IllegalArgumentException("Refresh token is missing");
         }
 
             JwtResponse tokens = authService.refresh(refreshToken);
