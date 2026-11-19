@@ -177,6 +177,24 @@ public final class LBCDtoMapper {
 
     public static LBC toDomain(LBCDTO dto, TypeLb typeLb,
                                Function<String, Equipment> equipmentResolver) {
+        return toDomain(
+                dto,
+                typeLb,
+                dto == null ? null : dto.getEquipmentSelections(),
+                equipmentResolver
+        );
+    }
+
+    /**
+     * Преобразует DTO в доменную модель с явно переданным составом оборудования.
+     * Исходный DTO не изменяется.
+     */
+    public static LBC toDomain(
+            LBCDTO dto,
+            TypeLb typeLb,
+            List<EquipmentSelectionDTO> equipmentSelections,
+            Function<String, Equipment> equipmentResolver
+    ) {
         if (dto == null) {
             return null;
         }
@@ -190,9 +208,9 @@ public final class LBCDtoMapper {
         }
 
         EquipmentConfiguration equipmentConfiguration =
-                dto.getEquipmentSelections() != null
+                equipmentSelections != null
                         ? ControlEquipmentResolver.resolve(
-                                dto.getEquipmentSelections(), equipmentResolver)
+                                equipmentSelections, equipmentResolver)
                         : ControlEquipmentResolver.resolve(
                                 dto.getDisplay(), dto.getDisplayQuantity(),
                                 dto.getBarReader(), dto.getBarReaderQuantity(),
