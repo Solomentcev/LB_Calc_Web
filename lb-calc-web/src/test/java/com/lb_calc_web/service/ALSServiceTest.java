@@ -51,10 +51,6 @@ class ALSServiceTest {
         findOrCreateLockService = mock(FindOrCreateLockService.class);
         equipmentCatalogService = mock(EquipmentCatalogService.class);
         equipmentRequirementResolver = mock(EquipmentRequirementResolver.class);
-        when(equipmentCatalogService.resolveForExistingConfiguration(anyString(), anySet()))
-                .thenAnswer(invocation -> EquipmentCatalog.resolve(invocation.getArgument(0)));
-        when(equipmentCatalogService.resolveById(anyString()))
-                .thenAnswer(invocation -> EquipmentCatalog.findByCatalogPositionId(invocation.getArgument(0)));
         when(equipmentCatalogService.findDomainCatalogResolver())
                 .thenReturn(EquipmentCatalog::findByCatalogPositionId);
         when(equipmentCatalogService.findExistingConfigurationResolver(anySet()))
