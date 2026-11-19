@@ -66,7 +66,7 @@ public class ALSRestController {
             @PathVariable Long id
     ) {
 
-        try {
+        
             ALSDTO als =
                     alsService.findById(id);
 
@@ -74,17 +74,7 @@ public class ALSRestController {
                     ApiResponse.success(als)
             );
 
-        } catch (NoSuchElementException e) {
-
-            return ResponseEntity.status(
-                            HttpStatus.NOT_FOUND
-                    )
-                    .body(
-                            ApiResponse.error(
-                                    e.getMessage()
-                            )
-                    );
-        }
+        
     }
 
     @GetMapping("/create")
@@ -108,7 +98,7 @@ public class ALSRestController {
             @RequestBody ALSDTO dto
     ) {
 
-        try {
+        
             dto.setId(0L);
 
             ALSDTO saved =
@@ -123,31 +113,7 @@ public class ALSRestController {
                             )
                     );
 
-        } catch (ValidationSizeException e) {
-
-            logger.warn(
-                    "Ошибка валидации ALS: {}",
-                    e.getErrors()
-            );
-
-            return ResponseEntity.badRequest()
-                    .body(
-                            ApiResponse.error(
-                                    "Ошибка валидации ALS",
-                                    e.getErrors()
-                            )
-                    );
-
-        } catch (IllegalArgumentException
-                 | IllegalStateException e) {
-
-            return ResponseEntity.badRequest()
-                    .body(
-                            ApiResponse.error(
-                                    e.getMessage()
-                            )
-                    );
-        }
+        
     }
 
     @PutMapping("/{id}")
@@ -159,7 +125,7 @@ public class ALSRestController {
             @RequestBody ALSDTO dto
     ) {
 
-        try {
+        
             dto.setId(id);
 
             ALSDTO saved =
@@ -169,37 +135,7 @@ public class ALSRestController {
                     ApiResponse.success(saved)
             );
 
-        } catch (NoSuchElementException e) {
-
-            return ResponseEntity.status(
-                            HttpStatus.NOT_FOUND
-                    )
-                    .body(
-                            ApiResponse.error(
-                                    e.getMessage()
-                            )
-                    );
-
-        } catch (ValidationSizeException e) {
-
-            return ResponseEntity.badRequest()
-                    .body(
-                            ApiResponse.error(
-                                    "Ошибка валидации ALS",
-                                    e.getErrors()
-                            )
-                    );
-
-        } catch (IllegalArgumentException
-                 | IllegalStateException e) {
-
-            return ResponseEntity.badRequest()
-                    .body(
-                            ApiResponse.error(
-                                    e.getMessage()
-                            )
-                    );
-        }
+        
     }
 
     @DeleteMapping("/{id}")
@@ -210,7 +146,7 @@ public class ALSRestController {
             @PathVariable Long id
     ) {
 
-        try {
+        
             alsService.deleteALS(id);
 
             return ResponseEntity.ok(
@@ -219,22 +155,7 @@ public class ALSRestController {
                     )
             );
 
-        } catch (NoSuchElementException e) {
-
-            return ResponseEntity.status(
-                            HttpStatus.NOT_FOUND
-                    )
-                    .body(
-                            ApiResponse.error(
-                                    e.getMessage()
-                            )
-                    );
-
-        } catch (IllegalStateException e) {
-
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(ApiResponse.error(e.getMessage()));
-        }
+        
     }
 
     /**
@@ -246,15 +167,12 @@ public class ALSRestController {
             @PathVariable Long alsId,
             @PathVariable Long lbcId
     ) {
-        try {
+        
             ALSDTO als = alsService.findById(alsId);
             return ResponseEntity.ok(
                     ApiResponse.success(alsService.findLBCInALS(als, lbcId))
             );
-        } catch (NoSuchElementException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(ApiResponse.error(e.getMessage()));
-        }
+        
     }
 
     /**
@@ -267,7 +185,7 @@ public class ALSRestController {
             @PathVariable Long lbcId,
             @RequestBody LBCDTO lbc
     ) {
-        try {
+        
             ALSDTO als = alsService.findById(alsId);
             lbc.setId(lbcId);
 
@@ -275,16 +193,7 @@ public class ALSRestController {
             return ResponseEntity.ok(
                     ApiResponse.success(saved.getLBC())
             );
-        } catch (NoSuchElementException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(ApiResponse.error(e.getMessage()));
-        } catch (ValidationSizeException e) {
-            return ResponseEntity.badRequest()
-                    .body(ApiResponse.error("LBC не прошёл валидацию", e.getErrors()));
-        } catch (IllegalArgumentException | IllegalStateException e) {
-            return ResponseEntity.badRequest()
-                    .body(ApiResponse.error(e.getMessage()));
-        }
+        
     }
 
     /**
@@ -295,19 +204,10 @@ public class ALSRestController {
     public ResponseEntity<?> replaceWithNewLBC(
             @PathVariable Long alsId
     ) {
-        try {
+        
             ALSDTO saved = alsService.replaceWithNewLBCandSaveALS(alsId);
             return ResponseEntity.ok(ApiResponse.success(saved));
-        } catch (NoSuchElementException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(ApiResponse.error(e.getMessage()));
-        } catch (ValidationSizeException e) {
-            return ResponseEntity.badRequest()
-                    .body(ApiResponse.error("LBC не прошёл валидацию", e.getErrors()));
-        } catch (IllegalArgumentException | IllegalStateException e) {
-            return ResponseEntity.badRequest()
-                    .body(ApiResponse.error(e.getMessage()));
-        }
+        
     }
 
     /**
@@ -318,20 +218,11 @@ public class ALSRestController {
     public ResponseEntity<?> addLB(
             @PathVariable Long alsId
     ) {
-        try {
+        
             ALSDTO saved = alsService.addNewLBandSaveALS(alsId);
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body(ApiResponse.success(saved));
-        } catch (NoSuchElementException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(ApiResponse.error(e.getMessage()));
-        } catch (ValidationSizeException e) {
-            return ResponseEntity.badRequest()
-                    .body(ApiResponse.error("ALS не прошла валидацию", e.getErrors()));
-        } catch (IllegalArgumentException | IllegalStateException e) {
-            return ResponseEntity.badRequest()
-                    .body(ApiResponse.error(e.getMessage()));
-        }
+        
     }
 
     /**
@@ -343,19 +234,10 @@ public class ALSRestController {
             @PathVariable Long alsId,
             @PathVariable Long lbId
     ) {
-        try {
+        
             ALSDTO saved = alsService.deleteLBandSaveALS(alsId, lbId);
             return ResponseEntity.ok(ApiResponse.success(saved));
-        } catch (NoSuchElementException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(ApiResponse.error(e.getMessage()));
-        } catch (ValidationSizeException e) {
-            return ResponseEntity.badRequest()
-                    .body(ApiResponse.error("ALS не прошла валидацию", e.getErrors()));
-        } catch (IllegalArgumentException | IllegalStateException e) {
-            return ResponseEntity.badRequest()
-                    .body(ApiResponse.error(e.getMessage()));
-        }
+        
     }
 
 }
