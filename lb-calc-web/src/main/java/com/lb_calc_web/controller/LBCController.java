@@ -5,6 +5,7 @@ import com.lb_calc_web.domain.attributes.PrintOption;
 import com.lb_calc_web.dto.LBCDTO;
 import com.lb_calc_web.handler.ValidationSizeException;
 import com.lb_calc_web.service.LBCService;
+import com.lb_calc_web.service.EquipmentCatalogService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -23,7 +24,8 @@ public class LBCController extends BaseCatalogController {
 
     private final LBCService lbcService;
 
-    public LBCController(LBCService lbcService) {
+    public LBCController(LBCService lbcService, EquipmentCatalogService equipmentCatalogService) {
+        super(equipmentCatalogService);
         this.lbcService = lbcService;
     }
 
