@@ -4,8 +4,8 @@
 <head th:replace="~{fragments/common :: head('Создание сотрудника')}"></head>
 <body>
 <div th:replace="~{header :: header}"></div>
-<div class="container mt-4">
-    <h2>Добавление нового сотрудника</h2>
+<div class="container">
+    <h1>Добавление нового сотрудника</h1>
 
     <div th:if="${errorMessage}!=null" class="text-danger"
          th:text="${errorMessage}">
@@ -52,8 +52,8 @@
         </div>
 
 
-        <button type="submit" class="btn btn-primary">Создать</button>
-        <a th:href="@{/employees}" class="btn btn-secondary">Отмена</a>
+        <button type="submit" class="btn btn-primary btn-sm">Создать</button>
+        <a th:href="@{/employees}" class="btn btn-secondary btn-sm">Отмена</a>
     </form>
 </div>
 
