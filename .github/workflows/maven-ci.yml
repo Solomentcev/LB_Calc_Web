@@ -1,4 +1,4 @@
-name: Maven test
+name: CI
 
 on:
   push:
@@ -9,7 +9,8 @@ on:
       - master
 
 jobs:
-  test:
+  verify:
+    name: Maven verification
     runs-on: ubuntu-latest
 
     services:
@@ -26,6 +27,31 @@ jobs:
           --health-timeout=5s
           --health-retries=20
 
+      kafka:
+        image: apache/kafka:4.0.0
+        ports:
+          - 9092:9092
+        env:
+          KAFKA_NODE_ID: 1
+          KAFKA_PROCESS_ROLES: broker,controller
+          KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
+          KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+          KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+          KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+          KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+          KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+          KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+          KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+          KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+          KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+          KAFKA_NUM_PARTITIONS: 3
+        options: >-
+          --health-cmd="/opt/kafka/bin/kafka-topics.sh --bootstrap-server localhost:9092 --list"
+          --health-interval=10s
+          --health-timeout=10s
+          --health-retries=20
+          --health-start-period=20s
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -37,5 +63,5 @@ jobs:
           java-version: '17'
           cache: maven
 
-      - name: Run full test suite
+      - name: Run Maven verification
         run: mvn -B clean verify
