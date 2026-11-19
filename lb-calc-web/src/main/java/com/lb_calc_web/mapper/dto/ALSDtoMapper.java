@@ -14,6 +14,8 @@ import com.lb_calc_web.dto.ALSDTO;
 import com.lb_calc_web.dto.ALSModuleOrderDTO;
 import com.lb_calc_web.dto.LBDTO;
 import com.lb_calc_web.dto.LBCDTO;
+import com.lb_calc_web.dto.LCDTO;
+import com.lb_calc_web.dto.EquipmentSelectionDTO;
 import com.lb_calc_web.dto.validation.ValidationResult;
 
 import java.util.function.Function;
@@ -190,6 +192,28 @@ public final class ALSDtoMapper {
             Function<LBCDTO, TypeLb> lbcTypeResolver,
             Function<String, Equipment> equipmentResolver
     ) {
+        return toDomain(
+                dto,
+                lbTypeResolver,
+                lbcTypeResolver,
+                equipmentResolver,
+                dto == null || dto.getLC() == null ? null : dto.getLC().getEquipmentSelections(),
+                dto == null || dto.getLBC() == null ? null : dto.getLBC().getEquipmentSelections()
+        );
+    }
+
+    /**
+     * Преобразует ALS, используя подготовленный состав оборудования управляющего модуля.
+     * DTO и вложенные DTO остаются неизменными.
+     */
+    public static ALS toDomain(
+            ALSDTO dto,
+            Function<LBDTO, TypeLb> lbTypeResolver,
+            Function<LBCDTO, TypeLb> lbcTypeResolver,
+            Function<String, Equipment> equipmentResolver,
+            List<EquipmentSelectionDTO> lcEquipmentSelections,
+            List<EquipmentSelectionDTO> lbcEquipmentSelections
+    ) {
         if (dto == null) {
             return null;
         }
@@ -227,8 +251,8 @@ public final class ALSDtoMapper {
         }
 
         List<Module> modules = dto.getModuleOrder() == null
-                ? restoreLegacyOrder(dto, lbTypeResolver, lbcTypeResolver, equipmentResolver)
-                : restoreExplicitOrder(dto, lbTypeResolver, lbcTypeResolver, equipmentResolver);
+                ? restoreLegacyOrder(dto, lbTypeResolver, lbcTypeResolver, equipmentResolver, lcEquipmentSelections, lbcEquipmentSelections)
+                : restoreExplicitOrder(dto, lbTypeResolver, lbcTypeResolver, equipmentResolver, lcEquipmentSelections, lbcEquipmentSelections);
 
         ALS domain = new ALS(
                 dto.getHeight(),
@@ -259,7 +283,9 @@ public final class ALSDtoMapper {
             ALSDTO dto,
             Function<LBDTO, TypeLb> lbTypeResolver,
             Function<LBCDTO, TypeLb> lbcTypeResolver,
-            Function<String, Equipment> equipmentResolver
+            Function<String, Equipment> equipmentResolver,
+            List<EquipmentSelectionDTO> lcEquipmentSelections,
+            List<EquipmentSelectionDTO> lbcEquipmentSelections
     ) {
         List<LBDTO> lbDtos = dto.getLbList() == null ? List.of() : dto.getLbList();
         List<Module> storageModules = new ArrayList<>();
@@ -271,8 +297,8 @@ public final class ALSDtoMapper {
         }
 
         Module controlModule = dto.getLBC() != null
-                ? LBCDtoMapper.toDomain(dto.getLBC(), lbcTypeResolver.apply(dto.getLBC()), equipmentResolver)
-                : LCDtoMapper.toDomain(dto.getLC(), equipmentResolver);
+                ? LBCDtoMapper.toDomain(dto.getLBC(), lbcTypeResolver.apply(dto.getLBC()), lbcEquipmentSelections, equipmentResolver)
+                : LCDtoMapper.toDomain(dto.getLC(), lcEquipmentSelections, equipmentResolver);
 
         return insertControlModule(storageModules, controlModule, dto.getPositionControlModule());
     }
