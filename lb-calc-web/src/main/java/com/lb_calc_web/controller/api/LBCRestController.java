@@ -2,7 +2,6 @@ package com.lb_calc_web.controller.api;
 
 import com.lb_calc_web.controller.api.response.ApiResponse;
 import com.lb_calc_web.dto.LBCDTO;
-import com.lb_calc_web.handler.ValidationSizeException;
 import com.lb_calc_web.service.LBCService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -13,8 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.NoSuchElementException;
 
 @RestController
 @RequestMapping("/api/v1/lbcs")
@@ -52,13 +49,13 @@ public class LBCRestController {
             @Parameter(description = "Идентификатор LBC")
             @PathVariable Long id
     ) {
-        
+
             return ResponseEntity.ok(
                     ApiResponse.success(
                             lbcService.findById(id)
                     )
             );
-        
+
     }
 
     @GetMapping("/create")
@@ -80,7 +77,7 @@ public class LBCRestController {
     public ResponseEntity<?> saveLBC(
             @RequestBody LBCDTO dto
     ) {
-        
+
             LBCDTO saved =
                     lbcService.saveLBC(dto);
 
@@ -93,6 +90,6 @@ public class LBCRestController {
                                     saved
                             )
                     );
-        
+
     }
 }
