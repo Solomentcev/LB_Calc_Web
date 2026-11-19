@@ -260,7 +260,7 @@ public class LCService {
             domain.setControlConfiguration(
                     equipmentRequirementResolver.resolve(domain.getControlConfiguration())
             );
-        } catch (IllegalArgumentException | NullPointerException exception) {
+        } catch (IllegalArgumentException | IllegalStateException | NullPointerException exception) {
             throw createMappingValidationException(
                     "LC",
                     dto.getId(),
