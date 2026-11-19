@@ -34,15 +34,12 @@ public class EmployeeRestController {
     @GetMapping
     public ResponseEntity<?> getAllEmployees() {
 
-
-
             List<EmployeeDTO> employees =
                     employeeService.findAll();
 
             return ResponseEntity.ok(
                     ApiResponse.success(employees)
             );
-
 
     }
 
@@ -61,15 +58,12 @@ public class EmployeeRestController {
             @PathVariable Long id
     ) {
 
-
-
             EmployeeDTO employee =
                     employeeService.loadUserById(id);
 
             return ResponseEntity.ok(
                     ApiResponse.success(employee)
             );
-
 
     }
 
@@ -79,8 +73,6 @@ public class EmployeeRestController {
             @Valid
             CreateEmployeeDTO createEmployeeDTO
     ) {
-
-
 
             EmployeeDTO employee =
                     authService.createEmployee(
@@ -95,7 +87,6 @@ public class EmployeeRestController {
                             )
                     );
 
-
     }
 
     @PutMapping("/{id}")
@@ -103,8 +94,6 @@ public class EmployeeRestController {
             @PathVariable int id,
             @RequestBody @Valid ProfileDTO employeeUpd
     ) {
-
-
 
             EmployeeDTO employee =
                     employeeService.loadUserById(id);
@@ -116,13 +105,9 @@ public class EmployeeRestController {
                     employeeUpd.getEmail()
             )) {
 
-                return ResponseEntity
-                        .status(HttpStatus.BAD_REQUEST)
-                        .body(
-                                ApiResponse.error(
-                                        "Пользователь с таким email уже существует"
-                                )
-                        );
+                throw new IllegalArgumentException(
+                        "Пользователь с таким email уже существует"
+                );
             }
 
             employee.setFirstName(
@@ -148,7 +133,6 @@ public class EmployeeRestController {
                     ApiResponse.success(saved)
             );
 
-
     }
 
     @PostMapping("/{id}/activate")
@@ -168,8 +152,6 @@ public class EmployeeRestController {
             @PathVariable Long id
     ) {
 
-
-
             employeeService.deactivateById(id);
 
             return ResponseEntity.ok(
@@ -177,7 +159,6 @@ public class EmployeeRestController {
                             "Employee deactivated successfully"
                     )
             );
-
 
     }
 
@@ -229,10 +210,8 @@ public class EmployeeRestController {
             @RequestBody @Valid ChangePasswordDTO passwordDTO
     ) {
         if (!passwordDTO.getPassword().equals(passwordDTO.getConfirmPassword())) {
-            return ResponseEntity.badRequest()
-                    .body(ApiResponse.error("Пароли не совпадают"));
+            throw new IllegalArgumentException("Пароли не совпадают");
         }
-
 
             EmployeeDTO currentEmployee = employeeService.getCurrentEmployee();
             authService.changePassword(currentEmployee.getId(), passwordDTO.getPassword());
@@ -254,7 +233,6 @@ public class EmployeeRestController {
             return ResponseEntity.badRequest()
                     .body(ApiResponse.error("Пароли не совпадают"));
         }
-
 
             authService.changePassword(id, passwordDTO.getPassword());
             return ResponseEntity.ok(
