@@ -283,6 +283,8 @@ class ALSServiceTest {
         ALSDTO result = alsService.replaceLBC(als, replacement);
 
         assertNotNull(result.getLBC());
+        assertNull(replacement.getEquipmentSelections(),
+                "Восстановление оборудования не должно изменять исходный LBCDTO");
         verify(equipmentCatalogService).findExistingConfigurationResolver(anySet());
     }
 
