@@ -5,9 +5,10 @@
 <body>
 <div th:replace="~{header :: header}"></div>
     <div class="container mt-4">
-        <h2>Сотрудники</h2>
-        <a th:href="@{/employees/create}" class="btn btn-success mb-3">Добавить нового сотрудника</a>
+        <h1>Сотрудники</h1>
+        <a th:href="@{/employees/create}" class="btn btn-success btn-sm mb-3">Добавить нового сотрудника</a>
 
+        <div class="table-responsive">
         <table class="table table-striped">
             <thead>
             <tr>
@@ -40,6 +41,7 @@
             </tr>
             </tbody>
         </table>
+        </div>
     </div>
     <div th:replace="~{footer :: footer}"></div>
 </body>
