@@ -36,7 +36,7 @@
                     <textarea class="form-control" th:field="*{description}" readonly></textarea></div>
             </div>
             <div class="row mt-3">
-                <div class="col-md-2"><label>Положение control-модуля</label>
+                <div class="col-md-2"><label>Положение модуля управления</label>
                     <select id="positionControlModule" class="form-control" th:field="*{positionControlModule}">
                         <option th:each="position : ${positionControlModuleList}"
                                 th:value="${position}" th:text="${position}"></option>
