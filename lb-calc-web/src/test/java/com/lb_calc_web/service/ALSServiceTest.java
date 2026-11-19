@@ -349,16 +349,11 @@ class ALSServiceTest {
     @Test
     void restoreDomain_shouldNotRetainEquipmentFromModuleOutsideAls() {
         ALSDTO als = TestDataFactory.validLBCALSDTO(1L);
-        var unrelatedModule = new com.lb_calc_web.entity.LBCEntity();
-        unrelatedModule.setEquipment(java.util.Set.of(
-                new com.lb_calc_web.entity.EquipmentQuantityEmbeddable("CUSTOM_MODEM", 1)
-        ));
-        when(moduleRepository.findById(als.getLBC().getId()))
-                .thenReturn(Optional.of(unrelatedModule));
         when(alsRepository.findById(als.getId())).thenReturn(Optional.of(mock(ALSEntity.class)));
 
         alsService.restoreDomain(als);
 
+        verify(moduleRepository, never()).findById(anyLong());
         verify(equipmentCatalogService).findExistingConfigurationResolver(java.util.Set.of());
     }
 
