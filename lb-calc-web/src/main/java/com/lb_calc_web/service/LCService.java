@@ -254,9 +254,10 @@ public class LCService {
             var existingEquipmentResolver =
                     equipmentCatalogService.findExistingConfigurationResolver(retainedEquipmentIds);
 
-            if (dto.getEquipmentSelections() == null && existingEntity.isPresent()) {
+            List<EquipmentSelectionDTO> equipmentSelections = dto.getEquipmentSelections();
+            if (equipmentSelections == null && existingEntity.isPresent()) {
                 LCEntity entity = existingEntity.get();
-                dto.setEquipmentSelections(EquipmentSelectionMapper.mergeDisplaySelection(
+                equipmentSelections = EquipmentSelectionMapper.mergeDisplaySelection(
                         entity.getEquipment().stream()
                                 .map(item -> new EquipmentSelectionDTO(
                                         item.getCatalogPositionId(), item.getQuantity()))
@@ -264,9 +265,9 @@ public class LCService {
                         dto.getDisplay(),
                         dto.getDisplayQuantity(),
                         existingEquipmentResolver
-                ));
+                );
             }
-            domain = LCDtoMapper.toDomain(dto, existingEquipmentResolver);
+            domain = LCDtoMapper.toDomain(dto, equipmentSelections, existingEquipmentResolver);
             domain.setControlConfiguration(
                     equipmentRequirementResolver.resolve(domain.getControlConfiguration())
             );
