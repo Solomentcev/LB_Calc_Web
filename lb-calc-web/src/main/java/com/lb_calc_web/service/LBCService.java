@@ -183,6 +183,7 @@ public class LBCService {
     @Transactional(readOnly = true)
     public List<LBCDTO> findAll() {
         logger.info("Получение списка LBC");
+        var equipmentResolver = equipmentCatalogService.findDomainCatalogResolver();
 
         return lbcRepository.findAll()
                 .stream()
@@ -194,7 +195,7 @@ public class LBCService {
                                 )
                         )
                 )
-                .map(entity -> addLBCImage(LBCEntityMapper.toDto(entity, equipmentCatalogService::resolveById)))
+                .map(entity -> addLBCImage(LBCEntityMapper.toDto(entity, equipmentResolver)))
                 .toList();
     }
 
@@ -212,7 +213,7 @@ public class LBCService {
                                 )
                         );
 
-        return addLBCImage(LBCEntityMapper.toDto(entity, equipmentCatalogService::resolveById));
+        return addLBCImage(LBCEntityMapper.toDto(entity, equipmentCatalogService.findDomainCatalogResolver()));
     }
 
     @Transactional
@@ -280,6 +281,7 @@ public class LBCService {
 
         // Блокировка исключает параллельное создание той же конфигурации.
         findOrCreateLockService.acquire();
+        var equipmentResolver = equipmentCatalogService.findDomainCatalogResolver();
 
         var typeLb = domain.getTypeLb();
         Optional<LBCEntity> existing =
@@ -301,7 +303,7 @@ public class LBCService {
                         domain.getControlConfiguration().getPayment()
                 ).stream()
                         .filter(entity ->
-                                LBCEntityMapper.toDomain(entity, equipmentCatalogService::resolveById).equals(domain)
+                                LBCEntityMapper.toDomain(entity, equipmentResolver).equals(domain)
                         )
                         .findFirst();
 
@@ -311,7 +313,7 @@ public class LBCService {
                     existing.get().getId()
             );
 
-            return addLBCImage(LBCEntityMapper.toDto(existing.get(), equipmentCatalogService::resolveById));
+            return addLBCImage(LBCEntityMapper.toDto(existing.get(), equipmentResolver));
         }
 
         LBCEntity entity =
@@ -325,7 +327,7 @@ public class LBCService {
                 saved.getId()
         );
 
-        return addLBCImage(LBCEntityMapper.toDto(saved, equipmentCatalogService::resolveById));
+        return addLBCImage(LBCEntityMapper.toDto(saved, equipmentResolver));
     }
 
     private LBCDTO addLBCImage(LBCDTO dto) {
