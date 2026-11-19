@@ -84,11 +84,6 @@ public class AuthRestController {
         try {
             JwtResponse tokens = authService.refresh(refreshToken);
 
-            if (tokens.getAccessToken() == null || tokens.getRefreshToken() == null) {
-                logger.warn("Token refresh failed: invalid tokens returned");
-                throw new JwtException("Invalid tokens");
-            }
-
             logger.debug("Token successfully refreshed");
             ApiResponse<JwtResponse> response = ApiResponse.success("Token refreshed", tokens);
             return ResponseEntity.ok(response);
