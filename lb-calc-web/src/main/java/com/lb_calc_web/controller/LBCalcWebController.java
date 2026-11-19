@@ -28,7 +28,7 @@ public class LBCalcWebController {
 
     @GetMapping
     public String init() {
-        return "/myprofile";
+        return "index";
     }
 
     @GetMapping("/alss")
