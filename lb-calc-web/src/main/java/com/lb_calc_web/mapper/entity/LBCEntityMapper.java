@@ -29,6 +29,7 @@ public final class LBCEntityMapper {
     public static LBC toDomain(LBCEntity entity,
                                          Function<String, Equipment> equipmentResolver) {
         if (entity == null) return null;
+        Objects.requireNonNull(equipmentResolver, "equipmentResolver не должен быть null");
         TypeLb typeLb = new TypeLb(entity.getType(), entity.getDeltaWidth(),
                 entity.getShelfThick(), entity.getServiceZoneWidth());
         ControlConfiguration configuration = new ControlConfiguration(
