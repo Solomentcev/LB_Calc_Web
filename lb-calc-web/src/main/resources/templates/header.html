@@ -1,62 +1,54 @@
 <header th:fragment="header"
         xmlns:th="http://www.thymeleaf.org"
         xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-    <nav class="navbar navbar-expand-md bg-dark navbar-dark">
+    <nav class="navbar bg-dark navbar-dark flex-wrap">
         <a class="navbar-brand" th:href="@{/}">LB_Calc_Web</a>
 
-        <button class="navbar-toggler" type="button"
-                data-toggle="collapse" data-target="#topNavbar"
-                aria-controls="topNavbar" aria-expanded="false"
-                aria-label="Переключить навигацию">
-            <span class="navbar-toggler-icon"></span>
-        </button>
+        <ul class="navbar-nav flex-row flex-wrap mr-auto"
+            sec:authorize="isAuthenticated()">
+            <li class="nav-item">
+                <a class="nav-link px-2" th:href="@{/myprofile}">Мой профиль</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link px-2" th:href="@{/projects}">Проекты</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link px-2" th:href="@{/alss}">АКХ</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link px-2" th:href="@{/lbs}">Модули хранения</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link px-2" th:href="@{/lcs}">Модули управления</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link px-2" th:href="@{/lbcs}">LBC</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link px-2" th:href="@{/profiles}">Профили сотрудников</a>
+            </li>
+            <li class="nav-item" sec:authorize="hasAuthority('ROLE_ADMIN')">
+                <a class="nav-link px-2" th:href="@{/employees}">Сотрудники</a>
+            </li>
+        </ul>
 
-        <div class="collapse navbar-collapse" id="topNavbar">
-            <ul class="navbar-nav mr-auto" sec:authorize="isAuthenticated()">
-                <li class="nav-item">
-                    <a class="nav-link" th:href="@{/myprofile}">Мой профиль</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" th:href="@{/projects}">Проекты</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" th:href="@{/alss}">АКХ</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" th:href="@{/lbs}">Модули хранения</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" th:href="@{/lcs}">Модули управления</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" th:href="@{/lbcs}">LBC</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" th:href="@{/profiles}">Профили сотрудников</a>
-                </li>
-                <li class="nav-item" sec:authorize="hasAuthority('ROLE_ADMIN')">
-                    <a class="nav-link" th:href="@{/employees}">Сотрудники</a>
-                </li>
-            </ul>
-
-            <ul class="navbar-nav ml-auto">
-                <li class="nav-item" sec:authorize="isAnonymous()">
-                    <a class="nav-link" th:href="@{/registration}">Регистрация</a>
-                </li>
-                <li class="nav-item" sec:authorize="isAnonymous()">
-                    <a class="nav-link" th:href="@{/login}">Вход</a>
-                </li>
-                <li class="nav-item" sec:authorize="isAuthenticated()">
-                    <span class="navbar-text mr-3">
-                        <span sec:authentication="name"></span>
-                    </span>
-                </li>
-                <li class="nav-item" sec:authorize="isAuthenticated()">
-                    <form th:action="@{/logout}" method="post" class="form-inline">
-                        <button type="submit" class="nav-link btn btn-link">Выход</button>
-                    </form>
-                </li>
-            </ul>
-        </div>
+        <ul class="navbar-nav flex-row flex-wrap align-items-center">
+            <li class="nav-item" sec:authorize="isAnonymous()">
+                <a class="nav-link px-2" th:href="@{/registration}">Регистрация</a>
+            </li>
+            <li class="nav-item" sec:authorize="isAnonymous()">
+                <a class="nav-link px-2" th:href="@{/login}">Вход</a>
+            </li>
+            <li class="nav-item" sec:authorize="isAuthenticated()">
+                <span class="navbar-text px-2">
+                    <span sec:authentication="name"></span>
+                </span>
+            </li>
+            <li class="nav-item" sec:authorize="isAuthenticated()">
+                <form th:action="@{/logout}" method="post" class="form-inline">
+                    <button type="submit" class="nav-link btn btn-link px-2">Выход</button>
+                </form>
+            </li>
+        </ul>
     </nav>
 </header>
