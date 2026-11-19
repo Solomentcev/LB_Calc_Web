@@ -13,6 +13,7 @@
 </div>
 <div class="row"><div class="col-lg-6">
 <input type="hidden" th:field="*{id}"><input type="hidden" th:field="*{name}"><input type="hidden" th:field="*{description}">
+<div class="table-responsive">
 <table class="table table-striped">
 <tr><th>Тип</th><td><select class="form-control" th:field="*{type}">
 <option th:each="type : ${typeList}" th:value="${type}" th:text="${type}"></option>
@@ -34,6 +35,7 @@
 <option th:each="color : ${colorsList}" th:value="${color}" th:text="${color}"></option>
 </select></td></tr>
 </table>
+</div>
 <h2 class="h5 mt-4">Управление LBC</h2>
 <table class="table table-striped">
 <tr><th>Дисплей</th><td><select class="form-control" th:field="*{display}">
