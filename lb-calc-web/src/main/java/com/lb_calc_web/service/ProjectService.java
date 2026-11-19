@@ -23,7 +23,6 @@ import com.lb_calc_web.handler.ValidationSizeException;
 import com.lb_calc_web.helper.ExcellHelper;
 import com.lb_calc_web.mapper.dto.EmployeeDtoMapper;
 import com.lb_calc_web.mapper.dto.ProjectDtoMapper;
-import com.lb_calc_web.mapper.entity.EmployeeEntityMapper;
 import com.lb_calc_web.mapper.entity.ProjectEntityMapper;
 import com.lb_calc_web.repository.ALSRepository;
 import com.lb_calc_web.repository.EmployeeRepository;
@@ -955,7 +954,7 @@ public class ProjectService {
          * При update эти поля не должны приходить
          * от клиента как источник истины.
          */
-        dto.setCreatedBy(EmployeeEntityMapper.toDto(existing.getCreatedBy()));
+        dto.setCreatedBy(employeeService.loadUserById(existing.getCreatedBy().getId()));
 
         dto.setCreatedAt(
                 existing.getCreatedAt()
