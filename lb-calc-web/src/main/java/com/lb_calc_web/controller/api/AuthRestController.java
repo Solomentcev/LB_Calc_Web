@@ -6,6 +6,7 @@ import com.lb_calc_web.dto.JwtResponse;
 import com.lb_calc_web.dto.LoginRequest;
 import com.lb_calc_web.dto.RegistrationDTO;
 import com.lb_calc_web.service.AuthService;
+import jakarta.security.auth.message.AuthException;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
@@ -29,14 +30,12 @@ public class AuthRestController {
      * Вход в систему с email и паролем
      */
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody @Valid LoginRequest loginRequest) {
+    public ResponseEntity<?> login(@RequestBody @Valid LoginRequest loginRequest) throws AuthException {
         logger.info("Login attempt for email: {}", loginRequest.getEmail());
-
 
             JwtResponse tokens = authService.login(loginRequest);
             logger.info("User {} successfully logged in", loginRequest.getEmail());
             return ResponseEntity.ok(ApiResponse.success("Login successful", tokens));
-
 
     }
 
@@ -49,12 +48,10 @@ public class AuthRestController {
     public ResponseEntity<?> registration(@RequestBody @Valid RegistrationDTO registrationDTO) {
         logger.info("Registration attempt for email: {}", registrationDTO.getEmail());
 
-
             EmployeeDTO employee = authService.registration(registrationDTO);
             logger.info("User {} successfully registered", registrationDTO.getEmail());
             ApiResponse<EmployeeDTO> response = ApiResponse.success("Registration successful", employee);
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
-
 
     }
 
@@ -72,13 +69,11 @@ public class AuthRestController {
                        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         }
 
-
             JwtResponse tokens = authService.refresh(refreshToken);
 
             logger.debug("Token successfully refreshed");
             ApiResponse<JwtResponse> response = ApiResponse.success("Token refreshed", tokens);
             return ResponseEntity.ok(response);
-
 
     }
 
