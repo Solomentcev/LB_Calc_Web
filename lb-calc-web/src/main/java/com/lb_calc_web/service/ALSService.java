@@ -577,10 +577,10 @@ public class ALSService {
                 equipmentCatalogService.findExistingConfigurationResolver(retainedEquipmentIds);
 
         if (dto.getLC() != null) {
-            retainEquipmentSelections(dto.getLC(), retainedEquipmentIds, existingModule, equipmentResolver);
+            retainEquipmentSelections(dto.getLC(), existingModule, equipmentResolver);
         }
         if (dto.getLBC() != null) {
-            retainEquipmentSelections(dto.getLBC(), retainedEquipmentIds, existingModule, equipmentResolver);
+            retainEquipmentSelections(dto.getLBC(), existingModule, equipmentResolver);
         }
         ALS domain = ALSConfigurationMapper.toDomain(
                 dto,
@@ -605,7 +605,7 @@ public class ALSService {
         Set<String> retainedEquipmentIds = getRetainedEquipmentIds(existingModule);
         Function<String, Equipment> equipmentResolver =
                 equipmentCatalogService.findExistingConfigurationResolver(retainedEquipmentIds);
-        retainEquipmentSelections(dto, retainedEquipmentIds, existingModule, equipmentResolver);
+        retainEquipmentSelections(dto, existingModule, equipmentResolver);
         LC domain = LCDtoMapper.toDomain(dto, equipmentResolver);
         domain.setControlConfiguration(
                 equipmentRequirementResolver.resolve(domain.getControlConfiguration()));
@@ -627,7 +627,6 @@ public class ALSService {
 
     private void retainEquipmentSelections(
             LCDTO dto,
-            Set<String> retainedEquipmentIds,
             ModuleEntity existingModule,
             Function<String, Equipment> equipmentResolver
     ) {
