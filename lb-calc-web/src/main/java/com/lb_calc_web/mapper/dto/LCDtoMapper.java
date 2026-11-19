@@ -131,15 +131,31 @@ public final class LCDtoMapper {
     }
 
     public static LC toDomain(LCDTO dto, Function<String, Equipment> equipmentResolver) {
+        return toDomain(
+                dto,
+                dto == null ? null : dto.getEquipmentSelections(),
+                equipmentResolver
+        );
+    }
+
+    /**
+     * Преобразует DTO в доменную модель с явно переданным составом оборудования.
+     * Исходный DTO не изменяется.
+     */
+    public static LC toDomain(
+            LCDTO dto,
+            List<EquipmentSelectionDTO> equipmentSelections,
+            Function<String, Equipment> equipmentResolver
+    ) {
         if (dto == null) {
             return null;
         }
         java.util.Objects.requireNonNull(equipmentResolver, "equipmentResolver не должен быть null");
 
         EquipmentConfiguration equipmentConfiguration =
-                dto.getEquipmentSelections() != null
+                equipmentSelections != null
                         ? ControlEquipmentResolver.resolve(
-                                dto.getEquipmentSelections(), equipmentResolver)
+                                equipmentSelections, equipmentResolver)
                         : ControlEquipmentResolver.resolve(
                                 dto.getDisplay(), dto.getDisplayQuantity(),
                                 dto.getBarReader(), dto.getBarReaderQuantity(),
