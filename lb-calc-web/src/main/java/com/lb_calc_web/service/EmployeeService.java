@@ -138,9 +138,9 @@ public class EmployeeService implements UserDetailsService {
     @Transactional
     public EmployeeDTO save(EmployeeDTO employeeDTO) {
 
-        if (employeeDTO.getId() == null) {
+        if (employeeDTO == null || employeeDTO.getId() == null || employeeDTO.getId() <= 0) {
             throw new IllegalArgumentException(
-                    "Для обновления сотрудника ID не должен быть null"
+                    "Для обновления сотрудника требуется корректный ID"
             );
         }
 
