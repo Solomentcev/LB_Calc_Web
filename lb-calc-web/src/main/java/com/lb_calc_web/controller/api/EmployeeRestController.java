@@ -34,7 +34,7 @@ public class EmployeeRestController {
     @GetMapping
     public ResponseEntity<?> getAllEmployees() {
 
-        
+
 
             List<EmployeeDTO> employees =
                     employeeService.findAll();
@@ -43,7 +43,7 @@ public class EmployeeRestController {
                     ApiResponse.success(employees)
             );
 
-        
+
     }
 
     /**
@@ -61,7 +61,7 @@ public class EmployeeRestController {
             @PathVariable Long id
     ) {
 
-        
+
 
             EmployeeDTO employee =
                     employeeService.loadUserById(id);
@@ -70,7 +70,7 @@ public class EmployeeRestController {
                     ApiResponse.success(employee)
             );
 
-        
+
     }
 
     @PostMapping
@@ -80,7 +80,7 @@ public class EmployeeRestController {
             CreateEmployeeDTO createEmployeeDTO
     ) {
 
-        
+
 
             EmployeeDTO employee =
                     authService.createEmployee(
@@ -95,7 +95,7 @@ public class EmployeeRestController {
                             )
                     );
 
-        
+
     }
 
     @PutMapping("/{id}")
@@ -104,7 +104,7 @@ public class EmployeeRestController {
             @RequestBody @Valid ProfileDTO employeeUpd
     ) {
 
-        
+
 
             EmployeeDTO employee =
                     employeeService.loadUserById(id);
@@ -148,19 +148,19 @@ public class EmployeeRestController {
                     ApiResponse.success(saved)
             );
 
-        
+
     }
 
     @PostMapping("/{id}/activate")
     public ResponseEntity<?> activateEmployee(
             @PathVariable Long id
     ) {
-        
+
             employeeService.activateById(id);
             return ResponseEntity.ok(
                     ApiResponse.success("Employee activated successfully")
             );
-        
+
     }
 
     @DeleteMapping("/{id}")
@@ -168,7 +168,7 @@ public class EmployeeRestController {
             @PathVariable Long id
     ) {
 
-        
+
 
             employeeService.deactivateById(id);
 
@@ -178,7 +178,7 @@ public class EmployeeRestController {
                     )
             );
 
-        
+
     }
 
     /**
@@ -187,11 +187,11 @@ public class EmployeeRestController {
     @GetMapping("/me")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> getCurrentProfile() {
-        
+
             return ResponseEntity.ok(
                     ApiResponse.success(employeeService.getCurrentEmployee())
             );
-        
+
     }
 
     /**
@@ -213,11 +213,11 @@ public class EmployeeRestController {
     public ResponseEntity<?> getProfileById(
             @PathVariable int id
     ) {
-        
+
             return ResponseEntity.ok(
                     ApiResponse.success(employeeService.getProfileById(id))
             );
-        
+
     }
 
     /**
@@ -233,13 +233,13 @@ public class EmployeeRestController {
                     .body(ApiResponse.error("Пароли не совпадают"));
         }
 
-        
+
             EmployeeDTO currentEmployee = employeeService.getCurrentEmployee();
             authService.changePassword(currentEmployee.getId(), passwordDTO.getPassword());
             return ResponseEntity.ok(
                     ApiResponse.success("Пароль успешно изменён")
             );
-        
+
     }
 
     /**
@@ -255,12 +255,12 @@ public class EmployeeRestController {
                     .body(ApiResponse.error("Пароли не совпадают"));
         }
 
-        
+
             authService.changePassword(id, passwordDTO.getPassword());
             return ResponseEntity.ok(
                     ApiResponse.success("Пароль успешно изменён")
             );
-        
+
     }
 
 }
