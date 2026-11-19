@@ -258,6 +258,7 @@ public class ProjectController
         model.addAttribute("project", project);
         model.addAttribute("als", als);
         model.addAttribute("lc", lc);
+        retainSelectedEquipmentOptions(model, lc.getDisplay(), lc.getBarReader());
         model.addAttribute("projectId", projectId);
         model.addAttribute("alsId", alsId);
         model.addAttribute("lcId", lcId);
@@ -318,6 +319,7 @@ public class ProjectController
                     "lc",
                     lc
             );
+            retainSelectedEquipmentOptions(model, lc.getDisplay(), lc.getBarReader());
 
             model.addAttribute(
                     "projectId",
@@ -369,6 +371,7 @@ public class ProjectController
         model.addAttribute("project", project);
         model.addAttribute("als", als);
         model.addAttribute("lbc", lbc);
+        retainSelectedEquipmentOptions(model, lbc.getDisplay(), lbc.getBarReader());
         model.addAttribute("projectId", projectId);
         model.addAttribute("alsId", alsId);
         model.addAttribute("lbcId", lbcId);
@@ -428,6 +431,7 @@ public class ProjectController
                     "lbc",
                     lbc
             );
+            retainSelectedEquipmentOptions(model, lbc.getDisplay(), lbc.getBarReader());
 
             model.addAttribute("projectId", projectId);
             model.addAttribute("alsId", alsId);
