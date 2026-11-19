@@ -150,6 +150,23 @@ class EquipmentCatalogServiceTest {
         verify(repository, never()).save(any());
     }
 
+
+    @Test
+    void findExistingConfigurationResolver_shouldPreferRetainedModelWhenNamesMatch() {
+        EquipmentCatalogEntity inactive = new EquipmentCatalogEntity(
+                "DISPLAY_OLD", "DISPLAY", "Одинаковое название", "", 0, 0, 0,
+                0, 0, 300, false, false, false, false, false);
+        EquipmentCatalogEntity active = new EquipmentCatalogEntity(
+                "DISPLAY_NEW", "DISPLAY", "Одинаковое название", "", 0, 0, 0,
+                0, 0, 300, false, false, false, false, true);
+        when(repository.findAll()).thenReturn(List.of(inactive, active));
+
+        var resolver = service.findExistingConfigurationResolver(
+                java.util.Set.of("DISPLAY_OLD"));
+
+        assertEquals("DISPLAY_OLD", resolver.apply("Одинаковое название").getCatalogPositionId());
+    }
+
     private EquipmentCatalogEntity defaultItem(String id) {
         EquipmentCatalogEntity item = item(id);
         item.setDefaultPosition(true);
