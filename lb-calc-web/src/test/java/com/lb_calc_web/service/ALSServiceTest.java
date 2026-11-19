@@ -278,6 +278,8 @@ class ALSServiceTest {
         assertNull(result.getLC());
         assertTrue(result.getLBC().getEquipmentSelections().stream()
                 .anyMatch(selection -> "CUSTOM_MODEM".equals(selection.catalogPositionId())));
+        verify(equipmentCatalogService, times(1))
+                .findExistingConfigurationResolver(anySet());
     }
 
     @Test
