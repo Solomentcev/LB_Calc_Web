@@ -85,6 +85,7 @@ public class ProjectService {
     }
 
     @Transactional(readOnly = true)
+    @Transactional(readOnly = true)
     public List<ProjectDTO> findAll() {
         logger.info("Получение списка проектов...");
         Function<String, Equipment> equipmentResolver = equipmentCatalogService.findDomainCatalogResolver();
