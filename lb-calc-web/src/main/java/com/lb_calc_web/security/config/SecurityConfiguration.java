@@ -55,6 +55,7 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(auth -> auth
 
                         .requestMatchers(
+                                "/",
                                 "/login/**",
                                 "/registration/**",
                                 "/error"
@@ -117,7 +118,7 @@ public class SecurityConfiguration {
                                         "jwtRefresh"
                                 )
                                 .logoutSuccessUrl(
-                                        "/login?logout"
+                                        "/"
                                 )
                 )
 
