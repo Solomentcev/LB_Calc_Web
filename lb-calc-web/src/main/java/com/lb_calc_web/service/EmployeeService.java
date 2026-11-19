@@ -42,6 +42,7 @@ public class EmployeeService implements UserDetailsService {
      * а не EmployeeDTO.
      */
     @Override
+    @Transactional(readOnly = true)
     public EmployeePrincipal loadUserByUsername(String email) {
 
         logger.debug(
@@ -289,6 +290,7 @@ public class EmployeeService implements UserDetailsService {
      *
      * В SecurityContext при этом находится EmployeePrincipal.
      */
+    @Transactional(readOnly = true)
     public EmployeeDTO getCurrentEmployee() {
 
         Authentication authentication =
