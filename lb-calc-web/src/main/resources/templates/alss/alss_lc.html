@@ -13,7 +13,6 @@
         <a th:href="@{/alss/{alsId} (alsId=${als.getId()})}"
            class="btn btn-primary btn-sm mb-3"
            th:text="'К АКХ №' + ${als.id} + ' — ' + ${als.name}">Вернуться к АКХ</a>
-        <br/>
         <h4 th:text="*{description}">Модуль управления</h4>
         <label hidden="hidden">
             <input size="180"  type="text" th:field="*{description}" readonly="readonly">
@@ -28,7 +27,7 @@
                     </label>
                 </td>
                 <td rowspan="13">
-                    <div class="container-fluid">
+                    <div>
                         <img class="img-thumbnail"
                              th:src="'data:image/png;base64,'+${lc.getStringLCImage()}"
                              alt="LC Image">
@@ -127,6 +126,7 @@
                 </td>
             </tr>
         </table>
+        </div>
 </form>
 </div>
 <div th:replace="~{footer :: footer}"></div>
