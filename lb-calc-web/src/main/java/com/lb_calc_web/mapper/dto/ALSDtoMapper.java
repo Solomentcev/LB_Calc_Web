@@ -14,7 +14,6 @@ import com.lb_calc_web.dto.ALSDTO;
 import com.lb_calc_web.dto.ALSModuleOrderDTO;
 import com.lb_calc_web.dto.LBDTO;
 import com.lb_calc_web.dto.LBCDTO;
-import com.lb_calc_web.dto.LCDTO;
 import com.lb_calc_web.dto.EquipmentSelectionDTO;
 import com.lb_calc_web.dto.validation.ValidationResult;
 
