@@ -12,6 +12,7 @@ import com.lb_calc_web.domain.model.EquipmentConfiguration;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Function;
 
 /** Преобразует выбранные в DTO позиции оборудования в доменную конфигурацию. */
@@ -61,8 +62,11 @@ final class ControlEquipmentResolver {
     static EquipmentConfiguration resolve(
             List<EquipmentSelectionDTO> selections,
             Function<String, Equipment> equipmentResolver) {
+        Objects.requireNonNull(selections, "Список оборудования не должен быть null");
+        Objects.requireNonNull(equipmentResolver, "equipmentResolver не должен быть null");
         List<EquipmentItem> items = new ArrayList<>();
         for (EquipmentSelectionDTO selection : selections) {
+            Objects.requireNonNull(selection, "Выбор оборудования не должен быть null");
             Equipment equipment = equipmentResolver.apply(selection.catalogPositionId());
             if (equipment == null) {
                 throw new IllegalArgumentException(
