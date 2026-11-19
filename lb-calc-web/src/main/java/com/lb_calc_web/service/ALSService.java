@@ -21,7 +21,6 @@ import com.lb_calc_web.entity.ModuleEntity;
 import com.lb_calc_web.handler.ValidationSizeException;
 import com.lb_calc_web.mapper.dto.ALSDtoMapper;
 import com.lb_calc_web.mapper.dto.EquipmentSelectionMapper;
-import com.lb_calc_web.mapper.dto.ALSConfigurationMapper;
 import com.lb_calc_web.mapper.dto.LBDtoMapper;
 import com.lb_calc_web.mapper.dto.LCDtoMapper;
 import com.lb_calc_web.mapper.dto.LBCDtoMapper;
@@ -583,7 +582,7 @@ public class ALSService {
                 ? null
                 : resolveEquipmentSelections(dto.getLBC(), existingModule, equipmentResolver);
 
-        ALS domain = ALSConfigurationMapper.toDomain(
+        ALS domain = ALSDtoMapper.toDomain(
                 dto,
                 candidate -> TypeLbFactory.forLB(environment, candidate.getType()),
                 candidate -> TypeLbFactory.forLBC(environment, candidate.getType()),
