@@ -6,8 +6,8 @@
 <div th:replace="~{header :: header}"></div>
 <div class="container-fluid">
   <h1>Мои Проекты</h1>
-  <a href="/projects/create" class="btn btn-primary btn-sm mb-3">Создать проект </a>
-  <a th:href="@{'/'}" class="btn btn-primary btn-sm mb-3">Back </a>
+  <a th:href="@{/projects/create}" class="btn btn-primary btn-sm mb-3">Создать проект </a>
+  <a th:href="@{/}" class="btn btn-primary btn-sm mb-3">Back </a>
   <br/><br/>
   <table border="1" class="table table-striped table-responsive-md">
     <thead>
