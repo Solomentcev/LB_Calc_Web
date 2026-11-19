@@ -6,7 +6,6 @@ import com.lb_calc_web.dto.LBCDTO;
 import com.lb_calc_web.dto.LBDTO;
 import com.lb_calc_web.dto.LCDTO;
 import com.lb_calc_web.dto.ProjectDTO;
-import com.lb_calc_web.handler.ValidationSizeException;
 import com.lb_calc_web.service.ProjectService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -78,14 +77,14 @@ public class ProjectRestController {
     public ResponseEntity<?> getProjectById(
             @PathVariable Long id
     ) {
-        
+
             return ResponseEntity.ok(
                     ApiResponse.success(
                             projectService.findById(id)
                     )
             );
 
-        
+
     }
 
     /**
@@ -114,7 +113,7 @@ public class ProjectRestController {
     public ResponseEntity<?> createProject(
             @RequestBody ProjectDTO project
     ) {
-        
+
             /*
              * Новый проект всегда создаётся как новый объект.
              */
@@ -129,7 +128,7 @@ public class ProjectRestController {
                             ApiResponse.success(saved)
                     );
 
-        
+
     }
 
     /**
@@ -143,7 +142,7 @@ public class ProjectRestController {
             @PathVariable Long id,
             @RequestBody ProjectDTO project
     ) {
-        
+
             /*
              * ID из URL является источником истины.
              */
@@ -156,7 +155,7 @@ public class ProjectRestController {
                     ApiResponse.success(saved)
             );
 
-        
+
     }
 
     /**
@@ -169,7 +168,7 @@ public class ProjectRestController {
     public ResponseEntity<?> deleteProject(
             @PathVariable Long id
     ) {
-        
+
             projectService.deleteById(id);
 
             return ResponseEntity.ok(
@@ -178,7 +177,7 @@ public class ProjectRestController {
                     )
             );
 
-        
+
     }
 
     /**
@@ -192,7 +191,7 @@ public class ProjectRestController {
             @PathVariable Long projectId,
             @PathVariable Long alsId
     ) {
-        
+
             return ResponseEntity.ok(
                     ApiResponse.success(
                             projectService.findALSInProject(
@@ -202,7 +201,7 @@ public class ProjectRestController {
                     )
             );
 
-        
+
     }
 
     /**
@@ -215,7 +214,7 @@ public class ProjectRestController {
     public ResponseEntity<?> addALS(
             @PathVariable Long projectId
     ) {
-        
+
             ProjectDTO project =
                     projectService.addNewALSandSaveProject(
                             projectId
@@ -230,7 +229,7 @@ public class ProjectRestController {
                             )
                     );
 
-        
+
     }
 
     /**
@@ -245,7 +244,7 @@ public class ProjectRestController {
             @PathVariable Long alsId,
             @RequestBody ALSDTO als
     ) {
-        
+
             als.setId(alsId);
 
             ProjectDTO project =
@@ -265,7 +264,7 @@ public class ProjectRestController {
                     )
             );
 
-        
+
     }
 
     /**
@@ -279,7 +278,7 @@ public class ProjectRestController {
             @PathVariable Long projectId,
             @PathVariable Long alsId
     ) {
-        
+
             ProjectDTO project =
                     projectService.deleteALSandSaveProject(
                             projectId,
@@ -293,7 +292,7 @@ public class ProjectRestController {
                     )
             );
 
-        
+
     }
 
     /**
@@ -310,7 +309,7 @@ public class ProjectRestController {
             @PathVariable Long alsId,
             @PathVariable Long lcId
     ) {
-        
+
             LCDTO lc =
                     projectService.findLCInProject(
                             projectId,
@@ -322,7 +321,7 @@ public class ProjectRestController {
                     ApiResponse.success(lc)
             );
 
-        
+
     }
 
     /**
@@ -340,7 +339,7 @@ public class ProjectRestController {
             @PathVariable Long lcId,
             @RequestBody LCDTO lc
     ) {
-        
+
             lc.setId(lcId);
 
             ALSDTO savedALS =
@@ -359,7 +358,7 @@ public class ProjectRestController {
                     )
             );
 
-        
+
     }
 
     /**
@@ -375,7 +374,7 @@ public class ProjectRestController {
             @PathVariable Long projectId,
             @PathVariable Long alsId
     ) {
-        
+
             ALSDTO saved =
                     projectService.replaceWithNewLBCAtProject(
                             projectId,
@@ -388,7 +387,7 @@ public class ProjectRestController {
                             saved
                     )
             );
-        
+
     }
 
     /**
@@ -405,7 +404,7 @@ public class ProjectRestController {
             @PathVariable Long alsId,
             @PathVariable Long lbcId
     ) {
-        
+
             LBCDTO lbc =
                     projectService.findLBCInProject(
                             projectId,
@@ -416,7 +415,7 @@ public class ProjectRestController {
             return ResponseEntity.ok(
                     ApiResponse.success(lbc)
             );
-        
+
     }
 
     /**
@@ -434,7 +433,7 @@ public class ProjectRestController {
             @PathVariable Long lbcId,
             @RequestBody LBCDTO lbc
     ) {
-        
+
             lbc.setId(lbcId);
 
             ALSDTO savedALS =
@@ -452,7 +451,7 @@ public class ProjectRestController {
                             saved
                     )
             );
-        
+
     }
 
     /**
@@ -469,7 +468,7 @@ public class ProjectRestController {
             @PathVariable Long alsId,
             @PathVariable Long lbId
     ) {
-        
+
             LBDTO lb =
                     projectService.findLBInProject(
                             projectId,
@@ -481,7 +480,7 @@ public class ProjectRestController {
                     ApiResponse.success(lb)
             );
 
-        
+
     }
 
     /**
@@ -499,7 +498,7 @@ public class ProjectRestController {
             @PathVariable Long lbId,
             @RequestBody LBDTO lb
     ) {
-        
+
             lb.setId(lbId);
 
             ALSDTO currentALS =
@@ -536,7 +535,7 @@ public class ProjectRestController {
                     )
             );
 
-        
+
     }
 
     /**
@@ -552,7 +551,7 @@ public class ProjectRestController {
             @PathVariable Long projectId,
             @PathVariable Long alsId
     ) {
-        
+
             ALSDTO als =
                     projectService.addLBAtProject(
                             projectId,
@@ -568,7 +567,7 @@ public class ProjectRestController {
                             )
                     );
 
-        
+
     }
 
     /**
@@ -585,7 +584,7 @@ public class ProjectRestController {
             @PathVariable Long alsId,
             @PathVariable Long lbId
     ) {
-        
+
             ALSDTO als =
                     projectService.deleteLBatProject(
                             projectId,
@@ -600,7 +599,7 @@ public class ProjectRestController {
                     )
             );
 
-        
+
     }
 
     /**
@@ -613,7 +612,7 @@ public class ProjectRestController {
     public ResponseEntity<?> exportProjectToExcel(
             @PathVariable Long id
     ) {
-        
+
             ProjectDTO project =
                     projectService.findById(id);
 
@@ -636,42 +635,7 @@ public class ProjectRestController {
                     )
                     .body(file);
 
-        
+
     }
 
-    private ResponseEntity<?> notFound(
-            NoSuchElementException e
-    ) {
-        return ResponseEntity
-                .status(HttpStatus.NOT_FOUND)
-                .body(
-                        ApiResponse.error(
-                                e.getMessage()
-                        )
-                );
-    }
-
-    private ResponseEntity<?> badRequest(
-            String message
-    ) {
-        return ResponseEntity
-                .badRequest()
-                .body(
-                        ApiResponse.error(message)
-                );
-    }
-
-    private ResponseEntity<?> badRequest(
-            String message,
-            List<String> errors
-    ) {
-        return ResponseEntity
-                .badRequest()
-                .body(
-                        ApiResponse.error(
-                                message,
-                                errors
-                        )
-                );
-    }
 }
