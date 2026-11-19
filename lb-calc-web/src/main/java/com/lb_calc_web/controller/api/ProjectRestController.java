@@ -84,7 +84,6 @@ public class ProjectRestController {
                     )
             );
 
-
     }
 
     /**
@@ -128,7 +127,6 @@ public class ProjectRestController {
                             ApiResponse.success(saved)
                     );
 
-
     }
 
     /**
@@ -155,7 +153,6 @@ public class ProjectRestController {
                     ApiResponse.success(saved)
             );
 
-
     }
 
     /**
@@ -176,7 +173,6 @@ public class ProjectRestController {
                             "Project deleted successfully"
                     )
             );
-
 
     }
 
@@ -200,7 +196,6 @@ public class ProjectRestController {
                             )
                     )
             );
-
 
     }
 
@@ -228,7 +223,6 @@ public class ProjectRestController {
                                     project
                             )
                     );
-
 
     }
 
@@ -264,7 +258,6 @@ public class ProjectRestController {
                     )
             );
 
-
     }
 
     /**
@@ -291,7 +284,6 @@ public class ProjectRestController {
                             project
                     )
             );
-
 
     }
 
@@ -320,7 +312,6 @@ public class ProjectRestController {
             return ResponseEntity.ok(
                     ApiResponse.success(lc)
             );
-
 
     }
 
@@ -357,7 +348,6 @@ public class ProjectRestController {
                             saved
                     )
             );
-
 
     }
 
@@ -480,7 +470,6 @@ public class ProjectRestController {
                     ApiResponse.success(lb)
             );
 
-
     }
 
     /**
@@ -535,7 +524,6 @@ public class ProjectRestController {
                     )
             );
 
-
     }
 
     /**
@@ -567,7 +555,6 @@ public class ProjectRestController {
                             )
                     );
 
-
     }
 
     /**
@@ -598,7 +585,6 @@ public class ProjectRestController {
                             als
                     )
             );
-
 
     }
 
@@ -634,7 +620,6 @@ public class ProjectRestController {
                             )
                     )
                     .body(file);
-
 
     }
 
