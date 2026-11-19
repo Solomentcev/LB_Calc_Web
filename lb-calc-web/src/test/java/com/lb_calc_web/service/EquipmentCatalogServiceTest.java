@@ -142,6 +142,31 @@ class EquipmentCatalogServiceTest {
         assertEquals("DISPLAY_OLD", resolver.apply("Одинаковое название").getCatalogPositionId());
     }
 
+
+    @Test
+    void create_shouldRequireDefaultForFirstActiveModelInCategory() {
+        EquipmentCatalogEntity item = item("COMPUTER_1");
+        when(repository.existsById("COMPUTER_1")).thenReturn(false);
+        when(repository.findAllByCategoryAndActiveTrueAndDefaultPositionTrueOrderByNameAsc(
+                "COMPUTER")).thenReturn(List.of());
+
+        assertThrows(IllegalArgumentException.class, () -> service.create(item));
+        verify(repository, never()).save(any());
+    }
+
+    @Test
+    void setActive_shouldRejectActivationWithoutActiveCategoryDefault() {
+        EquipmentCatalogEntity item = item("COMPUTER_2");
+        item.deactivate();
+        when(repository.findById("COMPUTER_2")).thenReturn(Optional.of(item));
+        when(repository.findAllByCategoryAndActiveTrueAndDefaultPositionTrueOrderByNameAsc(
+                "COMPUTER")).thenReturn(List.of());
+
+        assertThrows(IllegalStateException.class,
+                () -> service.setActive("COMPUTER_2", true));
+        assertFalse(item.isActive());
+    }
+
     private EquipmentCatalogEntity defaultItem(String id) {
         EquipmentCatalogEntity item = item(id);
         item.setDefaultPosition(true);
