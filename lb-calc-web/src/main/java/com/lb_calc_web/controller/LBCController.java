@@ -47,10 +47,9 @@ public class LBCController extends BaseCatalogController {
     public String createLBC(Model model) {
         logger.info("Открытие страницы создания LBC");
 
-        model.addAttribute(
-                "lbc",
-                lbcService.createLBC()
-        );
+        LBCDTO lbc = lbcService.createLBC();
+        model.addAttribute("lbc", lbc);
+        retainSelectedEquipmentOptions(model, lbc.getDisplay(), lbc.getBarReader());
 
         return "lbcs/lbc";
     }
@@ -68,10 +67,9 @@ public class LBCController extends BaseCatalogController {
                 id
         );
 
-        model.addAttribute(
-                "lbc",
-                lbcService.findById(id)
-        );
+        LBCDTO lbc = lbcService.findById(id);
+        model.addAttribute("lbc", lbc);
+        retainSelectedEquipmentOptions(model, lbc.getDisplay(), lbc.getBarReader());
 
         return "lbcs/lbc";
     }
@@ -99,6 +97,7 @@ public class LBCController extends BaseCatalogController {
                     "lbc",
                     lbc
             );
+            retainSelectedEquipmentOptions(model, lbc.getDisplay(), lbc.getBarReader());
 
             return "lbcs/lbc";
         }
