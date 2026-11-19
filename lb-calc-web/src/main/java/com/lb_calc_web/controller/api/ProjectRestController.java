@@ -547,6 +547,8 @@ public class ProjectRestController {
                     "LBC validation failed",
                     e.getErrors()
             );
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            return badRequest(e.getMessage());
         }
     }
 
@@ -682,6 +684,8 @@ public class ProjectRestController {
         } catch (NoSuchElementException e) {
 
             return notFound(e);
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            return badRequest(e.getMessage());
         }
     }
 
@@ -717,6 +721,8 @@ public class ProjectRestController {
         } catch (NoSuchElementException e) {
 
             return notFound(e);
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            return badRequest(e.getMessage());
         }
     }
 
