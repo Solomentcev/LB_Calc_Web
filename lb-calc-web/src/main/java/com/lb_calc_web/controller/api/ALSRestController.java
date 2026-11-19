@@ -2,6 +2,7 @@ package com.lb_calc_web.controller.api;
 
 import com.lb_calc_web.controller.api.response.ApiResponse;
 import com.lb_calc_web.dto.ALSDTO;
+import com.lb_calc_web.dto.LBCDTO;
 import com.lb_calc_web.handler.ValidationSizeException;
 import com.lb_calc_web.service.ALSService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -264,7 +265,7 @@ public class ALSRestController {
     public ResponseEntity<?> updateLBC(
             @PathVariable Long alsId,
             @PathVariable Long lbcId,
-            @RequestBody com.lb_calc_web.dto.LBCDTO lbc
+            @RequestBody LBCDTO lbc
     ) {
         try {
             ALSDTO als = alsService.findById(alsId);
