@@ -230,8 +230,7 @@ public class EmployeeRestController {
             @RequestBody @Valid ChangePasswordDTO passwordDTO
     ) {
         if (!passwordDTO.getPassword().equals(passwordDTO.getConfirmPassword())) {
-            return ResponseEntity.badRequest()
-                    .body(ApiResponse.error("Пароли не совпадают"));
+            throw new IllegalArgumentException("Пароли не совпадают");
         }
 
             authService.changePassword(id, passwordDTO.getPassword());
