@@ -176,6 +176,7 @@ public class LCService {
     public List<LCDTO> findAll() {
 
         logger.info("Получение списка LC");
+        var equipmentResolver = equipmentCatalogService.findDomainCatalogResolver();
 
         return lcRepository.findAll()
                 .stream()
@@ -187,7 +188,7 @@ public class LCService {
                                 )
                         )
                 )
-                .map(entity -> LCEntityMapper.toDto(entity, equipmentCatalogService::resolveById))
+                .map(entity -> LCEntityMapper.toDto(entity, equipmentResolver))
                 .toList();
     }
 
@@ -212,7 +213,7 @@ public class LCService {
                                 )
                         );
 
-        return LCEntityMapper.toDto(entity, equipmentCatalogService::resolveById);
+        return LCEntityMapper.toDto(entity, equipmentCatalogService.findDomainCatalogResolver());
     }
 
     /**
@@ -291,6 +292,7 @@ public class LCService {
          * Блокировка удерживается до фиксации результата транзакции.
          */
         findOrCreateLockService.acquire();
+        var equipmentResolver = equipmentCatalogService.findDomainCatalogResolver();
 
         /*
          * Проверяем, нет ли уже такой конфигурации.
@@ -307,7 +309,7 @@ public class LCService {
                         domain.getControlConfiguration().getPayment()
                 ).stream()
                         .filter(entity ->
-                                LCEntityMapper.toDomain(entity, equipmentCatalogService::resolveById).equals(domain)
+                                LCEntityMapper.toDomain(entity, equipmentResolver).equals(domain)
                         )
                         .findFirst();
 
@@ -318,7 +320,7 @@ public class LCService {
                     existing.get().getId()
             );
 
-            return LCEntityMapper.toDto(existing.get(), equipmentCatalogService::resolveById);
+            return LCEntityMapper.toDto(existing.get(), equipmentResolver);
         }
 
         /*
@@ -335,7 +337,7 @@ public class LCService {
                 saved.getId()
         );
 
-        return LCEntityMapper.toDto(saved, equipmentCatalogService::resolveById);
+        return LCEntityMapper.toDto(saved, equipmentResolver);
     }
 
     /**
