@@ -8,7 +8,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -22,7 +26,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /** Проверяет разграничение доступа к REST-операциям сотрудников. */
 @WebMvcTest(EmployeeRestController.class)
-@AutoConfigureMockMvc(addFilters = false)
+@AutoConfigureMockMvc
 @Import({
         RestExceptionHandler.class,
         EmployeeRestControllerSecurityTest.MethodSecurityConfiguration.class
@@ -37,6 +41,12 @@ class EmployeeRestControllerSecurityTest {
 
     @MockBean
     private AuthService authService;
+
+    @Test
+    void profiles_shouldRequireAuthentication() throws Exception {
+        mockMvc.perform(get("/api/v1/employees/profiles"))
+                .andExpect(status().isUnauthorized());
+    }
 
     @Test
     @WithMockUser(authorities = "ROLE_USER")
@@ -61,8 +71,15 @@ class EmployeeRestControllerSecurityTest {
                 .andExpect(status().isForbidden());
     }
 
-    @Configuration
+    @TestConfiguration
     @EnableMethodSecurity
     static class MethodSecurityConfiguration {
+
+        @Bean
+        SecurityFilterChain testSecurityFilterChain(HttpSecurity http) throws Exception {
+            return http.csrf(AbstractHttpConfigurer::disable)
+                    .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
+                    .build();
+        }
     }
 }
