@@ -29,7 +29,6 @@ import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.HashSet;
 
 @Service
 public class LCService {
@@ -242,19 +241,25 @@ public class LCService {
 
         LC domain;
         try {
-            Set<String> retainedEquipmentIds = findRetainedEquipmentIds(dto.getId());
-            if (dto.getEquipmentSelections() == null && dto.getId() != null && dto.getId() > 0) {
-                lcRepository.findById(dto.getId()).ifPresent(entity ->
-                        dto.setEquipmentSelections(EquipmentSelectionMapper.mergeDisplaySelection(
-                                entity.getEquipment().stream()
-                                        .map(item -> new EquipmentSelectionDTO(
-                                                item.getCatalogPositionId(), item.getQuantity()))
-                                        .toList(),
-                                dto.getDisplay(),
-                                dto.getDisplayQuantity(),
-                                id -> equipmentCatalogService.resolveForExistingConfiguration(
-                                        id, retainedEquipmentIds)
-                        )));
+            Optional<LCEntity> existingEntity = findExistingEntity(dto.getId());
+            Set<String> retainedEquipmentIds = existingEntity
+                    .map(entity -> entity.getEquipment().stream()
+                            .map(item -> item.getCatalogPositionId())
+                            .collect(java.util.stream.Collectors.toUnmodifiableSet()))
+                    .orElseGet(Set::of);
+
+            if (dto.getEquipmentSelections() == null && existingEntity.isPresent()) {
+                LCEntity entity = existingEntity.get();
+                dto.setEquipmentSelections(EquipmentSelectionMapper.mergeDisplaySelection(
+                        entity.getEquipment().stream()
+                                .map(item -> new EquipmentSelectionDTO(
+                                        item.getCatalogPositionId(), item.getQuantity()))
+                                .toList(),
+                        dto.getDisplay(),
+                        dto.getDisplayQuantity(),
+                        id -> equipmentCatalogService.resolveForExistingConfiguration(
+                                id, retainedEquipmentIds)
+                ));
             }
             domain = LCDtoMapper.toDomain(dto, id -> equipmentCatalogService.resolveForExistingConfiguration(id, retainedEquipmentIds));
             domain.setControlConfiguration(
@@ -375,17 +380,11 @@ public class LCService {
         );
     }
 
-    private Set<String> findRetainedEquipmentIds(Long moduleId) {
+    private Optional<LCEntity> findExistingEntity(Long moduleId) {
         if (moduleId == null || moduleId <= 0) {
-            return Set.of();
+            return Optional.empty();
         }
-        return lcRepository.findById(moduleId)
-                .map(entity -> {
-                    Set<String> ids = new HashSet<>();
-                    entity.getEquipment().forEach(item -> ids.add(item.getCatalogPositionId()));
-                    return Set.copyOf(ids);
-                })
-                .orElseGet(Set::of);
+        return lcRepository.findById(moduleId);
     }
 
     private <E extends Enum<E>> List<String> getEnumList(String key, Class<E> type) {
