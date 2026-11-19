@@ -107,6 +107,24 @@ public class EquipmentCatalogService {
         return repository.findAllByActiveTrueOrderByCategoryAscNameAsc();
     }
 
+    /**
+     * Возвращает названия активных моделей категории для выбора в формах.
+     * Специальные варианты отсутствия оборудования остаются доменными значениями.
+     */
+    public List<String> findActiveNamesByCategory(String category) {
+        List<String> names = new java.util.ArrayList<>();
+        if ("DISPLAY".equals(category)) {
+            names.add(Display.NONE.getName());
+        } else if ("BAR_READER".equals(category)) {
+            names.add(BarReader.NONE.getName());
+        }
+        names.addAll(repository.findAllByCategoryAndActiveTrueOrderByNameAsc(category)
+                .stream()
+                .map(EquipmentCatalogEntity::getName)
+                .toList());
+        return List.copyOf(names);
+    }
+
     public Equipment findActiveDefault(String category) {
         List<EquipmentCatalogEntity> defaults =
                 repository.findAllByCategoryAndActiveTrueAndDefaultPositionTrueOrderByNameAsc(category);
