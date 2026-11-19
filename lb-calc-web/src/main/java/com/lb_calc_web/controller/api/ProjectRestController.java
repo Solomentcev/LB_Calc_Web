@@ -432,6 +432,9 @@ public class ProjectRestController {
                     "LC validation failed",
                     e.getErrors()
             );
+        } catch (IllegalArgumentException | IllegalStateException e) {
+
+            return badRequest(e.getMessage());
         }
     }
 
@@ -468,6 +471,9 @@ public class ProjectRestController {
                     "LBC validation failed",
                     e.getErrors()
             );
+        } catch (IllegalArgumentException | IllegalStateException e) {
+
+            return badRequest(e.getMessage());
         }
     }
 
@@ -638,6 +644,9 @@ public class ProjectRestController {
                     "LB validation failed",
                     e.getErrors()
             );
+        } catch (IllegalArgumentException | IllegalStateException e) {
+
+            return badRequest(e.getMessage());
         }
     }
 
