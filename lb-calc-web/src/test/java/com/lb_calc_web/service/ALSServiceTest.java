@@ -2,6 +2,8 @@ package com.lb_calc_web.service;
 
 import com.lb_calc_web.TestDataFactory;
 import com.lb_calc_web.dto.ALSDTO;
+import com.lb_calc_web.domain.attributes.Payment;
+import com.lb_calc_web.domain.model.ControlConfiguration;
 import com.lb_calc_web.dto.LBCDTO;
 import com.lb_calc_web.dto.LBDTO;
 import com.lb_calc_web.dto.LCDTO;
@@ -236,6 +238,28 @@ class ALSServiceTest {
         assertThrows(
                 java.util.NoSuchElementException.class,
                 () -> alsService.findLBCInALS(als, 999L)
+        );
+    }
+
+    @Test
+    void restoreDomain_shouldApplyResolvedControlConfigurationToAggregate() {
+        ALSDTO dto = TestDataFactory.validALSDTO(1L);
+        when(equipmentRequirementResolver.resolve(any()))
+                .thenAnswer(invocation -> {
+                    ControlConfiguration configuration = invocation.getArgument(0);
+                    return new ControlConfiguration(
+                            Payment.CASH,
+                            configuration.getAccessMethods(),
+                            configuration.getPrintOptions(),
+                            configuration.getEquipmentConfiguration()
+                    );
+                });
+
+        ALS result = alsService.restoreDomain(dto);
+
+        assertEquals(
+                Payment.CASH,
+                result.getControlModule().getControlConfiguration().getPayment()
         );
     }
 
