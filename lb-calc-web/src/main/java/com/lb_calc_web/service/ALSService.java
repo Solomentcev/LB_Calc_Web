@@ -4,6 +4,7 @@ import com.lb_calc_web.domain.attributes.Colors;
 import com.lb_calc_web.domain.model.ALS;
 import com.lb_calc_web.domain.model.LB;
 import com.lb_calc_web.domain.model.LBC;
+import com.lb_calc_web.domain.equipment.Equipment;
 import com.lb_calc_web.domain.model.LC;
 import com.lb_calc_web.domain.model.Module;
 import com.lb_calc_web.domain.equipment.Equipment;
@@ -46,6 +47,7 @@ import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.HashSet;
 
 @Service
@@ -95,6 +97,7 @@ public class ALSService {
     @Transactional(readOnly = true)
     public List<ALSDTO> findAll() {
         logger.info("Получение списка АКХ...");
+        Function<String, Equipment> equipmentResolver = equipmentCatalogService.findDomainCatalogResolver();
 
         return alsRepository.findAll()
                 .stream()
@@ -103,7 +106,7 @@ public class ALSService {
                                 ALSEntity::getId
                         )
                 )
-                .map(entity -> addALSImage(ALSEntityMapper.toDto(entity, equipmentCatalogService::resolveById)))
+                .map(entity -> addALSImage(ALSEntityMapper.toDto(entity, equipmentResolver)))
                 .toList();
     }
 
@@ -113,6 +116,9 @@ public class ALSService {
                 "Поиск АКХ(id{})...",
                 id
         );
+        if (id == null || id <= 0) {
+            throw new NoSuchElementException("АКХ с id=" + id + " не найдена");
+        }
 
         ALSEntity entity =
                 alsRepository.findById(id)
@@ -271,9 +277,10 @@ public class ALSService {
 
         // Блокировка удерживается до завершения транзакции, включая сохранение модулей.
         findOrCreateLockService.acquire();
+        Function<String, Equipment> equipmentResolver = equipmentCatalogService.findDomainCatalogResolver();
 
         Optional<ALSEntity> duplicate =
-                findDuplicate(domain);
+                findDuplicate(domain, equipmentResolver);
 
         if (duplicate.isPresent()) {
             logger.info(
@@ -281,7 +288,7 @@ public class ALSService {
                     duplicate.get().getId()
             );
 
-            return addALSImage(ALSEntityMapper.toDto(duplicate.get(), equipmentCatalogService::resolveById));
+            return addALSImage(ALSEntityMapper.toDto(duplicate.get(), equipmentResolver));
         }
 
         /*
@@ -290,7 +297,7 @@ public class ALSService {
          * существующая запись может быть только переиспользована
          * при полном совпадении доменной конфигурации.
          */
-        ALSEntity entity = createEntity(domain);
+        ALSEntity entity = createEntity(domain, equipmentResolver);
 
         ALSEntity saved =
                 alsRepository.save(entity);
@@ -300,7 +307,7 @@ public class ALSService {
                 saved.getId()
         );
 
-        return addALSImage(ALSEntityMapper.toDto(saved, equipmentCatalogService::resolveById));
+        return addALSImage(ALSEntityMapper.toDto(saved, equipmentResolver));
     }
 
     @Transactional
@@ -715,7 +722,8 @@ public class ALSService {
      * существующую.</p>
      */
     private Optional<ALSEntity> findDuplicate(
-            com.lb_calc_web.domain.model.ALS domain
+            com.lb_calc_web.domain.model.ALS domain,
+            Function<String, Equipment> equipmentResolver
     ) {
         return alsRepository.findCandidates(
                         domain.getHeight(),
@@ -726,13 +734,14 @@ public class ALSService {
                         domain.getColorDoor()
                 ).stream()
                 .filter(entity ->
-                        domain.equals(ALSEntityMapper.toDomain(entity, equipmentCatalogService::resolveById))
+                        domain.equals(ALSEntityMapper.toDomain(entity, equipmentResolver))
                 )
                 .findFirst();
     }
 
     private ALSEntity createEntity(
-            com.lb_calc_web.domain.model.ALS domain
+            com.lb_calc_web.domain.model.ALS domain,
+            Function<String, Equipment> equipmentResolver
     ) {
         List<ModuleEntity> moduleCache =
                 new ArrayList<>();
@@ -742,18 +751,20 @@ public class ALSService {
                 module ->
                         resolveModule(
                                 module,
-                                moduleCache
+                                moduleCache,
+                                equipmentResolver
                         )
         );
     }
 
     private ModuleEntity resolveModule(
             com.lb_calc_web.domain.model.Module domainModule,
-            List<ModuleEntity> cache
+            List<ModuleEntity> cache,
+            Function<String, Equipment> equipmentResolver
     ) {
         for (ModuleEntity entity : cache) {
             if (isSameModuleType(domainModule, entity)
-                    && domainModule.equals(ModuleEntityMapper.toDomain(entity, equipmentCatalogService::resolveById))) {
+                    && domainModule.equals(ModuleEntityMapper.toDomain(entity, equipmentResolver))) {
                 return entity;
             }
         }
@@ -773,7 +784,7 @@ public class ALSService {
 
         for (ModuleEntity entity : candidates) {
             if (isSameModuleType(domainModule, entity)
-                    && domainModule.equals(ModuleEntityMapper.toDomain(entity, equipmentCatalogService::resolveById))) {
+                    && domainModule.equals(ModuleEntityMapper.toDomain(entity, equipmentResolver))) {
                 return entity;
             }
         }
