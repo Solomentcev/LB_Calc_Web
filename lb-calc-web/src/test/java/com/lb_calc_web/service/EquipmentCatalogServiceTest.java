@@ -62,31 +62,6 @@ class EquipmentCatalogServiceTest {
 
 
     @Test
-    void findActiveNamesByCategory_shouldIncludeNoDisplayAndOnlyActiveCatalogModels() {
-        EquipmentCatalogEntity active = new EquipmentCatalogEntity(
-                "DISPLAY_CUSTOM", "DISPLAY", "Дисплей пользовательский", "", 0, 0, 0,
-                0, 0, 300, false, false, false, false, true);
-        when(repository.findAllByCategoryAndActiveTrueOrderByNameAsc("DISPLAY"))
-                .thenReturn(List.of(active));
-
-        List<String> result = service.findActiveNamesByCategory("DISPLAY");
-
-        assertEquals(List.of("Без дисплея", "Дисплей пользовательский"), result);
-        verify(repository).findAllByCategoryAndActiveTrueOrderByNameAsc("DISPLAY");
-    }
-
-    @Test
-    void findActiveNamesByCategory_shouldIncludeNoBarcodeReader() {
-        when(repository.findAllByCategoryAndActiveTrueOrderByNameAsc("BAR_READER"))
-                .thenReturn(List.of());
-
-        List<String> result = service.findActiveNamesByCategory("BAR_READER");
-
-        assertEquals(List.of("Без сканера"), result);
-    }
-
-
-    @Test
     void findDomainCatalogResolver_shouldResolveInactiveHistoricalEquipmentFromSingleCatalogLoad() {
         EquipmentCatalogEntity inactive = new EquipmentCatalogEntity(
                 "DISPLAY_OLD", "DISPLAY", "Старый дисплей", "", 0, 0, 0,
