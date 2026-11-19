@@ -8,28 +8,28 @@
 
     <h1>Модули хранения</h1>
     <a th:href="@{/lbs/create}" class="btn btn-primary btn-sm mb-3">Создать Модуль Хранения </a>
-    <a th:href="@{/}" class="btn btn-primary btn-sm mb-3">Back </a>
+    <a th:href="@{/}" class="btn btn-primary btn-sm mb-3">Назад</a>
     <br/><br/>
     <table border="1" class="table table-striped table-responsive-md">
         <thead>
         <tr>
             <th>ID</th>
-            <th>Name</th>
-            <th>Description</th>
-            <th>Type</th>
-            <th>CountCells</th>
+            <th>Название</th>
+            <th>Описание</th>
+            <th>Тип</th>
+            <th>Количество ячеек</th>
 
-            <th>Height</th>
-            <th>Width</th>
-            <th>Depth</th>
-            <th>HeightCell</th>
-            <th>WidthCell</th>
-            <th>DepthCell</th>
-            <th>DirectionDoorOpening</th>
-            <th>ColorBody</th>
-            <th>ColorDoor</th>
+            <th>Высота</th>
+            <th>Ширина</th>
+            <th>Глубина</th>
+            <th>Высота ячейки</th>
+            <th>Ширина ячейки</th>
+            <th>Глубина ячейки</th>
+            <th>Направление открывания двери</th>
+            <th>Цвет корпуса</th>
+            <th>Цвет дверей</th>
 
-            <th>Action</th>
+            <th>Действие</th>
         </tr>
         </thead>
         <tbody>
@@ -50,7 +50,7 @@
             <td th:text="${lb.getColorDoor()}">ColorDoor</td>
 
             <td>
-                <a th:href="@{/lbs/{id}(id=${lb.getId()})}" class="btn btn-primary">Edit</a>
+                <a th:href="@{/lbs/{id}(id=${lb.getId()})}" class="btn btn-primary">Редактировать</a>
             </td>
         </tr>
         </tbody>
