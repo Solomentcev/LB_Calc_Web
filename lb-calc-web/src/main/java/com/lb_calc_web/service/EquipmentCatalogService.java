@@ -222,11 +222,22 @@ public class EquipmentCatalogService {
             throw new IllegalArgumentException("ID оборудования уже существует: "
                     + item.getCatalogPositionId());
         }
-        if (item.isActive() && item.isDefaultPosition()
-                && !repository.findAllByCategoryAndActiveTrueAndDefaultPositionTrueOrderByNameAsc(
-                        item.getCategory()).isEmpty()) {
+        List<EquipmentCatalogEntity> activeDefaults =
+                repository.findAllByCategoryAndActiveTrueAndDefaultPositionTrueOrderByNameAsc(
+                        item.getCategory());
+        if (activeDefaults.size() > 1) {
+            throw new IllegalStateException(
+                    "В категории уже нарушено правило единственной модели по умолчанию: "
+                            + item.getCategory());
+        }
+        if (item.isActive() && item.isDefaultPosition() && !activeDefaults.isEmpty()) {
             throw new IllegalArgumentException(
                     "Для категории уже задана активная модель по умолчанию: " + item.getCategory());
+        }
+        if (item.isActive() && !item.isDefaultPosition() && activeDefaults.isEmpty()) {
+            throw new IllegalArgumentException(
+                    "Первая активная модель категории должна быть назначена моделью по умолчанию: "
+                            + item.getCategory());
         }
         return repository.save(item);
     }
@@ -239,17 +250,23 @@ public class EquipmentCatalogService {
                                          boolean rfid, boolean print) {
         validateCatalogData(category, barcode1d, barcode2d, rfid, print);
         EquipmentCatalogEntity item = get(id);
-        if (item.isActive() && item.isDefaultPosition()
-                && !item.getCategory().equals(category)) {
-            if (!hasOtherActiveDefault(item.getCategory(), id)) {
+        if (item.isActive() && !item.getCategory().equals(category)) {
+            List<EquipmentCatalogEntity> targetDefaults =
+                    repository.findAllByCategoryAndActiveTrueAndDefaultPositionTrueOrderByNameAsc(category);
+            if (item.isDefaultPosition()) {
+                if (!hasOtherActiveDefault(item.getCategory(), id)) {
+                    throw new IllegalStateException(
+                            "Перед переносом модели назначьте другую модель по умолчанию для категории: "
+                                    + item.getCategory());
+                }
+                if (!targetDefaults.isEmpty()) {
+                    throw new IllegalArgumentException(
+                            "Для новой категории уже задана активная модель по умолчанию: " + category);
+                }
+            } else if (targetDefaults.size() != 1) {
                 throw new IllegalStateException(
-                        "Перед переносом модели назначьте другую модель по умолчанию для категории: "
-                                + item.getCategory());
-            }
-            if (!repository.findAllByCategoryAndActiveTrueAndDefaultPositionTrueOrderByNameAsc(
-                    category).isEmpty()) {
-                throw new IllegalArgumentException(
-                        "Для новой категории уже задана активная модель по умолчанию: " + category);
+                        "В целевой категории должна быть ровно одна активная модель по умолчанию: "
+                                + category);
             }
         }
         if (repository.isUsedInConfigurations(id)
@@ -360,14 +377,30 @@ public class EquipmentCatalogService {
                     "Перед деактивацией модели по умолчанию назначьте другую активную модель категории: "
                             + item.getCategory());
         }
-        if (active && item.isDefaultPosition()
-                && repository.findAllByCategoryAndActiveTrueAndDefaultPositionTrueOrderByNameAsc(
-                        item.getCategory()).stream()
-                        .anyMatch(existing -> !existing.getCatalogPositionId().equals(id))) {
-            throw new IllegalArgumentException(
-                    "Для категории уже есть активная модель по умолчанию: " + item.getCategory());
+        if (active) {
+            List<EquipmentCatalogEntity> activeDefaults =
+                    repository.findAllByCategoryAndActiveTrueAndDefaultPositionTrueOrderByNameAsc(
+                            item.getCategory());
+            if (activeDefaults.size() > 1) {
+                throw new IllegalStateException(
+                        "В категории уже нарушено правило единственной модели по умолчанию: "
+                                + item.getCategory());
+            }
+            boolean anotherDefaultExists = activeDefaults.stream()
+                    .anyMatch(existing -> !existing.getCatalogPositionId().equals(id));
+            if (item.isDefaultPosition() && anotherDefaultExists) {
+                throw new IllegalArgumentException(
+                        "Для категории уже есть активная модель по умолчанию: " + item.getCategory());
+            }
+            if (!item.isDefaultPosition() && activeDefaults.isEmpty()) {
+                throw new IllegalStateException(
+                        "Перед активацией модели назначьте активную модель по умолчанию для категории: "
+                                + item.getCategory());
+            }
+            item.activate();
+        } else {
+            item.deactivate();
         }
-        if (active) item.activate(); else item.deactivate();
         return item;
     }
 }
