@@ -11,8 +11,10 @@ import com.lb_calc_web.service.EquipmentCatalogService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.ModelAttribute;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import org.springframework.ui.Model;
 
 public abstract class BaseCatalogController {
 
@@ -117,6 +119,39 @@ public abstract class BaseCatalogController {
     @ModelAttribute("barReaderList")
     public List<String> barReaderList() {
         return equipmentCatalogService.findActiveNamesByCategory("BAR_READER");
+    }
+
+    /**
+     * Добавляет в варианты выбора текущие модели, если они были деактивированы.
+     * Это позволяет сохранить историческую конфигурацию без разрешения выбрать
+     * деактивированную модель для новой конфигурации.
+     */
+    protected void retainSelectedEquipmentOptions(
+            Model model,
+            String display,
+            String barReader
+    ) {
+        retainSelectedOption(model, "displayList", display);
+        retainSelectedOption(model, "barReaderList", barReader);
+    }
+
+    private void retainSelectedOption(Model model, String attribute, String selectedValue) {
+        if (selectedValue == null || selectedValue.isBlank()) {
+            return;
+        }
+
+        Object currentOptions = model.asMap().get(attribute);
+        List<String> options = new ArrayList<>();
+        if (currentOptions instanceof List<?> values) {
+            values.stream()
+                    .filter(String.class::isInstance)
+                    .map(String.class::cast)
+                    .forEach(options::add);
+        }
+        if (!options.contains(selectedValue)) {
+            options.add(selectedValue);
+        }
+        model.addAttribute(attribute, List.copyOf(options));
     }
 
     /**
