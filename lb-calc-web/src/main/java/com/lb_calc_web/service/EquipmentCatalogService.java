@@ -162,20 +162,7 @@ public class EquipmentCatalogService {
      * в исходной сохранённой комплектации.
      */
     public Equipment resolveForExistingConfiguration(String idOrName, Set<String> existingIds) {
-        if (idOrName == null || idOrName.isBlank()) return null;
-        if (existingIds != null && !existingIds.isEmpty()) {
-            List<Equipment> retained = existingIds.stream()
-                    .map(this::resolveById)
-                    .filter(item -> item.getCatalogPositionId().equals(idOrName)
-                            || item.getName().equalsIgnoreCase(idOrName))
-                    .toList();
-            if (retained.size() == 1) return retained.get(0);
-            if (retained.size() > 1) {
-                throw new IllegalArgumentException(
-                        "Позиция оборудования неоднозначна в исходной конфигурации: " + idOrName);
-            }
-        }
-        return resolve(idOrName);
+        return findExistingConfigurationResolver(existingIds).apply(idOrName);
     }
 
     /** Преобразует запись каталога в независимую доменную позицию. */
