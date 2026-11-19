@@ -1,5 +1,7 @@
 package com.lb_calc_web.security.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.lb_calc_web.controller.api.response.ApiResponse;
 import com.lb_calc_web.security.jwt.JwtAuthentificationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,6 +17,9 @@ import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 @Configuration
 @EnableWebSecurity
@@ -22,12 +27,14 @@ import org.springframework.http.HttpStatus;
 public class SecurityConfiguration {
 
     private final JwtAuthentificationFilter jwtAuthentificationFilter;
+    private final ObjectMapper objectMapper;
 
     public SecurityConfiguration(
-            JwtAuthentificationFilter jwtAuthentificationFilter
+            JwtAuthentificationFilter jwtAuthentificationFilter,
+            ObjectMapper objectMapper
     ) {
-        this.jwtAuthentificationFilter =
-                jwtAuthentificationFilter;
+        this.jwtAuthentificationFilter = jwtAuthentificationFilter;
+        this.objectMapper = objectMapper;
     }
 
     @Bean
@@ -79,12 +86,20 @@ public class SecurityConfiguration {
                 .exceptionHandling(exception -> exception
 
                         .defaultAuthenticationEntryPointFor(
-                                new HttpStatusEntryPoint(
-                                        HttpStatus.UNAUTHORIZED
+                                (request, response, exception) -> writeApiError(
+                                        response,
+                                        HttpStatus.UNAUTHORIZED,
+                                        "Требуется аутентификация"
                                 ),
-                                request ->
-                                        request.getRequestURI()
-                                                .startsWith("/api/")
+                                request -> request.getRequestURI().startsWith("/api/")
+                        )
+                        .defaultAccessDeniedHandlerFor(
+                                (request, response, exception) -> writeApiError(
+                                        response,
+                                        HttpStatus.FORBIDDEN,
+                                        "Недостаточно прав для выполнения операции"
+                                ),
+                                request -> request.getRequestURI().startsWith("/api/")
                         )
 
                         .defaultAuthenticationEntryPointFor(
@@ -113,6 +128,16 @@ public class SecurityConfiguration {
                 );
 
         return http.build();
+    }
+
+    private void writeApiError(
+            HttpServletResponse response,
+            HttpStatus status,
+            String message
+    ) throws IOException {
+        response.setStatus(status.value());
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        objectMapper.writeValue(response.getOutputStream(), ApiResponse.error(message));
     }
 
     @Bean
