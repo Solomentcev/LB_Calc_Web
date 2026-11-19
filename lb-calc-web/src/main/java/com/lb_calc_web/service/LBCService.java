@@ -251,7 +251,7 @@ public class LBCService {
             domain.setControlConfiguration(
                     equipmentRequirementResolver.resolve(domain.getControlConfiguration())
             );
-        } catch (IllegalArgumentException | NullPointerException exception) {
+        } catch (IllegalArgumentException | IllegalStateException | NullPointerException exception) {
             throw createMappingValidationException(
                     "LBC",
                     dto.getId(),
