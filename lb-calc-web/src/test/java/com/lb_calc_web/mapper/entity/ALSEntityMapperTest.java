@@ -3,6 +3,10 @@ package com.lb_calc_web.mapper.entity;
 import com.lb_calc_web.TestDataFactory;
 import com.lb_calc_web.domain.model.ALS;
 import com.lb_calc_web.entity.ALSEntity;
+import com.lb_calc_web.entity.LBEntity;
+import com.lb_calc_web.entity.ModuleEntity;
+
+import java.lang.reflect.Field;
 
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -118,4 +122,28 @@ class ALSEntityMapperTest {
                 () -> ALSEntityMapper.toEntity(domain, module -> null)
         );
     }
+    @Test
+    void synchronizeModules_shouldReuseAssociationWhenModuleIsProxySubclass() throws Exception {
+        ALSEntity entity = new ALSEntity();
+        LBEntity storedModule = new LBEntity();
+        LBEntity proxyModule = new ModuleProxy();
+        setModuleId(storedModule, 17L);
+        setModuleId(proxyModule, 17L);
+        entity.addModule(storedModule, 0);
+
+        var originalAssociation = entity.getModules().get(0);
+        entity.synchronizeModules(List.of(proxyModule));
+
+        assertSame(originalAssociation, entity.getModules().get(0));
+    }
+
+    private static void setModuleId(ModuleEntity module, Long id) throws Exception {
+        Field field = ModuleEntity.class.getDeclaredField("id");
+        field.setAccessible(true);
+        field.set(module, id);
+    }
+
+    private static class ModuleProxy extends LBEntity {
+    }
+
 }
