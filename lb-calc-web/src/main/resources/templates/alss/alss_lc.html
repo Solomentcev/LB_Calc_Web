@@ -13,7 +13,7 @@
         <a th:href="@{/alss/{alsId} (alsId=${als.getId()})}"
            class="btn btn-primary btn-sm mb-3"
            th:text="'К АКХ №' + ${als.id} + ' — ' + ${als.name}">Вернуться к АКХ</a>
-        <h4 th:text="*{description}">Модуль управления</h4>
+        <h1 class="h4" th:text="*{description}">Модуль управления</h1>
         <label hidden="hidden">
             <input size="180"  type="text" th:field="*{description}" readonly="readonly">
         </label>
