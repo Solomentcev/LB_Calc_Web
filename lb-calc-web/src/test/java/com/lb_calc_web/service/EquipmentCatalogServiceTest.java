@@ -110,6 +110,46 @@ class EquipmentCatalogServiceTest {
                 () -> resolver.apply("UNKNOWN"));
     }
 
+
+    @Test
+    void findExistingConfigurationResolver_shouldAllowRetainedInactiveEquipment() {
+        EquipmentCatalogEntity inactive = new EquipmentCatalogEntity(
+                "DISPLAY_OLD", "DISPLAY", "Старый дисплей", "", 0, 0, 0,
+                0, 0, 300, false, false, false, false, false);
+        when(repository.findAll()).thenReturn(List.of(inactive));
+
+        var resolver = service.findExistingConfigurationResolver(
+                java.util.Set.of("DISPLAY_OLD"));
+
+        assertEquals("DISPLAY_OLD", resolver.apply("DISPLAY_OLD").getCatalogPositionId());
+        verify(repository).findAll();
+        verify(repository, never()).findById("DISPLAY_OLD");
+    }
+
+    @Test
+    void findExistingConfigurationResolver_shouldRejectNewSelectionOfInactiveEquipment() {
+        EquipmentCatalogEntity inactive = new EquipmentCatalogEntity(
+                "DISPLAY_OLD", "DISPLAY", "Старый дисплей", "", 0, 0, 0,
+                0, 0, 300, false, false, false, false, false);
+        when(repository.findAll()).thenReturn(List.of(inactive));
+
+        var resolver = service.findExistingConfigurationResolver(java.util.Set.of());
+
+        assertThrows(IllegalArgumentException.class,
+                () -> resolver.apply("DISPLAY_OLD"));
+    }
+
+    @Test
+    void create_shouldRejectInactiveDefaultEquipment() {
+        EquipmentCatalogEntity item = new EquipmentCatalogEntity(
+                "DISPLAY_OLD", "DISPLAY", "Старый дисплей", "", 0, 0, 0,
+                0, 0, 300, false, false, false, false, false);
+        item.setDefaultPosition(true);
+
+        assertThrows(IllegalArgumentException.class, () -> service.create(item));
+        verify(repository, never()).save(any());
+    }
+
     private EquipmentCatalogEntity defaultItem(String id) {
         EquipmentCatalogEntity item = item(id);
         item.setDefaultPosition(true);
