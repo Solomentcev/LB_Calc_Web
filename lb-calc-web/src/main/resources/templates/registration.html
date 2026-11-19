@@ -11,7 +11,7 @@
     <div th:if="${errorMessage}!=null" class="text-danger"
          th:text="${errorMessage}">
     </div>
-    <form th:action="${'/registration'}"
+    <form th:action="@{/registration}"
           th:object="${employee}" method="post">
         <div class="form-group">
             <label>First Name</label>
