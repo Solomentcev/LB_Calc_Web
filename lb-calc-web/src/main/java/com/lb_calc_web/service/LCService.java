@@ -202,6 +202,10 @@ public class LCService {
                 "Поиск LC по id={}",
                 id
         );
+        if (id == null || id <= 0) {
+            throw new NoSuchElementException("LC с id=" + id + " не найден");
+        }
+
 
         LCEntity entity =
                 lcRepository.findById(id)
