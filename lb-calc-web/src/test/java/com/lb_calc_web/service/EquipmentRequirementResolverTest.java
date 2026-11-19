@@ -111,26 +111,23 @@ class EquipmentRequirementResolverTest {
     }
 
     @Test
-    void resolve_pinWithMultipleDisplays_shouldFail() {
-        stubDefaults();
+    void equipmentConfiguration_shouldRejectMultipleDisplays() {
         Equipment firstDisplay = equipment("DISPLAY", "DISPLAY_LC10");
         Equipment secondDisplay = equipment("DISPLAY", "DISPLAY_LC17");
-        ControlConfiguration source = configurationWithAccessAndEquipment(
-                List.of(AccessMethod.PIN, AccessMethod.RFID),
-                List.of(new EquipmentItem(firstDisplay, 1), new EquipmentItem(secondDisplay, 1)));
 
-        assertThrows(IllegalArgumentException.class, () -> resolver.resolve(source));
+        assertThrows(IllegalArgumentException.class, () ->
+                configurationWithAccessAndEquipment(
+                        List.of(AccessMethod.PIN, AccessMethod.RFID),
+                        List.of(new EquipmentItem(firstDisplay, 1),
+                                new EquipmentItem(secondDisplay, 1))));
     }
 
     @Test
-    void resolve_pinWithDisplayQuantityGreaterThanOne_shouldFail() {
-        stubDefaults();
+    void equipmentItem_shouldRejectDisplayQuantityGreaterThanOne() {
         Equipment display = equipment("DISPLAY", "DISPLAY_LC10");
-        ControlConfiguration source = configurationWithAccessAndEquipment(
-                List.of(AccessMethod.PIN, AccessMethod.RFID),
-                List.of(new EquipmentItem(display, 2)));
 
-        assertThrows(IllegalArgumentException.class, () -> resolver.resolve(source));
+        assertThrows(IllegalArgumentException.class,
+                () -> new EquipmentItem(display, 2));
     }
 
     @Test
