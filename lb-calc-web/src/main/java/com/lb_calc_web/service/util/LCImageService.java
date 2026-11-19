@@ -1,7 +1,6 @@
 package com.lb_calc_web.service.util;
 
 import com.lb_calc_web.domain.attributes.Colors;
-import com.lb_calc_web.domain.equipment.Display;
 import com.lb_calc_web.dto.LCDTO;
 
 import javax.imageio.ImageIO;
@@ -13,7 +12,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.Base64;
-import java.util.List;
 
 public class LCImageService {
 
@@ -85,10 +83,6 @@ public class LCImageService {
                         lc.getColorBody()
                 );
 
-        Display display =
-                findDisplay(
-                        lc.getDisplay()
-                );
 
         g2d.setColor(
                 colorBody.getColor()
@@ -143,7 +137,7 @@ public class LCImageService {
                 x
                         + (
                         (lc.getWidth()
-                                - display.getDisplayWidth())
+                                - lc.getDisplayWidth())
                                 / 2
                 ) / 10;
 
@@ -151,14 +145,14 @@ public class LCImageService {
                 (
                         lc.getHeight()
                                 - 1300
-                                - display.getDisplayHeight()
+                                - lc.getDisplayHeight()
                 ) / 10;
 
         int displayWidth =
-                display.getDisplayWidth() / 10;
+                lc.getDisplayWidth() / 10;
 
         int displayHeight =
-                display.getDisplayHeight() / 10;
+                lc.getDisplayHeight() / 10;
 
         g2d.fillRoundRect(
                 displayX,
@@ -191,35 +185,6 @@ public class LCImageService {
         );
 
         g2d.dispose();
-    }
-
-    private static Display findDisplay(
-            String name
-    ) {
-
-        if (name == null || name.isBlank()) {
-            return Display.NONE;
-        }
-
-        return List.of(
-                        Display.NONE,
-                        Display.LC10,
-                        Display.LC17,
-                        Display.LC19
-                )
-                .stream()
-                .filter(
-                        display ->
-                                display.getName().equals(name)
-                )
-                .findFirst()
-                .orElseThrow(
-                        () ->
-                                new IllegalArgumentException(
-                                        "Неизвестный дисплей LC: "
-                                                + name
-                                )
-                );
     }
 
     public static File getFileLCImage(
