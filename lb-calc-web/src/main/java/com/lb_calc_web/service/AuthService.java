@@ -308,7 +308,7 @@ public class AuthService {
         try {
             saved = employeeRepository.save(entity);
         } catch (DataIntegrityViolationException exception) {
-            throw new IllegalArgumentException("Email уже используется", exception);
+            throw toEmailConflict(exception);
         }
 
         EmployeeDTO result =
