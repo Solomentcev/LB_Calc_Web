@@ -46,14 +46,12 @@ public class LCRestController {
 
         logger.info("GET /api/v1/lcs");
 
-
             List<LCDTO> lcList =
                     lcService.findAll();
 
             return ResponseEntity.ok(
                     ApiResponse.success(lcList)
             );
-
 
     }
 
@@ -78,14 +76,12 @@ public class LCRestController {
                 id
         );
 
-
             LCDTO lc =
                     lcService.findById(id);
 
             return ResponseEntity.ok(
                     ApiResponse.success(lc)
             );
-
 
     }
 
@@ -103,14 +99,12 @@ public class LCRestController {
                 "GET /api/v1/lcs/create"
         );
 
-
             LCDTO lc =
                     lcService.createLC();
 
             return ResponseEntity.ok(
                     ApiResponse.success(lc)
             );
-
 
     }
 
@@ -132,7 +126,6 @@ public class LCRestController {
         );
 
 
-
             LCDTO saved =
                     lcService.saveLC(dto);
 
@@ -142,7 +135,6 @@ public class LCRestController {
                             saved
                     )
             );
-
 
     }
 }
