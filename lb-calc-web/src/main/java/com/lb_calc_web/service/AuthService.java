@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.lang.NonNull;
@@ -249,7 +250,7 @@ public class AuthService {
         try {
             saved = employeeRepository.save(entity);
         } catch (DataIntegrityViolationException exception) {
-            throw new IllegalArgumentException("Email уже используется", exception);
+            throw toEmailConflict(exception);
         }
 
         EmployeeDTO result =
@@ -362,6 +363,18 @@ public class AuthService {
                 employee.getId(),
                 employee.getEmail()
         );
+    }
+
+    private IllegalArgumentException toEmailConflict(DataIntegrityViolationException exception) {
+        Throwable cause = exception;
+        while (cause != null) {
+            if (cause instanceof ConstraintViolationException violation
+                    && "uk_employee_email".equalsIgnoreCase(violation.getConstraintName())) {
+                return new IllegalArgumentException("Email уже используется", exception);
+            }
+            cause = cause.getCause();
+        }
+        throw exception;
     }
 
     private void validatePasswords(
