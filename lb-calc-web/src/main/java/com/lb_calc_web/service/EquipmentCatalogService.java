@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Set;
+import java.util.function.Function;
 
 /** Управляет каталогом оборудования и его доступностью для новых конфигураций. */
 @Service
@@ -31,6 +32,22 @@ public class EquipmentCatalogService {
     public Map<String, Equipment> findDomainCatalog() {
         return repository.findAll().stream().collect(Collectors.toUnmodifiableMap(
                 EquipmentCatalogEntity::getCatalogPositionId, this::toDomain));
+    }
+
+    /**
+     * Создаёт разрешитель на основе единовременно загруженного каталога.
+     * В карту входят и деактивированные позиции, необходимые историческим конфигурациям.
+     */
+    public Function<String, Equipment> findDomainCatalogResolver() {
+        Map<String, Equipment> catalog = findDomainCatalog();
+        return id -> {
+            Equipment equipment = catalog.get(id);
+            if (equipment == null) {
+                throw new IllegalArgumentException(
+                        "Позиция оборудования не найдена в каталоге: " + id);
+            }
+            return equipment;
+        };
     }
 
     public Equipment resolveById(String id) {
