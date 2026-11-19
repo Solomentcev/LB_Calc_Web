@@ -46,13 +46,11 @@ public class LBRestController {
 
         logger.info("GET /api/v1/lbs");
 
-
             List<LBDTO> lbList = lbService.findAll();
 
             return ResponseEntity.ok(
                     ApiResponse.success(lbList)
             );
-
 
     }
 
@@ -74,13 +72,11 @@ public class LBRestController {
 
         logger.info("GET /api/v1/lbs/{}", id);
 
-
             LBDTO lb = lbService.findById(id);
 
             return ResponseEntity.ok(
                     ApiResponse.success(lb)
             );
-
 
     }
 
@@ -97,13 +93,11 @@ public class LBRestController {
 
         logger.info("GET /api/v1/lbs/create");
 
-
             LBDTO lb = lbService.createLB();
 
             return ResponseEntity.ok(
                     ApiResponse.success(lb)
             );
-
 
     }
 
@@ -124,7 +118,6 @@ public class LBRestController {
                 dto != null ? dto.getType() : null
         );
 
-
             LBDTO saved = lbService.saveLB(dto);
 
             return ResponseEntity.ok(
@@ -133,7 +126,6 @@ public class LBRestController {
                             saved
                     )
             );
-
 
     }
 }
