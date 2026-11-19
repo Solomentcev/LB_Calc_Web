@@ -5,8 +5,8 @@
 <body>
 <div th:replace="~{header :: header}"></div>
 
-<div class="container mt-4">
-    <h2>Регистрация</h2>
+<div class="container">
+    <h1>Регистрация</h1>
 
     <div th:if="${errorMessage}!=null" class="text-danger"
          th:text="${errorMessage}">
@@ -42,8 +42,8 @@
             <input type="password" class="form-control" th:field="*{confirmPassword}" required>
             <span class="text-danger" th:if="${#fields.hasErrors('confirmPassword')}" th:errors="*{confirmPassword}"></span>
         </div>
-        <button type="submit" class="btn btn-primary">Зарегистрироваться</button>
-        <a th:href="@{/login}" class="btn btn-secondary">Отмена</a>
+        <button type="submit" class="btn btn-primary btn-sm">Зарегистрироваться</button>
+        <a th:href="@{/login}" class="btn btn-secondary btn-sm">Отмена</a>
     </form>
 </div>
 
