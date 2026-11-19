@@ -3,6 +3,7 @@ package com.lb_calc_web.controller;
 import com.lb_calc_web.dto.ALSDTO;
 import com.lb_calc_web.handler.ValidationSizeException;
 import com.lb_calc_web.service.ALSService;
+import com.lb_calc_web.service.EquipmentCatalogService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -19,8 +20,10 @@ public class ALSController extends BaseCatalogController {
     private final ALSService alsService;
 
     public ALSController(
-            ALSService alsService
+            ALSService alsService,
+            EquipmentCatalogService equipmentCatalogService
     ) {
+        super(equipmentCatalogService);
         this.alsService = alsService;
     }
 
