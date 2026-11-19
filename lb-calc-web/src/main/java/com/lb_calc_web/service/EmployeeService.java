@@ -11,6 +11,7 @@ import com.lb_calc_web.security.EmployeePrincipal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -283,7 +284,8 @@ public class EmployeeService implements UserDetailsService {
                         .getAuthentication();
 
         if (authentication == null
-                || !authentication.isAuthenticated()) {
+                || !authentication.isAuthenticated()
+                || authentication instanceof AnonymousAuthenticationToken) {
 
             throw new NoSuchElementException(
                     "Пользователь не аутентифицирован"
