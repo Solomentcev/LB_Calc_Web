@@ -2,7 +2,6 @@ package com.lb_calc_web.service;
 
 import com.lb_calc_web.domain.attributes.AccessMethod;
 import com.lb_calc_web.domain.attributes.Colors;
-import com.lb_calc_web.domain.attributes.Payment;
 import com.lb_calc_web.domain.equipment.BarReader;
 import com.lb_calc_web.domain.equipment.Display;
 import com.lb_calc_web.domain.equipment.Equipment;
