@@ -4,14 +4,14 @@
 <head th:replace="~{fragments/common :: head('LBC в составе АКХ')}"></head>
 <body>
 <div th:replace="~{header :: header}"></div>
-<div class="container-fluid">
+<div class="container">
 <form th:action="@{/alss/{alsId}/lbcs/{lbcId}/save(alsId=${als.id},lbcId=${lbc.id})}" th:object="${lbc}" method="post">
 <button type="submit" class="btn btn-primary btn-sm mb-3">Сохранить LBC</button>
 <a th:href="@{/alss/{id}(id=${als.id})}" class="btn btn-secondary btn-sm mb-3">Вернуться к ALS</a>
 <div th:if="${errors != null}" class="alert alert-danger">
 <div th:each="error : ${errors}" th:text="${error}">Error</div>
 </div>
-<div class="row"><div class="col-md-5">
+<div class="row"><div class="col-lg-6">
 <input type="hidden" th:field="*{id}"><input type="hidden" th:field="*{name}"><input type="hidden" th:field="*{description}">
 <table class="table table-striped">
 <tr><th>Тип</th><td><select class="form-control" th:field="*{type}">
@@ -34,7 +34,7 @@
 <option th:each="color : ${colorsList}" th:value="${color}" th:text="${color}"></option>
 </select></td></tr>
 </table>
-<h5>Управление LBC</h5>
+<h2 class="h5 mt-4">Управление LBC</h2>
 <table class="table table-striped">
 <tr><th>Дисплей</th><td><select class="form-control" th:field="*{display}">
 <option th:each="display : ${displayList}" th:value="${display}" th:text="${display}"></option>
@@ -49,7 +49,7 @@
 <option th:each="option : ${printOptionList}" th:value="${option}" th:text="${option}"></option>
 </select></td></tr>
 </table>
-</div><div class="col-md-7">
+</div><div class="col-lg-6">
 <img class="img-thumbnail" th:src="'data:image/png;base64,' + ${lbc.stringLBCImage}" alt="LBC Image">
 </div></div>
 </form></div>
