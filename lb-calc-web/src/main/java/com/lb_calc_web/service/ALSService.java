@@ -381,7 +381,7 @@ public class ALSService {
             );
         }
 
-        var domain = toDomain(dto);
+        var domain = restoreALS(dto);
         int moduleIndex = ALSDtoMapper.findPhysicalLbIndex(domain, lbIndex);
         domain.removeModuleAt(moduleIndex);
 
@@ -462,7 +462,7 @@ public class ALSService {
             );
         }
 
-        var domain = toDomain(als);
+        var domain = restoreALS(als);
         domain.replaceControlModule(restoreLC(lc));
 
         return ALSDtoMapper.toDto(domain);
