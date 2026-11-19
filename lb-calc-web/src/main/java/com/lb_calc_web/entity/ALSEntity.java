@@ -250,10 +250,13 @@ public class ALSEntity {
             );
 
             ALSModuleEntity existing = unmatched.stream()
-                    .filter(association ->
-                            association.getModuleOrder() == expectedOrder
-                                    && (association.getModule() == module
-                                    || association.getModule().equals(module)))
+                    .filter(association -> {
+                        ModuleEntity existingModule = association.getModule();
+                        return association.getModuleOrder() == expectedOrder
+                                && (existingModule == module
+                                || (existingModule.getId() != null
+                                && existingModule.getId().equals(module.getId())));
+                    })
                     .findFirst()
                     .orElse(null);
 
