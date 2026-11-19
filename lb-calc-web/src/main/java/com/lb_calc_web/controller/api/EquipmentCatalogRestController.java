@@ -72,13 +72,16 @@ public class EquipmentCatalogRestController {
                 item.getDepth(), item.getDisplayWidth(), item.getDisplayHeight(),
                 item.getMinimumModuleWidth(), item.isSupportsBarcode1d(),
                 item.isSupportsBarcode2d(), item.isSupportsRfid(), item.isSupportsPrint(),
-                item.isActive());
+                item.isActive(), item.isDefaultPosition());
     }
 
     private EquipmentCatalogEntity toEntity(EquipmentCatalogDTO dto) {
-        return new EquipmentCatalogEntity(dto.catalogPositionId(), dto.category(), dto.name(),
-                dto.description(), dto.width(), dto.height(), dto.depth(), dto.displayWidth(),
+        EquipmentCatalogEntity entity = new EquipmentCatalogEntity(
+                dto.catalogPositionId(), dto.category(), dto.name(), dto.description(),
+                dto.width(), dto.height(), dto.depth(), dto.displayWidth(),
                 dto.displayHeight(), dto.minimumModuleWidth(), dto.supportsBarcode1d(),
                 dto.supportsBarcode2d(), dto.supportsRfid(), dto.supportsPrint(), dto.active());
+        entity.setDefaultPosition(dto.defaultPosition());
+        return entity;
     }
 }
