@@ -5,7 +5,7 @@
 <body>
 <div th:replace="~{header :: header}"></div>
 <div class="container">
-    <br/>
+    
     <form action="#" th:action="@{/lbs/save}" th:object="${lb}" method="post">
 
         <p  th:each="erorr, item: ${errors}" class="alert alert-danger"
@@ -14,13 +14,13 @@
         <button type="submit" class="btn btn-primary btn-sm mb-3">Сохранить Модуль хранения</button>
         <a th:href="@{'/lbs'}" class="btn btn-primary btn-sm mb-3"
         >К списку модулей хранения</a>
-        <br/>
+        
         <h4 th:text="*{description}">Модуль хранения</h4>
         <label hidden="hidden">
             <input size="130"  type="text" th:field="*{description}" readonly="readonly">
         </label>
 
-    <table border="1" class="table table-striped table-responsive-md">
+    <table class="table table-striped">
         <tr>
             <th >ID</th>
             <td>
@@ -29,7 +29,7 @@
                 </label>
             </td>
             <td rowspan="16">
-                <div class="container-fluid">
+                <div class="container">
                     <img class="img-thumbnail" th:src="'data:image/png;base64,'+${lb.getStringLBImage()}" alt="LB Image">
                 </div>
             </td>
