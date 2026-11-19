@@ -1,10 +1,10 @@
 <header th:fragment="header"
         xmlns:th="http://www.thymeleaf.org"
         xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-    <nav class="navbar bg-dark navbar-dark flex-wrap">
+    <nav class="navbar navbar-dark bg-dark flex-wrap px-3 py-2">
         <a class="navbar-brand" th:href="@{/}">LB_Calc_Web</a>
 
-        <ul class="navbar-nav flex-row flex-wrap mr-auto"
+        <ul class="navbar-nav flex-row flex-wrap mr-auto mb-0"
             sec:authorize="isAuthenticated()">
             <li class="nav-item">
                 <a class="nav-link px-2" th:href="@{/myprofile}">Мой профиль</a>
@@ -32,7 +32,7 @@
             </li>
         </ul>
 
-        <ul class="navbar-nav flex-row flex-wrap align-items-center">
+        <ul class="navbar-nav flex-row flex-wrap align-items-center mb-0">
             <li class="nav-item" sec:authorize="isAnonymous()">
                 <a class="nav-link px-2" th:href="@{/registration}">Регистрация</a>
             </li>
