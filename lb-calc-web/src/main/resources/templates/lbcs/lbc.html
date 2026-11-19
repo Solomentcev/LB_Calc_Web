@@ -1,86 +1,83 @@
-
 <!DOCTYPE html>
-<html lang="ru" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<html lang="ru" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/common :: head('LBC')}"></head>
 <body>
 <div th:replace="~{header :: header}"></div>
-<div class="container">
-<form th:action="@{/lbcs/save}" th:object="${lbc}" method="post">
-<div class="mb-3">
-<button type="submit" class="btn btn-primary btn-sm">Сохранить LBC</button>
-<a th:href="@{/lbcs}" class="btn btn-secondary btn-sm">К списку LBC</a>
-</div>
-<div th:if="${errors != null}" class="alert alert-danger">
-<div th:each="error : ${errors}" th:text="${error}">Error</div>
-</div>
-<div class="row">
-<div class="col-md-5">
-<h1 class="h4" th:text="${lbc.description}">Комбинированный модуль</h1>
-<input type="hidden" th:field="*{id}">
-<input type="hidden" th:field="*{name}">
-<input type="hidden" th:field="*{description}">
-<div class="table-responsive">
-<table class="table table-striped">
-<tr><th>Тип</th><td><select class="form-control" th:field="*{type}">
-<option th:each="type : ${typeList}" th:value="${type}" th:text="${type}"></option>
-</select></td></tr>
-<tr><th>Количество ячеек</th><td><input class="form-control" type="number" min="1" th:field="*{countCells}"></td></tr>
-<tr><th>Высота</th><td><input class="form-control" type="number" th:field="*{height}"></td></tr>
-<tr><th>Ширина</th><td><input class="form-control" type="number" th:field="*{width}"></td></tr>
-<tr><th>Глубина</th><td><input class="form-control" type="number" th:field="*{depth}"></td></tr>
-<tr><th>Верхняя рама</th><td><input class="form-control" type="number" th:field="*{upperFrame}"></td></tr>
-<tr><th>Нижняя рама</th><td><input class="form-control" type="number" th:field="*{bottomFrame}"></td></tr>
-<tr><th>Толщина дверцы</th><td><input class="form-control" type="number" th:field="*{doorThickness}"></td></tr>
-<tr><th>Направление двери</th><td><select class="form-control" th:field="*{directionDoorOpening}">
-<option th:each="direction : ${directionDoorOpeningList}" th:value="${direction}" th:text="${direction}"></option>
-</select></td></tr>
-<tr><th>Цвет корпуса</th><td><select class="form-control" th:field="*{colorBody}">
-<option th:each="color : ${colorsList}" th:value="${color}" th:text="${color}"></option>
-</select></td></tr>
-<tr><th>Цвет дверей</th><td><select class="form-control" th:field="*{colorDoor}">
-<option th:each="color : ${colorsList}" th:value="${color}" th:text="${color}"></option>
-</select></td></tr>
-</table>
-</div>
-<h2 class="h5 mt-4">Модуль управления внутри LBC</h2>
-<table class="table table-striped">
-<tr><th>Дисплей</th><td><select class="form-control" th:field="*{display}">
-<option th:each="display : ${displayList}" th:value="${display}" th:text="${display}"></option>
-</select></td></tr>
-<tr><th>Оплата</th><td><select class="form-control" th:field="*{payment}">
-<option th:each="payment : ${paymentList}" th:value="${payment}" th:text="${payment}"></option>
-</select></td></tr>
-<tr><th>Способы доступа</th><td><select multiple class="form-control" th:field="*{accessMethods}">
-<option th:each="method : ${accessMethodList}" th:value="${method}" th:text="${method}"></option>
-</select></td></tr>
-<tr><th>Печать</th><td><select multiple class="form-control" th:field="*{printOptions}">
-<option th:each="option : ${printOptionList}" th:value="${option}" th:text="${option}"></option>
-</select></td></tr>
-</table>
-</div>
-<h2 class="h5 mt-4">Модуль управления внутри LBC</h2>
-<div class="table-responsive">
-<table class="table table-striped">
-<tr><th>Дисплей</th><td><select class="form-control" th:field="*{display}">
-<option th:each="display : ${displayList}" th:value="${display}" th:text="${display}"></option>
-</select></td></tr>
-<tr><th>Оплата</th><td><select class="form-control" th:field="*{payment}">
-<option th:each="payment : ${paymentList}" th:value="${payment}" th:text="${payment}"></option>
-</select></td></tr>
-<tr><th>Способы доступа</th><td><select multiple class="form-control" th:field="*{accessMethods}">
-<option th:each="method : ${accessMethodList}" th:value="${method}" th:text="${method}"></option>
-</select></td></tr>
-<tr><th>Печать</th><td><select multiple class="form-control" th:field="*{printOptions}">
-<option th:each="option : ${printOptionList}" th:value="${option}" th:text="${option}"></option>
-</select></td></tr>
-</table>
-</div>
-<div class="col-md-7"><h2 class="h5">Физическая модель LBC</h2>
-<img class="img-thumbnail" th:src="'data:image/png;base64,' + ${lbc.stringLBCImage}" alt="LBC Image">
-</div>
-</div>
-</form>
-</div>
+
+<main class="container">
+    <form th:action="@{/lbcs/save}" th:object="${lbc}" method="post">
+        <div class="mb-3">
+            <button type="submit" class="btn btn-primary btn-sm">Сохранить LBC</button>
+            <a th:href="@{/lbcs}" class="btn btn-secondary btn-sm">К списку LBC</a>
+        </div>
+
+        <div th:if="${errors != null}" class="alert alert-danger">
+            <div th:each="error : ${errors}" th:text="${error}">Ошибка</div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-6">
+                <h1 class="h4" th:text="${lbc.description}">Комбинированный модуль</h1>
+                <input type="hidden" th:field="*{id}">
+                <input type="hidden" th:field="*{name}">
+                <input type="hidden" th:field="*{description}">
+
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <tbody>
+                        <tr><th>Тип</th><td><select class="form-control" th:field="*{type}">
+                            <option th:each="type : ${typeList}" th:value="${type}" th:text="${type}"></option>
+                        </select></td></tr>
+                        <tr><th>Количество ячеек</th><td><input class="form-control" type="number" min="1" th:field="*{countCells}"></td></tr>
+                        <tr><th>Высота</th><td><input class="form-control" type="number" th:field="*{height}"></td></tr>
+                        <tr><th>Ширина</th><td><input class="form-control" type="number" th:field="*{width}"></td></tr>
+                        <tr><th>Глубина</th><td><input class="form-control" type="number" th:field="*{depth}"></td></tr>
+                        <tr><th>Верхняя рама</th><td><input class="form-control" type="number" th:field="*{upperFrame}"></td></tr>
+                        <tr><th>Нижняя рама</th><td><input class="form-control" type="number" th:field="*{bottomFrame}"></td></tr>
+                        <tr><th>Толщина дверцы</th><td><input class="form-control" type="number" th:field="*{doorThickness}"></td></tr>
+                        <tr><th>Направление двери</th><td><select class="form-control" th:field="*{directionDoorOpening}">
+                            <option th:each="direction : ${directionDoorOpeningList}" th:value="${direction}" th:text="${direction}"></option>
+                        </select></td></tr>
+                        <tr><th>Цвет корпуса</th><td><select class="form-control" th:field="*{colorBody}">
+                            <option th:each="color : ${colorsList}" th:value="${color}" th:text="${color}"></option>
+                        </select></td></tr>
+                        <tr><th>Цвет дверей</th><td><select class="form-control" th:field="*{colorDoor}">
+                            <option th:each="color : ${colorsList}" th:value="${color}" th:text="${color}"></option>
+                        </select></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h2 class="h5 mt-4">Модуль управления внутри LBC</h2>
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <tbody>
+                        <tr><th>Дисплей</th><td><select class="form-control" th:field="*{display}">
+                            <option th:each="display : ${displayList}" th:value="${display}" th:text="${display}"></option>
+                        </select></td></tr>
+                        <tr><th>Оплата</th><td><select class="form-control" th:field="*{payment}">
+                            <option th:each="payment : ${paymentList}" th:value="${payment}" th:text="${payment}"></option>
+                        </select></td></tr>
+                        <tr><th>Способы доступа</th><td><select multiple class="form-control" th:field="*{accessMethods}">
+                            <option th:each="method : ${accessMethodList}" th:value="${method}" th:text="${method}"></option>
+                        </select></td></tr>
+                        <tr><th>Печать</th><td><select multiple class="form-control" th:field="*{printOptions}">
+                            <option th:each="option : ${printOptionList}" th:value="${option}" th:text="${option}"></option>
+                        </select></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <h2 class="h5">Физическая модель LBC</h2>
+                <img class="img-thumbnail" th:src="'data:image/png;base64,' + ${lbc.stringLBCImage}" alt="LBC Image">
+            </div>
+        </div>
+    </form>
+</main>
+
 <div th:replace="~{footer :: footer}"></div>
 </body>
 </html>
