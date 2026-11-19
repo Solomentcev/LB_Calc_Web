@@ -238,6 +238,8 @@ public class LBCService {
                             .map(item -> item.getCatalogPositionId())
                             .collect(java.util.stream.Collectors.toUnmodifiableSet()))
                     .orElseGet(Set::of);
+            var existingEquipmentResolver =
+                    equipmentCatalogService.findExistingConfigurationResolver(retainedEquipmentIds);
 
             if (dto.getEquipmentSelections() == null && existingEntity.isPresent()) {
                 LBCEntity entity = existingEntity.get();
@@ -248,11 +250,10 @@ public class LBCService {
                                 .toList(),
                         dto.getDisplay(),
                         dto.getDisplayQuantity(),
-                        id -> equipmentCatalogService.resolveForExistingConfiguration(
-                                id, retainedEquipmentIds)
+                        existingEquipmentResolver
                 ));
             }
-            domain = LBCDtoMapper.toDomain(dto, typeLb, id -> equipmentCatalogService.resolveForExistingConfiguration(id, retainedEquipmentIds));
+            domain = LBCDtoMapper.toDomain(dto, typeLb, existingEquipmentResolver);
             domain.setControlConfiguration(
                     equipmentRequirementResolver.resolve(domain.getControlConfiguration())
             );
