@@ -78,17 +78,14 @@ public class ProjectRestController {
     public ResponseEntity<?> getProjectById(
             @PathVariable Long id
     ) {
-        try {
+        
             return ResponseEntity.ok(
                     ApiResponse.success(
                             projectService.findById(id)
                     )
             );
 
-        } catch (NoSuchElementException e) {
-
-            return notFound(e);
-        }
+        
     }
 
     /**
@@ -117,7 +114,7 @@ public class ProjectRestController {
     public ResponseEntity<?> createProject(
             @RequestBody ProjectDTO project
     ) {
-        try {
+        
             /*
              * Новый проект всегда создаётся как новый объект.
              */
@@ -132,20 +129,7 @@ public class ProjectRestController {
                             ApiResponse.success(saved)
                     );
 
-        } catch (ValidationSizeException e) {
-
-            return badRequest(
-                    "Project validation failed",
-                    e.getErrors()
-            );
-
-        } catch (IllegalArgumentException
-                 | IllegalStateException e) {
-
-            return badRequest(
-                    e.getMessage()
-            );
-        }
+        
     }
 
     /**
@@ -159,7 +143,7 @@ public class ProjectRestController {
             @PathVariable Long id,
             @RequestBody ProjectDTO project
     ) {
-        try {
+        
             /*
              * ID из URL является источником истины.
              */
@@ -172,24 +156,7 @@ public class ProjectRestController {
                     ApiResponse.success(saved)
             );
 
-        } catch (NoSuchElementException e) {
-
-            return notFound(e);
-
-        } catch (ValidationSizeException e) {
-
-            return badRequest(
-                    "Project validation failed",
-                    e.getErrors()
-            );
-
-        } catch (IllegalArgumentException
-                 | IllegalStateException e) {
-
-            return badRequest(
-                    e.getMessage()
-            );
-        }
+        
     }
 
     /**
@@ -202,7 +169,7 @@ public class ProjectRestController {
     public ResponseEntity<?> deleteProject(
             @PathVariable Long id
     ) {
-        try {
+        
             projectService.deleteById(id);
 
             return ResponseEntity.ok(
@@ -211,10 +178,7 @@ public class ProjectRestController {
                     )
             );
 
-        } catch (NoSuchElementException e) {
-
-            return notFound(e);
-        }
+        
     }
 
     /**
@@ -228,7 +192,7 @@ public class ProjectRestController {
             @PathVariable Long projectId,
             @PathVariable Long alsId
     ) {
-        try {
+        
             return ResponseEntity.ok(
                     ApiResponse.success(
                             projectService.findALSInProject(
@@ -238,10 +202,7 @@ public class ProjectRestController {
                     )
             );
 
-        } catch (NoSuchElementException e) {
-
-            return notFound(e);
-        }
+        
     }
 
     /**
@@ -254,7 +215,7 @@ public class ProjectRestController {
     public ResponseEntity<?> addALS(
             @PathVariable Long projectId
     ) {
-        try {
+        
             ProjectDTO project =
                     projectService.addNewALSandSaveProject(
                             projectId
@@ -269,10 +230,7 @@ public class ProjectRestController {
                             )
                     );
 
-        } catch (NoSuchElementException e) {
-
-            return notFound(e);
-        }
+        
     }
 
     /**
@@ -287,7 +245,7 @@ public class ProjectRestController {
             @PathVariable Long alsId,
             @RequestBody ALSDTO als
     ) {
-        try {
+        
             als.setId(alsId);
 
             ProjectDTO project =
@@ -307,22 +265,7 @@ public class ProjectRestController {
                     )
             );
 
-        } catch (NoSuchElementException e) {
-
-            return notFound(e);
-
-        } catch (ValidationSizeException e) {
-
-            return badRequest(
-                    "ALS validation failed",
-                    e.getErrors()
-            );
-
-        } catch (IllegalArgumentException
-                 | IllegalStateException e) {
-
-            return badRequest(e.getMessage());
-        }
+        
     }
 
     /**
@@ -336,7 +279,7 @@ public class ProjectRestController {
             @PathVariable Long projectId,
             @PathVariable Long alsId
     ) {
-        try {
+        
             ProjectDTO project =
                     projectService.deleteALSandSaveProject(
                             projectId,
@@ -350,10 +293,7 @@ public class ProjectRestController {
                     )
             );
 
-        } catch (NoSuchElementException e) {
-
-            return notFound(e);
-        }
+        
     }
 
     /**
@@ -370,7 +310,7 @@ public class ProjectRestController {
             @PathVariable Long alsId,
             @PathVariable Long lcId
     ) {
-        try {
+        
             LCDTO lc =
                     projectService.findLCInProject(
                             projectId,
@@ -382,10 +322,7 @@ public class ProjectRestController {
                     ApiResponse.success(lc)
             );
 
-        } catch (NoSuchElementException e) {
-
-            return notFound(e);
-        }
+        
     }
 
     /**
@@ -403,7 +340,7 @@ public class ProjectRestController {
             @PathVariable Long lcId,
             @RequestBody LCDTO lc
     ) {
-        try {
+        
             lc.setId(lcId);
 
             ALSDTO savedALS =
@@ -422,20 +359,7 @@ public class ProjectRestController {
                     )
             );
 
-        } catch (NoSuchElementException e) {
-
-            return notFound(e);
-
-        } catch (ValidationSizeException e) {
-
-            return badRequest(
-                    "LC validation failed",
-                    e.getErrors()
-            );
-        } catch (IllegalArgumentException | IllegalStateException e) {
-
-            return badRequest(e.getMessage());
-        }
+        
     }
 
     /**
@@ -451,7 +375,7 @@ public class ProjectRestController {
             @PathVariable Long projectId,
             @PathVariable Long alsId
     ) {
-        try {
+        
             ALSDTO saved =
                     projectService.replaceWithNewLBCAtProject(
                             projectId,
@@ -464,17 +388,7 @@ public class ProjectRestController {
                             saved
                     )
             );
-        } catch (NoSuchElementException e) {
-            return notFound(e);
-        } catch (ValidationSizeException e) {
-            return badRequest(
-                    "LBC validation failed",
-                    e.getErrors()
-            );
-        } catch (IllegalArgumentException | IllegalStateException e) {
-
-            return badRequest(e.getMessage());
-        }
+        
     }
 
     /**
@@ -491,7 +405,7 @@ public class ProjectRestController {
             @PathVariable Long alsId,
             @PathVariable Long lbcId
     ) {
-        try {
+        
             LBCDTO lbc =
                     projectService.findLBCInProject(
                             projectId,
@@ -502,9 +416,7 @@ public class ProjectRestController {
             return ResponseEntity.ok(
                     ApiResponse.success(lbc)
             );
-        } catch (NoSuchElementException e) {
-            return notFound(e);
-        }
+        
     }
 
     /**
@@ -522,7 +434,7 @@ public class ProjectRestController {
             @PathVariable Long lbcId,
             @RequestBody LBCDTO lbc
     ) {
-        try {
+        
             lbc.setId(lbcId);
 
             ALSDTO savedALS =
@@ -540,16 +452,7 @@ public class ProjectRestController {
                             saved
                     )
             );
-        } catch (NoSuchElementException e) {
-            return notFound(e);
-        } catch (ValidationSizeException e) {
-            return badRequest(
-                    "LBC validation failed",
-                    e.getErrors()
-            );
-        } catch (IllegalArgumentException | IllegalStateException e) {
-            return badRequest(e.getMessage());
-        }
+        
     }
 
     /**
@@ -566,7 +469,7 @@ public class ProjectRestController {
             @PathVariable Long alsId,
             @PathVariable Long lbId
     ) {
-        try {
+        
             LBDTO lb =
                     projectService.findLBInProject(
                             projectId,
@@ -578,10 +481,7 @@ public class ProjectRestController {
                     ApiResponse.success(lb)
             );
 
-        } catch (NoSuchElementException e) {
-
-            return notFound(e);
-        }
+        
     }
 
     /**
@@ -599,7 +499,7 @@ public class ProjectRestController {
             @PathVariable Long lbId,
             @RequestBody LBDTO lb
     ) {
-        try {
+        
             lb.setId(lbId);
 
             ALSDTO currentALS =
@@ -636,20 +536,7 @@ public class ProjectRestController {
                     )
             );
 
-        } catch (NoSuchElementException e) {
-
-            return notFound(e);
-
-        } catch (ValidationSizeException e) {
-
-            return badRequest(
-                    "LB validation failed",
-                    e.getErrors()
-            );
-        } catch (IllegalArgumentException | IllegalStateException e) {
-
-            return badRequest(e.getMessage());
-        }
+        
     }
 
     /**
@@ -665,7 +552,7 @@ public class ProjectRestController {
             @PathVariable Long projectId,
             @PathVariable Long alsId
     ) {
-        try {
+        
             ALSDTO als =
                     projectService.addLBAtProject(
                             projectId,
@@ -681,12 +568,7 @@ public class ProjectRestController {
                             )
                     );
 
-        } catch (NoSuchElementException e) {
-
-            return notFound(e);
-        } catch (IllegalArgumentException | IllegalStateException e) {
-            return badRequest(e.getMessage());
-        }
+        
     }
 
     /**
@@ -703,7 +585,7 @@ public class ProjectRestController {
             @PathVariable Long alsId,
             @PathVariable Long lbId
     ) {
-        try {
+        
             ALSDTO als =
                     projectService.deleteLBatProject(
                             projectId,
@@ -718,12 +600,7 @@ public class ProjectRestController {
                     )
             );
 
-        } catch (NoSuchElementException e) {
-
-            return notFound(e);
-        } catch (IllegalArgumentException | IllegalStateException e) {
-            return badRequest(e.getMessage());
-        }
+        
     }
 
     /**
@@ -736,7 +613,7 @@ public class ProjectRestController {
     public ResponseEntity<?> exportProjectToExcel(
             @PathVariable Long id
     ) {
-        try {
+        
             ProjectDTO project =
                     projectService.findById(id);
 
@@ -759,10 +636,7 @@ public class ProjectRestController {
                     )
                     .body(file);
 
-        } catch (NoSuchElementException e) {
-
-            return notFound(e);
-        }
+        
     }
 
     private ResponseEntity<?> notFound(
