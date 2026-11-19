@@ -240,6 +240,18 @@ class ALSServiceTest {
     }
 
     @Test
+    void replaceLC_shouldReuseEquipmentResolverForBothConfigurations() {
+        ALSDTO als = TestDataFactory.validALSDTO(1L);
+        LCDTO replacement = TestDataFactory.validLCDTO(als.getLC().getId());
+
+        ALSDTO result = alsService.replaceLC(als, replacement);
+
+        assertNotNull(result.getLC());
+        verify(equipmentCatalogService, times(1))
+                .findExistingConfigurationResolver(anySet());
+    }
+
+    @Test
     void replaceLC_shouldRejectModuleIdNotBelongingToALS() {
         ALSDTO als = TestDataFactory.validALSDTO(1L);
         LCDTO anotherLC = TestDataFactory.validLCDTO(999L);
