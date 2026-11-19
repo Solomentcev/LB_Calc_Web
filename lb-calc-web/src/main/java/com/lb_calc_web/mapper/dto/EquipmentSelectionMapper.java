@@ -40,6 +40,7 @@ public final class EquipmentSelectionMapper {
         int displayIndex = -1;
 
         for (EquipmentSelectionDTO selection : existingSelections) {
+            Objects.requireNonNull(selection, "Сохранённый выбор оборудования не должен быть null");
             Equipment equipment = Objects.requireNonNull(
                     equipmentResolver.apply(selection.catalogPositionId()),
                     "Позиция оборудования не найдена: " + selection.catalogPositionId()
