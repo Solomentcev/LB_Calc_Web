@@ -165,7 +165,7 @@ public class AuthService {
                 employeeService.loadUserByUsername(email);
 
         if (!principal.isEnabled()) {
-            throw new IllegalStateException(
+            throw new JwtException(
                     "Учётная запись деактивирована"
             );
         }
