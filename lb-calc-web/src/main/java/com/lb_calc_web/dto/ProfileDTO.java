@@ -3,6 +3,7 @@ package com.lb_calc_web.dto;
 import com.lb_calc_web.domain.attributes.Role;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 import java.time.LocalDate;
@@ -20,6 +21,7 @@ public class ProfileDTO {
     private String email;
     private LocalDate registrationDate;
 
+    @NotNull
     private Role role;
 
     public Long getId() {
