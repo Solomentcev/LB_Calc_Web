@@ -10,8 +10,8 @@
     <div th:if="${successMessage}!=null" class="alert alert-success">
         <span th:text="${successMessage}"></span>
     </div>
-    <form  th:action="@{/employees/{id}/update (id=${id})}"
-
+    <form id="employee-update-form"
+          th:action="@{/employees/{id}/update (id=${id})}"
           th:object="${employee}" method="post">
         <div th:if="${id!=null}" class="form-group">
             <label>id</label>
@@ -56,29 +56,32 @@
             <span th:unless="${active}">Учётная запись деактивирована</span>
         </div>
         <div class="mb-3">
-            <form th:if="${active}"
-                  th:action="@{/employees/{id}/deactivate(id=${id})}"
-                  method="post" class="d-inline">
-                <button type="submit" class="btn btn-danger"
-                        onclick="return confirm('Деактивировать учётную запись?')">
-                    Деактивировать
-                </button>
-            </form>
-            <form th:unless="${active}"
-                  th:action="@{/employees/{id}/activate(id=${id})}"
-                  method="post" class="d-inline">
-                <button type="submit" class="btn btn-success">
-                    Активировать
-                </button>
-            </form>
-            <a th:href="@{/employees/{id}/changepassword (id=${id})}" class="btn btn-primary">
-                Сменить пароль
-            </a>
+            <button type="submit" form="employee-update-form"
+                    class="btn btn-primary">Сохранить</button>
+            <a th:href="@{/employees}" class="btn btn-secondary">Отмена</a>
         </div>
-        <button type="submit" class="btn btn-primary"
-                th:text="${'Сохранить'}"></button>
-        <a th:href="@{/employees}" class="btn btn-secondary">Отмена</a>
     </form>
+
+    <div class="mb-3">
+        <form th:if="${active}"
+              th:action="@{/employees/{id}/deactivate(id=${id})}"
+              method="post" class="d-inline">
+            <button type="submit" class="btn btn-danger"
+                    onclick="return confirm('Деактивировать учётную запись?')">
+                Деактивировать
+            </button>
+        </form>
+        <form th:unless="${active}"
+              th:action="@{/employees/{id}/activate(id=${id})}"
+              method="post" class="d-inline">
+            <button type="submit" class="btn btn-success">
+                Активировать
+            </button>
+        </form>
+        <a th:href="@{/employees/{id}/changepassword (id=${id})}" class="btn btn-primary">
+            Сменить пароль
+        </a>
+    </div>
 </div>
 
 <div th:replace="~{footer :: footer}"></div>
