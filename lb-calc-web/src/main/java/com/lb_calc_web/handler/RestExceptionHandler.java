@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
@@ -35,7 +36,6 @@ public class RestExceptionHandler {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(RestExceptionHandler.class);
 
-
     @ExceptionHandler(AuthException.class)
     public ResponseEntity<ApiResponse<Void>> handleAuthenticationFailure(
             AuthException exception
@@ -48,6 +48,13 @@ public class RestExceptionHandler {
             JwtException exception
     ) {
         return response(HttpStatus.UNAUTHORIZED, "Недействительный или просроченный токен");
+    }
+
+    @ExceptionHandler(UsernameNotFoundException.class)
+    public ResponseEntity<ApiResponse<Void>> handleUnknownUser(
+            UsernameNotFoundException exception
+    ) {
+        return response(HttpStatus.UNAUTHORIZED, "Недействительные учётные данные");
     }
 
     @ExceptionHandler(NoSuchElementException.class)
