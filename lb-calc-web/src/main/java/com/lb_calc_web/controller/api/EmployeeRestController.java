@@ -71,6 +71,16 @@ public class EmployeeRestController {
         }
     }
 
+    /**
+     * Получить состояние активности учётных записей сотрудников.
+     */
+    @GetMapping("/statuses")
+    public ResponseEntity<?> getEmployeeStatuses() {
+        return ResponseEntity.ok(
+                ApiResponse.success(employeeService.getActiveStatuses())
+        );
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<?> getEmployeeById(
             @PathVariable Long id
