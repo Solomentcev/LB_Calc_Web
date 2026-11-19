@@ -20,33 +20,92 @@
             color: #212529;
         }
 
-        body > main,
-        body > .container,
-        body > .container-fluid {
+        .container,
+        .container-fluid {
             width: 100%;
+            max-width: 1440px;
             min-width: 0;
-            padding-top: 1.5rem;
-            padding-bottom: 1.5rem;
+            margin-right: auto;
+            margin-left: auto;
+            padding: 1.5rem 1.5rem;
         }
 
-        h1,
+        main {
+            min-width: 0;
+        }
+
+        h1 {
+            margin-bottom: 1.5rem;
+            font-size: 2rem;
+            font-weight: 600;
+        }
+
         h2 {
             margin-bottom: 1.25rem;
+            font-size: 1.5rem;
+            font-weight: 600;
         }
 
-        table {
+        h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .btn {
+            font-size: 0.875rem;
+            line-height: 1.5;
+        }
+
+        .btn + .btn,
+        .btn + a,
+        a.btn + .btn,
+        a.btn + a.btn {
+            margin-left: 0.25rem;
+        }
+
+        .card {
+            border-color: #dee2e6;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+        }
+
+        .card-header {
+            background-color: #f1f3f5;
+        }
+
+        .table {
+            margin-bottom: 1.5rem;
             background-color: #fff;
         }
 
-        table[border] {
+        .table thead th {
+            background-color: #f1f3f5;
+            border-bottom-width: 1px;
+            vertical-align: middle;
+            white-space: nowrap;
+        }
+
+        .table td,
+        .table th {
+            vertical-align: middle;
+        }
+
+        .table[border] {
             border: 1px solid #dee2e6;
         }
 
-        table[border] th,
-        table[border] td {
+        .table[border] th,
+        .table[border] td {
             border: 1px solid #dee2e6;
             padding: 0.75rem;
-            vertical-align: middle;
+        }
+
+        .form-group label,
+        .card-body > .row label {
+            font-weight: 500;
+        }
+
+        .form-control {
+            min-width: 0;
         }
 
         input:not([class~="form-control"]):not([type="hidden"]):not([type="checkbox"]):not([type="radio"]):not([type="submit"]),
@@ -63,9 +122,25 @@
             border-radius: 0.25rem;
         }
 
+        .alert {
+            margin-bottom: 1.25rem;
+        }
+
         img {
             max-width: 100%;
             height: auto;
+        }
+
+        @media (max-width: 575.98px) {
+            .container,
+            .container-fluid {
+                padding-right: 1rem;
+                padding-left: 1rem;
+            }
+
+            h1 {
+                font-size: 1.65rem;
+            }
         }
     </style>
 </head>
