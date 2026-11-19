@@ -210,7 +210,7 @@ public class ALSService {
 
         als.getLbList().add(lb);
 
-        ALSDtoMapper.updateCalculatedFields(als, toDomain(als));
+        ALSDtoMapper.updateCalculatedFields(als, restoreALS(als));
 
         als.setStringALSImage(
                 ALSImageService.getStringALSImage(
@@ -241,7 +241,7 @@ public class ALSService {
 
         ALS domain;
         try {
-            domain = toDomain(dto);
+            domain = restoreALS(dto);
         } catch (IllegalStateException exception) {
             var validationResult =
                     new com.lb_calc_web.dto.validation.ValidationResult(
@@ -356,7 +356,7 @@ public class ALSService {
                 Colors.valueOf(dto.getColorDoor())
         );
 
-        var domain = toDomain(dto);
+        var domain = restoreALS(dto);
         domain.addStorageModule(LBDtoMapper.toDomain(lbDto, TypeLbFactory.forLB(environment, lbDto.getType())));
 
         return ALSDtoMapper.toDto(domain);
@@ -417,7 +417,7 @@ public class ALSService {
             );
         }
 
-        var domain = toDomain(als);
+        var domain = restoreALS(als);
         int moduleIndex = ALSDtoMapper.findPhysicalLbIndex(domain, lbIndex);
         domain.replaceModuleAt(
                 moduleIndex,
@@ -466,7 +466,7 @@ public class ALSService {
         }
 
         var domain = toDomain(als);
-        domain.replaceControlModule(toDomain(lc));
+        domain.replaceControlModule(restoreLC(lc));
 
         return ALSDtoMapper.toDto(domain);
     }
@@ -490,7 +490,7 @@ public class ALSService {
         // Используем общий путь восстановления ALS: он разрешает позиции
         // каталога и историческое оборудование так же, как при обычном сохранении.
         var domain = toDomain(als);
-        domain.replaceControlModule(toDomain(lbc));
+        domain.replaceControlModule(restoreLBC(lbc));
 
         return ALSDtoMapper.toDto(domain);
     }
@@ -564,10 +564,10 @@ public class ALSService {
      */
     @Transactional(readOnly = true)
     public ALS restoreDomain(ALSDTO dto) {
-        return toDomain(dto);
+        return restoreALS(dto);
     }
 
-    private ALS toDomain(ALSDTO dto) {
+    private ALS restoreALS(ALSDTO dto) {
         Long moduleId = dto.getLC() != null
                 ? dto.getLC().getId()
                 : dto.getLBC() != null ? dto.getLBC().getId() : null;
@@ -603,7 +603,7 @@ public class ALSService {
         return domain;
     }
 
-    private LC toDomain(LCDTO dto) {
+    private LC restoreLC(LCDTO dto) {
         ModuleEntity existingModule = findModule(dto.getId());
         Set<String> retainedEquipmentIds = getRetainedEquipmentIds(existingModule);
         Function<String, Equipment> equipmentResolver =
@@ -616,7 +616,7 @@ public class ALSService {
         return domain;
     }
 
-    private LBC toDomain(LBCDTO dto) {
+    private LBC restoreLBC(LBCDTO dto) {
         ModuleEntity existingModule = findModule(dto.getId());
         Set<String> retainedEquipmentIds = getRetainedEquipmentIds(existingModule);
         Function<String, Equipment> equipmentResolver =
