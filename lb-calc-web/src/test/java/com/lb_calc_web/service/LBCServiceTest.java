@@ -41,6 +41,10 @@ class LBCServiceTest {
                 .thenAnswer(invocation -> EquipmentCatalog.resolve(invocation.getArgument(0)));
         when(equipmentCatalogService.resolveById(anyString()))
                 .thenAnswer(invocation -> EquipmentCatalog.findByCatalogPositionId(invocation.getArgument(0)));
+        when(equipmentCatalogService.findDomainCatalogResolver())
+                .thenReturn(EquipmentCatalog::findByCatalogPositionId);
+        when(equipmentCatalogService.findExistingConfigurationResolver(anySet()))
+                .thenReturn(EquipmentCatalog::resolve);
 
         environment = new MockEnvironment()
                 .withProperty("size.height.default", "1940")
