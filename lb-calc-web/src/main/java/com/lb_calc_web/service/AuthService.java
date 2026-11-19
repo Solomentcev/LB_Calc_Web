@@ -465,5 +465,5 @@ public class AuthService {
                     exception
             );
         }
-    }}
+      }
 }
