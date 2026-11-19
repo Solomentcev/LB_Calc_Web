@@ -5,7 +5,7 @@
 <body>
 <div th:replace="~{header :: header}"></div>
 
-<div class="container mt-4">
+<div class="container">
     <h2>Сотрудник</h2>
     <div th:if="${successMessage}!=null" class="alert alert-success">
         <span th:text="${successMessage}"></span>
@@ -57,8 +57,8 @@
         </div>
         <div class="mb-3">
             <button type="submit" form="employee-update-form"
-                    class="btn btn-primary">Сохранить</button>
-            <a th:href="@{/employees}" class="btn btn-secondary">Отмена</a>
+                    class="btn btn-primary btn-sm">Сохранить</button>
+            <a th:href="@{/employees}" class="btn btn-secondary btn-sm">Отмена</a>
         </div>
     </form>
 
@@ -66,7 +66,7 @@
         <form th:if="${active}"
               th:action="@{/employees/{id}/deactivate(id=${id})}"
               method="post" class="d-inline">
-            <button type="submit" class="btn btn-danger"
+            <button type="submit" class="btn btn-danger btn-sm"
                     onclick="return confirm('Деактивировать учётную запись?')">
                 Деактивировать
             </button>
@@ -74,11 +74,11 @@
         <form th:unless="${active}"
               th:action="@{/employees/{id}/activate(id=${id})}"
               method="post" class="d-inline">
-            <button type="submit" class="btn btn-success">
+            <button type="submit" class="btn btn-success btn-sm">
                 Активировать
             </button>
         </form>
-        <a th:href="@{/employees/{id}/changepassword (id=${id})}" class="btn btn-primary">
+        <a th:href="@{/employees/{id}/changepassword (id=${id})}" class="btn btn-primary btn-sm">
             Сменить пароль
         </a>
     </div>
