@@ -3,6 +3,7 @@ package com.lb_calc_web.service;
 import com.lb_calc_web.TestDataFactory;
 import com.lb_calc_web.dto.ALSDTO;
 import com.lb_calc_web.domain.attributes.Payment;
+import com.lb_calc_web.domain.model.ALS;
 import com.lb_calc_web.domain.model.ControlConfiguration;
 import com.lb_calc_web.dto.LBCDTO;
 import com.lb_calc_web.dto.LBDTO;
