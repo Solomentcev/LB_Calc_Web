@@ -251,16 +251,33 @@ class ALSServiceTest {
     }
 
     @Test
-    void replaceWithNewLBC_shouldReplaceExistingLBC() {
+    void replaceWithNewLBC_shouldReplaceExistingLBCAndPreserveAdditionalEquipment() {
         ALSDTO als = TestDataFactory.validLBCALSDTO(1L);
         when(lbcService.createLBC(
                 anyInt(), anyInt(), anyInt(), anyInt(), any(), any()
         )).thenReturn(TestDataFactory.validLBCDTO(0L));
 
+        var existingModule = new com.lb_calc_web.entity.LBCEntity();
+        existingModule.setEquipment(java.util.Set.of(
+                new com.lb_calc_web.entity.EquipmentQuantityEmbeddable("CUSTOM_MODEM", 1)
+        ));
+        when(moduleRepository.findById(1L)).thenReturn(Optional.of(existingModule));
+
+        var customModem = new com.lb_calc_web.domain.equipment.CatalogEquipment(
+                "CUSTOM_MODEM", "MODEM", "Модем", "", 0, 0, 0,
+                0, 0, 0, false, false, false, false
+        );
+        when(equipmentCatalogService.findExistingConfigurationResolver(anySet()))
+                .thenReturn(id -> "CUSTOM_MODEM".equals(id)
+                        ? customModem
+                        : EquipmentCatalog.resolve(id));
+
         ALSDTO result = alsService.replaceWithNewLBC(als);
 
         assertNotNull(result.getLBC());
         assertNull(result.getLC());
+        assertTrue(result.getLBC().getEquipmentSelections().stream()
+                .anyMatch(selection -> "CUSTOM_MODEM".equals(selection.catalogPositionId())));
     }
 
     @Test
