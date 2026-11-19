@@ -64,14 +64,12 @@ public class ALSRestController {
             @PathVariable Long id
     ) {
 
-
             ALSDTO als =
                     alsService.findById(id);
 
             return ResponseEntity.ok(
                     ApiResponse.success(als)
             );
-
 
     }
 
@@ -96,7 +94,6 @@ public class ALSRestController {
             @RequestBody ALSDTO dto
     ) {
 
-
             dto.setId(0L);
 
             ALSDTO saved =
@@ -111,7 +108,6 @@ public class ALSRestController {
                             )
                     );
 
-
     }
 
     @PutMapping("/{id}")
@@ -123,7 +119,6 @@ public class ALSRestController {
             @RequestBody ALSDTO dto
     ) {
 
-
             dto.setId(id);
 
             ALSDTO saved =
@@ -132,7 +127,6 @@ public class ALSRestController {
             return ResponseEntity.ok(
                     ApiResponse.success(saved)
             );
-
 
     }
 
@@ -144,7 +138,6 @@ public class ALSRestController {
             @PathVariable Long id
     ) {
 
-
             alsService.deleteALS(id);
 
             return ResponseEntity.ok(
@@ -152,7 +145,6 @@ public class ALSRestController {
                             "ALS deleted successfully"
                     )
             );
-
 
     }
 
