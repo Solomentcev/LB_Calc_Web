@@ -210,9 +210,11 @@ public class ProjectService {
                 dto.getName()
         );
 
+        ProjectDTO working = ProjectDtoMapper.copy(dto);
+
         ProjectEntity existing =
                 loadExistingProject(
-                        dto.getId()
+                        working.getId()
                 );
 
         EmployeeDTO currentEmployee =
@@ -224,7 +226,7 @@ public class ProjectService {
         );
 
         prepareMetadata(
-                dto,
+                working,
                 existing,
                 currentEmployee
         );
@@ -235,10 +237,10 @@ public class ProjectService {
          */
         Project domain;
         try {
-            domain = ProjectDtoMapper.toDomain(dto, alsDto -> alsService.restoreDomain(alsDto));
+            domain = ProjectDtoMapper.toDomain(working, alsDto -> alsService.restoreDomain(alsDto));
         } catch (IllegalStateException exception) {
             ValidationResult validationResult =
-                    new ValidationResult("Project", dto.getId());
+                    new ValidationResult("Project", working.getId());
             validationResult.addError(
                     "alsStructure",
                     exception.getMessage(),
@@ -249,7 +251,7 @@ public class ProjectService {
             throw new ValidationSizeException(validationResult);
         } catch (IllegalArgumentException | NullPointerException exception) {
             ValidationResult validationResult =
-                    new ValidationResult("Project", dto.getId());
+                    new ValidationResult("Project", working.getId());
             validationResult.addError(
                     "projectData",
                     exception.getMessage(),
@@ -260,14 +262,14 @@ public class ProjectService {
             throw new ValidationSizeException(validationResult);
         }
 
-        validateProject(domain, dto);
+        validateProject(domain, working);
 
         List<ALSDTO> savedALS =
                 saveALS(
-                        dto.getAlsList()
+                        working.getAlsList()
                 );
 
-        dto.setAlsList(savedALS);
+        working.setAlsList(savedALS);
 
         /*
          * ALSService возвращает канонические DTO с конструктивными
@@ -275,7 +277,7 @@ public class ProjectService {
          * Повторно собираем Project, чтобы его ALS совпадали с теми,
          * для которых ниже разрешаются persistence-сущности.
          */
-        domain = ProjectDtoMapper.toDomain(dto, alsDto -> alsService.restoreDomain(alsDto));
+        domain = ProjectDtoMapper.toDomain(working, alsDto -> alsService.restoreDomain(alsDto));
 
         Function<ALS, ALSEntity> alsResolver =
                 resolveALSEntities(
