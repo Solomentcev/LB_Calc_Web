@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -38,6 +39,7 @@ import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.time.LocalDate;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
 @Service
@@ -213,6 +215,7 @@ public class AuthService {
     public EmployeeDTO registration(
             RegistrationDTO registrationDTO
     ) {
+        Objects.requireNonNull(registrationDTO, "Данные регистрации не должны быть null");
 
         validatePasswords(
                 registrationDTO.getPassword(),
@@ -242,8 +245,12 @@ public class AuthService {
                 )
         );
 
-        EmployeeEntity saved =
-                employeeRepository.save(entity);
+        EmployeeEntity saved;
+        try {
+            saved = employeeRepository.save(entity);
+        } catch (DataIntegrityViolationException exception) {
+            throw new IllegalArgumentException("Email уже используется", exception);
+        }
 
         EmployeeDTO result =
                 employeeService.loadUserById(
@@ -266,6 +273,7 @@ public class AuthService {
     public EmployeeDTO createEmployee(
             CreateEmployeeDTO createEmployeeDTO
     ) {
+        Objects.requireNonNull(createEmployeeDTO, "Данные сотрудника не должны быть null");
 
         validatePasswords(
                 createEmployeeDTO.getPassword(),
@@ -295,8 +303,12 @@ public class AuthService {
                 )
         );
 
-        EmployeeEntity saved =
-                employeeRepository.save(entity);
+        EmployeeEntity saved;
+        try {
+            saved = employeeRepository.save(entity);
+        } catch (DataIntegrityViolationException exception) {
+            throw new IllegalArgumentException("Email уже используется", exception);
+        }
 
         EmployeeDTO result =
                 employeeService.loadUserById(
@@ -322,6 +334,12 @@ public class AuthService {
             Long employeeId,
             String newPassword
     ) {
+        if (employeeId == null || employeeId <= 0) {
+            throw new IllegalArgumentException("Некорректный идентификатор сотрудника");
+        }
+        if (newPassword == null || newPassword.isBlank()) {
+            throw new IllegalArgumentException("Новый пароль не должен быть пустым");
+        }
 
         EmployeeEntity employee =
                 employeeRepository.findById(employeeId)
@@ -351,6 +369,10 @@ public class AuthService {
             String confirmPassword
     ) {
 
+        if (password == null || password.isBlank()
+                || confirmPassword == null || confirmPassword.isBlank()) {
+            throw new IllegalArgumentException("Пароль и подтверждение пароля обязательны");
+        }
         if (!password.equals(confirmPassword)) {
             throw new IllegalArgumentException(
                     "Пароли не совпадают"
