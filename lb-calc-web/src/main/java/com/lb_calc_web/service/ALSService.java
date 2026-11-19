@@ -120,6 +120,10 @@ public class ALSService {
             throw new NoSuchElementException("АКХ с id=" + id + " не найдена");
         }
 
+        if (id == null || id <= 0) {
+            throw new NoSuchElementException("АКХ с id=" + id + " не найдена");
+        }
+
         ALSEntity entity =
                 alsRepository.findById(id)
                         .orElseThrow(
@@ -130,7 +134,7 @@ public class ALSService {
                                 )
                         );
 
-        return addALSImage(ALSEntityMapper.toDto(entity, equipmentCatalogService::resolveById));
+        return addALSImage(ALSEntityMapper.toDto(entity, equipmentCatalogService.findDomainCatalogResolver()));
     }
 
     /**
@@ -568,18 +572,20 @@ public class ALSService {
                 : dto.getLBC() != null ? dto.getLBC().getId() : null;
         ModuleEntity existingModule = findModule(moduleId);
         Set<String> retainedEquipmentIds = getRetainedEquipmentIds(existingModule);
+        Function<String, Equipment> equipmentResolver =
+                equipmentCatalogService.findExistingConfigurationResolver(retainedEquipmentIds);
 
         if (dto.getLC() != null) {
-            retainEquipmentSelections(dto.getLC(), retainedEquipmentIds, existingModule);
+            retainEquipmentSelections(dto.getLC(), retainedEquipmentIds, existingModule, equipmentResolver);
         }
         if (dto.getLBC() != null) {
-            retainEquipmentSelections(dto.getLBC(), retainedEquipmentIds, existingModule);
+            retainEquipmentSelections(dto.getLBC(), retainedEquipmentIds, existingModule, equipmentResolver);
         }
         ALS domain = ALSConfigurationMapper.toDomain(
                 dto,
                 candidate -> TypeLbFactory.forLB(environment, candidate.getType()),
                 candidate -> TypeLbFactory.forLBC(environment, candidate.getType()),
-                id -> equipmentCatalogService.resolveForExistingConfiguration(id, retainedEquipmentIds)
+                equipmentResolver
         );
         for (Module module : domain.getModules()) {
             if (module instanceof LC lc) {
@@ -596,9 +602,10 @@ public class ALSService {
     private LC toDomain(LCDTO dto) {
         ModuleEntity existingModule = findModule(dto.getId());
         Set<String> retainedEquipmentIds = getRetainedEquipmentIds(existingModule);
-        retainEquipmentSelections(dto, retainedEquipmentIds, existingModule);
-        LC domain = LCDtoMapper.toDomain(dto,
-                id -> equipmentCatalogService.resolveForExistingConfiguration(id, retainedEquipmentIds));
+        Function<String, Equipment> equipmentResolver =
+                equipmentCatalogService.findExistingConfigurationResolver(retainedEquipmentIds);
+        retainEquipmentSelections(dto, retainedEquipmentIds, existingModule, equipmentResolver);
+        LC domain = LCDtoMapper.toDomain(dto, equipmentResolver);
         domain.setControlConfiguration(
                 equipmentRequirementResolver.resolve(domain.getControlConfiguration()));
         return domain;
@@ -607,10 +614,11 @@ public class ALSService {
     private LBC toDomain(LBCDTO dto) {
         ModuleEntity existingModule = findModule(dto.getId());
         Set<String> retainedEquipmentIds = getRetainedEquipmentIds(existingModule);
-        retainEquipmentSelections(dto, retainedEquipmentIds, existingModule);
+        Function<String, Equipment> equipmentResolver =
+                equipmentCatalogService.findExistingConfigurationResolver(retainedEquipmentIds);
+        retainEquipmentSelections(dto, retainedEquipmentIds, existingModule, equipmentResolver);
         LBC domain = LBCDtoMapper.toDomain(dto,
-                TypeLbFactory.forLBC(environment, dto.getType()),
-                id -> equipmentCatalogService.resolveForExistingConfiguration(id, retainedEquipmentIds));
+                TypeLbFactory.forLBC(environment, dto.getType()), equipmentResolver);
         domain.setControlConfiguration(
                 equipmentRequirementResolver.resolve(domain.getControlConfiguration()));
         return domain;
@@ -619,7 +627,8 @@ public class ALSService {
     private void retainEquipmentSelections(
             LCDTO dto,
             Set<String> retainedEquipmentIds,
-            ModuleEntity existingModule
+            ModuleEntity existingModule,
+            Function<String, Equipment> equipmentResolver
     ) {
         if (dto.getEquipmentSelections() != null
                 || !(existingModule instanceof LCEntity entity)) {
@@ -634,8 +643,7 @@ public class ALSService {
                                 .toList(),
                         dto.getDisplay(),
                         dto.getDisplayQuantity(),
-                        id -> equipmentCatalogService.resolveForExistingConfiguration(
-                                id, retainedEquipmentIds)
+                        equipmentResolver
                 )
         );
     }
