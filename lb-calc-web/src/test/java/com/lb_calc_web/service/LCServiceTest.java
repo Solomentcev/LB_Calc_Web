@@ -103,12 +103,9 @@ class LCServiceTest {
                         0, 0, 0, false, false, false, false
                 );
         when(equipmentCatalogService.findExistingConfigurationResolver(anySet()))
-                .thenAnswer(invocation -> id -> {
-                    String id = invocation.getArgument(0);
-                    return "MODEM_CUSTOM".equals(id)
-                            ? modem
-                            : EquipmentCatalog.resolve(id);
-                });
+                .thenAnswer(invocation -> id -> "MODEM_CUSTOM".equals(id)
+                        ? modem
+                        : EquipmentCatalog.resolve(id));
 
         LCDTO dto = TestDataFactory.validLCDTO(1L);
         dto.setColorBody(null);
