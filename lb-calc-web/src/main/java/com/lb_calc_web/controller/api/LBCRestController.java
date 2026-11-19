@@ -52,22 +52,13 @@ public class LBCRestController {
             @Parameter(description = "Идентификатор LBC")
             @PathVariable Long id
     ) {
-        try {
+        
             return ResponseEntity.ok(
                     ApiResponse.success(
                             lbcService.findById(id)
                     )
             );
-        } catch (NoSuchElementException e) {
-            return ResponseEntity.status(
-                            HttpStatus.NOT_FOUND
-                    )
-                    .body(
-                            ApiResponse.error(
-                                    e.getMessage()
-                            )
-                    );
-        }
+        
     }
 
     @GetMapping("/create")
@@ -89,7 +80,7 @@ public class LBCRestController {
     public ResponseEntity<?> saveLBC(
             @RequestBody LBCDTO dto
     ) {
-        try {
+        
             LBCDTO saved =
                     lbcService.saveLBC(dto);
 
@@ -102,22 +93,6 @@ public class LBCRestController {
                                     saved
                             )
                     );
-        } catch (ValidationSizeException e) {
-            return ResponseEntity.badRequest()
-                    .body(
-                            ApiResponse.error(
-                                    "LBC не прошёл валидацию",
-                                    e.getErrors()
-                            )
-                    );
-        } catch (IllegalArgumentException
-                 | IllegalStateException e) {
-            return ResponseEntity.badRequest()
-                    .body(
-                            ApiResponse.error(
-                                    e.getMessage()
-                            )
-                    );
-        }
+        
     }
 }
