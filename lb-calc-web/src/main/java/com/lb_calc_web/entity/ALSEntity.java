@@ -18,6 +18,7 @@ import java.util.Objects;
  * в разных ALS с разным расположением.</p>
  */
 @Entity
+@org.hibernate.annotations.BatchSize(size = 50)
 @Table(name = "als")
 public class ALSEntity {
 
@@ -93,6 +94,7 @@ public class ALSEntity {
      * <p>Список отсортирован по физическому расположению
      * модулей слева направо.</p>
      */
+    @org.hibernate.annotations.BatchSize(size = 50)
     @OneToMany(
             mappedBy = "als",
             cascade = CascadeType.ALL,
