@@ -40,6 +40,7 @@ import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.time.LocalDate;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
@@ -345,7 +346,7 @@ public class AuthService {
         EmployeeEntity employee =
                 employeeRepository.findById(employeeId)
                         .orElseThrow(() ->
-                                new IllegalArgumentException(
+                                new NoSuchElementException(
                                         "Сотрудник с id=" +
                                                 employeeId +
                                                 " не найден"
