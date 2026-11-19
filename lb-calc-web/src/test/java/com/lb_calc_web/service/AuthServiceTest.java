@@ -195,4 +195,28 @@ class AuthServiceTest {
         verifyNoInteractions(kafkaTemplate);
     }
 
+
+    @Test
+    void publishEvent_shouldSwallowSynchronousKafkaFailure() {
+        KafkaTemplate<String, UserEvent> kafkaTemplate = mock(KafkaTemplate.class);
+        when(kafkaTemplate.send(eq("user-events"), eq("42"), any(UserEvent.class)))
+                .thenThrow(new IllegalStateException("Kafka недоступен"));
+
+        AuthService authService = new AuthService(
+                mock(EmployeeService.class),
+                mock(EmployeeRepository.class),
+                mock(PasswordEncoder.class),
+                mock(JwtService.class),
+                kafkaTemplate,
+                "user-events"
+        );
+
+        org.junit.jupiter.api.Assertions.assertDoesNotThrow(
+                () -> authService.publishEvent(
+                        UserEventType.USER_REGISTERED, 42L, "user@example.com")
+        );
+
+        verify(kafkaTemplate).send(eq("user-events"), eq("42"), any(UserEvent.class));
+    }
+
 }
