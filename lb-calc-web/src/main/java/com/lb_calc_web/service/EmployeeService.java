@@ -99,6 +99,9 @@ public class EmployeeService implements UserDetailsService {
      * Загружает сотрудника по стабильному идентификатору.
      */
     public EmployeeDTO loadUserById(Long id) {
+        if (id == null || id <= 0) {
+            throw new NoSuchElementException("Пользователь с id=" + id + " не найден");
+        }
         EmployeeEntity entity = employeeRepository
                 .findById(id)
                 .orElseThrow(() ->
@@ -111,6 +114,9 @@ public class EmployeeService implements UserDetailsService {
     }
 
     public ProfileDTO getProfileById(int id) {
+        if (id <= 0) {
+            throw new NoSuchElementException("Пользователь с id=" + id + " не найден");
+        }
 
         EmployeeEntity entity = employeeRepository
                 .findById((long) id)
@@ -229,6 +235,9 @@ public class EmployeeService implements UserDetailsService {
     }
 
     private EmployeeEntity getRequiredEntity(Long id) {
+        if (id == null || id <= 0) {
+            throw new NoSuchElementException("Сотрудник с id=" + id + " не найден");
+        }
         return employeeRepository.findById(id)
                 .orElseThrow(() ->
                         new NoSuchElementException(
