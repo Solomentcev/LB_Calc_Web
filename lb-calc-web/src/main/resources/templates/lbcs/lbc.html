@@ -15,10 +15,11 @@
 </div>
 <div class="row">
 <div class="col-md-5">
-<h4 th:text="${lbc.description}">Комбинированный модуль</h4>
+<h1 class="h4" th:text="${lbc.description}">Комбинированный модуль</h1>
 <input type="hidden" th:field="*{id}">
 <input type="hidden" th:field="*{name}">
 <input type="hidden" th:field="*{description}">
+<div class="table-responsive">
 <table class="table table-striped">
 <tr><th>Тип</th><td><select class="form-control" th:field="*{type}">
 <option th:each="type : ${typeList}" th:value="${type}" th:text="${type}"></option>
@@ -40,7 +41,8 @@
 <option th:each="color : ${colorsList}" th:value="${color}" th:text="${color}"></option>
 </select></td></tr>
 </table>
-<h5>Модуль управления внутри LBC</h5>
+</div>
+<h2 class="h5 mt-4">Модуль управления внутри LBC</h2>
 <table class="table table-striped">
 <tr><th>Дисплей</th><td><select class="form-control" th:field="*{display}">
 <option th:each="display : ${displayList}" th:value="${display}" th:text="${display}"></option>
@@ -56,7 +58,7 @@
 </select></td></tr>
 </table>
 </div>
-<div class="col-md-7"><h5>Физическая модель LBC</h5>
+<div class="col-md-7"><h2 class="h5">Физическая модель LBC</h2>
 <img class="img-thumbnail" th:src="'data:image/png;base64,' + ${lbc.stringLBCImage}" alt="LBC Image">
 </div>
 </div>
