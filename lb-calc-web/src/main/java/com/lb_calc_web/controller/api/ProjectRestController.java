@@ -317,6 +317,11 @@ public class ProjectRestController {
                     "ALS validation failed",
                     e.getErrors()
             );
+
+        } catch (IllegalArgumentException
+                 | IllegalStateException e) {
+
+            return badRequest(e.getMessage());
         }
     }
 
