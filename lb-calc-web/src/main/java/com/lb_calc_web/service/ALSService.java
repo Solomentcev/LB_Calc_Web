@@ -512,6 +512,8 @@ public class ALSService {
 
         if (als.getLBC() != null) {
             lbc.setId(als.getLBC().getId());
+            // Восстановление по ID сохранит дополнительное оборудование исходного LBC.
+            lbc.setEquipmentSelections(null);
         }
 
         return replaceLBC(als, lbc);
