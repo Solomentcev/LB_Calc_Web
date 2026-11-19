@@ -6,15 +6,15 @@
 <div class="container">
     <div class="row">
         <div class="col-md-6 offset-md-3">
-            <div th:if="${error}" style="background:#ffdddd;padding:10px;margin-bottom:10px;border:1px solid red;">
+            <div th:if="${error}" class="alert alert-danger">
                 <span th:text="${error}"></span>
             </div>
 
-            <div th:if="${successMessage}!=null" style="background:#ddffdd;padding:10px;margin-bottom:10px;border:1px solid green;">
+            <div th:if="${successMessage}!=null" class="alert alert-success">
                 <span th:text="${successMessage}"></span>
             </div>
             <div th:if="${param.error}">
-                <div class="alert alert-danger" th:text="${param.error}">Invalid Электронная почта or Пароль</div>
+                <div class="alert alert-danger" th:text="${param.error}">Неверный адрес электронной почты или пароль</div>
             </div>
             <div th:if="${param.logout}">
                 <div class="alert alert-success"> Вы вышли из системы.</div>
@@ -28,7 +28,7 @@
                 <div class="card-body">
                     <form method="post" th:object="${loginRequest}" th:action="@{/login}" class="form-horizontal">
                         <div class="form-group mb-3">
-                            <label class="control-label" for="email"> Email</label>
+                            <label class="control-label" for="email">Электронная почта</label>
                             <input
                                     type="email"
                                     id="email"
@@ -36,13 +36,13 @@
                                     class="form-control"
                                     placeholder="Введите адрес электронной почты"
                             />
-                            <div th:if="${#fields.hasErrors('email')}" style="color:red">
+                            <div th:if="${#fields.hasErrors('email')}" class="text-danger">
                                 <p th:each="e : ${#fields.errors('email')}" th:text="${e}"></p>
                             </div>
                         </div>
 
                         <div class="form-group mb-3">
-                            <label class="control-label" for="password"> Password</label>
+                            <label class="control-label" for="password">Пароль</label>
                             <input
                                     type="password"
                                     id="password"
@@ -50,7 +50,7 @@
                                     class="form-control"
                                     placeholder="Введите пароль"
                             />
-                            <div th:if="${#fields.hasErrors('password')}" style="color:red">
+                            <div th:if="${#fields.hasErrors('password')}" class="text-danger">
                                 <p th:each="e : ${#fields.errors('password')}" th:text="${e}"></p>
                             </div>
                         </div>
