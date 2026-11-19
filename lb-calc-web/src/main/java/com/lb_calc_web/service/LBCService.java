@@ -202,6 +202,10 @@ public class LBCService {
     @Transactional(readOnly = true)
     public LBCDTO findById(Long id) {
         logger.info("Поиск LBC по id={}", id);
+        if (id == null || id <= 0) {
+            throw new NoSuchElementException("LBC с id=" + id + " не найден");
+        }
+
 
         LBCEntity entity =
                 lbcRepository.findById(id)
