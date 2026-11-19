@@ -83,7 +83,7 @@ public class SecurityConfiguration {
                         .anyRequest().authenticated()
                 )
 
-                .exceptionHandling(exception -> exception
+                .exceptionHandling(exceptionHandling -> exceptionHandling
 
                         .defaultAuthenticationEntryPointFor(
                                 (request, response, exception) -> writeApiError(
