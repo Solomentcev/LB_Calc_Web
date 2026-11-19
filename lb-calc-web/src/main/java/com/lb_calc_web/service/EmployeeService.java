@@ -1,10 +1,8 @@
 package com.lb_calc_web.service;
 
-import com.lb_calc_web.domain.model.Employee;
 import com.lb_calc_web.dto.EmployeeDTO;
 import com.lb_calc_web.dto.ProfileDTO;
 import com.lb_calc_web.entity.EmployeeEntity;
-import com.lb_calc_web.mapper.dto.EmployeeDtoMapper;
 import com.lb_calc_web.mapper.entity.EmployeeEntityMapper;
 import com.lb_calc_web.repository.EmployeeRepository;
 import com.lb_calc_web.security.EmployeePrincipal;
@@ -73,6 +71,7 @@ public class EmployeeService implements UserDetailsService {
      *
      * Возвращает DTO, а не Security Principal.
      */
+    @Transactional(readOnly = true)
     public EmployeeDTO loadUserByEmail(String email) {
 
         logger.debug(
@@ -98,6 +97,7 @@ public class EmployeeService implements UserDetailsService {
     /**
      * Загружает сотрудника по стабильному идентификатору.
      */
+    @Transactional(readOnly = true)
     public EmployeeDTO loadUserById(Long id) {
         if (id == null || id <= 0) {
             throw new NoSuchElementException("Пользователь с id=" + id + " не найден");
@@ -113,6 +113,7 @@ public class EmployeeService implements UserDetailsService {
         return EmployeeEntityMapper.toDto(entity);
     }
 
+    @Transactional(readOnly = true)
     public ProfileDTO getProfileById(int id) {
         if (id <= 0) {
             throw new NoSuchElementException("Пользователь с id=" + id + " не найден");
@@ -247,6 +248,7 @@ public class EmployeeService implements UserDetailsService {
     }
 
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @Transactional(readOnly = true)
     public List<EmployeeDTO> findAll() {
 
         List<EmployeeEntity> entities =
@@ -261,6 +263,7 @@ public class EmployeeService implements UserDetailsService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<ProfileDTO> getAllProfiles() {
 
         List<EmployeeEntity> entities =
@@ -275,6 +278,7 @@ public class EmployeeService implements UserDetailsService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public boolean existsByEmail(String email) {
 
         return employeeRepository.existsByEmail(email);
