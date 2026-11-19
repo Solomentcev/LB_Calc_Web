@@ -27,8 +27,8 @@ public class Display extends Equipment {
     @Override public boolean isDisplay() { return true; }
     @Override public String getCategory() { return "DISPLAY"; }
 
-    public int getDisplayWidth() { return displayWidth; }
-    public int getDisplayHeight() { return displayHeight; }
+    @Override public int getDisplayWidth() { return displayWidth; }
+    @Override public int getDisplayHeight() { return displayHeight; }
     public int getMinimumModuleWidth() { return minimumModuleWidth; }
     @Override public int getWidth() { return minimumModuleWidth; }
     @Override public int getHeight() { return displayHeight; }
