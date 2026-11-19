@@ -617,7 +617,7 @@ public class ALSService {
         Set<String> retainedEquipmentIds = getRetainedEquipmentIds(existingModule);
         Function<String, Equipment> equipmentResolver =
                 equipmentCatalogService.findExistingConfigurationResolver(retainedEquipmentIds);
-        retainEquipmentSelections(dto, existingModule, equipmentResolver)
+        retainEquipmentSelections(dto, existingModule, equipmentResolver);
         LBC domain = LBCDtoMapper.toDomain(dto,
                 TypeLbFactory.forLBC(environment, dto.getType()), equipmentResolver);
         domain.setControlConfiguration(
