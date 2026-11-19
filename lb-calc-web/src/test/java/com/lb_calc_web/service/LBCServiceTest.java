@@ -95,6 +95,25 @@ class LBCServiceTest {
     }
 
     @Test
+    void saveLBC_shouldLoadExistingEntityOnlyOnceWhenSelectionsAreMissing() {
+        LBCDTO dto = TestDataFactory.validLBCDTO(1L);
+        dto.setEquipmentSelections(null);
+
+        LBCEntity existing = LBCEntityMapper.toEntity(TestDataFactory.validLBC(1L));
+        when(lbcRepository.findById(1L)).thenReturn(Optional.of(existing));
+        when(lbcRepository.findCandidates(
+                anyInt(), anyInt(), anyInt(), anyInt(), anyInt(),
+                any(), any(), anyString(), anyInt(), anyInt(), anyInt(),
+                anyInt(), any(), anyInt(), any()
+        )).thenReturn(List.of());
+        when(lbcRepository.save(any(LBCEntity.class))).thenReturn(existing);
+
+        assertNotNull(lbcService.saveLBC(dto));
+
+        verify(lbcRepository, times(1)).findById(1L);
+    }
+
+    @Test
     void saveLBC_shouldPersistNewConfiguration() {
         LBCDTO dto =
                 TestDataFactory.validLBCDTO(1L);
