@@ -85,6 +85,31 @@ class EquipmentCatalogServiceTest {
         assertEquals(List.of("Без сканера"), result);
     }
 
+
+    @Test
+    void findDomainCatalogResolver_shouldResolveInactiveHistoricalEquipmentFromSingleCatalogLoad() {
+        EquipmentCatalogEntity inactive = new EquipmentCatalogEntity(
+                "DISPLAY_OLD", "DISPLAY", "Старый дисплей", "", 0, 0, 0,
+                0, 0, 300, false, false, false, false, false);
+        when(repository.findAll()).thenReturn(List.of(inactive));
+
+        var resolver = service.findDomainCatalogResolver();
+
+        assertEquals("Старый дисплей", resolver.apply("DISPLAY_OLD").getName());
+        verify(repository).findAll();
+        verify(repository, never()).findById("DISPLAY_OLD");
+    }
+
+    @Test
+    void findDomainCatalogResolver_shouldRejectUnknownEquipmentId() {
+        when(repository.findAll()).thenReturn(List.of());
+
+        var resolver = service.findDomainCatalogResolver();
+
+        assertThrows(IllegalArgumentException.class,
+                () -> resolver.apply("UNKNOWN"));
+    }
+
     private EquipmentCatalogEntity defaultItem(String id) {
         EquipmentCatalogEntity item = item(id);
         item.setDefaultPosition(true);
