@@ -4,7 +4,7 @@
 <head th:replace="~{fragments/common :: head('Модуль управления')}"></head>
 <body>
 <div th:replace="~{header :: header}"></div>
-<div>
+<div class="container">
     
     <form action="#" th:action="@{/lcs/save}"
           th:object="${lc}" method="post">
@@ -28,7 +28,7 @@
                      </label>
                  </td>
                 <td rowspan="13">
-                    <div class="container">
+                    <div class="text-center">
                         <img class="img-thumbnail"
                              th:src="'data:image/png;base64,'+${lc.getStringLCImage()}"
                              alt="LC Image">
