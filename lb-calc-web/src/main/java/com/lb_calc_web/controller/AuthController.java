@@ -71,7 +71,7 @@ public class AuthController {
                 redirectAttributes.addFlashAttribute("loginRequest", loginRequest);
                 return "redirect:/login";
         }
-        return "redirect:/myprofile";
+        return "redirect:/";
     }
 
 //    @GetMapping("/logout")
