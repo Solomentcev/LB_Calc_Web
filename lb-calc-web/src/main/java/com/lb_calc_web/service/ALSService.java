@@ -349,6 +349,7 @@ public class ALSService {
     /**
      * Формирует изменённую конфигурацию ALS с новым LB без сохранения.
      */
+    @Transactional(readOnly = true)
     public ALSDTO addNewLB(ALSDTO dto) {
         Objects.requireNonNull(dto, "ALS не должен быть null");
 
@@ -370,6 +371,7 @@ public class ALSService {
     /**
      * Формирует изменённую конфигурацию ALS без указанного LB.
      */
+    @Transactional(readOnly = true)
     public ALSDTO deleteLB(ALSDTO dto, Long lbId) {
         Objects.requireNonNull(dto, "ALS не должен быть null");
         Objects.requireNonNull(lbId, "Идентификатор LB не должен быть null");
@@ -401,6 +403,7 @@ public class ALSService {
      * <p>Модуль заменяется в домене по его физической позиции.
      * Идентификатор DTO используется только для поиска исходного LB.</p>
      */
+    @Transactional(readOnly = true)
     public ALSDTO replaceLB(ALSDTO als, LBDTO lb) {
         Objects.requireNonNull(als, "ALS не должен быть null");
         Objects.requireNonNull(lb, "LB не должен быть null");
@@ -455,6 +458,7 @@ public class ALSService {
     /**
      * Формирует ALS с заменённым управляющим модулем LC без сохранения.
      */
+    @Transactional(readOnly = true)
     public ALSDTO replaceLC(ALSDTO als, LCDTO lc) {
         Objects.requireNonNull(als, "ALS не должен быть null");
         Objects.requireNonNull(lc, "LC не должен быть null");
@@ -476,6 +480,7 @@ public class ALSService {
     /**
      * Формирует ALS с заменённым управляющим модулем LBC без сохранения.
      */
+    @Transactional(readOnly = true)
     public ALSDTO replaceLBC(ALSDTO als, LBCDTO lbc) {
         Objects.requireNonNull(als, "ALS не должен быть null");
         Objects.requireNonNull(lbc, "LBC не должен быть null");
@@ -499,6 +504,7 @@ public class ALSService {
     /**
      * Создаёт новый LBC и формирует изменённую ALS без сохранения.
      */
+    @Transactional(readOnly = true)
     public ALSDTO replaceWithNewLBC(ALSDTO als) {
         Objects.requireNonNull(als, "ALS не должен быть null");
 
@@ -562,6 +568,7 @@ public class ALSService {
      * Восстанавливает доменную ALS для других прикладных сценариев
      * с учётом каталога оборудования и исторических позиций.
      */
+    @Transactional(readOnly = true)
     public ALS restoreDomain(ALSDTO dto) {
         return toDomain(dto);
     }
@@ -651,7 +658,8 @@ public class ALSService {
     private void retainEquipmentSelections(
             LBCDTO dto,
             Set<String> retainedEquipmentIds,
-            ModuleEntity existingModule
+            ModuleEntity existingModule,
+            Function<String, Equipment> equipmentResolver
     ) {
         if (dto.getEquipmentSelections() != null
                 || !(existingModule instanceof LBCEntity entity)) {
@@ -666,8 +674,7 @@ public class ALSService {
                                 .toList(),
                         dto.getDisplay(),
                         dto.getDisplayQuantity(),
-                        id -> equipmentCatalogService.resolveForExistingConfiguration(
-                                id, retainedEquipmentIds)
+                        equipmentResolver
                 )
         );
     }
