@@ -6,7 +6,6 @@ import com.lb_calc_web.dto.LBDTO;
 import com.lb_calc_web.dto.LCDTO;
 import com.lb_calc_web.dto.ProjectDTO;
 import com.lb_calc_web.handler.ValidationSizeException;
-import com.lb_calc_web.service.EquipmentCatalogService;
 import com.lb_calc_web.service.ProjectService;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
@@ -25,10 +24,8 @@ public class ProjectController
     private final ProjectService projectService;
 
     public ProjectController(
-            ProjectService projectService,
-            EquipmentCatalogService equipmentCatalogService
+            ProjectService projectService
     ) {
-        super(equipmentCatalogService);
         this.projectService = projectService;
     }
 
@@ -258,7 +255,6 @@ public class ProjectController
         model.addAttribute("project", project);
         model.addAttribute("als", als);
         model.addAttribute("lc", lc);
-        retainSelectedEquipmentOptions(model, lc.getDisplay(), lc.getBarReader());
         model.addAttribute("projectId", projectId);
         model.addAttribute("alsId", alsId);
         model.addAttribute("lcId", lcId);
@@ -319,7 +315,6 @@ public class ProjectController
                     "lc",
                     lc
             );
-            retainSelectedEquipmentOptions(model, lc.getDisplay(), lc.getBarReader());
 
             model.addAttribute(
                     "projectId",
@@ -371,7 +366,6 @@ public class ProjectController
         model.addAttribute("project", project);
         model.addAttribute("als", als);
         model.addAttribute("lbc", lbc);
-        retainSelectedEquipmentOptions(model, lbc.getDisplay(), lbc.getBarReader());
         model.addAttribute("projectId", projectId);
         model.addAttribute("alsId", alsId);
         model.addAttribute("lbcId", lbcId);
@@ -431,7 +425,6 @@ public class ProjectController
                     "lbc",
                     lbc
             );
-            retainSelectedEquipmentOptions(model, lbc.getDisplay(), lbc.getBarReader());
 
             model.addAttribute("projectId", projectId);
             model.addAttribute("alsId", alsId);
