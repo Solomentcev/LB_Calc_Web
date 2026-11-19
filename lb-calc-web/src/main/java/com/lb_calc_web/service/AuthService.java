@@ -15,6 +15,7 @@ import com.lb_calc_web.repository.EmployeeRepository;
 import com.lb_calc_web.security.EmployeePrincipal;
 import com.lb_calc_web.security.jwt.JwtService;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import jakarta.security.auth.message.AuthException;
 import jakarta.servlet.http.Cookie;
 import jakarta.validation.constraints.Email;
@@ -153,7 +154,7 @@ public class AuthService {
                 jwtService.getRefreshClaims(refreshToken);
 
         if (!jwtService.isRefresh(claims)) {
-            throw new io.jsonwebtoken.JwtException(
+            throw new JwtException(
                     "Передан токен неверного типа: ожидается refresh token"
             );
         }
