@@ -305,7 +305,12 @@ public class ProjectEntity {
                 "ALS не должна быть null"
         );
 
-        if (alsEntries.stream().anyMatch(entry -> entry.getAls().equals(target))) {
+        if (alsEntries.stream().anyMatch(entry -> {
+            ALSEntity existing = entry.getAls();
+            return existing == target
+                    || (existing.getId() != null
+                    && existing.getId().equals(target.getId()));
+        })) {
             throw new IllegalArgumentException(
                     "Конфигурация ALS уже добавлена в проект"
             );
