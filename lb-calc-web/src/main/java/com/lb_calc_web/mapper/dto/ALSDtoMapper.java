@@ -309,7 +309,9 @@ public final class ALSDtoMapper {
             ALSDTO dto,
             Function<LBDTO, TypeLb> lbTypeResolver,
             Function<LBCDTO, TypeLb> lbcTypeResolver,
-            Function<String, Equipment> equipmentResolver
+            Function<String, Equipment> equipmentResolver,
+            List<EquipmentSelectionDTO> lcEquipmentSelections,
+            List<EquipmentSelectionDTO> lbcEquipmentSelections
     ) {
         List<LBDTO> lbDtos = dto.getLbList() == null ? List.of() : dto.getLbList();
         boolean[] usedLbIndexes = new boolean[lbDtos.size()];
