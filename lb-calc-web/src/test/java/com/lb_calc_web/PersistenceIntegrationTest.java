@@ -482,6 +482,7 @@ class PersistenceIntegrationTest {
             assertEquals(2, changedALS.getLbList().size());
 
             LCDTO changedLC = changedALS.getLC();
+            changedLC.setAccessMethods(List.of(AccessMethod.BARCODE.name()));
             changedLC.setBarReader(BarReader.READER_1D.getName());
             changedLC.setBarReaderQuantity(1);
             List<EquipmentSelectionDTO> changedEquipmentSelections =
