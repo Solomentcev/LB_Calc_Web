@@ -39,6 +39,7 @@ public class LCController extends BaseCatalogController {
         LCDTO lc = lcService.createLC();
 
         model.addAttribute("lc", lc);
+        retainSelectedEquipmentOptions(model, lc.getDisplay(), lc.getBarReader());
 
         return "lcs/lc";
     }
@@ -60,6 +61,7 @@ public class LCController extends BaseCatalogController {
         LCDTO lc = lcService.findById(id);
 
         model.addAttribute("lc", lc);
+        retainSelectedEquipmentOptions(model, lc.getDisplay(), lc.getBarReader());
 
         return "lcs/lc";
     }
@@ -102,6 +104,7 @@ public class LCController extends BaseCatalogController {
                     "lc",
                     lc
             );
+            retainSelectedEquipmentOptions(model, lc.getDisplay(), lc.getBarReader());
 
             return "lcs/lc";
         }
