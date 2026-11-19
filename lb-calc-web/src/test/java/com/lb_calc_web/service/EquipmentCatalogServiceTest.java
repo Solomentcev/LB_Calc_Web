@@ -167,6 +167,15 @@ class EquipmentCatalogServiceTest {
         assertFalse(item.isActive());
     }
 
+
+    @Test
+    void get_shouldThrowNotFoundExceptionForUnknownPosition() {
+        when(repository.findById("UNKNOWN")).thenReturn(Optional.empty());
+
+        assertThrows(java.util.NoSuchElementException.class,
+                () -> service.get("UNKNOWN"));
+    }
+
     private EquipmentCatalogEntity defaultItem(String id) {
         EquipmentCatalogEntity item = item(id);
         item.setDefaultPosition(true);
