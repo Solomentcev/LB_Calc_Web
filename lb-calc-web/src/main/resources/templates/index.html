@@ -1,47 +1,166 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:th="http://www.thymeleaf.org">
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="utf-8"/>
-    <title>LB_Calc_WEB</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>LB_Calc_Web</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
-          integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
+          integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkJwJ8ERdknLPMO"
           crossorigin="anonymous">
 </head>
 <body>
 <div th:replace="~{header :: header}"></div>
-<div class="container-fluid">
-    <h1>LB_Calc_WEB</h1>
-    <table border="1" class="table table-striped table-responsive-md">
-        <tbody>
-        <tr>
-            <td>
-                <a th:href="@{/projects}" class="btn btn-primary">Проекты</a>
-            </td>
-        </tr>
-        <tr>
-            <td>
-                <a th:href="@{/alss}" class="btn btn-primary">АКХ</a>
-            </td>
-        </tr>
-        <tr>
-            <td>
-                <a th:href="@{/lbs}" class="btn btn-primary">Модули хранения</a>
-            </td>
-        </tr>
-        <tr>
-            <td>
-                <a th:href="@{/lcs}" class="btn btn-primary">Модули управления</a>
-            </td>
-        </tr>
-        <tr>
-            <td>
-                <a th:href="@{/employees}" class="btn btn-primary">Сотрудники</a>
-            </td>
-        </tr>
-        </tbody>
-    </table>
-</div>
+
+<main class="container py-4">
+    <!-- Публичная главная страница для неавторизованных пользователей. -->
+    <section sec:authorize="isAnonymous()" class="jumbotron">
+        <h1 class="display-4">LB_Calc_Web</h1>
+        <p class="lead">
+            Система проектирования и расчёта автоматизированных камер хранения.
+        </p>
+        <hr class="my-4"/>
+        <p>
+            Проектируйте конфигурации камер хранения, подбирайте оборудование
+            и рассчитывайте состав системы в рамках проекта.
+        </p>
+        <p class="mb-0">
+            Для работы с проектами и каталогами оборудования войдите в систему
+            или зарегистрируйтесь.
+        </p>
+        <a class="btn btn-primary mt-3" th:href="@{/registration}">
+            Зарегистрироваться
+        </a>
+        <a class="btn btn-outline-primary mt-3" th:href="@{/login}">
+            Войти
+        </a>
+    </section>
+
+    <!-- Основная рабочая область для авторизованных пользователей. -->
+    <section sec:authorize="isAuthenticated()">
+        <div class="mb-4">
+            <h1>Рабочая область</h1>
+            <p class="text-muted">
+                Выберите проект или раздел каталога для работы с конфигурациями
+                автоматизированных камер хранения.
+            </p>
+        </div>
+
+        <h2 class="h4 mb-3">Проектирование</h2>
+        <div class="row">
+            <div class="col-md-6 col-lg-4 mb-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h3 class="h5 card-title">Проекты</h3>
+                        <p class="card-text">
+                            Создание, просмотр и редактирование проектов.
+                        </p>
+                        <a class="btn btn-primary" th:href="@{/projects}">
+                            Перейти к проектам
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h2 class="h4 mt-3 mb-3">Каталоги оборудования</h2>
+        <div class="row">
+            <div class="col-md-6 col-lg-4 mb-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h3 class="h5 card-title">АКХ</h3>
+                        <p class="card-text">
+                            Просмотр и настройка автоматизированных камер хранения.
+                        </p>
+                        <a class="btn btn-outline-primary" th:href="@{/alss}">
+                            Открыть каталог
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-4 mb-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h3 class="h5 card-title">Модули хранения</h3>
+                        <p class="card-text">
+                            Просмотр и настройка модулей хранения.
+                        </p>
+                        <a class="btn btn-outline-primary" th:href="@{/lbs}">
+                            Открыть каталог
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-4 mb-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h3 class="h5 card-title">Модули управления</h3>
+                        <p class="card-text">
+                            Просмотр и настройка модулей управления.
+                        </p>
+                        <a class="btn btn-outline-primary" th:href="@{/lcs}">
+                            Открыть каталог
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-4 mb-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h3 class="h5 card-title">LBC</h3>
+                        <p class="card-text">
+                            Просмотр и настройка контроллеров.
+                        </p>
+                        <a class="btn btn-outline-primary" th:href="@{/lbcs}">
+                            Открыть каталог
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h2 class="h4 mt-3 mb-3">Сотрудники</h2>
+        <div class="row">
+            <div class="col-md-6 col-lg-4 mb-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h3 class="h5 card-title">Профили сотрудников</h3>
+                        <p class="card-text">
+                            Просмотр профилей сотрудников.
+                        </p>
+                        <a class="btn btn-outline-primary" th:href="@{/profiles}">
+                            Открыть профили
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-4 mb-3"
+                 sec:authorize="hasAuthority('ROLE_ADMIN')">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h3 class="h5 card-title">Управление сотрудниками</h3>
+                        <p class="card-text">
+                            Просмотр, создание и управление учётными записями.
+                        </p>
+                        <a class="btn btn-primary" th:href="@{/employees}">
+                            К списку сотрудников
+                        </a>
+                        <a class="btn btn-outline-primary mt-2"
+                           th:href="@{/employees/create}">
+                            Добавить сотрудника
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
 <div th:replace="~{footer :: footer}"></div>
 </body>
 </html>
