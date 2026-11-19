@@ -518,7 +518,7 @@ class PersistenceIntegrationTest {
                     projectId,
                     changedWithLBC.getId()
             );
-            assertNotEquals(changedWithLBC.getId(), regeneratedLBC.getId());
+            assertNotEquals(changedWithLBC.getLBC().getId(), regeneratedLBC.getLBC().getId());
             assertEquals(independentAlsId, regeneratedLBC.getId());
 
             entityManager.flush();
