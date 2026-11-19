@@ -154,6 +154,16 @@ class ProjectServiceTest {
         invalidALS.setHeight(10);
         project.setAlsList(java.util.List.of(invalidALS));
 
+        EmployeeDTO originalCreatedBy = new EmployeeDTO();
+        originalCreatedBy.setId(7L);
+        EmployeeDTO originalUpdatedBy = new EmployeeDTO();
+        originalUpdatedBy.setId(8L);
+        project.setCreatedBy(originalCreatedBy);
+        project.setCreatedAt(java.time.LocalDate.of(2025, 1, 2));
+        project.setUpdatedBy(originalUpdatedBy);
+        project.setUpdatedAt(java.time.LocalDate.of(2025, 2, 3));
+        var originalAlsList = project.getAlsList();
+
         ValidationSizeException exception = assertThrows(
                 ValidationSizeException.class,
                 () -> projectService.saveProject(project)
@@ -168,6 +178,11 @@ class ProjectServiceTest {
                 .orElseThrow();
 
         assertEquals(10L, alsHeightError.getObjectId());
+        assertSame(originalCreatedBy, project.getCreatedBy());
+        assertEquals(java.time.LocalDate.of(2025, 1, 2), project.getCreatedAt());
+        assertSame(originalUpdatedBy, project.getUpdatedBy());
+        assertEquals(java.time.LocalDate.of(2025, 2, 3), project.getUpdatedAt());
+        assertSame(originalAlsList, project.getAlsList());
         verify(alsService, never()).saveALS(any(ALSDTO.class));
         verify(projectRepository, never()).save(any(ProjectEntity.class));
     }
