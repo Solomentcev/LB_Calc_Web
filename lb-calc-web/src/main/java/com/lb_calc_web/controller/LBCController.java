@@ -1,11 +1,9 @@
 package com.lb_calc_web.controller;
 
-import com.lb_calc_web.domain.attributes.AccessMethod;
-import com.lb_calc_web.domain.attributes.PrintOption;
 import com.lb_calc_web.dto.LBCDTO;
 import com.lb_calc_web.handler.ValidationSizeException;
-import com.lb_calc_web.service.LBCService;
 import com.lb_calc_web.service.EquipmentCatalogService;
+import com.lb_calc_web.service.LBCService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -106,13 +104,4 @@ public class LBCController extends BaseCatalogController {
         }
     }
 
-    @ModelAttribute("accessMethodList")
-    public List<AccessMethod> accessMethodList() {
-        return Arrays.asList(AccessMethod.values());
-    }
-
-    @ModelAttribute("printOptionList")
-    public List<PrintOption> printOptionList() {
-        return Arrays.asList(PrintOption.values());
-    }
 }
