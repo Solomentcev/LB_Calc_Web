@@ -34,6 +34,9 @@ public class LCDTO {
     private String colorBody;
     private String colorDoor;
 
+    private int displayWidth;
+    private int displayHeight;
+
     private List<EquipmentSelectionDTO> equipmentSelections;
     private List<String> accessMethods = new ArrayList<>();
     private List<String> printOptions = new ArrayList<>();
@@ -172,6 +175,11 @@ public class LCDTO {
     public void setPrinterQuantity(Integer value) { printerQuantity = value; }
     public Integer getRfidReaderQuantity() { return rfidReaderQuantity; }
     public void setRfidReaderQuantity(Integer value) { rfidReaderQuantity = value; }
+
+    public int getDisplayWidth() { return displayWidth; }
+    public void setDisplayWidth(int value) { displayWidth = value; }
+    public int getDisplayHeight() { return displayHeight; }
+    public void setDisplayHeight(int value) { displayHeight = value; }
 
     public List<EquipmentSelectionDTO> getEquipmentSelections() { return equipmentSelections; }
 
