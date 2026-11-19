@@ -462,8 +462,9 @@ public class ALSService {
             );
         }
 
-        var domain = restoreALS(als);
-        domain.replaceControlModule(restoreLC(lc));
+        EquipmentRestoreContext restoreContext = createEquipmentRestoreContext(als);
+        var domain = restoreALS(als, restoreContext);
+        domain.replaceControlModule(restoreLC(lc, restoreContext));
 
         return ALSDtoMapper.toDto(domain);
     }
@@ -486,8 +487,9 @@ public class ALSService {
 
         // Используем общий путь восстановления ALS: он разрешает позиции
         // каталога и историческое оборудование так же, как при обычном сохранении.
-        var domain = restoreALS(als);
-        domain.replaceControlModule(restoreLBC(lbc));
+        EquipmentRestoreContext restoreContext = createEquipmentRestoreContext(als);
+        var domain = restoreALS(als, restoreContext);
+        domain.replaceControlModule(restoreLBC(lbc, restoreContext));
 
         return ALSDtoMapper.toDto(domain);
     }
@@ -567,13 +569,12 @@ public class ALSService {
     }
 
     private ALS restoreALS(ALSDTO dto) {
-        Long moduleId = dto.getLC() != null
-                ? dto.getLC().getId()
-                : dto.getLBC() != null ? dto.getLBC().getId() : null;
-        ModuleEntity existingModule = findModule(moduleId);
-        Set<String> retainedEquipmentIds = getRetainedEquipmentIds(existingModule);
-        Function<String, Equipment> equipmentResolver =
-                equipmentCatalogService.findExistingConfigurationResolver(retainedEquipmentIds);
+        return restoreALS(dto, createEquipmentRestoreContext(dto));
+    }
+
+    private ALS restoreALS(ALSDTO dto, EquipmentRestoreContext restoreContext) {
+        ModuleEntity existingModule = restoreContext.existingModule();
+        Function<String, Equipment> equipmentResolver = restoreContext.equipmentResolver();
 
         List<EquipmentSelectionDTO> lcEquipmentSelections = dto.getLC() == null
                 ? null
@@ -602,11 +603,9 @@ public class ALSService {
         return domain;
     }
 
-    private LC restoreLC(LCDTO dto) {
-        ModuleEntity existingModule = findModule(dto.getId());
-        Set<String> retainedEquipmentIds = getRetainedEquipmentIds(existingModule);
-        Function<String, Equipment> equipmentResolver =
-                equipmentCatalogService.findExistingConfigurationResolver(retainedEquipmentIds);
+    private LC restoreLC(LCDTO dto, EquipmentRestoreContext restoreContext) {
+        ModuleEntity existingModule = restoreContext.existingModule();
+        Function<String, Equipment> equipmentResolver = restoreContext.equipmentResolver();
         List<EquipmentSelectionDTO> equipmentSelections =
                 resolveEquipmentSelections(dto, existingModule, equipmentResolver);
         LC domain = LCDtoMapper.toDomain(dto, equipmentSelections, equipmentResolver);
@@ -615,11 +614,9 @@ public class ALSService {
         return domain;
     }
 
-    private LBC restoreLBC(LBCDTO dto) {
-        ModuleEntity existingModule = findModule(dto.getId());
-        Set<String> retainedEquipmentIds = getRetainedEquipmentIds(existingModule);
-        Function<String, Equipment> equipmentResolver =
-                equipmentCatalogService.findExistingConfigurationResolver(retainedEquipmentIds);
+    private LBC restoreLBC(LBCDTO dto, EquipmentRestoreContext restoreContext) {
+        ModuleEntity existingModule = restoreContext.existingModule();
+        Function<String, Equipment> equipmentResolver = restoreContext.equipmentResolver();
         List<EquipmentSelectionDTO> equipmentSelections =
                 resolveEquipmentSelections(dto, existingModule, equipmentResolver);
         LBC domain = LBCDtoMapper.toDomain(
@@ -631,6 +628,23 @@ public class ALSService {
         domain.setControlConfiguration(
                 equipmentRequirementResolver.resolve(domain.getControlConfiguration()));
         return domain;
+    }
+
+    private EquipmentRestoreContext createEquipmentRestoreContext(ALSDTO dto) {
+        Long moduleId = dto.getLC() != null
+                ? dto.getLC().getId()
+                : dto.getLBC() != null ? dto.getLBC().getId() : null;
+        ModuleEntity existingModule = findModule(moduleId);
+        Set<String> retainedEquipmentIds = getRetainedEquipmentIds(existingModule);
+        Function<String, Equipment> equipmentResolver =
+                equipmentCatalogService.findExistingConfigurationResolver(retainedEquipmentIds);
+        return new EquipmentRestoreContext(existingModule, equipmentResolver);
+    }
+
+    private record EquipmentRestoreContext(
+            ModuleEntity existingModule,
+            Function<String, Equipment> equipmentResolver
+    ) {
     }
 
     private List<EquipmentSelectionDTO> resolveEquipmentSelections(
