@@ -7,15 +7,20 @@ import com.lb_calc_web.domain.attributes.Payment;
 import com.lb_calc_web.domain.attributes.PrintOption;
 import com.lb_calc_web.domain.attributes.PositionControlModule;
 import com.lb_calc_web.domain.attributes.PositionLC;
-import com.lb_calc_web.domain.equipment.BarReader;
-import com.lb_calc_web.domain.equipment.Display;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import com.lb_calc_web.service.EquipmentCatalogService;
 
 import java.util.Arrays;
 import java.util.List;
 
 public abstract class BaseCatalogController {
+
+    private final EquipmentCatalogService equipmentCatalogService;
+
+    protected BaseCatalogController(EquipmentCatalogService equipmentCatalogService) {
+        this.equipmentCatalogService = equipmentCatalogService;
+    }
 
     /**
      * Цвета корпуса и дверей.
@@ -56,36 +61,9 @@ public abstract class BaseCatalogController {
             Arrays.asList(Payment.values());
 
     /**
-     * Доступные дисплеи LC.
-     *
-     * <p>Display больше не enum, поэтому передаём
-     * в шаблон имена оборудования.</p>
-     */
-    protected final List<String> displayList =
-            List.of(
-                    Display.NONE.getName(),
-                    Display.LC10.getName(),
-                    Display.LC17.getName(),
-                    Display.LC19.getName()
-            );
-
-    /**
-     * Доступные сканеры штрихкода.
-     *
-     * <p>BarReader больше не enum.</p>
-     */
-    protected final List<String> barReaderList =
-            List.of(
-                    BarReader.NONE.getName(),
-                    BarReader.READER_1D.getName(),
-                    BarReader.READER_2D.getName()
-            );
-
-    /**
      * Список типов LB из конфигурации.
      *
-     * <p>TypeLb больше не enum.
-     * Типы задаются в size-bounds.properties.</p>
+     * <p>TypeLb больше не enum. Типы задаются в size-bounds.properties.</p>
      */
     @Value("${lb.types}")
     private String lbTypes;
@@ -131,12 +109,12 @@ public abstract class BaseCatalogController {
 
     @ModelAttribute("displayList")
     public List<String> displayList() {
-        return displayList;
+        return equipmentCatalogService.findActiveNamesByCategory("DISPLAY");
     }
 
     @ModelAttribute("barReaderList")
     public List<String> barReaderList() {
-        return barReaderList;
+        return equipmentCatalogService.findActiveNamesByCategory("BAR_READER");
     }
 
     /**
