@@ -4,7 +4,7 @@
 <head th:replace="~{fragments/common :: head('Модуль управления')}"></head>
 <body>
 <div th:replace="~{header :: header}"></div>
-<div class="container">
+<div>
     
     <form action="#" th:action="@{/lcs/save}"
           th:object="${lc}" method="post">
@@ -14,10 +14,11 @@
         <button type="submit" class="btn btn-primary btn-sm mb-3">Сохранить Модуль управления</button>
         <a th:href="@{'/lcs'}" class="btn btn-primary btn-sm mb-3">К списку модулей управления </a>
     
-        <h4 th:text="*{description}">Модуль управления</h4>
+        <h1 class="h4" th:text="*{description}">Модуль управления</h1>
         <label hidden="hidden">
             <input size="180"  type="text" th:field="*{description}" readonly="readonly">
         </label>
+    <div class="table-responsive">
     <table class="table table-striped">
             <tr>
                  <th>ID</th>
@@ -130,6 +131,7 @@
             </td>
         </tr>
     </table>
+    </div>
 </form>
 </div>
 <div th:replace="~{footer :: footer}"></div>
