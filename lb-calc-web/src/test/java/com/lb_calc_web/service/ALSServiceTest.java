@@ -316,13 +316,13 @@ class ALSServiceTest {
                 anyInt(), anyInt(), anyInt(), anyInt(), any(), any()
         )).thenReturn(TestDataFactory.validLBCDTO(0L));
 
-        var existingModule = new com.lb_calc_web.entity.LBCEntity();
+        var existingModule = spy(new com.lb_calc_web.entity.LBCEntity());
         existingModule.setEquipment(java.util.Set.of(
                 new com.lb_calc_web.entity.EquipmentQuantityEmbeddable("CUSTOM_MODEM", 1)
         ));
         var existingAls = mock(ALSEntity.class);
         var association = mock(com.lb_calc_web.entity.ALSModuleEntity.class);
-        when(existingModule.getId()).thenReturn(als.getLBC().getId());
+        doReturn(als.getLBC().getId()).when(existingModule).getId();
         when(association.getModule()).thenReturn(existingModule);
         when(existingAls.getModules()).thenReturn(List.of(association));
         when(alsRepository.findById(als.getId())).thenReturn(Optional.of(existingAls));
