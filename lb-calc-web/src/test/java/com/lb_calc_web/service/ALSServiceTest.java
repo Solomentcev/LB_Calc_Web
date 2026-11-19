@@ -261,7 +261,7 @@ class ALSServiceTest {
         existingModule.setEquipment(java.util.Set.of(
                 new com.lb_calc_web.entity.EquipmentQuantityEmbeddable("CUSTOM_MODEM", 1)
         ));
-        when(moduleRepository.findById(1L)).thenReturn(Optional.of(existingModule));
+        when(moduleRepository.findById(als.getLBC().getId())).thenReturn(Optional.of(existingModule));
 
         var customModem = new com.lb_calc_web.domain.equipment.CatalogEquipment(
                 "CUSTOM_MODEM", "MODEM", "Модем", "", 0, 0, 0,
