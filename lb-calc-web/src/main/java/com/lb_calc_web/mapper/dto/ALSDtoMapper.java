@@ -339,14 +339,14 @@ public final class ALSDtoMapper {
                         throw new IllegalStateException("moduleOrder содержит недопустимую ссылку на LC");
                     }
                     controlModuleUsed = true;
-                    modules.add(LCDtoMapper.toDomain(dto.getLC(), equipmentResolver));
+                    modules.add(LCDtoMapper.toDomain(dto.getLC(), lcEquipmentSelections, equipmentResolver));
                 }
                 case "LBC" -> {
                     if (item.getIndex() != 0 || dto.getLBC() == null || controlModuleUsed) {
                         throw new IllegalStateException("moduleOrder содержит недопустимую ссылку на LBC");
                     }
                     controlModuleUsed = true;
-                    modules.add(LBCDtoMapper.toDomain(dto.getLBC(), lbcTypeResolver.apply(dto.getLBC()), equipmentResolver));
+                    modules.add(LBCDtoMapper.toDomain(dto.getLBC(), lbcTypeResolver.apply(dto.getLBC()), lbcEquipmentSelections, equipmentResolver));
                 }
                 default -> throw new IllegalStateException("Неизвестный тип модуля в moduleOrder: " + item.getType());
             }
