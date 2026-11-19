@@ -320,7 +320,12 @@ class ALSServiceTest {
         existingModule.setEquipment(java.util.Set.of(
                 new com.lb_calc_web.entity.EquipmentQuantityEmbeddable("CUSTOM_MODEM", 1)
         ));
-        when(moduleRepository.findById(als.getLBC().getId())).thenReturn(Optional.of(existingModule));
+        var existingAls = mock(ALSEntity.class);
+        var association = mock(com.lb_calc_web.entity.ALSModuleEntity.class);
+        when(existingModule.getId()).thenReturn(als.getLBC().getId());
+        when(association.getModule()).thenReturn(existingModule);
+        when(existingAls.getModules()).thenReturn(List.of(association));
+        when(alsRepository.findById(als.getId())).thenReturn(Optional.of(existingAls));
 
         var customModem = new com.lb_calc_web.domain.equipment.CatalogEquipment(
                 "CUSTOM_MODEM", "MODEM", "Модем", "", 0, 0, 0,
@@ -339,6 +344,22 @@ class ALSServiceTest {
                 .anyMatch(selection -> "CUSTOM_MODEM".equals(selection.catalogPositionId())));
         verify(equipmentCatalogService, times(1))
                 .findExistingConfigurationResolver(anySet());
+    }
+
+    @Test
+    void restoreDomain_shouldNotRetainEquipmentFromModuleOutsideAls() {
+        ALSDTO als = TestDataFactory.validLBCALSDTO(1L);
+        var unrelatedModule = new com.lb_calc_web.entity.LBCEntity();
+        unrelatedModule.setEquipment(java.util.Set.of(
+                new com.lb_calc_web.entity.EquipmentQuantityEmbeddable("CUSTOM_MODEM", 1)
+        ));
+        when(moduleRepository.findById(als.getLBC().getId()))
+                .thenReturn(Optional.of(unrelatedModule));
+        when(alsRepository.findById(als.getId())).thenReturn(Optional.of(mock(ALSEntity.class)));
+
+        alsService.restoreDomain(als);
+
+        verify(equipmentCatalogService).findExistingConfigurationResolver(java.util.Set.of());
     }
 
     @Test
