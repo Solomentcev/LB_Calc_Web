@@ -4,10 +4,11 @@
 <head th:replace="~{fragments/common :: head('Каталог LBC')}"></head>
 <body>
 <div th:replace="~{header :: header}"></div>
-<div class="container-fluid">
+<div class="container">
     <h1>Комбинированные модули LBC</h1>
     <a th:href="@{/lbcs/create}" class="btn btn-primary btn-sm mb-3">Создать LBC</a>
-    <table class="table table-striped table-responsive-md">
+    <div class="table-responsive">
+    <table class="table table-striped">
         <thead><tr>
             <th>ID</th><th>Название</th><th>Тип</th><th>Ячейки</th>
             <th>Размеры В×Ш×Г</th><th>Дисплей</th><th>Оплата</th><th>Действие</th>
@@ -25,6 +26,7 @@
         </tr>
         </tbody>
     </table>
+        </div>
 </div>
 <div th:replace="~{footer :: footer}"></div>
 </body>
