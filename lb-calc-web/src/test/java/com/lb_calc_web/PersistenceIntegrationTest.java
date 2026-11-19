@@ -6,6 +6,7 @@ import com.lb_calc_web.domain.model.Module;
 import com.lb_calc_web.domain.model.Project;
 import com.lb_calc_web.dto.ALSDTO;
 import com.lb_calc_web.dto.EmployeeDTO;
+import com.lb_calc_web.dto.EquipmentSelectionDTO;
 import com.lb_calc_web.dto.LCDTO;
 import com.lb_calc_web.dto.LBCDTO;
 import com.lb_calc_web.dto.LBDTO;
@@ -43,6 +44,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
@@ -482,6 +484,14 @@ class PersistenceIntegrationTest {
             LCDTO changedLC = changedALS.getLC();
             changedLC.setBarReader(BarReader.READER_1D.getName());
             changedLC.setBarReaderQuantity(1);
+            List<EquipmentSelectionDTO> changedEquipmentSelections =
+                    new ArrayList<>(changedLC.getEquipmentSelections().stream()
+                            .filter(selection -> !selection.catalogPositionId()
+                                    .startsWith("BAR_READER"))
+                            .toList());
+            changedEquipmentSelections.add(
+                    new EquipmentSelectionDTO(BarReader.READER_1D_ID, 1));
+            changedLC.setEquipmentSelections(changedEquipmentSelections);
             ALSDTO changedWithLC = projectService.saveLCAtProject(
                     projectId,
                     changedALS.getId(),
