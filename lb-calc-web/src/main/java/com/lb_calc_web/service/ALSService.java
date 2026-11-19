@@ -556,12 +556,17 @@ public class ALSService {
     }
 
     private ALS toDomain(ALSDTO dto) {
-        Set<String> retainedEquipmentIds = findRetainedEquipmentIds(dto);
+        Long moduleId = dto.getLC() != null
+                ? dto.getLC().getId()
+                : dto.getLBC() != null ? dto.getLBC().getId() : null;
+        ModuleEntity existingModule = findModule(moduleId);
+        Set<String> retainedEquipmentIds = getRetainedEquipmentIds(existingModule);
+
         if (dto.getLC() != null) {
-            retainEquipmentSelections(dto.getLC(), retainedEquipmentIds);
+            retainEquipmentSelections(dto.getLC(), retainedEquipmentIds, existingModule);
         }
         if (dto.getLBC() != null) {
-            retainEquipmentSelections(dto.getLBC(), retainedEquipmentIds);
+            retainEquipmentSelections(dto.getLBC(), retainedEquipmentIds, existingModule);
         }
         ALS domain = ALSConfigurationMapper.toDomain(
                 dto,
@@ -582,8 +587,9 @@ public class ALSService {
     }
 
     private LC toDomain(LCDTO dto) {
-        Set<String> retainedEquipmentIds = findRetainedEquipmentIds(dto.getId());
-        retainEquipmentSelections(dto, retainedEquipmentIds);
+        ModuleEntity existingModule = findModule(dto.getId());
+        Set<String> retainedEquipmentIds = getRetainedEquipmentIds(existingModule);
+        retainEquipmentSelections(dto, retainedEquipmentIds, existingModule);
         LC domain = LCDtoMapper.toDomain(dto,
                 id -> equipmentCatalogService.resolveForExistingConfiguration(id, retainedEquipmentIds));
         domain.setControlConfiguration(
@@ -592,8 +598,9 @@ public class ALSService {
     }
 
     private LBC toDomain(LBCDTO dto) {
-        Set<String> retainedEquipmentIds = findRetainedEquipmentIds(dto.getId());
-        retainEquipmentSelections(dto, retainedEquipmentIds);
+        ModuleEntity existingModule = findModule(dto.getId());
+        Set<String> retainedEquipmentIds = getRetainedEquipmentIds(existingModule);
+        retainEquipmentSelections(dto, retainedEquipmentIds, existingModule);
         LBC domain = LBCDtoMapper.toDomain(dto,
                 TypeLbFactory.forLBC(environment, dto.getType()),
                 id -> equipmentCatalogService.resolveForExistingConfiguration(id, retainedEquipmentIds));
@@ -602,67 +609,76 @@ public class ALSService {
         return domain;
     }
 
-    private void retainEquipmentSelections(LCDTO dto, Set<String> retainedEquipmentIds) {
-        if (dto.getEquipmentSelections() != null || dto.getId() == null || dto.getId() <= 0) {
+    private void retainEquipmentSelections(
+            LCDTO dto,
+            Set<String> retainedEquipmentIds,
+            ModuleEntity existingModule
+    ) {
+        if (dto.getEquipmentSelections() != null
+                || !(existingModule instanceof LCEntity entity)) {
             return;
         }
-        moduleRepository.findById(dto.getId())
-                .filter(LCEntity.class::isInstance)
-                .map(LCEntity.class::cast)
-                .ifPresent(entity -> dto.setEquipmentSelections(
-                        EquipmentSelectionMapper.mergeDisplaySelection(
-                                entity.getEquipment().stream()
-                                        .map(item -> new EquipmentSelectionDTO(
-                                                item.getCatalogPositionId(), item.getQuantity()))
-                                        .toList(),
-                                dto.getDisplay(),
-                                dto.getDisplayQuantity(),
-                                id -> equipmentCatalogService.resolveForExistingConfiguration(
-                                        id, retainedEquipmentIds)
-                        )));
+
+        dto.setEquipmentSelections(
+                EquipmentSelectionMapper.mergeDisplaySelection(
+                        entity.getEquipment().stream()
+                                .map(item -> new EquipmentSelectionDTO(
+                                        item.getCatalogPositionId(), item.getQuantity()))
+                                .toList(),
+                        dto.getDisplay(),
+                        dto.getDisplayQuantity(),
+                        id -> equipmentCatalogService.resolveForExistingConfiguration(
+                                id, retainedEquipmentIds)
+                )
+        );
     }
 
-    private void retainEquipmentSelections(LBCDTO dto, Set<String> retainedEquipmentIds) {
-        if (dto.getEquipmentSelections() != null || dto.getId() == null || dto.getId() <= 0) {
+    private void retainEquipmentSelections(
+            LBCDTO dto,
+            Set<String> retainedEquipmentIds,
+            ModuleEntity existingModule
+    ) {
+        if (dto.getEquipmentSelections() != null
+                || !(existingModule instanceof LBCEntity entity)) {
             return;
         }
-        moduleRepository.findById(dto.getId())
-                .filter(LBCEntity.class::isInstance)
-                .map(LBCEntity.class::cast)
-                .ifPresent(entity -> dto.setEquipmentSelections(
-                        EquipmentSelectionMapper.mergeDisplaySelection(
-                                entity.getEquipment().stream()
-                                        .map(item -> new EquipmentSelectionDTO(
-                                                item.getCatalogPositionId(), item.getQuantity()))
-                                        .toList(),
-                                dto.getDisplay(),
-                                dto.getDisplayQuantity(),
-                                id -> equipmentCatalogService.resolveForExistingConfiguration(
-                                        id, retainedEquipmentIds)
-                        )));
+
+        dto.setEquipmentSelections(
+                EquipmentSelectionMapper.mergeDisplaySelection(
+                        entity.getEquipment().stream()
+                                .map(item -> new EquipmentSelectionDTO(
+                                        item.getCatalogPositionId(), item.getQuantity()))
+                                .toList(),
+                        dto.getDisplay(),
+                        dto.getDisplayQuantity(),
+                        id -> equipmentCatalogService.resolveForExistingConfiguration(
+                                id, retainedEquipmentIds)
+                )
+        );
     }
 
-    private Set<String> findRetainedEquipmentIds(ALSDTO dto) {
-        Long moduleId = dto.getLC() != null ? dto.getLC().getId()
-                : dto.getLBC() != null ? dto.getLBC().getId() : null;
-        return findRetainedEquipmentIds(moduleId);
-    }
-
-    private Set<String> findRetainedEquipmentIds(Long moduleId) {
+    private ModuleEntity findModule(Long moduleId) {
         if (moduleId == null || moduleId <= 0) {
-            return Set.of();
+            return null;
         }
-        return moduleRepository.findById(moduleId)
-                .map(entity -> {
-                    Set<String> ids = new HashSet<>();
-                    if (entity instanceof LCEntity lcEntity) {
-                        lcEntity.getEquipment().forEach(item -> ids.add(item.getCatalogPositionId()));
-                    } else if (entity instanceof LBCEntity lbcEntity) {
-                        lbcEntity.getEquipment().forEach(item -> ids.add(item.getCatalogPositionId()));
-                    }
-                    return Set.copyOf(ids);
-                })
-                .orElseGet(Set::of);
+
+        return moduleRepository.findById(moduleId).orElse(null);
+    }
+
+    private Set<String> getRetainedEquipmentIds(ModuleEntity module) {
+        if (module instanceof LCEntity lcEntity) {
+            return lcEntity.getEquipment().stream()
+                    .map(item -> item.getCatalogPositionId())
+                    .collect(java.util.stream.Collectors.toUnmodifiableSet());
+        }
+
+        if (module instanceof LBCEntity lbcEntity) {
+            return lbcEntity.getEquipment().stream()
+                    .map(item -> item.getCatalogPositionId())
+                    .collect(java.util.stream.Collectors.toUnmodifiableSet());
+        }
+
+        return Set.of();
     }
 
     private void validate(ALS domain, ALSDTO source) {
