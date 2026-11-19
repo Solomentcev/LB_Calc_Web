@@ -116,7 +116,7 @@ public class ProjectService {
                                 )
                         );
 
-        return ProjectEntityMapper.toDto(entity, equipmentCatalogService::resolveById);
+        return ProjectEntityMapper.toDto(entity, equipmentCatalogService.findDomainCatalogResolver());
     }
 
     /**
