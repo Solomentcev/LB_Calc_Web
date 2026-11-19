@@ -1,6 +1,7 @@
 package com.lb_calc_web.service;
 
 import com.lb_calc_web.security.jwt.JwtService;
+import com.lb_calc_web.dto.RegistrationDTO;
 import static org.mockito.ArgumentMatchers.eq;
 import java.util.concurrent.CompletableFuture;
 import org.springframework.transaction.support.TransactionSynchronizationUtils;
@@ -104,6 +105,51 @@ class AuthServiceTest {
             TransactionSynchronizationManager.clearSynchronization();
             TransactionSynchronizationManager.setActualTransactionActive(false);
         }
+    }
+
+
+    @Test
+    void registration_shouldRejectMissingPasswordBeforeDatabaseAccess() {
+        EmployeeRepository employeeRepository = mock(EmployeeRepository.class);
+        RegistrationDTO dto = mock(RegistrationDTO.class);
+        when(dto.getPassword()).thenReturn(null);
+        when(dto.getConfirmPassword()).thenReturn(null);
+
+        AuthService authService = new AuthService(
+                mock(EmployeeService.class),
+                employeeRepository,
+                mock(PasswordEncoder.class),
+                mock(JwtService.class),
+                mock(KafkaTemplate.class),
+                "user-events"
+        );
+
+        org.junit.jupiter.api.Assertions.assertThrows(
+                IllegalArgumentException.class,
+                () -> authService.registration(dto)
+        );
+
+        verifyNoInteractions(employeeRepository);
+    }
+
+    @Test
+    void changePassword_shouldRejectBlankPasswordBeforeDatabaseAccess() {
+        EmployeeRepository employeeRepository = mock(EmployeeRepository.class);
+        AuthService authService = new AuthService(
+                mock(EmployeeService.class),
+                employeeRepository,
+                mock(PasswordEncoder.class),
+                mock(JwtService.class),
+                mock(KafkaTemplate.class),
+                "user-events"
+        );
+
+        org.junit.jupiter.api.Assertions.assertThrows(
+                IllegalArgumentException.class,
+                () -> authService.changePassword(1L, " ")
+        );
+
+        verifyNoInteractions(employeeRepository);
     }
 
 }
