@@ -1,6 +1,7 @@
 package com.lb_calc_web.controller.api;
 
 import com.lb_calc_web.controller.api.response.ApiResponse;
+import com.lb_calc_web.dto.ChangePasswordDTO;
 import com.lb_calc_web.dto.CreateEmployeeDTO;
 import com.lb_calc_web.dto.EmployeeDTO;
 import com.lb_calc_web.dto.ProfileDTO;
@@ -277,4 +278,102 @@ public class EmployeeRestController {
                     );
         }
     }
+
+    /**
+     * Получить профиль текущего сотрудника.
+     */
+    @GetMapping("/me")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<?> getCurrentProfile() {
+        try {
+            return ResponseEntity.ok(
+                    ApiResponse.success(employeeService.getCurrentEmployee())
+            );
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ApiResponse.error(e.getMessage()));
+        }
+    }
+
+    /**
+     * Получить список профилей сотрудников.
+     */
+    @GetMapping("/profiles")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<?> getAllProfiles() {
+        return ResponseEntity.ok(
+                ApiResponse.success(employeeService.getAllProfiles())
+        );
+    }
+
+    /**
+     * Получить профиль сотрудника по ID.
+     */
+    @GetMapping("/profiles/{id}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<?> getProfileById(
+            @PathVariable int id
+    ) {
+        try {
+            return ResponseEntity.ok(
+                    ApiResponse.success(employeeService.getProfileById(id))
+            );
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ApiResponse.error("Сотрудник не найден", e.getMessage()));
+        }
+    }
+
+    /**
+     * Изменить пароль текущего сотрудника.
+     */
+    @PutMapping("/me/password")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<?> changeCurrentPassword(
+            @RequestBody @Valid ChangePasswordDTO passwordDTO
+    ) {
+        if (!passwordDTO.getPassword().equals(passwordDTO.getConfirmPassword())) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.error("Пароли не совпадают"));
+        }
+
+        try {
+            EmployeeDTO currentEmployee = employeeService.getCurrentEmployee();
+            authService.changePassword(currentEmployee.getId(), passwordDTO.getPassword());
+            return ResponseEntity.ok(
+                    ApiResponse.success("Пароль успешно изменён")
+            );
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.error(e.getMessage()));
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ApiResponse.error(e.getMessage()));
+        }
+    }
+
+    /**
+     * Изменить пароль сотрудника от имени администратора.
+     */
+    @PutMapping("/{id}/password")
+    public ResponseEntity<?> changeEmployeePassword(
+            @PathVariable Long id,
+            @RequestBody @Valid ChangePasswordDTO passwordDTO
+    ) {
+        if (!passwordDTO.getPassword().equals(passwordDTO.getConfirmPassword())) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.error("Пароли не совпадают"));
+        }
+
+        try {
+            authService.changePassword(id, passwordDTO.getPassword());
+            return ResponseEntity.ok(
+                    ApiResponse.success("Пароль успешно изменён")
+            );
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.error(e.getMessage()));
+        }
+    }
+
 }
