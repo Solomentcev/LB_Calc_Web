@@ -418,6 +418,8 @@ class PersistenceIntegrationTest {
             ));
 
             ProjectDTO savedProject = projectService.saveProject(project);
+            ALS originalConfiguration = ALSDtoMapper.toDomain(savedProject.getAlsList().get(0));
+            ALS independentConfiguration = ALSDtoMapper.toDomain(savedProject.getAlsList().get(2));
             Long projectId = savedProject.getId();
             Long selectedAlsId = savedProject.getAlsList().get(0).getId();
             Long independentAlsId = savedProject.getAlsList().get(2).getId();
@@ -534,8 +536,6 @@ class PersistenceIntegrationTest {
             Project restoredProject =
                     ProjectEntityMapper.toDomain(restoredEntity);
 
-            ALS originalConfiguration = ALSDtoMapper.toDomain(repeatedALS);
-            ALS independentConfiguration = ALSDtoMapper.toDomain(independentALS);
             ALS changedLCConfiguration = ALSDtoMapper.toDomain(changedWithLC);
             ALS changedLBCConfiguration = ALSDtoMapper.toDomain(regeneratedLBC);
 
