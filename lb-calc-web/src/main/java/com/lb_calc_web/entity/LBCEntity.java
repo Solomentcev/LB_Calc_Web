@@ -177,10 +177,7 @@ public class LBCEntity extends StorageModuleEntity {
                 ", heightCell=" + getHeightCell() +
                 ", widthCell=" + getWidthCell() +
                 ", depthCell=" + getDepthCell() +
-                ", equipment=" + equipment +
                 ", payment=" + payment +
-                ", accessMethods=" + accessMethods +
-                ", printOptions=" + printOptions +
                 '}';
     }
 }
