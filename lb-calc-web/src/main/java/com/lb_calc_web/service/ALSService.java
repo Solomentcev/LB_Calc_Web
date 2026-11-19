@@ -14,6 +14,7 @@ import com.lb_calc_web.dto.LBCDTO;
 import com.lb_calc_web.dto.LBDTO;
 import com.lb_calc_web.dto.LCDTO;
 import com.lb_calc_web.entity.ALSEntity;
+import com.lb_calc_web.entity.ALSModuleEntity;
 import com.lb_calc_web.entity.LBEntity;
 import com.lb_calc_web.entity.LBCEntity;
 import com.lb_calc_web.entity.LCEntity;
@@ -637,11 +638,38 @@ public class ALSService {
         Long moduleId = dto.getLC() != null
                 ? dto.getLC().getId()
                 : dto.getLBC() != null ? dto.getLBC().getId() : null;
-        ModuleEntity existingModule = findModule(moduleId);
+        ModuleEntity existingModule = findExistingControlModule(dto, moduleId);
         Set<String> retainedEquipmentIds = getRetainedEquipmentIds(existingModule);
         Function<String, Equipment> equipmentResolver =
                 equipmentCatalogService.findExistingConfigurationResolver(retainedEquipmentIds);
         return new EquipmentRestoreContext(existingModule, equipmentResolver);
+    }
+
+    /**
+     * Возвращает управляющий модуль только если он действительно входит
+     * в указанную сохранённую ALS и соответствует её типу.
+     *
+     * <p>Один лишь ID модуля из входного DTO не даёт права переносить
+     * деактивированное оборудование из произвольной конфигурации.</p>
+     */
+    private ModuleEntity findExistingControlModule(ALSDTO dto, Long moduleId) {
+        if (dto.getId() == null || dto.getId() <= 0 || moduleId == null || moduleId <= 0) {
+            return null;
+        }
+
+        ALSEntity existingAls = alsRepository.findById(dto.getId()).orElse(null);
+        if (existingAls == null) {
+            return null;
+        }
+
+        return existingAls.getModules().stream()
+                .map(ALSModuleEntity::getModule)
+                .filter(module -> Objects.equals(module.getId(), moduleId))
+                .filter(module -> dto.getLC() != null
+                        ? module instanceof LCEntity
+                        : module instanceof LBCEntity)
+                .findFirst()
+                .orElse(null);
     }
 
     private record EquipmentRestoreContext(
@@ -692,14 +720,6 @@ public class ALSService {
                 dto.getDisplayQuantity(),
                 equipmentResolver
         );
-    }
-
-    private ModuleEntity findModule(Long moduleId) {
-        if (moduleId == null || moduleId <= 0) {
-            return null;
-        }
-
-        return moduleRepository.findById(moduleId).orElse(null);
     }
 
     private Set<String> getRetainedEquipmentIds(ModuleEntity module) {
