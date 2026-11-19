@@ -3,7 +3,6 @@ package com.lb_calc_web.controller.api;
 import com.lb_calc_web.controller.api.response.ApiResponse;
 import com.lb_calc_web.dto.ALSDTO;
 import com.lb_calc_web.dto.LBCDTO;
-import com.lb_calc_web.handler.ValidationSizeException;
 import com.lb_calc_web.service.ALSService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -16,7 +15,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 
 @RestController
 @RequestMapping("/api/v1/alss")
@@ -66,7 +64,7 @@ public class ALSRestController {
             @PathVariable Long id
     ) {
 
-        
+
             ALSDTO als =
                     alsService.findById(id);
 
@@ -74,7 +72,7 @@ public class ALSRestController {
                     ApiResponse.success(als)
             );
 
-        
+
     }
 
     @GetMapping("/create")
@@ -98,7 +96,7 @@ public class ALSRestController {
             @RequestBody ALSDTO dto
     ) {
 
-        
+
             dto.setId(0L);
 
             ALSDTO saved =
@@ -113,7 +111,7 @@ public class ALSRestController {
                             )
                     );
 
-        
+
     }
 
     @PutMapping("/{id}")
@@ -125,7 +123,7 @@ public class ALSRestController {
             @RequestBody ALSDTO dto
     ) {
 
-        
+
             dto.setId(id);
 
             ALSDTO saved =
@@ -135,7 +133,7 @@ public class ALSRestController {
                     ApiResponse.success(saved)
             );
 
-        
+
     }
 
     @DeleteMapping("/{id}")
@@ -146,7 +144,7 @@ public class ALSRestController {
             @PathVariable Long id
     ) {
 
-        
+
             alsService.deleteALS(id);
 
             return ResponseEntity.ok(
@@ -155,7 +153,7 @@ public class ALSRestController {
                     )
             );
 
-        
+
     }
 
     /**
@@ -167,12 +165,12 @@ public class ALSRestController {
             @PathVariable Long alsId,
             @PathVariable Long lbcId
     ) {
-        
+
             ALSDTO als = alsService.findById(alsId);
             return ResponseEntity.ok(
                     ApiResponse.success(alsService.findLBCInALS(als, lbcId))
             );
-        
+
     }
 
     /**
@@ -185,7 +183,7 @@ public class ALSRestController {
             @PathVariable Long lbcId,
             @RequestBody LBCDTO lbc
     ) {
-        
+
             ALSDTO als = alsService.findById(alsId);
             lbc.setId(lbcId);
 
@@ -193,7 +191,7 @@ public class ALSRestController {
             return ResponseEntity.ok(
                     ApiResponse.success(saved.getLBC())
             );
-        
+
     }
 
     /**
@@ -204,10 +202,10 @@ public class ALSRestController {
     public ResponseEntity<?> replaceWithNewLBC(
             @PathVariable Long alsId
     ) {
-        
+
             ALSDTO saved = alsService.replaceWithNewLBCandSaveALS(alsId);
             return ResponseEntity.ok(ApiResponse.success(saved));
-        
+
     }
 
     /**
@@ -218,11 +216,11 @@ public class ALSRestController {
     public ResponseEntity<?> addLB(
             @PathVariable Long alsId
     ) {
-        
+
             ALSDTO saved = alsService.addNewLBandSaveALS(alsId);
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body(ApiResponse.success(saved));
-        
+
     }
 
     /**
@@ -234,10 +232,10 @@ public class ALSRestController {
             @PathVariable Long alsId,
             @PathVariable Long lbId
     ) {
-        
+
             ALSDTO saved = alsService.deleteLBandSaveALS(alsId, lbId);
             return ResponseEntity.ok(ApiResponse.success(saved));
-        
+
     }
 
 }
