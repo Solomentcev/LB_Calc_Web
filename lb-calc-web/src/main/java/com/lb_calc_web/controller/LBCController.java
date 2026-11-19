@@ -1,8 +1,9 @@
 package com.lb_calc_web.controller;
 
+import com.lb_calc_web.domain.attributes.AccessMethod;
+import com.lb_calc_web.domain.attributes.PrintOption;
 import com.lb_calc_web.dto.LBCDTO;
 import com.lb_calc_web.handler.ValidationSizeException;
-import com.lb_calc_web.service.EquipmentCatalogService;
 import com.lb_calc_web.service.LBCService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,8 +23,7 @@ public class LBCController extends BaseCatalogController {
 
     private final LBCService lbcService;
 
-    public LBCController(LBCService lbcService, EquipmentCatalogService equipmentCatalogService) {
-        super(equipmentCatalogService);
+    public LBCController(LBCService lbcService) {
         this.lbcService = lbcService;
     }
 
@@ -47,9 +47,10 @@ public class LBCController extends BaseCatalogController {
     public String createLBC(Model model) {
         logger.info("Открытие страницы создания LBC");
 
-        LBCDTO lbc = lbcService.createLBC();
-        model.addAttribute("lbc", lbc);
-        retainSelectedEquipmentOptions(model, lbc.getDisplay(), lbc.getBarReader());
+        model.addAttribute(
+                "lbc",
+                lbcService.createLBC()
+        );
 
         return "lbcs/lbc";
     }
@@ -67,9 +68,10 @@ public class LBCController extends BaseCatalogController {
                 id
         );
 
-        LBCDTO lbc = lbcService.findById(id);
-        model.addAttribute("lbc", lbc);
-        retainSelectedEquipmentOptions(model, lbc.getDisplay(), lbc.getBarReader());
+        model.addAttribute(
+                "lbc",
+                lbcService.findById(id)
+        );
 
         return "lbcs/lbc";
     }
@@ -97,10 +99,18 @@ public class LBCController extends BaseCatalogController {
                     "lbc",
                     lbc
             );
-            retainSelectedEquipmentOptions(model, lbc.getDisplay(), lbc.getBarReader());
 
             return "lbcs/lbc";
         }
     }
 
+    @ModelAttribute("accessMethodList")
+    public List<AccessMethod> accessMethodList() {
+        return Arrays.asList(AccessMethod.values());
+    }
+
+    @ModelAttribute("printOptionList")
+    public List<PrintOption> printOptionList() {
+        return Arrays.asList(PrintOption.values());
+    }
 }
