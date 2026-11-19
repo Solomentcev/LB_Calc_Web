@@ -4,7 +4,7 @@
 <head th:replace="~{fragments/common :: head('Модуль хранения')}"></head>
 <body>
 <div th:replace="~{header :: header}"></div>
-<div>
+<div class="container">
     
     <form action="#" th:action="@{/lbs/save}" th:object="${lb}" method="post">
 
@@ -30,7 +30,7 @@
                 </label>
             </td>
             <td rowspan="16">
-                <div class="container">
+                <div class="text-center">
                     <img class="img-thumbnail" th:src="'data:image/png;base64,'+${lb.getStringLBImage()}" alt="LB Image">
                 </div>
             </td>
