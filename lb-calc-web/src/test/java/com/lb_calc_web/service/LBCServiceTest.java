@@ -39,8 +39,6 @@ class LBCServiceTest {
                 .thenAnswer(invocation -> invocation.getArgument(0));
         when(equipmentCatalogService.resolve(anyString()))
                 .thenAnswer(invocation -> EquipmentCatalog.resolve(invocation.getArgument(0)));
-        when(equipmentCatalogService.resolveById(anyString()))
-                .thenAnswer(invocation -> EquipmentCatalog.findByCatalogPositionId(invocation.getArgument(0)));
         when(equipmentCatalogService.findDomainCatalogResolver())
                 .thenReturn(EquipmentCatalog::findByCatalogPositionId);
         when(equipmentCatalogService.findExistingConfigurationResolver(anySet()))
