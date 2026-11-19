@@ -28,6 +28,7 @@ import com.lb_calc_web.mapper.dto.LBCDtoMapper;
 import com.lb_calc_web.mapper.entity.ALSEntityMapper;
 import com.lb_calc_web.mapper.entity.ModuleEntityMapper;
 import com.lb_calc_web.repository.ALSRepository;
+import com.lb_calc_web.repository.ProjectALSRepository;
 import com.lb_calc_web.repository.ModuleEntityRepository;
 import com.lb_calc_web.service.util.ALSImageService;
 import com.lb_calc_web.service.util.SizeValidator;
@@ -55,6 +56,7 @@ public class ALSService {
 
     private final FindOrCreateLockService findOrCreateLockService;
     private final ALSRepository alsRepository;
+    private final ProjectALSRepository projectALSRepository;
     private final ModuleEntityRepository moduleRepository;
     private final LBService lbService;
     private final LCService lcService;
@@ -66,6 +68,7 @@ public class ALSService {
 
     public ALSService(
             ALSRepository alsRepository,
+            ProjectALSRepository projectALSRepository,
             ModuleEntityRepository moduleRepository,
             LBService lbService,
             LCService lcService,
@@ -77,6 +80,7 @@ public class ALSService {
             EquipmentRequirementResolver equipmentRequirementResolver
     ) {
         this.alsRepository = alsRepository;
+        this.projectALSRepository = projectALSRepository;
         this.moduleRepository = moduleRepository;
         this.lbService = lbService;
         this.lcService = lcService;
@@ -306,6 +310,11 @@ public class ALSService {
                 id
         );
 
+        Objects.requireNonNull(
+                id,
+                "Идентификатор ALS не должен быть null"
+        );
+
         ALSEntity entity =
                 alsRepository.findById(id)
                         .orElseThrow(
@@ -315,6 +324,13 @@ public class ALSService {
                                                 + " не найдена"
                                 )
                         );
+
+        if (projectALSRepository.existsByAls_Id(id)) {
+            throw new IllegalStateException(
+                    "Нельзя удалить ALS с id=" + id
+                            + ": конфигурация используется в проектах"
+            );
+        }
 
         alsRepository.delete(entity);
     }
