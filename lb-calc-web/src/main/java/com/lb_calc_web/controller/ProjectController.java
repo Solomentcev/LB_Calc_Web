@@ -7,6 +7,7 @@ import com.lb_calc_web.dto.LCDTO;
 import com.lb_calc_web.dto.ProjectDTO;
 import com.lb_calc_web.handler.ValidationSizeException;
 import com.lb_calc_web.service.ProjectService;
+import com.lb_calc_web.service.EquipmentCatalogService;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -24,8 +25,10 @@ public class ProjectController
     private final ProjectService projectService;
 
     public ProjectController(
-            ProjectService projectService
+            ProjectService projectService,
+            EquipmentCatalogService equipmentCatalogService
     ) {
+        super(equipmentCatalogService);
         this.projectService = projectService;
     }
 
