@@ -8,6 +8,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import java.util.List;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 
 import java.util.Optional;
 
@@ -89,4 +93,26 @@ class EmployeeServiceTest {
         verify(employeeRepository, never()).save(any());
         verify(employeeRepository, never()).deleteById(anyLong());
     }
+
+    @Test
+    void getCurrentEmployee_shouldRejectAnonymousAuthentication() {
+        SecurityContextHolder.getContext().setAuthentication(
+                new AnonymousAuthenticationToken(
+                        "test-key",
+                        "anonymousUser",
+                        List.of(new SimpleGrantedAuthority("ROLE_ANONYMOUS"))
+                )
+        );
+
+        try {
+            assertThrows(
+                    java.util.NoSuchElementException.class,
+                    () -> employeeService.getCurrentEmployee()
+            );
+            verifyNoInteractions(employeeRepository);
+        } finally {
+            SecurityContextHolder.clearContext();
+        }
+    }
+
 }
