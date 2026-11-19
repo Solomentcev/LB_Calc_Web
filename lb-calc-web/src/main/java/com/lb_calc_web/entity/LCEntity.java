@@ -13,6 +13,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import org.hibernate.annotations.BatchSize;
 
 import java.util.EnumSet;
 import java.util.HashSet;
@@ -31,6 +32,7 @@ public class LCEntity extends ModuleEntity {
     /**
      * Физический состав оборудования модуля с количеством каждой позиции.
      */
+    @BatchSize(size = 50)
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(
             name = "lc_equipment",
@@ -54,6 +56,7 @@ public class LCEntity extends ModuleEntity {
     /**
      * Допустимые способы доступа.
      */
+    @BatchSize(size = 50)
     @ElementCollection
     @CollectionTable(
             name = "lc_access_method",
@@ -67,6 +70,7 @@ public class LCEntity extends ModuleEntity {
     /**
      * Варианты печати.
      */
+    @BatchSize(size = 50)
     @ElementCollection
     @CollectionTable(
             name = "lc_print_option",
