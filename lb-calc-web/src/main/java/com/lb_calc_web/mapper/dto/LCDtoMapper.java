@@ -7,8 +7,6 @@ import com.lb_calc_web.domain.attributes.PrintOption;
 import com.lb_calc_web.domain.equipment.BarReader;
 import com.lb_calc_web.domain.equipment.Display;
 import com.lb_calc_web.domain.equipment.Equipment;
-import com.lb_calc_web.domain.equipment.Printer;
-import com.lb_calc_web.domain.equipment.RfidReader;
 import com.lb_calc_web.domain.model.ControlConfiguration;
 import com.lb_calc_web.domain.model.EquipmentConfiguration;
 import com.lb_calc_web.domain.model.LC;
