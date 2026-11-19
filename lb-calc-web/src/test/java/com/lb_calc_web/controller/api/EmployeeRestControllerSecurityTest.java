@@ -3,6 +3,7 @@ package com.lb_calc_web.controller.api;
 import com.lb_calc_web.handler.RestExceptionHandler;
 import com.lb_calc_web.service.AuthService;
 import com.lb_calc_web.service.EmployeeService;
+import com.lb_calc_web.security.jwt.JwtService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -43,6 +44,9 @@ class EmployeeRestControllerSecurityTest {
 
     @MockBean
     private AuthService authService;
+
+    @MockBean
+    private JwtService jwtService;
 
     @Test
     void profiles_shouldRequireAuthentication() throws Exception {
