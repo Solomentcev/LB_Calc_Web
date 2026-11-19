@@ -88,6 +88,8 @@ public final class LCDtoMapper {
                         ? display.getName()
                         : Display.NONE.getName()
         );
+        dto.setDisplayWidth(display == null ? 0 : display.getDisplayWidth());
+        dto.setDisplayHeight(display == null ? 0 : display.getDisplayHeight());
 
         dto.setBarReader(
                 barReader != null
