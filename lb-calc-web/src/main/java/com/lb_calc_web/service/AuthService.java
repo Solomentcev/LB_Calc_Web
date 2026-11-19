@@ -358,7 +358,7 @@ public class AuthService {
         }
     }
 
-    private void publishEvent(
+    void publishEvent(
             UserEventType type,
             Long userId,
             String email
