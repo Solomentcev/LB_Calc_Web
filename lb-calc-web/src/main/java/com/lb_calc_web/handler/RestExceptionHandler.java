@@ -38,7 +38,7 @@ public class RestExceptionHandler {
             NoSuchElementException exception
     ) {
         return response(HttpStatus.NOT_FOUND, "Запрашиваемый объект не найден",
-                List.of(exception.getMessage()));
+                List.of(exception.getMessage() == null\n                        ? "Объект не найден"\n                        : exception.getMessage()));
     }
 
     @ExceptionHandler(ValidationSizeException.class)
