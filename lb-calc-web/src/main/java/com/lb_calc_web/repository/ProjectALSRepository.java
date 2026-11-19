@@ -6,4 +6,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ProjectALSRepository extends JpaRepository<ProjectALSEntity, Long> {
+
+    /** Проверяет, используется ли конфигурация ALS хотя бы в одном проекте. */
+    boolean existsByAls_Id(Long alsId);
 }
