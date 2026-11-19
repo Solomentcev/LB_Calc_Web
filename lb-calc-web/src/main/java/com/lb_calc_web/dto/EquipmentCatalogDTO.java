@@ -16,5 +16,6 @@ public record EquipmentCatalogDTO(
         boolean supportsBarcode2d,
         boolean supportsRfid,
         boolean supportsPrint,
-        boolean active
+        boolean active,
+        boolean defaultPosition
 ) { }
