@@ -144,6 +144,9 @@ public class LBService {
     @Transactional(readOnly = true)
     public LBDTO findById(Long id) {
         logger.info("Поиск LB по id={}", id);
+        if (id == null || id <= 0) {
+            throw new NoSuchElementException("LB с id=" + id + " не найден");
+        }
 
         LBEntity entity = lbRepository.findById(id)
                 .orElseThrow(() ->
