@@ -576,17 +576,20 @@ public class ALSService {
         Function<String, Equipment> equipmentResolver =
                 equipmentCatalogService.findExistingConfigurationResolver(retainedEquipmentIds);
 
-        if (dto.getLC() != null) {
-            retainEquipmentSelections(dto.getLC(), existingModule, equipmentResolver);
-        }
-        if (dto.getLBC() != null) {
-            retainEquipmentSelections(dto.getLBC(), existingModule, equipmentResolver);
-        }
+        List<EquipmentSelectionDTO> lcEquipmentSelections = dto.getLC() == null
+                ? null
+                : resolveEquipmentSelections(dto.getLC(), existingModule, equipmentResolver);
+        List<EquipmentSelectionDTO> lbcEquipmentSelections = dto.getLBC() == null
+                ? null
+                : resolveEquipmentSelections(dto.getLBC(), existingModule, equipmentResolver);
+
         ALS domain = ALSConfigurationMapper.toDomain(
                 dto,
                 candidate -> TypeLbFactory.forLB(environment, candidate.getType()),
                 candidate -> TypeLbFactory.forLBC(environment, candidate.getType()),
-                equipmentResolver
+                equipmentResolver,
+                lcEquipmentSelections,
+                lbcEquipmentSelections
         );
         for (Module module : domain.getModules()) {
             if (module instanceof LC lc) {
@@ -605,8 +608,9 @@ public class ALSService {
         Set<String> retainedEquipmentIds = getRetainedEquipmentIds(existingModule);
         Function<String, Equipment> equipmentResolver =
                 equipmentCatalogService.findExistingConfigurationResolver(retainedEquipmentIds);
-        retainEquipmentSelections(dto, existingModule, equipmentResolver);
-        LC domain = LCDtoMapper.toDomain(dto, equipmentResolver);
+        List<EquipmentSelectionDTO> equipmentSelections =
+                resolveEquipmentSelections(dto, existingModule, equipmentResolver);
+        LC domain = LCDtoMapper.toDomain(dto, equipmentSelections, equipmentResolver);
         domain.setControlConfiguration(
                 equipmentRequirementResolver.resolve(domain.getControlConfiguration()));
         return domain;
@@ -617,57 +621,60 @@ public class ALSService {
         Set<String> retainedEquipmentIds = getRetainedEquipmentIds(existingModule);
         Function<String, Equipment> equipmentResolver =
                 equipmentCatalogService.findExistingConfigurationResolver(retainedEquipmentIds);
-        retainEquipmentSelections(dto, existingModule, equipmentResolver);
-        LBC domain = LBCDtoMapper.toDomain(dto,
-                TypeLbFactory.forLBC(environment, dto.getType()), equipmentResolver);
+        List<EquipmentSelectionDTO> equipmentSelections =
+                resolveEquipmentSelections(dto, existingModule, equipmentResolver);
+        LBC domain = LBCDtoMapper.toDomain(
+                dto,
+                TypeLbFactory.forLBC(environment, dto.getType()),
+                equipmentSelections,
+                equipmentResolver
+        );
         domain.setControlConfiguration(
                 equipmentRequirementResolver.resolve(domain.getControlConfiguration()));
         return domain;
     }
 
-    private void retainEquipmentSelections(
+    private List<EquipmentSelectionDTO> resolveEquipmentSelections(
             LCDTO dto,
             ModuleEntity existingModule,
             Function<String, Equipment> equipmentResolver
     ) {
-        if (dto.getEquipmentSelections() != null
-                || !(existingModule instanceof LCEntity entity)) {
-            return;
+        if (dto.getEquipmentSelections() != null) {
+            return dto.getEquipmentSelections();
         }
-
-        dto.setEquipmentSelections(
-                EquipmentSelectionMapper.mergeDisplaySelection(
-                        entity.getEquipment().stream()
-                                .map(item -> new EquipmentSelectionDTO(
-                                        item.getCatalogPositionId(), item.getQuantity()))
-                                .toList(),
-                        dto.getDisplay(),
-                        dto.getDisplayQuantity(),
-                        equipmentResolver
-                )
+        if (!(existingModule instanceof LCEntity entity)) {
+            return null;
+        }
+        return EquipmentSelectionMapper.mergeDisplaySelection(
+                entity.getEquipment().stream()
+                        .map(item -> new EquipmentSelectionDTO(
+                                item.getCatalogPositionId(), item.getQuantity()))
+                        .toList(),
+                dto.getDisplay(),
+                dto.getDisplayQuantity(),
+                equipmentResolver
         );
     }
 
-    private void retainEquipmentSelections(
+    private List<EquipmentSelectionDTO> resolveEquipmentSelections(
             LBCDTO dto,
             ModuleEntity existingModule,
             Function<String, Equipment> equipmentResolver
     ) {
-        if (dto.getEquipmentSelections() != null
-                || !(existingModule instanceof LBCEntity entity)) {
-            return;
+        if (dto.getEquipmentSelections() != null) {
+            return dto.getEquipmentSelections();
         }
-
-        dto.setEquipmentSelections(
-                EquipmentSelectionMapper.mergeDisplaySelection(
-                        entity.getEquipment().stream()
-                                .map(item -> new EquipmentSelectionDTO(
-                                        item.getCatalogPositionId(), item.getQuantity()))
-                                .toList(),
-                        dto.getDisplay(),
-                        dto.getDisplayQuantity(),
-                        equipmentResolver
-                )
+        if (!(existingModule instanceof LBCEntity entity)) {
+            return null;
+        }
+        return EquipmentSelectionMapper.mergeDisplaySelection(
+                entity.getEquipment().stream()
+                        .map(item -> new EquipmentSelectionDTO(
+                                item.getCatalogPositionId(), item.getQuantity()))
+                        .toList(),
+                dto.getDisplay(),
+                dto.getDisplayQuantity(),
+                equipmentResolver
         );
     }
 
