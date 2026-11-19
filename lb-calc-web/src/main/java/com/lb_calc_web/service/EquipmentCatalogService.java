@@ -192,7 +192,7 @@ public class EquipmentCatalogService {
 
     public EquipmentCatalogEntity get(String id) {
         return repository.findById(id).orElseThrow(
-                () -> new IllegalArgumentException("Оборудование не найдено: " + id));
+                () -> new java.util.NoSuchElementException("Оборудование не найдено: " + id));
     }
 
     @Transactional
