@@ -2,6 +2,7 @@ package com.lb_calc_web.service;
 
 import com.lb_calc_web.domain.attributes.Colors;
 import com.lb_calc_web.domain.model.ALS;
+import com.lb_calc_web.domain.model.ControlModule;
 import com.lb_calc_web.domain.model.LB;
 import com.lb_calc_web.domain.model.LBC;
 import com.lb_calc_web.domain.equipment.Equipment;
@@ -591,15 +592,17 @@ public class ALSService {
                 lcEquipmentSelections,
                 lbcEquipmentSelections
         );
-        for (Module module : domain.getModules()) {
-            if (module instanceof LC lc) {
-                lc.setControlConfiguration(
-                        equipmentRequirementResolver.resolve(lc.getControlConfiguration()));
-            } else if (module instanceof LBC lbc) {
-                lbc.setControlConfiguration(
-                        equipmentRequirementResolver.resolve(lbc.getControlConfiguration()));
-            }
+        ControlModule controlModule = domain.getControlModule();
+        if (controlModule instanceof LC lc) {
+            lc.setControlConfiguration(
+                    equipmentRequirementResolver.resolve(lc.getControlConfiguration()));
+            domain.replaceControlModule(lc);
+        } else if (controlModule instanceof LBC lbc) {
+            lbc.setControlConfiguration(
+                    equipmentRequirementResolver.resolve(lbc.getControlConfiguration()));
+            domain.replaceControlModule(lbc);
         }
+
         return domain;
     }
 
