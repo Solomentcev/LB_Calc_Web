@@ -10,7 +10,6 @@
 
 <div class="container">
 
-    <br>
 
     <form th:action="@{/projects/{id}/save(id=${project.id})}"
           th:object="${project}"
@@ -44,7 +43,7 @@
         <div class="card mb-4">
 
             <div class="card-header">
-                <h2 th:text="${project.name}">
+                <h1 class="h4 mb-0" th:text="${project.name}">
                     Проект
                 </h1>
             </div>
