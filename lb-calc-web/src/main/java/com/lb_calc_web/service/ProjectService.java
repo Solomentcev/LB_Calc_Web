@@ -86,11 +86,12 @@ public class ProjectService {
     @Transactional(readOnly = true)
     public List<ProjectDTO> findAll() {
         logger.info("Получение списка проектов...");
+        Function<String, Equipment> equipmentResolver = equipmentCatalogService.findDomainCatalogResolver();
 
         return projectRepository
                 .findAllWithUsers()
                 .stream()
-                .map(entity -> ProjectEntityMapper.toDto(entity, equipmentCatalogService::resolveById))
+                .map(entity -> ProjectEntityMapper.toDto(entity, equipmentResolver))
                 .toList();
     }
 
@@ -100,6 +101,9 @@ public class ProjectService {
                 "Поиск проекта(id={})...",
                 id
         );
+        if (id == null || id <= 0) {
+            throw new NoSuchElementException("Проект с id " + id + " не найден");
+        }
 
         ProjectEntity entity =
                 projectRepository.findById(id)
@@ -307,7 +311,7 @@ public class ProjectService {
                 saved.getId()
         );
 
-        return ProjectEntityMapper.toDto(saved, equipmentCatalogService::resolveById);
+        return ProjectEntityMapper.toDto(saved, equipmentCatalogService.findDomainCatalogResolver());
     }
 
     @Transactional
