@@ -119,10 +119,6 @@ public class ALSService {
             throw new NoSuchElementException("АКХ с id=" + id + " не найдена");
         }
 
-        if (id == null || id <= 0) {
-            throw new NoSuchElementException("АКХ с id=" + id + " не найдена");
-        }
-
         ALSEntity entity =
                 alsRepository.findById(id)
                         .orElseThrow(
