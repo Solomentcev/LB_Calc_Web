@@ -13,6 +13,7 @@
 </div>
 <div class="row"><div class="col-lg-6">
 <input type="hidden" th:field="*{id}"><input type="hidden" th:field="*{name}"><input type="hidden" th:field="*{description}">
+<h1 class="h4" th:text="${lbc.description}">LBC</h1>
 <div class="table-responsive">
 <table class="table table-striped">
 <tr><th>Тип</th><td><select class="form-control" th:field="*{type}">
