@@ -29,6 +29,7 @@ public final class LCEntityMapper {
     public static LC toDomain(LCEntity entity,
                                          Function<String, Equipment> equipmentResolver) {
         if (entity == null) return null;
+        Objects.requireNonNull(equipmentResolver, "equipmentResolver не должен быть null");
         ControlConfiguration configuration = new ControlConfiguration(
                 Objects.requireNonNull(entity.getPayment(),
                         "Способ оплаты LC не должен быть null"),
