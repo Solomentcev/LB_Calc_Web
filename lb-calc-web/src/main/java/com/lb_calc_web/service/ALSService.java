@@ -486,7 +486,7 @@ public class ALSService {
 
         // Используем общий путь восстановления ALS: он разрешает позиции
         // каталога и историческое оборудование так же, как при обычном сохранении.
-        var domain = toDomain(als);
+        var domain = restoreALS(als);
         domain.replaceControlModule(restoreLBC(lbc));
 
         return ALSDtoMapper.toDto(domain);
