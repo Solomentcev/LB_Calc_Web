@@ -11,6 +11,7 @@ import com.lb_calc_web.mapper.dto.ALSDtoMapper;
 import com.lb_calc_web.mapper.entity.ALSEntityMapper;
 import com.lb_calc_web.mapper.entity.ModuleEntityMapper;
 import com.lb_calc_web.repository.ALSRepository;
+import com.lb_calc_web.repository.ProjectALSRepository;
 import com.lb_calc_web.repository.ModuleEntityRepository;
 import com.lb_calc_web.domain.equipment.EquipmentCatalog;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,6 +28,7 @@ class ALSServiceTest {
 
     private FindOrCreateLockService findOrCreateLockService;
     private ALSRepository alsRepository;
+    private ProjectALSRepository projectALSRepository;
     private ModuleEntityRepository moduleRepository;
     private LBService lbService;
     private LCService lcService;
@@ -40,6 +42,7 @@ class ALSServiceTest {
     void setUp() {
 
         alsRepository = mock(ALSRepository.class);
+        projectALSRepository = mock(ProjectALSRepository.class);
         moduleRepository = mock(ModuleEntityRepository.class);
         lbService = mock(LBService.class);
         lcService = mock(LCService.class);
@@ -71,6 +74,7 @@ class ALSServiceTest {
         alsService =
                 new ALSService(
                         alsRepository,
+                        projectALSRepository,
                         moduleRepository,
                         lbService,
                         lcService,
@@ -81,6 +85,21 @@ class ALSServiceTest {
                         equipmentCatalogService,
                         equipmentRequirementResolver
                 );
+    }
+
+    @Test
+    void deleteALS_shouldRejectConfigurationUsedByProject() {
+        ALSEntity entity = mock(ALSEntity.class);
+        when(alsRepository.findById(15L)).thenReturn(Optional.of(entity));
+        when(projectALSRepository.existsByAls_Id(15L)).thenReturn(true);
+
+        IllegalStateException exception = assertThrows(
+                IllegalStateException.class,
+                () -> alsService.deleteALS(15L)
+        );
+
+        assertTrue(exception.getMessage().contains("используется в проектах"));
+        verify(alsRepository, never()).delete(any(ALSEntity.class));
     }
 
     @Test
