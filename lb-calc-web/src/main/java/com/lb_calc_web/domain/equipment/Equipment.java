@@ -21,6 +21,8 @@ public abstract class Equipment {
     public String getCatalogPositionId() { return catalogPositionId; }
     public String getName() { return name; }
     public boolean isDisplay() { return false; }
+    public int getDisplayWidth() { return 0; }
+    public int getDisplayHeight() { return 0; }
     public boolean isBarReader() { return false; }
     public boolean isPrinter() { return false; }
     public boolean isRfidReader() { return false; }
