@@ -54,6 +54,18 @@ public class EquipmentCatalogRestController {
         return toDto(service.setActive(id, active));
     }
 
+    @PatchMapping("/{id}/default")
+    public EquipmentCatalogDTO setDefault(@PathVariable String id,
+                                          @RequestParam boolean defaultPosition) {
+        return toDto(service.setDefault(id, defaultPosition));
+    }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(@PathVariable String id) {
+        service.delete(id);
+    }
+
     private EquipmentCatalogDTO toDto(EquipmentCatalogEntity item) {
         return new EquipmentCatalogDTO(item.getCatalogPositionId(), item.getCategory(),
                 item.getName(), item.getDescription(), item.getWidth(), item.getHeight(),
