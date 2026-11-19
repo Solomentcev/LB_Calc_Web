@@ -187,6 +187,13 @@ class LCServiceTest {
     }
 
     @Test
+    void findById_invalidId_shouldRejectWithoutRepositoryCall() {
+        assertThrows(NoSuchElementException.class, () -> lcService.findById(0L));
+        assertThrows(NoSuchElementException.class, () -> lcService.findById(null));
+        verify(lcRepository, never()).findById(any());
+    }
+
+    @Test
     void findById_missing_shouldThrow() {
         when(lcRepository.findById(1L))
                 .thenReturn(Optional.empty());
