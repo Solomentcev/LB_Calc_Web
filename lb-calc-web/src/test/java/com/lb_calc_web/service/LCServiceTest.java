@@ -115,6 +115,7 @@ class LCServiceTest {
                 .resolveForExistingConfiguration(eq("MODEM_CUSTOM"), anySet());
         verify(equipmentCatalogService, atLeastOnce())
                 .resolveForExistingConfiguration(eq("LC10"), anySet());
+        verify(lcRepository, times(1)).findById(1L);
     }
 
     @Test
