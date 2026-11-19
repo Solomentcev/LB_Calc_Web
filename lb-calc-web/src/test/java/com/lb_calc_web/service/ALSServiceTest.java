@@ -265,6 +265,28 @@ class ALSServiceTest {
     }
 
     @Test
+    void restoreDomain_shouldApplyResolvedControlConfigurationToLBC() {
+        ALSDTO dto = TestDataFactory.validLBCALSDTO(1L);
+        when(equipmentRequirementResolver.resolve(any()))
+                .thenAnswer(invocation -> {
+                    ControlConfiguration configuration = invocation.getArgument(0);
+                    return new ControlConfiguration(
+                            Payment.CASH,
+                            configuration.getAccessMethods(),
+                            configuration.getPrintOptions(),
+                            configuration.getEquipmentConfiguration()
+                    );
+                });
+
+        ALS result = alsService.restoreDomain(dto);
+
+        assertEquals(
+                Payment.CASH,
+                result.getControlModule().getControlConfiguration().getPayment()
+        );
+    }
+
+    @Test
     void replaceLC_shouldReuseEquipmentResolverForBothConfigurations() {
         ALSDTO als = TestDataFactory.validALSDTO(1L);
         LCDTO replacement = TestDataFactory.validLCDTO(als.getLC().getId());
