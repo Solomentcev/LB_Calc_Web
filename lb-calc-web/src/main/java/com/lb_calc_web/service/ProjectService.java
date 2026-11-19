@@ -1,6 +1,7 @@
 package com.lb_calc_web.service;
 
 import com.lb_calc_web.domain.attributes.Role;
+import com.lb_calc_web.domain.equipment.Equipment;
 import com.lb_calc_web.domain.model.ALS;
 import com.lb_calc_web.domain.model.Employee;
 import com.lb_calc_web.domain.model.LB;
