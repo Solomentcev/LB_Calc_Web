@@ -316,10 +316,9 @@ public class ALSService {
                 id
         );
 
-        Objects.requireNonNull(
-                id,
-                "Идентификатор ALS не должен быть null"
-        );
+        if (id == null || id <= 0) {
+            throw new NoSuchElementException("АКХ с id=" + id + " не найдена");
+        }
 
         ALSEntity entity =
                 alsRepository.findById(id)
