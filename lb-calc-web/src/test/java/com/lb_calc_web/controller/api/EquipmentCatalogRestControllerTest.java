@@ -3,6 +3,7 @@ package com.lb_calc_web.controller.api;
 import com.lb_calc_web.entity.EquipmentCatalogEntity;
 import com.lb_calc_web.handler.RestExceptionHandler;
 import com.lb_calc_web.service.EquipmentCatalogService;
+import com.lb_calc_web.security.jwt.JwtService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -34,6 +35,9 @@ class EquipmentCatalogRestControllerTest {
 
     @MockBean
     private EquipmentCatalogService service;
+
+    @MockBean
+    private JwtService jwtService;
 
     @Test
     void getUnknownPosition_shouldReturnNotFound() throws Exception {
