@@ -125,10 +125,9 @@ public class ALSController extends BaseCatalogController {
         ALSDTO als = alsService.findById(alsId);
 
         model.addAttribute("als", als);
-        model.addAttribute(
-                "lbc",
-                alsService.findLBCInALS(als, lbcId)
-        );
+        var lbc = alsService.findLBCInALS(als, lbcId);
+        model.addAttribute("lbc", lbc);
+        retainSelectedEquipmentOptions(model, lbc.getDisplay(), lbc.getBarReader());
 
         return "alss/alss_lbc";
     }
@@ -161,6 +160,7 @@ public class ALSController extends BaseCatalogController {
             model.addAttribute("errors", e.getErrors());
             model.addAttribute("als", alsService.findById(alsId));
             model.addAttribute("lbc", lbc);
+            retainSelectedEquipmentOptions(model, lbc.getDisplay(), lbc.getBarReader());
 
             return "alss/alss_lbc";
         }
