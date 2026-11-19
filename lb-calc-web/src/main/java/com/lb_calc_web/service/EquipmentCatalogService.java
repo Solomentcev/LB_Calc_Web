@@ -11,9 +11,12 @@ import com.lb_calc_web.repository.EquipmentCatalogRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /** Управляет каталогом оборудования и его доступностью для новых конфигураций. */
 @Service
@@ -53,6 +56,66 @@ public class EquipmentCatalogService {
     public Equipment resolveById(String id) {
         return repository.findById(id).map(this::toDomain).orElseThrow(() ->
                 new IllegalArgumentException("Позиция оборудования не найдена в каталоге: " + id));
+    }
+
+    /**
+     * Создаёт разрешитель для редактирования конфигурации на основе одного
+     * чтения каталога. Деактивированные позиции разрешены только если их ID
+     * присутствовал в исходной сохранённой комплектации.
+     */
+    public Function<String, Equipment> findExistingConfigurationResolver(Set<String> retainedIds) {
+        Set<String> retained = retainedIds == null ? Set.of() : Set.copyOf(retainedIds);
+        Map<String, EquipmentCatalogEntity> catalog = repository.findAll().stream()
+                .collect(Collectors.toUnmodifiableMap(
+                        EquipmentCatalogEntity::getCatalogPositionId,
+                        Function.identity()
+                ));
+        Map<String, List<EquipmentCatalogEntity>> activeByName = catalog.values().stream()
+                .filter(EquipmentCatalogEntity::isActive)
+                .collect(Collectors.groupingBy(
+                        item -> item.getName().toLowerCase(java.util.Locale.ROOT)
+                ));
+
+        return idOrName -> {
+            if (idOrName == null || idOrName.isBlank()) {
+                return null;
+            }
+            if (Display.NONE_ID.equals(idOrName) || Display.NONE.getName().equals(idOrName)) {
+                return Display.NONE;
+            }
+            if (BarReader.NONE_ID.equals(idOrName) || BarReader.NONE.getName().equals(idOrName)) {
+                return BarReader.NONE;
+            }
+
+            EquipmentCatalogEntity byId = catalog.get(idOrName);
+            if (byId != null) {
+                if (!byId.isActive() && !retained.contains(idOrName)) {
+                    throw new IllegalArgumentException(
+                            "Деактивированную позицию нельзя выбрать для новой конфигурации: " + idOrName);
+                }
+                return toDomain(byId);
+            }
+
+            List<EquipmentCatalogEntity> matches = new ArrayList<>(
+                    activeByName.getOrDefault(idOrName.toLowerCase(java.util.Locale.ROOT), List.of())
+            );
+            catalog.values().stream()
+                    .filter(item -> retained.contains(item.getCatalogPositionId()))
+                    .filter(item -> item.getName().equalsIgnoreCase(idOrName))
+                    .filter(item -> matches.stream().noneMatch(
+                            match -> match.getCatalogPositionId().equals(item.getCatalogPositionId())))
+                    .forEach(matches::add);
+
+            if (matches.size() == 1) {
+                return toDomain(matches.get(0));
+            }
+            if (matches.size() > 1) {
+                throw new IllegalArgumentException(
+                        "Название оборудования неоднозначно, используйте ID каталога: " + idOrName);
+            }
+            throw new IllegalArgumentException(
+                    "Активная позиция оборудования не найдена в каталоге: " + idOrName);
+        };
     }
 
     public Equipment resolve(String idOrName) {
@@ -161,6 +224,12 @@ public class EquipmentCatalogService {
 
     @Transactional
     public EquipmentCatalogEntity create(EquipmentCatalogEntity item) {
+        if (item == null) {
+            throw new IllegalArgumentException("Позиция оборудования не должна быть null");
+        }
+        if (item.isDefaultPosition() && !item.isActive()) {
+            throw new IllegalArgumentException("Деактивированная модель не может быть моделью по умолчанию");
+        }
         validateCatalogData(item.getCategory(), item.isSupportsBarcode1d(),
                 item.isSupportsBarcode2d(), item.isSupportsRfid(), item.isSupportsPrint());
         if (repository.existsById(item.getCatalogPositionId())) {
