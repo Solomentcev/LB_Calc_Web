@@ -102,6 +102,7 @@ public class ProjectEntity {
      * <p>{@code orphanRemoval = true} означает, что связь,
      * удалённая из этой коллекции, должна быть удалена из БД.</p>
      */
+    @org.hibernate.annotations.BatchSize(size = 50)
     @OneToMany(
             mappedBy = "project",
             cascade = CascadeType.ALL,
