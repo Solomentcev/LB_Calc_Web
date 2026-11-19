@@ -112,6 +112,8 @@ class LBCServiceTest {
 
         assertNotNull(lbcService.saveLBC(dto));
 
+        assertNull(dto.getEquipmentSelections(),
+                "Сервис не должен изменять входящий LBCDTO при восстановлении оборудования");
         verify(lbcRepository, times(1)).findById(1L);
     }
 
