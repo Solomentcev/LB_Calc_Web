@@ -1,17 +1,14 @@
 package com.lb_calc_web.service;
 
-import com.lb_calc_web.entity.EquipmentCatalogEntity;
-import com.lb_calc_web.domain.equipment.CatalogEquipment;
-import com.lb_calc_web.domain.equipment.Equipment;
-import com.lb_calc_web.domain.equipment.Display;
 import com.lb_calc_web.domain.equipment.BarReader;
-import java.util.Map;
-import java.util.stream.Collectors;
+import com.lb_calc_web.domain.equipment.CatalogEquipment;
+import com.lb_calc_web.domain.equipment.Display;
+import com.lb_calc_web.domain.equipment.Equipment;
+import com.lb_calc_web.entity.EquipmentCatalogEntity;
 import com.lb_calc_web.repository.EquipmentCatalogRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
