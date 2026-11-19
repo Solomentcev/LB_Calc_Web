@@ -235,4 +235,126 @@ public class ALSRestController {
                     .body(ApiResponse.error(e.getMessage()));
         }
     }
+
+    /**
+     * Получить LBC, входящий в ALS.
+     */
+    @GetMapping("/{alsId}/lbc/{lbcId}")
+    @Operation(summary = "Получить LBC ALS")
+    public ResponseEntity<?> getLBC(
+            @PathVariable Long alsId,
+            @PathVariable Long lbcId
+    ) {
+        try {
+            ALSDTO als = alsService.findById(alsId);
+            return ResponseEntity.ok(
+                    ApiResponse.success(alsService.findLBCInALS(als, lbcId))
+            );
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ApiResponse.error(e.getMessage()));
+        }
+    }
+
+    /**
+     * Обновить LBC внутри ALS.
+     */
+    @PutMapping("/{alsId}/lbc/{lbcId}")
+    @Operation(summary = "Обновить LBC ALS")
+    public ResponseEntity<?> updateLBC(
+            @PathVariable Long alsId,
+            @PathVariable Long lbcId,
+            @RequestBody com.lb_calc_web.dto.LBCDTO lbc
+    ) {
+        try {
+            ALSDTO als = alsService.findById(alsId);
+            lbc.setId(lbcId);
+
+            ALSDTO saved = alsService.replaceLBCandSaveALS(als, lbc);
+            return ResponseEntity.ok(
+                    ApiResponse.success(saved.getLBC())
+            );
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ApiResponse.error(e.getMessage()));
+        } catch (ValidationSizeException e) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.error("LBC не прошёл валидацию", e.getErrors()));
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.error(e.getMessage()));
+        }
+    }
+
+    /**
+     * Заменить управляющий модуль ALS новым LBC.
+     */
+    @PostMapping("/{alsId}/replace-lbc")
+    @Operation(summary = "Заменить управляющий модуль ALS на новый LBC")
+    public ResponseEntity<?> replaceWithNewLBC(
+            @PathVariable Long alsId
+    ) {
+        try {
+            ALSDTO saved = alsService.replaceWithNewLBCandSaveALS(alsId);
+            return ResponseEntity.ok(ApiResponse.success(saved));
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ApiResponse.error(e.getMessage()));
+        } catch (ValidationSizeException e) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.error("LBC не прошёл валидацию", e.getErrors()));
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.error(e.getMessage()));
+        }
+    }
+
+    /**
+     * Добавить LB в ALS.
+     */
+    @PostMapping("/{alsId}/lb")
+    @Operation(summary = "Добавить LB в ALS")
+    public ResponseEntity<?> addLB(
+            @PathVariable Long alsId
+    ) {
+        try {
+            ALSDTO saved = alsService.addNewLBandSaveALS(alsId);
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(ApiResponse.success(saved));
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ApiResponse.error(e.getMessage()));
+        } catch (ValidationSizeException e) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.error("ALS не прошла валидацию", e.getErrors()));
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.error(e.getMessage()));
+        }
+    }
+
+    /**
+     * Удалить LB из ALS.
+     */
+    @DeleteMapping("/{alsId}/lb/{lbId}")
+    @Operation(summary = "Удалить LB из ALS")
+    public ResponseEntity<?> deleteLB(
+            @PathVariable Long alsId,
+            @PathVariable Long lbId
+    ) {
+        try {
+            ALSDTO saved = alsService.deleteLBandSaveALS(alsId, lbId);
+            return ResponseEntity.ok(ApiResponse.success(saved));
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ApiResponse.error(e.getMessage()));
+        } catch (ValidationSizeException e) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.error("ALS не прошла валидацию", e.getErrors()));
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.error(e.getMessage()));
+        }
+    }
+
 }
