@@ -8,6 +8,7 @@ import com.lb_calc_web.domain.model.Project;
 import com.lb_calc_web.entity.ALSEntity;
 import com.lb_calc_web.entity.EmployeeEntity;
 import com.lb_calc_web.entity.ProjectEntity;
+import java.lang.reflect.Field;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
@@ -157,4 +158,31 @@ class ProjectEntityMapperTest {
         assertSame(association, entity.getAlsEntries().get(0));
         assertEquals(3, association.getQuantity());
     }
+    @Test
+    void addAlsEntry_shouldRejectSamePersistentAlsRepresentedByProxySubclass() throws Exception {
+        ALSEntity storedAls = new ALSEntity();
+        ALSEntity proxyAls = new AlsProxy();
+        setEntityId(storedAls, 42L);
+        setEntityId(proxyAls, 42L);
+
+        ProjectEntity project = new ProjectEntity();
+        project.addAlsEntry(storedAls, 1);
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> project.addAlsEntry(proxyAls, 1)
+        );
+    }
+
+    private static void setEntityId(Object entity, Long id) throws Exception {
+        Field field = entity.getClass().getSuperclass() == ALSEntity.class
+                ? ALSEntity.class.getDeclaredField("id")
+                : entity.getClass().getDeclaredField("id");
+        field.setAccessible(true);
+        field.set(entity, id);
+    }
+
+    private static class AlsProxy extends ALSEntity {
+    }
+
 }
