@@ -2,6 +2,7 @@ package com.lb_calc_web.controller;
 
 import com.lb_calc_web.dto.LCDTO;
 import com.lb_calc_web.handler.ValidationSizeException;
+import com.lb_calc_web.service.EquipmentCatalogService;
 import com.lb_calc_web.service.LCService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +20,10 @@ public class LCController extends BaseCatalogController {
 
     private final LCService lcService;
 
-    public LCController(LCService lcService, com.lb_calc_web.service.EquipmentCatalogService equipmentCatalogService) {
+    public LCController(
+            LCService lcService,
+            EquipmentCatalogService equipmentCatalogService
+    ) {
         super(equipmentCatalogService);
         this.lcService = lcService;
     }
