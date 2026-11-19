@@ -502,7 +502,7 @@ class PersistenceIntegrationTest {
             assertEquals(1, changedWithLC.getLC().getBarReaderQuantity());
 
             LBCDTO changedLBC = savedProject.getAlsList().get(2).getLBC();
-            changedLBC.setAccessMethods(List.of(AccessMethod.RFID.name()));
+            changedLBC.setAccessMethods(List.of(AccessMethod.BARCODE.name()));
             ALSDTO changedWithLBC = projectService.saveLBCAtProject(
                     projectId,
                     independentAlsId,
@@ -510,7 +510,7 @@ class PersistenceIntegrationTest {
                     changedLBC
             );
             assertEquals(
-                    List.of(AccessMethod.RFID.name()),
+                    List.of(AccessMethod.BARCODE.name()),
                     changedWithLBC.getLBC().getAccessMethods()
             );
 
