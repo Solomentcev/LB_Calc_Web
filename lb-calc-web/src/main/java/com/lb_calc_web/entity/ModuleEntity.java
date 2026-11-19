@@ -13,6 +13,7 @@ import java.util.Objects;
  * {@link LCEntity}, {@link LBEntity} и {@link LBCEntity}.</p>
  */
 @Entity
+@org.hibernate.annotations.BatchSize(size = 50)
 @Table(name = "module")
 @Inheritance(strategy = InheritanceType.JOINED)
 public abstract class ModuleEntity {
