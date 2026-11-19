@@ -8,6 +8,7 @@ import com.lb_calc_web.dto.RegistrationDTO;
 import com.lb_calc_web.service.AuthService;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.security.auth.message.AuthException;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,10 +39,14 @@ public class AuthRestController {
             logger.info("User {} successfully logged in", loginRequest.getEmail());
             return ResponseEntity.ok(ApiResponse.success("Login successful", tokens));
 
-        } catch (Exception e) {
+        } catch (AuthException e) {
             logger.warn("Login failed for {}: {}", loginRequest.getEmail(), e.getMessage());
-            ApiResponse<Void> errorResponse = ApiResponse.error(e.getMessage());
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ApiResponse.error(e.getMessage()));
+        } catch (Exception e) {
+            logger.error("Unexpected error during login for {}", loginRequest.getEmail(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.error("Login failed"));
         }
     }
 
@@ -60,10 +65,14 @@ public class AuthRestController {
             ApiResponse<EmployeeDTO> response = ApiResponse.success("Registration successful", employee);
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
 
-        } catch (RuntimeException e) {
+        } catch (IllegalArgumentException e) {
             logger.warn("Registration failed for {}: {}", registrationDTO.getEmail(), e.getMessage());
-            ApiResponse<String> errorResponse= ApiResponse.error("Не удалось создать пользователя",e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ApiResponse.error("Не удалось создать пользователя", e.getMessage()));
+        } catch (RuntimeException e) {
+            logger.error("Unexpected error during registration for {}", registrationDTO.getEmail(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.error("Не удалось создать пользователя"));
         }
     }
 
