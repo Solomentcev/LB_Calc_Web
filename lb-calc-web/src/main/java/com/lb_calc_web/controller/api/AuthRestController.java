@@ -32,12 +32,12 @@ public class AuthRestController {
     public ResponseEntity<?> login(@RequestBody @Valid LoginRequest loginRequest) {
         logger.info("Login attempt for email: {}", loginRequest.getEmail());
 
-        
+
             JwtResponse tokens = authService.login(loginRequest);
             logger.info("User {} successfully logged in", loginRequest.getEmail());
             return ResponseEntity.ok(ApiResponse.success("Login successful", tokens));
 
-        
+
     }
 
     /**
@@ -49,13 +49,13 @@ public class AuthRestController {
     public ResponseEntity<?> registration(@RequestBody @Valid RegistrationDTO registrationDTO) {
         logger.info("Registration attempt for email: {}", registrationDTO.getEmail());
 
-        
+
             EmployeeDTO employee = authService.registration(registrationDTO);
             logger.info("User {} successfully registered", registrationDTO.getEmail());
             ApiResponse<EmployeeDTO> response = ApiResponse.success("Registration successful", employee);
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
 
-        
+
     }
 
     /**
@@ -72,14 +72,14 @@ public class AuthRestController {
                        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         }
 
-        
+
             JwtResponse tokens = authService.refresh(refreshToken);
 
             logger.debug("Token successfully refreshed");
             ApiResponse<JwtResponse> response = ApiResponse.success("Token refreshed", tokens);
             return ResponseEntity.ok(response);
 
-        
+
     }
 
     @PostMapping("/logout")
