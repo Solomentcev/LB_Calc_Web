@@ -110,6 +110,8 @@ class LCServiceTest {
 
         assertThrows(ValidationSizeException.class, () -> lcService.saveLC(dto));
 
+        assertNull(dto.getEquipmentSelections(),
+                "Сервис не должен изменять входящий LCDTO при восстановлении оборудования");
         verify(equipmentCatalogService).findExistingConfigurationResolver(anySet());
         verify(lcRepository, times(1)).findById(1L);
     }
