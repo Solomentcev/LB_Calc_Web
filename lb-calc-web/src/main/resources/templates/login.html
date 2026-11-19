@@ -14,10 +14,10 @@
                 <span th:text="${successMessage}"></span>
             </div>
             <div th:if="${param.error}">
-                <div class="alert alert-danger" th:text="${param.error}">Invalid Email or Password</div>
+                <div class="alert alert-danger" th:text="${param.error}">Invalid Электронная почта or Пароль</div>
             </div>
             <div th:if="${param.logout}">
-                <div class="alert alert-success"> You have been logged out.</div>
+                <div class="alert alert-success"> Вы вышли из системы.</div>
             </div>
 
             <div class="card">
@@ -34,7 +34,7 @@
                                     id="email"
                                     th:field="*{email}"
                                     class="form-control"
-                                    placeholder="Enter email address"
+                                    placeholder="Введите адрес электронной почты"
                             />
                             <div th:if="${#fields.hasErrors('email')}" style="color:red">
                                 <p th:each="e : ${#fields.errors('email')}" th:text="${e}"></p>
@@ -48,7 +48,7 @@
                                     id="password"
                                     th:field="*{password}"
                                     class="form-control"
-                                    placeholder="Enter password"
+                                    placeholder="Введите пароль"
                             />
                             <div th:if="${#fields.hasErrors('password')}" style="color:red">
                                 <p th:each="e : ${#fields.errors('password')}" th:text="${e}"></p>
