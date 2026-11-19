@@ -55,6 +55,10 @@ class ALSServiceTest {
                 .thenAnswer(invocation -> EquipmentCatalog.resolve(invocation.getArgument(0)));
         when(equipmentCatalogService.resolveById(anyString()))
                 .thenAnswer(invocation -> EquipmentCatalog.findByCatalogPositionId(invocation.getArgument(0)));
+        when(equipmentCatalogService.findDomainCatalogResolver())
+                .thenReturn(EquipmentCatalog::findByCatalogPositionId);
+        when(equipmentCatalogService.findExistingConfigurationResolver(anySet()))
+                .thenReturn(EquipmentCatalog::resolve);
         when(equipmentRequirementResolver.resolve(any()))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -269,21 +273,21 @@ class ALSServiceTest {
         als.getLBC().setEquipmentSelections(List.of(
                 new com.lb_calc_web.dto.EquipmentSelectionDTO("CUSTOM_MODEM", 1)
         ));
-        when(equipmentCatalogService.resolveForExistingConfiguration(
-                eq("CUSTOM_MODEM"), anySet()
-        )).thenReturn(new com.lb_calc_web.domain.equipment.CatalogEquipment(
+        var customModem = new com.lb_calc_web.domain.equipment.CatalogEquipment(
                 "CUSTOM_MODEM", "MODEM", "Модем", "", 0, 0, 0,
                 0, 0, 0, false, false, false, false
-        ));
+        );
+        when(equipmentCatalogService.findExistingConfigurationResolver(anySet()))
+                .thenReturn(id -> "CUSTOM_MODEM".equals(id)
+                        ? customModem
+                        : EquipmentCatalog.resolve(id));
 
         LBCDTO replacement = TestDataFactory.validLBCDTO(als.getLBC().getId());
 
         ALSDTO result = alsService.replaceLBC(als, replacement);
 
         assertNotNull(result.getLBC());
-        verify(equipmentCatalogService).resolveForExistingConfiguration(
-                eq("CUSTOM_MODEM"), anySet()
-        );
+        verify(equipmentCatalogService).findExistingConfigurationResolver(anySet());
     }
 
     @Test
