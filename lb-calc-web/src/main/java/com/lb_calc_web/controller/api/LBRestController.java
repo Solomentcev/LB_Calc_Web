@@ -49,28 +49,14 @@ public class LBRestController {
 
         logger.info("GET /api/v1/lbs");
 
-        try {
+        
             List<LBDTO> lbList = lbService.findAll();
 
             return ResponseEntity.ok(
                     ApiResponse.success(lbList)
             );
 
-        } catch (Exception e) {
-            logger.error(
-                    "Ошибка при получении списка LB",
-                    e
-            );
-
-            return ResponseEntity
-                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(
-                            ApiResponse.error(
-                                    "Ошибка при получении списка LB",
-                                    e.getMessage()
-                            )
-                    );
-        }
+        
     }
 
     /**
@@ -91,43 +77,14 @@ public class LBRestController {
 
         logger.info("GET /api/v1/lbs/{}", id);
 
-        try {
+        
             LBDTO lb = lbService.findById(id);
 
             return ResponseEntity.ok(
                     ApiResponse.success(lb)
             );
 
-        } catch (NoSuchElementException e) {
-            logger.warn(
-                    "LB с id={} не найден",
-                    id
-            );
-
-            return ResponseEntity
-                    .status(HttpStatus.NOT_FOUND)
-                    .body(
-                            ApiResponse.error(
-                                    "LB с id=" + id + " не найден"
-                            )
-                    );
-
-        } catch (Exception e) {
-            logger.error(
-                    "Ошибка при получении LB id={}",
-                    id,
-                    e
-            );
-
-            return ResponseEntity
-                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(
-                            ApiResponse.error(
-                                    "Ошибка при получении LB",
-                                    e.getMessage()
-                            )
-                    );
-        }
+        
     }
 
     /**
@@ -143,28 +100,14 @@ public class LBRestController {
 
         logger.info("GET /api/v1/lbs/create");
 
-        try {
+        
             LBDTO lb = lbService.createLB();
 
             return ResponseEntity.ok(
                     ApiResponse.success(lb)
             );
 
-        } catch (Exception e) {
-            logger.error(
-                    "Ошибка при создании шаблона LB",
-                    e
-            );
-
-            return ResponseEntity
-                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(
-                            ApiResponse.error(
-                                    "Ошибка при создании шаблона LB",
-                                    e.getMessage()
-                            )
-                    );
-        }
+        
     }
 
     /**
@@ -184,7 +127,7 @@ public class LBRestController {
                 dto != null ? dto.getType() : null
         );
 
-        try {
+        
             LBDTO saved = lbService.saveLB(dto);
 
             return ResponseEntity.ok(
@@ -194,49 +137,6 @@ public class LBRestController {
                     )
             );
 
-        } catch (ValidationSizeException e) {
-            logger.warn(
-                    "Ошибка валидации LB: {}",
-                    e.getErrors()
-            );
-
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .body(
-                            ApiResponse.error(
-                                    "LB не прошёл валидацию",
-                                    e.getErrors()
-                            )
-                    );
-
-        } catch (IllegalArgumentException e) {
-            logger.warn(
-                    "Некорректные параметры LB: {}",
-                    e.getMessage()
-            );
-
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .body(
-                            ApiResponse.error(
-                                    e.getMessage()
-                            )
-                    );
-
-        } catch (Exception e) {
-            logger.error(
-                    "Ошибка при сохранении LB",
-                    e
-            );
-
-            return ResponseEntity
-                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(
-                            ApiResponse.error(
-                                    "Ошибка при сохранении LB",
-                                    e.getMessage()
-                            )
-                    );
-        }
+        
     }
 }
