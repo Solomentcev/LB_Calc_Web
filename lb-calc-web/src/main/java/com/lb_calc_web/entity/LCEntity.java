@@ -165,10 +165,7 @@ public class LCEntity extends ModuleEntity {
                 ", bottomFrame=" + getBottomFrame() +
                 ", colorBody=" + getColorBody() +
                 ", colorDoor=" + getColorDoor() +
-                ", equipment=" + equipment +
                 ", payment=" + payment +
-                ", accessMethods=" + accessMethods +
-                ", printOptions=" + printOptions +
                 '}';
     }
 }
