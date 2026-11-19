@@ -3,7 +3,6 @@ package com.lb_calc_web.controller;
 import com.lb_calc_web.dto.ALSDTO;
 import com.lb_calc_web.handler.ValidationSizeException;
 import com.lb_calc_web.service.ALSService;
-import com.lb_calc_web.service.EquipmentCatalogService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -20,10 +19,8 @@ public class ALSController extends BaseCatalogController {
     private final ALSService alsService;
 
     public ALSController(
-            ALSService alsService,
-            EquipmentCatalogService equipmentCatalogService
+            ALSService alsService
     ) {
-        super(equipmentCatalogService);
         this.alsService = alsService;
     }
 
@@ -125,9 +122,10 @@ public class ALSController extends BaseCatalogController {
         ALSDTO als = alsService.findById(alsId);
 
         model.addAttribute("als", als);
-        var lbc = alsService.findLBCInALS(als, lbcId);
-        model.addAttribute("lbc", lbc);
-        retainSelectedEquipmentOptions(model, lbc.getDisplay(), lbc.getBarReader());
+        model.addAttribute(
+                "lbc",
+                alsService.findLBCInALS(als, lbcId)
+        );
 
         return "alss/alss_lbc";
     }
@@ -160,7 +158,6 @@ public class ALSController extends BaseCatalogController {
             model.addAttribute("errors", e.getErrors());
             model.addAttribute("als", alsService.findById(alsId));
             model.addAttribute("lbc", lbc);
-            retainSelectedEquipmentOptions(model, lbc.getDisplay(), lbc.getBarReader());
 
             return "alss/alss_lbc";
         }
