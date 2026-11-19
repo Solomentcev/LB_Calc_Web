@@ -319,7 +319,6 @@ public class ALSEntity {
                 ", bottomFrame=" + bottomFrame +
                 ", colorBody=" + colorBody +
                 ", colorDoor=" + colorDoor +
-                "
                 '}';
     }
 }
