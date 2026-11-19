@@ -42,6 +42,11 @@ public class EquipmentRequirementResolver {
         boolean requiresPin = configuration.getAccessMethods().contains(AccessMethod.PIN);
         boolean requiresRfid = configuration.getAccessMethods().contains(AccessMethod.RFID);
 
+        if (requiresPin && !requiresRfid && !requiresBarcode && !requiresQrCode) {
+            throw new IllegalArgumentException(
+                    "PIN не может быть единственным способом доступа: выберите RFID, штрихкод или QR-код");
+        }
+
         Set<String> requiredCategories = new HashSet<>();
         boolean requiresDisplay = configuration.getEquipmentConfiguration().getAllItems()
                 .stream()
@@ -111,10 +116,6 @@ public class EquipmentRequirementResolver {
         }
 
         if (requiresPin) {
-            if (!requiresRfid && !requiresBarcode && !requiresQrCode) {
-                throw new IllegalArgumentException(
-                        "PIN не может быть единственным способом доступа: выберите RFID, штрихкод или QR-код");
-            }
             ensureEquipment(selected, "DISPLAY", Equipment::isDisplay,
                     "Для доступа по PIN нужен дисплей");
         }
