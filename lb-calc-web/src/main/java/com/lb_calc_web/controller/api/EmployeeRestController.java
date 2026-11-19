@@ -79,15 +79,13 @@ public class EmployeeRestController {
         try {
 
             EmployeeDTO employee =
-                    employeeService.loadUserById(
-                            id.intValue()
-                    );
+                    employeeService.loadUserById(id);
 
             return ResponseEntity.ok(
                     ApiResponse.success(employee)
             );
 
-        } catch (Exception e) {
+        } catch (NoSuchElementException e) {
 
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
@@ -202,6 +200,18 @@ public class EmployeeRestController {
                     ApiResponse.success(saved)
             );
 
+        } catch (NoSuchElementException e) {
+
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(ApiResponse.error("Сотрудник не найден", e.getMessage()));
+
+        } catch (IllegalArgumentException e) {
+
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(ApiResponse.error(e.getMessage()));
+
         } catch (Exception e) {
 
             logger.error(
@@ -210,7 +220,7 @@ public class EmployeeRestController {
             );
 
             return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(
                             ApiResponse.error(
                                     "Ошибка обновления сотрудника",
