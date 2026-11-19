@@ -4,7 +4,7 @@
 <head th:replace="~{fragments/common :: head('Модуль хранения')}"></head>
 <body>
 <div th:replace="~{header :: header}"></div>
-<div class="container">
+<div>
     
     <form action="#" th:action="@{/lbs/save}" th:object="${lb}" method="post">
 
@@ -15,11 +15,12 @@
         <a th:href="@{'/lbs'}" class="btn btn-primary btn-sm mb-3"
         >К списку модулей хранения</a>
         
-        <h4 th:text="*{description}">Модуль хранения</h4>
+        <h1 class="h4" th:text="*{description}">Модуль хранения</h1>
         <label hidden="hidden">
             <input size="130"  type="text" th:field="*{description}" readonly="readonly">
         </label>
 
+    <div class="table-responsive">
     <table class="table table-striped">
         <tr>
             <th >ID</th>
@@ -171,6 +172,7 @@
             </td>
         </tr>
     </table>
+    </div>
     </form>
 </div>
 
