@@ -134,6 +134,7 @@ public final class LCDtoMapper {
         if (dto == null) {
             return null;
         }
+        java.util.Objects.requireNonNull(equipmentResolver, "equipmentResolver не должен быть null");
 
         EquipmentConfiguration equipmentConfiguration =
                 dto.getEquipmentSelections() != null
