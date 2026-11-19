@@ -58,6 +58,23 @@
 </select></td></tr>
 </table>
 </div>
+<h2 class="h5 mt-4">Модуль управления внутри LBC</h2>
+<div class="table-responsive">
+<table class="table table-striped">
+<tr><th>Дисплей</th><td><select class="form-control" th:field="*{display}">
+<option th:each="display : ${displayList}" th:value="${display}" th:text="${display}"></option>
+</select></td></tr>
+<tr><th>Оплата</th><td><select class="form-control" th:field="*{payment}">
+<option th:each="payment : ${paymentList}" th:value="${payment}" th:text="${payment}"></option>
+</select></td></tr>
+<tr><th>Способы доступа</th><td><select multiple class="form-control" th:field="*{accessMethods}">
+<option th:each="method : ${accessMethodList}" th:value="${method}" th:text="${method}"></option>
+</select></td></tr>
+<tr><th>Печать</th><td><select multiple class="form-control" th:field="*{printOptions}">
+<option th:each="option : ${printOptionList}" th:value="${option}" th:text="${option}"></option>
+</select></td></tr>
+</table>
+</div>
 <div class="col-md-7"><h2 class="h5">Физическая модель LBC</h2>
 <img class="img-thumbnail" th:src="'data:image/png;base64,' + ${lbc.stringLBCImage}" alt="LBC Image">
 </div>
