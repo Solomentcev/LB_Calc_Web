@@ -6,9 +6,9 @@
 <body>
 <div th:replace="~{header :: header}"></div>
 
-<main class="container py-4">
+<main class="container py-4 page-content">
     <!-- Публичная главная страница для неавторизованных пользователей. -->
-    <section sec:authorize="isAnonymous()" class="jumbotron">
+    <section sec:authorize="isAnonymous()" class="jumbotron mb-4">
         <h1 class="display-4">LB_Calc_Web</h1>
         <p class="lead">
             Система проектирования и расчёта автоматизированных камер хранения.
@@ -41,7 +41,7 @@
         </div>
 
         <h2 class="h4 mb-3">Проектирование</h2>
-        <div class="row">
+        <div class="row align-items-stretch">
             <div class="col-md-6 col-lg-4 mb-3">
                 <div class="card h-100">
                     <div class="card-body">
