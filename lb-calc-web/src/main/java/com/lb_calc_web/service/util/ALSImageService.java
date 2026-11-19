@@ -121,7 +121,7 @@ public class ALSImageService {
         if (position == PositionControlModule.RIGHT
                 || (
                 position == PositionControlModule.CENTER
-                        && als.getLbList().isEmpty()
+                        && lbList.isEmpty()
         )) {
             x += drawControlModule(
                     img,
