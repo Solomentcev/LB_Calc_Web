@@ -111,6 +111,29 @@ class EquipmentRequirementResolverTest {
     }
 
     @Test
+    void resolve_pinWithMultipleDisplays_shouldFail() {
+        stubDefaults();
+        Equipment firstDisplay = equipment("DISPLAY", "DISPLAY_LC10");
+        Equipment secondDisplay = equipment("DISPLAY", "DISPLAY_LC17");
+        ControlConfiguration source = configurationWithAccessAndEquipment(
+                List.of(AccessMethod.PIN, AccessMethod.RFID),
+                List.of(new EquipmentItem(firstDisplay, 1), new EquipmentItem(secondDisplay, 1)));
+
+        assertThrows(IllegalArgumentException.class, () -> resolver.resolve(source));
+    }
+
+    @Test
+    void resolve_pinWithDisplayQuantityGreaterThanOne_shouldFail() {
+        stubDefaults();
+        Equipment display = equipment("DISPLAY", "DISPLAY_LC10");
+        ControlConfiguration source = configurationWithAccessAndEquipment(
+                List.of(AccessMethod.PIN, AccessMethod.RFID),
+                List.of(new EquipmentItem(display, 2)));
+
+        assertThrows(IllegalArgumentException.class, () -> resolver.resolve(source));
+    }
+
+    @Test
     void resolve_pinWithoutAdditionalAccessMethod_shouldFail() {
         ControlConfiguration source = configurationWithAccess(AccessMethod.PIN);
 
@@ -191,6 +214,13 @@ class EquipmentRequirementResolverTest {
         return new ControlConfiguration(Payment.NONE, EnumSet.copyOf(List.of(methods)),
                 EnumSet.noneOf(PrintOption.class),
                 new EquipmentConfiguration(List.of(), List.of()));
+    }
+
+    private ControlConfiguration configurationWithAccessAndEquipment(
+            List<AccessMethod> methods, List<EquipmentItem> required) {
+        return new ControlConfiguration(Payment.NONE, EnumSet.copyOf(methods),
+                EnumSet.noneOf(PrintOption.class),
+                EquipmentConfiguration.fromItems(required, List.of()));
     }
 
     private ControlConfiguration configuration(Payment payment) {
