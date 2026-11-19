@@ -1,6 +1,8 @@
 package com.lb_calc_web.service;
 
 import com.lb_calc_web.security.jwt.JwtService;
+import com.lb_calc_web.dto.CreateEmployeeDTO;
+import com.lb_calc_web.domain.attributes.Role;
 import com.lb_calc_web.dto.RegistrationDTO;
 import com.lb_calc_web.entity.EmployeeEntity;
 import org.hibernate.exception.ConstraintViolationException;
@@ -217,6 +219,49 @@ class AuthServiceTest {
         );
 
         verify(kafkaTemplate).send(eq("user-events"), eq("42"), any(UserEvent.class));
+    }
+
+    @Test
+    void createEmployee_shouldPropagateNonEmailConstraintViolation() {
+        EmployeeService employeeService = mock(EmployeeService.class);
+        EmployeeRepository employeeRepository = mock(EmployeeRepository.class);
+        PasswordEncoder passwordEncoder = mock(PasswordEncoder.class);
+        CreateEmployeeDTO dto = mock(CreateEmployeeDTO.class);
+
+        when(dto.getPassword()).thenReturn("secret");
+        when(dto.getConfirmPassword()).thenReturn("secret");
+        when(dto.getFirstName()).thenReturn("Иван");
+        when(dto.getLastName()).thenReturn("Иванов");
+        when(dto.getEmail()).thenReturn("user@example.com");
+        when(dto.getRole()).thenReturn(Role.ROLE_MANAGER);
+        when(employeeService.existsByEmail("user@example.com")).thenReturn(false);
+        when(passwordEncoder.encode("secret")).thenReturn("encoded");
+
+        DataIntegrityViolationException violation = new DataIntegrityViolationException(
+                "foreign key violation",
+                new ConstraintViolationException(
+                        "foreign key violation",
+                        new java.sql.SQLException("foreign key violation"),
+                        "fk_employee_role"
+                )
+        );
+        when(employeeRepository.save(any(EmployeeEntity.class))).thenThrow(violation);
+
+        AuthService authService = new AuthService(
+                employeeService,
+                employeeRepository,
+                passwordEncoder,
+                mock(JwtService.class),
+                mock(KafkaTemplate.class),
+                "user-events"
+        );
+
+        DataIntegrityViolationException thrown = org.junit.jupiter.api.Assertions.assertThrows(
+                DataIntegrityViolationException.class,
+                () -> authService.createEmployee(dto)
+        );
+
+        org.junit.jupiter.api.Assertions.assertSame(violation, thrown);
     }
 
 }
