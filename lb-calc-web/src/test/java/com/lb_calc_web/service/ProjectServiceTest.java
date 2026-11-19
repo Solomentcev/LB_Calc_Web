@@ -1,6 +1,7 @@
 package com.lb_calc_web.service;
 
 import com.lb_calc_web.TestDataFactory;
+import com.lb_calc_web.service.export.ProjectExcelExportService;
 import com.lb_calc_web.domain.attributes.Role;
 import com.lb_calc_web.dto.ALSDTO;
 import com.lb_calc_web.domain.attributes.TypeLb;
@@ -37,6 +38,7 @@ class ProjectServiceTest {
     private MockEnvironment environment;
     private ProjectService projectService;
     private EquipmentCatalogService equipmentCatalogService;
+    private ProjectExcelExportService projectExcelExportService;
 
     @BeforeEach
     void setUp() {
@@ -56,6 +58,7 @@ class ProjectServiceTest {
         });
         employeeService = mock(EmployeeService.class);
         equipmentCatalogService = mock(EquipmentCatalogService.class);
+        projectExcelExportService = mock(ProjectExcelExportService.class);
         when(equipmentCatalogService.findDomainCatalogResolver())
                 .thenReturn(EquipmentCatalog::findByCatalogPositionId);
 
@@ -74,7 +77,8 @@ class ProjectServiceTest {
                         employeeService,
                         environment,
                         TestDataFactory.createSizeValidator(),
-                        equipmentCatalogService
+                        equipmentCatalogService,
+                        projectExcelExportService
                 );
     }
 

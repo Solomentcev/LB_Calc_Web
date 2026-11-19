@@ -1,4 +1,4 @@
-package com.lb_calc_web.service.util;
+package com.lb_calc_web.service.validation.size;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;

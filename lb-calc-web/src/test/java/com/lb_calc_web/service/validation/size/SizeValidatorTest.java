@@ -1,4 +1,4 @@
-package com.lb_calc_web.service.util;
+package com.lb_calc_web.service.validation.size;
 
 import com.lb_calc_web.TestDataFactory;
 import com.lb_calc_web.domain.attributes.Colors;

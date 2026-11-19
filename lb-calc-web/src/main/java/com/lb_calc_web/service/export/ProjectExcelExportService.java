@@ -1,30 +1,32 @@
-package com.lb_calc_web.helper;
+package com.lb_calc_web.service.export;
 
 import com.lb_calc_web.dto.ALSDTO;
 import com.lb_calc_web.dto.LBCDTO;
 import com.lb_calc_web.dto.LBDTO;
 import com.lb_calc_web.dto.ProjectDTO;
-import com.lb_calc_web.service.util.ALSImageService;
+import com.lb_calc_web.service.image.ALSImageService;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
-public class ExcellHelper {
+@Service
+public class ProjectExcelExportService {
 
     private static final Logger logger =
-            LoggerFactory.getLogger(ExcellHelper.class);
+            LoggerFactory.getLogger(ProjectExcelExportService.class);
 
     private static final DateTimeFormatter DF =
             DateTimeFormatter.ofPattern("dd.MM.yyyy");
 
-    public static ByteArrayInputStream projectToExcel(
+    public ByteArrayInputStream exportToExcel(
             ProjectDTO project
     ) {
 

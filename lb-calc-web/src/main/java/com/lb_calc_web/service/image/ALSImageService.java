@@ -1,4 +1,4 @@
-package com.lb_calc_web.service.util;
+package com.lb_calc_web.service.image;
 
 import com.lb_calc_web.domain.attributes.PositionControlModule;
 import com.lb_calc_web.dto.ALSDTO;

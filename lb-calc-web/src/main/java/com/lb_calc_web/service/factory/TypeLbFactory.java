@@ -1,4 +1,4 @@
-package com.lb_calc_web.service.util;
+package com.lb_calc_web.service.factory;
 
 import com.lb_calc_web.domain.attributes.TypeLb;
 import org.springframework.core.env.Environment;

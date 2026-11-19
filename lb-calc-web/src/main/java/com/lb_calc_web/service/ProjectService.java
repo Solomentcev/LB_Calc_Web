@@ -20,14 +20,14 @@ import com.lb_calc_web.entity.ALSEntity;
 import com.lb_calc_web.entity.EmployeeEntity;
 import com.lb_calc_web.entity.ProjectEntity;
 import com.lb_calc_web.handler.ValidationSizeException;
-import com.lb_calc_web.helper.ExcellHelper;
+import com.lb_calc_web.service.export.ProjectExcelExportService;
 import com.lb_calc_web.mapper.dto.EmployeeDtoMapper;
 import com.lb_calc_web.mapper.dto.ProjectDtoMapper;
 import com.lb_calc_web.mapper.entity.ProjectEntityMapper;
 import com.lb_calc_web.repository.ALSRepository;
 import com.lb_calc_web.repository.EmployeeRepository;
 import com.lb_calc_web.repository.ProjectRepository;
-import com.lb_calc_web.service.util.SizeValidator;
+import com.lb_calc_web.service.validation.size.SizeValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.env.Environment;
@@ -61,6 +61,7 @@ public class ProjectService {
     private final Environment environment;
     private final SizeValidator sizeValidator;
     private final EquipmentCatalogService equipmentCatalogService;
+    private final ProjectExcelExportService projectExcelExportService;
 
     public ProjectService(
             ProjectRepository projectRepository,
@@ -70,7 +71,8 @@ public class ProjectService {
             EmployeeService employeeService,
             Environment environment,
             SizeValidator sizeValidator,
-            EquipmentCatalogService equipmentCatalogService
+            EquipmentCatalogService equipmentCatalogService,
+            ProjectExcelExportService projectExcelExportService
     ) {
         this.projectRepository = projectRepository;
         this.alsRepository = alsRepository;
@@ -80,6 +82,7 @@ public class ProjectService {
         this.environment = environment;
         this.sizeValidator = sizeValidator;
         this.equipmentCatalogService = equipmentCatalogService;
+        this.projectExcelExportService = projectExcelExportService;
     }
 
     @Transactional(readOnly = true)
@@ -353,9 +356,7 @@ public class ProjectService {
                 "Экспорт проекта в Excel..."
         );
 
-        return ExcellHelper.projectToExcel(
-                projectDTO
-        );
+        return projectExcelExportService.exportToExcel(projectDTO);
     }
 
     /**

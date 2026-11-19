@@ -1,5 +1,5 @@
 
-package com.lb_calc_web.service.util;
+package com.lb_calc_web.service.image;
 
 import com.lb_calc_web.domain.attributes.Colors;
 import com.lb_calc_web.domain.attributes.DirectionDoorOpening;

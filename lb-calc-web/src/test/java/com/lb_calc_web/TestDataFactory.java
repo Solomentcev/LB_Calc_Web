@@ -19,12 +19,12 @@ import com.lb_calc_web.dto.LCDTO;
 import com.lb_calc_web.dto.ProjectDTO;
 import com.lb_calc_web.mapper.dto.ALSDtoMapper;
 import com.lb_calc_web.mapper.dto.LBCDtoMapper;
-import com.lb_calc_web.service.util.ALSImageService;
-import com.lb_calc_web.service.util.ALSSizeValidator;
-import com.lb_calc_web.service.util.ModuleSizeValidator;
-import com.lb_calc_web.service.util.ProjectSizeValidator;
-import com.lb_calc_web.service.util.SizeBounds;
-import com.lb_calc_web.service.util.SizeValidator;
+import com.lb_calc_web.service.image.ALSImageService;
+import com.lb_calc_web.service.validation.size.ALSSizeValidator;
+import com.lb_calc_web.service.validation.size.ModuleSizeValidator;
+import com.lb_calc_web.service.validation.size.ProjectSizeValidator;
+import com.lb_calc_web.service.validation.size.SizeBounds;
+import com.lb_calc_web.service.validation.size.SizeValidator;
 
 import java.util.ArrayList;
 import java.util.List;

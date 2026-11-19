@@ -1,4 +1,4 @@
-package com.lb_calc_web.service.util;
+package com.lb_calc_web.service.validation.size;
 
 import com.lb_calc_web.domain.model.ALS;
 import com.lb_calc_web.domain.model.ControlModule;
