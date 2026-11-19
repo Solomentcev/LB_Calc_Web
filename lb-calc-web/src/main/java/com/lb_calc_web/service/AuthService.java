@@ -34,6 +34,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.time.LocalDate;
 import java.util.concurrent.CompletableFuture;
@@ -369,6 +371,30 @@ public class AuthService {
                         email
                 );
 
+        Runnable sendEvent = () -> sendEvent(event, type, userId);
+
+        /*
+         * События изменения данных отправляются только после успешного commit.
+         * Для сценариев без транзакции (например, вход пользователя)
+         * отправка выполняется сразу.
+         */
+        if (TransactionSynchronizationManager.isActualTransactionActive()
+                && TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.registerSynchronization(
+                    new TransactionSynchronization() {
+                        @Override
+                        public void afterCommit() {
+                            sendEvent.run();
+                        }
+                    }
+            );
+            return;
+        }
+
+        sendEvent.run();
+    }
+
+    private void sendEvent(UserEvent event, UserEventType type, Long userId) {
         CompletableFuture<SendResult<String, UserEvent>> future =
                 kafkaTemplate.send(
                         userEventsTopic,
@@ -378,16 +404,13 @@ public class AuthService {
 
         future.whenComplete(
                 (sendResult, throwable) -> {
-
                     if (throwable != null) {
-
                         logger.error(
                                 "Ошибка отправки события Kafka type={}, userId={}: {}",
                                 type,
                                 userId,
                                 throwable.getMessage()
                         );
-
                         return;
                     }
 
