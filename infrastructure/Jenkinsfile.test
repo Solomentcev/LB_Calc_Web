@@ -125,7 +125,11 @@ pipeline {
                     ) == 0
 
                     if (!tagExists) {
-                        sh 'git tag -a "$RELEASE_TAG" "$DEPLOY_COMMIT" -m "Релиз $RELEASE_TAG"'
+                        sh '''
+                            git config user.name "Jenkins"
+                            git config user.email "jenkins@localhost"
+                            git tag -a "$RELEASE_TAG" "$DEPLOY_COMMIT" -m "Релиз $RELEASE_TAG"
+                        '''
                         withCredentials([
                             sshUserPrivateKey(
                                 credentialsId: 'github-ssh',
@@ -170,7 +174,7 @@ pipeline {
                         ssh -i "$SSH_KEY" -o BatchMode=yes \
                             "$SSH_USER@$TEST_HOST" \
                             "cd '$TEST_PROJECT_DIR' && \
-                             git fetch origin master --tags && \
+                             git fetch https://github.com/Solomentcev/LB_Calc_Web.git master --tags && \
                              git checkout --detach '$DEPLOY_COMMIT' && \
                              mkdir -p lb-calc-web/target notification-service/target"
 
