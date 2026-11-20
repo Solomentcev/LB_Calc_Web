@@ -10,7 +10,7 @@ Jenkins job `LB-CALC-DEV`:
 - Script Path: `infrastructure/Jenkinsfile.dev`.
 - Параметр `SOURCE_BRANCH`: `refactor-main` либо ветка `feature/*`, `refactor/*` или `bugfix/*`.
 
-Pipeline сначала запускает MySQL и Kafka и дожидается их healthcheck. Затем пересоздаёт отдельную схему `lb_calc_web_integration`, выполняет `mvn clean verify` с подключением интеграционных тестов к этой схеме и только после успешных тестов собирает Docker-образы и развёртывает приложения в DEV. Переменные подключения и приложения поступают из Jenkins credential `dev-env-file`; Spring-профиль `test` не используется. Версия приложения — последняя SemVer-версия с суффиксом `-SNAPSHOT`; Docker tag дополнительно содержит нормализованное имя ветки и номер сборки. DEV не создаёт release tags.
+Pipeline запускает MySQL и Kafka DEV и дожидается их healthcheck. `mvn clean verify` выполняет интеграционные тесты с параметрами `DB_URL`, `DB_USERNAME` и `DB_PASSWORD` из `dev-env-file`, то есть с БД DEV-стенда. После успешных тестов собираются Docker-образы и развёртываются приложения DEV. Отдельная третья БД не создаётся; данные и инфраструктура DEV сохраняются. Spring-профиль `test` не используется. Версия приложения — последняя SemVer-версия с суффиксом `-SNAPSHOT`; Docker tag дополнительно содержит нормализованное имя ветки и номер сборки. DEV не создаёт release tags.
 
 ## TEST pipeline
 
@@ -22,7 +22,7 @@ Jenkins job `LB-CALC-TEST`:
 - Script Path: `infrastructure/Jenkinsfile.test`.
 - Триггер: проверка SCM каждые две минуты.
 
-TEST pipeline проверяет, что собранный commit является результатом merge ровно одного PR в `master`. У PR должна быть ровно одна из меток `version:patch`, `version:minor` или `version:major`. Затем pipeline перед сборкой запускает на TEST-хосте MySQL и Kafka, дожидается healthcheck и пересоздаёт отдельную схему `lb_calc_web_integration`. `mvn clean verify` подключается только к этой схеме; Spring-профиль `test` не используется. После успешных тестов pipeline передаёт JAR-файлы и Dockerfile, развёртывает приложения и выполняет smoke-проверку. Следующая SemVer-версия рассчитывается от последнего release tag. Release tag создаётся и отправляется в GitHub только после успешного развёртывания и smoke-проверки.
+TEST pipeline проверяет, что собранный commit является результатом merge ровно одного PR в `master`. У PR должна быть ровно одна из меток `version:patch`, `version:minor` или `version:major`. Затем pipeline запускает MySQL и Kafka на отдельном TEST-хосте и дожидается healthcheck. `mvn clean verify` выполняет интеграционные тесты с параметрами `DB_URL`, `DB_USERNAME` и `DB_PASSWORD` из `test-env-file`, то есть с БД TEST-стенда. DEV и TEST не используют общие базы; отдельная третья БД не создаётся, инфраструктура TEST сохраняется. Spring-профиль `test` не используется. После успешных тестов pipeline передаёт JAR-файлы и Dockerfile, развёртывает приложения и выполняет smoke-проверку. Следующая SemVer-версия рассчитывается от последнего release tag. Release tag создаётся и отправляется в GitHub только после успешного развёртывания и smoke-проверки.
 
 Jenkinsfile TEST должен присутствовать в ветке `master`, прежде чем job сможет загрузить его из SCM. В текущих рабочих ветках файл поддерживается синхронно; `master` обновляется отдельно.
 
