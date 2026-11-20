@@ -1,10 +1,14 @@
 pipeline {
     agent any
-    options { disableConcurrentBuilds() }
 
     parameters {
-        string(name: 'SOURCE_BRANCH', defaultValue: 'refactor-main',
-               description: 'Ветка для DEV: feature/*, refactor/*, bugfix/*')
+        string(name: 'SOURCE_BRANCH', defaultValue: '',
+            description: 'Ветка feature/*, refactor/* или bugfix/* для сборки DEV')
+    }
+
+    options {
+        disableConcurrentBuilds()
+        timestamps()
     }
 
     environment {
@@ -14,47 +18,36 @@ pipeline {
     }
 
     stages {
-        stage('Validate branch') {
+        stage('Validate selected branch') {
             steps {
                 script {
                     def sourceBranch = params.SOURCE_BRANCH?.trim()
-                    def allowedBranch = sourceBranch == 'refactor-main' ||
-                            sourceBranch ==~ '^(feature|refactor|bugfix)/[A-Za-z0-9][A-Za-z0-9._/-]*$'
-                    if (!allowedBranch) {
-                        error('Допустимы refactor-main и ветки feature/*, refactor/*, bugfix/*')
+                    if (!sourceBranch || !(sourceBranch ==~ /^(feature|refactor|bugfix)\/[A-Za-z0-9._\/-]+$/)
+                            || sourceBranch.contains('..') || sourceBranch.contains('//')) {
+                        error('Укажите существующую ветку формата feature/*, refactor/* или bugfix/*.')
                     }
                     env.SOURCE_BRANCH = sourceBranch
+                    env.BRANCH_SLUG = sourceBranch.toLowerCase().replaceAll(/[^a-z0-9]+/, '-')
+                            .replaceAll(/^-+|-+$/, '')
                 }
             }
         }
 
-        stage('Checkout source branch') {
+        stage('Checkout selected branch') {
             steps {
-                deleteDir()
                 checkout([
                     $class: 'GitSCM',
-                    branches: [[name: "*/${env.SOURCE_BRANCH}"]],
+                    branches: [[name: "*/${params.SOURCE_BRANCH}"]],
                     userRemoteConfigs: [[
                         url: 'git@github.com:Solomentcev/LB_Calc_Web.git',
                         credentialsId: 'github-ssh'
-                    ]],
-                    extensions: [[
-                        $class: 'CloneOption',
-                        shallow: false,
-                        noTags: false
                     ]]
                 ])
-                script {
-                    env.DEPLOY_COMMIT = sh(
-                        script: 'git rev-parse HEAD',
-                        returnStdout: true
-                    ).trim()
-                    sh 'git fetch --tags https://github.com/Solomentcev/LB_Calc_Web.git'
-                }
+                sh 'git fetch --tags https://github.com/Solomentcev/LB_Calc_Web.git'
             }
         }
 
-        stage('Resolve application version') {
+        stage('Resolve snapshot version') {
             steps {
                 script {
                     def latestTag = sh(
@@ -62,24 +55,18 @@ pipeline {
                         returnStdout: true
                     ).trim()
 
-                    def baseVersion
-                    if (latestTag) {
-                        baseVersion = latestTag.replaceFirst(/^v/, '')
-                    } else {
-                        baseVersion = sh(
+                    def baseVersion = latestTag
+                        ? latestTag.replaceFirst(/^v/, '')
+                        : sh(
                             script: 'mvn -s "$MAVEN_SETTINGS" help:evaluate -Dexpression=revision -q -DforceStdout',
                             returnStdout: true
                         ).trim().replaceFirst(/-SNAPSHOT$/, '')
-                    }
 
                     if (!(baseVersion ==~ /\d+\.\d+\.\d+/)) {
-                        error("Не удалось определить базовую SemVer-версию: ${baseVersion}")
+                        error("Некорректная базовая SemVer-версия: ${baseVersion}")
                     }
 
                     env.APP_VERSION = "${baseVersion}-SNAPSHOT"
-                    def branchSlug = env.SOURCE_BRANCH.toLowerCase()
-                            .replaceAll(/[^a-z0-9_.-]+/, '-')
-                            .replaceAll(/^-+|-+$/, '')
                     def tagPrefix = "${env.APP_VERSION}-"
                     def tagSuffix = "-build-${env.BUILD_NUMBER}"
                     def maxBranchSlugLength = 128 - tagPrefix.length() - tagSuffix.length()
@@ -88,15 +75,36 @@ pipeline {
                         error('Не удалось сформировать допустимый Docker tag.')
                     }
 
-                    branchSlug = branchSlug.take(maxBranchSlugLength)
-                    env.IMAGE_TAG = "${tagPrefix}${branchSlug}${tagSuffix}"
+                    env.BRANCH_SLUG = env.BRANCH_SLUG.take(maxBranchSlugLength)
+                    env.IMAGE_TAG = "${tagPrefix}${env.BRANCH_SLUG}${tagSuffix}"
+
+                    echo "DEV branch: ${env.SOURCE_BRANCH}"
+                    echo "Application version: ${env.APP_VERSION}"
+                    echo "Docker image tag: ${env.IMAGE_TAG}"
                 }
             }
         }
 
-        stage('Build') {
+        stage('Build and test') {
             steps {
-                sh 'mvn -s "$MAVEN_SETTINGS" clean package -DskipTests -Drevision="$APP_VERSION"'
+                sh 'mvn -s "$MAVEN_SETTINGS" clean verify -Drevision="$APP_VERSION"'
+            }
+        }
+
+        stage('Build Docker images') {
+            steps {
+                sh '''
+                    set -eu
+                    test -f "$DEV_ENV_FILE"
+
+                    APP_VERSION="$APP_VERSION" IMAGE_TAG="$IMAGE_TAG" \
+                    docker compose --env-file "$DEV_ENV_FILE" \
+                        -f "$DEV_COMPOSE" config -q
+
+                    APP_VERSION="$APP_VERSION" IMAGE_TAG="$IMAGE_TAG" \
+                    docker compose --env-file "$DEV_ENV_FILE" \
+                        -f "$DEV_COMPOSE" build lb-calc-web notification-service
+                '''
             }
         }
 
@@ -113,8 +121,6 @@ pipeline {
                             echo "Контейнер инфраструктуры $container_name должен быть running/healthy; текущее состояние: ${state:-не найден}"
                             exit 1
                         fi
-
-                        echo "Инфраструктура доступна: $container_name ($state)"
                     }
 
                     check_healthy_container lb-calc-dev-mysql
@@ -126,22 +132,47 @@ pipeline {
         stage('Deploy DEV applications') {
             steps {
                 sh '''
+                    APP_VERSION="$APP_VERSION" IMAGE_TAG="$IMAGE_TAG" \
+                    docker compose --env-file "$DEV_ENV_FILE" \
+                        -f "$DEV_COMPOSE" \
+                        up -d --no-build --force-recreate --no-deps \
+                        lb-calc-web notification-service
+                '''
+            }
+        }
+
+        stage('Verify DEV') {
+            steps {
+                sh '''
                     set -eu
+                    WEB_PORT=$(APP_VERSION="$APP_VERSION" IMAGE_TAG="$IMAGE_TAG" docker compose \
+                        --env-file "$DEV_ENV_FILE" \
+                        -f "$DEV_COMPOSE" port lb-calc-web 8081 \
+                        | tail -n 1 | awk -F: '{print $NF}')
+
+                    if [ -z "$WEB_PORT" ]; then
+                        echo "Не удалось определить опубликованный порт DEV web."
+                        exit 1
+                    fi
+
+                    for attempt in $(seq 1 30); do
+                        if curl --fail --silent "http://127.0.0.1:$WEB_PORT/login" >/dev/null; then
+                            NOTIFICATION_STATE=$(docker inspect \
+                                --format='{{.State.Running}}' lb-calc-dev-notification 2>/dev/null || true)
+
+                            if [ "$NOTIFICATION_STATE" = "true" ]; then
+                                echo "DEV web и notification-service запущены."
+                                exit 0
+                            fi
+                        fi
+                        sleep 2
+                    done
 
                     APP_VERSION="$APP_VERSION" IMAGE_TAG="$IMAGE_TAG" docker compose \
                         --env-file "$DEV_ENV_FILE" \
                         -f "$DEV_COMPOSE" \
-                        up -d --build --force-recreate --no-deps \
-                        lb-calc-web notification-service
-
-                    for container_name in lb-calc-dev-web lb-calc-dev-notification; do
-                        state=$(docker inspect --format '{{.State.Status}}' "$container_name" 2>/dev/null || true)
-                        if [ "$state" != "running" ]; then
-                            echo "Контейнер приложения $container_name не запущен; состояние: ${state:-не найден}"
-                            exit 1
-                        fi
-                        echo "Приложение запущено: $container_name"
-                    done
+                        logs --tail=100 lb-calc-web notification-service
+                    exit 1
                 '''
             }
         }
@@ -149,10 +180,10 @@ pipeline {
 
     post {
         success {
-            echo "Развёртывание DEV завершено. Ветка: ${env.SOURCE_BRANCH}, commit: ${env.DEPLOY_COMMIT}, версия: ${env.APP_VERSION}, image tag: ${env.IMAGE_TAG}"
+            echo "DEV успешно развёрнут: ${env.SOURCE_BRANCH}, ${env.APP_VERSION}, ${env.IMAGE_TAG}"
         }
         failure {
-            echo 'Развёртывание DEV завершилось ошибкой.'
+            echo 'Сборка или развёртывание DEV завершились ошибкой.'
         }
     }
 }
