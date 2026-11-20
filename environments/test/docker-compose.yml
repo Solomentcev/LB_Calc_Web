@@ -54,7 +54,7 @@ services:
       dockerfile: infrastructure/docker/lb-calc-web/Dockerfile
       args:
         APP_VERSION: ${APP_VERSION}
-    image: lb-calc-web:${APP_VERSION}
+    image: lb-calc-web:${IMAGE_TAG}
     container_name: lb-calc-test-web
     restart: unless-stopped
     environment:
@@ -84,7 +84,7 @@ services:
       dockerfile: infrastructure/docker/notification-service/Dockerfile
       args:
         APP_VERSION: ${APP_VERSION}
-    image: notification-service:${APP_VERSION}
+    image: notification-service:${IMAGE_TAG}
     container_name: lb-calc-test-notification
     restart: unless-stopped
     environment:
