@@ -38,7 +38,7 @@ pipeline {
             steps {
                 checkout([
                     $class: 'GitSCM',
-                    branches: [[name: "*/\${params.SOURCE_BRANCH}"]],
+                    branches: [[name: "*/${params.SOURCE_BRANCH}"]],
                     userRemoteConfigs: [[
                         url: 'git@github.com:Solomentcev/LB_Calc_Web.git',
                         credentialsId: 'github-ssh'
@@ -64,15 +64,15 @@ pipeline {
                         ).trim().replaceFirst(/-SNAPSHOT$/, '')
 
                     if (!(baseVersion ==~ /\d+\.\d+\.\d+/)) {
-                        error("Некорректная базовая SemVer-версия: \${baseVersion}")
+                        error("Некорректная базовая SemVer-версия: ${baseVersion}")
                     }
 
-                    env.APP_VERSION = "\${baseVersion}-SNAPSHOT"
-                    env.IMAGE_TAG = "\${env.APP_VERSION}-\${env.BRANCH_SLUG}-build-\${env.BUILD_NUMBER}"
+                    env.APP_VERSION = "${baseVersion}-SNAPSHOT"
+                    env.IMAGE_TAG = "${env.APP_VERSION}-${env.BRANCH_SLUG}-build-${env.BUILD_NUMBER}"
 
-                    echo "DEV branch: \${env.SOURCE_BRANCH}"
-                    echo "Application version: \${env.APP_VERSION}"
-                    echo "Docker image tag: \${env.IMAGE_TAG}"
+                    echo "DEV branch: ${env.SOURCE_BRANCH}"
+                    echo "Application version: ${env.APP_VERSION}"
+                    echo "Docker image tag: ${env.IMAGE_TAG}"
                 }
             }
         }
@@ -106,9 +106,9 @@ pipeline {
                     file: env.DEV_IMAGE_OVERRIDE,
                     text: """services:
   lb-calc-web:
-    image: lb-calc-web:\${env.IMAGE_TAG}
+    image: lb-calc-web:${env.IMAGE_TAG}
   notification-service:
-    image: notification-service:\${env.IMAGE_TAG}
+    image: notification-service:${env.IMAGE_TAG}
 """
                 )
 
@@ -177,7 +177,7 @@ pipeline {
             sh 'rm -f "$DEV_IMAGE_OVERRIDE"'
         }
         success {
-            echo "DEV успешно развёрнут: \${env.SOURCE_BRANCH}, \${env.APP_VERSION}, \${env.IMAGE_TAG}"
+            echo "DEV успешно развёрнут: ${env.SOURCE_BRANCH}, ${env.APP_VERSION}, ${env.IMAGE_TAG}"
         }
         failure {
             echo 'Сборка или развёртывание DEV завершились ошибкой.'
