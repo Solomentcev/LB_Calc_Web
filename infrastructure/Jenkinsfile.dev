@@ -95,12 +95,6 @@ pipeline {
             }
         }
 
-        stage('Build and test') {
-            steps {
-                sh 'mvn -s "$MAVEN_SETTINGS" clean verify -Drevision="$APP_VERSION"'
-            }
-        }
-
         stage('Start DEV infrastructure') {
             steps {
                 withCredentials([file(credentialsId: 'dev-env-file', variable: 'DEV_ENV_FILE')]) {
@@ -111,6 +105,63 @@ pipeline {
                         docker compose --env-file "$DEV_ENV_FILE" -f "$DEV_COMPOSE" config -q
                         APP_VERSION="$APP_VERSION" IMAGE_TAG="$IMAGE_TAG" \
                         docker compose --env-file "$DEV_ENV_FILE" -f "$DEV_COMPOSE" up -d --wait mysql kafka
+                    '''
+                }
+            }
+        }
+
+        stage('Prepare integration database') {
+            steps {
+                withCredentials([file(credentialsId: 'dev-env-file', variable: 'DEV_ENV_FILE')]) {
+                    sh '''
+                        set -eu
+                        set +x
+                        set -a
+                        . "$DEV_ENV_FILE"
+                        set +a
+
+                        case "$DB_USERNAME" in
+                            ""|*[!A-Za-z0-9_]*)
+                                echo "Недопустимое имя пользователя MySQL для интеграционных тестов."
+                                exit 1
+                                ;;
+                        esac
+
+                        cat > "$WORKSPACE/integration-test-db.sql" <<SQL
+DROP DATABASE IF EXISTS lb_calc_web_integration;
+CREATE DATABASE lb_calc_web_integration;
+GRANT ALL PRIVILEGES ON lb_calc_web_integration.* TO '$DB_USERNAME'@'%';
+FLUSH PRIVILEGES;
+SQL
+
+                        APP_VERSION="$APP_VERSION" IMAGE_TAG="$IMAGE_TAG" docker compose \
+                            --env-file "$DEV_ENV_FILE" -f "$DEV_COMPOSE" \
+                            exec -T mysql sh -c 'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" mysql --protocol=socket -uroot' \
+                            < "$WORKSPACE/integration-test-db.sql"
+                        rm -f "$WORKSPACE/integration-test-db.sql"
+                    '''
+                }
+            }
+        }
+
+        stage('Build and test') {
+            steps {
+                withCredentials([file(credentialsId: 'dev-env-file', variable: 'DEV_ENV_FILE')]) {
+                    sh '''
+                        set -eu
+                        set +x
+                        set -a
+                        . "$DEV_ENV_FILE"
+                        set +a
+
+                        : "${DOCKER_HOST_ADDRESS:?Не задан DOCKER_HOST_ADDRESS}"
+                        : "${MYSQL_PORT:?Не задан MYSQL_PORT}"
+                        : "${DB_USERNAME:?Не задан DB_USERNAME}"
+                        : "${DB_PASSWORD:?Не задан DB_PASSWORD}"
+                        : "${KAFKA_BOOTSTRAP_SERVERS:?Не задан KAFKA_BOOTSTRAP_SERVERS}"
+
+                        export DB_URL="jdbc:mysql://${DOCKER_HOST_ADDRESS}:${MYSQL_PORT}/lb_calc_web_integration?createDatabaseIfNotExist=true"
+                        mvn -s "$MAVEN_SETTINGS" clean verify -Drevision="$APP_VERSION"
                     '''
                 }
             }

@@ -139,13 +139,7 @@ pipeline {
             }
         }
 
-        stage('Build release') {
-            steps {
-                sh 'mvn -s "$MAVEN_SETTINGS" clean verify -Drevision="$APP_VERSION"'
-            }
-        }
-
-        stage('Deploy TEST') {
+        stage('Prepare TEST dependencies') {
             steps {
                 withCredentials([
                     sshUserPrivateKey(
@@ -155,28 +149,24 @@ pipeline {
                     ),
                     file(credentialsId: 'test-env-file', variable: 'TEST_ENV_FILE')
                 ]) {
+                    script {
+                        def remoteHome = sh(
+                            script: 'ssh -i "$SSH_KEY" -o BatchMode=yes "$SSH_USER@$TEST_HOST" \'printf "%s" "$HOME"\'',
+                            returnStdout: true
+                        ).trim()
+                        env.TEST_DEPLOY_DIR = remoteHome.endsWith('/')
+                            ? remoteHome + 'lb-calc-test'
+                            : remoteHome + '/lb-calc-test'
+                    }
                     sh '''
                         set -eu
+                        set +x
                         : "${TEST_HOST:?Задайте TEST_HOST в Jenkins}"
                         : "${TEST_ENV_FILE:?Не получен Jenkins credential test-env-file}"
-
-                        REMOTE_HOME=$(ssh -i "$SSH_KEY" -o BatchMode=yes \
-                            "$SSH_USER@$TEST_HOST" 'printf "%s" "$HOME"')
-                        TEST_DEPLOY_DIR="${REMOTE_HOME%/}/lb-calc-test"
-
-                        case "$TEST_DEPLOY_DIR" in
-                            *[!A-Za-z0-9_./-]*)
-                                echo "Недопустимый путь каталога развёртывания: $TEST_DEPLOY_DIR"
-                                exit 1
-                                ;;
-                        esac
+                        : "${TEST_DEPLOY_DIR:?Не определён каталог TEST}"
 
                         ssh -i "$SSH_KEY" -o BatchMode=yes "$SSH_USER@$TEST_HOST" \
-                            "mkdir -p '$TEST_DEPLOY_DIR/environments/test' \
-                                '$TEST_DEPLOY_DIR/infrastructure/docker/lb-calc-web' \
-                                '$TEST_DEPLOY_DIR/infrastructure/docker/notification-service' \
-                                '$TEST_DEPLOY_DIR/lb-calc-web/target' \
-                                '$TEST_DEPLOY_DIR/notification-service/target'"
+                            "mkdir -p '$TEST_DEPLOY_DIR/environments/test'"
 
                         scp -i "$SSH_KEY" -o BatchMode=yes "$TEST_ENV_FILE" \
                             "$SSH_USER@$TEST_HOST:$TEST_DEPLOY_DIR/environments/test/.env.upload"
@@ -187,6 +177,83 @@ pipeline {
 
                         scp -i "$SSH_KEY" -o BatchMode=yes environments/test/docker-compose.yml \
                             "$SSH_USER@$TEST_HOST:$TEST_DEPLOY_DIR/environments/test/"
+
+                        ssh -i "$SSH_KEY" -o BatchMode=yes "$SSH_USER@$TEST_HOST" \
+                            "cd '$TEST_DEPLOY_DIR' && \
+                             APP_VERSION='$APP_VERSION' IMAGE_TAG='$IMAGE_TAG' \
+                             docker compose --env-file environments/test/.env -f environments/test/docker-compose.yml config -q && \
+                             APP_VERSION='$APP_VERSION' IMAGE_TAG='$IMAGE_TAG' \
+                             docker compose --env-file environments/test/.env -f environments/test/docker-compose.yml up -d --wait mysql kafka"
+
+                        set -a
+                        . "$TEST_ENV_FILE"
+                        set +a
+                        case "$DB_USERNAME" in
+                            ""|*[!A-Za-z0-9_]*)
+                                echo "Недопустимое имя пользователя MySQL для интеграционных тестов."
+                                exit 1
+                                ;;
+                        esac
+
+                        cat > "$WORKSPACE/integration-test-db.sql" <<SQL
+DROP DATABASE IF EXISTS lb_calc_web_integration;
+CREATE DATABASE lb_calc_web_integration;
+GRANT ALL PRIVILEGES ON lb_calc_web_integration.* TO '$DB_USERNAME'@'%';
+FLUSH PRIVILEGES;
+SQL
+
+                        ssh -i "$SSH_KEY" -o BatchMode=yes "$SSH_USER@$TEST_HOST" \
+                            "cd '$TEST_DEPLOY_DIR' && \
+                             docker compose --env-file environments/test/.env -f environments/test/docker-compose.yml \
+                             exec -T mysql sh -c 'MYSQL_PWD=\"\$MYSQL_ROOT_PASSWORD\" mysql --protocol=socket -uroot'" \
+                            < "$WORKSPACE/integration-test-db.sql"
+                        rm -f "$WORKSPACE/integration-test-db.sql"
+                    '''
+                }
+            }
+        }
+
+        stage('Build release') {
+            steps {
+                withCredentials([file(credentialsId: 'test-env-file', variable: 'TEST_ENV_FILE')]) {
+                    sh '''
+                        set -eu
+                        set +x
+                        set -a
+                        . "$TEST_ENV_FILE"
+                        set +a
+
+                        : "${DOCKER_HOST_ADDRESS:?Не задан DOCKER_HOST_ADDRESS}"
+                        : "${MYSQL_PORT:?Не задан MYSQL_PORT}"
+                        : "${DB_USERNAME:?Не задан DB_USERNAME}"
+                        : "${DB_PASSWORD:?Не задан DB_PASSWORD}"
+                        : "${KAFKA_BOOTSTRAP_SERVERS:?Не задан KAFKA_BOOTSTRAP_SERVERS}"
+
+                        export DB_URL="jdbc:mysql://${DOCKER_HOST_ADDRESS}:${MYSQL_PORT}/lb_calc_web_integration?createDatabaseIfNotExist=true"
+                        mvn -s "$MAVEN_SETTINGS" clean verify -Drevision="$APP_VERSION"
+                    '''
+                }
+            }
+        }
+
+        stage('Deploy TEST applications') {
+            steps {
+                withCredentials([sshUserPrivateKey(
+                    credentialsId: 'test-host-ssh',
+                    keyFileVariable: 'SSH_KEY',
+                    usernameVariable: 'SSH_USER'
+                )]) {
+                    sh '''
+                        set -eu
+                        : "${TEST_HOST:?Задайте TEST_HOST в Jenkins}"
+                        : "${TEST_DEPLOY_DIR:?Не определён каталог TEST}"
+
+                        ssh -i "$SSH_KEY" -o BatchMode=yes "$SSH_USER@$TEST_HOST" \
+                            "mkdir -p '$TEST_DEPLOY_DIR/infrastructure/docker/lb-calc-web' \
+                                '$TEST_DEPLOY_DIR/infrastructure/docker/notification-service' \
+                                '$TEST_DEPLOY_DIR/lb-calc-web/target' \
+                                '$TEST_DEPLOY_DIR/notification-service/target'"
+
                         scp -i "$SSH_KEY" -o BatchMode=yes infrastructure/docker/lb-calc-web/Dockerfile \
                             "$SSH_USER@$TEST_HOST:$TEST_DEPLOY_DIR/infrastructure/docker/lb-calc-web/"
                         scp -i "$SSH_KEY" -o BatchMode=yes infrastructure/docker/notification-service/Dockerfile \
@@ -201,13 +268,22 @@ pipeline {
                         ssh -i "$SSH_KEY" -o BatchMode=yes "$SSH_USER@$TEST_HOST" \
                             "cd '$TEST_DEPLOY_DIR' && \
                              APP_VERSION='$APP_VERSION' IMAGE_TAG='$IMAGE_TAG' \
-                             docker compose --env-file environments/test/.env -f environments/test/docker-compose.yml config -q && \
-                             APP_VERSION='$APP_VERSION' IMAGE_TAG='$IMAGE_TAG' \
-                             docker compose --env-file environments/test/.env -f environments/test/docker-compose.yml up -d --wait mysql kafka && \
-                             APP_VERSION='$APP_VERSION' IMAGE_TAG='$IMAGE_TAG' \
                              docker compose --env-file environments/test/.env -f environments/test/docker-compose.yml \
                                  up -d --build --force-recreate --no-deps lb-calc-web notification-service"
+                    '''
+                }
+            }
+        }
 
+        stage('Verify TEST') {
+            steps {
+                withCredentials([sshUserPrivateKey(
+                    credentialsId: 'test-host-ssh',
+                    keyFileVariable: 'SSH_KEY',
+                    usernameVariable: 'SSH_USER'
+                )]) {
+                    sh '''
+                        set -eu
                         ssh -i "$SSH_KEY" -o BatchMode=yes "$SSH_USER@$TEST_HOST" \
                             "cd '$TEST_DEPLOY_DIR' && \
                              WEB_PORT=\$(docker compose --env-file environments/test/.env -f environments/test/docker-compose.yml port lb-calc-web 8081 | tail -n 1 | awk -F: '{print \$NF}') && \
