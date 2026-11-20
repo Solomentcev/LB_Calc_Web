@@ -43,7 +43,14 @@ public class AuthService {
     private final KafkaTemplate<String, UserEvent> kafkaTemplate;
     private final String userEventsTopic;
 
-    public AuthService(EmployeeService employeeService, EmployeeRepository employeeRepository, PasswordEncoder passwordEncoder, JwtService jwtService, KafkaTemplate<String, UserEvent> kafkaTemplate, @Value("${app.kafka.topic.user-events.name}") String userEventsTopic) {
+    public AuthService(
+            EmployeeService employeeService,
+            EmployeeRepository employeeRepository,
+            PasswordEncoder passwordEncoder,
+            JwtService jwtService,
+            KafkaTemplate<String, UserEvent> kafkaTemplate,
+            @Value("${app.kafka.topic.user-events.name}") String userEventsTopic
+    ) {
         this.employeeService = employeeService;
         this.employeeRepository = employeeRepository;
         this.passwordEncoder = passwordEncoder;
