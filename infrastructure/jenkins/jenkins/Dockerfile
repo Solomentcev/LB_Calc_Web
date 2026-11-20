@@ -1,12 +1,6 @@
 FROM jenkins/jenkins:lts
 
-
 USER root
-
-
-# =========================
-# Основные инструменты
-# =========================
 
 RUN apt-get update && apt-get install -y \
     git \
@@ -19,11 +13,8 @@ RUN apt-get update && apt-get install -y \
     unzip \
     gnupg \
     ca-certificates \
+    openssh-client \
     && rm -rf /var/lib/apt/lists/*
-
-# =========================
-# Docker CLI + Compose V2
-# =========================
 
 RUN install -m 0755 -d /etc/apt/keyrings && \
     curl -fsSL https://download.docker.com/linux/debian/gpg \
@@ -32,34 +23,16 @@ RUN install -m 0755 -d /etc/apt/keyrings && \
     echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian $(. /etc/os-release && echo "$VERSION_CODENAME") stable" \
     > /etc/apt/sources.list.d/docker.list && \
     apt-get update && \
-    apt-get install -y \
-        docker-ce-cli \
-        docker-compose-plugin && \
+    apt-get install -y docker-ce-cli docker-compose-plugin && \
     rm -rf /var/lib/apt/lists/*
-
-# =========================
-# Google Chrome
-# =========================
 
 RUN wget -q -O - https://dl.google.com/linux/linux_signing_key.pub \
-    | gpg --dearmor \
-    -o /usr/share/keyrings/google-chrome.gpg
+    | gpg --dearmor -o /usr/share/keyrings/google-chrome.gpg
 
+RUN echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-chrome.gpg] http://dl.google.com/linux/chrome/deb/ stable main" \
+    > /etc/apt/sources.list.d/google-chrome.list
 
-RUN echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-chrome.gpg] \
-http://dl.google.com/linux/chrome/deb/ stable main" \
-> /etc/apt/sources.list.d/google-chrome.list
-
-
-RUN apt-get update && \
-    apt-get install -y google-chrome-stable && \
-    rm -rf /var/lib/apt/lists/*
-
-
-
-# =========================
-# ChromeDriver
-# =========================
+RUN apt-get update && apt-get install -y google-chrome-stable && rm -rf /var/lib/apt/lists/*
 
 RUN DRIVER_VERSION=$(curl -s https://googlechromelabs.github.io/chrome-for-testing/LATEST_RELEASE_STABLE) && \
     wget https://storage.googleapis.com/chrome-for-testing-public/${DRIVER_VERSION}/linux64/chromedriver-linux64.zip && \
@@ -68,30 +41,12 @@ RUN DRIVER_VERSION=$(curl -s https://googlechromelabs.github.io/chrome-for-testi
     chmod +x /usr/local/bin/chromedriver && \
     rm -rf chromedriver-linux64.zip chromedriver-linux64
 
-
-
-# =========================
-# Allure CLI
-# =========================
-
-RUN curl -o allure.tgz -OL \
-https://github.com/allure-framework/allure2/releases/download/2.29.0/allure-2.29.0.tgz && \
-tar -zxvf allure.tgz -C /opt && \
-ln -s /opt/allure-2.29.0/bin/allure /usr/bin/allure && \
-rm allure.tgz
-
-
-
-# =========================
-# Jenkins plugins
-# =========================
+RUN curl -o allure.tgz -OL https://github.com/allure-framework/allure2/releases/download/2.29.0/allure-2.29.0.tgz && \
+    tar -zxvf allure.tgz -C /opt && \
+    ln -s /opt/allure-2.29.0/bin/allure /usr/bin/allure && \
+    rm allure.tgz
 
 COPY plugins.txt /usr/share/jenkins/ref/plugins.txt
-
-
-RUN jenkins-plugin-cli \
-    --plugin-file /usr/share/jenkins/ref/plugins.txt
-
-
+RUN jenkins-plugin-cli --plugin-file /usr/share/jenkins/ref/plugins.txt
 
 USER jenkins

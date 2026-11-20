@@ -64,20 +64,20 @@ pipeline {
                         usernameVariable: 'SSH_USER'
                     )
                 ]) {
-                    sh """
+                    sh '''
                         : "${TEST_HOST:?В Jenkins необходимо задать TEST_HOST}"
                         : "${TEST_PROJECT_DIR:?В Jenkins необходимо задать TEST_PROJECT_DIR}"
 
-                        ssh -i "${SSH_KEY}" -o BatchMode=yes \
-                            "${SSH_USER}@${TEST_HOST}" \
-                            "cd '${TEST_PROJECT_DIR}' && \
+                        ssh -i "$SSH_KEY" -o BatchMode=yes \
+                            "$SSH_USER@$TEST_HOST" \
+                            "cd '$TEST_PROJECT_DIR' && \
                              git fetch origin && git checkout master && \
                              git pull --ff-only origin master && \
-                             APP_VERSION='${APP_VERSION}' docker compose \
+                             APP_VERSION='$APP_VERSION' docker compose \
                                --env-file environments/test/.env \
                                -f environments/test/docker-compose.yml \
                                up -d --build --force-recreate"
-                    """
+                    '''
                 }
             }
         }

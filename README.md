@@ -106,7 +106,7 @@ Jenkins работает на DEV-ноутбуке и имеет парамет�
 - DEV `.env` доступен Jenkins-контейнеру по `/var/jenkins_env/dev/.env`;
 - TEST `.env` хранится на TEST в `environments/test/.env`.
 
-На TEST заранее установить Docker Engine и Compose plugin, настроить SSH и клонировать репозиторий. Jenkins не разворачивает TEST на Docker Engine DEV.
+На TEST заранее установить Docker Engine и Compose plugin, настроить SSH и клонировать репозиторий. Jenkins не разворачивает TEST на Docker Engine DEV. Host key TEST-ноутбука должен быть заранее добавлен в `known_hosts` Jenkins-контейнера (в постоянном томе `/var/jenkins_home/.ssh/known_hosts`).
 
 ## Сброс данных
 
