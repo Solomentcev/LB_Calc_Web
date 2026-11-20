@@ -129,6 +129,9 @@ pipeline {
 
                         ssh -i "$SSH_KEY" -o BatchMode=yes "$SSH_USER@$TEST_HOST" \
                             "if [ ! -d '$TEST_PROJECT_DIR/.git' ]; then \
+                               if [ -d '$TEST_PROJECT_DIR' ]; then \
+                                 rmdir '$TEST_PROJECT_DIR' || { echo 'TEST_PROJECT_DIR существует и не пуст'; exit 1; }; \
+                               fi && \
                                mkdir -p \"$(dirname '$TEST_PROJECT_DIR')\" && \
                                git clone https://github.com/Solomentcev/LB_Calc_Web.git '$TEST_PROJECT_DIR'; \
                              fi && cd '$TEST_PROJECT_DIR' && \
