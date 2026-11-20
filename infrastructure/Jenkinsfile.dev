@@ -19,7 +19,7 @@ pipeline {
                 script {
                     def sourceBranch = params.SOURCE_BRANCH?.trim()
                     def allowedBranch = sourceBranch == 'refactor-main' ||
-                            sourceBranch ==~ /^(feature|refactor|bugfix)\/[A-Za-z0-9][A-Za-z0-9._/-]*$/
+                            sourceBranch ==~ '^(feature|refactor|bugfix)/[A-Za-z0-9][A-Za-z0-9._/-]*$'
                     if (!allowedBranch) {
                         error('Допустимы refactor-main и ветки feature/*, refactor/*, bugfix/*')
                     }
