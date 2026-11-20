@@ -14,7 +14,6 @@ pipeline {
     environment {
         MAVEN_SETTINGS = '/var/jenkins_home/.m2/settings.xml'
         DEV_COMPOSE = 'environments/dev/docker-compose.yml'
-        DEV_ENV_FILE = '/var/jenkins_env/dev.env'
     }
 
     stages {
@@ -91,37 +90,41 @@ pipeline {
             }
         }
 
-        stage('Build Docker images') {
+        stage('Start DEV infrastructure') {
             steps {
-                sh '''
-                    set -eu
-                    test -f "$DEV_ENV_FILE"
+                withCredentials([
+                    file(credentialsId: 'dev-env-file', variable: 'DEV_ENV_FILE')
+                ]) {
+                    sh '''
+                        set -eu
+                        : "${DEV_ENV_FILE:?Не получен Jenkins credential dev-env-file}"
 
-                    APP_VERSION="$APP_VERSION" IMAGE_TAG="$IMAGE_TAG" \
-                    docker compose --env-file "$DEV_ENV_FILE" \
-                        -f "$DEV_COMPOSE" config -q
+                        APP_VERSION="$APP_VERSION" IMAGE_TAG="$IMAGE_TAG" \
+                        docker compose --env-file "$DEV_ENV_FILE" \
+                            -f "$DEV_COMPOSE" config -q
 
-                    APP_VERSION="$APP_VERSION" IMAGE_TAG="$IMAGE_TAG" \
-                    docker compose --env-file "$DEV_ENV_FILE" \
-                        -f "$DEV_COMPOSE" build lb-calc-web notification-service
-                '''
+                        APP_VERSION="$APP_VERSION" IMAGE_TAG="$IMAGE_TAG" \
+                        docker compose --env-file "$DEV_ENV_FILE" \
+                            -f "$DEV_COMPOSE" up -d --wait mysql kafka
+                    '''
+                }
             }
         }
 
-        stage('Check DEV infrastructure') {
+        stage('Build Docker images') {
             steps {
-                sh '''
-                    set -eu
-
-                    check_healthy_container() {
-                        container_name="$1"
-                        state=$(docker inspect --format '{{.State.Status}} {{if .State.Health}}{{.State.Health.Status}}{{else}}no-healthcheck{{end}}' "$container_name" 2>/dev/null || true)
-
-                        if [ "$state" != "running healthy" ]; then
-                            echo "Контейнер инфраструктуры $container_name должен быть running/healthy; текущее состояние: ${state:-не найден}"
-                            exit 1
-                        fi
-                    }
+                withCredentials([
+                    file(credentialsId: 'dev-env-file', variable: 'DEV_ENV_FILE')
+                ]) {
+                    sh '''
+                        set -eu
+                        APP_VERSION="$APP_VERSION" IMAGE_TAG="$IMAGE_TAG" \
+                        docker compose --env-file "$DEV_ENV_FILE" \
+                            -f "$DEV_COMPOSE" build lb-calc-web notification-service
+                    '''
+                }
+            }
+        }
 
                     check_healthy_container lb-calc-dev-mysql
                     check_healthy_container lb-calc-dev-kafka
@@ -131,19 +134,28 @@ pipeline {
 
         stage('Deploy DEV applications') {
             steps {
-                sh '''
-                    APP_VERSION="$APP_VERSION" IMAGE_TAG="$IMAGE_TAG" \
-                    docker compose --env-file "$DEV_ENV_FILE" \
-                        -f "$DEV_COMPOSE" \
-                        up -d --no-build --force-recreate --no-deps \
-                        lb-calc-web notification-service
-                '''
+                withCredentials([
+                    file(credentialsId: 'dev-env-file', variable: 'DEV_ENV_FILE')
+                ]) {
+                    sh '''
+                        set -eu
+                        APP_VERSION="$APP_VERSION" IMAGE_TAG="$IMAGE_TAG" \
+                        docker compose --env-file "$DEV_ENV_FILE" \
+                            -f "$DEV_COMPOSE" \
+                            up -d --no-build --force-recreate --no-deps \
+                            lb-calc-web notification-service
+                    '''
+                }
             }
+        }
         }
 
         stage('Verify DEV') {
             steps {
-                sh '''
+                withCredentials([
+                    file(credentialsId: 'dev-env-file', variable: 'DEV_ENV_FILE')
+                ]) {
+                    sh '''
                     set -eu
                     WEB_PORT=$(APP_VERSION="$APP_VERSION" IMAGE_TAG="$IMAGE_TAG" docker compose \
                         --env-file "$DEV_ENV_FILE" \
@@ -173,7 +185,8 @@ pipeline {
                         -f "$DEV_COMPOSE" \
                         logs --tail=100 lb-calc-web notification-service
                     exit 1
-                '''
+                    '''
+                }
             }
         }
     }
