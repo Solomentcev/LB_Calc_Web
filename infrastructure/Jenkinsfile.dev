@@ -72,7 +72,7 @@ pipeline {
                         ).trim().replaceFirst(/-SNAPSHOT$/, '')
                     }
 
-                    if (!(baseVersion ==~ /\d+\.\d+\.\d+/)) {
+                    if (!(baseVersion ==~ /\\d+\\.\\d+\\.\\d+/)) {
                         error("Не удалось определить базовую SemVer-версию: ${baseVersion}")
                     }
 
@@ -100,13 +100,48 @@ pipeline {
             }
         }
 
-        stage('Deploy DEV') {
+        stage('Check DEV infrastructure') {
             steps {
                 sh '''
-                    APP_VERSION="$APP_VERSION" IMAGE_TAG="$IMAGE_TAG" docker compose \
-                        --env-file "$DEV_ENV_FILE" \
-                        -f "$DEV_COMPOSE" \
-                        up -d --build --force-recreate
+                    set -eu
+
+                    check_healthy_container() {
+                        container_name="$1"
+                        state=$(docker inspect --format '{{.State.Status}} {{if .State.Health}}{{.State.Health.Status}}{{else}}no-healthcheck{{end}}' "$container_name" 2>/dev/null || true)
+
+                        if [ "$state" != "running healthy" ]; then
+                            echo "Контейнер инфраструктуры $container_name должен быть running/healthy; текущее состояние: ${state:-не найден}"
+                            exit 1
+                        fi
+
+                        echo "Инфраструктура доступна: $container_name ($state)"
+                    }
+
+                    check_healthy_container lb-calc-dev-mysql
+                    check_healthy_container lb-calc-dev-kafka
+                '''
+            }
+        }
+
+        stage('Deploy DEV applications') {
+            steps {
+                sh '''
+                    set -eu
+
+                    APP_VERSION="$APP_VERSION" IMAGE_TAG="$IMAGE_TAG" docker compose \\
+                        --env-file "$DEV_ENV_FILE" \\
+                        -f "$DEV_COMPOSE" \\
+                        up -d --build --force-recreate --no-deps \\
+                        lb-calc-web notification-service
+
+                    for container_name in lb-calc-dev-web lb-calc-dev-notification; do
+                        state=$(docker inspect --format '{{.State.Status}}' "$container_name" 2>/dev/null || true)
+                        if [ "$state" != "running" ]; then
+                            echo "Контейнер приложения $container_name не запущен; состояние: ${state:-не найден}"
+                            exit 1
+                        fi
+                        echo "Приложение запущено: $container_name"
+                    done
                 '''
             }
         }
