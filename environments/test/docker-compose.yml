@@ -56,14 +56,14 @@ services:
     container_name: lb-calc-test-web
     restart: unless-stopped
     environment:
-      DB_URL: "jdbc:mysql://${TEST_HOST_IP}:${MYSQL_PORT}/${MYSQL_DATABASE}?createDatabaseIfNotExist=true"
+      DB_URL: "jdbc:mysql://mysql:3306/${MYSQL_DATABASE}?createDatabaseIfNotExist=true"
       DB_USERNAME: ${MYSQL_USER}
       DB_PASSWORD: ${MYSQL_PASSWORD}
       JWT_SECRET_ACCESS: ${JWT_SECRET_ACCESS}
       JWT_SECRET_REFRESH: ${JWT_SECRET_REFRESH}
       JWT_EXPIRATION_ACCESS: ${JWT_EXPIRATION_ACCESS:-36000000}
       JWT_EXPIRATION_REFRESH: ${JWT_EXPIRATION_REFRESH:-252000000}
-      KAFKA_BOOTSTRAP_SERVERS: "${TEST_HOST_IP}:${KAFKA_EXTERNAL_PORT}"
+      KAFKA_BOOTSTRAP_SERVERS: "kafka:9092"
       KAFKA_TOPIC_USER_EVENTS: ${KAFKA_TOPIC_USER_EVENTS}
     ports:
       - "${WEB_PORT}:8081"
