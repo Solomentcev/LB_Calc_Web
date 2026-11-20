@@ -37,7 +37,6 @@ import org.hibernate.Hibernate;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
 import com.lb_calc_web.security.EmployeePrincipal;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -56,7 +55,6 @@ import static org.junit.jupiter.api.Assertions.*;
  * Проверяет сквозное сохранение и восстановление Project → ALS → Module.
  */
 @SpringBootTest
-@ActiveProfiles("test")
 @Transactional
 class PersistenceIntegrationTest {
 

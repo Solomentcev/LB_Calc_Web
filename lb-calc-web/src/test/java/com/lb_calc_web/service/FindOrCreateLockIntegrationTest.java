@@ -9,7 +9,6 @@ import com.lb_calc_web.repository.LBRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -28,7 +27,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * Проверяет блокировку Find-or-Create на реальной тестовой БД.
  */
 @SpringBootTest
-@ActiveProfiles("test")
 class FindOrCreateLockIntegrationTest {
 
     @Autowired
