@@ -67,7 +67,16 @@ pipeline {
                     }
 
                     env.APP_VERSION = "${baseVersion}-SNAPSHOT"
-                    env.IMAGE_TAG = "${env.APP_VERSION}-${env.BRANCH_SLUG}-build-${env.BUILD_NUMBER}"
+                    def tagPrefix = "${env.APP_VERSION}-"
+                    def tagSuffix = "-build-${env.BUILD_NUMBER}"
+                    def maxBranchSlugLength = 128 - tagPrefix.length() - tagSuffix.length()
+
+                    if (maxBranchSlugLength < 1) {
+                        error('Не удалось сформировать допустимый Docker tag.')
+                    }
+
+                    env.BRANCH_SLUG = env.BRANCH_SLUG.take(maxBranchSlugLength)
+                    env.IMAGE_TAG = "${tagPrefix}${env.BRANCH_SLUG}${tagSuffix}"
 
                     echo "DEV branch: ${env.SOURCE_BRANCH}"
                     echo "Application version: ${env.APP_VERSION}"
