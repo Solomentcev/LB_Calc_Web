@@ -19,7 +19,7 @@ pipeline {
                     env.DEPLOY_COMMIT = scmVars.GIT_COMMIT
                     def checkedOutBranch = scmVars.GIT_BRANCH ?: env.BRANCH_NAME
                     if (!(checkedOutBranch in ['master', 'origin/master'])) {
-                        error("TEST pipeline разрешён только для master. Получена ветка: @{checkedOutBranch}")
+                        error("TEST pipeline разрешён только для master. Получена ветка: ${checkedOutBranch}")
                     }
                 }
                 withCredentials([sshUserPrivateKey(
@@ -58,7 +58,7 @@ pipeline {
                                 it.merge_commit_sha == env.DEPLOY_COMMIT
                         }
                         if (mergedPrs.size() != 1) {
-                            error("Для commit @{env.DEPLOY_COMMIT} ожидался ровно один merged PR в master, найдено: @{mergedPrs.size()}.")
+                            error("Для commit ${env.DEPLOY_COMMIT} ожидался ровно один merged PR в master, найдено: ${mergedPrs.size()}.")
                         }
 
                         def pr = mergedPrs[0]
@@ -66,16 +66,16 @@ pipeline {
                             it in ['version:patch', 'version:minor', 'version:major']
                         }
                         if (labels.size() != 1) {
-                            error("PR #@{pr.number} должен иметь ровно одну метку version:patch, version:minor или version:major.")
+                            error("PR #${pr.number} должен иметь ровно одну метку version:patch, version:minor или version:major.")
                         }
 
                         def existingTags = sh(
-                            script: "git tag --points-at '@{env.DEPLOY_COMMIT}' --list 'v[0-9]*' | grep -E '^v[0-9]+\\.[0-9]+\\.[0-9]+$' || true",
+                            script: "git tag --points-at '${env.DEPLOY_COMMIT}' --list 'v[0-9]*' | grep -E '^v[0-9]+\\.[0-9]+\\.[0-9]+$' || true",
                             returnStdout: true
                         ).trim().readLines().findAll { it }
 
                         if (existingTags.size() > 1) {
-                            error("На commit @{env.DEPLOY_COMMIT} найдено несколько SemVer-тегов.")
+                            error("На commit ${env.DEPLOY_COMMIT} найдено несколько SemVer-тегов.")
                         }
 
                         if (existingTags.size() == 1) {
@@ -94,7 +94,7 @@ pipeline {
                                 ).trim().replaceFirst(/-SNAPSHOT$/, '')
 
                             if (!(baseVersion ==~ /\d+\.\d+\.\d+/)) {
-                                error("Некорректная базовая SemVer-версия: @{baseVersion}")
+                                error("Некорректная базовая SemVer-версия: ${baseVersion}")
                             }
 
                             def parts = baseVersion.tokenize('.').collect { it.toInteger() }
@@ -115,25 +115,25 @@ pipeline {
                                     patch++
                                     break
                             }
-                            env.APP_VERSION = "@{major}.@{minor}.@{patch}"
-                            env.RELEASE_TAG = "v@{env.APP_VERSION}"
+                            env.APP_VERSION = "${major}.${minor}.${patch}"
+                            env.RELEASE_TAG = "v${env.APP_VERSION}"
                         }
 
                         if (sh(
-                            script: "git show-ref --verify --quiet 'refs/tags/@{env.RELEASE_TAG}'",
+                            script: "git show-ref --verify --quiet 'refs/tags/${env.RELEASE_TAG}'",
                             returnStatus: true
                         ) == 0) {
                             def taggedCommit = sh(
-                                script: "git rev-list -n 1 '@{env.RELEASE_TAG}'",
+                                script: "git rev-list -n 1 '${env.RELEASE_TAG}'",
                                 returnStdout: true
                             ).trim()
                             if (taggedCommit != env.DEPLOY_COMMIT) {
-                                error("Тег @{env.RELEASE_TAG} уже указывает на другой commit.")
+                                error("Тег ${env.RELEASE_TAG} уже указывает на другой commit.")
                             }
                         }
 
-                        env.IMAGE_TAG = "@{env.APP_VERSION}-build-@{env.BUILD_NUMBER}"
-                        echo "PR #@{pr.number}; version @{env.APP_VERSION}; commit @{env.DEPLOY_COMMIT}"
+                        env.IMAGE_TAG = "${env.APP_VERSION}-build-${env.BUILD_NUMBER}"
+                        echo "PR #${pr.number}; version ${env.APP_VERSION}; commit ${env.DEPLOY_COMMIT}"
                     }
                 }
             }
@@ -157,12 +157,12 @@ pipeline {
                 ]) {
                     sh '''
                         set -eu
-                        : "$@{TEST_HOST:?Задайте TEST_HOST в Jenkins}"
-                        : "$@{TEST_ENV_FILE:?Не получен Jenkins credential test-env-file}"
+                        : "$${TEST_HOST:?Задайте TEST_HOST в Jenkins}"
+                        : "$${TEST_ENV_FILE:?Не получен Jenkins credential test-env-file}"
 
                         REMOTE_HOME=$(ssh -i "$SSH_KEY" -o BatchMode=yes \
                             "$SSH_USER@$TEST_HOST" 'printf "%s" "$HOME"')
-                        TEST_DEPLOY_DIR="@{REMOTE_HOME%/}/lb-calc-test"
+                        TEST_DEPLOY_DIR="${REMOTE_HOME%/}/lb-calc-test"
 
                         case "$TEST_DEPLOY_DIR" in
                             *[!A-Za-z0-9_./-]*)
@@ -229,7 +229,7 @@ pipeline {
             steps {
                 script {
                     if (sh(
-                        script: "git show-ref --verify --quiet 'refs/tags/@{env.RELEASE_TAG}'",
+                        script: "git show-ref --verify --quiet 'refs/tags/${env.RELEASE_TAG}'",
                         returnStatus: true
                     ) != 0) {
                         sh '''
@@ -257,7 +257,7 @@ pipeline {
 
     post {
         success {
-            echo "TEST развёрнут: commit @{env.DEPLOY_COMMIT}, версия @{env.APP_VERSION}, тег @{env.RELEASE_TAG}, образ @{env.IMAGE_TAG}"
+            echo "TEST развёрнут: commit ${env.DEPLOY_COMMIT}, версия ${env.APP_VERSION}, тег ${env.RELEASE_TAG}, образ ${env.IMAGE_TAG}"
         }
         failure {
             echo 'Развёртывание TEST завершилось ошибкой.'
