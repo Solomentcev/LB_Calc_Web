@@ -113,3 +113,14 @@ TEST:
 
 Для TEST credential `test-env-file` должен содержать конфигурацию второго ноутбука. Секреты не хранятся в репозитории.
 
+DEV-файл `/var/jenkins_env/dev.env` на агенте Jenkins должен быть подготовлен на основе `environments/dev/.env.example`. В нём должны быть заданы актуальный `DOCKER_HOST_ADDRESS`, учётные данные MySQL и JWT-секреты. Файл хранится вне репозитория.
+
+## GitHub Actions
+
+Workflow: `.github/workflows/java-ci.yml`.
+
+- Запускается для pull request в `master` и при push в `master`.
+- Для PR проверяет наличие ровно одной метки версии.
+- Выполняет `mvn clean verify` на Java 17.
+- Не развёртывает приложения и не управляет TEST/DEV стендами.
+
