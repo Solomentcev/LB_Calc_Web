@@ -157,8 +157,8 @@ pipeline {
                 ]) {
                     sh '''
                         set -eu
-                        : "$${TEST_HOST:?Задайте TEST_HOST в Jenkins}"
-                        : "$${TEST_ENV_FILE:?Не получен Jenkins credential test-env-file}"
+                        : "${TEST_HOST:?Задайте TEST_HOST в Jenkins}"
+                        : "${TEST_ENV_FILE:?Не получен Jenkins credential test-env-file}"
 
                         REMOTE_HOME=$(ssh -i "$SSH_KEY" -o BatchMode=yes \
                             "$SSH_USER@$TEST_HOST" 'printf "%s" "$HOME"')
@@ -210,10 +210,10 @@ pipeline {
 
                         ssh -i "$SSH_KEY" -o BatchMode=yes "$SSH_USER@$TEST_HOST" \
                             "cd '$TEST_DEPLOY_DIR' && \
-                             WEB_PORT=\\$(docker compose --env-file environments/test/.env -f environments/test/docker-compose.yml port lb-calc-web 8081 | tail -n 1 | awk -F: '{print \\$NF}') && \
-                             for attempt in \\$(seq 1 30); do \
-                               if curl --fail --silent \\\"http://127.0.0.1:\\$WEB_PORT/login\\\" >/dev/null && \
-                                  [ \\\"\\$(docker inspect --format '{{.State.Running}}' lb-calc-test-notification 2>/dev/null)\\\" = true ]; then \
+                             WEB_PORT=\$(docker compose --env-file environments/test/.env -f environments/test/docker-compose.yml port lb-calc-web 8081 | tail -n 1 | awk -F: '{print \$NF}') && \
+                             for attempt in \$(seq 1 30); do \
+                               if curl --fail --silent \"http://127.0.0.1:\$WEB_PORT/login\" >/dev/null && \
+                                  [ \"\$(docker inspect --format '{{.State.Running}}' lb-calc-test-notification 2>/dev/null)\" = true ]; then \
                                  echo 'TEST web и notification-service доступны'; exit 0; \
                                fi; \
                                sleep 2; \
