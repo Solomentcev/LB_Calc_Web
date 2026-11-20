@@ -1,0 +1,224 @@
+pipeline {
+    agent any
+
+    options {
+        disableConcurrentBuilds()
+        timestamps()
+    }
+
+    triggers {
+        pollSCM('H/2 * * * *')
+    }
+
+    environment {
+        MAVEN_SETTINGS = '/var/jenkins_home/.m2/settings.xml'
+    }
+
+    stages {
+        stage('Checkout master') {
+            steps {
+                script {
+                    def scmVars = checkout scm
+                    env.DEPLOY_COMMIT = scmVars.GIT_COMMIT
+                    def checkedOutBranch = scmVars.GIT_BRANCH ?: env.BRANCH_NAME
+                    if (!(checkedOutBranch in ['master', 'origin/master'])) {
+                        error("TEST pipeline разрешён только для master. Получена ветка: ${checkedOutBranch}")
+                    }
+                }
+                sh 'git fetch --tags https://github.com/Solomentcev/LB_Calc_Web.git'
+            }
+        }
+
+        stage('Validate merged PR and resolve version') {
+            steps {
+                script {
+                    def response = sh(
+                        script: """curl --fail --silent --show-error \
+                            -H 'Accept: application/vnd.github+json' \
+                            -H 'X-GitHub-Api-Version: 2022-11-28' \
+                            'https://api.github.com/repos/Solomentcev/LB_Calc_Web/commits/${env.DEPLOY_COMMIT}/pulls'""",
+                        returnStdout: true
+                    ).trim()
+                    def pullRequests = new groovy.json.JsonSlurperClassic().parseText(response)
+                    def mergedPr = pullRequests.find {
+                        it.base?.ref == 'master' && it.merged_at &&
+                                it.merge_commit_sha == env.DEPLOY_COMMIT
+                    }
+                    if (mergedPr == null) {
+                        error("Commit ${env.DEPLOY_COMMIT} не является результатом merge PR в master.")
+                    }
+
+                    def labels = mergedPr.labels.collect { it.name }.findAll {
+                        it in ['version:patch', 'version:minor', 'version:major']
+                    }
+                    if (labels.size() != 1) {
+                        error("PR #${mergedPr.number} должен иметь ровно одну метку version:patch, version:minor или version:major.")
+                    }
+
+                    def existingTag = sh(
+                        script: "git tag --points-at '${env.DEPLOY_COMMIT}' --list 'v[0-9]*' | head -n 1",
+                        returnStdout: true
+                    ).trim()
+                    if (existingTag) {
+                        env.RELEASE_TAG = existingTag
+                        env.APP_VERSION = existingTag.replaceFirst(/^v/, '')
+                    } else {
+                        def latestTag = sh(
+                            script: "git tag --list 'v[0-9]*' --sort=-v:refname | head -n 1",
+                            returnStdout: true
+                        ).trim()
+                        def baseVersion = latestTag
+                            ? latestTag.replaceFirst(/^v/, '')
+                            : sh(
+                                script: 'mvn -s "$MAVEN_SETTINGS" help:evaluate -Dexpression=revision -q -DforceStdout',
+                                returnStdout: true
+                            ).trim().replaceFirst(/-SNAPSHOT$/, '')
+                        if (!(baseVersion ==~ /\d+\.\d+\.\d+/)) {
+                            error("Некорректная базовая SemVer-версия: ${baseVersion}")
+                        }
+
+                        def parts = baseVersion.tokenize('.').collect { it.toInteger() }
+                        def major = parts[0]
+                        def minor = parts[1]
+                        def patch = parts[2]
+                        switch (labels[0]) {
+                            case 'version:major':
+                                major++; minor = 0; patch = 0
+                                break
+                            case 'version:minor':
+                                minor++; patch = 0
+                                break
+                            case 'version:patch':
+                                patch++
+                                break
+                        }
+                        env.APP_VERSION = "${major}.${minor}.${patch}"
+                        env.RELEASE_TAG = "v${env.APP_VERSION}"
+                    }
+                    env.IMAGE_TAG = "${env.APP_VERSION}-build-${env.BUILD_NUMBER}"
+                    echo "PR #${mergedPr.number}; version ${env.APP_VERSION}; commit ${env.DEPLOY_COMMIT}"
+                }
+            }
+        }
+
+        stage('Build release') {
+            steps {
+                sh 'mvn -s "$MAVEN_SETTINGS" clean package -DskipTests -Drevision="$APP_VERSION"'
+            }
+        }
+
+        stage('Deploy TEST') {
+            steps {
+                withCredentials([
+                    sshUserPrivateKey(
+                        credentialsId: 'test-host-ssh',
+                        keyFileVariable: 'SSH_KEY',
+                        usernameVariable: 'SSH_USER'
+                    ),
+                    file(
+                        credentialsId: 'test-env-file',
+                        variable: 'TEST_ENV_FILE'
+                    )
+                ]) {
+                    sh '''
+                        set -eu
+                        : "${TEST_HOST:?Задайте TEST_HOST в Jenkins}"
+                        : "${TEST_PROJECT_DIR:?Задайте TEST_PROJECT_DIR в Jenkins}"
+                        : "${APP_VERSION:?APP_VERSION не определена}"
+                        : "${IMAGE_TAG:?IMAGE_TAG не определён}"
+
+                        ssh -i "$SSH_KEY" -o BatchMode=yes "$SSH_USER@$TEST_HOST" \
+                            "mkdir -p '$TEST_PROJECT_DIR/environments/test' && \
+                             if [ ! -d '$TEST_PROJECT_DIR/.git' ]; then \
+                               git clone https://github.com/Solomentcev/LB_Calc_Web.git '$TEST_PROJECT_DIR'; \
+                             fi && cd '$TEST_PROJECT_DIR' && \
+                             git fetch origin master --tags && \
+                             git checkout --detach '$DEPLOY_COMMIT' && \
+                             mkdir -p lb-calc-web/target notification-service/target"
+
+                        scp -i "$SSH_KEY" -o BatchMode=yes "$TEST_ENV_FILE" \
+                            "$SSH_USER@$TEST_HOST:$TEST_PROJECT_DIR/environments/test/.env.upload"
+                        ssh -i "$SSH_KEY" -o BatchMode=yes "$SSH_USER@$TEST_HOST" \
+                            "cd '$TEST_PROJECT_DIR' && chmod 600 environments/test/.env.upload && \
+                             mv environments/test/.env.upload environments/test/.env"
+
+                        scp -i "$SSH_KEY" -o BatchMode=yes \
+                            "lb-calc-web/target/lb-calc-web-$APP_VERSION.jar" \
+                            "$SSH_USER@$TEST_HOST:$TEST_PROJECT_DIR/lb-calc-web/target/"
+                        scp -i "$SSH_KEY" -o BatchMode=yes \
+                            "notification-service/target/notification-service-$APP_VERSION.jar" \
+                            "$SSH_USER@$TEST_HOST:$TEST_PROJECT_DIR/notification-service/target/"
+
+                        ssh -i "$SSH_KEY" -o BatchMode=yes "$SSH_USER@$TEST_HOST" \
+                            "cd '$TEST_PROJECT_DIR' && \
+                             APP_VERSION='$APP_VERSION' IMAGE_TAG='$IMAGE_TAG' \
+                             docker compose --env-file environments/test/.env \
+                               -f environments/test/docker-compose.yml config -q && \
+                             APP_VERSION='$APP_VERSION' IMAGE_TAG='$IMAGE_TAG' \
+                             docker compose --env-file environments/test/.env \
+                               -f environments/test/docker-compose.yml up -d --build --force-recreate && \
+                             docker compose --env-file environments/test/.env \
+                               -f environments/test/docker-compose.yml ps"
+
+                        ssh -i "$SSH_KEY" -o BatchMode=yes "$SSH_USER@$TEST_HOST" \
+                            "cd '$TEST_PROJECT_DIR' && set -a && . environments/test/.env && set +a && \
+                             for attempt in $(seq 1 30); do \
+                               if curl --fail --silent http://127.0.0.1:\$WEB_PORT/login >/dev/null; then \
+                                 echo 'TEST web доступен'; exit 0; \
+                               fi; sleep 2; \
+                             done; \
+                             docker compose --env-file environments/test/.env \
+                               -f environments/test/docker-compose.yml logs --tail=100; exit 1"
+                    '''
+                }
+            }
+        }
+
+        stage('Create release tag') {
+            steps {
+                script {
+                    def tagExists = sh(
+                        script: "git show-ref --verify --quiet 'refs/tags/${env.RELEASE_TAG}'",
+                        returnStatus: true
+                    ) == 0
+                    if (!tagExists) {
+                        sh '''
+                            git config user.name "Jenkins"
+                            git config user.email "jenkins@localhost"
+                            git tag -a "$RELEASE_TAG" "$DEPLOY_COMMIT" -m "Релиз $RELEASE_TAG"
+                        '''
+                        withCredentials([
+                            sshUserPrivateKey(
+                                credentialsId: 'github-ssh',
+                                keyFileVariable: 'GITHUB_SSH_KEY',
+                                usernameVariable: 'GITHUB_SSH_USER'
+                            )
+                        ]) {
+                            sh '''
+                                export GIT_SSH_COMMAND="ssh -i $GITHUB_SSH_KEY -o IdentitiesOnly=yes"
+                                git push origin "refs/tags/$RELEASE_TAG"
+                            '''
+                        }
+                    } else {
+                        def taggedCommit = sh(
+                            script: "git rev-list -n 1 '${env.RELEASE_TAG}'",
+                            returnStdout: true
+                        ).trim()
+                        if (taggedCommit != env.DEPLOY_COMMIT) {
+                            error("Тег ${env.RELEASE_TAG} уже указывает на другой commit.")
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "TEST развёрнут: commit ${env.DEPLOY_COMMIT}, версия ${env.APP_VERSION}, тег ${env.RELEASE_TAG}, образ ${env.IMAGE_TAG}"
+        }
+        failure {
+            echo 'Развёртывание TEST завершилось ошибкой.'
+        }
+    }
+}
