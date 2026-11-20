@@ -19,6 +19,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.lang.NonNull;
@@ -39,14 +40,16 @@ public class AuthService {
     private final EmployeeRepository employeeRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
-    private KafkaTemplate<String, UserEvent> kafkaTemplate;
+    private final KafkaTemplate<String, UserEvent> kafkaTemplate;
+    private final String userEventsTopic;
 
-    public AuthService(EmployeeService employeeService, EmployeeRepository employeeRepository, PasswordEncoder passwordEncoder, JwtService jwtService, KafkaTemplate<String, UserEvent> kafkaTemplate) {
+    public AuthService(EmployeeService employeeService, EmployeeRepository employeeRepository, PasswordEncoder passwordEncoder, JwtService jwtService, KafkaTemplate<String, UserEvent> kafkaTemplate, @Value("${app.kafka.topic.user-events.name}") String userEventsTopic) {
         this.employeeService = employeeService;
         this.employeeRepository = employeeRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
         this.kafkaTemplate = kafkaTemplate;
+        this.userEventsTopic = userEventsTopic;
     }
     public JwtResponse login(LoginRequest loginRequest) throws AuthException {
         logger.info("Login attempt for email: {}", loginRequest.getEmail());
@@ -67,7 +70,7 @@ public class AuthService {
 
             UserEvent userEvent=new UserEvent(UserEventType.USER_LOGGED_IN, user.getId(), user.getEmail());
             CompletableFuture<SendResult<String,UserEvent>> future=kafkaTemplate
-                    .send("user-events-topic", String.valueOf(user.getId()), userEvent);
+                    .send(userEventsTopic, String.valueOf(user.getId()), userEvent);
             future.whenComplete((sendResult, throwable) -> {
                 if (throwable != null) {
                     logger.error("Failed to send user event to Kafka: {}", throwable.getMessage());
@@ -133,7 +136,7 @@ public class AuthService {
 
         UserEvent userEvent=new UserEvent(UserEventType.USER_REGISTERED, employeeDTO1.getId(), employeeDTO1.getEmail());
         CompletableFuture<SendResult<String,UserEvent>> future=kafkaTemplate
-                .send("user-events-topic", String.valueOf(employeeDTO1.getId()), userEvent);
+                .send(userEventsTopic, String.valueOf(employeeDTO1.getId()), userEvent);
         future.whenComplete((sendResult, throwable) -> {
             if (throwable != null) {
                 logger.error("Failed to send user event to Kafka: {}", throwable.getMessage());
