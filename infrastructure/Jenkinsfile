@@ -44,7 +44,7 @@ pipeline {
                         credentialsId: 'github-ssh'
                     ]]
                 ])
-                sh 'git fetch --tags origin'
+                sh 'git fetch --tags https://github.com/Solomentcev/LB_Calc_Web.git'
             }
         }
 
