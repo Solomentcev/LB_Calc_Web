@@ -72,7 +72,7 @@ pipeline {
                         ).trim().replaceFirst(/-SNAPSHOT$/, '')
                     }
 
-                    if (!(baseVersion ==~ /\d+\\.\d+\\.\d+/)) {
+                    if (!(baseVersion ==~ /\d+\.\d+\.\d+/)) {
                         error("Не удалось определить базовую SemVer-версию: ${baseVersion}")
                     }
 
