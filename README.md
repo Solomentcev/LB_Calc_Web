@@ -132,10 +132,10 @@ GitHub Actions проверяет наличие ровно одной метк�
 
 Создать в репозитории метки version:patch, version:minor, version:major. Для master включить правила:
 - изменения только через Pull Request;
-- обязательные проверки Validate version label и Maven verification;
+- обязательная проверка Validate version label; Maven verification сделать обязательной после устранения ошибок интеграционных тестов;
 - запрет прямого push в master.
 
-Сейчас ветка master не защищена; правила необходимо включить в GitHub Settings → Rules → Rulesets (или Branches).
+Сейчас ветка master не защищена; правила необходимо включить в GitHub Settings → Rules → Rulesets (или Branches). На текущем этапе не включать Maven verification в обязательные проверки: существующий запуск завершился 8 ошибками загрузки Spring ApplicationContext (227 тестов запущено, 0 assertion failures).
 
 ### Настройки Jenkins
 
