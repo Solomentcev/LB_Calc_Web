@@ -51,5 +51,12 @@ jobs:
               );
             }
 
+      - name: Проверить Docker Compose конфигурации
+        run: |
+          docker compose --env-file environments/dev/.env.example \
+            -f environments/dev/docker-compose.yml config -q
+          docker compose --env-file environments/test/.env.example \
+            -f environments/test/docker-compose.yml config -q
+
       - name: Собрать проект и выполнить тесты
         run: mvn --batch-mode --no-transfer-progress clean verify
