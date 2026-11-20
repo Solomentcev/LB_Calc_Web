@@ -80,7 +80,16 @@ pipeline {
                     def branchSlug = env.SOURCE_BRANCH.toLowerCase()
                             .replaceAll(/[^a-z0-9_.-]+/, '-')
                             .replaceAll(/^-+|-+$/, '')
-                    env.IMAGE_TAG = "${env.APP_VERSION}-${branchSlug}-build-${env.BUILD_NUMBER}"
+                    def tagPrefix = "${env.APP_VERSION}-"
+                    def tagSuffix = "-build-${env.BUILD_NUMBER}"
+                    def maxBranchSlugLength = 128 - tagPrefix.length() - tagSuffix.length()
+
+                    if (maxBranchSlugLength < 1) {
+                        error('Не удалось сформировать допустимый Docker tag.')
+                    }
+
+                    branchSlug = branchSlug.take(maxBranchSlugLength)
+                    env.IMAGE_TAG = "${tagPrefix}${branchSlug}${tagSuffix}"
                 }
             }
         }
