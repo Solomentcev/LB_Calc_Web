@@ -95,27 +95,61 @@ docker compose up -d notification-service
 
 Flyway автоматически применяет миграции при запуске основного приложения. Hibernate использует `ddl-auto=validate`.
 
-## Jenkins
+## Jenkins и версионирование
 
-На DEV-ноутбуке работают две независимые Pipeline Job. У каждой фиксированная ветка и собственный Jenkinsfile; параметра выбора стенда нет.
+На DEV-ноутбуке работают две независимые Pipeline Job. Отдельной Release Job нет.
 
-| Job | Ветка | Jenkinsfile | Развёртывание |
+| Job | Ветка Jenkinsfile | Jenkinsfile | Назначение |
 |---|---|---|---|
-| `LB-CALC-DEV` | `refactor-main` | `infrastructure/Jenkinsfile.dev` | Docker Engine DEV |
-| `LB-CALC-TEST` | `master` | `infrastructure/Jenkinsfile.test` | Docker Engine TEST по SSH |
+| LB-CALC-DEV | refactor-main | infrastructure/Jenkinsfile.dev | Выбор ветки разработки и развёртывание на DEV |
+| LB-CALC-TEST | master | infrastructure/Jenkinsfile.test | Автоматическая сборка версии и развёртывание на TEST после merge PR |
 
-Обе Job настраиваются как **Pipeline script from SCM** с Git URL `git@github.com:Solomentcev/LB_Calc_Web.git` и credential `github-ssh`. Для каждой Job указываются соответствующая ветка и путь к Jenkinsfile из таблицы. Jenkinsfile использует `checkout scm`, поэтому собирается именно commit выбранной ветки.
+### DEV
 
-Обе Pipeline собирают приложения на Jenkins/DEV. DEV Pipeline развёртывает их локально с DEV `.env`. TEST Pipeline передаёт собранные JAR по SCP на TEST и запускает Compose на TEST; перед передачей рабочая копия TEST переключается на тот же commit, из которого собраны артефакты. Java и Maven на TEST не требуются.
+В Job LB-CALC-DEV перед запуском указывается SOURCE_BRANCH. Разрешены feature/*, refactor/*, bugfix/*; refactor-main временно оставлена как текущая рабочая ветка.
 
-Дополнительные настройки Jenkins:
-- SSH credential типа SSH Username with private key с ID `test-host-ssh`;
-- глобальные переменные `TEST_HOST` (LAN IP/hostname TEST) и `TEST_PROJECT_DIR` (путь к клону репозитория на TEST);
-- DEV `.env` доступен Jenkins-контейнеру по `/var/jenkins_env/dev/.env`;
-- TEST `.env` хранится на TEST в `environments/test/.env`;
-- host key TEST-ноутбука заранее добавлен в `/var/jenkins_home/.ssh/known_hosts` Jenkins-контейнера.
+DEV получает последнюю релизную версию с суффиксом -SNAPSHOT. Пока Git-тегов нет, базовая версия берётся из корневого POM. Docker tag уникален для ветки и номера сборки: <APP_VERSION>-<branch>-build-<BUILD_NUMBER>.
 
-На TEST заранее установить Docker Engine и Compose plugin, настроить SSH и клонировать репозиторий. Jenkins не развёртывает TEST на Docker Engine DEV. Jenkins Job для TEST настраивается после появления `infrastructure/Jenkinsfile.test` в ветке `master` (после merge изменений).
+### TEST и SemVer
+
+Каждый PR в master обязан иметь ровно одну GitHub-метку:
+- version:patch — исправление или обратно совместимое изменение;
+- version:minor — новая обратно совместимая функциональность;
+- version:major — несовместимое изменение.
+
+GitHub Actions проверяет наличие ровно одной метки до merge. После merge LB-CALC-TEST находит PR по merge commit, берёт его метку и увеличивает последнюю версию:
+- PATCH: X.Y.Z → X.Y.(Z+1);
+- MINOR: X.Y.Z → X.(Y+1).0;
+- MAJOR: X.Y.Z → (X+1).0.0.
+
+Пока Git-тегов нет, исходная версия берётся из revision корневого POM (0.1.0-SNAPSHOT) без суффикса. Поэтому первый merge с version:patch создаст v0.1.1, с version:minor — v0.2.0, с version:major — v1.0.0.
+
+После успешной Maven-сборки Jenkins создаёт и отправляет в GitHub аннотированный тег vX.Y.Z, затем развёртывает оба приложения на TEST. Если pipeline повторно запускается для того же commit, уже существующий тег этого commit используется повторно. GitHub Releases не создаются.
+
+Оба приложения получают одну Maven-версию через -Drevision=.... Docker tag TEST имеет вид <APP_VERSION>-build-<BUILD_NUMBER>. APP_VERSION и IMAGE_TAG передаются Jenkins в Compose как переменные окружения и не хранятся в .env.
+
+### Настройки GitHub
+
+Создать в репозитории метки version:patch, version:minor, version:major. Для master включить правила:
+- изменения только через Pull Request;
+- обязательные проверки Validate version label и Maven verification;
+- запрет прямого push в master.
+
+Сейчас ветка master не защищена; правила необходимо включить в GitHub Settings → Rules → Rulesets (или Branches).
+
+### Настройки Jenkins
+
+Обе Job настраиваются как Pipeline script from SCM с Git URL git@github.com:Solomentcev/LB_Calc_Web.git и credential github-ssh. Для DEV Pipeline script branch остаётся refactor-main, для TEST — master. Путь к Jenkinsfile указан в таблице.
+
+Credential github-ssh должен иметь право отправлять Git-теги в репозиторий. Для TEST дополнительно нужны:
+- SSH credential test-host-ssh;
+- глобальные переменные TEST_HOST и TEST_PROJECT_DIR;
+- DEV .env доступен Jenkins по /var/jenkins_env/dev/.env;
+- TEST .env хранится на TEST в environments/test/.env;
+- host key TEST-ноутбука находится в /var/jenkins_home/.ssh/known_hosts Jenkins-контейнера.
+
+Обе Pipeline собирают приложения на Jenkins/DEV. DEV развёртывается локально. TEST получает JAR по SCP и собирает контейнеры на Docker Engine TEST. Java и Maven на TEST не требуются.
+
 ## Сброс данных
 
 `docker compose down -v` удаляет volumes и все данные текущего стенда. Выполнять только при осознанном полном сбросе.
