@@ -24,7 +24,7 @@ pipeline {
                         script: """curl --fail --silent --show-error \
                             -H 'Accept: application/vnd.github+json' \
                             -H 'X-GitHub-Api-Version: 2022-11-28' \
-                            'https://api.github.com/repos/Solomentcev/LB_Calc_Web/commits/${DEPLOY_COMMIT}/pulls'""",
+                            'https://api.github.com/repos/Solomentcev/LB_Calc_Web/commits/${env.DEPLOY_COMMIT}/pulls'""",
                         returnStdout: true
                     ).trim()
 
@@ -32,7 +32,7 @@ pipeline {
                     def mergedPullRequest = pullRequests.find {
                         it.base?.ref == 'master' &&
                                 it.merged_at &&
-                                it.merge_commit_sha == DEPLOY_COMMIT
+                                it.merge_commit_sha == env.DEPLOY_COMMIT
                     }
 
                     if (mergedPullRequest == null) {
@@ -82,7 +82,7 @@ pipeline {
                         def minor = parts[1]
                         def patch = parts[2]
 
-                        switch (VERSION_LABEL) {
+                        switch (env.VERSION_LABEL) {
                             case 'version:major':
                                 major++
                                 minor = 0
@@ -96,14 +96,14 @@ pipeline {
                                 patch++
                                 break
                             default:
-                                error("Неизвестная метка версии: ${VERSION_LABEL}")
+                                error("Неизвестная метка версии: ${env.VERSION_LABEL}")
                         }
 
                         env.APP_VERSION = "${major}.${minor}.${patch}"
-                        env.RELEASE_TAG = "v${APP_VERSION}"
+                        env.RELEASE_TAG = "v${env.APP_VERSION}"
                     }
 
-                    env.IMAGE_TAG = "${APP_VERSION}-build-${BUILD_NUMBER}"
+                    env.IMAGE_TAG = "${APP_VERSION}-build-${env.BUILD_NUMBER}"
                     echo "PR #${mergedPullRequest.number}; метка: ${VERSION_LABEL}; версия: ${APP_VERSION}; commit: ${DEPLOY_COMMIT}"
                 }
             }
@@ -119,7 +119,7 @@ pipeline {
             steps {
                 script {
                     def tagExists = sh(
-                        script: "git show-ref --verify --quiet 'refs/tags/${RELEASE_TAG}'",
+                        script: "git show-ref --verify --quiet 'refs/tags/${env.RELEASE_TAG}'",
                         returnStatus: true
                     ) == 0
 
@@ -142,7 +142,7 @@ pipeline {
                             script: "git rev-list -n 1 '${RELEASE_TAG}'",
                             returnStdout: true
                         ).trim()
-                        if (taggedCommit != DEPLOY_COMMIT) {
+                        if (taggedCommit != env.DEPLOY_COMMIT) {
                             error("Тег ${RELEASE_TAG} уже существует и указывает на другой commit.")
                         }
                     }
@@ -196,7 +196,7 @@ pipeline {
 
     post {
         success {
-            echo "Развёртывание TEST завершено. Commit: ${DEPLOY_COMMIT}, версия: ${APP_VERSION}, тег: ${RELEASE_TAG}, image tag: ${IMAGE_TAG}"
+            echo "Развёртывание TEST завершено. Commit: ${env.DEPLOY_COMMIT}, версия: ${env.APP_VERSION}, тег: ${env.RELEASE_TAG}, image tag: ${env.IMAGE_TAG}"
         }
         failure {
             echo 'Развёртывание TEST завершилось ошибкой.'
