@@ -2,22 +2,18 @@ services:
   jenkins:
     build:
       context: .
-
     container_name: jenkins
     restart: unless-stopped
     user: root
-
     ports:
       - "8080:8080"
       - "50000:50000"
-
     environment:
       CHROME_DRIVER: /usr/local/bin/chromedriver
-
     volumes:
       - jenkins_home:/var/jenkins_home
       - /var/run/docker.sock:/var/run/docker.sock
-      - /home/denis/JAVA_PROJECTS/LB_Calc_Web/environments/.secrets:/var/jenkins_env:ro
+      - /home/denis/JAVA_PROJECTS/LB_Calc_Web/environments/dev/.env:/var/jenkins_env/dev/.env:ro
     networks:
       - jenkins_network
 
