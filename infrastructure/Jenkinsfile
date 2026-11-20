@@ -14,7 +14,7 @@ pipeline {
     environment {
         MAVEN_SETTINGS = '/var/jenkins_home/.m2/settings.xml'
         DEV_COMPOSE = 'environments/dev/docker-compose.yml'
-        DEV_ENV = '/var/jenkins_env/dev.env'
+        DEV_ENV_FILE = '/var/jenkins_env/dev.env'
     }
 
     stages {
@@ -95,14 +95,14 @@ pipeline {
             steps {
                 sh '''
                     set -eu
-                    test -f "$DEV_ENV"
+                    test -f "$DEV_ENV_FILE"
 
                     APP_VERSION="$APP_VERSION" IMAGE_TAG="$IMAGE_TAG" \
-                    docker compose --env-file "$DEV_ENV" \
+                    docker compose --env-file "$DEV_ENV_FILE" \
                         -f "$DEV_COMPOSE" config -q
 
                     APP_VERSION="$APP_VERSION" IMAGE_TAG="$IMAGE_TAG" \
-                    docker compose --env-file "$DEV_ENV" \
+                    docker compose --env-file "$DEV_ENV_FILE" \
                         -f "$DEV_COMPOSE" build lb-calc-web notification-service
                 '''
             }
@@ -133,7 +133,7 @@ pipeline {
             steps {
                 sh '''
                     APP_VERSION="$APP_VERSION" IMAGE_TAG="$IMAGE_TAG" \
-                    docker compose --env-file "$DEV_ENV" \
+                    docker compose --env-file "$DEV_ENV_FILE" \
                         -f "$DEV_COMPOSE" \
                         up -d --no-build --force-recreate --no-deps \
                         lb-calc-web notification-service
@@ -146,7 +146,7 @@ pipeline {
                 sh '''
                     set -eu
                     WEB_PORT=$(APP_VERSION="$APP_VERSION" IMAGE_TAG="$IMAGE_TAG" docker compose \
-                        --env-file "$DEV_ENV" \
+                        --env-file "$DEV_ENV_FILE" \
                         -f "$DEV_COMPOSE" port lb-calc-web 8081 \
                         | tail -n 1 | awk -F: '{print $NF}')
 
@@ -169,7 +169,7 @@ pipeline {
                     done
 
                     APP_VERSION="$APP_VERSION" IMAGE_TAG="$IMAGE_TAG" docker compose \
-                        --env-file "$DEV_ENV" \
+                        --env-file "$DEV_ENV_FILE" \
                         -f "$DEV_COMPOSE" \
                         logs --tail=100 lb-calc-web notification-service
                     exit 1
