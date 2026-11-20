@@ -139,7 +139,7 @@ GitHub Actions проверяет наличие ровно одной метк�
 
 ### Настройки Jenkins
 
-Обе Job настраиваются как Pipeline script from SCM с Git URL git@github.com:Solomentcev/LB_Calc_Web.git и credential github-ssh. Для DEV Pipeline script branch остаётся refactor-main, для TEST — master. Путь к Jenkinsfile указан в таблице.
+Обе Job настраиваются как Pipeline script from SCM с Git URL git@github.com:Solomentcev/LB_Calc_Web.git и credential github-ssh. Для DEV Pipeline script branch остаётся refactor-main, для TEST — master. Путь к Jenkinsfile указан в таблице. DEV запускается вручную с параметром SOURCE_BRANCH. Для TEST включить Poll SCM с расписанием H/2 * * * * — Jenkins проверяет master каждые две минуты и запускает Pipeline при обнаружении нового commit.
 
 Credential github-ssh должен иметь право отправлять Git-теги в репозиторий. Для TEST дополнительно нужны:
 - SSH credential test-host-ssh;
