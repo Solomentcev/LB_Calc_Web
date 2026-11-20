@@ -14,8 +14,9 @@ target/
 
 # Environment / secrets
 .env
+**/.env
 *.env
-!.env.example
+!**/.env.example
 environments/.secrets/
 
 # IntelliJ IDEA
@@ -53,4 +54,4 @@ src/main/resources/static/images/
 
 # OS
 .DS_Store
-Thumbs.db.env
+Thumbs.db
