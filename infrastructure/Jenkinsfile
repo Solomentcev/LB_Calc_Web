@@ -126,12 +126,6 @@ pipeline {
             }
         }
 
-                    check_healthy_container lb-calc-dev-mysql
-                    check_healthy_container lb-calc-dev-kafka
-                '''
-            }
-        }
-
         stage('Deploy DEV applications') {
             steps {
                 withCredentials([
@@ -147,7 +141,6 @@ pipeline {
                     '''
                 }
             }
-        }
         }
 
         stage('Verify DEV') {
