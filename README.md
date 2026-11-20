@@ -97,19 +97,25 @@ Flyway автоматически применяет миграции при з�
 
 ## Jenkins
 
-Jenkins работает на DEV-ноутбуке и имеет параметр `TARGET`:
-- DEV: checkout `refactor-main`, сборка и развёртывание на Docker Engine DEV.
-- TEST: checkout `master`; Jenkins по SSH обновляет рабочую копию на TEST-ноутбуке и запускает там Docker Compose.
+На DEV-ноутбуке работают две независимые Pipeline Job. У каждой фиксированная ветка и собственный Jenkinsfile; параметра выбора стенда нет.
 
-Необходимые настройки Jenkins:
-- credential `github-ssh` для checkout;
+| Job | Ветка | Jenkinsfile | Развёртывание |
+|---|---|---|---|
+| `LB-CALC-DEV` | `refactor-main` | `infrastructure/Jenkinsfile.dev` | Docker Engine DEV |
+| `LB-CALC-TEST` | `master` | `infrastructure/Jenkinsfile.test` | Docker Engine TEST по SSH |
+
+Обе Job настраиваются как **Pipeline script from SCM** с Git URL `git@github.com:Solomentcev/LB_Calc_Web.git` и credential `github-ssh`. Для каждой Job указываются соответствующая ветка и путь к Jenkinsfile из таблицы. Jenkinsfile использует `checkout scm`, поэтому собирается именно commit выбранной ветки.
+
+Обе Pipeline собирают приложения на Jenkins/DEV. DEV Pipeline развёртывает их локально с DEV `.env`. TEST Pipeline передаёт собранные JAR по SCP на TEST и запускает Compose на TEST; перед передачей рабочая копия TEST переключается на тот же commit, из которого собраны артефакты. Java и Maven на TEST не требуются.
+
+Дополнительные настройки Jenkins:
 - SSH credential типа SSH Username with private key с ID `test-host-ssh`;
 - глобальные переменные `TEST_HOST` (LAN IP/hostname TEST) и `TEST_PROJECT_DIR` (путь к клону репозитория на TEST);
 - DEV `.env` доступен Jenkins-контейнеру по `/var/jenkins_env/dev/.env`;
-- TEST `.env` хранится на TEST в `environments/test/.env`.
+- TEST `.env` хранится на TEST в `environments/test/.env`;
+- host key TEST-ноутбука заранее добавлен в `/var/jenkins_home/.ssh/known_hosts` Jenkins-контейнера.
 
-На TEST заранее установить Docker Engine и Compose plugin, настроить SSH и клонировать репозиторий. Java и Maven на TEST не требуются: Jenkins собирает оба JAR на DEV и передаёт их по SCP в `target/` на TEST. Перед передачей Jenkins переключает рабочую копию TEST на тот же commit, из которого собраны артефакты. Jenkins не развёртывает TEST на Docker Engine DEV. Host key TEST-ноутбука должен быть заранее добавлен в `known_hosts` Jenkins-контейнера (в постоянном томе `/var/jenkins_home/.ssh/known_hosts`).
-
+На TEST заранее установить Docker Engine и Compose plugin, настроить SSH и клонировать репозиторий. Jenkins не развёртывает TEST на Docker Engine DEV. Jenkins Job для TEST настраивается после появления `infrastructure/Jenkinsfile.test` в ветке `master` (после merge изменений).
 ## Сброс данных
 
 `docker compose down -v` удаляет volumes и все данные текущего стенда. Выполнять только при осознанном полном сбросе.
