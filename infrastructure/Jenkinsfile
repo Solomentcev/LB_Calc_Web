@@ -46,9 +46,9 @@ pipeline {
             when { expression { params.TARGET == 'DEV' } }
             steps {
                 sh """
-                    APP_VERSION=${APP_VERSION} docker compose \
-                        --env-file ${DEV_ENV_FILE} \
-                        -f ${DEV_COMPOSE} \
+                    APP_VERSION=${APP_VERSION} docker compose \\
+                        --env-file ${DEV_ENV_FILE} \\
+                        -f ${DEV_COMPOSE} \\
                         up -d --build --force-recreate
                 """
             }
@@ -67,15 +67,29 @@ pipeline {
                     sh '''
                         : "${TEST_HOST:?В Jenkins необходимо задать TEST_HOST}"
                         : "${TEST_PROJECT_DIR:?В Jenkins необходимо задать TEST_PROJECT_DIR}"
+                        : "${APP_VERSION:?Не определена версия приложения}"
 
-                        ssh -i "$SSH_KEY" -o BatchMode=yes \
-                            "$SSH_USER@$TEST_HOST" \
-                            "cd '$TEST_PROJECT_DIR' && \
-                             git fetch origin && git checkout master && \
-                             git pull --ff-only origin master && \
-                             APP_VERSION='$APP_VERSION' docker compose \
-                               --env-file environments/test/.env \
-                               -f environments/test/docker-compose.yml \
+                        ssh -i "$SSH_KEY" -o BatchMode=yes \\
+                            "$SSH_USER@$TEST_HOST" \\
+                            "mkdir -p '$TEST_PROJECT_DIR/lb-calc-web/target' \\
+                                     '$TEST_PROJECT_DIR/notification-service/target'"
+
+                        scp -i "$SSH_KEY" -o BatchMode=yes \\
+                            "lb-calc-web/target/lb-calc-web-$APP_VERSION.jar" \\
+                            "$SSH_USER@$TEST_HOST:$TEST_PROJECT_DIR/lb-calc-web/target/"
+
+                        scp -i "$SSH_KEY" -o BatchMode=yes \\
+                            "notification-service/target/notification-service-$APP_VERSION.jar" \\
+                            "$SSH_USER@$TEST_HOST:$TEST_PROJECT_DIR/notification-service/target/"
+
+                        ssh -i "$SSH_KEY" -o BatchMode=yes \\
+                            "$SSH_USER@$TEST_HOST" \\
+                            "cd '$TEST_PROJECT_DIR' && \\
+                             git fetch origin && git checkout master && \\
+                             git pull --ff-only origin master && \\
+                             APP_VERSION='$APP_VERSION' docker compose \\
+                               --env-file environments/test/.env \\
+                               -f environments/test/docker-compose.yml \\
                                up -d --build --force-recreate"
                     '''
                 }
