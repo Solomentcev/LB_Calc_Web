@@ -103,7 +103,7 @@ pipeline {
 
         stage('Build release') {
             steps {
-                sh 'mvn -s "$MAVEN_SETTINGS" clean package -DskipTests -Drevision="$APP_VERSION"'
+                sh 'mvn -s "$MAVEN_SETTINGS" clean verify -Drevision="$APP_VERSION"'
             }
         }
 
@@ -166,14 +166,20 @@ pipeline {
                                -f environments/test/docker-compose.yml ps"
 
                         ssh -i "$SSH_KEY" -o BatchMode=yes "$SSH_USER@$TEST_HOST" \
-                            "cd '$TEST_PROJECT_DIR' && set -a && . environments/test/.env && set +a && \
-                             for attempt in $(seq 1 30); do \
-                               if curl --fail --silent http://127.0.0.1:\$WEB_PORT/login >/dev/null; then \
-                                 echo 'TEST web доступен'; exit 0; \
-                               fi; sleep 2; \
+                            "cd '$TEST_PROJECT_DIR' && \
+                             WEB_PORT=\$(docker compose --env-file environments/test/.env \
+                               -f environments/test/docker-compose.yml port lb-calc-web 8081 | \
+                               tail -n 1 | awk -F: '{print \$NF}') && \
+                             for attempt in \$(seq 1 30); do \
+                               if curl --fail --silent \"http://127.0.0.1:\$WEB_PORT/login\" >/dev/null && \
+                                  [ \"\$(docker inspect --format '{{.State.Running}}' lb-calc-test-notification 2>/dev/null)\" = true ]; then \
+                                 echo 'TEST web и notification-service доступны'; exit 0; \
+                               fi; \
+                               sleep 2; \
                              done; \
                              docker compose --env-file environments/test/.env \
-                               -f environments/test/docker-compose.yml logs --tail=100; exit 1"
+                               -f environments/test/docker-compose.yml \
+                               logs --tail=100 lb-calc-web notification-service; exit 1"
                     '''
                 }
             }
@@ -201,7 +207,7 @@ pipeline {
                         ]) {
                             sh '''
                                 export GIT_SSH_COMMAND="ssh -i $GITHUB_SSH_KEY -o IdentitiesOnly=yes"
-                                git push origin "refs/tags/$RELEASE_TAG"
+                                git push git@github.com:Solomentcev/LB_Calc_Web.git "refs/tags/$RELEASE_TAG"
                             '''
                         }
                     } else {
