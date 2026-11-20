@@ -128,10 +128,11 @@ pipeline {
                         : "${IMAGE_TAG:?IMAGE_TAG не определён}"
 
                         ssh -i "$SSH_KEY" -o BatchMode=yes "$SSH_USER@$TEST_HOST" \
-                            "mkdir -p '$TEST_PROJECT_DIR/environments/test' && \
-                             if [ ! -d '$TEST_PROJECT_DIR/.git' ]; then \
+                            "if [ ! -d '$TEST_PROJECT_DIR/.git' ]; then \
+                               mkdir -p \"$(dirname '$TEST_PROJECT_DIR')\" && \
                                git clone https://github.com/Solomentcev/LB_Calc_Web.git '$TEST_PROJECT_DIR'; \
                              fi && cd '$TEST_PROJECT_DIR' && \
+                             mkdir -p environments/test && \
                              git fetch origin master --tags && \
                              git checkout --detach '$DEPLOY_COMMIT' && \
                              mkdir -p lb-calc-web/target notification-service/target"
