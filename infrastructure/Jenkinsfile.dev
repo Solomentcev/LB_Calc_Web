@@ -172,7 +172,7 @@ pipeline {
                         fi
 
                         for attempt in $(seq 1 30); do
-                            if curl --fail --silent "http://127.0.0.1:$WEB_PORT/login" >/dev/null; then
+                            if curl --fail --silent "http://host.docker.internal:$WEB_PORT/login" >/dev/null; then
                                 NOTIFICATION_STATE=$(docker inspect \
                                     --format='{{.State.Running}}' lb-calc-dev-notification 2>/dev/null || true)
                                 if [ "$NOTIFICATION_STATE" = "true" ]; then
