@@ -54,13 +54,20 @@ cp environments/test/.env.example environments/test/.env
 
 Compose публикует порты MySQL и Kafka на Docker-хосте. Kafka рекламирует клиентам тот же LAN-адрес. Контейнеры приложений также подключаются к опубликованным портам хоста, а не к Docker DNS-именам `mysql` и `kafka`. Поэтому `application.properties` не меняются при переключении способа запуска.
 
-## Запуск стенда
+## Запуск DEV из Docker
 
-На соответствующем ноутбуке:
+Для локальной Docker-сборки сначала собрать JAR-файлы из корня проекта:
 ```bash
-cd environments/dev   # либо environments/test
+mvn -B clean package -DskipTests
+```
+
+Затем запустить инфраструктуру и приложения:
+```bash
+cd environments/dev
 docker compose up -d --build
 ```
+
+При ручном запуске Compose использует значения по умолчанию `APP_VERSION=0.1.0-SNAPSHOT` и `IMAGE_TAG=local`. Эти параметры не хранятся в `.env`; Jenkins передаёт собственные значения при deployment. Штатное развёртывание TEST выполняет Jenkins на втором ноутбуке и передаёт туда собранные JAR-файлы.
 
 Остановка без удаления данных:
 ```bash
