@@ -38,7 +38,7 @@ pipeline {
             steps {
                 checkout([
                     $class: 'GitSCM',
-                    branches: [[name: "*/${params.SOURCE_BRANCH}"]],
+                    branches: [[name: "*/${env.SOURCE_BRANCH}"]],
                     userRemoteConfigs: [[
                         url: 'git@github.com:Solomentcev/LB_Calc_Web.git',
                         credentialsId: 'github-ssh'
