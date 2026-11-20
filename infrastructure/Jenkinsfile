@@ -1,178 +1,171 @@
 pipeline {
     agent any
 
+    parameters {
+        string(name: 'SOURCE_BRANCH', defaultValue: '',
+            description: 'Ветка feature/*, refactor/* или bugfix/* для сборки DEV')
+    }
+
+    options {
+        disableConcurrentBuilds()
+        timestamps()
+    }
+
     environment {
         MAVEN_SETTINGS = '/var/jenkins_home/.m2/settings.xml'
-
-        DEV_COMPOSE  = 'environments/dev/docker-compose.yml'
-        TEST_COMPOSE = 'environments/test/docker-compose.yml'
-        PROD_COMPOSE = 'environments/prod/docker-compose.yml'
-
-        DEV_ENV  = '/var/jenkins_env/dev.env'
-        TEST_ENV = '/var/jenkins_env/test.env'
-        PROD_ENV = '/var/jenkins_env/prod.env'
+        DEV_COMPOSE = 'environments/dev/docker-compose.yml'
+        DEV_ENV = '/var/jenkins_env/dev.env'
+        DEV_IMAGE_OVERRIDE = 'dev-image-override.yml'
     }
 
     stages {
-
-        stage('Checkout') {
-            steps {
-                git(
-                    branch: 'master',
-                    credentialsId: 'github-ssh',
-                    url: 'git@github.com:Solomentcev/LB_Calc_Web.git'
-                )
-            }
-        }
-
-        stage('Get version') {
+        stage('Validate selected branch') {
             steps {
                 script {
-                    env.APP_VERSION = sh(
-                        script: """
-                            mvn -s ${MAVEN_SETTINGS} \
-                                help:evaluate \
-                                -Dexpression=revision \
-                                -q \
-                                -DforceStdout
-                        """,
-                        returnStdout: true
-                    ).trim()
-
-                    echo "Application version: ${env.APP_VERSION}"
+                    def sourceBranch = params.SOURCE_BRANCH?.trim()
+                    if (!sourceBranch || !(sourceBranch ==~ /^(feature|refactor|bugfix)\/[A-Za-z0-9._\/-]+$/)
+                            || sourceBranch.contains('..') || sourceBranch.contains('//')) {
+                        error('Укажите существующую ветку формата feature/*, refactor/* или bugfix/*.')
+                    }
+                    env.SOURCE_BRANCH = sourceBranch
+                    env.BRANCH_SLUG = sourceBranch.toLowerCase().replaceAll(/[^a-z0-9]+/, '-')
+                            .replaceAll(/^-+|-+$/, '')
                 }
             }
         }
 
-        stage('Build') {
+        stage('Checkout selected branch') {
             steps {
-                sh """
-                    mvn -s ${MAVEN_SETTINGS} \
-                        clean package \
-                        -DskipTests \
-                        -Drevision=${APP_VERSION}
-                """
+                checkout([
+                    $class: 'GitSCM',
+                    branches: [[name: "*/\${params.SOURCE_BRANCH}"]],
+                    userRemoteConfigs: [[
+                        url: 'git@github.com:Solomentcev/LB_Calc_Web.git',
+                        credentialsId: 'github-ssh'
+                    ]]
+                ])
+                sh 'git fetch --tags origin'
             }
         }
 
-        stage('Docker Build') {
+        stage('Resolve snapshot version') {
             steps {
-                sh """
-                    APP_VERSION=${APP_VERSION} \
-                    docker compose \
-                        --env-file ${DEV_ENV} \
-                        -f ${DEV_COMPOSE} \
-                        build
-                """
+                script {
+                    def latestTag = sh(
+                        script: "git tag --list 'v[0-9]*' --sort=-v:refname | head -n 1",
+                        returnStdout: true
+                    ).trim()
 
-                sh """
-                    docker images | grep -E \
-                        'lb-calc-web|notification-service'
-                """
+                    def baseVersion = latestTag
+                        ? latestTag.replaceFirst(/^v/, '')
+                        : sh(
+                            script: 'mvn -s "$MAVEN_SETTINGS" help:evaluate -Dexpression=revision -q -DforceStdout',
+                            returnStdout: true
+                        ).trim().replaceFirst(/-SNAPSHOT$/, '')
+
+                    if (!(baseVersion ==~ /\d+\.\d+\.\d+/)) {
+                        error("Некорректная базовая SemVer-версия: \${baseVersion}")
+                    }
+
+                    env.APP_VERSION = "\${baseVersion}-SNAPSHOT"
+                    env.IMAGE_TAG = "\${env.APP_VERSION}-\${env.BRANCH_SLUG}-build-\${env.BUILD_NUMBER}"
+
+                    echo "DEV branch: \${env.SOURCE_BRANCH}"
+                    echo "Application version: \${env.APP_VERSION}"
+                    echo "Docker image tag: \${env.IMAGE_TAG}"
+                }
+            }
+        }
+
+        stage('Build and test') {
+            steps {
+                sh 'mvn -s "$MAVEN_SETTINGS" clean verify -Drevision="$APP_VERSION"'
+            }
+        }
+
+        stage('Build Docker images') {
+            steps {
+                sh '''
+                    set -eu
+                    test -f "$DEV_ENV"
+                    APP_VERSION="$APP_VERSION" docker compose \
+                        --env-file "$DEV_ENV" \
+                        -f "$DEV_COMPOSE" \
+                        config -q
+
+                    APP_VERSION="$APP_VERSION" docker compose \
+                        --env-file "$DEV_ENV" \
+                        -f "$DEV_COMPOSE" \
+                        build
+
+                    docker tag "lb-calc-web:$APP_VERSION" "lb-calc-web:$IMAGE_TAG"
+                    docker tag "notification-service:$APP_VERSION" "notification-service:$IMAGE_TAG"
+                '''
+
+                writeFile(
+                    file: env.DEV_IMAGE_OVERRIDE,
+                    text: """services:
+  lb-calc-web:
+    image: lb-calc-web:\${env.IMAGE_TAG}
+  notification-service:
+    image: notification-service:\${env.IMAGE_TAG}
+"""
+                )
+
+                sh '''
+                    APP_VERSION="$APP_VERSION" IMAGE_TAG="$IMAGE_TAG" \
+                    docker compose --env-file "$DEV_ENV" \
+                        -f "$DEV_COMPOSE" \
+                        -f "$DEV_IMAGE_OVERRIDE" config -q
+                '''
             }
         }
 
         stage('Deploy DEV') {
             steps {
-                sh """
-                    APP_VERSION=${APP_VERSION} \
-                    docker compose \
-                        --env-file ${DEV_ENV} \
-                        -f ${DEV_COMPOSE} \
-                        up -d --no-build --force-recreate
-                """
-            }
-        }
-
-        stage('Deploy TEST') {
-            steps {
-                sh """
-                    APP_VERSION=${APP_VERSION} \
-                    docker compose \
-                        --env-file ${TEST_ENV} \
-                        -f ${TEST_COMPOSE} \
-                        up -d --no-build --force-recreate
-                """
-            }
-        }
-
-        stage('TEST verification') {
-            steps {
-                sh """
-                    APP_VERSION=${APP_VERSION} \
-                    docker compose \
-                        --env-file ${TEST_ENV} \
-                        -f ${TEST_COMPOSE} \
-                        ps
-                """
-
                 sh '''
-                    echo "Waiting for TEST web..."
-
-                    for i in $(seq 1 30); do
-                        if curl -fsS http://host.docker.internal:8083/login > /dev/null; then
-                            echo "TEST web is available"
-                            exit 0
-                        fi
-
-                        echo "Attempt $i/30"
-                        sleep 2
-                    done
-
-                    echo "TEST web is unavailable"
-
-                    docker compose \
-                        --env-file ${TEST_ENV} \
-                        -f ${TEST_COMPOSE} \
-                        logs --tail=100 lb-calc-web
-
-                    exit 1
+                    APP_VERSION="$APP_VERSION" IMAGE_TAG="$IMAGE_TAG" \
+                    docker compose --env-file "$DEV_ENV" \
+                        -f "$DEV_COMPOSE" \
+                        -f "$DEV_IMAGE_OVERRIDE" \
+                        up -d --no-build --force-recreate
                 '''
             }
         }
 
-        stage('Deploy PROD') {
+        stage('Verify DEV') {
             steps {
-                sh """
-                    APP_VERSION=${APP_VERSION} \
-                    docker compose \
-                        --env-file ${PROD_ENV} \
-                        -f ${PROD_COMPOSE} \
-                        up -d --no-build --force-recreate
-                """
-            }
-        }
-
-        stage('PROD verification') {
-            steps {
-                sh """
-                    APP_VERSION=${APP_VERSION} \
-                    docker compose \
-                        --env-file ${PROD_ENV} \
-                        -f ${PROD_COMPOSE} \
-                        ps
-                """
-
                 sh '''
-                    echo "Waiting for PROD web..."
+                    set -eu
+                    WEB_PORT=$(APP_VERSION="$APP_VERSION" docker compose \
+                        --env-file "$DEV_ENV" \
+                        -f "$DEV_COMPOSE" \
+                        -f "$DEV_IMAGE_OVERRIDE" port lb-calc-web 8081 \
+                        | tail -n 1 | awk -F: '{print $NF}')
 
-                    for i in $(seq 1 30); do
-                        if curl -fsS http://host.docker.internal:8085/login > /dev/null; then
-                            echo "PROD web is available"
-                            exit 0
+                    if [ -z "$WEB_PORT" ]; then
+                        echo "Не удалось определить опубликованный порт DEV web."
+                        exit 1
+                    fi
+
+                    for attempt in $(seq 1 30); do
+                        if curl --fail --silent "http://127.0.0.1:$WEB_PORT/login" >/dev/null; then
+                            NOTIFICATION_STATE=$(docker inspect \
+                                --format='{{.State.Running}}' lb-calc-dev-notification 2>/dev/null || true)
+
+                            if [ "$NOTIFICATION_STATE" = "true" ]; then
+                                echo "DEV web и notification-service запущены."
+                                exit 0
+                            fi
                         fi
-
-                        echo "Attempt $i/30"
                         sleep 2
                     done
 
-                    echo "PROD web is unavailable"
-
-                    docker compose \
-                        --env-file ${PROD_ENV} \
-                        -f ${PROD_COMPOSE} \
-                        logs --tail=100 lb-calc-web
-
+                    APP_VERSION="$APP_VERSION" docker compose \
+                        --env-file "$DEV_ENV" \
+                        -f "$DEV_COMPOSE" \
+                        -f "$DEV_IMAGE_OVERRIDE" \
+                        logs --tail=100 lb-calc-web notification-service
                     exit 1
                 '''
             }
@@ -180,17 +173,14 @@ pipeline {
     }
 
     post {
-        success {
-            echo "======================================"
-            echo "CI/CD completed successfully"
-            echo "Version: ${APP_VERSION}"
-            echo "======================================"
+        always {
+            sh 'rm -f "$DEV_IMAGE_OVERRIDE"'
         }
-
+        success {
+            echo "DEV успешно развёрнут: \${env.SOURCE_BRANCH}, \${env.APP_VERSION}, \${env.IMAGE_TAG}"
+        }
         failure {
-            echo "======================================"
-            echo "CI/CD failed"
-            echo "======================================"
+            echo 'Сборка или развёртывание DEV завершились ошибкой.'
         }
     }
 }
