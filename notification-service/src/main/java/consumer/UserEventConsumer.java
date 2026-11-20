@@ -9,7 +9,10 @@ public class UserEventConsumer {
     public UserEventConsumer(NotificationService notificationService) {
         this.notificationService = notificationService;
     }
-    @KafkaListener(topics = "${app.kafka.topic.user-events.name}", groupId = "notification-service")
+    @KafkaListener(
+            topics = "${app.kafka.topic.user-events.name}",
+            groupId = "notification-service"
+    )
     public void consume(UserEvent event) {
         System.out.println("Получено событие: " + event.getType());
         System.out.println("User ID: " + event.getUserId());
