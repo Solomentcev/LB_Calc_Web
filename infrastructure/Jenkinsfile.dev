@@ -1,5 +1,11 @@
 pipeline {
     agent any
+    options { disableConcurrentBuilds() }
+
+    parameters {
+        string(name: 'SOURCE_BRANCH', defaultValue: 'refactor-main',
+               description: 'Ветка для DEV: feature/*, refactor/*, bugfix/*')
+    }
 
     environment {
         MAVEN_SETTINGS = '/var/jenkins_home/.m2/settings.xml'
@@ -8,22 +14,73 @@ pipeline {
     }
 
     stages {
-        stage('Checkout') {
+        stage('Validate branch') {
             steps {
                 script {
-                    def scmVars = checkout scm
-                    env.DEPLOY_COMMIT = scmVars.GIT_COMMIT
+                    def sourceBranch = params.SOURCE_BRANCH?.trim()
+                    def allowedBranch = sourceBranch == 'refactor-main' ||
+                            sourceBranch ==~ /^(feature|refactor|bugfix)\/[A-Za-z0-9][A-Za-z0-9._/-]*$/
+                    if (!allowedBranch) {
+                        error('Допустимы refactor-main и ветки feature/*, refactor/*, bugfix/*')
+                    }
+                    env.SOURCE_BRANCH = sourceBranch
                 }
             }
         }
 
-        stage('Get version') {
+        stage('Checkout source branch') {
             steps {
+                deleteDir()
+                checkout([
+                    $class: 'GitSCM',
+                    branches: [[name: "*/${SOURCE_BRANCH}"]],
+                    userRemoteConfigs: [[
+                        url: 'git@github.com:Solomentcev/LB_Calc_Web.git',
+                        credentialsId: 'github-ssh'
+                    ]],
+                    extensions: [[
+                        $class: 'CloneOption',
+                        shallow: false,
+                        noTags: false
+                    ]]
+                ])
                 script {
-                    env.APP_VERSION = sh(
-                        script: 'mvn -s "$MAVEN_SETTINGS" help:evaluate -Dexpression=revision -q -DforceStdout',
+                    env.DEPLOY_COMMIT = sh(
+                        script: 'git rev-parse HEAD',
                         returnStdout: true
                     ).trim()
+                    sh 'git fetch --tags origin'
+                }
+            }
+        }
+
+        stage('Resolve application version') {
+            steps {
+                script {
+                    def latestTag = sh(
+                        script: "git tag --list 'v[0-9]*' --sort=-v:refname | head -n 1",
+                        returnStdout: true
+                    ).trim()
+
+                    def baseVersion
+                    if (latestTag) {
+                        baseVersion = latestTag.replaceFirst(/^v/, '')
+                    } else {
+                        baseVersion = sh(
+                            script: 'mvn -s "$MAVEN_SETTINGS" help:evaluate -Dexpression=revision -q -DforceStdout',
+                            returnStdout: true
+                        ).trim().replaceFirst(/-SNAPSHOT$/, '')
+                    }
+
+                    if (!(baseVersion ==~ /\d+\.\d+\.\d+/)) {
+                        error("Не удалось определить базовую SemVer-версию: ${baseVersion}")
+                    }
+
+                    env.APP_VERSION = "${baseVersion}-SNAPSHOT"
+                    def branchSlug = SOURCE_BRANCH.toLowerCase()
+                            .replaceAll(/[^a-z0-9_.-]+/, '-')
+                            .replaceAll(/^-+|-+$/, '')
+                    env.IMAGE_TAG = "${APP_VERSION}-${branchSlug}-build-${BUILD_NUMBER}"
                 }
             }
         }
@@ -37,7 +94,7 @@ pipeline {
         stage('Deploy DEV') {
             steps {
                 sh '''
-                    APP_VERSION="$APP_VERSION" docker compose \
+                    APP_VERSION="$APP_VERSION" IMAGE_TAG="$IMAGE_TAG" docker compose \
                         --env-file "$DEV_ENV_FILE" \
                         -f "$DEV_COMPOSE" \
                         up -d --build --force-recreate
@@ -48,7 +105,7 @@ pipeline {
 
     post {
         success {
-            echo "Развёртывание DEV завершено. Commit: ${DEPLOY_COMMIT}, версия: ${APP_VERSION}"
+            echo "Развёртывание DEV завершено. Ветка: ${SOURCE_BRANCH}, commit: ${DEPLOY_COMMIT}, версия: ${APP_VERSION}, image tag: ${IMAGE_TAG}"
         }
         failure {
             echo 'Развёртывание DEV завершилось ошибкой.'
