@@ -33,7 +33,7 @@ pipeline {
                 deleteDir()
                 checkout([
                     $class: 'GitSCM',
-                    branches: [[name: "*/${SOURCE_BRANCH}"]],
+                    branches: [[name: "*/${env.SOURCE_BRANCH}"]],
                     userRemoteConfigs: [[
                         url: 'git@github.com:Solomentcev/LB_Calc_Web.git',
                         credentialsId: 'github-ssh'
@@ -77,10 +77,10 @@ pipeline {
                     }
 
                     env.APP_VERSION = "${baseVersion}-SNAPSHOT"
-                    def branchSlug = SOURCE_BRANCH.toLowerCase()
+                    def branchSlug = env.SOURCE_BRANCH.toLowerCase()
                             .replaceAll(/[^a-z0-9_.-]+/, '-')
                             .replaceAll(/^-+|-+$/, '')
-                    env.IMAGE_TAG = "${APP_VERSION}-${branchSlug}-build-${BUILD_NUMBER}"
+                    env.IMAGE_TAG = "${env.APP_VERSION}-${branchSlug}-build-${env.BUILD_NUMBER}"
                 }
             }
         }
@@ -105,7 +105,7 @@ pipeline {
 
     post {
         success {
-            echo "Развёртывание DEV завершено. Ветка: ${SOURCE_BRANCH}, commit: ${DEPLOY_COMMIT}, версия: ${APP_VERSION}, image tag: ${IMAGE_TAG}"
+            echo "Развёртывание DEV завершено. Ветка: ${env.SOURCE_BRANCH}, commit: ${env.DEPLOY_COMMIT}, версия: ${env.APP_VERSION}, image tag: ${env.IMAGE_TAG}"
         }
         failure {
             echo 'Развёртывание DEV завершилось ошибкой.'
