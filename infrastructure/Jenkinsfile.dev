@@ -1,0 +1,57 @@
+pipeline {
+    agent any
+
+    environment {
+        MAVEN_SETTINGS = '/var/jenkins_home/.m2/settings.xml'
+        DEV_COMPOSE = 'environments/dev/docker-compose.yml'
+        DEV_ENV_FILE = '/var/jenkins_env/dev/.env'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                script {
+                    def scmVars = checkout scm
+                    env.DEPLOY_COMMIT = scmVars.GIT_COMMIT
+                }
+            }
+        }
+
+        stage('Get version') {
+            steps {
+                script {
+                    env.APP_VERSION = sh(
+                        script: 'mvn -s "$MAVEN_SETTINGS" help:evaluate -Dexpression=revision -q -DforceStdout',
+                        returnStdout: true
+                    ).trim()
+                }
+            }
+        }
+
+        stage('Build') {
+            steps {
+                sh 'mvn -s "$MAVEN_SETTINGS" clean package -DskipTests -Drevision="$APP_VERSION"'
+            }
+        }
+
+        stage('Deploy DEV') {
+            steps {
+                sh '''
+                    APP_VERSION="$APP_VERSION" docker compose \
+                        --env-file "$DEV_ENV_FILE" \
+                        -f "$DEV_COMPOSE" \
+                        up -d --build --force-recreate
+                '''
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "Развёртывание DEV завершено. Commit: ${DEPLOY_COMMIT}, версия: ${APP_VERSION}"
+        }
+        failure {
+            echo 'Развёртывание DEV завершилось ошибкой.'
+        }
+    }
+}
