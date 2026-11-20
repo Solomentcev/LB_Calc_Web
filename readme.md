@@ -44,28 +44,30 @@ LB Calc Web → Kafka → Notification Service → Email
 
 ## Локальная конфигурация DEV
 
-1. Скопируйте корневой `.env.example` в `.env`.
-2. Замените `CHANGE_ME` собственными значениями.
-3. Для Docker Compose используются внутренние адреса сервисов:
+1. Скопируйте `environments/dev/.env.example` в `environments/dev/.env`.
+2. Укажите актуальный LAN-адрес Docker-хоста в `DOCKER_HOST_ADDRESS` и замените тестовые пароли и JWT-секреты.
+3. Для приложений внутри Docker Compose используются внутренние адреса:
    - MySQL: `mysql:3306`;
    - Kafka: `kafka:9092`.
 4. Запустите окружение из корня репозитория:
 
 ```bash
-docker compose --env-file .env -f environments/dev/docker-compose.yml up -d --build
+docker compose --env-file environments/dev/.env -f environments/dev/docker-compose.yml up -d --build
 ```
 
 Внешние порты по умолчанию:
 
 - web-приложение: `http://localhost:8081`;
+- notification-service: `http://localhost:8082`;
 - MySQL: `localhost:3307`;
-- Kafka: `localhost:29092`;
-- notification-service слушает `8082` внутри сети Docker Compose; DEV pipeline публикует этот порт на хост через Compose override.
-
-Для запуска Java-приложений из IntelliJ IDEA вместо внутренних адресов Docker укажите в конфигурации запуска адреса хоста:
-
-- MySQL: `jdbc:mysql://localhost:3307/lb_calc_web_dev?createDatabaseIfNotExist=true`;
 - Kafka: `localhost:29092`.
+
+Для запуска Java-приложений из IntelliJ IDEA используйте внешние адреса из DEV-файла окружения:
+
+- MySQL: значение `DB_URL`;
+- Kafka: значение `KAFKA_BOOTSTRAP_SERVERS`.
+
+MySQL создаёт пользователя приложения только при первоначальной инициализации пустого volume. Для уже существующего `dev_mysql_data` изменение `DB_USERNAME` и `DB_PASSWORD` в env-файле не создаёт и не меняет пользователя автоматически. Существующий volume не удаляйте.
 
 ## Версионирование и Jenkins
 
