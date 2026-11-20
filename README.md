@@ -50,6 +50,8 @@ cp environments/test/.env.example environments/test/.env
 - MySQL: `DOCKER_HOST_ADDRESS:MYSQL_PORT`;
 - Kafka: `DOCKER_HOST_ADDRESS:KAFKA_EXTERNAL_PORT`.
 
+Имя topic задаётся через `KAFKA_TOPIC_USER_EVENTS`, количество partitions — через `KAFKA_TOPIC_USER_EVENTS_PARTITIONS`. В одноброкерной конфигурации replication factor равен 1.
+
 Compose публикует порты MySQL и Kafka на Docker-хосте. Kafka рекламирует клиентам тот же LAN-адрес. Контейнеры приложений также подключаются к опубликованным портам хоста, а не к Docker DNS-именам `mysql` и `kafka`. Поэтому `application.properties` не меняются при переключении способа запуска.
 
 ## Запуск стенда

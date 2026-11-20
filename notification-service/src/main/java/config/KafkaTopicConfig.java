@@ -12,17 +12,20 @@ import java.util.Map;
 public class KafkaTopicConfig {
 
     private final String userEventsTopic;
+    private final int userEventsTopicPartitions;
 
     public KafkaTopicConfig(
-            @Value("${app.kafka.topic.user-events}") String userEventsTopic
+            @Value("${app.kafka.topic.user-events}") String userEventsTopic,
+            @Value("${app.kafka.topic.user-events.partitions}") int userEventsTopicPartitions
     ) {
         this.userEventsTopic = userEventsTopic;
+        this.userEventsTopicPartitions = userEventsTopicPartitions;
     }
 
     @Bean
     public NewTopic userEventsTopic() {
         return TopicBuilder.name(userEventsTopic)
-                .partitions(3)
+                .partitions(userEventsTopicPartitions)
                 .replicas(1)
                 .configs(Map.of("min.insync.replicas", "1"))
                 .build();
