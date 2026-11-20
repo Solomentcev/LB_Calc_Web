@@ -65,10 +65,10 @@ pipeline {
                     )
                 ]) {
                     sh '''
-                        : "\${TEST_HOST:?В Jenkins необходимо задать TEST_HOST}"
-                        : "\${TEST_PROJECT_DIR:?В Jenkins необходимо задать TEST_PROJECT_DIR}"
-                        : "\${APP_VERSION:?Не определена версия приложения}"
-                        : "\${GIT_COMMIT:?Не определён commit для развёртывания}"
+                        : "${TEST_HOST:?В Jenkins необходимо задать TEST_HOST}"
+                        : "${TEST_PROJECT_DIR:?В Jenkins необходимо задать TEST_PROJECT_DIR}"
+                        : "${APP_VERSION:?Не определена версия приложения}"
+                        : "${GIT_COMMIT:?Не определён commit для развёртывания}"
 
                         ssh -i "$SSH_KEY" -o BatchMode=yes \
                             "$SSH_USER@$TEST_HOST" \
