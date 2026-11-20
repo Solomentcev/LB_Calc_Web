@@ -184,30 +184,6 @@ pipeline {
                              docker compose --env-file environments/test/.env -f environments/test/docker-compose.yml config -q && \
                              APP_VERSION='$APP_VERSION' IMAGE_TAG='$IMAGE_TAG' \
                              docker compose --env-file environments/test/.env -f environments/test/docker-compose.yml up -d --wait mysql kafka"
-
-                        set -a
-                        . "$TEST_ENV_FILE"
-                        set +a
-                        case "$DB_USERNAME" in
-                            ""|*[!A-Za-z0-9_]*)
-                                echo "Недопустимое имя пользователя MySQL для интеграционных тестов."
-                                exit 1
-                                ;;
-                        esac
-
-                        cat > "$WORKSPACE/integration-test-db.sql" <<SQL
-DROP DATABASE IF EXISTS lb_calc_web_integration;
-CREATE DATABASE lb_calc_web_integration;
-GRANT ALL PRIVILEGES ON lb_calc_web_integration.* TO '$DB_USERNAME'@'%';
-FLUSH PRIVILEGES;
-SQL
-
-                        ssh -i "$SSH_KEY" -o BatchMode=yes "$SSH_USER@$TEST_HOST" \
-                            "cd '$TEST_DEPLOY_DIR' && \
-                             docker compose --env-file environments/test/.env -f environments/test/docker-compose.yml \
-                             exec -T mysql sh -c 'MYSQL_PWD=\"\$MYSQL_ROOT_PASSWORD\" mysql --protocol=socket -uroot'" \
-                            < "$WORKSPACE/integration-test-db.sql"
-                        rm -f "$WORKSPACE/integration-test-db.sql"
                     '''
                 }
             }
@@ -229,7 +205,7 @@ SQL
                         : "${DB_PASSWORD:?Не задан DB_PASSWORD}"
                         : "${KAFKA_BOOTSTRAP_SERVERS:?Не задан KAFKA_BOOTSTRAP_SERVERS}"
 
-                        export DB_URL="jdbc:mysql://${DOCKER_HOST_ADDRESS}:${MYSQL_PORT}/lb_calc_web_integration?createDatabaseIfNotExist=true"
+                        : "${DB_URL:?Не задан DB_URL в test-env-file}"
                         mvn -s "$MAVEN_SETTINGS" clean verify -Drevision="$APP_VERSION"
                     '''
                 }
