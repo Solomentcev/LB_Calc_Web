@@ -13,7 +13,7 @@ pipeline {
                     def scmVars = checkout scm
                     env.DEPLOY_COMMIT = scmVars.GIT_COMMIT
                 }
-                sh 'git fetch --tags origin'
+                sh 'git fetch --tags https://github.com/Solomentcev/LB_Calc_Web.git'
             }
         }
 
@@ -133,8 +133,8 @@ pipeline {
                             )
                         ]) {
                             sh '''
-                                GIT_SSH_COMMAND="ssh -i "$GITHUB_SSH_KEY" -o IdentitiesOnly=yes" \
-                                    git push origin "refs/tags/$RELEASE_TAG"
+                                export GIT_SSH_COMMAND="ssh -i $GITHUB_SSH_KEY -o IdentitiesOnly=yes"
+                                git push origin "refs/tags/$RELEASE_TAG"
                             '''
                         }
                     } else {
