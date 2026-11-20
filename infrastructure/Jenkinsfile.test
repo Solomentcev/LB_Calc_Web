@@ -126,13 +126,14 @@ pipeline {
                         : "${TEST_PROJECT_DIR:?Задайте TEST_PROJECT_DIR в Jenkins}"
                         : "${APP_VERSION:?APP_VERSION не определена}"
                         : "${IMAGE_TAG:?IMAGE_TAG не определён}"
+                        TEST_PROJECT_PARENT=$(dirname "$TEST_PROJECT_DIR")
 
                         ssh -i "$SSH_KEY" -o BatchMode=yes "$SSH_USER@$TEST_HOST" \
                             "if [ ! -d '$TEST_PROJECT_DIR/.git' ]; then \
                                if [ -d '$TEST_PROJECT_DIR' ]; then \
                                  rmdir '$TEST_PROJECT_DIR' || { echo 'TEST_PROJECT_DIR существует и не пуст'; exit 1; }; \
                                fi && \
-                               mkdir -p \"$(dirname '$TEST_PROJECT_DIR')\" && \
+                               mkdir -p '$TEST_PROJECT_PARENT' && \
                                git clone https://github.com/Solomentcev/LB_Calc_Web.git '$TEST_PROJECT_DIR'; \
                              fi && cd '$TEST_PROJECT_DIR' && \
                              mkdir -p environments/test && \
