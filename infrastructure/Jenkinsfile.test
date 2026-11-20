@@ -36,7 +36,7 @@ pipeline {
                     }
 
                     if (mergedPullRequest == null) {
-                        error("Для commit ${DEPLOY_COMMIT} не найден merged PR в master. Прямые изменения master запрещены.")
+                        error("Для commit ${env.DEPLOY_COMMIT} не найден merged PR в master. Прямые изменения master запрещены.")
                     }
 
                     def versionLabels = mergedPullRequest.labels
@@ -49,7 +49,7 @@ pipeline {
                     env.VERSION_LABEL = versionLabels[0]
 
                     def existingTag = sh(
-                        script: "git tag --points-at '${DEPLOY_COMMIT}' --list 'v[0-9]*' | head -n 1",
+                        script: "git tag --points-at '${env.DEPLOY_COMMIT}' --list 'v[0-9]*' | head -n 1",
                         returnStdout: true
                     ).trim()
 
@@ -103,8 +103,8 @@ pipeline {
                         env.RELEASE_TAG = "v${env.APP_VERSION}"
                     }
 
-                    env.IMAGE_TAG = "${APP_VERSION}-build-${env.BUILD_NUMBER}"
-                    echo "PR #${mergedPullRequest.number}; метка: ${VERSION_LABEL}; версия: ${APP_VERSION}; commit: ${DEPLOY_COMMIT}"
+                    env.IMAGE_TAG = "${env.APP_VERSION}-build-${env.BUILD_NUMBER}"
+                    echo "PR #${mergedPullRequest.number}; метка: ${env.VERSION_LABEL}; версия: ${env.APP_VERSION}; commit: ${env.DEPLOY_COMMIT}"
                 }
             }
         }
@@ -139,11 +139,11 @@ pipeline {
                         }
                     } else {
                         def taggedCommit = sh(
-                            script: "git rev-list -n 1 '${RELEASE_TAG}'",
+                            script: "git rev-list -n 1 '${env.RELEASE_TAG}'",
                             returnStdout: true
                         ).trim()
                         if (taggedCommit != env.DEPLOY_COMMIT) {
-                            error("Тег ${RELEASE_TAG} уже существует и указывает на другой commit.")
+                            error("Тег ${env.RELEASE_TAG} уже существует и указывает на другой commit.")
                         }
                     }
                 }
