@@ -82,7 +82,7 @@ services:
     container_name: lb-calc-test-notification
     restart: unless-stopped
     environment:
-      KAFKA_BOOTSTRAP_SERVERS: "${TEST_HOST_IP}:${KAFKA_EXTERNAL_PORT}"
+      KAFKA_BOOTSTRAP_SERVERS: "kafka:9092"
       KAFKA_TOPIC_USER_EVENTS: ${KAFKA_TOPIC_USER_EVENTS}
       KAFKA_TOPIC_USER_EVENTS_PARTITIONS: ${KAFKA_TOPIC_USER_EVENTS_PARTITIONS:-3}
     ports:
