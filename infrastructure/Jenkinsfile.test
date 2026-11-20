@@ -161,7 +161,10 @@ pipeline {
                                -f environments/test/docker-compose.yml config -q && \
                              APP_VERSION='$APP_VERSION' IMAGE_TAG='$IMAGE_TAG' \
                              docker compose --env-file environments/test/.env \
-                               -f environments/test/docker-compose.yml up -d --build --force-recreate && \
+                               -f environments/test/docker-compose.yml up -d --wait mysql kafka && \
+                             APP_VERSION='$APP_VERSION' IMAGE_TAG='$IMAGE_TAG' \
+                             docker compose --env-file environments/test/.env \
+                               -f environments/test/docker-compose.yml up -d --build --force-recreate --no-deps lb-calc-web notification-service && \
                              docker compose --env-file environments/test/.env \
                                -f environments/test/docker-compose.yml ps"
 
