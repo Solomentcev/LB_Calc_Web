@@ -1,0 +1,86 @@
+pipeline {
+    agent any
+
+    environment {
+        MAVEN_SETTINGS = '/var/jenkins_home/.m2/settings.xml'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                script {
+                    def scmVars = checkout scm
+                    env.DEPLOY_COMMIT = scmVars.GIT_COMMIT
+                }
+            }
+        }
+
+        stage('Get version') {
+            steps {
+                script {
+                    env.APP_VERSION = sh(
+                        script: 'mvn -s "$MAVEN_SETTINGS" help:evaluate -Dexpression=revision -q -DforceStdout',
+                        returnStdout: true
+                    ).trim()
+                }
+            }
+        }
+
+        stage('Build') {
+            steps {
+                sh 'mvn -s "$MAVEN_SETTINGS" clean package -DskipTests -Drevision="$APP_VERSION"'
+            }
+        }
+
+        stage('Deploy TEST') {
+            steps {
+                withCredentials([
+                    sshUserPrivateKey(
+                        credentialsId: 'test-host-ssh',
+                        keyFileVariable: 'SSH_KEY',
+                        usernameVariable: 'SSH_USER'
+                    )
+                ]) {
+                    sh '''
+                        : "${TEST_HOST:?В Jenkins необходимо задать TEST_HOST}"
+                        : "${TEST_PROJECT_DIR:?В Jenkins необходимо задать TEST_PROJECT_DIR}"
+                        : "${APP_VERSION:?Не определена версия приложения}"
+                        : "${DEPLOY_COMMIT:?Не определён commit для развёртывания}"
+
+                        ssh -i "$SSH_KEY" -o BatchMode=yes \
+                            "$SSH_USER@$TEST_HOST" \
+                            "cd '$TEST_PROJECT_DIR' && \
+                             git fetch origin master && \
+                             git checkout --detach '$DEPLOY_COMMIT' && \
+                             mkdir -p lb-calc-web/target notification-service/target"
+
+                        scp -i "$SSH_KEY" -o BatchMode=yes \
+                            "lb-calc-web/target/lb-calc-web-$APP_VERSION.jar" \
+                            "$SSH_USER@$TEST_HOST:$TEST_PROJECT_DIR/lb-calc-web/target/"
+
+                        scp -i "$SSH_KEY" -o BatchMode=yes \
+                            "notification-service/target/notification-service-$APP_VERSION.jar" \
+                            "$SSH_USER@$TEST_HOST:$TEST_PROJECT_DIR/notification-service/target/"
+
+                        ssh -i "$SSH_KEY" -o BatchMode=yes \
+                            "$SSH_USER@$TEST_HOST" \
+                            "cd '$TEST_PROJECT_DIR' && \
+                             APP_VERSION='$APP_VERSION' docker compose \
+                               --env-file environments/test/.env \
+                               -f environments/test/docker-compose.yml \
+                               up -d --build --force-recreate"
+                    '''
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "Развёртывание TEST завершено. Commit: ${DEPLOY_COMMIT}, версия: ${APP_VERSION}"
+        }
+        failure {
+            echo 'Развёртывание TEST завершилось ошибкой.'
+        }
+    }
+}
