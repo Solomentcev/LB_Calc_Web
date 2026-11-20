@@ -60,7 +60,7 @@ docker compose --env-file .env -f environments/dev/docker-compose.yml up -d --bu
 - web-приложение: `http://localhost:8081`;
 - MySQL: `localhost:3307`;
 - Kafka: `localhost:29092`;
-- notification-service: `localhost:8082`.
+- notification-service слушает `8082` внутри сети Docker Compose; DEV pipeline публикует этот порт на хост через Compose override.
 
 Для запуска Java-приложений из IntelliJ IDEA вместо внутренних адресов Docker укажите в конфигурации запуска адреса хоста:
 
