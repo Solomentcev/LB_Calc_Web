@@ -72,7 +72,7 @@ pipeline {
                         ).trim().replaceFirst(/-SNAPSHOT$/, '')
                     }
 
-                    if (!(baseVersion ==~ /\\d+\\.\\d+\\.\\d+/)) {
+                    if (!(baseVersion ==~ /\d+\\.\d+\\.\d+/)) {
                         error("Не удалось определить базовую SemVer-версию: ${baseVersion}")
                     }
 
@@ -128,10 +128,10 @@ pipeline {
                 sh '''
                     set -eu
 
-                    APP_VERSION="$APP_VERSION" IMAGE_TAG="$IMAGE_TAG" docker compose \\
-                        --env-file "$DEV_ENV_FILE" \\
-                        -f "$DEV_COMPOSE" \\
-                        up -d --build --force-recreate --no-deps \\
+                    APP_VERSION="$APP_VERSION" IMAGE_TAG="$IMAGE_TAG" docker compose \
+                        --env-file "$DEV_ENV_FILE" \
+                        -f "$DEV_COMPOSE" \
+                        up -d --build --force-recreate --no-deps \
                         lb-calc-web notification-service
 
                     for container_name in lb-calc-dev-web lb-calc-dev-notification; do
