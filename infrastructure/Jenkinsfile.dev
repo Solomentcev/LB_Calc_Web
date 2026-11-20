@@ -3,7 +3,7 @@ pipeline {
 
     parameters {
         string(name: 'SOURCE_BRANCH', defaultValue: '',
-            description: 'Ветка feature/*, refactor/* или bugfix/* для сборки DEV')
+            description: 'Ветка refactor-main или feature/*, refactor/*, bugfix/* для сборки DEV')
     }
 
     options {
@@ -22,9 +22,9 @@ pipeline {
                 script {
                     def sourceBranch = params.SOURCE_BRANCH?.trim()
                     if (!sourceBranch ||
-                            !(sourceBranch ==~ /^(feature|refactor|bugfix)\/[A-Za-z0-9._\/-]+$/) ||
+                            !(sourceBranch == 'refactor-main' || sourceBranch ==~ /^(feature|refactor|bugfix)\/[A-Za-z0-9._\/-]+$/) ||
                             sourceBranch.contains('..') || sourceBranch.contains('//')) {
-                        error('Укажите существующую ветку формата feature/*, refactor/* или bugfix/*.')
+                        error('Укажите refactor-main или существующую ветку формата feature/*, refactor/* или bugfix/*.')
                     }
                     env.SOURCE_BRANCH = sourceBranch
                     env.BRANCH_SLUG = sourceBranch.toLowerCase()
@@ -64,7 +64,7 @@ pipeline {
             steps {
                 script {
                     def latestTag = sh(
-                        script: "git tag --list 'v[0-9]*' --sort=-v:refname | grep -E '^v[0-9]+\\.[0-9]+\\.[0-9]+$' | head -n 1 || true",
+                        script: "git tag --list 'v[0-9]*' --sort=-v:refname | grep -E '^v[0-9]+\\.[0-9]+\\.[0-9]+\ || true", | head -n 1 || true",
                         returnStdout: true
                     ).trim()
                     def baseVersion = latestTag
