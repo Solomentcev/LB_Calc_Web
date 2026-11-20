@@ -174,7 +174,7 @@ pipeline {
                         ssh -i "$SSH_KEY" -o BatchMode=yes \
                             "$SSH_USER@$TEST_HOST" \
                             "cd '$TEST_PROJECT_DIR' && \
-                             git fetch https://github.com/Solomentcev/LB_Calc_Web.git master --tags && \
+                             git fetch --tags https://github.com/Solomentcev/LB_Calc_Web.git master && \
                              git checkout --detach '$DEPLOY_COMMIT' && \
                              mkdir -p lb-calc-web/target notification-service/target"
 
