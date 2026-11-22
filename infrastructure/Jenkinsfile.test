@@ -151,7 +151,7 @@ pipeline {
                 ]) {
                     script {
                         def remoteHome = sh(
-                            script: 'ssh -i "$SSH_KEY" -o BatchMode=yes "$SSH_USER@$TEST_HOST" \'printf "%s" "$HOME"\'',
+                            script: 'set -eu; : "${TEST_HOST:?Задайте TEST_HOST в Jenkins}"; ssh -i "$SSH_KEY" -o UserKnownHostsFile=/var/jenkins_home/.ssh/known_hosts -o StrictHostKeyChecking=yes -o BatchMode=yes "$SSH_USER@$TEST_HOST" \'printf "%s" "$HOME"\'',
                             returnStdout: true
                         ).trim()
                         env.TEST_DEPLOY_DIR = remoteHome.endsWith('/')
@@ -165,20 +165,20 @@ pipeline {
                         : "${TEST_ENV_FILE:?Не получен Jenkins credential test-env-file}"
                         : "${TEST_DEPLOY_DIR:?Не определён каталог TEST}"
 
-                        ssh -i "$SSH_KEY" -o BatchMode=yes "$SSH_USER@$TEST_HOST" \
+                        ssh -i "$SSH_KEY" -o UserKnownHostsFile=/var/jenkins_home/.ssh/known_hosts -o StrictHostKeyChecking=yes -o BatchMode=yes "$SSH_USER@$TEST_HOST" \
                             "mkdir -p '$TEST_DEPLOY_DIR/environments/test'"
 
-                        scp -i "$SSH_KEY" -o BatchMode=yes "$TEST_ENV_FILE" \
+                        scp -i "$SSH_KEY" -o UserKnownHostsFile=/var/jenkins_home/.ssh/known_hosts -o StrictHostKeyChecking=yes -o BatchMode=yes "$TEST_ENV_FILE" \
                             "$SSH_USER@$TEST_HOST:$TEST_DEPLOY_DIR/environments/test/.env.upload"
-                        ssh -i "$SSH_KEY" -o BatchMode=yes "$SSH_USER@$TEST_HOST" \
+                        ssh -i "$SSH_KEY" -o UserKnownHostsFile=/var/jenkins_home/.ssh/known_hosts -o StrictHostKeyChecking=yes -o BatchMode=yes "$SSH_USER@$TEST_HOST" \
                             "chmod 600 '$TEST_DEPLOY_DIR/environments/test/.env.upload' && \
                              mv '$TEST_DEPLOY_DIR/environments/test/.env.upload' \
                                 '$TEST_DEPLOY_DIR/environments/test/.env'"
 
-                        scp -i "$SSH_KEY" -o BatchMode=yes environments/test/docker-compose.yml \
+                        scp -i "$SSH_KEY" -o UserKnownHostsFile=/var/jenkins_home/.ssh/known_hosts -o StrictHostKeyChecking=yes -o BatchMode=yes environments/test/docker-compose.yml \
                             "$SSH_USER@$TEST_HOST:$TEST_DEPLOY_DIR/environments/test/"
 
-                        ssh -i "$SSH_KEY" -o BatchMode=yes "$SSH_USER@$TEST_HOST" \
+                        ssh -i "$SSH_KEY" -o UserKnownHostsFile=/var/jenkins_home/.ssh/known_hosts -o StrictHostKeyChecking=yes -o BatchMode=yes "$SSH_USER@$TEST_HOST" \
                             "cd '$TEST_DEPLOY_DIR' && \
                              APP_VERSION='$APP_VERSION' IMAGE_TAG='$IMAGE_TAG' \
                              docker compose --env-file environments/test/.env -f environments/test/docker-compose.yml config -q && \
@@ -224,24 +224,24 @@ pipeline {
                         : "${TEST_HOST:?Задайте TEST_HOST в Jenkins}"
                         : "${TEST_DEPLOY_DIR:?Не определён каталог TEST}"
 
-                        ssh -i "$SSH_KEY" -o BatchMode=yes "$SSH_USER@$TEST_HOST" \
+                        ssh -i "$SSH_KEY" -o UserKnownHostsFile=/var/jenkins_home/.ssh/known_hosts -o StrictHostKeyChecking=yes -o BatchMode=yes "$SSH_USER@$TEST_HOST" \
                             "mkdir -p '$TEST_DEPLOY_DIR/infrastructure/docker/lb-calc-web' \
                                 '$TEST_DEPLOY_DIR/infrastructure/docker/notification-service' \
                                 '$TEST_DEPLOY_DIR/lb-calc-web/target' \
                                 '$TEST_DEPLOY_DIR/notification-service/target'"
 
-                        scp -i "$SSH_KEY" -o BatchMode=yes infrastructure/docker/lb-calc-web/Dockerfile \
+                        scp -i "$SSH_KEY" -o UserKnownHostsFile=/var/jenkins_home/.ssh/known_hosts -o StrictHostKeyChecking=yes -o BatchMode=yes infrastructure/docker/lb-calc-web/Dockerfile \
                             "$SSH_USER@$TEST_HOST:$TEST_DEPLOY_DIR/infrastructure/docker/lb-calc-web/"
-                        scp -i "$SSH_KEY" -o BatchMode=yes infrastructure/docker/notification-service/Dockerfile \
+                        scp -i "$SSH_KEY" -o UserKnownHostsFile=/var/jenkins_home/.ssh/known_hosts -o StrictHostKeyChecking=yes -o BatchMode=yes infrastructure/docker/notification-service/Dockerfile \
                             "$SSH_USER@$TEST_HOST:$TEST_DEPLOY_DIR/infrastructure/docker/notification-service/"
-                        scp -i "$SSH_KEY" -o BatchMode=yes \
+                        scp -i "$SSH_KEY" -o UserKnownHostsFile=/var/jenkins_home/.ssh/known_hosts -o StrictHostKeyChecking=yes -o BatchMode=yes \
                             "lb-calc-web/target/lb-calc-web-$APP_VERSION.jar" \
                             "$SSH_USER@$TEST_HOST:$TEST_DEPLOY_DIR/lb-calc-web/target/"
-                        scp -i "$SSH_KEY" -o BatchMode=yes \
+                        scp -i "$SSH_KEY" -o UserKnownHostsFile=/var/jenkins_home/.ssh/known_hosts -o StrictHostKeyChecking=yes -o BatchMode=yes \
                             "notification-service/target/notification-service-$APP_VERSION.jar" \
                             "$SSH_USER@$TEST_HOST:$TEST_DEPLOY_DIR/notification-service/target/"
 
-                        ssh -i "$SSH_KEY" -o BatchMode=yes "$SSH_USER@$TEST_HOST" \
+                        ssh -i "$SSH_KEY" -o UserKnownHostsFile=/var/jenkins_home/.ssh/known_hosts -o StrictHostKeyChecking=yes -o BatchMode=yes "$SSH_USER@$TEST_HOST" \
                             "cd '$TEST_DEPLOY_DIR' && \
                              APP_VERSION='$APP_VERSION' IMAGE_TAG='$IMAGE_TAG' \
                              docker compose --env-file environments/test/.env -f environments/test/docker-compose.yml \
@@ -260,7 +260,7 @@ pipeline {
                 )]) {
                     sh '''
                         set -eu
-                        ssh -i "$SSH_KEY" -o BatchMode=yes "$SSH_USER@$TEST_HOST" \
+                        ssh -i "$SSH_KEY" -o UserKnownHostsFile=/var/jenkins_home/.ssh/known_hosts -o StrictHostKeyChecking=yes -o BatchMode=yes "$SSH_USER@$TEST_HOST" \
                             "cd '$TEST_DEPLOY_DIR' && \
                              WEB_PORT=\$(docker compose --env-file environments/test/.env -f environments/test/docker-compose.yml port lb-calc-web 8081 | tail -n 1 | awk -F: '{print \$NF}') && \
                              for attempt in \$(seq 1 30); do \
