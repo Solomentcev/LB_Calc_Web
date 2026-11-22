@@ -116,7 +116,6 @@ public class ProjectService {
         logger.info("Проект(id%d-%s) обновлен в БД..."
                 .formatted(project.getId(), project.getName()));
         projectDTO=ProjectMapper.toProjectDTO(project);
-        saveProject(projectDTO);
         return projectDTO;
     }
     @Transactional
