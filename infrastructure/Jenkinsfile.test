@@ -273,11 +273,18 @@ pipeline {
                         TEST_DEPLOY_DIR=$1
                         cd "$TEST_DEPLOY_DIR"
 
-                        COMPOSE="docker compose --env-file environments/test/.env -f environments/test/docker-compose.yml"
-                        WEB_PORT=$($COMPOSE port lb-calc-web 8081 | tail -n 1 | awk -F: '{print $NF}')
+                        compose() {
+                            docker compose \
+                                --env-file environments/test/.env \
+                                -f environments/test/docker-compose.yml "$@"
+                        }
+
+                        WEB_PORT=$(compose port lb-calc-web 8081 2>/dev/null \
+                            | tail -n 1 | awk -F: '{print $NF}')
 
                         if [ -z "$WEB_PORT" ]; then
                             echo "Не удалось определить опубликованный порт TEST web."
+                            compose logs --tail=100 lb-calc-web notification-service || true
                             exit 1
                         fi
 
@@ -299,7 +306,7 @@ pipeline {
                             sleep 2
                         done
 
-                        $COMPOSE logs --tail=100 lb-calc-web notification-service
+                        compose logs --tail=100 lb-calc-web notification-service || true
                         exit 1
 REMOTE
                     '''
