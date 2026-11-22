@@ -1,4 +1,7 @@
 <footer th:fragment="footer"
         class="text-center text-muted bg-white border-top py-3 mt-auto">
-    <small>© 2026 LB_Calc_Web</small>
+    <small>
+        © 2026 LB_Calc_Web · Версия
+        <span th:text="${@buildProperties.version}">0.1.0-SNAPSHOT</span>
+    </small>
 </footer>
