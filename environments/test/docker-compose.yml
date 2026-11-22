@@ -1,152 +1,102 @@
 services:
-
-  # ============================================================
-  # MySQL
-  # ============================================================
-
   mysql:
     image: mysql:8.4
     container_name: lb-calc-test-mysql
     restart: unless-stopped
-
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: ${MYSQL_DATABASE}
-
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
     ports:
       - "${MYSQL_PORT}:3306"
-
     volumes:
       - test_mysql_data:/var/lib/mysql
-
     healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "mysqladmin ping -h localhost -uroot -p$${MYSQL_ROOT_PASSWORD} --silent"
-        ]
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p${MYSQL_ROOT_PASSWORD} --silent"]
       interval: 5s
       timeout: 5s
       retries: 20
-
-
-  # ============================================================
-  # Kafka
-  # ============================================================
 
   kafka:
     image: apache/kafka:4.0.0
     container_name: lb-calc-test-kafka
     restart: unless-stopped
-
     ports:
       - "${KAFKA_EXTERNAL_PORT}:29092"
-
     environment:
       KAFKA_NODE_ID: 1
       KAFKA_PROCESS_ROLES: broker,controller
-
       KAFKA_LISTENERS: INTERNAL://:9092,EXTERNAL://:29092,CONTROLLER://:9093
-
-      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9092,EXTERNAL://localhost:29092
-
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9092,EXTERNAL://${DOCKER_HOST_ADDRESS}:${KAFKA_EXTERNAL_PORT}
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT
-
       KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
-
       KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
       KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
-
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
-
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
-
-      KAFKA_NUM_PARTITIONS: 3
-
+      KAFKA_NUM_PARTITIONS: ${KAFKA_TOPIC_USER_EVENTS_PARTITIONS:-3}
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
     volumes:
       - test_kafka_data:/var/lib/kafka/data
-
-
-  # ============================================================
-  # LB Calc Web
-  # ============================================================
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:9092 >/dev/null 2>&1"]
+      interval: 10s
+      timeout: 10s
+      retries: 20
+      start_period: 30s
 
   lb-calc-web:
     build:
       context: ../..
       dockerfile: infrastructure/docker/lb-calc-web/Dockerfile
       args:
-        APP_VERSION: ${APP_VERSION}
-
-    image: lb-calc-web:${APP_VERSION}
-
+        APP_VERSION: ${APP_VERSION:-0.1.0-SNAPSHOT}
+    image: lb-calc-web:${IMAGE_TAG:-local}
     container_name: lb-calc-test-web
     restart: unless-stopped
-
     environment:
-      DB_URL: ${DB_URL}
+      DB_URL: "jdbc:mysql://mysql:3306/${MYSQL_DATABASE}?createDatabaseIfNotExist=true"
       DB_USERNAME: ${DB_USERNAME}
       DB_PASSWORD: ${DB_PASSWORD}
-
       JWT_SECRET_ACCESS: ${JWT_SECRET_ACCESS}
       JWT_SECRET_REFRESH: ${JWT_SECRET_REFRESH}
-
-      JWT_EXPIRATION_ACCESS: ${JWT_EXPIRATION_ACCESS}
-      JWT_EXPIRATION_REFRESH: ${JWT_EXPIRATION_REFRESH}
-
-      KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS}
+      JWT_EXPIRATION_ACCESS: ${JWT_EXPIRATION_ACCESS:-36000000}
+      JWT_EXPIRATION_REFRESH: ${JWT_EXPIRATION_REFRESH:-252000000}
+      KAFKA_BOOTSTRAP_SERVERS: "kafka:9092"
       KAFKA_TOPIC_USER_EVENTS: ${KAFKA_TOPIC_USER_EVENTS}
-
+      LOGGING_LEVEL_COM_LB_CALC_WEB: ${LOGGING_LEVEL_COM_LB_CALC_WEB:-INFO}
     ports:
       - "${WEB_PORT}:8081"
-
     depends_on:
       mysql:
         condition: service_healthy
-
       kafka:
-        condition: service_started
-
-
-  # ============================================================
-  # Notification Service
-  # ============================================================
+        condition: service_healthy
 
   notification-service:
     build:
       context: ../..
       dockerfile: infrastructure/docker/notification-service/Dockerfile
       args:
-        APP_VERSION: ${APP_VERSION}
-
-    image: notification-service:${APP_VERSION}
-
+        APP_VERSION: ${APP_VERSION:-0.1.0-SNAPSHOT}
+    image: notification-service:${IMAGE_TAG:-local}
     container_name: lb-calc-test-notification
     restart: unless-stopped
-
     environment:
-      KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS}
+      KAFKA_BOOTSTRAP_SERVERS: "kafka:9092"
       KAFKA_TOPIC_USER_EVENTS: ${KAFKA_TOPIC_USER_EVENTS}
-
+      KAFKA_TOPIC_USER_EVENTS_PARTITIONS: ${KAFKA_TOPIC_USER_EVENTS_PARTITIONS:-3}
     ports:
-      - "${NOTIFICATION_PORT}:8080"
-
+      - "${NOTIFICATION_PORT}:8082"
     depends_on:
       kafka:
-        condition: service_started
-
-
-# ============================================================
-# Volumes
-# ============================================================
+        condition: service_healthy
 
 volumes:
-
   test_mysql_data:
     name: test_mysql_data
-
   test_kafka_data:
     name: test_kafka_data

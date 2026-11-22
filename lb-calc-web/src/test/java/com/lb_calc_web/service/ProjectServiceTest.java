@@ -108,6 +108,9 @@ class ProjectServiceTest {
         newProject.setCompany("NewClient");
         newProject.setCreatedAt(java.time.LocalDate.now());
         newProject.setName("NewClient_" + newProject.getCreatedAt());
+        newProject.setCreatedBy(currentUser);
+        newProject.setUpdatedBy(currentUser);
+        newProject.setUpdatedAt(java.time.LocalDate.now());
         newProject.getAlsList().add(als1);
         newProject.getQuantityALS().put(als1, 1);
 

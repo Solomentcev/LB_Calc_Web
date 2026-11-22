@@ -6,36 +6,21 @@
 
 Приложение позволяет:
 
-* создавать и редактировать проекты;
-* хранить данные в MySQL;
-* рассчитывать размеры конструкций;
-* формировать коммерческие предложения с техническими характеристиками и эскизами;
-* регистрировать и авторизовывать сотрудников с разграничением доступа по ролям;
-* отправлять пользовательские события и email-уведомления.
-
-## Цели
-
-Практическое освоение:
-
-* Java и Spring Boot;
-* Spring Data JPA и MySQL;
-* Spring Security и JWT;
-* REST API и Thymeleaf;
-* Apache Kafka;
-* Docker и Docker Compose;
-* JUnit и Mockito;
-* Apache POI и Java IO;
-* Git;
-* ООП, SOLID и MVC.
+- создавать и редактировать проекты;
+- хранить данные в MySQL;
+- рассчитывать размеры конструкций;
+- формировать коммерческие предложения с техническими характеристиками и эскизами;
+- регистрировать и авторизовывать сотрудников с разграничением доступа по ролям;
+- отправлять пользовательские события и email-уведомления.
 
 ## Архитектура
 
-Проект состоит из:
+Проект состоит из двух Java-приложений и инфраструктурных компонентов:
 
-* `lb-calc-web` — основное web-приложение;
-* `notification-service` — сервис обработки событий и отправки email;
-* `MySQL` — база данных;
-* `Kafka` — обмен событиями между сервисами.
+- `lb-calc-web` — основное web-приложение;
+- `notification-service` — обработка событий и отправка email;
+- MySQL — хранение данных;
+- Apache Kafka — обмен событиями между приложениями.
 
 ```text
 LB Calc Web → Kafka → Notification Service → Email
@@ -45,43 +30,97 @@ LB Calc Web → Kafka → Notification Service → Email
 
 ## Технологии
 
-* Java 21
-* Spring Boot
-* Spring Data JPA / Hibernate
-* Spring Security / JWT
-* Spring Kafka
-* Thymeleaf
-* MySQL 8.4
-* Docker / Docker Compose
-* JUnit / Mockito
-* Apache POI
-* Maven
-* Git
+- Java 17
+- Spring Boot 3
+- Spring MVC, Spring Security, JWT
+- Spring Data JPA / Hibernate
+- Spring Kafka
+- Thymeleaf
+- MySQL 8.4
+- Docker / Docker Compose
+- JUnit 5 / Mockito
+- Apache POI
+- Maven
 
-## Запуск
+## Локальная конфигурация DEV
 
-Сборка проекта:
-
-```bash
-./mvnw clean package
-```
-
-Запуск Docker-окружения:
+1. Скопируйте `environments/dev/.env.example` в `environments/dev/.env`.
+2. Укажите актуальный LAN-адрес Docker-хоста в `DOCKER_HOST_ADDRESS` и замените тестовые пароли и JWT-секреты.
+3. Для приложений внутри Docker Compose используются внутренние адреса:
+   - MySQL: `mysql:3306`;
+   - Kafka: `kafka:9092`.
+4. Запустите окружение из корня репозитория:
 
 ```bash
-cd environments/dev
-docker compose --env-file dev.env up -d --build
+docker compose --env-file environments/dev/.env -f environments/dev/docker-compose.yml up -d --build
 ```
 
-Основное приложение:
+Внешние порты по умолчанию:
 
-`http://localhost:8081`
+- web-приложение: `http://localhost:8081`;
+- notification-service: `http://localhost:8082`;
+- MySQL: `localhost:3307`;
+- Kafka: `localhost:29092`.
 
-Notification Service:
+Для запуска Java-приложений из IntelliJ IDEA используйте внешние адреса из DEV-файла окружения:
 
-`http://localhost:8082`
+- MySQL: значение `DB_URL`;
+- Kafka: значение `KAFKA_BOOTSTRAP_SERVERS`.
 
-При запуске приложений из IntelliJ IDEA Kafka доступна по адресу:
+MySQL создаёт пользователя приложения только при первоначальной инициализации пустого volume. Для уже существующего `dev_mysql_data` изменение `DB_USERNAME` и `DB_PASSWORD` в env-файле не создаёт и не меняет пользователя автоматически. Существующий volume не удаляйте.
 
-`localhost:29092`
+## Версионирование и Jenkins
+
+Для DEV и TEST используются отдельные Jenkins pipeline.
+
+### DEV
+
+Pipeline: `infrastructure/Jenkinsfile`.
+
+- В Jenkins передаётся имя ветки `feature/*`, `refactor/*` или `bugfix/*`.
+- Maven-версия формируется от последнего релизного Git-тега с суффиксом `-SNAPSHOT`.
+- Запускается `mvn clean verify`.
+- Docker tag включает SNAPSHOT-версию, нормализованное имя ветки и номер сборки Jenkins.
+- Развёртывание выполняется только в DEV.
+
+### TEST
+
+Pipeline: `infrastructure/Jenkinsfile.test`.
+
+- Job должна собирать ветку `master`.
+- Обрабатывается commit, полученный в результате merge PR в `master`.
+- PR должен иметь ровно одну метку: `version:patch`, `version:minor` или `version:major`.
+- Следующая SemVer-версия вычисляется автоматически относительно последнего тега `vX.Y.Z`.
+- После успешных Maven-проверок и развёртывания TEST создаётся Git-тег `vX.Y.Z`.
+- Docker tag TEST включает релизную версию и номер сборки Jenkins.
+
+### Настройка Jenkins
+
+Для обоих pipeline используется credential `github-ssh`.
+
+DEV:
+
+- Script Path: `infrastructure/Jenkinsfile`;
+- параметр сборки: `SOURCE_BRANCH`;
+- файл окружения агента: `/var/jenkins_env/dev.env`.
+
+TEST:
+
+- Script Path: `infrastructure/Jenkinsfile.test`;
+- SCM branch: `master`;
+- credentials: `test-host-ssh`, `test-env-file`, `github-ssh`;
+- переменные Jenkins: `TEST_HOST`, `TEST_PROJECT_DIR`.
+
+Для TEST credential `test-env-file` должен содержать конфигурацию второго ноутбука. Секреты не хранятся в репозитории.
+
+DEV-файл `/var/jenkins_env/dev.env` на агенте Jenkins должен быть подготовлен на основе `environments/dev/.env.example`. В нём должны быть заданы актуальный `DOCKER_HOST_ADDRESS`, учётные данные MySQL и JWT-секреты. Файл хранится вне репозитория.
+
+## GitHub Actions
+
+Workflow: `.github/workflows/java-ci.yml`.
+
+- Запускается для pull request в `master` и при push в `master`.
+- Для PR проверяет наличие ровно одной метки версии.
+- Выполняет `mvn clean verify` на Java 17.
+- Не развёртывает приложения и не управляет TEST/DEV стендами.
 
