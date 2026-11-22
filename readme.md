@@ -69,51 +69,16 @@ docker compose --env-file environments/dev/.env -f environments/dev/docker-compo
 
 MySQL создаёт пользователя приложения только при первоначальной инициализации пустого volume. Для уже существующего `dev_mysql_data` изменение `DB_USERNAME` и `DB_PASSWORD` в env-файле не создаёт и не меняет пользователя автоматически. Существующий volume не удаляйте.
 
-## Версионирование и Jenkins
+## Версионирование и CI/CD
 
-Для DEV и TEST используются отдельные Jenkins pipeline.
+Для CI используется GitHub Actions, для развёртывания DEV и TEST — Jenkins.
 
-### DEV
+- GitHub Actions выполняет проверки PR и сборку/тестирование, но не развёртывает приложения.
+- Jenkins DEV собирает выбранную рабочую ветку и развёртывает DEV.
+- Jenkins TEST собирает `master` после merge PR, проверяет version label, развёртывает TEST и после smoke-проверки публикует release tag `vX.Y.Z`.
+- Для PR в `master` используется ровно одна метка: `version:patch`, `version:minor` или `version:major`.
 
-Pipeline: `infrastructure/Jenkinsfile`.
-
-- В Jenkins передаётся имя ветки `feature/*`, `refactor/*` или `bugfix/*`.
-- Maven-версия формируется от последнего релизного Git-тега с суффиксом `-SNAPSHOT`.
-- Запускается `mvn clean verify`.
-- Docker tag включает SNAPSHOT-версию, нормализованное имя ветки и номер сборки Jenkins.
-- Развёртывание выполняется только в DEV.
-
-### TEST
-
-Pipeline: `infrastructure/Jenkinsfile.test`.
-
-- Job должна собирать ветку `master`.
-- Обрабатывается commit, полученный в результате merge PR в `master`.
-- PR должен иметь ровно одну метку: `version:patch`, `version:minor` или `version:major`.
-- Следующая SemVer-версия вычисляется автоматически относительно последнего тега `vX.Y.Z`.
-- После успешных Maven-проверок и развёртывания TEST создаётся Git-тег `vX.Y.Z`.
-- Docker tag TEST включает релизную версию и номер сборки Jenkins.
-
-### Настройка Jenkins
-
-Для обоих pipeline используется credential `github-ssh`.
-
-DEV:
-
-- Script Path: `infrastructure/Jenkinsfile`;
-- параметр сборки: `SOURCE_BRANCH`;
-- файл окружения агента: `/var/jenkins_env/dev.env`.
-
-TEST:
-
-- Script Path: `infrastructure/Jenkinsfile.test`;
-- SCM branch: `master`;
-- credentials: `test-host-ssh`, `test-env-file`, `github-ssh`;
-- переменные Jenkins: `TEST_HOST`, `TEST_PROJECT_DIR`.
-
-Для TEST credential `test-env-file` должен содержать конфигурацию второго ноутбука. Секреты не хранятся в репозитории.
-
-DEV-файл `/var/jenkins_env/dev.env` на агенте Jenkins должен быть подготовлен на основе `environments/dev/.env.example`. В нём должны быть заданы актуальный `DOCKER_HOST_ADDRESS`, учётные данные MySQL и JWT-секреты. Файл хранится вне репозитория.
+Подробная конфигурация серверов, Docker Compose, Jenkins, Credentials, SSH и порядок запуска стендов описаны в [руководстве по инфраструктуре](infrastructure/README.md).
 
 ## GitHub Actions
 
