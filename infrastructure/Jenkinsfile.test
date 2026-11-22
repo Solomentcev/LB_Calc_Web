@@ -70,7 +70,7 @@ pipeline {
                         }
 
                         def existingTags = sh(
-                            script: "git tag --points-at '${env.DEPLOY_COMMIT}' --list 'v[0-9]*' | grep -E '^v[0-9]+\\.[0-9]+\\.[0-9]+$' || true",
+                            script: "git tag --points-at '${env.DEPLOY_COMMIT}' --list 'v[0-9]*' | grep -E '^v[0-9]+\\.[0-9]+\\.[0-9]+\ || true",
                             returnStdout: true
                         ).trim().readLines().findAll { it }
 
@@ -84,6 +84,485 @@ pipeline {
                         } else {
                             def latestTag = sh(
                                 script: "git tag --list 'v[0-9]*' --sort=-v:refname | grep -E '^v[0-9]+\\.[0-9]+\\.[0-9]+$' | head -n 1 || true",
+                                returnStdout: true
+                            ).trim()
+                            def baseVersion = latestTag
+                                ? latestTag.substring(1)
+                                : sh(
+                                    script: 'mvn -s "$MAVEN_SETTINGS" help:evaluate -Dexpression=revision -q -DforceStdout',
+                                    returnStdout: true
+                                ).trim().replaceFirst(/-SNAPSHOT$/, '')
+
+                            if (!(baseVersion ==~ /\d+\.\d+\.\d+/)) {
+                                error("Некорректная базовая SemVer-версия: ${baseVersion}")
+                            }
+
+                            def parts = baseVersion.tokenize('.').collect { it.toInteger() }
+                            def major = parts[0]
+                            def minor = parts[1]
+                            def patch = parts[2]
+                            switch (labels[0]) {
+                                case 'version:major':
+                                    major++
+                                    minor = 0
+                                    patch = 0
+                                    break
+                                case 'version:minor':
+                                    minor++
+                                    patch = 0
+                                    break
+                                case 'version:patch':
+                                    patch++
+                                    break
+                            }
+                            env.APP_VERSION = "${major}.${minor}.${patch}"
+                            env.RELEASE_TAG = "v${env.APP_VERSION}"
+                        }
+
+                        if (sh(
+                            script: "git show-ref --verify --quiet 'refs/tags/${env.RELEASE_TAG}'",
+                            returnStatus: true
+                        ) == 0) {
+                            def taggedCommit = sh(
+                                script: "git rev-list -n 1 '${env.RELEASE_TAG}'",
+                                returnStdout: true
+                            ).trim()
+                            if (taggedCommit != env.DEPLOY_COMMIT) {
+                                error("Тег ${env.RELEASE_TAG} уже указывает на другой commit.")
+                            }
+                        }
+
+                        env.IMAGE_TAG = "${env.APP_VERSION}-build-${env.BUILD_NUMBER}"
+                        echo "PR #${pr.number}; version ${env.APP_VERSION}; commit ${env.DEPLOY_COMMIT}"
+                    }
+                }
+            }
+        }
+
+        stage('Prepare TEST dependencies') {
+            steps {
+                withCredentials([
+                    sshUserPrivateKey(
+                        credentialsId: 'test-host-ssh',
+                        keyFileVariable: 'SSH_KEY',
+                        usernameVariable: 'SSH_USER'
+                    ),
+                    file(credentialsId: 'test-env-file', variable: 'TEST_ENV_FILE')
+                ]) {
+                    script {
+                        def remoteHome = sh(
+                            script: 'ssh -i "$SSH_KEY" -o BatchMode=yes "$SSH_USER@$TEST_HOST" \'printf "%s" "$HOME"\'',
+                            returnStdout: true
+                        ).trim()
+                        env.TEST_DEPLOY_DIR = remoteHome.endsWith('/')
+                            ? remoteHome + 'lb-calc-test'
+                            : remoteHome + '/lb-calc-test'
+                    }
+                    sh '''
+                        set -eu
+                        set +x
+                        : "${TEST_HOST:?Задайте TEST_HOST в Jenkins}"
+                        : "${TEST_ENV_FILE:?Не получен Jenkins credential test-env-file}"
+                        : "${TEST_DEPLOY_DIR:?Не определён каталог TEST}"
+
+                        ssh -i "$SSH_KEY" -o BatchMode=yes "$SSH_USER@$TEST_HOST" \
+                            "mkdir -p '$TEST_DEPLOY_DIR/environments/test'"
+
+                        scp -i "$SSH_KEY" -o BatchMode=yes "$TEST_ENV_FILE" \
+                            "$SSH_USER@$TEST_HOST:$TEST_DEPLOY_DIR/environments/test/.env.upload"
+                        ssh -i "$SSH_KEY" -o BatchMode=yes "$SSH_USER@$TEST_HOST" \
+                            "chmod 600 '$TEST_DEPLOY_DIR/environments/test/.env.upload' && \
+                             mv '$TEST_DEPLOY_DIR/environments/test/.env.upload' \
+                                '$TEST_DEPLOY_DIR/environments/test/.env'"
+
+                        scp -i "$SSH_KEY" -o BatchMode=yes environments/test/docker-compose.yml \
+                            "$SSH_USER@$TEST_HOST:$TEST_DEPLOY_DIR/environments/test/"
+
+                        ssh -i "$SSH_KEY" -o BatchMode=yes "$SSH_USER@$TEST_HOST" \
+                            "cd '$TEST_DEPLOY_DIR' && \
+                             APP_VERSION='$APP_VERSION' IMAGE_TAG='$IMAGE_TAG' \
+                             docker compose --env-file environments/test/.env -f environments/test/docker-compose.yml config -q && \
+                             APP_VERSION='$APP_VERSION' IMAGE_TAG='$IMAGE_TAG' \
+                             docker compose --env-file environments/test/.env -f environments/test/docker-compose.yml up -d --wait mysql kafka"
+                    '''
+                }
+            }
+        }
+
+        stage('Build release') {
+            steps {
+                withCredentials([file(credentialsId: 'test-env-file', variable: 'TEST_ENV_FILE')]) {
+                    sh '''
+                        set -eu
+                        set +x
+                        set -a
+                        . "$TEST_ENV_FILE"
+                        set +a
+
+                        : "${DOCKER_HOST_ADDRESS:?Не задан DOCKER_HOST_ADDRESS}"
+                        : "${MYSQL_PORT:?Не задан MYSQL_PORT}"
+                        : "${DB_USERNAME:?Не задан DB_USERNAME}"
+                        : "${DB_PASSWORD:?Не задан DB_PASSWORD}"
+                        : "${KAFKA_BOOTSTRAP_SERVERS:?Не задан KAFKA_BOOTSTRAP_SERVERS}"
+
+                        : "${DB_URL:?Не задан DB_URL в test-env-file}"
+                        mvn -s "$MAVEN_SETTINGS" clean verify -Drevision="$APP_VERSION"
+                    '''
+                }
+            }
+        }
+
+        stage('Deploy TEST applications') {
+            steps {
+                withCredentials([sshUserPrivateKey(
+                    credentialsId: 'test-host-ssh',
+                    keyFileVariable: 'SSH_KEY',
+                    usernameVariable: 'SSH_USER'
+                )]) {
+                    sh '''
+                        set -eu
+                        : "${TEST_HOST:?Задайте TEST_HOST в Jenkins}"
+                        : "${TEST_DEPLOY_DIR:?Не определён каталог TEST}"
+
+                        ssh -i "$SSH_KEY" -o BatchMode=yes "$SSH_USER@$TEST_HOST" \
+                            "mkdir -p '$TEST_DEPLOY_DIR/infrastructure/docker/lb-calc-web' \
+                                '$TEST_DEPLOY_DIR/infrastructure/docker/notification-service' \
+                                '$TEST_DEPLOY_DIR/lb-calc-web/target' \
+                                '$TEST_DEPLOY_DIR/notification-service/target'"
+
+                        scp -i "$SSH_KEY" -o BatchMode=yes infrastructure/docker/lb-calc-web/Dockerfile \
+                            "$SSH_USER@$TEST_HOST:$TEST_DEPLOY_DIR/infrastructure/docker/lb-calc-web/"
+                        scp -i "$SSH_KEY" -o BatchMode=yes infrastructure/docker/notification-service/Dockerfile \
+                            "$SSH_USER@$TEST_HOST:$TEST_DEPLOY_DIR/infrastructure/docker/notification-service/"
+                        scp -i "$SSH_KEY" -o BatchMode=yes \
+                            "lb-calc-web/target/lb-calc-web-$APP_VERSION.jar" \
+                            "$SSH_USER@$TEST_HOST:$TEST_DEPLOY_DIR/lb-calc-web/target/"
+                        scp -i "$SSH_KEY" -o BatchMode=yes \
+                            "notification-service/target/notification-service-$APP_VERSION.jar" \
+                            "$SSH_USER@$TEST_HOST:$TEST_DEPLOY_DIR/notification-service/target/"
+
+                        ssh -i "$SSH_KEY" -o BatchMode=yes "$SSH_USER@$TEST_HOST" \
+                            "cd '$TEST_DEPLOY_DIR' && \
+                             APP_VERSION='$APP_VERSION' IMAGE_TAG='$IMAGE_TAG' \
+                             docker compose --env-file environments/test/.env -f environments/test/docker-compose.yml \
+                                 up -d --build --force-recreate --no-deps lb-calc-web notification-service"
+                    '''
+                }
+            }
+        }
+
+        stage('Verify TEST') {
+            steps {
+                withCredentials([sshUserPrivateKey(
+                    credentialsId: 'test-host-ssh',
+                    keyFileVariable: 'SSH_KEY',
+                    usernameVariable: 'SSH_USER'
+                )]) {
+                    sh '''
+                        set -eu
+                        ssh -i "$SSH_KEY" -o BatchMode=yes "$SSH_USER@$TEST_HOST" \
+                            "cd '$TEST_DEPLOY_DIR' && \
+                             WEB_PORT=\$(docker compose --env-file environments/test/.env -f environments/test/docker-compose.yml port lb-calc-web 8081 | tail -n 1 | awk -F: '{print \$NF}') && \
+                             for attempt in \$(seq 1 30); do \
+                               if curl --fail --silent \"http://127.0.0.1:\$WEB_PORT/login\" >/dev/null && \
+                                  [ \"\$(docker inspect --format '{{.State.Running}}' lb-calc-test-notification 2>/dev/null)\" = true ]; then \
+                                 echo 'TEST web и notification-service доступны'; exit 0; \
+                               fi; \
+                               sleep 2; \
+                             done; \
+                             docker compose --env-file environments/test/.env -f environments/test/docker-compose.yml \
+                                 logs --tail=100 lb-calc-web notification-service; exit 1"
+                    '''
+                }
+            }
+        }
+
+        stage('Create release tag') {
+            steps {
+                script {
+                    if (sh(
+                        script: "git show-ref --verify --quiet 'refs/tags/${env.RELEASE_TAG}'",
+                        returnStatus: true
+                    ) != 0) {
+                        sh '''
+                            set -eu
+                            git config user.name "Jenkins"
+                            git config user.email "jenkins@localhost"
+                            git tag -a "$RELEASE_TAG" "$DEPLOY_COMMIT" -m "Релиз $RELEASE_TAG"
+                        '''
+                        withCredentials([sshUserPrivateKey(
+                            credentialsId: 'github-ssh',
+                            keyFileVariable: 'GITHUB_SSH_KEY',
+                            usernameVariable: 'GITHUB_SSH_USER'
+                        )]) {
+                            sh '''
+                                set -eu
+                                export GIT_SSH_COMMAND="ssh -i $GITHUB_SSH_KEY -o IdentitiesOnly=yes"
+                                git push origin "refs/tags/$RELEASE_TAG"
+                            '''
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "TEST развёрнут: commit ${env.DEPLOY_COMMIT}, версия ${env.APP_VERSION}, тег ${env.RELEASE_TAG}, образ ${env.IMAGE_TAG}"
+        }
+        failure {
+            echo 'Развёртывание TEST завершилось ошибкой.'
+        }
+    }
+}
+ || true",
+                            returnStdout: true
+                        ).trim().readLines().findAll { it }
+
+                        if (existingTags.size() > 1) {
+                            error("На commit ${env.DEPLOY_COMMIT} найдено несколько SemVer-тегов.")
+                        }
+
+                        if (existingTags.size() == 1) {
+                            env.RELEASE_TAG = existingTags[0]
+                            env.APP_VERSION = env.RELEASE_TAG.substring(1)
+                        } else {
+                            def latestTag = sh(
+                                script: "git tag --list 'v[0-9]*' --sort=-v:refname | grep -E '^v[0-9]+\\.[0-9]+\\.[0-9]+\ | head -n 1 || true",
+                                returnStdout: true
+                            ).trim()
+                            def baseVersion = latestTag
+                                ? latestTag.substring(1)
+                                : sh(
+                                    script: 'mvn -s "$MAVEN_SETTINGS" help:evaluate -Dexpression=revision -q -DforceStdout',
+                                    returnStdout: true
+                                ).trim().replaceFirst(/-SNAPSHOT$/, '')
+
+                            if (!(baseVersion ==~ /\d+\.\d+\.\d+/)) {
+                                error("Некорректная базовая SemVer-версия: ${baseVersion}")
+                            }
+
+                            def parts = baseVersion.tokenize('.').collect { it.toInteger() }
+                            def major = parts[0]
+                            def minor = parts[1]
+                            def patch = parts[2]
+                            switch (labels[0]) {
+                                case 'version:major':
+                                    major++
+                                    minor = 0
+                                    patch = 0
+                                    break
+                                case 'version:minor':
+                                    minor++
+                                    patch = 0
+                                    break
+                                case 'version:patch':
+                                    patch++
+                                    break
+                            }
+                            env.APP_VERSION = "${major}.${minor}.${patch}"
+                            env.RELEASE_TAG = "v${env.APP_VERSION}"
+                        }
+
+                        if (sh(
+                            script: "git show-ref --verify --quiet 'refs/tags/${env.RELEASE_TAG}'",
+                            returnStatus: true
+                        ) == 0) {
+                            def taggedCommit = sh(
+                                script: "git rev-list -n 1 '${env.RELEASE_TAG}'",
+                                returnStdout: true
+                            ).trim()
+                            if (taggedCommit != env.DEPLOY_COMMIT) {
+                                error("Тег ${env.RELEASE_TAG} уже указывает на другой commit.")
+                            }
+                        }
+
+                        env.IMAGE_TAG = "${env.APP_VERSION}-build-${env.BUILD_NUMBER}"
+                        echo "PR #${pr.number}; version ${env.APP_VERSION}; commit ${env.DEPLOY_COMMIT}"
+                    }
+                }
+            }
+        }
+
+        stage('Prepare TEST dependencies') {
+            steps {
+                withCredentials([
+                    sshUserPrivateKey(
+                        credentialsId: 'test-host-ssh',
+                        keyFileVariable: 'SSH_KEY',
+                        usernameVariable: 'SSH_USER'
+                    ),
+                    file(credentialsId: 'test-env-file', variable: 'TEST_ENV_FILE')
+                ]) {
+                    script {
+                        def remoteHome = sh(
+                            script: 'ssh -i "$SSH_KEY" -o BatchMode=yes "$SSH_USER@$TEST_HOST" \'printf "%s" "$HOME"\'',
+                            returnStdout: true
+                        ).trim()
+                        env.TEST_DEPLOY_DIR = remoteHome.endsWith('/')
+                            ? remoteHome + 'lb-calc-test'
+                            : remoteHome + '/lb-calc-test'
+                    }
+                    sh '''
+                        set -eu
+                        set +x
+                        : "${TEST_HOST:?Задайте TEST_HOST в Jenkins}"
+                        : "${TEST_ENV_FILE:?Не получен Jenkins credential test-env-file}"
+                        : "${TEST_DEPLOY_DIR:?Не определён каталог TEST}"
+
+                        ssh -i "$SSH_KEY" -o BatchMode=yes "$SSH_USER@$TEST_HOST" \
+                            "mkdir -p '$TEST_DEPLOY_DIR/environments/test'"
+
+                        scp -i "$SSH_KEY" -o BatchMode=yes "$TEST_ENV_FILE" \
+                            "$SSH_USER@$TEST_HOST:$TEST_DEPLOY_DIR/environments/test/.env.upload"
+                        ssh -i "$SSH_KEY" -o BatchMode=yes "$SSH_USER@$TEST_HOST" \
+                            "chmod 600 '$TEST_DEPLOY_DIR/environments/test/.env.upload' && \
+                             mv '$TEST_DEPLOY_DIR/environments/test/.env.upload' \
+                                '$TEST_DEPLOY_DIR/environments/test/.env'"
+
+                        scp -i "$SSH_KEY" -o BatchMode=yes environments/test/docker-compose.yml \
+                            "$SSH_USER@$TEST_HOST:$TEST_DEPLOY_DIR/environments/test/"
+
+                        ssh -i "$SSH_KEY" -o BatchMode=yes "$SSH_USER@$TEST_HOST" \
+                            "cd '$TEST_DEPLOY_DIR' && \
+                             APP_VERSION='$APP_VERSION' IMAGE_TAG='$IMAGE_TAG' \
+                             docker compose --env-file environments/test/.env -f environments/test/docker-compose.yml config -q && \
+                             APP_VERSION='$APP_VERSION' IMAGE_TAG='$IMAGE_TAG' \
+                             docker compose --env-file environments/test/.env -f environments/test/docker-compose.yml up -d --wait mysql kafka"
+                    '''
+                }
+            }
+        }
+
+        stage('Build release') {
+            steps {
+                withCredentials([file(credentialsId: 'test-env-file', variable: 'TEST_ENV_FILE')]) {
+                    sh '''
+                        set -eu
+                        set +x
+                        set -a
+                        . "$TEST_ENV_FILE"
+                        set +a
+
+                        : "${DOCKER_HOST_ADDRESS:?Не задан DOCKER_HOST_ADDRESS}"
+                        : "${MYSQL_PORT:?Не задан MYSQL_PORT}"
+                        : "${DB_USERNAME:?Не задан DB_USERNAME}"
+                        : "${DB_PASSWORD:?Не задан DB_PASSWORD}"
+                        : "${KAFKA_BOOTSTRAP_SERVERS:?Не задан KAFKA_BOOTSTRAP_SERVERS}"
+
+                        : "${DB_URL:?Не задан DB_URL в test-env-file}"
+                        mvn -s "$MAVEN_SETTINGS" clean verify -Drevision="$APP_VERSION"
+                    '''
+                }
+            }
+        }
+
+        stage('Deploy TEST applications') {
+            steps {
+                withCredentials([sshUserPrivateKey(
+                    credentialsId: 'test-host-ssh',
+                    keyFileVariable: 'SSH_KEY',
+                    usernameVariable: 'SSH_USER'
+                )]) {
+                    sh '''
+                        set -eu
+                        : "${TEST_HOST:?Задайте TEST_HOST в Jenkins}"
+                        : "${TEST_DEPLOY_DIR:?Не определён каталог TEST}"
+
+                        ssh -i "$SSH_KEY" -o BatchMode=yes "$SSH_USER@$TEST_HOST" \
+                            "mkdir -p '$TEST_DEPLOY_DIR/infrastructure/docker/lb-calc-web' \
+                                '$TEST_DEPLOY_DIR/infrastructure/docker/notification-service' \
+                                '$TEST_DEPLOY_DIR/lb-calc-web/target' \
+                                '$TEST_DEPLOY_DIR/notification-service/target'"
+
+                        scp -i "$SSH_KEY" -o BatchMode=yes infrastructure/docker/lb-calc-web/Dockerfile \
+                            "$SSH_USER@$TEST_HOST:$TEST_DEPLOY_DIR/infrastructure/docker/lb-calc-web/"
+                        scp -i "$SSH_KEY" -o BatchMode=yes infrastructure/docker/notification-service/Dockerfile \
+                            "$SSH_USER@$TEST_HOST:$TEST_DEPLOY_DIR/infrastructure/docker/notification-service/"
+                        scp -i "$SSH_KEY" -o BatchMode=yes \
+                            "lb-calc-web/target/lb-calc-web-$APP_VERSION.jar" \
+                            "$SSH_USER@$TEST_HOST:$TEST_DEPLOY_DIR/lb-calc-web/target/"
+                        scp -i "$SSH_KEY" -o BatchMode=yes \
+                            "notification-service/target/notification-service-$APP_VERSION.jar" \
+                            "$SSH_USER@$TEST_HOST:$TEST_DEPLOY_DIR/notification-service/target/"
+
+                        ssh -i "$SSH_KEY" -o BatchMode=yes "$SSH_USER@$TEST_HOST" \
+                            "cd '$TEST_DEPLOY_DIR' && \
+                             APP_VERSION='$APP_VERSION' IMAGE_TAG='$IMAGE_TAG' \
+                             docker compose --env-file environments/test/.env -f environments/test/docker-compose.yml \
+                                 up -d --build --force-recreate --no-deps lb-calc-web notification-service"
+                    '''
+                }
+            }
+        }
+
+        stage('Verify TEST') {
+            steps {
+                withCredentials([sshUserPrivateKey(
+                    credentialsId: 'test-host-ssh',
+                    keyFileVariable: 'SSH_KEY',
+                    usernameVariable: 'SSH_USER'
+                )]) {
+                    sh '''
+                        set -eu
+                        ssh -i "$SSH_KEY" -o BatchMode=yes "$SSH_USER@$TEST_HOST" \
+                            "cd '$TEST_DEPLOY_DIR' && \
+                             WEB_PORT=\$(docker compose --env-file environments/test/.env -f environments/test/docker-compose.yml port lb-calc-web 8081 | tail -n 1 | awk -F: '{print \$NF}') && \
+                             for attempt in \$(seq 1 30); do \
+                               if curl --fail --silent \"http://127.0.0.1:\$WEB_PORT/login\" >/dev/null && \
+                                  [ \"\$(docker inspect --format '{{.State.Running}}' lb-calc-test-notification 2>/dev/null)\" = true ]; then \
+                                 echo 'TEST web и notification-service доступны'; exit 0; \
+                               fi; \
+                               sleep 2; \
+                             done; \
+                             docker compose --env-file environments/test/.env -f environments/test/docker-compose.yml \
+                                 logs --tail=100 lb-calc-web notification-service; exit 1"
+                    '''
+                }
+            }
+        }
+
+        stage('Create release tag') {
+            steps {
+                script {
+                    if (sh(
+                        script: "git show-ref --verify --quiet 'refs/tags/${env.RELEASE_TAG}'",
+                        returnStatus: true
+                    ) != 0) {
+                        sh '''
+                            set -eu
+                            git config user.name "Jenkins"
+                            git config user.email "jenkins@localhost"
+                            git tag -a "$RELEASE_TAG" "$DEPLOY_COMMIT" -m "Релиз $RELEASE_TAG"
+                        '''
+                        withCredentials([sshUserPrivateKey(
+                            credentialsId: 'github-ssh',
+                            keyFileVariable: 'GITHUB_SSH_KEY',
+                            usernameVariable: 'GITHUB_SSH_USER'
+                        )]) {
+                            sh '''
+                                set -eu
+                                export GIT_SSH_COMMAND="ssh -i $GITHUB_SSH_KEY -o IdentitiesOnly=yes"
+                                git push origin "refs/tags/$RELEASE_TAG"
+                            '''
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "TEST развёрнут: commit ${env.DEPLOY_COMMIT}, версия ${env.APP_VERSION}, тег ${env.RELEASE_TAG}, образ ${env.IMAGE_TAG}"
+        }
+        failure {
+            echo 'Развёртывание TEST завершилось ошибкой.'
+        }
+    }
+}
+ | head -n 1 || true",
                                 returnStdout: true
                             ).trim()
                             def baseVersion = latestTag
