@@ -1,6 +1,8 @@
 package com.lb_calc_web.controller;
 
 import com.lb_calc_web.dto.ALSDTO;
+import com.lb_calc_web.mapper.dto.ALSDtoMapper;
+import com.lb_calc_web.service.image.ALSImageService;
 import com.lb_calc_web.handler.ValidationSizeException;
 import com.lb_calc_web.service.ALSService;
 import org.slf4j.Logger;
@@ -28,8 +30,8 @@ public class ALSController extends BaseCatalogController {
     public String createALS(
             Model model
     ) {
-        ALSDTO als =
-                alsService.createALS();
+        ALSDTO als = ALSDtoMapper.toDto(alsService.createALS());
+        als.setStringALSImage(ALSImageService.getStringALSImage(als));
 
         model.addAttribute(
                 "als",

@@ -1,6 +1,7 @@
 package com.lb_calc_web.service;
 
 import com.lb_calc_web.domain.attributes.Colors;
+import com.lb_calc_web.domain.attributes.PositionControlModule;
 import com.lb_calc_web.domain.model.ALS;
 import com.lb_calc_web.domain.model.ControlModule;
 import com.lb_calc_web.domain.model.LB;
@@ -132,12 +133,13 @@ public class ALSService {
     }
 
     /**
-     * Создаёт DTO для формы создания ALS.
+     * Создаёт доменную конфигурацию ALS с параметрами по умолчанию.
      *
-     * Значения берутся из properties.
+     * <p>Значения базовой геометрии и положение управляющего модуля
+     * берутся из конфигурации приложения.</p>
      */
     @Transactional
-    public ALSDTO createALS() {
+    public ALS createALS() {
         logger.info("Создание АКХ...");
 
         int height = getInt("size.height.default");
@@ -145,83 +147,59 @@ public class ALSService {
         int upperFrame = getInt("size.frame.upper.default");
         int bottomFrame = getInt("size.frame.bottom.default");
 
-        Colors colorBody =
-                Colors.valueOf(
-                        getRequired(
-                                "als.color.body.default"
-                        )
-                );
+        Colors colorBody = Colors.valueOf(getRequired("als.color.body.default"));
+        Colors colorDoor = Colors.valueOf(getRequired("als.color.door.default"));
 
-        Colors colorDoor =
-                Colors.valueOf(
-                        getRequired(
-                                "als.color.door.default"
-                        )
-                );
-
-        LC lc =
-                lcService.createLC(
-                        height,
-                        depth,
-                        upperFrame,
-                        bottomFrame,
-                        colorBody
-                );
-
+        LC lc = lcService.createLC(
+                height,
+                depth,
+                upperFrame,
+                bottomFrame,
+                colorBody
+        );
         lc.setColorDoor(colorDoor);
 
-        LCDTO lcDto = com.lb_calc_web.mapper.dto.LCDtoMapper.toDto(lc);
-
-        LB lb =
-                lbService.createLB(
-                        height,
-                        depth,
-                        upperFrame,
-                        bottomFrame,
-                        colorBody,
-                        colorDoor
-                );
-
-        ALSDTO als = new ALSDTO();
-
-        als.setId(0L);
-        als.setHeight(height);
-        als.setDepth(depth);
-        als.setUpperFrame(upperFrame);
-        als.setBottomFrame(bottomFrame);
-
-        als.setColorBody(
-                colorBody.name()
+        LB lb = lbService.createLB(
+                height,
+                depth,
+                upperFrame,
+                bottomFrame,
+                colorBody,
+                colorDoor
         );
 
-        als.setColorDoor(
-                colorDoor.name()
+        String configuredPosition = environment.getProperty(
+                "als.position.control-module.default",
+                getRequired("als.position.lc.default")
+        );
+        PositionControlModule position = PositionControlModule.valueOf(configuredPosition);
+
+        List<Module> modules = new ArrayList<>();
+        switch (position) {
+            case LEFT -> {
+                modules.add(lc);
+                modules.add(lb);
+            }
+            case RIGHT -> {
+                modules.add(lb);
+                modules.add(lc);
+            }
+            case CENTER -> throw new IllegalStateException(
+                    "Положение CENTER недопустимо для ALS с одним LB"
+            );
+        }
+
+        ALS als = new ALS(
+                height,
+                depth,
+                upperFrame,
+                bottomFrame,
+                colorBody,
+                colorDoor,
+                modules
         );
 
-        als.setPositionControlModule(
-                environment.getProperty(
-                        "als.position.control-module.default",
-                        getRequired("als.position.lc.default")
-                )
-        );
-
-        als.setLC(lcDto);
-
-        als.getLbList().add(LBDtoMapper.toDto(lb));
-
-        ALSDtoMapper.updateCalculatedFields(als, restoreALS(als));
-
-        als.setStringALSImage(
-                ALSImageService.getStringALSImage(
-                        als
-                )
-        );
-
-        logger.info(
-                "Создана АКХ: {}",
-                als.getName()
-        );
-
+        logger.info("Создана АКХ: {}", als.getName());
         return als;
     }
 
