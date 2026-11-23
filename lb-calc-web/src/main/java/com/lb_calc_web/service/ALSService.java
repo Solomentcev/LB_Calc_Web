@@ -93,7 +93,7 @@ public class ALSService {
     }
 
     @Transactional(readOnly = true)
-    public List<ALSDTO> findAll() {
+    public List<ALS> findAll() {
         logger.info("Получение списка АКХ...");
         Function<String, Equipment> equipmentResolver = equipmentCatalogService.findDomainCatalogResolver();
 
@@ -104,7 +104,7 @@ public class ALSService {
                                 ALSEntity::getId
                         )
                 )
-                .map(entity -> ALSDtoMapper.toDto(ALSEntityMapper.toDomain(entity, equipmentResolver)))
+                .map(entity -> ALSEntityMapper.toDomain(entity, equipmentResolver))
                 .toList();
     }
 

@@ -49,7 +49,7 @@ public class ALSRestController {
     public ResponseEntity<?> getAllALS() {
 
         List<ALSDTO> alsList =
-                alsService.findAll().stream().map(this::addALSImage).toList();
+                alsService.findAll().stream().map(this::toDto).toList();
 
         return ResponseEntity.ok(
                 ApiResponse.success(
