@@ -1089,7 +1089,6 @@ public class ProjectService {
     private void validateProject(Project domain, ProjectDTO source) {
         List<ValidationResult> results =
                 sizeValidator.validateProject(domain);
-        ProjectDtoMapper.assignValidationObjectIds(results, domain, source, alsDto -> alsService.restoreDomain(alsDto));
 
         List<ValidationError> errors =
                 results.stream()
