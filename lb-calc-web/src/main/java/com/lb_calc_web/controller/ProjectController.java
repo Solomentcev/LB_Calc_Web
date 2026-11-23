@@ -673,6 +673,7 @@ public class ProjectController
      */
     private ProjectDTO addALSImages(ProjectDTO project) {
         if (project != null && project.getAlsList() != null) {
+            ProjectDtoMapper.recalculateQuantityALS(project);
             project.getAlsList().forEach(this::addALSImage);
         }
         return project;

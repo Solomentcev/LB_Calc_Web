@@ -57,6 +57,31 @@ public final class ProjectDtoMapper {
     }
 
     /**
+     * Пересчитывает количество одинаковых ALS по фактическому списку DTO.
+     *
+     * <p>Карта является производным представлением для пользовательского
+     * интерфейса и должна восстанавливаться после связывания HTML-формы,
+     * поскольку она не отправляется браузером.</p>
+     *
+     * @param project DTO проекта
+     */
+    public static void recalculateQuantityALS(ProjectDTO project) {
+        if (project == null) {
+            return;
+        }
+
+        Map<ALSDTO, Integer> quantityALS = new LinkedHashMap<>();
+        if (project.getAlsList() != null) {
+            for (ALSDTO als : project.getAlsList()) {
+                if (als != null) {
+                    quantityALS.merge(als, 1, Math::addExact);
+                }
+            }
+        }
+        project.setQuantityALS(quantityALS);
+    }
+
+    /**
      * Преобразует доменный проект в DTO без восстановления
      * идентификаторов ALS.
      *
