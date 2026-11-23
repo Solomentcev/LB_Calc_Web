@@ -411,7 +411,8 @@ class ALSServiceTest {
         assertNotNull(resultDto.getLBC());
         assertNull(replacement.getEquipmentSelections(),
                 "Восстановление оборудования не должно изменять исходный LBCDTO");
-        verify(equipmentCatalogService).findExistingConfigurationResolver(anySet());
+        verify(equipmentCatalogService, times(2))
+                .findExistingConfigurationResolver(anySet());
     }
 
     @Test

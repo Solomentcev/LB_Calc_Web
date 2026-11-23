@@ -8,6 +8,7 @@ import com.lb_calc_web.domain.equipment.EquipmentCatalog;
 import com.lb_calc_web.mapper.dto.ALSDtoMapper;
 import com.lb_calc_web.mapper.dto.LBDtoMapper;
 import com.lb_calc_web.mapper.dto.ProjectDtoMapper;
+import com.lb_calc_web.mapper.dto.EmployeeDtoMapper;
 import com.lb_calc_web.domain.model.Employee;
 import com.lb_calc_web.dto.LBCDTO;
 import com.lb_calc_web.dto.LBDTO;
@@ -129,6 +130,8 @@ class ProjectServiceTest {
 
         ProjectDTO dto = TestDataFactory.validProject(1L);
         dto.setId(null);
+        dto.setCreatedBy(EmployeeDtoMapper.toDto(employee));
+        dto.setUpdatedBy(EmployeeDtoMapper.toDto(employee));
         ALSDTO invalidALS = TestDataFactory.validALSDTO(10L);
         invalidALS.setHeight(10);
         dto.setAlsList(java.util.List.of(invalidALS));
@@ -233,6 +236,10 @@ class ProjectServiceTest {
 
         ProjectDTO dto = TestDataFactory.validProject(1L);
         dto.setId(1L);
+        Employee ownerDomain = new Employee(10L, "Владелец", "Проекта",
+                "owner@example.com", java.time.LocalDate.of(2026, 9, 18), Role.ROLE_MANAGER);
+        dto.setCreatedBy(EmployeeDtoMapper.toDto(ownerDomain));
+        dto.setUpdatedBy(EmployeeDtoMapper.toDto(ownerDomain));
         com.lb_calc_web.domain.model.Project project =
                 ProjectDtoMapper.toDomain(dto, alsService::restoreDomain);
 

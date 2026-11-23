@@ -480,7 +480,7 @@ class PersistenceIntegrationTest {
             changedLBDTO.setCountCells(4);
             changedALS = projectService.saveLBAtProject(
                     projectId,
-                    selectedAlsId,
+                    changedALS.getId(),
                     changedLB.getId(),
                     alsService.restoreLB(changedLBDTO)
             );
@@ -494,7 +494,7 @@ class PersistenceIntegrationTest {
                     .orElseThrow();
             changedALS = projectService.deleteLBatProject(
                     projectId,
-                    selectedAlsId,
+                    changedALS.getId(),
                     removedLBId
             );
             assertEquals(2, changedALS.getStorageModules().size());
@@ -513,7 +513,7 @@ class PersistenceIntegrationTest {
             changedLCDTO.setEquipmentSelections(changedEquipmentSelections);
             ALS changedWithLC = projectService.saveLCAtProject(
                     projectId,
-                    selectedAlsId,
+                    changedALS.getId(),
                     changedLCDTO.getId(),
                     alsService.restoreLC(changedLCDTO, changedALS)
             );
