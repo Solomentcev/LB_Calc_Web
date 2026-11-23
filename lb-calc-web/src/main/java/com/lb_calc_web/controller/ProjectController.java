@@ -122,7 +122,7 @@ public class ProjectController
 
             model.addAttribute(
                     "projectErrors",
-                    e.getErrors()
+                    ValidationErrorFormatter.format(e.getValidationResult())
             );
 
             model.addAttribute("project", addALSImages(project));
@@ -234,7 +234,7 @@ public class ProjectController
 
             model.addAttribute(
                     "ALSErrors",
-                    e.getErrors()
+                    ValidationErrorFormatter.format(e.getValidationResult())
             );
 
             model.addAttribute("als", addALSImage(als));
@@ -317,7 +317,7 @@ public class ProjectController
 
             model.addAttribute(
                     "errors",
-                    e.getErrors()
+                    ValidationErrorFormatter.format(e.getValidationResult())
             );
 
             model.addAttribute(
@@ -424,7 +424,7 @@ public class ProjectController
         } catch (ValidationSizeException e) {
             model.addAttribute(
                     "errors",
-                    e.getErrors()
+                    ValidationErrorFormatter.format(e.getValidationResult())
             );
 
             model.addAttribute("project", addALSImages(ProjectDtoMapper.toDto(projectService.findById(projectId))));
@@ -514,7 +514,7 @@ public class ProjectController
 
             model.addAttribute(
                     "errors",
-                    e.getErrors()
+                    ValidationErrorFormatter.format(e.getValidationResult())
             );
 
             model.addAttribute("project", addALSImages(ProjectDtoMapper.toDto(projectService.findById(projectId))));

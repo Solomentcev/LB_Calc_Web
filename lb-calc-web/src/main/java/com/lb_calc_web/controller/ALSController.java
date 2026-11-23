@@ -83,12 +83,12 @@ public class ALSController extends BaseCatalogController {
 
             logger.warn(
                     "Ошибка валидации ALS: {}",
-                    e.getErrors()
+                    ValidationErrorFormatter.format(e.getValidationResult())
             );
 
             model.addAttribute(
                     "ALSErrors",
-                    e.getErrors()
+                    ValidationErrorFormatter.format(e.getValidationResult())
             );
 
             model.addAttribute(
@@ -157,7 +157,7 @@ public class ALSController extends BaseCatalogController {
             return "redirect:/alss/"
                     + saved.getId();
         } catch (ValidationSizeException e) {
-            model.addAttribute("errors", e.getErrors());
+            model.addAttribute("errors", ValidationErrorFormatter.format(e.getValidationResult()));
             model.addAttribute("als", toDto(alsService.findById(alsId)));
             model.addAttribute("lbc", lbc);
 

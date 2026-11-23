@@ -127,12 +127,12 @@ public class LCController {
 
             logger.warn(
                     "LC не прошёл валидацию: {}",
-                    e.getErrors()
+                    ValidationErrorFormatter.format(e.getValidationResult())
             );
 
             model.addAttribute(
                     "errors",
-                    e.getErrors()
+                    ValidationErrorFormatter.format(e.getValidationResult())
             );
 
             model.addAttribute(

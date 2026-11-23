@@ -235,16 +235,6 @@ class SizeValidatorTest {
     }
 
     @Test
-    void getErrorValidateLBCSizesList_shouldReturnErrors() {
-        LBC invalidLBC = createLBC(10, 500, 3, 20);
-
-        List<String> errors =
-                sizeValidator.getErrorValidateLBCSizesList(invalidLBC);
-
-        assertFalse(errors.isEmpty());
-    }
-
-    @Test
     void deepValidateALS_shouldIncludeLBC() {
         List<ValidationResult> results =
                 sizeValidator.deepValidateALS(validLBCALS(40L));

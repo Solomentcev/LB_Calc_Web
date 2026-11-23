@@ -67,9 +67,4 @@ public class ValidationError {
         this.objectId = objectId;
     }
 
-    @Override
-    public String toString() {
-        return "["+objectType+"-id"+objectId+"]"+field + ": " + message +
-                " (текущее: " + actualValue + ", допустимое: " + minValue + "-" + maxValue + ")";
-    }
 }

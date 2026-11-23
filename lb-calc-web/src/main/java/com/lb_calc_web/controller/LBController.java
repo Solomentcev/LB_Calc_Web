@@ -102,12 +102,12 @@ public class LBController {
 
             logger.warn(
                     "LB не прошёл валидацию: {}",
-                    e.getErrors()
+                    ValidationErrorFormatter.format(e.getValidationResult())
             );
 
             model.addAttribute(
                     "errors",
-                    e.getErrors()
+                    ValidationErrorFormatter.format(e.getValidationResult())
             );
 
             model.addAttribute(

@@ -110,7 +110,7 @@ public class LBCController extends BaseCatalogController {
         } catch (ValidationSizeException e) {
             model.addAttribute(
                     "errors",
-                    e.getErrors()
+                    ValidationErrorFormatter.format(e.getValidationResult())
             );
             model.addAttribute(
                     "lbc",

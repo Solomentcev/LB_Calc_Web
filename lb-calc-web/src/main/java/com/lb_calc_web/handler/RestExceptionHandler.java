@@ -2,6 +2,7 @@ package com.lb_calc_web.handler;
 
 import com.lb_calc_web.service.validation.ValidationSizeException;
 
+import com.lb_calc_web.controller.ValidationErrorFormatter;
 import com.lb_calc_web.controller.api.response.ApiResponse;
 import io.jsonwebtoken.JwtException;
 import jakarta.security.auth.message.AuthException;
@@ -74,7 +75,7 @@ public class RestExceptionHandler {
             ValidationSizeException exception
     ) {
         return response(HttpStatus.BAD_REQUEST, "Ошибка проверки размеров",
-                exception.getErrors());
+                ValidationErrorFormatter.format(exception.getValidationResult()));
     }
 
     @ExceptionHandler({
