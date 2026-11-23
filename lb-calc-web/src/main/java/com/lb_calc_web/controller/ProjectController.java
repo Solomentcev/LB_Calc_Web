@@ -109,10 +109,7 @@ public class ProjectController
                     e.getErrors()
             );
 
-            model.addAttribute(
-                    "project",
-                    project
-            );
+            model.addAttribute("project", addALSImages(project));
 
             return "projects/project";
         }
@@ -228,10 +225,7 @@ public class ProjectController
                     e.getErrors()
             );
 
-            model.addAttribute(
-                    "als",
-                    als
-            );
+            model.addAttribute("als", addALSImage(als));
 
             model.addAttribute(
                     "project",
@@ -316,10 +310,7 @@ public class ProjectController
                     e.getErrors()
             );
 
-            model.addAttribute(
-                    "project",
-                    projectService.findById(projectId)
-            );
+            model.addAttribute("project", addALSImages(projectService.findById(projectId)));
 
             model.addAttribute(
                     "als",
@@ -426,18 +417,9 @@ public class ProjectController
                     e.getErrors()
             );
 
-            model.addAttribute(
-                    "project",
-                    projectService.findById(projectId)
-            );
+            model.addAttribute("project", addALSImages(projectService.findById(projectId)));
 
-            model.addAttribute(
-                    "als",
-                    projectService.findALSInProject(
-                            projectId,
-                            alsId
-                    )
-            );
+            model.addAttribute("als", addALSImage(projectService.findALSInProject(projectId, alsId)));
 
             model.addAttribute(
                     "lbc",
@@ -480,8 +462,8 @@ public class ProjectController
                         lbId
                 );
 
-        model.addAttribute("project", project);
-        model.addAttribute("als", als);
+        model.addAttribute("project", addALSImages(project));
+        model.addAttribute("als", addALSImage(als));
         model.addAttribute("lb", lb);
         model.addAttribute("projectId", projectId);
         model.addAttribute("alsId", alsId);
@@ -526,18 +508,9 @@ public class ProjectController
                     e.getErrors()
             );
 
-            model.addAttribute(
-                    "project",
-                    projectService.findById(projectId)
-            );
+            model.addAttribute("project", addALSImages(projectService.findById(projectId)));
 
-            model.addAttribute(
-                    "als",
-                    projectService.findALSInProject(
-                            projectId,
-                            alsId
-                    )
-            );
+            model.addAttribute("als", addALSImage(projectService.findALSInProject(projectId, alsId)));
 
             model.addAttribute(
                     "lb",
