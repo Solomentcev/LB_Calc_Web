@@ -201,16 +201,11 @@ public class ProjectController
             Model model
     ) {
         try {
-            als.setId(alsId);
-
-            ProjectDTO project =
-                    projectService.findById(projectId);
-
             ALSDTO savedALS =
                     projectService.replaceALSandSaveProject(
-                            project,
-                            als,
-                            alsId
+                            projectId,
+                            alsId,
+                            als
                     );
 
             return "redirect:/projects/"

@@ -477,30 +477,26 @@ public class ProjectService {
      */
     @Transactional
     public ALSDTO replaceALSandSaveProject(
-            ProjectDTO project,
-            ALSDTO als,
-            Long alsId
+            Long projectId,
+            Long alsId,
+            ALSDTO als
     ) {
-        Objects.requireNonNull(project, "Проект не должен быть null");
         Objects.requireNonNull(als, "ALS не должен быть null");
 
-        Project domain = findDomainProject(project.getId());
+        Project domain = findDomainProject(projectId);
         ALS oldConfiguration = findDomainALS(domain, alsId);
+
+        /*
+         * ID определяется URL, а не телом запроса.
+         * Это исключает подмену идентификатора ALS клиентом.
+         */
+        als.setId(alsId);
         ALS newConfiguration = alsService.restoreDomain(als);
 
         domain.replaceALS(oldConfiguration, newConfiguration);
 
         ProjectDTO savedProject = saveDomainProject(domain);
-
-        return savedProject.getAlsList().stream()
-                .filter(value -> value != null
-                        && alsService.restoreDomain(value).equals(newConfiguration))
-                .findFirst()
-                .orElseThrow(
-                        () -> new IllegalStateException(
-                                "После сохранения изменённая ALS отсутствует в проекте"
-                        )
-                );
+        return findSavedALS(savedProject, newConfiguration);
     }
 
     /**
@@ -756,6 +752,11 @@ public class ProjectService {
      * Возвращает DTO сохранённой конфигурации ALS по её доменному содержимому.
      */
     private ALSDTO findSavedALS(ProjectDTO savedProject, ALS configuration) {
+        /*
+         * ALS является неизменяемой конфигурацией: при изменении её
+         * содержимого ALSService может создать новую запись с другим ID.
+         * Поэтому результат ищется по доменному содержимому, а не по ID.
+         */
         return savedProject.getAlsList().stream()
                 .filter(Objects::nonNull)
                 .filter(dto -> alsService.restoreDomain(dto).equals(configuration))
@@ -764,6 +765,7 @@ public class ProjectService {
                         "После сохранения изменённая ALS отсутствует в проекте"
                 ));
     }
+
 
     private ProjectEntity loadExistingProject(
             Long id

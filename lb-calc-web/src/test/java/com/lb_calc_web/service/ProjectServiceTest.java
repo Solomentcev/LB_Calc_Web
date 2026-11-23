@@ -261,6 +261,21 @@ class ProjectServiceTest {
     }
 
     @Test
+    void replaceALSandSaveProject_missingProject_shouldRejectBeforeRestoringALS() {
+        when(projectRepository.findById(1L)).thenReturn(Optional.empty());
+
+        ALSDTO replacement = TestDataFactory.validALSDTO(10L);
+
+        assertThrows(
+                NoSuchElementException.class,
+                () -> projectService.replaceALSandSaveProject(1L, 10L, replacement)
+        );
+
+        verify(alsService, never()).restoreDomain(any(ALSDTO.class));
+        verify(projectRepository, never()).save(any(ProjectEntity.class));
+    }
+
+    @Test
     void findLBCInProject_shouldReturnLBC() {
         ALSDTO als = TestDataFactory.validLBCALSDTO(10L);
         LBCDTO lbc = als.getLBC();

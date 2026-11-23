@@ -239,16 +239,11 @@ public class ProjectRestController {
             @RequestBody ALSDTO als
     ) {
 
-            als.setId(alsId);
-
-            ProjectDTO project =
-                    projectService.findById(projectId);
-
             ALSDTO saved =
                     projectService.replaceALSandSaveProject(
-                            project,
-                            als,
-                            alsId
+                            projectId,
+                            alsId,
+                            als
                     );
 
             return ResponseEntity.ok(
