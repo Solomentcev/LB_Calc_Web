@@ -59,7 +59,7 @@ public class ProjectController
     ) {
         model.addAttribute(
                 "project",
-                projectService.createProject()
+                addALSImages(projectService.createProject())
         );
 
         return "projects/project";
@@ -75,7 +75,7 @@ public class ProjectController
     ) {
         model.addAttribute(
                 "project",
-                projectService.findById(id)
+                addALSImages(projectService.findById(id))
         );
 
         return "projects/project";
@@ -182,12 +182,12 @@ public class ProjectController
 
         model.addAttribute(
                 "project",
-                project
+                addALSImages(project)
         );
 
         model.addAttribute(
                 "als",
-                als
+                addALSImage(als)
         );
 
         return "projects/project_als";
@@ -235,7 +235,7 @@ public class ProjectController
 
             model.addAttribute(
                     "project",
-                    projectService.findById(projectId)
+                    addALSImages(projectService.findById(projectId))
             );
 
             return "projects/project_als";
@@ -323,10 +323,10 @@ public class ProjectController
 
             model.addAttribute(
                     "als",
-                    projectService.findALSInProject(
+                    addALSImage(projectService.findALSInProject(
                             projectId,
                             alsId
-                    )
+                    ))
             );
 
             model.addAttribute(
@@ -381,8 +381,8 @@ public class ProjectController
                         lbcId
                 );
 
-        model.addAttribute("project", project);
-        model.addAttribute("als", als);
+        model.addAttribute("project", addALSImages(project));
+        model.addAttribute("als", addALSImage(als));
         model.addAttribute("lbc", lbc);
         model.addAttribute("projectId", projectId);
         model.addAttribute("alsId", alsId);
