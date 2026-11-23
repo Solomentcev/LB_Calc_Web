@@ -164,6 +164,10 @@
                     </span>
 
                 </div>
+                <img class="img-thumbnail mt-2" style="max-height: 260px"
+                     th:if="${als.stringALSImage != null}"
+                     th:src="|data:image/png;base64,${als.stringALSImage}|"
+                     alt="Чертёж АКХ">
 
             </div>
 
@@ -307,6 +311,10 @@
                     th:text="${als.LC.description}">
                     Модуль управления
                 </h5>
+                <img class="img-thumbnail mb-2" style="max-height: 220px"
+                     th:if="${als.LC != null and als.LC.stringLCImage != null}"
+                     th:src="|data:image/png;base64,${als.LC.stringLCImage}|"
+                     alt="Чертёж LC">
 
                 <div th:if="${als.LC != null}">
 
@@ -423,6 +431,10 @@
                     <h5 th:text="${'LBC — ' + als.LBC.name}">
                         LBC
                     </h5>
+                    <img class="img-thumbnail mb-2" style="max-height: 220px"
+                         th:if="${als.LBC.stringLBCImage != null}"
+                         th:src="|data:image/png;base64,${als.LBC.stringLBCImage}|"
+                         alt="Чертёж LBC">
 
                     <input type="hidden"
                            th:field="*{alsList[__${item.index}__].LBC.id}">
@@ -535,6 +547,10 @@
 
                 <div th:each="lb, lbItem : ${als.lbList}"
                      class="border rounded p-3 mb-3">
+                    <img class="img-thumbnail mb-2" style="max-height: 220px"
+                         th:if="${lb.stringLBImage != null}"
+                         th:src="|data:image/png;base64,${lb.stringLBImage}|"
+                         alt="Чертёж LB">
 
                     <input type="hidden"
                            th:field="*{alsList[__${item.index}__].lbList[__${lbItem.index}__].id}">
