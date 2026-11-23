@@ -9,6 +9,7 @@ import com.lb_calc_web.dto.ProjectDTO;
 import com.lb_calc_web.handler.ValidationSizeException;
 import com.lb_calc_web.service.ProjectService;
 import com.lb_calc_web.service.ALSService;
+import com.lb_calc_web.service.image.ALSImageService;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -132,7 +133,7 @@ public class ProjectController
          */
         if (id == null || id <= 0) {
             draft.getAlsList().add(ALSDtoMapper.toDto(alsService.createALS()));
-            model.addAttribute("project", draft);
+            model.addAttribute("project", addALSImages(draft));
             return "projects/project";
         }
 
@@ -269,8 +270,8 @@ public class ProjectController
                         lcId
                 );
 
-        model.addAttribute("project", project);
-        model.addAttribute("als", als);
+        model.addAttribute("project", addALSImages(project));
+        model.addAttribute("als", addALSImage(als));
         model.addAttribute("lc", lc);
         model.addAttribute("projectId", projectId);
         model.addAttribute("alsId", alsId);
@@ -663,4 +664,24 @@ public class ProjectController
                 )
                 .body(file);
     }
+    /**
+     * Добавляет изображения ALS перед передачей проекта в представление.
+     */
+    private ProjectDTO addALSImages(ProjectDTO project) {
+        if (project != null && project.getAlsList() != null) {
+            project.getAlsList().forEach(this::addALSImage);
+        }
+        return project;
+    }
+
+    /**
+     * Формирует изображение конфигурации для представления.
+     */
+    private ALSDTO addALSImage(ALSDTO als) {
+        if (als != null) {
+            als.setStringALSImage(ALSImageService.getStringALSImage(als));
+        }
+        return als;
+    }
+
 }

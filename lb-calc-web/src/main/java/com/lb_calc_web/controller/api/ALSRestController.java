@@ -6,6 +6,7 @@ import com.lb_calc_web.mapper.dto.ALSDtoMapper;
 import com.lb_calc_web.domain.model.ALS;
 import com.lb_calc_web.dto.LBCDTO;
 import com.lb_calc_web.service.ALSService;
+import com.lb_calc_web.service.image.ALSImageService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -48,7 +49,7 @@ public class ALSRestController {
     public ResponseEntity<?> getAllALS() {
 
         List<ALSDTO> alsList =
-                alsService.findAll();
+                alsService.findAll().stream().map(this::addALSImage).toList();
 
         return ResponseEntity.ok(
                 ApiResponse.success(
@@ -66,7 +67,7 @@ public class ALSRestController {
             @PathVariable Long id
     ) {
 
-            ALSDTO als = ALSDtoMapper.toDto(alsService.findById(id));
+            ALSDTO als = toDto(alsService.findById(id));
 
             return ResponseEntity.ok(
                     ApiResponse.success(als)
@@ -82,7 +83,7 @@ public class ALSRestController {
 
         return ResponseEntity.ok(
                 ApiResponse.success(
-ALSDtoMapper.toDto(alsService.createALS())
+toDto(alsService.createALS())
                 )
         );
     }
@@ -98,7 +99,7 @@ ALSDtoMapper.toDto(alsService.createALS())
             dto.setId(0L);
 
             ALS savedDomain = alsService.saveALS(alsService.restoreDomain(dto));
-            ALSDTO saved = ALSDtoMapper.toDto(savedDomain);
+            ALSDTO saved = toDto(savedDomain);
 
             return ResponseEntity.status(
                             HttpStatus.CREATED
@@ -198,7 +199,7 @@ ALSDtoMapper.toDto(alsService.createALS())
     ) {
 
             ALSDTO saved = alsService.replaceWithNewLBCandSaveALS(alsId);
-            return ResponseEntity.ok(ApiResponse.success(saved));
+            return ResponseEntity.ok(ApiResponse.success(addALSImage(saved)));
 
     }
 
@@ -213,7 +214,7 @@ ALSDtoMapper.toDto(alsService.createALS())
 
             ALSDTO saved = alsService.addNewLBandSaveALS(alsId);
             return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(ApiResponse.success(saved));
+                    .body(ApiResponse.success(addALSImage(saved)));
 
     }
 
@@ -228,8 +229,23 @@ ALSDtoMapper.toDto(alsService.createALS())
     ) {
 
             ALSDTO saved = alsService.deleteLBandSaveALS(alsId, lbId);
-            return ResponseEntity.ok(ApiResponse.success(saved));
+            return ResponseEntity.ok(.body(ApiResponse.success(addALSImage(saved)));
 
+    }
+
+    /**
+     * Преобразует доменную ALS в DTO и формирует изображение для ответа API.
+     */
+    private ALSDTO toDto(com.lb_calc_web.domain.model.ALS domain) {
+        return addALSImage(ALSDtoMapper.toDto(domain));
+    }
+
+    /**
+     * Добавляет изображение на границе HTTP-представления.
+     */
+    private ALSDTO addALSImage(ALSDTO dto) {
+        dto.setStringALSImage(ALSImageService.getStringALSImage(dto));
+        return dto;
     }
 
 }

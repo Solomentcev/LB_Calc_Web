@@ -31,7 +31,6 @@ import com.lb_calc_web.mapper.entity.ModuleEntityMapper;
 import com.lb_calc_web.repository.ALSRepository;
 import com.lb_calc_web.repository.ProjectALSRepository;
 import com.lb_calc_web.repository.ModuleEntityRepository;
-import com.lb_calc_web.service.image.ALSImageService;
 import com.lb_calc_web.service.validation.size.SizeValidator;
 import com.lb_calc_web.service.factory.TypeLbFactory;
 import org.slf4j.Logger;
@@ -105,7 +104,7 @@ public class ALSService {
                                 ALSEntity::getId
                         )
                 )
-                .map(entity -> addALSImage(ALSDtoMapper.toDto(ALSEntityMapper.toDomain(entity, equipmentResolver))))
+                .map(entity -> ALSDtoMapper.toDto(ALSEntityMapper.toDomain(entity, equipmentResolver)))
                 .toList();
     }
 
@@ -248,7 +247,7 @@ public class ALSService {
     ALSDTO saveALS(ALSDTO dto) {
         Objects.requireNonNull(dto, "ALS не должен быть null");
         ALS domain = restoreDomain(dto);
-        return addALSImage(ALSDtoMapper.toDto(saveALS(domain)));
+        return ALSDtoMapper.toDto(saveALS(domain));
     }
 
     private ValidationSizeException createValidationException(
@@ -822,22 +821,6 @@ public class ALSService {
         return (domainModule instanceof LBC && entity instanceof LBCEntity)
                 || (domainModule instanceof LB && entity instanceof LBEntity)
                 || (domainModule instanceof LC && entity instanceof LCEntity);
-    }
-
-    /**
-     * Обновляет производные поля DTO на основании доменной модели ALS.
-     *
-     * <p>Расчёты ширины, количества ячеек, глубины и описания
-     * выполняются только доменной моделью. DTO получает готовые
-     * значения и не содержит самостоятельной бизнес-логики.</p>
-     */
-    private ALSDTO addALSImage(
-            ALSDTO dto
-    ) {
-        dto.setStringALSImage(
-                ALSImageService.getStringALSImage(dto)
-        );
-        return dto;
     }
 
     private String getRequired(
