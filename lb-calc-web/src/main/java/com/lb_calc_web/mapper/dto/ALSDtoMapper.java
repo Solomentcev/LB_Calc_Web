@@ -15,7 +15,6 @@ import com.lb_calc_web.dto.ALSModuleOrderDTO;
 import com.lb_calc_web.dto.LBDTO;
 import com.lb_calc_web.dto.LBCDTO;
 import com.lb_calc_web.dto.EquipmentSelectionDTO;
-import com.lb_calc_web.dto.validation.ValidationResult;
 
 import java.util.function.Function;
 
@@ -111,28 +110,6 @@ public final class ALSDtoMapper {
         target.setDepthCell(calculated.getDepthCell());
         target.setPositionControlModule(calculated.getPositionControlModule());
         target.setModuleOrder(calculated.getModuleOrder());
-    }
-
-    /**
-     * Переносит persistence ID ALS и её модулей в результаты валидации.
-     */
-    public static void assignValidationObjectIds(List<ValidationResult> results, ALS domain, ALSDTO source) {
-        if (results.isEmpty()) return;
-        results.get(0).setObjectId(source.getId());
-        List<LBDTO> sourceLBs = source.getLbList() == null ? List.of()
-                : source.getLbList().stream().filter(Objects::nonNull).toList();
-        int resultIndex = 1, lbIndex = 0;
-        for (Module module : domain.getModules()) {
-            Long moduleId = null;
-            if (module instanceof LBC && source.getLBC() != null) moduleId = source.getLBC().getId();
-            else if (module instanceof LC && source.getLC() != null) moduleId = source.getLC().getId();
-            else if (module instanceof LB) {
-                if (lbIndex < sourceLBs.size()) moduleId = sourceLBs.get(lbIndex).getId();
-                lbIndex++;
-            }
-            if (resultIndex < results.size()) results.get(resultIndex).setObjectId(moduleId);
-            resultIndex++;
-        }
     }
 
     /**

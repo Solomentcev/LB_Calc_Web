@@ -271,7 +271,7 @@ public class ALSService {
             throw new ValidationSizeException(validationResult);
         }
 
-        validate(domain, dto);
+        validate(domain);
 
         // Блокировка удерживается до завершения транзакции, включая сохранение модулей.
         findOrCreateLockService.acquire();
@@ -736,9 +736,8 @@ public class ALSService {
         return Set.of();
     }
 
-    private void validate(ALS domain, ALSDTO source) {
+    private void validate(ALS domain) {
         var results = sizeValidator.deepValidateALS(domain);
-        ALSDtoMapper.assignValidationObjectIds(results, domain, source);
 
         var errors = results.stream()
                 .filter(result -> !result.isValid())

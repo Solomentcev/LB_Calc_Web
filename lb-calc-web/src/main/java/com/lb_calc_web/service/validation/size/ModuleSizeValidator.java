@@ -141,7 +141,7 @@ public class ModuleSizeValidator {
             return invalidResult("LC", "module", "Модуль LC не задан");
         }
 
-        ValidationResult result = new ValidationResult("LC", null);
+        ValidationResult result = new ValidationResult("LC", lc.getId());
         logger.info("Валидация размеров доменной модели LC");
 
         long requiredWidth = lc.getEquipment().stream()
@@ -225,7 +225,7 @@ public class ModuleSizeValidator {
             boolean validateCommonDimensions,
             boolean controlModule
     ) {
-        ValidationResult result = new ValidationResult(objectType, null);
+        ValidationResult result = new ValidationResult(objectType, module.getId());
         TypeLb typeLb = module.getTypeLb();
 
         logger.info("Валидация размеров доменной модели {}", objectType);

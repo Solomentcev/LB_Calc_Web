@@ -40,13 +40,13 @@ public class ALSSizeValidator {
      */
     public ValidationResult validateALS(ALS als) {
         if (als == null) {
-            ValidationResult result = new ValidationResult("ALS", null);
+            ValidationResult result = new ValidationResult("ALS", als.getId());
             addError(result, "als", "Конфигурация ALS не задана",
                     null, null, null);
             return result;
         }
 
-        ValidationResult result = new ValidationResult("ALS", null);
+        ValidationResult result = new ValidationResult("ALS", als.getId());
         List<Module> modules = als.getModules();
 
         long controlCount = modules.stream()
