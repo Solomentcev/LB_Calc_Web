@@ -188,7 +188,11 @@ public class LBCService {
         Objects.requireNonNull(domain, "LBC не должен быть null");
         logger.info("Сохранение LBC: id={}, type={}", domain.getId(), domain.getTypeLb().getType());
 
-        domain.setControlConfiguration(equipmentRequirementResolver.resolve(domain.getControlConfiguration()));
+        try {
+            domain.setControlConfiguration(equipmentRequirementResolver.resolve(domain.getControlConfiguration()));
+        } catch (RuntimeException exception) {
+            throw createMappingValidationException("LBC", domain.getId(), exception);
+        }
         ValidationResult validationResult = sizeValidator.validateLBC(domain);
         validationResult.setObjectId(domain.getId());
         if (!validationResult.isValid()) {

@@ -7,6 +7,7 @@ import com.lb_calc_web.domain.equipment.BarReader;
 import com.lb_calc_web.domain.equipment.Display;
 import com.lb_calc_web.domain.model.LC;
 import com.lb_calc_web.dto.LCDTO;
+import com.lb_calc_web.dto.validation.ValidationResult;
 import com.lb_calc_web.dto.EquipmentSelectionDTO;
 import com.lb_calc_web.mapper.dto.LCDtoMapper;
 import com.lb_calc_web.mapper.dto.EquipmentSelectionMapper;
@@ -144,6 +145,18 @@ public class LCController {
     }
 
     private LC toDomain(LCDTO dto) {
+        try {
+            return mapToDomain(dto);
+        } catch (ValidationSizeException exception) {
+            throw exception;
+        } catch (RuntimeException exception) {
+            ValidationResult result = new ValidationResult("LC", dto.getId());
+            result.addError("domainModel", exception.getMessage(), null, null, null);
+            throw new ValidationSizeException(result);
+        }
+    }
+
+    private LC mapToDomain(LCDTO dto) {
         LC existing = dto.getId() == null || dto.getId() <= 0
                 ? null
                 : lcService.findById(dto.getId());

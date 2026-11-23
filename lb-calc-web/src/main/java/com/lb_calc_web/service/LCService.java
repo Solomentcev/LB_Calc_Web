@@ -189,7 +189,11 @@ public class LCService {
         Objects.requireNonNull(domain, "LC не должен быть null");
         logger.info("Сохранение LC: id={}, name={}", domain.getId(), domain.getName());
 
-        domain.setControlConfiguration(equipmentRequirementResolver.resolve(domain.getControlConfiguration()));
+        try {
+            domain.setControlConfiguration(equipmentRequirementResolver.resolve(domain.getControlConfiguration()));
+        } catch (RuntimeException exception) {
+            throw createMappingValidationException("LC", domain.getId(), exception);
+        }
         ValidationResult validationResult = sizeValidator.validateLC(domain);
         validationResult.setObjectId(domain.getId());
         if (!validationResult.isValid()) {

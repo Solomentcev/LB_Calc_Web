@@ -4,6 +4,7 @@ import com.lb_calc_web.domain.attributes.AccessMethod;
 import com.lb_calc_web.domain.attributes.PrintOption;
 import com.lb_calc_web.domain.model.LBC;
 import com.lb_calc_web.dto.LBCDTO;
+import com.lb_calc_web.dto.validation.ValidationResult;
 import com.lb_calc_web.dto.EquipmentSelectionDTO;
 import com.lb_calc_web.mapper.dto.LBCDtoMapper;
 import com.lb_calc_web.mapper.dto.EquipmentSelectionMapper;
@@ -121,6 +122,18 @@ public class LBCController extends BaseCatalogController {
     }
 
     private LBC toDomain(LBCDTO dto) {
+        try {
+            return mapToDomain(dto);
+        } catch (ValidationSizeException exception) {
+            throw exception;
+        } catch (RuntimeException exception) {
+            ValidationResult result = new ValidationResult("LBC", dto.getId());
+            result.addError("domainModel", exception.getMessage(), null, null, null);
+            throw new ValidationSizeException(result);
+        }
+    }
+
+    private LBC mapToDomain(LBCDTO dto) {
         LBC existing = dto.getId() == null || dto.getId() <= 0
                 ? null
                 : lbcService.findById(dto.getId());
