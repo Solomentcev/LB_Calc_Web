@@ -95,7 +95,7 @@ public class ALSController extends BaseCatalogController {
 
             model.addAttribute(
                     "als",
-                    toDto(alsService.findById(als.getId()))
+                    addImages(als)
             );
 
             return "alss/als";
@@ -161,7 +161,7 @@ public class ALSController extends BaseCatalogController {
         } catch (ValidationSizeException e) {
             model.addAttribute("errors", ValidationErrorFormatter.format(e.getValidationResult()));
             model.addAttribute("als", toDto(alsService.findById(alsId)));
-            model.addAttribute("lbc", lbc);
+            model.addAttribute("lbc", addLBCImage(lbc));
 
             return "alss/alss_lbc";
         }
@@ -199,7 +199,14 @@ public class ALSController extends BaseCatalogController {
      * Преобразует доменную ALS в модель представления и добавляет изображение.
      */
     private ALSDTO toDto(com.lb_calc_web.domain.model.ALS als) {
-        ALSDTO dto = ALSDtoMapper.toDto(als);
+        return addImages(ALSDtoMapper.toDto(als));
+    }
+
+    /**
+     * Добавляет изображения к DTO, сохраняя исходные значения формы при ошибках.
+     */
+    private ALSDTO addImages(ALSDTO dto) {
+        if (dto == null) return null;
         try {
             dto.setStringALSImage(ALSImageService.getStringALSImage(dto));
         } catch (RuntimeException exception) {
@@ -223,6 +230,14 @@ public class ALSController extends BaseCatalogController {
             });
         }
         return dto;
+    }
+
+    private void addLBCImage(com.lb_calc_web.dto.LBCDTO lbc) {
+        try {
+            lbc.setStringLBCImage(LBCImageService.getStringLBCImage(lbc));
+        } catch (RuntimeException exception) {
+            logger.warn("Не удалось сформировать изображение LBC id={}: {}", lbc.getId(), exception.getMessage());
+        }
     }
 
     private void addLBCImage(com.lb_calc_web.dto.LBCDTO lbc) {

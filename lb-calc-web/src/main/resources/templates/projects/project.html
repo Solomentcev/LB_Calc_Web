@@ -557,8 +557,13 @@
                     <input type="hidden"
                            th:field="*{alsList[__${item.index}__].lbList[__${lbItem.index}__].bottomFrame}">
 
-                    <input type="hidden"
-                           th:field="*{alsList[__${item.index}__].lbList[__${lbItem.index}__].doorThickness}">
+                    <div class="row mb-2">
+                        <div class="col-md-4">
+                            <label>Толщина дверцы, мм</label>
+                            <input type="number" class="form-control" min="5" max="50"
+                                   th:field="*{alsList[__${item.index}__].lbList[__${lbItem.index}__].doorThickness}">
+                        </div>
+                    </div>
 
                     <input type="hidden"
                            th:field="*{alsList[__${item.index}__].lbList[__${lbItem.index}__].heightCell}">

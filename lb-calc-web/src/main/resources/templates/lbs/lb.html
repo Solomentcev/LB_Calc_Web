@@ -27,7 +27,6 @@
             <td>
                 <label>
                      <input type="number" size="3" th:field="*{id}" readonly="readonly">
-                     <input type="hidden" th:field="*{doorThickness}">
                 </label>
             </td>
             <td rowspan="16">
@@ -35,6 +34,10 @@
                     <img class="img-thumbnail" th:src="'data:image/png;base64,'+${lb.getStringLBImage()}" alt="LB Image">
                 </div>
             </td>
+        </tr>
+        <tr>
+            <th>Толщина дверцы</th>
+            <td><input type="number" min="5" max="50" th:field="*{doorThickness}"></td>
         </tr>
         <tr>
             <th>Название</th>
