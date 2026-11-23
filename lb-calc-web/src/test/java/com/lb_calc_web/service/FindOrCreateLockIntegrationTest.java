@@ -1,10 +1,12 @@
 package com.lb_calc_web.service;
 
 import com.lb_calc_web.TestDataFactory;
-import com.lb_calc_web.dto.ALSDTO;
 import com.lb_calc_web.dto.LBDTO;
-import com.lb_calc_web.dto.LBCDTO;
-import com.lb_calc_web.dto.LCDTO;
+import com.lb_calc_web.domain.model.ALS;
+import com.lb_calc_web.domain.model.LB;
+import com.lb_calc_web.domain.model.LBC;
+import com.lb_calc_web.domain.model.LC;
+import com.lb_calc_web.mapper.dto.LBDtoMapper;
 import com.lb_calc_web.repository.LBRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -100,10 +102,12 @@ class FindOrCreateLockIntegrationTest {
 
     @Test
     void saveConfigurations_shouldExecuteLockingCandidateQueries() {
-        ALSDTO als = alsService.saveALS(TestDataFactory.validALSDTO(0L));
-        ALSDTO lbcAls = alsService.saveALS(TestDataFactory.validLBCALSDTO(0L));
-        LCDTO lc = lcService.saveLC(TestDataFactory.validLCDTO(0L));
-        LBCDTO lbc = lbcService.saveLBC(TestDataFactory.validLBCDTO(0L));
+        ALS als = alsService.saveALS(TestDataFactory.validALS(0L));
+        ALS lbcAls = alsService.saveALS(
+                alsService.restoreDomain(TestDataFactory.validLBCALSDTO(0L))
+        );
+        LC lc = lcService.saveLC(TestDataFactory.validLC(0L));
+        LBC lbc = lbcService.saveLBC(TestDataFactory.validLBC(0L));
 
         assertNotNull(als);
         assertNotNull(lbcAls);
@@ -124,33 +128,36 @@ class FindOrCreateLockIntegrationTest {
         secondDto.setColorBody("Red");
         secondDto.setColorDoor("Green");
 
+        LB firstLB = LBDtoMapper.toDomain(firstDto);
+        LB secondLB = LBDtoMapper.toDomain(secondDto);
+
         CountDownLatch firstLocked = new CountDownLatch(1);
         CountDownLatch secondSnapshotReady = new CountDownLatch(1);
         ExecutorService executor = Executors.newFixedThreadPool(2);
 
         try {
-            Future<LBDTO> first = executor.submit(() ->
+            Future<LB> first = executor.submit(() ->
                     transactionTemplate.execute(status -> {
                         lockService.acquire();
                         firstLocked.countDown();
                         await(secondSnapshotReady);
-                        return lbService.saveLB(firstDto);
+                        return lbService.saveLB(firstLB);
                     })
             );
 
             assertTrue(firstLocked.await(5, TimeUnit.SECONDS));
 
-            Future<LBDTO> second = executor.submit(() ->
+            Future<LB> second = executor.submit(() ->
                     transactionTemplate.execute(status -> {
                         // Создаём REPEATABLE READ snapshot до ожидания mutex.
                         lbRepository.count();
                         secondSnapshotReady.countDown();
-                        return lbService.saveLB(secondDto);
+                        return lbService.saveLB(secondLB);
                     })
             );
 
-            LBDTO firstResult = first.get(10, TimeUnit.SECONDS);
-            LBDTO secondResult = second.get(10, TimeUnit.SECONDS);
+            LB firstResult = first.get(10, TimeUnit.SECONDS);
+            LB secondResult = second.get(10, TimeUnit.SECONDS);
 
             assertTrue(firstResult.getId() > 0);
             assertEquals(

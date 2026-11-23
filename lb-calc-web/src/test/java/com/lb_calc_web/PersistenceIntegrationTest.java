@@ -3,7 +3,12 @@ package com.lb_calc_web;
 import com.lb_calc_web.domain.model.ALS;
 import com.lb_calc_web.domain.model.Employee;
 import com.lb_calc_web.domain.model.Module;
+import com.lb_calc_web.domain.model.LB;
 import com.lb_calc_web.domain.model.Project;
+import com.lb_calc_web.mapper.dto.LBCDtoMapper;
+import com.lb_calc_web.mapper.dto.LBDtoMapper;
+import com.lb_calc_web.mapper.dto.LCDtoMapper;
+import com.lb_calc_web.mapper.dto.ProjectDtoMapper;
 import com.lb_calc_web.dto.ALSDTO;
 import com.lb_calc_web.dto.EmployeeDTO;
 import com.lb_calc_web.dto.EquipmentSelectionDTO;
@@ -12,6 +17,7 @@ import com.lb_calc_web.dto.LBCDTO;
 import com.lb_calc_web.dto.LBDTO;
 import com.lb_calc_web.dto.ProjectDTO;
 import com.lb_calc_web.service.ProjectService;
+import com.lb_calc_web.service.ALSService;
 import com.lb_calc_web.entity.ALSEntity;
 import com.lb_calc_web.entity.EmployeeEntity;
 import com.lb_calc_web.entity.LCEntity;
@@ -75,6 +81,9 @@ class PersistenceIntegrationTest {
 
     @Autowired
     private ProjectService projectService;
+
+    @Autowired
+    private ALSService alsService;
 
     @Test
     void projectAggregate_shouldRoundTripThroughMySqlWithoutLosingAssociations() {
@@ -373,8 +382,8 @@ class PersistenceIntegrationTest {
     void projectService_shouldReplaceOnlySelectedAlsAndPreserveOtherConfigurations() {
         EmployeeEntity employeeEntity = new EmployeeEntity();
         employeeEntity.setFirstName("Тест");
-        employeeEntity.setLastName("ProjectService");
-        employeeEntity.setEmail("project-service@example.test");
+        employeeEntity.setLastName("Project owner");
+        employeeEntity.setEmail("project-owner@example.test");
         employeeEntity.setEncryptedPassword("encoded-password");
         employeeEntity.setRegistrationDate(LocalDate.of(2026, 1, 10));
         employeeEntity.setRole(Role.ROLE_ADMIN);
@@ -396,31 +405,28 @@ class PersistenceIntegrationTest {
         );
 
         try {
-            ALSDTO repeatedALS = TestDataFactory.validALSDTO(null);
-            ALSDTO independentALS = TestDataFactory.validLBCALSDTO(null);
+            Employee employee = EmployeeEntityMapper.toDomain(employeeEntity);
+            ALS repeatedALS = alsService.restoreDomain(TestDataFactory.validALSDTO(null));
+            ALS independentALS = alsService.restoreDomain(TestDataFactory.validLBCALSDTO(null));
 
-            EmployeeDTO employeeDTO = EmployeeDtoMapper.toDto(
-                    EmployeeEntityMapper.toDomain(employeeEntity)
+            Project requested = new Project(
+                    "ProjectService replacement",
+                    "Test company",
+                    LocalDate.of(2026, 1, 10),
+                    employee
             );
-            ProjectDTO project = new ProjectDTO();
-            project.setName("ProjectService replacement");
-            project.setCompany("Test company");
-            project.setCreatedBy(employeeDTO);
-            project.setUpdatedBy(employeeDTO);
-            project.setCreatedAt(LocalDate.of(2026, 1, 10));
-            project.setUpdatedAt(LocalDate.of(2026, 1, 10));
-            project.setAlsList(List.of(
-                    repeatedALS,
-                    repeatedALS,
-                    independentALS
-            ));
+            requested.addALS(repeatedALS);
+            requested.addALS(repeatedALS);
+            requested.addALS(independentALS);
 
-            ProjectDTO savedProject = projectService.saveProject(project);
-            ALS originalConfiguration = ALSDtoMapper.toDomain(savedProject.getAlsList().get(0));
-            ALS independentConfiguration = ALSDtoMapper.toDomain(savedProject.getAlsList().get(2));
+            Project savedProject = projectService.saveProject(requested);
+            List<ALS> savedConfigurations =
+                    new ArrayList<>(savedProject.getQuantityALS().keySet());
+            ALS originalConfiguration = savedConfigurations.get(0).copy();
+            ALS independentConfiguration = savedConfigurations.get(1).copy();
             Long projectId = savedProject.getId();
-            Long selectedAlsId = savedProject.getAlsList().get(0).getId();
-            Long independentAlsId = savedProject.getAlsList().get(2).getId();
+            Long selectedAlsId = originalConfiguration.getId();
+            Long independentAlsId = independentConfiguration.getId();
             LocalDate originalCreatedAt = savedProject.getCreatedAt();
 
             EmployeeEntity editorEntity = new EmployeeEntity();
@@ -447,74 +453,89 @@ class PersistenceIntegrationTest {
                     )
             );
 
-            ProjectDTO tamperedProject = projectService.findById(projectId);
-            tamperedProject.setCreatedBy(EmployeeDtoMapper.toDto(
-                    EmployeeEntityMapper.toDomain(editorEntity)
-            ));
-            tamperedProject.setCreatedAt(LocalDate.of(2000, 1, 1));
-            tamperedProject.setUpdatedBy(employeeDTO);
-            tamperedProject.setUpdatedAt(LocalDate.of(2000, 1, 1));
-            ProjectDTO updatedMetadata = projectService.saveProject(tamperedProject);
+            Project tamperedProject = Project.restore(
+                    savedProject.getName(),
+                    savedProject.getCompany(),
+                    LocalDate.of(2000, 1, 1),
+                    EmployeeEntityMapper.toDomain(editorEntity),
+                    LocalDate.of(2000, 1, 1),
+                    employee,
+                    savedProject.getQuantityALS()
+            );
+            tamperedProject.setId(projectId);
+            Project updatedMetadata = projectService.saveProject(tamperedProject);
 
             assertEquals(employeeEntity.getId(), updatedMetadata.getCreatedBy().getId());
             assertEquals(originalCreatedAt, updatedMetadata.getCreatedAt());
             assertEquals(editorEntity.getId(), updatedMetadata.getUpdatedBy().getId());
             assertEquals(LocalDate.now(), updatedMetadata.getUpdatedAt());
 
-            ALSDTO changedALS =
-                    projectService.addLBAtProject(projectId, selectedAlsId);
-
-            LBDTO changedLB = changedALS.getLbList().get(0);
-            changedLB.setCountCells(4);
+            ALS changedALS = projectService.addLBAtProject(projectId, selectedAlsId);
+            LB changedLB = changedALS.getStorageModules().stream()
+                    .filter(LB.class::isInstance)
+                    .map(LB.class::cast)
+                    .findFirst()
+                    .orElseThrow();
+            LBDTO changedLBDTO = LBDtoMapper.toDto(changedLB);
+            changedLBDTO.setCountCells(4);
             changedALS = projectService.saveLBAtProject(
                     projectId,
-                    changedALS.getId(),
+                    selectedAlsId,
                     changedLB.getId(),
-                    changedLB
+                    alsService.restoreLB(changedLBDTO)
             );
 
-            Long removedLBId = changedALS.getLbList().get(1).getId();
+            Long removedLBId = changedALS.getStorageModules().stream()
+                    .filter(LB.class::isInstance)
+                    .map(LB.class::cast)
+                    .skip(1)
+                    .map(LB::getId)
+                    .findFirst()
+                    .orElseThrow();
             changedALS = projectService.deleteLBatProject(
                     projectId,
-                    changedALS.getId(),
+                    selectedAlsId,
                     removedLBId
             );
-            assertEquals(2, changedALS.getLbList().size());
+            assertEquals(2, changedALS.getStorageModules().size());
 
-            LCDTO changedLC = changedALS.getLC();
-            changedLC.setAccessMethods(List.of(AccessMethod.BARCODE.name()));
-            changedLC.setBarReader(BarReader.READER_1D.getName());
-            changedLC.setBarReaderQuantity(1);
+            LCDTO changedLCDTO = LCDtoMapper.toDto(changedALS.getLC());
+            changedLCDTO.setAccessMethods(List.of(AccessMethod.BARCODE.name()));
+            changedLCDTO.setBarReader(BarReader.READER_1D.getName());
+            changedLCDTO.setBarReaderQuantity(1);
             List<EquipmentSelectionDTO> changedEquipmentSelections =
-                    new ArrayList<>(changedLC.getEquipmentSelections().stream()
+                    new ArrayList<>(changedLCDTO.getEquipmentSelections().stream()
                             .filter(selection -> !selection.catalogPositionId()
                                     .startsWith("BAR_READER"))
                             .toList());
             changedEquipmentSelections.add(
                     new EquipmentSelectionDTO(BarReader.READER_1D_ID, 1));
-            changedLC.setEquipmentSelections(changedEquipmentSelections);
-            ALSDTO changedWithLC = projectService.saveLCAtProject(
+            changedLCDTO.setEquipmentSelections(changedEquipmentSelections);
+            ALS changedWithLC = projectService.saveLCAtProject(
                     projectId,
-                    changedALS.getId(),
-                    changedLC.getId(),
-                    changedLC
+                    selectedAlsId,
+                    changedLCDTO.getId(),
+                    alsService.restoreLC(changedLCDTO, changedALS)
             );
-            assertEquals(1, changedWithLC.getLC().getBarReaderQuantity());
+            assertEquals(
+                    1,
+                    LCDtoMapper.toDto(changedWithLC.getLC()).getBarReaderQuantity()
+            );
 
-            LBCDTO changedLBC = savedProject.getAlsList().get(2).getLBC();
-            changedLBC.setAccessMethods(List.of(AccessMethod.BARCODE.name()));
-            ALSDTO changedWithLBC = projectService.saveLBCAtProject(
+            LBCDTO changedLBCDTO = LBCDtoMapper.toDto(independentConfiguration.getLBC());
+            changedLBCDTO.setAccessMethods(List.of(AccessMethod.BARCODE.name()));
+            ALS changedWithLBC = projectService.saveLBCAtProject(
                     projectId,
                     independentAlsId,
-                    changedLBC.getId(),
-                    changedLBC
+                    changedLBCDTO.getId(),
+                    alsService.restoreLBC(changedLBCDTO, independentConfiguration)
             );
             assertEquals(
                     List.of(AccessMethod.BARCODE.name()),
-                    changedWithLBC.getLBC().getAccessMethods()
+                    LBCDtoMapper.toDto(changedWithLBC.getLBC()).getAccessMethods()
             );
 
-            ALSDTO regeneratedLBC = projectService.replaceWithNewLBCAtProject(
+            ALS regeneratedLBC = projectService.replaceWithNewLBCAtProject(
                     projectId,
                     changedWithLBC.getId()
             );
@@ -531,16 +552,12 @@ class PersistenceIntegrationTest {
             assertEquals(originalCreatedAt, restoredEntity.getCreatedAt());
             assertEquals(LocalDate.now(), restoredEntity.getUpdatedAt());
 
-            Project restoredProject =
-                    ProjectEntityMapper.toDomain(restoredEntity);
-
-            ALS changedLCConfiguration = ALSDtoMapper.toDomain(changedWithLC);
-            ALS changedLBCConfiguration = ALSDtoMapper.toDomain(regeneratedLBC);
+            Project restoredProject = ProjectEntityMapper.toDomain(restoredEntity);
 
             assertEquals(1, restoredProject.getQuantity(originalConfiguration));
             assertEquals(0, restoredProject.getQuantity(independentConfiguration));
-            assertEquals(1, restoredProject.getQuantity(changedLCConfiguration));
-            assertEquals(1, restoredProject.getQuantity(changedLBCConfiguration));
+            assertEquals(1, restoredProject.getQuantity(changedWithLC));
+            assertEquals(1, restoredProject.getQuantity(regeneratedLBC));
             assertEquals(3, restoredEntity.getAlsEntries().size());
 
             ALSEntity restoredChangedLCEntity =
@@ -556,7 +573,8 @@ class PersistenceIntegrationTest {
                             .toList()
             );
 
-            ProjectDTO restoredDTO = projectService.findById(projectId);
+            ProjectDTO restoredDTO =
+                    ProjectDtoMapper.toDto(projectService.findById(projectId));
             ALSDTO persistedLCConfiguration = restoredDTO.getAlsList().stream()
                     .filter(value -> value.getId().equals(changedWithLC.getId()))
                     .findFirst()
@@ -568,12 +586,11 @@ class PersistenceIntegrationTest {
                     .findFirst()
                     .orElseThrow();
             assertEquals(
-                    regeneratedLBC.getLBC().getAccessMethods(),
+                    LBCDtoMapper.toDto(regeneratedLBC.getLBC()).getAccessMethods(),
                     persistedLBCConfiguration.getLBC().getAccessMethods()
             );
         } finally {
             SecurityContextHolder.clearContext();
         }
     }
-
 }
