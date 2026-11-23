@@ -72,6 +72,7 @@ public final class LBEntityMapper {
             );
         }
 
+        domain.setId(entity.getId());
         return domain;
     }
 
@@ -87,6 +88,7 @@ public final class LBEntityMapper {
         }
 
         LBEntity entity = new LBEntity();
+        entity.setId(domain.getId());
 
         updateEntity(domain, entity);
 

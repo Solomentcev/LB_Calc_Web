@@ -59,12 +59,14 @@ public final class LBCEntityMapper {
             );
         }
 
+        domain.setId(entity.getId());
         return domain;
     }
 
     public static LBCEntity toEntity(LBC domain) {
         if (domain == null) return null;
         LBCEntity entity = new LBCEntity();
+        entity.setId(domain.getId());
         updateEntity(domain, entity);
         return entity;
     }

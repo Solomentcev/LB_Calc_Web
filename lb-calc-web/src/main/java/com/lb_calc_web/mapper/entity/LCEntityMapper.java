@@ -51,12 +51,14 @@ public final class LCEntityMapper {
             );
         }
 
+        domain.setId(entity.getId());
         return domain;
     }
 
     public static LCEntity toEntity(LC domain) {
         if (domain == null) return null;
         LCEntity entity = new LCEntity();
+        entity.setId(domain.getId());
         updateEntity(domain, entity);
         return entity;
     }

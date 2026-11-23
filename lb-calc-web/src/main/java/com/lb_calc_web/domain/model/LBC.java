@@ -242,7 +242,7 @@ public class LBC extends StorageModule implements ControlModule {
                 controlConfiguration
         );
         copy.copyCellNumbersFrom(this);
-        return copy;
+        return copyIdentityTo(copy);
     }
 
     /**

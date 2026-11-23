@@ -129,7 +129,7 @@ public class LB extends StorageModule {
                 getDoorThickness()
         );
         copy.copyCellNumbersFrom(this);
-        return copy;
+        return copyIdentityTo(copy);
     }
 
     /**

@@ -215,7 +215,7 @@ public class LC extends Module implements ControlModule {
      */
     @Override
     public LC copy() {
-        return new LC(
+        LC copy = new LC(
                 getHeight(),
                 getWidth(),
                 getDepth(),
@@ -225,6 +225,7 @@ public class LC extends Module implements ControlModule {
                 getColorDoor(),
                 controlConfiguration
         );
+        return copyIdentityTo(copy);
     }
 
     /**
