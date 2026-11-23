@@ -27,7 +27,8 @@
                 К списку проектов
             </a>
 
-            <a th:href="@{/projects/{id}/savetoexcel(id=${project.id})}"
+            <a th:if="${project.id != null and project.id > 0}"
+               th:href="@{/projects/{id}/savetoexcel(id=${project.id})}"
                class="btn btn-success btn-sm">
                 Excel
             </a>
@@ -395,7 +396,8 @@
 
                     <div class="mt-2">
 
-                        <a th:href="@{/projects/{projectId}/alss/{alsId}/lcs/{lcId}(
+                        <a th:if="${project.id != null and project.id > 0 and als.id != null and als.LC.id != null}"
+                           th:href="@{/projects/{projectId}/alss/{alsId}/lcs/{lcId}(
                                     projectId=${project.id},
                                     alsId=${als.id},
                                     lcId=${als.LC.id})}"
@@ -503,14 +505,16 @@
                     </div>
 
                     <div class="mt-2">
-                        <a th:href="@{/projects/{projectId}/alss/{alsId}/lbcs/{lbcId}(
+                        <a th:if="${project.id != null and project.id > 0 and als.id != null and als.LBC.id != null}"
+                           th:href="@{/projects/{projectId}/alss/{alsId}/lbcs/{lbcId}(
                                     projectId=${project.id},
                                     alsId=${als.id},
                                     lbcId=${als.LBC.id})}"
                            class="btn btn-primary btn-sm">
                             Редактировать LBC
                         </a>
-                        <button type="submit"
+                        <button th:if="${project.id != null and project.id > 0 and als.id != null}"
+                                type="submit"
                                 class="btn btn-warning btn-sm"
                                 th:formaction="@{/projects/{projectId}/alss/{alsId}/replaceLBC(
                                     projectId=${project.id},
@@ -612,7 +616,8 @@
 
                     <div class="mt-2">
 
-                        <a th:href="@{/projects/{projectId}/alss/{alsId}/lbs/{lbId}(
+                        <a th:if="${project.id != null and project.id > 0 and als.id != null and lb.id != null}"
+                           th:href="@{/projects/{projectId}/alss/{alsId}/lbs/{lbId}(
                                     projectId=${project.id},
                                     alsId=${als.id},
                                     lbId=${lb.id})}"
@@ -624,7 +629,8 @@
 
                 </div>
 
-                <button type="submit"
+                <button th:if="${project.id != null and project.id > 0 and als.id != null}"
+                        type="submit"
                         class="btn btn-primary btn-sm"
                         th:formaction="@{/projects/{projectId}/alss/{alsId}/addLB(
                                     projectId=${project.id},
@@ -637,14 +643,16 @@
                     Сохранить изменения
                 </button>
 
-                <a th:href="@{/projects/{projectId}/alss/{alsId}(
+                <a th:if="${project.id != null and project.id > 0 and als.id != null}"
+                   th:href="@{/projects/{projectId}/alss/{alsId}(
                             projectId=${project.id},
                             alsId=${als.id})}"
                    class="btn btn-secondary btn-sm">
                     Открыть ALS
                 </a>
 
-                <button type="submit"
+                <button th:if="${project.id != null and project.id > 0 and als.id != null}"
+                        type="submit"
                         class="btn btn-danger btn-sm"
                         th:formaction="@{/projects/{projectId}/alss/{alsId}/delete(
                                     projectId=${project.id},
