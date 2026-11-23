@@ -118,6 +118,8 @@ public final class ProjectEntityMapper {
                 quantityALS
         );
 
+        project.setId(entity.getId());
+
         if (!project.getDescription().equals(entity.getDescription())) {
             throw new IllegalStateException(
                     "Описание проекта в БД не соответствует его составу"
@@ -214,6 +216,7 @@ public final class ProjectEntityMapper {
 
         ProjectEntity entity =
                 new ProjectEntity();
+        entity.setId(domain.getId());
 
         updateEntity(
                 domain,

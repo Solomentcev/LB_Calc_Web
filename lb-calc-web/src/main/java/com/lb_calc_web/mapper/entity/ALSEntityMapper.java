@@ -71,6 +71,7 @@ public final class ALSEntityMapper {
             );
         }
 
+        domain.setId(entity.getId());
         return domain;
     }
 
@@ -112,6 +113,7 @@ public final class ALSEntityMapper {
         Objects.requireNonNull(moduleResolver, "moduleResolver не должен быть null");
 
         ALSEntity entity = new ALSEntity();
+        entity.setId(domain.getId());
         updateEntity(domain, entity, moduleResolver);
         return entity;
     }
