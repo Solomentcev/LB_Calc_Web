@@ -74,7 +74,7 @@ public final class ProjectDtoMapper {
     ) {
         return toDto(
                 domain,
-                als -> null
+                ALS::getId
         );
     }
 
@@ -99,6 +99,7 @@ public final class ProjectDtoMapper {
         );
 
         ProjectDTO dto = new ProjectDTO();
+        dto.setId(domain.getId());
 
         dto.setName(
                 domain.getName()
@@ -329,7 +330,7 @@ public final class ProjectDtoMapper {
                         alsMapper
                 );
 
-        return Project.restore(
+        Project project = Project.restore(
                 dto.getName(),
                 dto.getCompany(),
                 dto.getCreatedAt(),
@@ -338,6 +339,8 @@ public final class ProjectDtoMapper {
                 updatedBy,
                 quantityALS
         );
+        project.setId(dto.getId() == null || dto.getId() <= 0 ? null : dto.getId());
+        return project;
     }
 
     /**
