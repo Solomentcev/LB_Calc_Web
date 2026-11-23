@@ -383,6 +383,46 @@ public class ALSService {
     }
 
     /**
+     * Восстанавливает доменный LB из транспортной модели с конструктивным типом.
+     */
+    @Transactional(readOnly = true)
+    public LB restoreLB(LBDTO dto) {
+        Objects.requireNonNull(dto, "LB не должен быть null");
+        return LBDtoMapper.toDomain(
+                dto,
+                TypeLbFactory.forLB(environment, dto.getType())
+        );
+    }
+
+    /**
+     * Заменяет LB в доменной ALS, сохраняя его физическую позицию.
+     *
+     * @param als доменная конфигурация
+     * @param lbId идентификатор заменяемого LB
+     * @param replacement новая доменная конфигурация LB
+     * @return изменённая ALS
+     */
+    @Transactional(readOnly = true)
+    public ALS replaceLB(ALS als, Long lbId, LB replacement) {
+        Objects.requireNonNull(als, "ALS не должен быть null");
+        Objects.requireNonNull(lbId, "Идентификатор LB не должен быть null");
+        Objects.requireNonNull(replacement, "Новый LB не должен быть null");
+
+        List<Module> modules = als.getModules();
+        for (int i = 0; i < modules.size(); i++) {
+            Module module = modules.get(i);
+            if (module instanceof LB current && Objects.equals(current.getId(), lbId)) {
+                als.replaceModuleAt(i, replacement);
+                return als;
+            }
+        }
+
+        throw new NoSuchElementException(
+                "LB с id " + lbId + " не найден в ALS " + als.getId()
+        );
+    }
+
+    /**
      * Формирует ALS с заменённым LB без сохранения.
      *
      * <p>Модуль заменяется в домене по его физической позиции.
@@ -394,27 +434,8 @@ public class ALSService {
         Objects.requireNonNull(lb, "LB не должен быть null");
         Objects.requireNonNull(lb.getId(), "Идентификатор LB не должен быть null");
 
-        int lbIndex = -1;
-        for (int i = 0; i < als.getLbList().size(); i++) {
-            if (Objects.equals(als.getLbList().get(i).getId(), lb.getId())) {
-                lbIndex = i;
-                break;
-            }
-        }
-
-        if (lbIndex < 0) {
-            throw new NoSuchElementException(
-                    "LB с id " + lb.getId() + " не найден в ALS " + als.getId()
-            );
-        }
-
-        var domain = restoreALS(als);
-        int moduleIndex = ALSDtoMapper.findPhysicalLbIndex(domain, lbIndex);
-        domain.replaceModuleAt(
-                moduleIndex,
-                LBDtoMapper.toDomain(lb, TypeLbFactory.forLB(environment, lb.getType()))
-        );
-
+        ALS domain = restoreALS(als);
+        replaceLB(domain, lb.getId(), restoreLB(lb));
         return ALSDtoMapper.toDto(domain);
     }
 
