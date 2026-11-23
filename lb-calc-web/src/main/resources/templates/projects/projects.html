@@ -62,7 +62,7 @@
             </td>
 
             <td th:text="${project.createdBy != null
-                           ? project.createdBy.username
+                           ? project.createdBy.firstName + ' ' + project.createdBy.lastName
                            : ''}">
                 CreatedBy
             </td>
@@ -72,7 +72,7 @@
             </td>
 
             <td th:text="${project.updatedBy != null
-                           ? project.updatedBy.username
+                           ? project.updatedBy.firstName + ' ' + project.updatedBy.lastName
                            : ''}">
                 UpdatedBy
             </td>
