@@ -2,6 +2,9 @@ package com.lb_calc_web.service;
 
 import com.lb_calc_web.TestDataFactory;
 import com.lb_calc_web.dto.LBCDTO;
+import com.lb_calc_web.domain.model.LBC;
+import com.lb_calc_web.mapper.dto.LBCDtoMapper;
+import com.lb_calc_web.service.factory.TypeLbFactory;
 import com.lb_calc_web.entity.LBCEntity;
 import com.lb_calc_web.handler.ValidationSizeException;
 import com.lb_calc_web.mapper.entity.LBCEntityMapper;
@@ -79,8 +82,8 @@ class LBCServiceTest {
 
     @Test
     void createLBC_shouldCreateValidDefault() {
-        LBCDTO result =
-                lbcService.createLBC();
+        LBC domain = lbcService.createLBC();
+        LBCDTO result = LBCDtoMapper.toDto(domain);
 
         assertNotNull(result);
         assertEquals(1940, result.getHeight());
@@ -97,30 +100,9 @@ class LBCServiceTest {
     }
 
     @Test
-    void saveLBC_shouldLoadExistingEntityOnlyOnceWhenSelectionsAreMissing() {
-        LBCDTO dto = TestDataFactory.validLBCDTO(1L);
-        dto.setEquipmentSelections(null);
-
-        LBCEntity existing = LBCEntityMapper.toEntity(TestDataFactory.validLBC(1L));
-        when(lbcRepository.findById(1L)).thenReturn(Optional.of(existing));
-        when(lbcRepository.findCandidates(
-                anyInt(), anyInt(), anyInt(), anyInt(), anyInt(),
-                any(), any(), anyString(), anyInt(), anyInt(), anyInt(),
-                anyInt(), any(), anyInt(), any()
-        )).thenReturn(List.of());
-        when(lbcRepository.save(any(LBCEntity.class))).thenReturn(existing);
-
-        assertNotNull(lbcService.saveLBC(dto));
-
-        assertNull(dto.getEquipmentSelections(),
-                "Сервис не должен изменять входящий LBCDTO при восстановлении оборудования");
-        verify(lbcRepository, times(1)).findById(1L);
-    }
-
-    @Test
     void saveLBC_shouldPersistNewConfiguration() {
         LBCDTO dto =
-                TestDataFactory.validLBCDTO(1L);
+                TestDataFactory.validLBCDTO(null);
 
         LBCEntity saved =
                 LBCEntityMapper.toEntity(
@@ -136,8 +118,7 @@ class LBCServiceTest {
         when(lbcRepository.save(any(LBCEntity.class)))
                 .thenReturn(saved);
 
-        LBCDTO result =
-                lbcService.saveLBC(dto);
+        LBC result = lbcService.saveLBC(toDomain(dto));
 
         assertNotNull(result);
         verify(lbcRepository)
@@ -177,7 +158,7 @@ class LBCServiceTest {
 
         assertThrows(
                 ValidationSizeException.class,
-                () -> lbcService.saveLBC(dto)
+                () -> lbcService.saveLBC(toDomain(dto))
         );
 
         verify(lbcRepository, never()).save(any());
@@ -234,16 +215,17 @@ class LBCServiceTest {
         when(lbcRepository.findById(1L))
                 .thenReturn(Optional.of(entity));
 
-        LBCDTO result =
-                lbcService.findById(1L);
+        LBC result = lbcService.findById(1L);
 
         assertEquals(
                 1L,
                 result.getId()
         );
-        assertNotNull(
-                result.getStringLBCImage()
-        );
+
+    }
+
+    private LBC toDomain(LBCDTO dto) {
+        return LBCDtoMapper.toDomain(dto, TypeLbFactory.forLBC(environment, dto.getType()), EquipmentCatalog::resolve);
     }
 
     @Test

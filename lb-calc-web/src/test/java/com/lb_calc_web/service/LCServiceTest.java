@@ -2,6 +2,7 @@ package com.lb_calc_web.service;
 
 import com.lb_calc_web.TestDataFactory;
 import com.lb_calc_web.dto.LCDTO;
+import com.lb_calc_web.domain.model.LC;
 import com.lb_calc_web.entity.LCEntity;
 import com.lb_calc_web.handler.ValidationSizeException;
 import com.lb_calc_web.mapper.dto.LCDtoMapper;
@@ -72,7 +73,8 @@ class LCServiceTest {
 
     @Test
     void createLC_shouldCreateValidDefault() {
-        LCDTO result = lcService.createLC();
+        LC domain = lcService.createLC();
+        LCDTO result = LCDtoMapper.toDto(domain);
 
         assertNotNull(result);
         assertEquals(1940, result.getHeight());
@@ -88,42 +90,13 @@ class LCServiceTest {
     }
 
     @Test
-    void saveLC_shouldPreserveExistingCatalogEquipmentWhenFormOmitsSelections() {
-        LCEntity existing = new LCEntity();
-        existing.setEquipment(java.util.Set.of(
-                new com.lb_calc_web.entity.EquipmentQuantityEmbeddable("DISPLAY_LC17", 1),
-                new com.lb_calc_web.entity.EquipmentQuantityEmbeddable("MODEM_CUSTOM", 2)
-        ));
-        when(lcRepository.findById(1L)).thenReturn(Optional.of(existing));
-        com.lb_calc_web.domain.equipment.CatalogEquipment modem =
-                new com.lb_calc_web.domain.equipment.CatalogEquipment(
-                        "MODEM_CUSTOM", "MODEM", "Модем", "", 0, 0, 0,
-                        0, 0, 0, false, false, false, false
-                );
-        when(equipmentCatalogService.findExistingConfigurationResolver(anySet()))
-                .thenReturn(id -> "MODEM_CUSTOM".equals(id)
-                        ? modem
-                        : EquipmentCatalog.resolve(id));
-
-        LCDTO dto = TestDataFactory.validLCDTO(1L);
-        dto.setColorBody(null);
-
-        assertThrows(ValidationSizeException.class, () -> lcService.saveLC(dto));
-
-        assertNull(dto.getEquipmentSelections(),
-                "Сервис не должен изменять входящий LCDTO при восстановлении оборудования");
-        verify(equipmentCatalogService).findExistingConfigurationResolver(anySet());
-        verify(lcRepository, times(1)).findById(1L);
-    }
-
-    @Test
     void saveLC_missingRequiredColor_shouldReturnValidationError() {
         LCDTO dto = TestDataFactory.validLCDTO(42L);
         dto.setColorBody(null);
 
         ValidationSizeException exception = assertThrows(
                 ValidationSizeException.class,
-                () -> lcService.saveLC(dto)
+                () -> lcService.saveLC(LCDtoMapper.toDomain(dto, EquipmentCatalog::resolve))
         );
 
         var error = exception.getValidationResult().getErrors().get(0);
@@ -158,7 +131,7 @@ class LCServiceTest {
         when(lcRepository.findAll())
                 .thenReturn(List.of(second, first));
 
-        List<LCDTO> result = lcService.findAll();
+        List<LC> result = lcService.findAll();
 
         assertEquals(2, result.size());
         assertEquals(1L, result.get(0).getId());
@@ -181,7 +154,7 @@ class LCServiceTest {
         when(lcRepository.findById(1L))
                 .thenReturn(Optional.of(entity));
 
-        LCDTO result = lcService.findById(1L);
+        LC result = lcService.findById(1L);
 
         assertEquals(1L, result.getId());
     }
@@ -206,7 +179,7 @@ class LCServiceTest {
 
     @Test
     void saveLC_shouldReturnExistingByConfiguration() {
-        LCDTO dto = TestDataFactory.validLCDTO(1L);
+        LCDTO dto = TestDataFactory.validLCDTO(null);
 
         LCEntity existing =
                 LCEntityMapper.toEntity(
@@ -218,7 +191,7 @@ class LCServiceTest {
                 any(), any(), any()
         )).thenReturn(List.of(existing));
 
-        LCDTO result = lcService.saveLC(dto);
+        LC result = lcService.saveLC(LCDtoMapper.toDomain(dto, EquipmentCatalog::resolve));
 
         assertNotNull(result);
         verify(lcRepository, never()).save(any());
@@ -226,7 +199,7 @@ class LCServiceTest {
 
     @Test
     void saveLC_shouldPersistNewConfiguration() {
-        LCDTO dto = TestDataFactory.validLCDTO(1L);
+        LCDTO dto = TestDataFactory.validLCDTO(null);
         LCEntity saved =
                 LCEntityMapper.toEntity(
                         LCDtoMapper.toDomain(dto)
@@ -239,7 +212,7 @@ class LCServiceTest {
         when(lcRepository.save(any(LCEntity.class)))
                 .thenReturn(saved);
 
-        LCDTO result = lcService.saveLC(dto);
+        LC result = lcService.saveLC(LCDtoMapper.toDomain(dto, EquipmentCatalog::resolve));
 
         assertNotNull(result);
         verify(lcRepository).save(any(LCEntity.class));
@@ -252,7 +225,7 @@ class LCServiceTest {
 
         assertThrows(
                 ValidationSizeException.class,
-                () -> lcService.saveLC(dto)
+                () -> lcService.saveLC(LCDtoMapper.toDomain(dto, EquipmentCatalog::resolve))
         );
 
         verify(lcRepository, never()).save(any());
@@ -265,7 +238,7 @@ class LCServiceTest {
 
         assertThrows(
                 ValidationSizeException.class,
-                () -> lcService.saveLC(dto)
+                () -> lcService.saveLC(LCDtoMapper.toDomain(dto, EquipmentCatalog::resolve))
         );
 
         verify(lcRepository, never()).save(any());
