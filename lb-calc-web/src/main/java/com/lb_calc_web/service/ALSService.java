@@ -335,7 +335,7 @@ public class ALSService {
      * Формирует изменённую конфигурацию ALS с новым LB без сохранения.
      */
     @Transactional(readOnly = true)
-    public ALSDTO addNewLB(ALSDTO dto) {
+    ALSDTO addNewLB(ALSDTO dto) {
         Objects.requireNonNull(dto, "ALS не должен быть null");
 
         LB lb = lbService.createLB(
@@ -357,7 +357,7 @@ public class ALSService {
      * Формирует изменённую конфигурацию ALS без указанного LB.
      */
     @Transactional(readOnly = true)
-    public ALSDTO deleteLB(ALSDTO dto, Long lbId) {
+    ALSDTO deleteLB(ALSDTO dto, Long lbId) {
         Objects.requireNonNull(dto, "ALS не должен быть null");
         Objects.requireNonNull(lbId, "Идентификатор LB не должен быть null");
 
@@ -429,7 +429,7 @@ public class ALSService {
      * Идентификатор DTO используется только для поиска исходного LB.</p>
      */
     @Transactional(readOnly = true)
-    public ALSDTO replaceLB(ALSDTO als, LBDTO lb) {
+    ALSDTO replaceLB(ALSDTO als, LBDTO lb) {
         Objects.requireNonNull(als, "ALS не должен быть null");
         Objects.requireNonNull(lb, "LB не должен быть null");
         Objects.requireNonNull(lb.getId(), "Идентификатор LB не должен быть null");
