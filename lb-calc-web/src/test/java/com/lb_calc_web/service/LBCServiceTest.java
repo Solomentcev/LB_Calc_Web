@@ -200,7 +200,7 @@ class LBCServiceTest {
     }
 
     @Test
-    void findById_existing_shouldReturnDto() {
+    void findById_existing_shouldReturnDomain() {
         LBCEntity entity =
                 spy(
                         LBCEntityMapper.toEntity(

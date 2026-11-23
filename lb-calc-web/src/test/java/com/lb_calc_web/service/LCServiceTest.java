@@ -122,7 +122,7 @@ class LCServiceTest {
     }
 
     @Test
-    void findById_existing_shouldReturnDto() {
+    void findById_existing_shouldReturnDomain() {
         LCEntity entity =
                 spy(
                         LCEntityMapper.toEntity(
