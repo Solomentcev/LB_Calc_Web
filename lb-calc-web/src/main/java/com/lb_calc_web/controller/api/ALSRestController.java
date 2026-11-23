@@ -2,6 +2,8 @@ package com.lb_calc_web.controller.api;
 
 import com.lb_calc_web.controller.api.response.ApiResponse;
 import com.lb_calc_web.dto.ALSDTO;
+import com.lb_calc_web.mapper.dto.ALSDtoMapper;
+import com.lb_calc_web.domain.model.ALS;
 import com.lb_calc_web.dto.LBCDTO;
 import com.lb_calc_web.service.ALSService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -64,8 +66,7 @@ public class ALSRestController {
             @PathVariable Long id
     ) {
 
-            ALSDTO als =
-                    alsService.findById(id);
+            ALSDTO als = ALSDtoMapper.toDto(alsService.findById(id));
 
             return ResponseEntity.ok(
                     ApiResponse.success(als)
@@ -81,7 +82,7 @@ public class ALSRestController {
 
         return ResponseEntity.ok(
                 ApiResponse.success(
-                        alsService.createALS()
+ALSDtoMapper.toDto(alsService.createALS())
                 )
         );
     }
@@ -96,8 +97,8 @@ public class ALSRestController {
 
             dto.setId(0L);
 
-            ALSDTO saved =
-                    alsService.saveALS(dto);
+            ALS savedDomain = alsService.saveALS(alsService.restoreDomain(dto));
+            ALSDTO saved = ALSDtoMapper.toDto(savedDomain);
 
             return ResponseEntity.status(
                             HttpStatus.CREATED
@@ -121,8 +122,8 @@ public class ALSRestController {
 
             dto.setId(id);
 
-            ALSDTO saved =
-                    alsService.saveALS(dto);
+            ALS savedDomain = alsService.saveALS(alsService.restoreDomain(dto));
+            ALSDTO saved = ALSDtoMapper.toDto(savedDomain);
 
             return ResponseEntity.ok(
                     ApiResponse.success(saved)
@@ -158,7 +159,7 @@ public class ALSRestController {
             @PathVariable Long lbcId
     ) {
 
-            ALSDTO als = alsService.findById(alsId);
+            ALSDTO als = ALSDtoMapper.toDto(alsService.findById(alsId));
             return ResponseEntity.ok(
                     ApiResponse.success(alsService.findLBCInALS(als, lbcId))
             );
@@ -176,7 +177,7 @@ public class ALSRestController {
             @RequestBody LBCDTO lbc
     ) {
 
-            ALSDTO als = alsService.findById(alsId);
+            ALSDTO als = ALSDtoMapper.toDto(alsService.findById(alsId));
             alsService.findLBCInALS(als, lbcId);
             lbc.setId(lbcId);
 
