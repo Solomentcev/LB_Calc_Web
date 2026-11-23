@@ -187,7 +187,7 @@ class ProjectServiceTest {
         assertSame(originalUpdatedBy, project.getUpdatedBy());
         assertEquals(java.time.LocalDate.of(2025, 2, 3), project.getUpdatedAt());
         assertSame(originalAlsList, project.getAlsList());
-        verify(alsService, never()).saveALS(any(ALSDTO.class));
+        verify(alsService, never()).saveALS(any(com.lb_calc_web.domain.model.ALS.class));
         verify(projectRepository, never()).save(any(ProjectEntity.class));
     }
 
@@ -221,7 +221,7 @@ class ProjectServiceTest {
         var error = exception.getValidationResult().getErrors().get(0);
         assertEquals("Project", error.getObjectType());
         assertEquals("projectData", error.getField());
-        verify(alsService, never()).saveALS(any(ALSDTO.class));
+        verify(alsService, never()).saveALS(any(com.lb_calc_web.domain.model.ALS.class));
         verify(projectRepository, never()).save(any(ProjectEntity.class));
     }
 
@@ -340,7 +340,7 @@ class ProjectServiceTest {
                 () -> projectService.saveProject(project)
         );
 
-        verify(alsService, never()).saveALS(any(ALSDTO.class));
+        verify(alsService, never()).saveALS(any(com.lb_calc_web.domain.model.ALS.class));
         verify(projectRepository, never()).save(any(ProjectEntity.class));
     }
 

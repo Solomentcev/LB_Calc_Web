@@ -239,17 +239,6 @@ public class ALSService {
         return domain;
     }
 
-    /**
-     * Сохраняет DTO для существующих сценариев проектирования.
-     * Вся логика сохранения конфигурации сосредоточена в доменном методе.
-     */
-    @Transactional
-    ALSDTO saveALS(ALSDTO dto) {
-        Objects.requireNonNull(dto, "ALS не должен быть null");
-        ALS domain = restoreDomain(dto);
-        return ALSDtoMapper.toDto(saveALS(domain));
-    }
-
     private ValidationSizeException createValidationException(
             ALSDTO dto,
             String field,

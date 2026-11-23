@@ -265,25 +265,17 @@ public class ProjectService {
 
         validateProject(domain);
 
-        List<ALSDTO> savedALS =
-                saveALS(
-                        working.getAlsList()
-                );
-
-        working.setAlsList(savedALS);
-
         /*
-         * ALSService возвращает канонические DTO с конструктивными
-         * параметрами, разрешёнными из конфигурации приложения.
-         * Повторно собираем Project, чтобы его ALS совпадали с теми,
-         * для которых ниже разрешаются persistence-сущности.
+         * Сохраняем каждую уникальную конфигурацию агрегата через Domain API.
+         * Project уже сгруппировал одинаковые ALS и хранит их количество,
+         * поэтому повторно сохранять одну конфигурацию для каждой единицы
+         * физического состава не требуется.
          */
-        domain = ProjectDtoMapper.toDomain(working, alsDto -> alsService.restoreDomain(alsDto));
+        List<ALS> savedALS = new ArrayList<>(domain.getQuantityALS().keySet());
+        savedALS.forEach(alsService::saveALS);
 
         Function<ALS, ALSEntity> alsResolver =
-                resolveALSEntities(
-                        savedALS
-                );
+                resolveALSEntities(savedALS);
 
         ProjectEntity entity;
 
@@ -999,49 +991,13 @@ public class ProjectService {
     }
 
     /**
-     * Сохраняет все ALS, входящие в проект.
-     *
-     * После сохранения DTO обязательно получают
-     * актуальные persistence ID.
-     */
-    private List<ALSDTO> saveALS(
-            List<ALSDTO> source
-    ) {
-        if (source == null) {
-            return List.of();
-        }
-
-        List<ALSDTO> result =
-                new ArrayList<>(
-                        source.size()
-                );
-
-        for (ALSDTO als : source) {
-
-            if (als == null) {
-                throw new IllegalArgumentException(
-                        "ALS проекта не должен быть null"
-                );
-            }
-
-            result.add(
-                    alsService.saveALS(
-                            als
-                    )
-            );
-        }
-
-        return result;
-    }
-
-    /**
      * Создаёт функцию разрешения доменной ALS в сохранённую ALSEntity.
      *
-     * <p>Сопоставление выполняется по бизнес-содержимому через список
-     * пар, а не через Map с изменяемыми доменными ключами.</p>
+     * <p>Каждая уникальная конфигурация уже сохранена через Domain API.
+     * Для связывания с проектом загружаются только сущности по полученным ID.</p>
      */
     private Function<ALS, ALSEntity> resolveALSEntities(
-            List<ALSDTO> savedALS
+            List<ALS> savedALS
     ) {
         if (savedALS == null || savedALS.isEmpty()) {
             return als -> {
@@ -1053,26 +1009,23 @@ public class ProjectService {
 
         Set<Long> ids = new LinkedHashSet<>();
 
-        for (ALSDTO dto : savedALS) {
-            if (dto == null) {
+        for (ALS als : savedALS) {
+            if (als == null) {
                 throw new IllegalArgumentException(
                         "ALS проекта не должен быть null"
                 );
             }
 
-            Long id = dto.getId();
-
+            Long id = als.getId();
             if (id == null || id <= 0) {
                 throw new IllegalStateException(
                         "После сохранения ALS не получил корректный id"
                 );
             }
-
             ids.add(id);
         }
 
         Map<Long, ALSEntity> entitiesById = new HashMap<>();
-
         for (ALSEntity entity : alsRepository.findAllById(ids)) {
             entitiesById.put(entity.getId(), entity);
         }
@@ -1086,13 +1039,10 @@ public class ProjectService {
         }
 
         List<Map.Entry<ALS, ALSEntity>> resolved = new ArrayList<>();
-
-        for (ALSDTO dto : savedALS) {
-            ALSEntity entity = entitiesById.get(dto.getId());
-            ALS domain = alsService.restoreDomain(dto);
-
-            if (resolved.stream().noneMatch(entry -> entry.getKey().equals(domain))) {
-                resolved.add(Map.entry(domain, entity));
+        for (ALS als : savedALS) {
+            ALSEntity entity = entitiesById.get(als.getId());
+            if (resolved.stream().noneMatch(entry -> entry.getKey().equals(als))) {
+                resolved.add(Map.entry(als, entity));
             }
         }
 

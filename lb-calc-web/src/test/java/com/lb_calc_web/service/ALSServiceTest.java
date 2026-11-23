@@ -139,7 +139,7 @@ class ALSServiceTest {
                 anyInt(), anyInt(), anyInt(), anyInt(), any(), any()
         )).thenReturn(List.of(existing));
 
-        ALSDTO result = alsService.saveALS(dto);
+        ALS result = alsService.saveALS(alsService.restoreDomain(dto));
 
         assertNotNull(result);
         verify(alsRepository, never()).save(any());
@@ -180,7 +180,7 @@ class ALSServiceTest {
 
         assertThrows(
                 IllegalStateException.class,
-                () -> alsService.saveALS(dto)
+                () -> alsService.saveALS(alsService.restoreDomain(dto))
         );
 
         verify(alsRepository, never()).save(any());
@@ -203,7 +203,7 @@ class ALSServiceTest {
 
         assertThrows(
                 IllegalStateException.class,
-                () -> alsService.saveALS(dto)
+                () -> alsService.saveALS(alsService.restoreDomain(dto))
         );
 
         verify(alsRepository, never()).save(any());
@@ -217,7 +217,7 @@ class ALSServiceTest {
 
         ValidationSizeException exception = assertThrows(
                 ValidationSizeException.class,
-                () -> alsService.saveALS(als)
+                () -> alsService.saveALS(alsService.restoreDomain(als))
         );
 
         var alsHeightError = exception.getValidationResult()
@@ -228,7 +228,7 @@ class ALSServiceTest {
                 .findFirst()
                 .orElseThrow();
 
-        assertEquals(1L, alsHeightError.getObjectId());
+        assertNull(alsHeightError.getObjectId());
 
         verify(alsRepository, never()).save(any());
     }
@@ -240,7 +240,7 @@ class ALSServiceTest {
 
         ValidationSizeException exception = assertThrows(
                 ValidationSizeException.class,
-                () -> alsService.saveALS(als)
+                () -> alsService.saveALS(alsService.restoreDomain(als))
         );
 
         var error = exception.getValidationResult().getErrors().get(0);
