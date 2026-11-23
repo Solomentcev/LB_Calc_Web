@@ -126,36 +126,6 @@ public final class ProjectEntityMapper {
     }
 
     /**
-     * Преобразует ProjectEntity в DTO, включая идентификаторы ALS и модулей.
-     */
-    public static ProjectDTO toDto(ProjectEntity entity) {
-        return toDto(entity, EquipmentCatalog::findByCatalogPositionId);
-    }
-
-    public static ProjectDTO toDto(ProjectEntity entity,
-                                   Function<String, Equipment> equipmentResolver) {
-        Objects.requireNonNull(entity, "ProjectEntity не должен быть null");
-        Map<ALS, Long> alsIds = new LinkedHashMap<>();
-        Project domain = toDomain(entity,
-                (als, alsEntity) -> alsIds.putIfAbsent(als, alsEntity.getId()),
-                equipmentResolver);
-        ProjectDTO dto = ProjectDtoMapper.toDto(domain, alsIds::get);
-        dto.setId(entity.getId());
-
-        Map<Long, ALSEntity> entitiesById = new LinkedHashMap<>();
-        for (ProjectALSEntity entry : entity.getAlsEntries()) {
-            entitiesById.put(entry.getAls().getId(), entry.getAls());
-        }
-        for (ALSDTO alsDto : dto.getAlsList()) {
-            if (alsDto != null && alsDto.getId() != null) {
-                ALSEntity alsEntity = entitiesById.get(alsDto.getId());
-                if (alsEntity != null) ALSEntityMapper.enrichModuleIds(alsDto, alsEntity);
-            }
-        }
-        return dto;
-    }
-
-    /**
      * Создаёт новую ProjectEntity из доменного проекта.
      *
      * @param domain доменный проект

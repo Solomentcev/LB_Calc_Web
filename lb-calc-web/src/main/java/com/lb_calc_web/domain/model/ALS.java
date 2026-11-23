@@ -487,6 +487,26 @@ public class ALS {
     }
 
     /**
+     * Возвращает LC, если управляющим модулем ALS является LC.
+     *
+     * @return независимая копия LC или {@code null}, если в ALS установлен LBC
+     */
+    public LC getLC() {
+        ControlModule controlModule = getControlModule();
+        return controlModule instanceof LC lc ? lc : null;
+    }
+
+    /**
+     * Возвращает LBC, если управляющим модулем ALS является LBC.
+     *
+     * @return независимая копия LBC или {@code null}, если в ALS установлен LC
+     */
+    public LBC getLBC() {
+        ControlModule controlModule = getControlModule();
+        return controlModule instanceof LBC lbc ? lbc : null;
+    }
+
+    /**
      * Возвращает storage-модули в их физическом порядке.
      *
      * @return неизменяемый список storage-модулей

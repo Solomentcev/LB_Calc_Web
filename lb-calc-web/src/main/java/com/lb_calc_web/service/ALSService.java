@@ -159,8 +159,6 @@ public class ALSService {
                 bottomFrame,
                 colorBody
         );
-        lc.setColorDoor(colorDoor);
-
         LB lb = lbService.createLB(
                 height,
                 depth,
