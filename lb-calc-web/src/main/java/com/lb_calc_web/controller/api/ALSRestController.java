@@ -199,7 +199,7 @@ toDto(alsService.createALS())
     ) {
 
             ALSDTO saved = alsService.replaceWithNewLBCandSaveALS(alsId);
-            return ResponseEntity.ok(ApiResponse.success(addALSImage(saved)));
+            return ResponseEntity.ok(ApiResponse.success(saved));
 
     }
 
@@ -214,7 +214,7 @@ toDto(alsService.createALS())
 
             ALSDTO saved = toDto(alsService.addNewLBandSaveALS(alsId));
             return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(ApiResponse.success(addALSImage(saved)));
+                    .body(ApiResponse.success(saved));
 
     }
 
