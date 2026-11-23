@@ -202,6 +202,27 @@ class LCServiceTest {
     }
 
     @Test
+    void saveLC_existingConfiguration_shouldUpdateSameEntityAndPreserveId() {
+        LC domain = LCDtoMapper.toDomain(
+                TestDataFactory.validLCDTO(1L),
+                EquipmentCatalog::resolve
+        );
+        LCEntity existing = spy(LCEntityMapper.toEntity(domain));
+        doReturn(1L).when(existing).getId();
+        when(lcRepository.findById(1L)).thenReturn(Optional.of(existing));
+        when(lcRepository.findCandidates(
+                anyInt(), anyInt(), anyInt(), anyInt(), anyInt(),
+                any(), any(), any()
+        )).thenReturn(List.of());
+        when(lcRepository.save(any(LCEntity.class))).thenReturn(existing);
+
+        LC saved = lcService.saveLC(domain);
+
+        assertEquals(1L, saved.getId());
+        verify(lcRepository).save(same(existing));
+    }
+
+    @Test
     void saveLC_widthBelowEquipmentRequirement_shouldThrowValidationException() {
         LCDTO dto = TestDataFactory.validLCDTO(1L);
         dto.setWidth(100);

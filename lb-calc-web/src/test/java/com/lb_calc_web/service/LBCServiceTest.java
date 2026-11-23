@@ -150,6 +150,25 @@ class LBCServiceTest {
     }
 
     @Test
+    void saveLBC_existingConfiguration_shouldUpdateSameEntityAndPreserveId() {
+        LBC domain = toDomain(TestDataFactory.validLBCDTO(1L));
+        LBCEntity existing = spy(LBCEntityMapper.toEntity(domain));
+        doReturn(1L).when(existing).getId();
+        when(lbcRepository.findById(1L)).thenReturn(Optional.of(existing));
+        when(lbcRepository.findCandidates(
+                anyInt(), anyInt(), anyInt(), anyInt(), anyInt(),
+                any(), any(), anyString(), anyInt(), anyInt(), anyInt(),
+                anyInt(), any(), anyInt(), any()
+        )).thenReturn(List.of());
+        when(lbcRepository.save(any(LBCEntity.class))).thenReturn(existing);
+
+        LBC saved = lbcService.saveLBC(domain);
+
+        assertEquals(1L, saved.getId());
+        verify(lbcRepository).save(same(existing));
+    }
+
+    @Test
     void saveLBC_widthBelowEquipmentRequirement_shouldThrowValidationException() {
         LBCDTO dto = TestDataFactory.validLBCDTO(1L);
         dto.setWidth(159);
