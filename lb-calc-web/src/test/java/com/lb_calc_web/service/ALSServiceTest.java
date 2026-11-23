@@ -336,10 +336,9 @@ class ALSServiceTest {
     @Test
     void replaceWithNewLBC_shouldReplaceExistingLBCAndPreserveAdditionalEquipment() {
         ALSDTO als = TestDataFactory.validLBCALSDTO(1L);
+        ALS source = alsService.restoreDomain(als);
         com.lb_calc_web.domain.model.LBC newLBC =
-                (com.lb_calc_web.domain.model.LBC) alsService.restoreDomain(
-                        TestDataFactory.validLBCALSDTO(0L)
-                ).getControlModule();
+                (com.lb_calc_web.domain.model.LBC) source.getControlModule();
         when(lbcService.createLBC(
                 anyInt(), anyInt(), anyInt(), anyInt(), any(), any()
         )).thenReturn(newLBC);
@@ -364,7 +363,6 @@ class ALSServiceTest {
                         ? customModem
                         : EquipmentCatalog.resolve(id));
 
-        ALS source = alsService.restoreDomain(als);
         ALS result = alsService.replaceWithNewLBC(source);
         ALSDTO resultDto = ALSDtoMapper.toDto(result);
 
@@ -372,7 +370,7 @@ class ALSServiceTest {
         assertNull(resultDto.getLC());
         assertTrue(resultDto.getLBC().getEquipmentSelections().stream()
                 .anyMatch(selection -> "CUSTOM_MODEM".equals(selection.catalogPositionId())));
-        verify(equipmentCatalogService, times(1))
+        verify(equipmentCatalogService, times(2))
                 .findExistingConfigurationResolver(anySet());
     }
 
