@@ -263,7 +263,7 @@ public class ProjectService {
             throw new ValidationSizeException(validationResult);
         }
 
-        validateProject(domain, working);
+        validateProject(domain);
 
         List<ALSDTO> savedALS =
                 saveALS(
@@ -1086,7 +1086,7 @@ public class ProjectService {
         );
     }
 
-    private void validateProject(Project domain, ProjectDTO source) {
+    private void validateProject(Project domain) {
         List<ValidationResult> results =
                 sizeValidator.validateProject(domain);
 
