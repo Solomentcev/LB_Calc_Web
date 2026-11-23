@@ -560,6 +560,22 @@ public class ALSService {
     }
 
     /**
+     * Заменяет LC в доменной ALS и сохраняет новую конфигурацию.
+     */
+    @Transactional
+    public ALS replaceLCandSaveALS(ALS als, LC replacement) {
+        return saveALS(replaceLC(als, replacement));
+    }
+
+    /**
+     * Заменяет LBC в доменной ALS и сохраняет новую конфигурацию.
+     */
+    @Transactional
+    public ALS replaceLBCandSaveALS(ALS als, LBC replacement) {
+        return saveALS(replaceLBC(als, replacement));
+    }
+
+    /**
      * Создаёт новый LBC для сохранённой ALS и сохраняет результат.
      */
     @Transactional

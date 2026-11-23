@@ -306,33 +306,43 @@ class ALSServiceTest {
 
     @Test
     void replaceLC_shouldReuseEquipmentResolverForBothConfigurations() {
-        ALSDTO als = TestDataFactory.validALSDTO(1L);
-        LCDTO replacement = TestDataFactory.validLCDTO(als.getLC().getId());
+        ALSDTO source = TestDataFactory.validALSDTO(1L);
+        ALS als = alsService.restoreDomain(source);
+        LCDTO replacement = TestDataFactory.validLCDTO(source.getLC().getId());
 
-        ALSDTO result = alsService.replaceLC(als, replacement);
+        com.lb_calc_web.domain.model.LC replacementDomain =
+                alsService.restoreLC(replacement, als);
+        ALS result = alsService.replaceLC(als, replacementDomain);
 
-        assertNotNull(result.getLC());
-        verify(equipmentCatalogService, times(1))
+        assertInstanceOf(com.lb_calc_web.domain.model.LC.class, result.getControlModule());
+        verify(equipmentCatalogService, times(2))
                 .findExistingConfigurationResolver(anySet());
     }
 
     @Test
     void replaceLC_shouldRejectModuleIdNotBelongingToALS() {
-        ALSDTO als = TestDataFactory.validALSDTO(1L);
+        ALSDTO source = TestDataFactory.validALSDTO(1L);
+        ALS als = alsService.restoreDomain(source);
         LCDTO anotherLC = TestDataFactory.validLCDTO(999L);
+        com.lb_calc_web.domain.model.LC replacement =
+                alsService.restoreLC(anotherLC, als);
 
         assertThrows(
                 java.util.NoSuchElementException.class,
-                () -> alsService.replaceLC(als, anotherLC)
+                () -> alsService.replaceLC(als, replacement)
         );
     }
 
     @Test
     void replaceWithNewLBC_shouldReplaceExistingLBCAndPreserveAdditionalEquipment() {
         ALSDTO als = TestDataFactory.validLBCALSDTO(1L);
+        com.lb_calc_web.domain.model.LBC newLBC =
+                (com.lb_calc_web.domain.model.LBC) alsService.restoreDomain(
+                        TestDataFactory.validLBCALSDTO(0L)
+                ).getControlModule();
         when(lbcService.createLBC(
                 anyInt(), anyInt(), anyInt(), anyInt(), any(), any()
-        )).thenReturn(TestDataFactory.validLBCDTO(0L));
+        )).thenReturn(newLBC);
 
         var existingModule = spy(new com.lb_calc_web.entity.LBCEntity());
         existingModule.setEquipment(java.util.Set.of(
@@ -354,11 +364,13 @@ class ALSServiceTest {
                         ? customModem
                         : EquipmentCatalog.resolve(id));
 
-        ALSDTO result = alsService.replaceWithNewLBC(als);
+        ALS source = alsService.restoreDomain(als);
+        ALS result = alsService.replaceWithNewLBC(source);
+        ALSDTO resultDto = ALSDtoMapper.toDto(result);
 
-        assertNotNull(result.getLBC());
-        assertNull(result.getLC());
-        assertTrue(result.getLBC().getEquipmentSelections().stream()
+        assertNotNull(resultDto.getLBC());
+        assertNull(resultDto.getLC());
+        assertTrue(resultDto.getLBC().getEquipmentSelections().stream()
                 .anyMatch(selection -> "CUSTOM_MODEM".equals(selection.catalogPositionId())));
         verify(equipmentCatalogService, times(1))
                 .findExistingConfigurationResolver(anySet());
@@ -391,10 +403,14 @@ class ALSServiceTest {
                         : EquipmentCatalog.resolve(id));
 
         LBCDTO replacement = TestDataFactory.validLBCDTO(als.getLBC().getId());
+        ALS source = alsService.restoreDomain(als);
+        com.lb_calc_web.domain.model.LBC replacementDomain =
+                alsService.restoreLBC(replacement, source);
 
-        ALSDTO result = alsService.replaceLBC(als, replacement);
+        ALS result = alsService.replaceLBC(source, replacementDomain);
+        ALSDTO resultDto = ALSDtoMapper.toDto(result);
 
-        assertNotNull(result.getLBC());
+        assertNotNull(resultDto.getLBC());
         assertNull(replacement.getEquipmentSelections(),
                 "Восстановление оборудования не должно изменять исходный LBCDTO");
         verify(equipmentCatalogService).findExistingConfigurationResolver(anySet());
@@ -402,26 +418,32 @@ class ALSServiceTest {
 
     @Test
     void replaceLBC_shouldRejectModuleIdNotBelongingToALS() {
-        ALSDTO als = TestDataFactory.validLBCALSDTO(1L);
+        ALSDTO source = TestDataFactory.validLBCALSDTO(1L);
+        ALS als = alsService.restoreDomain(source);
         LBCDTO anotherLBC = TestDataFactory.validLBCDTO(999L);
+        com.lb_calc_web.domain.model.LBC replacement =
+                alsService.restoreLBC(anotherLBC, als);
 
         assertThrows(
                 java.util.NoSuchElementException.class,
-                () -> alsService.replaceLBC(als, anotherLBC)
+                () -> alsService.replaceLBC(als, replacement)
         );
     }
 
     @Test
     void replaceLCandSaveALS_shouldReplaceControlModule() {
-        ALSDTO als = TestDataFactory.validALSDTO(1L);
-        LCDTO lc = TestDataFactory.validLCDTO(als.getLC().getId());
+        ALSDTO source = TestDataFactory.validALSDTO(1L);
+        ALS als = alsService.restoreDomain(source);
+        LCDTO lc = TestDataFactory.validLCDTO(source.getLC().getId());
+        com.lb_calc_web.domain.model.LC replacement = alsService.restoreLC(lc, als);
 
         ALSService spy = spy(alsService);
         doAnswer(invocation -> invocation.getArgument(0))
-                .when(spy).saveALS(any(ALSDTO.class));
+                .when(spy).saveALS(any(ALS.class));
 
-        ALSDTO result =
-                spy.replaceLCandSaveALS(als, lc);
+        ALSDTO result = ALSDtoMapper.toDto(
+                spy.replaceLCandSaveALS(als, replacement)
+        );
 
         assertNotNull(result.getLC());
         assertEquals(lc.getDisplay(), result.getLC().getDisplay());
@@ -431,15 +453,18 @@ class ALSServiceTest {
 
     @Test
     void replaceLBCandSaveALS_shouldReplaceControlAndKeepLBCAsStorage() {
-        ALSDTO als = TestDataFactory.validALSDTO(1L);
+        ALSDTO source = TestDataFactory.validALSDTO(1L);
+        ALS als = alsService.restoreDomain(source);
         LBCDTO lbc = TestDataFactory.validLBCDTO(2L);
+        com.lb_calc_web.domain.model.LBC replacement = alsService.restoreLBC(lbc, als);
 
         ALSService spy = spy(alsService);
         doAnswer(invocation -> invocation.getArgument(0))
-                .when(spy).saveALS(any(ALSDTO.class));
+                .when(spy).saveALS(any(ALS.class));
 
-        ALSDTO result =
-                spy.replaceLBCandSaveALS(als, lbc);
+        ALSDTO result = ALSDtoMapper.toDto(
+                spy.replaceLBCandSaveALS(als, replacement)
+        );
 
         assertNotNull(result.getLBC());
         assertEquals(lbc.getType(), result.getLBC().getType());
