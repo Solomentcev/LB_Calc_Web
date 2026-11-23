@@ -232,20 +232,16 @@ public class ALSController extends BaseCatalogController {
         return dto;
     }
 
-    private void addLBCImage(com.lb_calc_web.dto.LBCDTO lbc) {
+    private com.lb_calc_web.dto.LBCDTO addLBCImage(com.lb_calc_web.dto.LBCDTO lbc) {
+        if (lbc == null) {
+            return null;
+        }
         try {
             lbc.setStringLBCImage(LBCImageService.getStringLBCImage(lbc));
         } catch (RuntimeException exception) {
             logger.warn("Не удалось сформировать изображение LBC id={}: {}", lbc.getId(), exception.getMessage());
         }
-    }
-
-    private void addLBCImage(com.lb_calc_web.dto.LBCDTO lbc) {
-        try {
-            lbc.setStringLBCImage(LBCImageService.getStringLBCImage(lbc));
-        } catch (RuntimeException exception) {
-            logger.warn("Не удалось сформировать изображение LBC id={}: {}", lbc.getId(), exception.getMessage());
-        }
+        return lbc;
     }
 
 }
