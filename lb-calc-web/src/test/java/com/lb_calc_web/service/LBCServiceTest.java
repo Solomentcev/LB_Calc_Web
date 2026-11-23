@@ -128,7 +128,7 @@ class LBCServiceTest {
     @Test
     void saveLBC_shouldReturnExistingByConfiguration() {
         LBCDTO dto =
-                TestDataFactory.validLBCDTO(1L);
+                TestDataFactory.validLBCDTO(null);
 
         LBCEntity existing =
                 LBCEntityMapper.toEntity(
@@ -141,8 +141,7 @@ class LBCServiceTest {
                 anyInt(), any(), anyInt(), any()
         )).thenReturn(List.of(existing));
 
-        LBCDTO result =
-                lbcService.saveLBC(dto);
+        LBC result = lbcService.saveLBC(toDomain(dto));
 
         assertNotNull(result);
         verify(
@@ -173,7 +172,7 @@ class LBCServiceTest {
 
         assertThrows(
                 ValidationSizeException.class,
-                () -> lbcService.saveLBC(dto)
+                () -> lbcService.saveLBC(toDomain(dto))
         );
 
         verify(
