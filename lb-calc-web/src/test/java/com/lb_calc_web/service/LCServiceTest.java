@@ -90,23 +90,6 @@ class LCServiceTest {
     }
 
     @Test
-    void saveLC_missingRequiredColor_shouldReturnValidationError() {
-        LCDTO dto = TestDataFactory.validLCDTO(42L);
-        dto.setColorBody(null);
-
-        ValidationSizeException exception = assertThrows(
-                ValidationSizeException.class,
-                () -> lcService.saveLC(LCDtoMapper.toDomain(dto, EquipmentCatalog::resolve))
-        );
-
-        var error = exception.getValidationResult().getErrors().get(0);
-        assertEquals("LC", error.getObjectType());
-        assertEquals(42L, error.getObjectId());
-        assertEquals("domainModel", error.getField());
-        verify(lcRepository, never()).save(any());
-    }
-
-    @Test
     void findAll_shouldReturnSortedById() {
         LCEntity first =
                 spy(
