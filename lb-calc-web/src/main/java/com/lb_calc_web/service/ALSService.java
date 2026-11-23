@@ -346,17 +346,17 @@ public class ALSService {
     public ALSDTO addNewLB(ALSDTO dto) {
         Objects.requireNonNull(dto, "ALS не должен быть null");
 
-        LBDTO lbDto = lbService.createLB(
-                dto.getHeight(),
-                dto.getDepth(),
-                dto.getUpperFrame(),
-                dto.getBottomFrame(),
-                Colors.valueOf(dto.getColorBody()),
-                Colors.valueOf(dto.getColorDoor())
-        );
-
         var domain = restoreALS(dto);
-        domain.addStorageModule(LBDtoMapper.toDomain(lbDto, TypeLbFactory.forLB(environment, lbDto.getType())));
+        domain.addStorageModule(
+                lbService.createDomainLB(
+                        dto.getHeight(),
+                        dto.getDepth(),
+                        dto.getUpperFrame(),
+                        dto.getBottomFrame(),
+                        Colors.valueOf(dto.getColorBody()),
+                        Colors.valueOf(dto.getColorDoor())
+                )
+        );
 
         return ALSDtoMapper.toDto(domain);
     }

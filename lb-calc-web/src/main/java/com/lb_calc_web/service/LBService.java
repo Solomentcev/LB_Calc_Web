@@ -77,44 +77,51 @@ public class LBService {
             Colors colorBody,
             Colors colorDoor
     ) {
-        LBDTO dto = new LBDTO();
-
-        dto.setId(0L);
-        dto.setHeight(height);
-        dto.setWidth(requiredInt("size.width.default"));
-        dto.setDepth(depth);
-
-        dto.setUpperFrame(upperFrame);
-        dto.setBottomFrame(bottomFrame);
-
-        dto.setCountCells(
-                requiredInt("size.count.cells.default")
-        );
-
-        dto.setType(
-                environment.getRequiredProperty(
-                        "lb.type.default"
+        return LBDtoMapper.toDto(
+                createDomainLB(
+                        height,
+                        depth,
+                        upperFrame,
+                        bottomFrame,
+                        colorBody,
+                        colorDoor
                 )
         );
+    }
 
-        dto.setDoorThickness(
-                requiredInt("size.door.thickness.default")
-        );
+    /**
+     * Создаёт доменную модель LB с заданными базовыми параметрами.
+     *
+     * <p>Метод не сохраняет модуль в базе данных и не использует DTO,
+     * поэтому может вызываться другими сервисами при построении ALS.</p>
+     */
+    public LB createDomainLB(
+            int height,
+            int depth,
+            int upperFrame,
+            int bottomFrame,
+            Colors colorBody,
+            Colors colorDoor
+    ) {
+        String type = environment.getRequiredProperty("lb.type.default");
+        TypeLb typeLb = TypeLbFactory.forLB(environment, type);
 
-        dto.setDirectionDoorOpening(
-                environment.getProperty(
+        return new LB(
+                height,
+                requiredInt("size.width.default"),
+                depth,
+                upperFrame,
+                bottomFrame,
+                colorBody,
+                colorDoor,
+                typeLb,
+                requiredInt("size.count.cells.default"),
+                DirectionDoorOpening.valueOf(environment.getProperty(
                         "lb.direction.default",
                         DirectionDoorOpening.LEFT.name()
-                )
+                )),
+                requiredInt("size.door.thickness.default")
         );
-
-        dto.setColorBody(colorBody.name());
-        dto.setColorDoor(colorDoor.name());
-
-        TypeLb typeLb = TypeLbFactory.forLB(environment, dto.getType());
-        LB domain = LBDtoMapper.toDomain(dto, typeLb);
-
-        return LBDtoMapper.toDto(domain);
     }
 
     /**
