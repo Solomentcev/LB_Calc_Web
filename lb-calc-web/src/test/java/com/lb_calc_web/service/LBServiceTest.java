@@ -71,24 +71,6 @@ class LBServiceTest {
     }
 
     @Test
-    void createDomainLB_shouldCreateDomainModelWithoutDto() {
-        LB result = lbService.createDomainLB(
-                1940, 500, 50, 50,
-                com.lb_calc_web.domain.attributes.Colors.Blue,
-                com.lb_calc_web.domain.attributes.Colors.White
-        );
-
-        assertNotNull(result);
-        assertEquals(1940, result.getHeight());
-        assertEquals(500, result.getWidth());
-        assertEquals("TYPE1", result.getTypeLb().getType());
-        assertEquals(3, result.getCountCells());
-        assertEquals(com.lb_calc_web.domain.attributes.DirectionDoorOpening.RIGHT,
-                result.getDirectionDoorOpening());
-        assertTrue(result.getCellHeight() > 0);
-    }
-
-    @Test
     void saveLB_shouldReturnExistingByConfiguration() {
         LBDTO dto = TestDataFactory.validLBDTO(1L);
         LBEntity existing = LBEntityMapper.toEntity(

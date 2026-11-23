@@ -77,51 +77,44 @@ public class LBService {
             Colors colorBody,
             Colors colorDoor
     ) {
-        return LBDtoMapper.toDto(
-                createDomainLB(
-                        height,
-                        depth,
-                        upperFrame,
-                        bottomFrame,
-                        colorBody,
-                        colorDoor
+        LBDTO dto = new LBDTO();
+
+        dto.setId(0L);
+        dto.setHeight(height);
+        dto.setWidth(requiredInt("size.width.default"));
+        dto.setDepth(depth);
+
+        dto.setUpperFrame(upperFrame);
+        dto.setBottomFrame(bottomFrame);
+
+        dto.setCountCells(
+                requiredInt("size.count.cells.default")
+        );
+
+        dto.setType(
+                environment.getRequiredProperty(
+                        "lb.type.default"
                 )
         );
-    }
 
-    /**
-     * Создаёт доменную модель LB с заданными базовыми параметрами.
-     *
-     * <p>Метод не сохраняет модуль в базе данных и не использует DTO,
-     * поэтому может вызываться другими сервисами при построении ALS.</p>
-     */
-    public LB createDomainLB(
-            int height,
-            int depth,
-            int upperFrame,
-            int bottomFrame,
-            Colors colorBody,
-            Colors colorDoor
-    ) {
-        String type = environment.getRequiredProperty("lb.type.default");
-        TypeLb typeLb = TypeLbFactory.forLB(environment, type);
-
-        return new LB(
-                height,
-                requiredInt("size.width.default"),
-                depth,
-                upperFrame,
-                bottomFrame,
-                colorBody,
-                colorDoor,
-                typeLb,
-                requiredInt("size.count.cells.default"),
-                DirectionDoorOpening.valueOf(environment.getProperty(
-                        "lb.direction.default",
-                        DirectionDoorOpening.LEFT.name()
-                )),
+        dto.setDoorThickness(
                 requiredInt("size.door.thickness.default")
         );
+
+        dto.setDirectionDoorOpening(
+                environment.getProperty(
+                        "lb.direction.default",
+                        DirectionDoorOpening.LEFT.name()
+                )
+        );
+
+        dto.setColorBody(colorBody.name());
+        dto.setColorDoor(colorDoor.name());
+
+        TypeLb typeLb = TypeLbFactory.forLB(environment, dto.getType());
+        LB domain = LBDtoMapper.toDomain(dto, typeLb);
+
+        return LBDtoMapper.toDto(domain);
     }
 
     /**
