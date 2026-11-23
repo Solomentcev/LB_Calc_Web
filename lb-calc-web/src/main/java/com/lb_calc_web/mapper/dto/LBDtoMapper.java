@@ -29,6 +29,7 @@ public final class LBDtoMapper {
         }
 
         LBDTO dto = new LBDTO();
+        dto.setId(domain.getId());
 
         dto.setName(domain.getName());
         dto.setDescription(domain.getDescription());

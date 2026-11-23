@@ -30,6 +30,7 @@ public final class LCDtoMapper {
         }
 
         LCDTO dto = new LCDTO();
+        dto.setId(domain.getId());
 
         dto.setName(domain.getName());
         dto.setDescription(domain.getDescription());

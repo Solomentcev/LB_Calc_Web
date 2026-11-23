@@ -32,6 +32,7 @@ public final class LBCDtoMapper {
         }
 
         LBCDTO dto = new LBCDTO();
+        dto.setId(domain.getId());
 
         dto.setName(domain.getName());
         dto.setDescription(domain.getDescription());
