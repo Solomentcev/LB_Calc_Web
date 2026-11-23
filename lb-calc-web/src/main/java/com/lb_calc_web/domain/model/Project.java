@@ -26,6 +26,17 @@ import java.util.Objects;
  */
 public class Project {
 
+    /** Идентификатор сохранённого проекта. */
+    private Long id;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     /**
      * Название проекта.
      */

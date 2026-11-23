@@ -6,6 +6,23 @@ import java.util.Objects;
 
 public abstract class Module {
 
+    /** Идентификатор сохранённого модуля. */
+    private Long id;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    /** Переносит идентификатор в независимую копию модуля. */
+    protected <T extends Module> T copyIdentityTo(T copy) {
+        copy.setId(id);
+        return copy;
+    }
+
     private String name;
     private String description;
 

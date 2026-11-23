@@ -29,6 +29,17 @@ import java.util.Objects;
  */
 public class ALS {
 
+    /** Идентификатор сохранённого агрегата ALS. */
+    private Long id;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     /**
      * Наименование ALS.
      *
@@ -147,7 +158,7 @@ public class ALS {
      * @return независимая копия ALS
      */
     public ALS copy() {
-        return new ALS(
+        ALS copy = new ALS(
                 height,
                 depth,
                 upperFrame,
@@ -156,6 +167,8 @@ public class ALS {
                 colorDoor,
                 modules
         );
+        copy.setId(id);
+        return copy;
     }
 
     /**
