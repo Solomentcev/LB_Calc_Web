@@ -1,18 +1,18 @@
 package com.lb_calc_web.service;
 
 import com.lb_calc_web.domain.attributes.AccessMethod;
+import com.lb_calc_web.domain.attributes.Payment;
+import com.lb_calc_web.domain.attributes.PrintOption;
+import com.lb_calc_web.domain.model.ControlConfiguration;
+import com.lb_calc_web.domain.model.EquipmentConfiguration;
 import com.lb_calc_web.domain.attributes.Colors;
 import com.lb_calc_web.domain.equipment.BarReader;
 import com.lb_calc_web.domain.equipment.Display;
 import com.lb_calc_web.domain.equipment.Equipment;
 import com.lb_calc_web.domain.model.LC;
-import com.lb_calc_web.dto.EquipmentSelectionDTO;
-import com.lb_calc_web.dto.LCDTO;
 import com.lb_calc_web.dto.validation.ValidationResult;
 import com.lb_calc_web.entity.LCEntity;
 import com.lb_calc_web.handler.ValidationSizeException;
-import com.lb_calc_web.mapper.dto.EquipmentSelectionMapper;
-import com.lb_calc_web.mapper.dto.LCDtoMapper;
 import com.lb_calc_web.mapper.entity.LCEntityMapper;
 import com.lb_calc_web.repository.LCRepository;
 import com.lb_calc_web.service.validation.size.SizeValidator;
@@ -88,81 +88,45 @@ public class LCService {
             int bottomFrame,
             Colors colorBody
     ) {
-        String displayName =
-                environment.getRequiredProperty(
-                        "lc.display.default"
-                );
+        String displayName = environment.getRequiredProperty("lc.display.default");
+        Equipment display = findDisplay(displayName);
+        EquipmentConfiguration equipment = new EquipmentConfiguration(List.of(), List.of());
 
-        LCDTO dto = new LCDTO();
+        if (!Display.NONE_ID.equals(display.getCatalogPositionId())) {
+            equipment.addRequiredEquipment(display, 1);
+        }
 
-        dto.setId(0L);
+        String barReaderName = environment.getRequiredProperty("lc.bar-reader.default");
+        Equipment barReader = equipmentCatalogService.resolve(barReaderName);
+        if (barReader != null && !BarReader.NONE_ID.equals(barReader.getCatalogPositionId())) {
+            equipment.addRequiredEquipment(barReader, 1);
+        }
 
-        dto.setHeight(height);
-        dto.setDepth(depth);
+        if (requiredBoolean("lc.printer.default")) {
+            equipment.addRequiredEquipment(equipmentCatalogService.resolve("PRINTER_STANDARD"), 1);
+        }
+        if (requiredBoolean("lc.rfid-reader.default")) {
+            equipment.addRequiredEquipment(equipmentCatalogService.resolve("RFID_READER_STANDARD"), 1);
+        }
 
-        dto.setUpperFrame(upperFrame);
-        dto.setBottomFrame(bottomFrame);
-
-        dto.setDisplay(displayName);
-        dto.setWidth(
-                findDisplay(displayName).getWidth()
+        ControlConfiguration configuration = new ControlConfiguration(
+                Payment.valueOf(environment.getRequiredProperty("lc.payment.default")),
+                getEnumSet("lc.access-methods.default", AccessMethod.class),
+                getEnumSet("lc.print-options.default", PrintOption.class),
+                equipment
         );
 
-        dto.setBarReader(
-                environment.getRequiredProperty(
-                        "lc.bar-reader.default"
-                )
+        LC domain = new LC(
+                height,
+                display.getWidth(),
+                depth,
+                upperFrame,
+                bottomFrame,
+                colorBody,
+                requiredColor("lc.color.door.default"),
+                configuration
         );
-
-        dto.setPayment(
-                environment.getRequiredProperty(
-                        "lc.payment.default"
-                )
-        );
-
-        dto.setPrinter(
-                requiredBoolean(
-                        "lc.printer.default"
-                )
-        );
-
-        dto.setRfidReader(
-                requiredBoolean(
-                        "lc.rfid-reader.default"
-                )
-        );
-
-        dto.setAccessMethods(getEnumList("lc.access-methods.default", AccessMethod.class));
-
-        dto.setDisplayQuantity(
-                (Display.NONE_ID.equals(displayName) || Display.NONE.getName().equals(displayName)) ? 0 : 1
-        );
-        dto.setBarReaderQuantity(
-                (BarReader.NONE.getName().equals(dto.getBarReader())
-                        || BarReader.NONE_ID.equals(dto.getBarReader())) ? 0 : 1
-        );
-        dto.setPrinterQuantity(dto.isPrinter() ? 1 : 0);
-        dto.setRfidReaderQuantity(dto.isRfidReader() ? 1 : 0);
-
-        dto.setColorBody(
-                colorBody.name()
-        );
-
-        dto.setColorDoor(
-                environment.getRequiredProperty(
-                        "lc.color.door.default"
-                )
-        );
-
-        /*
-         * Domain выполняет расчёт имени,
-         * описания и проверку ширины.
-         */
-        LC domain = LCDtoMapper.toDomain(dto, equipmentCatalogService::resolve);
-        domain.setControlConfiguration(
-                equipmentRequirementResolver.resolve(domain.getControlConfiguration())
-        );
-
+        domain.setControlConfiguration(equipmentRequirementResolver.resolve(domain.getControlConfiguration()));
         return domain;
     }
 
@@ -311,16 +275,19 @@ public class LCService {
         return lcRepository.findById(moduleId);
     }
 
-    private <E extends Enum<E>> List<String> getEnumList(String key, Class<E> type) {
+    private <E extends Enum<E>> java.util.Set<E> getEnumSet(String key, Class<E> type) {
         String value = environment.getProperty(key, "");
         if (value.isBlank()) {
-            return List.of();
+            return java.util.EnumSet.noneOf(type);
         }
-        return java.util.Arrays.stream(value.split(","))
-                .map(String::trim)
-                .filter(item -> !item.isBlank())
-                .map(item -> Enum.valueOf(type, item).name())
-                .toList();
+        java.util.EnumSet<E> result = java.util.EnumSet.noneOf(type);
+        for (String item : value.split(",")) {
+            String trimmed = item.trim();
+            if (!trimmed.isBlank()) {
+                result.add(Enum.valueOf(type, trimmed));
+            }
+        }
+        return result;
     }
 
     /**

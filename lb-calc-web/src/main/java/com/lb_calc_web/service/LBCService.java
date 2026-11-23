@@ -3,19 +3,18 @@ package com.lb_calc_web.service;
 import com.lb_calc_web.domain.attributes.AccessMethod;
 import com.lb_calc_web.domain.attributes.Colors;
 import com.lb_calc_web.domain.attributes.PrintOption;
+import com.lb_calc_web.domain.attributes.Payment;
+import com.lb_calc_web.domain.model.ControlConfiguration;
+import com.lb_calc_web.domain.model.EquipmentConfiguration;
 import com.lb_calc_web.domain.model.LBC;
 import com.lb_calc_web.domain.attributes.TypeLb;
 import com.lb_calc_web.domain.attributes.DirectionDoorOpening;
 import com.lb_calc_web.domain.equipment.BarReader;
 import com.lb_calc_web.domain.equipment.Display;
 import com.lb_calc_web.domain.equipment.Equipment;
-import com.lb_calc_web.dto.EquipmentSelectionDTO;
-import com.lb_calc_web.dto.LBCDTO;
 import com.lb_calc_web.dto.validation.ValidationResult;
 import com.lb_calc_web.entity.LBCEntity;
 import com.lb_calc_web.handler.ValidationSizeException;
-import com.lb_calc_web.mapper.dto.EquipmentSelectionMapper;
-import com.lb_calc_web.mapper.dto.LBCDtoMapper;
 import com.lb_calc_web.mapper.entity.LBCEntityMapper;
 import com.lb_calc_web.repository.LBCRepository;
 import com.lb_calc_web.service.validation.size.SizeValidator;
@@ -90,90 +89,54 @@ public class LBCService {
             Colors colorBody,
             Colors colorDoor
     ) {
-        String displayName =
-                environment.getRequiredProperty(
-                        "lbc.display.default"
-                );
+        String displayName = environment.getRequiredProperty("lbc.display.default");
+        Equipment display = findDisplay(displayName);
+        int width = Math.max(requiredInt("size.width.default"), display.getWidth());
 
-        int width =
-                Math.max(
-                        requiredInt("size.width.default"),
-                        findDisplay(displayName).getWidth()
-                );
+        EquipmentConfiguration equipment = new EquipmentConfiguration(List.of(), List.of());
+        if (!Display.NONE_ID.equals(display.getCatalogPositionId())) {
+            equipment.addRequiredEquipment(display, 1);
+        }
 
-        LBCDTO dto = new LBCDTO();
+        String barReaderName = environment.getRequiredProperty("lbc.bar-reader.default");
+        Equipment barReader = equipmentCatalogService.resolve(barReaderName);
+        if (barReader != null && !BarReader.NONE_ID.equals(barReader.getCatalogPositionId())) {
+            equipment.addRequiredEquipment(barReader, 1);
+        }
+        if (requiredBoolean("lbc.printer.default")) {
+            equipment.addRequiredEquipment(equipmentCatalogService.resolve("PRINTER_STANDARD"), 1);
+        }
+        if (requiredBoolean("lbc.rfid-reader.default")) {
+            equipment.addRequiredEquipment(equipmentCatalogService.resolve("RFID_READER_STANDARD"), 1);
+        }
 
-        dto.setId(0L);
-        dto.setHeight(height);
-        dto.setWidth(width);
-        dto.setDepth(depth);
-        dto.setUpperFrame(upperFrame);
-        dto.setBottomFrame(bottomFrame);
-
-        dto.setCountCells(
-                requiredInt("size.count.cells.default")
+        TypeLb typeLb = TypeLbFactory.forLBC(
+                environment,
+                environment.getRequiredProperty("lbc.type.default")
         );
-
-        dto.setType(
-                environment.getRequiredProperty(
-                        "lbc.type.default"
-                )
-        );
-
-        dto.setDoorThickness(
-                requiredInt("size.door.thickness.default")
+        ControlConfiguration configuration = new ControlConfiguration(
+                Payment.valueOf(environment.getRequiredProperty("lbc.payment.default")),
+                getEnumSet("lbc.access-methods.default", AccessMethod.class),
+                getEnumSet("lbc.print-options.default", PrintOption.class),
+                equipment
         );
 
-        dto.setDirectionDoorOpening(
-                environment.getProperty(
-                        "lbc.direction.default",
-                        DirectionDoorOpening.LEFT.name()
-                )
+        LBC domain = new LBC(
+                height,
+                width,
+                depth,
+                upperFrame,
+                bottomFrame,
+                colorBody,
+                colorDoor,
+                typeLb,
+                requiredInt("size.count.cells.default"),
+                DirectionDoorOpening.valueOf(environment.getProperty(
+                        "lbc.direction.default", DirectionDoorOpening.LEFT.name())),
+                requiredInt("size.door.thickness.default"),
+                configuration
         );
-
-        dto.setColorBody(colorBody.name());
-        dto.setColorDoor(colorDoor.name());
-
-        dto.setDisplay(displayName);
-        dto.setBarReader(
-                environment.getRequiredProperty(
-                        "lbc.bar-reader.default"
-                )
-        );
-        dto.setPayment(
-                environment.getRequiredProperty(
-                        "lbc.payment.default"
-                )
-        );
-        dto.setPrinter(
-                requiredBoolean("lbc.printer.default")
-        );
-        dto.setRfidReader(
-                requiredBoolean("lbc.rfid-reader.default")
-        );
-
-        dto.setDisplayQuantity(
-                (Display.NONE_ID.equals(displayName) || Display.NONE.getName().equals(displayName)) ? 0 : 1
-        );
-        dto.setBarReaderQuantity(
-                (BarReader.NONE.getName().equals(dto.getBarReader())
-                        || BarReader.NONE_ID.equals(dto.getBarReader())) ? 0 : 1
-        );
-        dto.setPrinterQuantity(dto.isPrinter() ? 1 : 0);
-        dto.setRfidReaderQuantity(dto.isRfidReader() ? 1 : 0);
-
-        dto.setAccessMethods(
-                getEnumList("lbc.access-methods.default", AccessMethod.class)
-        );
-        dto.setPrintOptions(
-                getEnumList("lbc.print-options.default", PrintOption.class)
-        );
-
-        TypeLb typeLb = TypeLbFactory.forLBC(environment, dto.getType());
-        LBC domain = LBCDtoMapper.toDomain(dto, typeLb, equipmentCatalogService::resolve);
-        domain.setControlConfiguration(
-                equipmentRequirementResolver.resolve(domain.getControlConfiguration())
-        );
+        domain.setControlConfiguration(equipmentRequirementResolver.resolve(domain.getControlConfiguration()));
         return domain;
     }
 
@@ -289,33 +252,18 @@ public class LBCService {
         );
     }
 
-    private <E extends Enum<E>> List<String> getEnumList(
-            String key,
-            Class<E> type
-    ) {
-        String value =
-                environment.getProperty(
-                        key,
-                        ""
-                );
-
+    private <E extends Enum<E>> java.util.Set<E> getEnumSet(String key, Class<E> type) {
+        String value = environment.getProperty(key, "");
         if (value.isBlank()) {
-            return List.of();
+            return java.util.EnumSet.noneOf(type);
         }
-
-        List<String> result =
-                new ArrayList<>();
-
+        java.util.EnumSet<E> result = java.util.EnumSet.noneOf(type);
         for (String item : value.split(",")) {
             String trimmed = item.trim();
-
             if (!trimmed.isBlank()) {
-                result.add(
-                        Enum.valueOf(type, trimmed).name()
-                );
+                result.add(Enum.valueOf(type, trimmed));
             }
         }
-
         return result;
     }
 
