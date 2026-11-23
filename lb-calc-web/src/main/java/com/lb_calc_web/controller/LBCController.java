@@ -114,7 +114,7 @@ public class LBCController extends BaseCatalogController {
             );
             model.addAttribute(
                     "lbc",
-                    lbc
+                    addLBCImageSafely(lbc)
             );
 
             return "lbcs/lbc";
@@ -163,7 +163,18 @@ public class LBCController extends BaseCatalogController {
     }
 
     private static LBCDTO addLBCImage(LBCDTO dto) {
-        dto.setStringLBCImage(LBCImageService.getStringLBCImage(dto));
+        return addLBCImageSafely(dto);
+    }
+
+    /**
+     * Формирует изображение LBC, не подменяя первичную ошибку валидации.
+     */
+    private static LBCDTO addLBCImageSafely(LBCDTO dto) {
+        try {
+            dto.setStringLBCImage(LBCImageService.getStringLBCImage(dto));
+        } catch (RuntimeException exception) {
+            logger.warn("Не удалось сформировать изображение LBC id={}: {}", dto.getId(), exception.getMessage());
+        }
         return dto;
     }
 

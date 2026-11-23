@@ -19,6 +19,9 @@ import com.lb_calc_web.service.ProjectService;
 import com.lb_calc_web.service.ALSService;
 import com.lb_calc_web.service.export.ProjectExcelExportService;
 import com.lb_calc_web.service.image.ALSImageService;
+import com.lb_calc_web.service.image.LBImageService;
+import com.lb_calc_web.service.image.LCImageService;
+import com.lb_calc_web.service.image.LBCImageService;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -299,7 +302,7 @@ public class ProjectController
 
         model.addAttribute("project", addALSImages(project));
         model.addAttribute("als", addALSImage(als));
-        model.addAttribute("lc", lc);
+        model.addAttribute("lc", addLCImage(lc));
         model.addAttribute("projectId", projectId);
         model.addAttribute("alsId", alsId);
         model.addAttribute("lcId", lcId);
@@ -358,7 +361,7 @@ public class ProjectController
 
             model.addAttribute(
                     "lc",
-                    lc
+                    addLCImage(lc)
             );
 
             model.addAttribute(
@@ -407,7 +410,7 @@ public class ProjectController
 
         model.addAttribute("project", addALSImages(project));
         model.addAttribute("als", addALSImage(als));
-        model.addAttribute("lbc", lbc);
+        model.addAttribute("lbc", addLBCImage(lbc));
         model.addAttribute("projectId", projectId);
         model.addAttribute("alsId", alsId);
         model.addAttribute("lbcId", lbcId);
@@ -459,7 +462,7 @@ public class ProjectController
 
             model.addAttribute(
                     "lbc",
-                    lbc
+                    addLBCImage(lbc)
             );
 
             model.addAttribute("projectId", projectId);
@@ -497,7 +500,7 @@ public class ProjectController
 
         model.addAttribute("project", addALSImages(project));
         model.addAttribute("als", addALSImage(als));
-        model.addAttribute("lb", lb);
+        model.addAttribute("lb", addLBImage(lb));
         model.addAttribute("projectId", projectId);
         model.addAttribute("alsId", alsId);
         model.addAttribute("lbId", lbId);
@@ -547,7 +550,7 @@ public class ProjectController
 
             model.addAttribute(
                     "lb",
-                    lb
+                    addLBImage(lb)
             );
 
             model.addAttribute(
@@ -683,10 +686,43 @@ public class ProjectController
      * Формирует изображение конфигурации для представления.
      */
     private ALSDTO addALSImage(ALSDTO als) {
-        if (als != null) {
+        if (als == null) return null;
+        try {
             als.setStringALSImage(ALSImageService.getStringALSImage(als));
+        } catch (RuntimeException exception) {
+            logger.warn("Не удалось сформировать изображение ALS id={}: {}", als.getId(), exception.getMessage());
         }
+        if (als.getLC() != null) addLCImage(als.getLC());
+        if (als.getLBC() != null) addLBCImage(als.getLBC());
+        if (als.getLbList() != null) als.getLbList().forEach(this::addLBImage);
         return als;
+    }
+
+    private LBDTO addLBImage(LBDTO lb) {
+        try {
+            lb.setStringLBImage(LBImageService.getStringLBImage(lb));
+        } catch (RuntimeException exception) {
+            logger.warn("Не удалось сформировать изображение LB id={}: {}", lb.getId(), exception.getMessage());
+        }
+        return lb;
+    }
+
+    private LCDTO addLCImage(LCDTO lc) {
+        try {
+            lc.setStringLCImage(LCImageService.getStringLCImage(lc));
+        } catch (RuntimeException exception) {
+            logger.warn("Не удалось сформировать изображение LC id={}: {}", lc.getId(), exception.getMessage());
+        }
+        return lc;
+    }
+
+    private LBCDTO addLBCImage(LBCDTO lbc) {
+        try {
+            lbc.setStringLBCImage(LBCImageService.getStringLBCImage(lbc));
+        } catch (RuntimeException exception) {
+            logger.warn("Не удалось сформировать изображение LBC id={}: {}", lbc.getId(), exception.getMessage());
+        }
+        return lbc;
     }
 
 }

@@ -14,6 +14,7 @@ import com.lb_calc_web.mapper.dto.EquipmentSelectionMapper;
 import com.lb_calc_web.service.EquipmentCatalogService;
 import com.lb_calc_web.service.validation.ValidationSizeException;
 import com.lb_calc_web.service.LCService;
+import com.lb_calc_web.service.image.LCImageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -73,7 +74,7 @@ public class LCController {
 
         logger.info("Открытие страницы создания LC");
 
-        LCDTO lc = LCDtoMapper.toDto(lcService.createLC());
+        LCDTO lc = addLCImage(LCDtoMapper.toDto(lcService.createLC()));
         lc.setId(0L);
 
         model.addAttribute("lc", lc);
@@ -95,7 +96,7 @@ public class LCController {
                 id
         );
 
-        LCDTO lc = LCDtoMapper.toDto(lcService.findById(id));
+        LCDTO lc = addLCImage(LCDtoMapper.toDto(lcService.findById(id)));
 
         model.addAttribute("lc", lc);
 
@@ -137,11 +138,23 @@ public class LCController {
 
             model.addAttribute(
                     "lc",
-                    lc
+                    addLCImage(lc)
             );
 
             return "lcs/lc";
         }
+    }
+
+    /**
+     * Формирует изображение LC для отображения в форме.
+     */
+    private LCDTO addLCImage(LCDTO lc) {
+        try {
+            lc.setStringLCImage(LCImageService.getStringLCImage(lc));
+        } catch (RuntimeException exception) {
+            logger.warn("Не удалось сформировать изображение LC id={}: {}", lc.getId(), exception.getMessage());
+        }
+        return lc;
     }
 
     private LC toDomain(LCDTO dto) {

@@ -4,6 +4,9 @@ import com.lb_calc_web.dto.ALSDTO;
 import com.lb_calc_web.mapper.dto.ALSDtoMapper;
 import com.lb_calc_web.mapper.dto.LBCDtoMapper;
 import com.lb_calc_web.service.image.ALSImageService;
+import com.lb_calc_web.service.image.LBImageService;
+import com.lb_calc_web.service.image.LCImageService;
+import com.lb_calc_web.service.image.LBCImageService;
 import com.lb_calc_web.service.validation.ValidationSizeException;
 import com.lb_calc_web.service.ALSService;
 import org.slf4j.Logger;
@@ -31,8 +34,7 @@ public class ALSController extends BaseCatalogController {
     public String createALS(
             Model model
     ) {
-        ALSDTO als = ALSDtoMapper.toDto(alsService.createALS());
-        als.setStringALSImage(ALSImageService.getStringALSImage(als));
+        ALSDTO als = toDto(alsService.createALS());
 
         model.addAttribute(
                 "als",
@@ -93,7 +95,7 @@ public class ALSController extends BaseCatalogController {
 
             model.addAttribute(
                     "als",
-                    als
+                    toDto(alsService.findById(als.getId()))
             );
 
             return "alss/als";
@@ -128,7 +130,7 @@ public class ALSController extends BaseCatalogController {
         model.addAttribute("als", als);
         model.addAttribute(
                 "lbc",
-                LBCDtoMapper.toDto(alsService.findLBCInALS(domain, lbcId))
+                addLBCImage(LBCDtoMapper.toDto(alsService.findLBCInALS(domain, lbcId)))
         );
 
         return "alss/alss_lbc";
@@ -198,8 +200,37 @@ public class ALSController extends BaseCatalogController {
      */
     private ALSDTO toDto(com.lb_calc_web.domain.model.ALS als) {
         ALSDTO dto = ALSDtoMapper.toDto(als);
-        dto.setStringALSImage(ALSImageService.getStringALSImage(dto));
+        try {
+            dto.setStringALSImage(ALSImageService.getStringALSImage(dto));
+        } catch (RuntimeException exception) {
+            logger.warn("Не удалось сформировать изображение ALS id={}: {}", dto.getId(), exception.getMessage());
+        }
+        if (dto.getLC() != null) {
+            try {
+                dto.getLC().setStringLCImage(LCImageService.getStringLCImage(dto.getLC()));
+            } catch (RuntimeException exception) {
+                logger.warn("Не удалось сформировать изображение LC id={}: {}", dto.getLC().getId(), exception.getMessage());
+            }
+        }
+        if (dto.getLBC() != null) addLBCImage(dto.getLBC());
+        if (dto.getLbList() != null) {
+            dto.getLbList().forEach(lb -> {
+                try {
+                    lb.setStringLBImage(LBImageService.getStringLBImage(lb));
+                } catch (RuntimeException exception) {
+                    logger.warn("Не удалось сформировать изображение LB id={}: {}", lb.getId(), exception.getMessage());
+                }
+            });
+        }
         return dto;
+    }
+
+    private void addLBCImage(com.lb_calc_web.dto.LBCDTO lbc) {
+        try {
+            lbc.setStringLBCImage(LBCImageService.getStringLBCImage(lbc));
+        } catch (RuntimeException exception) {
+            logger.warn("Не удалось сформировать изображение LBC id={}: {}", lbc.getId(), exception.getMessage());
+        }
     }
 
 }

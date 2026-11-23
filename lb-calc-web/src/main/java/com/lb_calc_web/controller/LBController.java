@@ -6,6 +6,7 @@ import com.lb_calc_web.dto.LBDTO;
 import com.lb_calc_web.mapper.dto.LBDtoMapper;
 import com.lb_calc_web.service.validation.ValidationSizeException;
 import com.lb_calc_web.service.LBService;
+import com.lb_calc_web.service.image.LBImageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.env.Environment;
@@ -48,7 +49,7 @@ public class LBController {
 
         logger.info("Открытие страницы создания LB");
 
-        LBDTO lb = LBDtoMapper.toDto(lbService.createLB());
+        LBDTO lb = addLBImage(LBDtoMapper.toDto(lbService.createLB()));
 
         model.addAttribute("lb", lb);
 
@@ -69,7 +70,7 @@ public class LBController {
                 id
         );
 
-        LBDTO lb = LBDtoMapper.toDto(lbService.findById(id));
+        LBDTO lb = addLBImage(LBDtoMapper.toDto(lbService.findById(id)));
 
         model.addAttribute("lb", lb);
 
@@ -112,11 +113,23 @@ public class LBController {
 
             model.addAttribute(
                     "lb",
-                    lb
+                    addLBImage(lb)
             );
 
             return "lbs/lb";
         }
+    }
+
+    /**
+     * Формирует изображение LB для отображения в форме.
+     */
+    private LBDTO addLBImage(LBDTO lb) {
+        try {
+            lb.setStringLBImage(LBImageService.getStringLBImage(lb));
+        } catch (RuntimeException exception) {
+            logger.warn("Не удалось сформировать изображение LB id={}: {}", lb.getId(), exception.getMessage());
+        }
+        return lb;
     }
 
     /**
