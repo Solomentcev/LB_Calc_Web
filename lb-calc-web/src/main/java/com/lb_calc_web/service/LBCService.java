@@ -202,7 +202,11 @@ public class LBCService {
 
         findOrCreateLockService.acquire();
         var equipmentResolver = equipmentCatalogService.findDomainCatalogResolver();
-        Optional<LBCEntity> currentEntity = findExistingEntity(domain.getId());
+        if (domain.getId() != null && lbcRepository.findById(domain.getId()).isEmpty()) {
+            throw new NoSuchElementException("LBC с id=" + domain.getId() + " не найден");
+        }
+
+
         if (domain.getId() != null && currentEntity.isEmpty()) {
             throw new NoSuchElementException("LBC с id=" + domain.getId() + " не найден");
         }
@@ -217,7 +221,6 @@ public class LBCService {
                         domain.getDirectionDoorOpening(), domain.getCountCells(),
                         domain.getControlConfiguration().getPayment())
                 .stream()
-                .filter(entity -> !Objects.equals(entity.getId(), domain.getId()))
                 .filter(entity -> LBCEntityMapper.toDomain(entity, equipmentResolver).equals(domain))
                 .findFirst();
 
@@ -226,8 +229,7 @@ public class LBCService {
             return LBCEntityMapper.toDomain(duplicate.get(), equipmentResolver);
         }
 
-        LBCEntity entity = currentEntity.orElseGet(() -> LBCEntityMapper.toEntity(domain));
-        LBCEntityMapper.updateEntity(domain, entity);
+        LBCEntity entity = LBCEntityMapper.toEntity(domain);
         LBCEntity saved = lbcRepository.save(entity);
         domain.setId(saved.getId());
         logger.info("LBC сохранён, id={}", saved.getId());
@@ -276,13 +278,6 @@ public class LBCService {
                 key,
                 Integer.class
         );
-    }
-
-    private Optional<LBCEntity> findExistingEntity(Long moduleId) {
-        if (moduleId == null || moduleId <= 0) {
-            return Optional.empty();
-        }
-        return lbcRepository.findById(moduleId);
     }
 
     /**

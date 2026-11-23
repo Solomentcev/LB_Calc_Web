@@ -202,7 +202,7 @@ class LCServiceTest {
     }
 
     @Test
-    void saveLC_existingConfiguration_shouldUpdateSameEntityAndPreserveId() {
+    void saveLC_existingId_shouldCreateNewEntityInsteadOfUpdatingExisting() {
         LC domain = LCDtoMapper.toDomain(
                 TestDataFactory.validLCDTO(1L),
                 EquipmentCatalog::resolve
@@ -214,12 +214,17 @@ class LCServiceTest {
                 anyInt(), anyInt(), anyInt(), anyInt(), anyInt(),
                 any(), any(), any()
         )).thenReturn(List.of());
-        when(lcRepository.save(any(LCEntity.class))).thenReturn(existing);
+        when(lcRepository.save(any(LCEntity.class))).thenAnswer(invocation -> {
+            LCEntity created = invocation.getArgument(0);
+            created.setId(2L);
+            return created;
+        });
 
         LC saved = lcService.saveLC(domain);
 
-        assertEquals(1L, saved.getId());
-        verify(lcRepository).save(same(existing));
+        assertEquals(2L, saved.getId());
+        verify(lcRepository).save(argThat(entity -> entity != existing));
+        verify(existing, never()).setName(anyString());
     }
 
     @Test

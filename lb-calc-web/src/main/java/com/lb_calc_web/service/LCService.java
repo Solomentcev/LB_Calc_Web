@@ -203,7 +203,11 @@ public class LCService {
 
         findOrCreateLockService.acquire();
         var equipmentResolver = equipmentCatalogService.findDomainCatalogResolver();
-        Optional<LCEntity> currentEntity = findExistingEntity(domain.getId());
+        if (domain.getId() != null && lcRepository.findById(domain.getId()).isEmpty()) {
+            throw new NoSuchElementException("LC с id=" + domain.getId() + " не найден");
+        }
+
+
         if (domain.getId() != null && currentEntity.isEmpty()) {
             throw new NoSuchElementException("LC с id=" + domain.getId() + " не найден");
         }
@@ -214,7 +218,6 @@ public class LCService {
                         domain.getColorBody(), domain.getColorDoor(),
                         domain.getControlConfiguration().getPayment())
                 .stream()
-                .filter(entity -> !Objects.equals(entity.getId(), domain.getId()))
                 .filter(entity -> LCEntityMapper.toDomain(entity, equipmentResolver).equals(domain))
                 .findFirst();
 
@@ -223,8 +226,7 @@ public class LCService {
             return LCEntityMapper.toDomain(duplicate.get(), equipmentResolver);
         }
 
-        LCEntity entity = currentEntity.orElseGet(() -> LCEntityMapper.toEntity(domain));
-        LCEntityMapper.updateEntity(domain, entity);
+        LCEntity entity = LCEntityMapper.toEntity(domain);
         LCEntity saved = lcRepository.save(entity);
         domain.setId(saved.getId());
         logger.info("LC сохранён, id={}", saved.getId());
@@ -270,13 +272,6 @@ public class LCService {
         return Colors.valueOf(
                 environment.getRequiredProperty(key)
         );
-    }
-
-    private Optional<LCEntity> findExistingEntity(Long moduleId) {
-        if (moduleId == null || moduleId <= 0) {
-            return Optional.empty();
-        }
-        return lcRepository.findById(moduleId);
     }
 
     private <E extends Enum<E>> java.util.Set<E> getEnumSet(String key, Class<E> type) {

@@ -150,7 +150,7 @@ class LBCServiceTest {
     }
 
     @Test
-    void saveLBC_existingConfiguration_shouldUpdateSameEntityAndPreserveId() {
+    void saveLBC_existingId_shouldCreateNewEntityInsteadOfUpdatingExisting() {
         LBC domain = toDomain(TestDataFactory.validLBCDTO(1L));
         LBCEntity existing = spy(LBCEntityMapper.toEntity(domain));
         doReturn(1L).when(existing).getId();
@@ -160,12 +160,17 @@ class LBCServiceTest {
                 any(), any(), anyString(), anyInt(), anyInt(), anyInt(),
                 anyInt(), any(), anyInt(), any()
         )).thenReturn(List.of());
-        when(lbcRepository.save(any(LBCEntity.class))).thenReturn(existing);
+        when(lbcRepository.save(any(LBCEntity.class))).thenAnswer(invocation -> {
+            LBCEntity created = invocation.getArgument(0);
+            created.setId(2L);
+            return created;
+        });
 
         LBC saved = lbcService.saveLBC(domain);
 
-        assertEquals(1L, saved.getId());
-        verify(lbcRepository).save(same(existing));
+        assertEquals(2L, saved.getId());
+        verify(lbcRepository).save(argThat(entity -> entity != existing));
+        verify(existing, never()).setName(anyString());
     }
 
     @Test
