@@ -110,7 +110,7 @@ public class ALSService {
     }
 
     @Transactional(readOnly = true)
-    public ALSDTO findById(Long id) {
+    public ALS findById(Long id) {
         logger.info(
                 "Поиск АКХ(id{})...",
                 id
@@ -129,7 +129,10 @@ public class ALSService {
                                 )
                         );
 
-        return addALSImage(ALSDtoMapper.toDto(ALSEntityMapper.toDomain(entity, equipmentCatalogService.findDomainCatalogResolver())));
+        return ALSEntityMapper.toDomain(
+                entity,
+                equipmentCatalogService.findDomainCatalogResolver()
+        );
     }
 
     /**
@@ -504,7 +507,7 @@ public class ALSService {
      */
     @Transactional
     public ALSDTO addNewLBandSaveALS(Long alsId) {
-        return saveALS(addNewLB(findById(alsId)));
+        return saveALS(addNewLB(ALSDtoMapper.toDto(findById(alsId))));
     }
 
     /**
@@ -512,7 +515,7 @@ public class ALSService {
      */
     @Transactional
     public ALSDTO deleteLBandSaveALS(Long alsId, Long lbId) {
-        return saveALS(deleteLB(findById(alsId), lbId));
+        return saveALS(deleteLB(ALSDtoMapper.toDto(findById(alsId)), lbId));
     }
 
     /**
@@ -536,7 +539,7 @@ public class ALSService {
      */
     @Transactional
     public ALSDTO replaceWithNewLBCandSaveALS(Long alsId) {
-        return saveALS(replaceWithNewLBC(findById(alsId)));
+        return saveALS(replaceWithNewLBC(ALSDtoMapper.toDto(findById(alsId))));
     }
 
     /**

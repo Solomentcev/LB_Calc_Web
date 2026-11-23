@@ -47,7 +47,7 @@ public class ALSController extends BaseCatalogController {
             Model model
     ) {
         ALSDTO als =
-                alsService.findById(id);
+                toDto(alsService.findById(id));
 
         model.addAttribute(
                 "als",
@@ -67,7 +67,7 @@ public class ALSController extends BaseCatalogController {
             // Восстанавливаем управляющий модуль из БД, чтобы форма не теряла
             // каталожное оборудование, которое не редактируется на этой странице.
             if (als.getId() != null && als.getId() > 0) {
-                ALSDTO persisted = alsService.findById(als.getId());
+                ALSDTO persisted = toDto(alsService.findById(als.getId()));
                 als.setLC(persisted.getLC());
                 als.setLBC(persisted.getLBC());
             }
@@ -121,7 +121,7 @@ public class ALSController extends BaseCatalogController {
             @PathVariable Long lbcId,
             Model model
     ) {
-        ALSDTO als = alsService.findById(alsId);
+        ALSDTO als = toDto(alsService.findById(alsId));
 
         model.addAttribute("als", als);
         model.addAttribute(
@@ -144,7 +144,7 @@ public class ALSController extends BaseCatalogController {
     ) {
         try {
             ALSDTO als =
-                    alsService.findById(alsId);
+                    toDto(alsService.findById(alsId));
 
             lbc.setId(lbcId);
 
@@ -158,7 +158,7 @@ public class ALSController extends BaseCatalogController {
                     + saved.getId();
         } catch (ValidationSizeException e) {
             model.addAttribute("errors", e.getErrors());
-            model.addAttribute("als", alsService.findById(alsId));
+            model.addAttribute("als", toDto(alsService.findById(alsId)));
             model.addAttribute("lbc", lbc);
 
             return "alss/alss_lbc";
@@ -195,4 +195,13 @@ public class ALSController extends BaseCatalogController {
         return "redirect:/alss/"
                 + als.getId();
     }
+    /**
+     * Преобразует доменную ALS в модель представления и добавляет изображение.
+     */
+    private ALSDTO toDto(com.lb_calc_web.domain.model.ALS als) {
+        ALSDTO dto = ALSDtoMapper.toDto(als);
+        dto.setStringALSImage(ALSImageService.getStringALSImage(dto));
+        return dto;
+    }
+
 }
