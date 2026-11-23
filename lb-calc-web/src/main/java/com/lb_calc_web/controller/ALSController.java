@@ -3,7 +3,6 @@ package com.lb_calc_web.controller;
 import com.lb_calc_web.dto.ALSDTO;
 import com.lb_calc_web.mapper.dto.ALSDtoMapper;
 import com.lb_calc_web.mapper.dto.LBCDtoMapper;
-import com.lb_calc_web.mapper.dto.ALSDtoMapper;
 import com.lb_calc_web.service.image.ALSImageService;
 import com.lb_calc_web.service.image.LBCImageService;
 import com.lb_calc_web.service.validation.ValidationSizeException;
