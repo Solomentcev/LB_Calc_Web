@@ -40,7 +40,7 @@ public class ALSSizeValidator {
      */
     public ValidationResult validateALS(ALS als) {
         if (als == null) {
-            ValidationResult result = new ValidationResult("ALS", als.getId());
+            ValidationResult result = new ValidationResult("ALS", null);
             addError(result, "als", "Конфигурация ALS не задана",
                     null, null, null);
             return result;
