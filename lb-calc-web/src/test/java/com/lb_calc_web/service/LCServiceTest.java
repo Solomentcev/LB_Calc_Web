@@ -215,6 +215,7 @@ class LCServiceTest {
                 any(), any(), any()
         )).thenReturn(List.of());
         when(lcRepository.save(any(LCEntity.class))).thenAnswer(invocation -> {
+            LCEntity created = invocation.getArgument(0);
             LCEntity createdSpy = spy(created);
             doReturn(2L).when(createdSpy).getId();
             return createdSpy;

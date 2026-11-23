@@ -161,6 +161,7 @@ class LBCServiceTest {
                 anyInt(), any(), anyInt(), any()
         )).thenReturn(List.of());
         when(lbcRepository.save(any(LBCEntity.class))).thenAnswer(invocation -> {
+            LBCEntity created = invocation.getArgument(0);
             LBCEntity createdSpy = spy(created);
             doReturn(2L).when(createdSpy).getId();
             return createdSpy;
