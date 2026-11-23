@@ -46,6 +46,10 @@
                 <h1 class="h4 mb-0" th:text="${als.name}">
                     ALS
                 </h1>
+                <img class="img-fluid mt-3"
+                     th:if="${als.stringALSImage != null}"
+                     th:src="|data:image/png;base64,${als.stringALSImage}|"
+                     alt="Изображение АКХ">
             </div>
 
             <div class="card-body">
@@ -198,27 +202,27 @@
             <div class="card-body">
 
                 <!-- Сохраняем неизменяемую конфигурацию LC при отправке формы ALS. -->
-                <input type="hidden" th:field="*{lc.id}">
-                <input type="hidden" th:field="*{lc.name}">
-                <input type="hidden" th:field="*{lc.description}">
-                <input type="hidden" th:field="*{lc.height}">
-                <input type="hidden" th:field="*{lc.width}">
-                <input type="hidden" th:field="*{lc.depth}">
-                <input type="hidden" th:field="*{lc.upperFrame}">
-                <input type="hidden" th:field="*{lc.bottomFrame}">
-                <input type="hidden" th:field="*{lc.display}">
-                <input type="hidden" th:field="*{lc.barReader}">
-                <input type="hidden" th:field="*{lc.payment}">
-                <input type="hidden" th:field="*{lc.printer}">
-                <input type="hidden" th:field="*{lc.rfidReader}">
-                <input type="hidden" th:field="*{lc.displayQuantity}">
-                <input type="hidden" th:field="*{lc.barReaderQuantity}">
-                <input type="hidden" th:field="*{lc.printerQuantity}">
-                <input type="hidden" th:field="*{lc.rfidReaderQuantity}">
-                <input type="hidden" th:field="*{lc.colorBody}">
-                <input type="hidden" th:field="*{lc.colorDoor}">
-                <input type="hidden" th:field="*{lc.displayWidth}">
-                <input type="hidden" th:field="*{lc.displayHeight}">
+                <input type="hidden" th:field="*{LC.id}">
+                <input type="hidden" th:field="*{LC.name}">
+                <input type="hidden" th:field="*{LC.description}">
+                <input type="hidden" th:field="*{LC.height}">
+                <input type="hidden" th:field="*{LC.width}">
+                <input type="hidden" th:field="*{LC.depth}">
+                <input type="hidden" th:field="*{LC.upperFrame}">
+                <input type="hidden" th:field="*{LC.bottomFrame}">
+                <input type="hidden" th:field="*{LC.display}">
+                <input type="hidden" th:field="*{LC.barReader}">
+                <input type="hidden" th:field="*{LC.payment}">
+                <input type="hidden" th:field="*{LC.printer}">
+                <input type="hidden" th:field="*{LC.rfidReader}">
+                <input type="hidden" th:field="*{LC.displayQuantity}">
+                <input type="hidden" th:field="*{LC.barReaderQuantity}">
+                <input type="hidden" th:field="*{LC.printerQuantity}">
+                <input type="hidden" th:field="*{LC.rfidReaderQuantity}">
+                <input type="hidden" th:field="*{LC.colorBody}">
+                <input type="hidden" th:field="*{LC.colorDoor}">
+                <input type="hidden" th:field="*{LC.displayWidth}">
+                <input type="hidden" th:field="*{LC.displayHeight}">
                 <input type="hidden"
                        th:each="method, methodStat : ${als.LC.accessMethods}"
                        th:name="|lc.accessMethods[${methodStat.index}]|"
@@ -323,31 +327,31 @@
             </div>
 
             <div class="card-body">
-                <input type="hidden" th:field="*{lbc.id}">
-                <input type="hidden" th:field="*{lbc.name}">
-                <input type="hidden" th:field="*{lbc.description}">
-                <input type="hidden" th:field="*{lbc.type}">
-                <input type="hidden" th:field="*{lbc.height}">
-                <input type="hidden" th:field="*{lbc.width}">
-                <input type="hidden" th:field="*{lbc.depth}">
-                <input type="hidden" th:field="*{lbc.upperFrame}">
-                <input type="hidden" th:field="*{lbc.bottomFrame}">
-                <input type="hidden" th:field="*{lbc.shelfThick}">
-                <input type="hidden" th:field="*{lbc.deltaWidth}">
-                <input type="hidden" th:field="*{lbc.serviceZoneWidth}">
-                <input type="hidden" th:field="*{lbc.doorThickness}">
-                <input type="hidden" th:field="*{lbc.countCells}">
-                <input type="hidden" th:field="*{lbc.heightCell}">
-                <input type="hidden" th:field="*{lbc.widthCell}">
-                <input type="hidden" th:field="*{lbc.depthCell}">
-                <input type="hidden" th:field="*{lbc.directionDoorOpening}">
-                <input type="hidden" th:field="*{lbc.colorBody}">
-                <input type="hidden" th:field="*{lbc.colorDoor}">
-                <input type="hidden" th:field="*{lbc.display}">
-                <input type="hidden" th:field="*{lbc.barReader}">
-                <input type="hidden" th:field="*{lbc.payment}">
-                <input type="hidden" th:field="*{lbc.printer}">
-                <input type="hidden" th:field="*{lbc.rfidReader}">
+                <input type="hidden" th:field="*{LBC.id}">
+                <input type="hidden" th:field="*{LBC.name}">
+                <input type="hidden" th:field="*{LBC.description}">
+                <input type="hidden" th:field="*{LBC.type}">
+                <input type="hidden" th:field="*{LBC.height}">
+                <input type="hidden" th:field="*{LBC.width}">
+                <input type="hidden" th:field="*{LBC.depth}">
+                <input type="hidden" th:field="*{LBC.upperFrame}">
+                <input type="hidden" th:field="*{LBC.bottomFrame}">
+                <input type="hidden" th:field="*{LBC.shelfThick}">
+                <input type="hidden" th:field="*{LBC.deltaWidth}">
+                <input type="hidden" th:field="*{LBC.serviceZoneWidth}">
+                <input type="hidden" th:field="*{LBC.doorThickness}">
+                <input type="hidden" th:field="*{LBC.countCells}">
+                <input type="hidden" th:field="*{LBC.heightCell}">
+                <input type="hidden" th:field="*{LBC.widthCell}">
+                <input type="hidden" th:field="*{LBC.depthCell}">
+                <input type="hidden" th:field="*{LBC.directionDoorOpening}">
+                <input type="hidden" th:field="*{LBC.colorBody}">
+                <input type="hidden" th:field="*{LBC.colorDoor}">
+                <input type="hidden" th:field="*{LBC.display}">
+                <input type="hidden" th:field="*{LBC.barReader}">
+                <input type="hidden" th:field="*{LBC.payment}">
+                <input type="hidden" th:field="*{LBC.printer}">
+                <input type="hidden" th:field="*{LBC.rfidReader}">
 
                 <input type="hidden"
                        th:each="method, methodStat : ${als.LBC.accessMethods}"
