@@ -183,89 +183,61 @@ public class ProjectService {
     }
 
     /**
-     * Сохраняет проект.
-     *
-     * Общая схема:
-     *
-     * 1. Загружаем существующий проект, если это update.
-     * 2. Устанавливаем серверные metadata.
-     * 3. Преобразуем DTO в доменный проект.
-     * 4. Валидируем доменную модель до сохранения новых ALS.
-     * 5. Сохраняем ALS и получаем реальные ID.
-     * 6. Разрешаем ALS -> ALSEntity.
-     * 7. Domain -> ProjectEntity.
-     * 8. Сохраняем ProjectEntity.
+     * Сохраняет доменный проект. Серверные metadata формируются
+     * на основании сохранённой записи и текущего сотрудника.
      */
     @Transactional
-    public ProjectDTO saveProject(
-            ProjectDTO dto
-    ) {
-        Objects.requireNonNull(
-                dto,
-                "Проект не должен быть null"
-        );
+    public Project saveProject(Project requested) {
+        Objects.requireNonNull(requested, "Проект не должен быть null");
 
-        logger.info(
-                "Сохранение проекта(id={}, name={})...",
-                dto.getId(),
-                dto.getName()
-        );
+        ProjectEntity existing = loadExistingProject(requested.getId());
+        EmployeeDTO currentEmployeeDto = employeeService.getCurrentEmployee();
+        assertCanModifyProject(existing, currentEmployeeDto);
 
-        ProjectDTO working = ProjectDtoMapper.copy(dto);
+        Employee currentEmployee = EmployeeDtoMapper.toDomain(currentEmployeeDto);
+        LocalDate today = LocalDate.now();
 
-        ProjectEntity existing =
-                loadExistingProject(
-                        working.getId()
-                );
-
-        EmployeeDTO currentEmployee =
-                employeeService.getCurrentEmployee();
-
-        assertCanModifyProject(
-                existing,
-                currentEmployee
-        );
-
-        prepareMetadata(
-                working,
-                existing,
-                currentEmployee
-        );
-
-        /*
-         * Сначала преобразуем DTO в доменный агрегат и проверяем его.
-         * До успешной валидации не сохраняем новые конфигурации ALS.
-         */
-        Project domain;
-        try {
-            domain = ProjectDtoMapper.toDomain(working, alsDto -> alsService.restoreDomain(alsDto));
-        } catch (IllegalStateException exception) {
-            ValidationResult validationResult =
-                    new ValidationResult("Project", working.getId());
-            validationResult.addError(
-                    "alsStructure",
-                    exception.getMessage(),
-                    null,
-                    null,
-                    null
-            );
-            throw new ValidationSizeException(validationResult);
-        } catch (IllegalArgumentException | NullPointerException exception) {
-            ValidationResult validationResult =
-                    new ValidationResult("Project", working.getId());
-            validationResult.addError(
-                    "projectData",
-                    exception.getMessage(),
-                    null,
-                    null,
-                    null
-            );
-            throw new ValidationSizeException(validationResult);
+        String company = existing == null
+                ? requested.getCompany()
+                : existing.getCompany();
+        if (company == null || company.isBlank()) {
+            company = getRequired("project.company.default");
         }
 
-        validateProject(domain);
+        String name = requested.getName();
+        if (name == null || name.isBlank()) {
+            name = existing == null
+                    ? company + "_" + today
+                    : existing.getName();
+        }
 
-        return persistProject(domain, existing);
+        LocalDate createdAt = existing == null
+                ? today
+                : existing.getCreatedAt();
+        Employee createdBy = existing == null
+                ? currentEmployee
+                : com.lb_calc_web.mapper.entity.EmployeeEntityMapper.toDomain(
+                        existing.getCreatedBy()
+                );
+
+        Project domain = Project.restore(
+                name,
+                company,
+                createdAt,
+                createdBy,
+                today,
+                currentEmployee,
+                requested.getQuantityALS()
+        );
+        domain.setId(existing == null ? null : existing.getId());
+
+        validateProject(domain);
+        ProjectEntity saved = persistProjectEntity(domain, existing);
+        return ProjectEntityMapper.toDomain(
+                saved,
+                (als, alsEntity) -> { },
+                equipmentCatalogService.findDomainCatalogResolver()
+        );
     }
 
     @Transactional
@@ -714,6 +686,17 @@ public class ProjectService {
      * Сохраняет доменный проект и все уникальные конфигурации ALS.
      */
     private ProjectDTO persistProject(Project domain, ProjectEntity existing) {
+        ProjectEntity saved = persistProjectEntity(domain, existing);
+        return ProjectEntityMapper.toDto(
+                saved,
+                equipmentCatalogService.findDomainCatalogResolver()
+        );
+    }
+
+    /**
+     * Сохраняет доменный проект и все уникальные конфигурации ALS.
+     */
+    private ProjectEntity persistProjectEntity(Project domain, ProjectEntity existing) {
         /*
          * Project агрегирует одинаковые ALS, поэтому каждая уникальная
          * конфигурация сохраняется ровно один раз независимо от количества.
@@ -742,10 +725,7 @@ public class ProjectService {
 
         ProjectEntity saved = projectRepository.save(entity);
         logger.info("Проект сохранён: id={}", saved.getId());
-        return ProjectEntityMapper.toDto(
-                saved,
-                equipmentCatalogService.findDomainCatalogResolver()
-        );
+        return saved;
     }
 
     /**
@@ -823,91 +803,6 @@ public class ProjectService {
         if (!isOwner) {
             throw new AccessDeniedException(
                     "Менеджер может изменять только собственные проекты"
-            );
-        }
-    }
-
-    /**
-     * Metadata проекта контролируются сервером.
-     *
-     * CREATE:
-     * - createdBy = текущий сотрудник
-     * - createdAt = текущая дата
-     *
-     * UPDATE:
-     * - createdBy/createdAt берутся из БД
-     * - updatedBy = текущий сотрудник
-     * - updatedAt = текущая дата
-     */
-    private void prepareMetadata(
-            ProjectDTO dto,
-            ProjectEntity existing,
-            EmployeeDTO currentEmployee
-    ) {
-        dto.setUpdatedBy(
-                currentEmployee
-        );
-
-        dto.setUpdatedAt(
-                LocalDate.now()
-        );
-
-        if (existing == null) {
-
-            dto.setCreatedBy(
-                    currentEmployee
-            );
-
-            dto.setCreatedAt(
-                    LocalDate.now()
-            );
-
-            if (dto.getCompany() == null
-                    || dto.getCompany().isBlank()) {
-
-                dto.setCompany(
-                        getRequired(
-                                "project.company.default"
-                        )
-                );
-            }
-
-            if (dto.getName() == null
-                    || dto.getName().isBlank()) {
-
-                dto.setName(
-                        dto.getCompany()
-                                + "_"
-                                + dto.getCreatedAt()
-                );
-            }
-
-            return;
-        }
-
-        /*
-         * При update эти поля не должны приходить
-         * от клиента как источник истины.
-         */
-        dto.setCreatedBy(employeeService.loadUserById(existing.getCreatedBy().getId()));
-
-        dto.setCreatedAt(
-                existing.getCreatedAt()
-        );
-
-        if (dto.getCompany() == null
-                || dto.getCompany().isBlank()) {
-
-            dto.setCompany(
-                    existing.getCompany()
-            );
-        }
-
-        if (dto.getName() == null
-                || dto.getName().isBlank()) {
-
-            dto.setName(
-                    existing.getName()
             );
         }
     }

@@ -226,6 +226,37 @@ class ProjectServiceTest {
     }
 
     @Test
+    void saveProject_domain_shouldValidateBeforePersistingALS() {
+        EmployeeDTO employee = new EmployeeDTO();
+        employee.setId(1L);
+        employee.setFirstName("Иван");
+        employee.setLastName("Иванов");
+        employee.setEmail("ivan@example.com");
+        employee.setRegistrationDate(
+                java.time.LocalDate.of(2026, 9, 18)
+        );
+        employee.setRole(Role.ROLE_MANAGER);
+        when(employeeService.getCurrentEmployee()).thenReturn(employee);
+
+        ProjectDTO dto = TestDataFactory.validProject(1L);
+        dto.setId(null);
+        ALSDTO invalidALS = TestDataFactory.validALSDTO(10L);
+        invalidALS.setHeight(10);
+        dto.setAlsList(java.util.List.of(invalidALS));
+
+        com.lb_calc_web.domain.model.Project domain =
+                ProjectDtoMapper.toDomain(dto, alsService::restoreDomain);
+
+        assertThrows(
+                ValidationSizeException.class,
+                () -> projectService.saveProject(domain)
+        );
+
+        verify(alsService, never()).saveALS(any(com.lb_calc_web.domain.model.ALS.class));
+        verify(projectRepository, never()).save(any(ProjectEntity.class));
+    }
+
+    @Test
     void deleteById_existing_shouldDelete() {
         ProjectEntity entity = new ProjectEntity();
         EmployeeDTO admin = new EmployeeDTO();

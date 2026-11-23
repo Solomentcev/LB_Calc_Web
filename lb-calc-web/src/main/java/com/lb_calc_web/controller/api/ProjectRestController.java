@@ -6,6 +6,9 @@ import com.lb_calc_web.dto.LBCDTO;
 import com.lb_calc_web.dto.LBDTO;
 import com.lb_calc_web.dto.LCDTO;
 import com.lb_calc_web.dto.ProjectDTO;
+import com.lb_calc_web.domain.model.Project;
+import com.lb_calc_web.mapper.dto.ProjectDtoMapper;
+import com.lb_calc_web.service.ALSService;
 import com.lb_calc_web.service.ProjectService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -40,11 +43,14 @@ import java.util.Objects;
 public class ProjectRestController {
 
     private final ProjectService projectService;
+    private final ALSService alsService;
 
     public ProjectRestController(
-            ProjectService projectService
+            ProjectService projectService,
+            ALSService alsService
     ) {
         this.projectService = projectService;
+        this.alsService = alsService;
     }
 
     /**
@@ -118,14 +124,15 @@ public class ProjectRestController {
              */
             project.setId(0L);
 
-            ProjectDTO saved =
-                    projectService.saveProject(project);
+            Project domain = ProjectDtoMapper.toDomain(
+                    project,
+                    alsService::restoreDomain
+            );
+            Project saved = projectService.saveProject(domain);
 
             return ResponseEntity
                     .status(HttpStatus.CREATED)
-                    .body(
-                            ApiResponse.success(saved)
-                    );
+                    .body(ApiResponse.success(ProjectDtoMapper.toDto(saved)));
 
     }
 
@@ -146,11 +153,14 @@ public class ProjectRestController {
              */
             project.setId(id);
 
-            ProjectDTO saved =
-                    projectService.saveProject(project);
+            Project domain = ProjectDtoMapper.toDomain(
+                    project,
+                    alsService::restoreDomain
+            );
+            Project saved = projectService.saveProject(domain);
 
             return ResponseEntity.ok(
-                    ApiResponse.success(saved)
+                    ApiResponse.success(ProjectDtoMapper.toDto(saved))
             );
 
     }

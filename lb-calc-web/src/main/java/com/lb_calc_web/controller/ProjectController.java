@@ -96,8 +96,13 @@ public class ProjectController
              */
             project.setId(id);
 
-            ProjectDTO saved =
-                    projectService.saveProject(project);
+            com.lb_calc_web.domain.model.Project domain =
+                    com.lb_calc_web.mapper.dto.ProjectDtoMapper.toDomain(
+                            project,
+                            alsService::restoreDomain
+                    );
+            com.lb_calc_web.domain.model.Project saved =
+                    projectService.saveProject(domain);
 
             return "redirect:/projects/"
                     + saved.getId();
