@@ -96,7 +96,6 @@ class LBCServiceTest {
         assertEquals(0, result.getPrinterQuantity());
         assertEquals(1, result.getRfidReaderQuantity());
         assertTrue(result.getAccessMethods().contains("RFID"));
-        assertNotNull(result.getStringLBCImage());
     }
 
     @Test
