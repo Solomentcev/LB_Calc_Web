@@ -36,6 +36,7 @@ public final class ALSDtoMapper {
         }
 
         ALSDTO dto = new ALSDTO();
+        dto.setId(domain.getId());
 
         dto.setName(domain.getName());
         dto.setDescription(domain.getDescription());
@@ -262,6 +263,8 @@ public final class ALSDtoMapper {
                 colorDoor,
                 modules
         );
+
+        domain.setId(dto.getId() == null || dto.getId() <= 0 ? null : dto.getId());
 
         if (dto.getModuleOrder() != null
                 && dto.getPositionControlModule() != null

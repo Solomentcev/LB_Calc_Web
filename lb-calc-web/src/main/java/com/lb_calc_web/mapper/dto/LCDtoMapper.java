@@ -170,7 +170,7 @@ public final class LCDtoMapper {
                         equipmentConfiguration
                 );
 
-        return new LC(
+        LC domain = new LC(
                 dto.getHeight(),
                 dto.getWidth(),
                 dto.getDepth(),
@@ -180,6 +180,8 @@ public final class LCDtoMapper {
                 Colors.valueOf(dto.getColorDoor()),
                 controlConfiguration
         );
+        domain.setId(dto.getId() == null || dto.getId() <= 0 ? null : dto.getId());
+        return domain;
     }
 
     private static Set<AccessMethod> toAccessMethods(

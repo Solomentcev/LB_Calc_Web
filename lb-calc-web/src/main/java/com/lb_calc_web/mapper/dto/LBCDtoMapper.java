@@ -225,7 +225,7 @@ public final class LBCDtoMapper {
                         equipmentConfiguration
                 );
 
-        return new LBC(
+        LBC domain = new LBC(
                 dto.getHeight(),
                 dto.getWidth(),
                 dto.getDepth(),
@@ -241,6 +241,8 @@ public final class LBCDtoMapper {
                 dto.getDoorThickness(),
                 controlConfiguration
         );
+        domain.setId(dto.getId() == null || dto.getId() <= 0 ? null : dto.getId());
+        return domain;
     }
 
     public static List<LBCDTO> toDtoList(

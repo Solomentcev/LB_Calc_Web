@@ -111,7 +111,7 @@ public final class LBDtoMapper {
             );
         }
 
-        return new LB(
+        LB domain = new LB(
                 dto.getHeight(),
                 dto.getWidth(),
                 dto.getDepth(),
@@ -126,6 +126,8 @@ public final class LBDtoMapper {
                 ),
                 dto.getDoorThickness()
         );
+        domain.setId(dto.getId() == null || dto.getId() <= 0 ? null : dto.getId());
+        return domain;
     }
 
     /**
