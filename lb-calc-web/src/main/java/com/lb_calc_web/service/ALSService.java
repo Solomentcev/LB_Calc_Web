@@ -208,68 +208,27 @@ public class ALSService {
         return als;
     }
 
+    /**
+     * Сохраняет доменную конфигурацию ALS.
+     *
+     * <p>Существующие конфигурации неизменяемы: при совпадении
+     * возвращается существующий идентификатор, иначе создаётся новая запись.</p>
+     */
     @Transactional
-    public ALSDTO saveALS(ALSDTO dto) {
-        Objects.requireNonNull(
-                dto,
-                "ALS не должен быть null"
-        );
-
-        logger.info(
-                "Сохранение АКХ(id={}, name={})...",
-                dto.getId(),
-                dto.getName()
-        );
-
-        ALS domain;
-        try {
-            domain = restoreALS(dto);
-        } catch (IllegalStateException exception) {
-            var validationResult =
-                    new com.lb_calc_web.dto.validation.ValidationResult(
-                            "ALS",
-                            dto.getId()
-                    );
-            validationResult.addError(
-                    "structure",
-                    exception.getMessage(),
-                    null,
-                    null,
-                    null
-            );
-            throw new ValidationSizeException(validationResult);
-        } catch (IllegalArgumentException | NullPointerException exception) {
-            var validationResult =
-                    new com.lb_calc_web.dto.validation.ValidationResult(
-                            "ALS",
-                            dto.getId()
-                    );
-            validationResult.addError(
-                    "domainModel",
-                    exception.getMessage(),
-                    null,
-                    null,
-                    null
-            );
-            throw new ValidationSizeException(validationResult);
-        }
+    public ALS saveALS(ALS domain) {
+        Objects.requireNonNull(domain, "ALS не должен быть null");
+        logger.info("Сохранение АКХ(id={}, name={})...", domain.getId(), domain.getName());
 
         validate(domain);
-
-        // Блокировка удерживается до завершения транзакции, включая сохранение модулей.
         findOrCreateLockService.acquire();
         Function<String, Equipment> equipmentResolver = equipmentCatalogService.findDomainCatalogResolver();
 
-        Optional<ALSEntity> duplicate =
-                findDuplicate(domain, equipmentResolver);
-
+        Optional<ALSEntity> duplicate = findDuplicate(domain, equipmentResolver);
         if (duplicate.isPresent()) {
-            logger.info(
-                    "Такой ALS уже существует: id={}",
-                    duplicate.get().getId()
-            );
-
-            return addALSImage(ALSDtoMapper.toDto(ALSEntityMapper.toDomain(duplicate.get(), equipmentResolver)));
+            Long existingId = duplicate.get().getId();
+            domain.setId(existingId);
+            logger.info("Такая ALS уже существует: id={}", existingId);
+            return domain;
         }
 
         /*
@@ -279,16 +238,44 @@ public class ALSService {
          * при полном совпадении доменной конфигурации.
          */
         ALSEntity entity = createEntity(domain, equipmentResolver);
+        ALSEntity saved = alsRepository.save(entity);
+        domain.setId(saved.getId());
 
-        ALSEntity saved =
-                alsRepository.save(entity);
+        logger.info("АКХ сохранена: id={}", saved.getId());
+        return domain;
+    }
 
-        logger.info(
-                "АКХ сохранена: id={}",
-                saved.getId()
+    /**
+     * Внутренний сценарий сохранения DTO для проектных операций.
+     * Основная логика сохранения находится в доменном методе.
+     */
+    @Transactional
+    ALSDTO saveALS(ALSDTO dto) {
+        Objects.requireNonNull(dto, "ALS не должен быть null");
+
+        ALS domain;
+        try {
+            domain = restoreALS(dto);
+        } catch (IllegalStateException exception) {
+            throw createValidationException(dto, "structure", exception);
+        } catch (IllegalArgumentException | NullPointerException exception) {
+            throw createValidationException(dto, "domainModel", exception);
+        }
+
+        return addALSImage(ALSDtoMapper.toDto(saveALS(domain)));
+    }
+
+    private ValidationSizeException createValidationException(
+            ALSDTO dto,
+            String field,
+            RuntimeException exception
+    ) {
+        var validationResult = new com.lb_calc_web.dto.validation.ValidationResult(
+                "ALS",
+                dto.getId()
         );
-
-        return addALSImage(ALSDtoMapper.toDto(ALSEntityMapper.toDomain(saved, equipmentResolver)));
+        validationResult.addError(field, exception.getMessage(), null, null, null);
+        return new ValidationSizeException(validationResult);
     }
 
     @Transactional
@@ -548,7 +535,14 @@ public class ALSService {
      */
     @Transactional(readOnly = true)
     public ALS restoreDomain(ALSDTO dto) {
-        return restoreALS(dto);
+        Objects.requireNonNull(dto, "ALS не должен быть null");
+        try {
+            return restoreALS(dto);
+        } catch (IllegalStateException exception) {
+            throw createValidationException(dto, "structure", exception);
+        } catch (IllegalArgumentException | NullPointerException exception) {
+            throw createValidationException(dto, "domainModel", exception);
+        }
     }
 
     private ALS restoreALS(ALSDTO dto) {
