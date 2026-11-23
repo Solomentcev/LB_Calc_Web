@@ -110,13 +110,13 @@ class ALSServiceTest {
         when(lcService.createLC(
                 anyInt(), anyInt(), anyInt(), anyInt(), any()
         )).thenReturn(
-                TestDataFactory.validLCDTO(10L)
+                TestDataFactory.validLC(10L)
         );
 
         when(lbService.createLB(
                 anyInt(), anyInt(), anyInt(), anyInt(), any(), any()
         )).thenReturn(
-                TestDataFactory.validLBDTO(20L)
+                TestDataFactory.validLB(20L)
         );
 
         ALS result = alsService.createALS();

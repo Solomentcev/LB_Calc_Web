@@ -21,7 +21,6 @@ import com.lb_calc_web.entity.EmployeeEntity;
 import com.lb_calc_web.entity.ProjectEntity;
 import com.lb_calc_web.handler.ValidationSizeException;
 import com.lb_calc_web.service.export.ProjectExcelExportService;
-import com.lb_calc_web.mapper.dto.ALSDtoMapper;
 import com.lb_calc_web.mapper.dto.EmployeeDtoMapper;
 import com.lb_calc_web.mapper.dto.ProjectDtoMapper;
 import com.lb_calc_web.mapper.entity.ProjectEntityMapper;
@@ -139,7 +138,8 @@ public class ProjectService {
         ProjectDTO project =
                 initProject(company);
 
-        ALSDTO als = ALSDtoMapper.toDto(alsService.createALS());
+        ALSDTO als =
+                alsService.createALS();
 
         project.getAlsList().add(als);
 

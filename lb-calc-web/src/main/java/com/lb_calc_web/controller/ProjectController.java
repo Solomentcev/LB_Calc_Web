@@ -1,7 +1,6 @@
 package com.lb_calc_web.controller;
 
 import com.lb_calc_web.dto.ALSDTO;
-import com.lb_calc_web.mapper.dto.ALSDtoMapper;
 import com.lb_calc_web.dto.LBCDTO;
 import com.lb_calc_web.dto.LBDTO;
 import com.lb_calc_web.dto.LCDTO;
@@ -131,7 +130,7 @@ public class ProjectController
          * ALS в текущую форму и не пытаемся загружать проект из БД.
          */
         if (id == null || id <= 0) {
-            draft.getAlsList().add(ALSDtoMapper.toDto(alsService.createALS()));
+            draft.getAlsList().add(alsService.createALS());
             model.addAttribute("project", draft);
             return "projects/project";
         }
