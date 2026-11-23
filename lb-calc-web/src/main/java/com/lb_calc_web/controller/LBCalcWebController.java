@@ -49,7 +49,9 @@ public class LBCalcWebController {
     ) {
         model.addAttribute(
                 "lcs",
-                lcService.findAll()
+                lcService.findAll().stream()
+                        .map(com.lb_calc_web.mapper.dto.LCDtoMapper::toDto)
+                        .toList()
         );
 
         return "lcs/lcs";
@@ -61,7 +63,9 @@ public class LBCalcWebController {
     ) {
         model.addAttribute(
                 "lbs",
-                lbService.findAll()
+                lbService.findAll().stream()
+                        .map(com.lb_calc_web.mapper.dto.LBDtoMapper::toDto)
+                        .toList()
         );
 
         return "lbs/lbs";

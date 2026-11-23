@@ -1,35 +1,17 @@
-
 <!DOCTYPE html>
 <html lang="ru" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/common :: head('Каталог LBC')}"></head>
-<body>
-<div th:replace="~{header :: header}"></div>
-<div class="container">
-    <h1 class="page-title">Комбинированные модули LBC</h1>
-    <div class="page-actions">
-        <a th:href="@{/lbcs/create}" class="btn btn-primary btn-sm">Создать LBC</a>
-        <a th:href="@{/}" class="btn btn-secondary btn-sm">Назад</a>
-    </div>
-    <div class="table-responsive">
-    <table class="table table-striped table-hover js-data-table">
-        <thead><tr>
-            <th>ID</th><th>Название</th><th>Тип</th><th>Ячейки</th>
-            <th>Размеры В×Ш×Г</th><th>Конфигурация</th><th>Действие</th>
-        </tr></thead>
-        <tbody>
-        <tr th:each="lbc : ${lbcs}">
-            <td th:text="${lbc.id}">ID</td>
-            <td th:text="${lbc.name}">Name</td>
-            <td th:text="${lbc.type}">Type</td>
-            <td th:text="${lbc.countCells}">Cells</td>
-            <td th:text="${lbc.height + ' × ' + lbc.width + ' × ' + lbc.depth}">Size</td>
-            <td th:text="${lbc.description}">Конфигурация</td>
-            <td><a th:href="@{/lbcs/{id}(id=${lbc.id})}" class="btn btn-primary btn-sm">Редактировать</a></td>
-        </tr>
-        </tbody>
-    </table>
-        </div>
-</div>
-<div th:replace="~{footer :: footer}"></div>
-</body>
-</html>
+<body><div th:replace="~{header :: header}"></div><div class="container">
+<h1 class="page-title">Комбинированные модули LBC</h1><div class="page-actions"><a th:href="@{/lbcs/create}" class="btn btn-primary btn-sm">Создать LBC</a><a th:href="@{/}" class="btn btn-secondary btn-sm">Назад</a></div>
+<div class="table-responsive"><table class="table table-striped table-hover js-data-table catalog-table">
+<colgroup><col style="width:3%"><col style="width:8%"><col style="width:10%"><col style="width:3%"><col style="width:3%"><col style="width:3%"><col style="width:3%"><col style="width:3%"><col style="width:5%"><col style="width:3%"><col style="width:3%"><col style="width:3%"><col style="width:3%"><col style="width:6%"><col style="width:4%"><col style="width:6%"><col style="width:6%"><col style="width:5%"><col style="width:8%"><col style="width:4%"><col style="width:4%"><col style="width:4%"></colgroup>
+<thead><tr><th>ID</th><th>Название</th><th>Описание</th><th>Тип</th><th>Ячейки</th><th>Высота</th><th>Ширина</th><th>Глубина</th><th>Рамы верх/низ</th><th>Полка</th><th>Δ ширины</th><th>Сервисная зона</th><th>Дверца</th><th>Ячейка В×Ш×Г</th><th>Открывание</th><th>Дисплей</th><th>Сканер / оплата</th><th>Принтер / RFID</th><th>Доступ / печать</th><th>Оборудование</th><th>Цвета</th><th>Действие</th></tr></thead>
+<tbody><tr th:each="lbc : ${lbcs}">
+<td th:text="${lbc.id}"></td><td th:text="${lbc.name}"></td><td th:text="${lbc.description}"></td><td th:text="${lbc.type}"></td><td th:text="${lbc.countCells}"></td>
+<td th:text="${lbc.height}"></td><td th:text="${lbc.width}"></td><td th:text="${lbc.depth}"></td><td th:text="${lbc.upperFrame + ' / ' + lbc.bottomFrame}"></td>
+<td th:text="${lbc.shelfThick}"></td><td th:text="${lbc.deltaWidth}"></td><td th:text="${lbc.serviceZoneWidth}"></td><td th:text="${lbc.doorThickness}"></td>
+<td th:text="${lbc.heightCell + ' × ' + lbc.widthCell + ' × ' + lbc.depthCell}"></td><td th:text="${lbc.directionDoorOpening}"></td><td th:text="${lbc.display + ' / ' + lbc.displayWidth + ' × ' + lbc.displayHeight + ' мм; ' + lbc.displayQuantity + ' шт.'}"></td>
+<td th:text="${lbc.barReader + ' / ' + lbc.payment}"></td><td th:text="${(lbc.printer ? 'Да' : 'Нет') + ' / ' + (lbc.rfidReader ? 'Да' : 'Нет')}"></td>
+<td th:text="${#strings.listJoin(lbc.accessMethods, ', ') + '; печать: ' + #strings.listJoin(lbc.printOptions, ', ')}"></td><td th:text="${lbc.equipmentSelections != null ? #lists.size(lbc.equipmentSelections) : 0}"></td><td th:text="${lbc.colorBody + ' / ' + lbc.colorDoor}"></td><td><a th:href="@{/lbcs/{id}(id=${lbc.id})}" class="btn btn-primary btn-sm">Изменить</a></td>
+</tr></tbody></table></div>
+</div><div th:replace="~{footer :: footer}"></div></body></html>
