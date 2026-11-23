@@ -17,7 +17,7 @@
         <tr th:each="lbc : ${lbcs}">
             <td th:text="${lbc.id}">ID</td>
             <td th:text="${lbc.name}">Name</td>
-            <td th:text="${lbc.typeLb.type}">Type</td>
+            <td th:text="${lbc.type}">Type</td>
             <td th:text="${lbc.countCells}">Cells</td>
             <td th:text="${lbc.height + ' × ' + lbc.width + ' × ' + lbc.depth}">Size</td>
             <td th:text="${lbc.description}">Конфигурация</td>
