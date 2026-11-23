@@ -96,7 +96,7 @@
                         <input type="text"
                                class="form-control"
                                th:value="${project.createdBy != null
-                                          ? project.createdBy.username
+                                          ? project.createdBy.firstName + ' ' + project.createdBy.lastName
                                           : ''}"
                                readonly aria-label="Поле формы">
                     </div>
@@ -114,7 +114,7 @@
                         <input type="text"
                                class="form-control"
                                th:value="${project.updatedBy != null
-                                          ? project.updatedBy.username
+                                          ? project.updatedBy.firstName + ' ' + project.updatedBy.lastName
                                           : ''}"
                                readonly aria-label="Поле формы">
                     </div>
