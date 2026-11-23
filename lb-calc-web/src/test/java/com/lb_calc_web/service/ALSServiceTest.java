@@ -256,7 +256,7 @@ class ALSServiceTest {
 
         assertThrows(
                 java.util.NoSuchElementException.class,
-                () -> alsService.findLBCInALS(als, 999L)
+                () -> alsService.findLBCInALS(alsService.restoreDomain(als), 999L)
         );
     }
 

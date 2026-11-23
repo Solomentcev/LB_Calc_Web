@@ -361,15 +361,12 @@ public class ALSService {
     }
 
     /**
-     * Находит LBC по идентификатору внутри уже загруженной ALS.
+     * Находит LBC по идентификатору внутри доменной ALS.
      */
-    public LBCDTO findLBCInALS(
-            ALSDTO als,
-            Long lbcId
-    ) {
+    public LBC findLBCInALS(ALS als, Long lbcId) {
         Objects.requireNonNull(als, "ALS не должен быть null");
 
-        LBCDTO lbc = als.getLBC();
+        LBC lbc = als.getLBC();
         if (lbc == null || !Objects.equals(lbc.getId(), lbcId)) {
             throw new NoSuchElementException(
                     "LBC с id " + lbcId + " не найден в ALS " + als.getId()

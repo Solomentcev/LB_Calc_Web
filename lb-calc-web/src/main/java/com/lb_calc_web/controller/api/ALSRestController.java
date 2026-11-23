@@ -3,6 +3,7 @@ package com.lb_calc_web.controller.api;
 import com.lb_calc_web.controller.api.response.ApiResponse;
 import com.lb_calc_web.dto.ALSDTO;
 import com.lb_calc_web.mapper.dto.ALSDtoMapper;
+import com.lb_calc_web.mapper.dto.LBCDtoMapper;
 import com.lb_calc_web.domain.model.ALS;
 import com.lb_calc_web.dto.LBCDTO;
 import com.lb_calc_web.service.ALSService;
@@ -160,9 +161,11 @@ toDto(alsService.createALS())
             @PathVariable Long lbcId
     ) {
 
-            ALSDTO als = ALSDtoMapper.toDto(alsService.findById(alsId));
+            ALS als = alsService.findById(alsId);
             return ResponseEntity.ok(
-                    ApiResponse.success(alsService.findLBCInALS(als, lbcId))
+                    ApiResponse.success(
+                            LBCDtoMapper.toDto(alsService.findLBCInALS(als, lbcId))
+                    )
             );
 
     }

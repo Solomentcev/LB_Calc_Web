@@ -2,6 +2,7 @@ package com.lb_calc_web.controller;
 
 import com.lb_calc_web.dto.ALSDTO;
 import com.lb_calc_web.mapper.dto.ALSDtoMapper;
+import com.lb_calc_web.mapper.dto.LBCDtoMapper;
 import com.lb_calc_web.service.image.ALSImageService;
 import com.lb_calc_web.handler.ValidationSizeException;
 import com.lb_calc_web.service.ALSService;
@@ -121,12 +122,13 @@ public class ALSController extends BaseCatalogController {
             @PathVariable Long lbcId,
             Model model
     ) {
-        ALSDTO als = toDto(alsService.findById(alsId));
+        com.lb_calc_web.domain.model.ALS domain = alsService.findById(alsId);
+        ALSDTO als = toDto(domain);
 
         model.addAttribute("als", als);
         model.addAttribute(
                 "lbc",
-                alsService.findLBCInALS(als, lbcId)
+                LBCDtoMapper.toDto(alsService.findLBCInALS(domain, lbcId))
         );
 
         return "alss/alss_lbc";
