@@ -132,6 +132,8 @@ class ProjectServiceTest {
         dto.setId(null);
         dto.setCreatedBy(EmployeeDtoMapper.toDto(employee));
         dto.setUpdatedBy(EmployeeDtoMapper.toDto(employee));
+        dto.setCreatedAt(java.time.LocalDate.of(2026, 9, 18));
+        dto.setUpdatedAt(java.time.LocalDate.of(2026, 9, 18));
         ALSDTO invalidALS = TestDataFactory.validALSDTO(10L);
         invalidALS.setHeight(10);
         dto.setAlsList(java.util.List.of(invalidALS));
@@ -240,6 +242,8 @@ class ProjectServiceTest {
                 "owner@example.com", java.time.LocalDate.of(2026, 9, 18), Role.ROLE_MANAGER);
         dto.setCreatedBy(EmployeeDtoMapper.toDto(ownerDomain));
         dto.setUpdatedBy(EmployeeDtoMapper.toDto(ownerDomain));
+        dto.setCreatedAt(java.time.LocalDate.of(2026, 9, 18));
+        dto.setUpdatedAt(java.time.LocalDate.of(2026, 9, 18));
         com.lb_calc_web.domain.model.Project project =
                 ProjectDtoMapper.toDomain(dto, alsService::restoreDomain);
 
