@@ -172,7 +172,7 @@ public class ALSService {
                 colorDoor.name()
         );
 
-        LBDTO lb =
+        LB lb =
                 lbService.createLB(
                         height,
                         depth,
@@ -207,7 +207,7 @@ public class ALSService {
 
         als.setLC(lc);
 
-        als.getLbList().add(lb);
+        als.getLbList().add(LBDtoMapper.toDto(lb));
 
         ALSDtoMapper.updateCalculatedFields(als, restoreALS(als));
 
@@ -346,7 +346,7 @@ public class ALSService {
     public ALSDTO addNewLB(ALSDTO dto) {
         Objects.requireNonNull(dto, "ALS не должен быть null");
 
-        LBDTO lbDto = lbService.createLB(
+        LB lb = lbService.createLB(
                 dto.getHeight(),
                 dto.getDepth(),
                 dto.getUpperFrame(),
@@ -356,7 +356,7 @@ public class ALSService {
         );
 
         var domain = restoreALS(dto);
-        domain.addStorageModule(LBDtoMapper.toDomain(lbDto, TypeLbFactory.forLB(environment, lbDto.getType())));
+        domain.addStorageModule(lb);
 
         return ALSDtoMapper.toDto(domain);
     }

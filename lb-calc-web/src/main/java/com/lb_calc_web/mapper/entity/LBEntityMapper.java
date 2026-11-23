@@ -1,8 +1,6 @@
 package com.lb_calc_web.mapper.entity;
 
 import com.lb_calc_web.domain.attributes.Colors;
-import com.lb_calc_web.mapper.dto.LBDtoMapper;
-import com.lb_calc_web.dto.LBDTO;
 import com.lb_calc_web.domain.attributes.DirectionDoorOpening;
 import com.lb_calc_web.domain.attributes.TypeLb;
 import com.lb_calc_web.domain.model.LB;
@@ -157,16 +155,6 @@ public final class LBEntityMapper {
 
         entity.setCountCells(domain.getCountCells());
 
-    }
-
-    /**
-     * Преобразует LBEntity в DTO, восстанавливая persistence ID.
-     */
-    public static LBDTO toDto(LBEntity entity) {
-        if (entity == null) return null;
-        LBDTO dto = LBDtoMapper.toDto(toDomain(entity));
-        dto.setId(entity.getId());
-        return dto;
     }
 
 }

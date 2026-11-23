@@ -2,6 +2,7 @@ package com.lb_calc_web.controller.api;
 
 import com.lb_calc_web.controller.api.response.ApiResponse;
 import com.lb_calc_web.dto.LBDTO;
+import com.lb_calc_web.mapper.dto.LBDtoMapper;
 import com.lb_calc_web.service.LBService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -46,7 +47,7 @@ public class LBRestController {
 
         logger.info("GET /api/v1/lbs");
 
-            List<LBDTO> lbList = lbService.findAll();
+            List<LBDTO> lbList = lbService.findAll().stream().map(LBDtoMapper::toDto).toList();
 
             return ResponseEntity.ok(
                     ApiResponse.success(lbList)
@@ -72,7 +73,7 @@ public class LBRestController {
 
         logger.info("GET /api/v1/lbs/{}", id);
 
-            LBDTO lb = lbService.findById(id);
+            LBDTO lb = LBDtoMapper.toDto(lbService.findById(id));
 
             return ResponseEntity.ok(
                     ApiResponse.success(lb)
@@ -93,7 +94,7 @@ public class LBRestController {
 
         logger.info("GET /api/v1/lbs/create");
 
-            LBDTO lb = lbService.createLB();
+            LBDTO lb = LBDtoMapper.toDto(lbService.createLB());
 
             return ResponseEntity.ok(
                     ApiResponse.success(lb)
@@ -118,7 +119,7 @@ public class LBRestController {
                 dto != null ? dto.getType() : null
         );
 
-            LBDTO saved = lbService.saveLB(dto);
+            LBDTO saved = LBDtoMapper.toDto(lbService.saveLB(LBDtoMapper.toDomain(dto)));
 
             return ResponseEntity.ok(
                     ApiResponse.success(

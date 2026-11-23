@@ -3,6 +3,7 @@ package com.lb_calc_web.controller;
 import com.lb_calc_web.domain.attributes.Colors;
 import com.lb_calc_web.domain.attributes.DirectionDoorOpening;
 import com.lb_calc_web.dto.LBDTO;
+import com.lb_calc_web.mapper.dto.LBDtoMapper;
 import com.lb_calc_web.handler.ValidationSizeException;
 import com.lb_calc_web.service.LBService;
 import org.slf4j.Logger;
@@ -47,7 +48,7 @@ public class LBController {
 
         logger.info("Открытие страницы создания LB");
 
-        LBDTO lb = lbService.createLB();
+        LBDTO lb = LBDtoMapper.toDto(lbService.createLB());
 
         model.addAttribute("lb", lb);
 
@@ -68,7 +69,7 @@ public class LBController {
                 id
         );
 
-        LBDTO lb = lbService.findById(id);
+        LBDTO lb = LBDtoMapper.toDto(lbService.findById(id));
 
         model.addAttribute("lb", lb);
 
@@ -93,7 +94,7 @@ public class LBController {
         try {
 
             LBDTO savedLB =
-                    lbService.saveLB(lb);
+                    LBDtoMapper.toDto(lbService.saveLB(LBDtoMapper.toDomain(lb)));
 
             return "redirect:/lbs/" + savedLB.getId();
 
