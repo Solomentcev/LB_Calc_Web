@@ -11,17 +11,16 @@
     <table class="table table-striped">
         <thead><tr>
             <th>ID</th><th>Название</th><th>Тип</th><th>Ячейки</th>
-            <th>Размеры В×Ш×Г</th><th>Дисплей</th><th>Оплата</th><th>Действие</th>
+            <th>Размеры В×Ш×Г</th><th>Конфигурация</th><th>Действие</th>
         </tr></thead>
         <tbody>
         <tr th:each="lbc : ${lbcs}">
             <td th:text="${lbc.id}">ID</td>
             <td th:text="${lbc.name}">Name</td>
-            <td th:text="${lbc.type}">Type</td>
+            <td th:text="${lbc.typeLb.type}">Type</td>
             <td th:text="${lbc.countCells}">Cells</td>
             <td th:text="${lbc.height + ' × ' + lbc.width + ' × ' + lbc.depth}">Size</td>
-            <td th:text="${lbc.display}">Display</td>
-            <td th:text="${lbc.payment}">Payment</td>
+            <td th:text="${lbc.description}">Конфигурация</td>
             <td><a th:href="@{/lbcs/{id}(id=${lbc.id})}" class="btn btn-primary btn-sm">Редактировать</a></td>
         </tr>
         </tbody>

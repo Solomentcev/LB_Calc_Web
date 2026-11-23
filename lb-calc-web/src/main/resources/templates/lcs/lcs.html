@@ -20,12 +20,7 @@
             <th>Ширина</th>
             <th>Глубина</th>
             <th>Цвет корпуса</th>
-            <th>Дисплей</th>
-            <th>Оплата</th>
-            <th>Принтер</th>
-            <th>Сканер штрихкодов</th>
-            <th>RFID-считыватель</th>
-
+            <th>Конфигурация</th>
             <th>Действие</th>
         </tr>
         </thead>
@@ -38,11 +33,7 @@
             <td th:text="${lc.getWidth()}">Width</td>
             <td th:text="${lc.getDepth()}">Depth</td>
             <td th:text="${lc.getColorBody()}">ColorBody</td>
-            <td th:text="${lc.getDisplay()}">Display</td>
-            <td th:text="${lc.getPayment()}">Payment</td>
-            <td th:text="${lc.isPrinter()}">Printer</td>
-            <td th:text="${lc.getBarReader()}">BarReader</td>
-            <td th:text="${lc.isRfidReader()}">RfidReader</td>
+            <td th:text="${lc.getDescription()}">Конфигурация</td>
 
             <td>
                 <a th:href="@{/lcs/{id}(id=${lc.getId()})}" class="btn btn-primary btn-sm">Редактировать</a>
