@@ -143,16 +143,14 @@ public class ALSController extends BaseCatalogController {
             Model model
     ) {
         try {
-            ALSDTO als =
-                    toDto(alsService.findById(alsId));
-
+            com.lb_calc_web.domain.model.ALS als =
+                    alsService.findById(alsId);
             lbc.setId(lbcId);
 
-            ALSDTO saved =
-                    alsService.replaceLBCandSaveALS(
-                            als,
-                            lbc
-                    );
+            com.lb_calc_web.domain.model.LBC replacement =
+                    alsService.restoreLBC(lbc, als);
+            com.lb_calc_web.domain.model.ALS saved =
+                    alsService.saveALS(alsService.replaceLBC(als, replacement));
 
             return "redirect:/alss/"
                     + saved.getId();
@@ -172,10 +170,8 @@ public class ALSController extends BaseCatalogController {
     public String replaceLBC(
             @PathVariable Long alsId
     ) {
-        ALSDTO saved =
-                alsService.replaceWithNewLBCandSaveALS(
-                        alsId
-                );
+        com.lb_calc_web.domain.model.ALS saved =
+                alsService.replaceWithNewLBCandSaveALS(alsId);
 
         return "redirect:/alss/"
                 + saved.getId();

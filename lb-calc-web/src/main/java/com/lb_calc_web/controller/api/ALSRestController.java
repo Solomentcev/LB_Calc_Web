@@ -178,13 +178,20 @@ toDto(alsService.createALS())
             @RequestBody LBCDTO lbc
     ) {
 
-            ALSDTO als = ALSDtoMapper.toDto(alsService.findById(alsId));
-            alsService.findLBCInALS(als, lbcId);
+            ALS als = alsService.findById(alsId);
+            LBCDTO current = ALSDtoMapper.toDto(als).getLBC();
+            if (current == null || !Objects.equals(current.getId(), lbcId)) {
+                throw new NoSuchElementException(
+                        "LBC с id " + lbcId + " не найден в ALS " + alsId
+                );
+            }
             lbc.setId(lbcId);
 
-            ALSDTO saved = alsService.replaceLBCandSaveALS(als, lbc);
+            com.lb_calc_web.domain.model.LBC replacement =
+                    alsService.restoreLBC(lbc, als);
+            ALS saved = alsService.saveALS(alsService.replaceLBC(als, replacement));
             return ResponseEntity.ok(
-                    ApiResponse.success(saved.getLBC())
+                    ApiResponse.success(LBCDtoMapper.toDto(saved.getControlModule() instanceof com.lb_calc_web.domain.model.LBC value ? value : null))
             );
 
     }
@@ -198,8 +205,8 @@ toDto(alsService.createALS())
             @PathVariable Long alsId
     ) {
 
-            ALSDTO saved = alsService.replaceWithNewLBCandSaveALS(alsId);
-            return ResponseEntity.ok(ApiResponse.success(saved));
+            ALS saved = alsService.replaceWithNewLBCandSaveALS(alsId);
+            return ResponseEntity.ok(ApiResponse.success(toDto(saved)));
 
     }
 
