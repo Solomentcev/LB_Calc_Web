@@ -6,11 +6,13 @@
 <div th:replace="~{header :: header}"></div>
 <div class="container">
     <h1>Модули управления</h1>
-    <a th:href="@{/lcs/create}" class="btn btn-primary btn-sm mb-3">Создать Модуль Управления </a>
-    <a th:href="@{/}" class="btn btn-primary btn-sm mb-3">Назад</a>
+    <div class="page-actions">
+        <a th:href="@{/lcs/create}" class="btn btn-primary btn-sm">Создать модуль управления</a>
+        <a th:href="@{/}" class="btn btn-secondary btn-sm">Назад</a>
+    </div>
     
     <div class="table-responsive">
-    <table class="table table-striped">
+    <table class="table table-striped js-data-table">
         <thead>
         <tr>
             <th>ID</th>

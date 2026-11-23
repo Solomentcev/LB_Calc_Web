@@ -9,15 +9,69 @@
     <style>
         html,
         body {
+            width: 100%;
+            height: 100%;
             min-height: 100%;
         }
 
         body {
-            min-height: 100vh;
+            height: 100vh;
+            min-height: 0;
             display: grid;
-            grid-template-rows: auto 1fr auto;
+            grid-template-rows: auto minmax(0, 1fr) auto;
+            overflow: hidden;
             background-color: #f8f9fa;
             color: #212529;
+        }
+
+        body > header,
+        body > div:has(> header) {
+            position: relative;
+            z-index: 100;
+        }
+
+        .container,
+        .container-fluid {
+            min-height: 0;
+            overflow-x: auto;
+            overflow-y: auto;
+            overscroll-behavior: contain;
+        }
+
+        .container > nav[aria-label="breadcrumb"] {
+            position: sticky;
+            top: 0;
+            z-index: 30;
+            padding-top: 0.75rem;
+            padding-bottom: 0.75rem;
+            background-color: #f8f9fa;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+        }
+
+        form > .mb-3:first-child,
+        .page-actions {
+            position: sticky;
+            top: 0;
+            z-index: 29;
+            padding: 0.5rem 0;
+            background-color: #f8f9fa;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+        }
+
+        .container:has(> nav[aria-label="breadcrumb"]) form > .mb-3:first-child {
+            top: 3.5rem;
+        }
+
+        .page-actions {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .page-actions .btn {
+            margin: 0;
         }
 
         .container,
@@ -166,6 +220,57 @@
             height: auto;
         }
 
+        .js-data-table thead th {
+            padding: 0;
+        }
+
+        .js-data-table .table-sort-button {
+            display: flex;
+            width: 100%;
+            min-height: 2.75rem;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem;
+            padding: 0.75rem;
+            border: 0;
+            background: transparent;
+            color: inherit;
+            font: inherit;
+            font-weight: 600;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .js-data-table .table-sort-button:hover,
+        .js-data-table .table-sort-button:focus {
+            background-color: #e2e6ea;
+            outline: none;
+        }
+
+        .table-pagination {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+            margin: -0.75rem 0 1.5rem;
+            padding: 0.75rem;
+            background: #fff;
+            border: 1px solid #dee2e6;
+            border-radius: 0.25rem;
+        }
+
+        .table-pagination-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .table-pagination select {
+            width: auto;
+            min-width: 5rem;
+        }
+
         @media (max-width: 575.98px) {
             .container,
             .container-fluid {
@@ -178,4 +283,148 @@
             }
         }
     </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('table.js-data-table').forEach(function (table) {
+                const body = table.tBodies[0];
+                const head = table.tHead;
+                if (!body || !head || !head.rows.length) return;
+
+                const headers = Array.from(head.rows[0].cells);
+                let rows = Array.from(body.rows).map(function (row, index) {
+                    return { element: row, index: index };
+                });
+                let sortColumn = -1;
+                let sortDirection = 'asc';
+                let currentPage = 0;
+                let pageSize = 10;
+
+                const wrapper = table.closest('.table-responsive');
+                const pagination = document.createElement('div');
+                pagination.className = 'table-pagination';
+
+                const pageSizeLabel = document.createElement('label');
+                pageSizeLabel.className = 'mb-0';
+                pageSizeLabel.textContent = 'Строк на странице: ';
+
+                const pageSizeSelect = document.createElement('select');
+                pageSizeSelect.className = 'form-control form-control-sm';
+                [10, 25, 50, 100].forEach(function (size) {
+                    const option = document.createElement('option');
+                    option.value = String(size);
+                    option.textContent = String(size);
+                    pageSizeSelect.appendChild(option);
+                });
+                pageSizeLabel.appendChild(pageSizeSelect);
+
+                const summary = document.createElement('span');
+                summary.className = 'text-muted small';
+
+                const controls = document.createElement('div');
+                controls.className = 'table-pagination-controls';
+
+                const previous = document.createElement('button');
+                previous.type = 'button';
+                previous.className = 'btn btn-outline-secondary btn-sm';
+                previous.textContent = 'Назад';
+
+                const pageLabel = document.createElement('span');
+                pageLabel.className = 'small text-nowrap';
+
+                const next = document.createElement('button');
+                next.type = 'button';
+                next.className = 'btn btn-outline-secondary btn-sm';
+                next.textContent = 'Вперёд';
+
+                controls.append(previous, pageLabel, next);
+                pagination.append(pageSizeLabel, summary, controls);
+                if (wrapper) wrapper.insertAdjacentElement('afterend', pagination);
+                else table.insertAdjacentElement('afterend', pagination);
+
+                function render() {
+                    const pageCount = Math.max(1, Math.ceil(rows.length / pageSize));
+                    currentPage = Math.min(currentPage, pageCount - 1);
+                    const start = currentPage * pageSize;
+                    const end = Math.min(start + pageSize, rows.length);
+
+                    rows.forEach(function (row, index) {
+                        row.element.hidden = index < start || index >= end;
+                        body.appendChild(row.element);
+                    });
+
+                    summary.textContent = rows.length
+                        ? (start + 1) + '–' + end + ' из ' + rows.length
+                        : 'Нет записей';
+                    pageLabel.textContent = (currentPage + 1) + ' / ' + pageCount;
+                    previous.disabled = currentPage === 0;
+                    next.disabled = currentPage >= pageCount - 1;
+                }
+
+                headers.forEach(function (header, columnIndex) {
+                    const label = header.textContent.trim();
+                    const button = document.createElement('button');
+                    button.type = 'button';
+                    button.className = 'table-sort-button';
+                    button.textContent = label;
+
+                    const indicator = document.createElement('span');
+                    indicator.setAttribute('aria-hidden', 'true');
+                    button.appendChild(indicator);
+                    button.addEventListener('click', function () {
+                        if (sortColumn === columnIndex) {
+                            sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+                        } else {
+                            sortColumn = columnIndex;
+                            sortDirection = 'asc';
+                        }
+
+                        rows.sort(function (left, right) {
+                            const a = left.element.cells[columnIndex]?.textContent.trim() || '';
+                            const b = right.element.cells[columnIndex]?.textContent.trim() || '';
+                            const comparison = a.localeCompare(b, 'ru', {
+                                numeric: true,
+                                sensitivity: 'base'
+                            });
+                            return (sortDirection === 'asc' ? comparison : -comparison)
+                                || left.index - right.index;
+                        });
+
+                        headers.forEach(function (item, index) {
+                            const active = index === sortColumn;
+                            item.setAttribute('aria-sort', active
+                                ? (sortDirection === 'asc' ? 'ascending' : 'descending')
+                                : 'none');
+                            const sortIndicator = item.querySelector('.table-sort-button span');
+                            if (sortIndicator) sortIndicator.textContent = active
+                                ? (sortDirection === 'asc' ? '▲' : '▼')
+                                : '↕';
+                        });
+
+                        currentPage = 0;
+                        render();
+                    });
+
+                    header.replaceChildren(button);
+                    header.setAttribute('aria-sort', 'none');
+                    indicator.textContent = '↕';
+                });
+
+                pageSizeSelect.addEventListener('change', function () {
+                    pageSize = Number(pageSizeSelect.value);
+                    currentPage = 0;
+                    render();
+                });
+                previous.addEventListener('click', function () {
+                    currentPage--;
+                    render();
+                });
+                next.addEventListener('click', function () {
+                    currentPage++;
+                    render();
+                });
+
+                render();
+            });
+        });
+    </script>
 </head>
