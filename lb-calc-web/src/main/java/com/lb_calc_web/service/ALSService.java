@@ -169,9 +169,11 @@ public class ALSService {
         );
 
         String configuredPosition = environment.getProperty(
-                "als.position.control-module.default",
-                getRequired("als.position.lc.default")
+                "als.position.control-module.default"
         );
+        if (configuredPosition == null) {
+            configuredPosition = getRequired("als.position.lc.default");
+        }
         PositionControlModule position = PositionControlModule.valueOf(configuredPosition);
 
         List<Module> modules = new ArrayList<>();
