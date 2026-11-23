@@ -216,7 +216,6 @@ public final class ProjectEntityMapper {
 
         ProjectEntity entity =
                 new ProjectEntity();
-        entity.setId(domain.getId());
 
         updateEntity(
                 domain,
