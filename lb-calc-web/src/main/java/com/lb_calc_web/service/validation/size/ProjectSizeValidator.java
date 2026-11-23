@@ -43,8 +43,6 @@ public class ProjectSizeValidator {
             return results;
         }
 
-        results.add(new ValidationResult("Project", project.getId()));
-
         Map<ALS, Integer> configurations = project.getQuantityALS();
 
         logger.info(
