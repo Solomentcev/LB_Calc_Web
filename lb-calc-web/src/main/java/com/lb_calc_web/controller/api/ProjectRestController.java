@@ -17,6 +17,7 @@ import com.lb_calc_web.mapper.dto.LCDtoMapper;
 import com.lb_calc_web.mapper.dto.LBCDtoMapper;
 import com.lb_calc_web.mapper.dto.LBDtoMapper;
 import com.lb_calc_web.service.ALSService;
+import com.lb_calc_web.service.export.ProjectExcelExportService;
 import com.lb_calc_web.service.ProjectService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -52,13 +53,16 @@ public class ProjectRestController {
 
     private final ProjectService projectService;
     private final ALSService alsService;
+    private final ProjectExcelExportService projectExcelExportService;
 
     public ProjectRestController(
             ProjectService projectService,
-            ALSService alsService
+            ALSService alsService,
+            ProjectExcelExportService projectExcelExportService
     ) {
         this.projectService = projectService;
         this.alsService = alsService;
+        this.projectExcelExportService = projectExcelExportService;
     }
 
     /**
@@ -111,9 +115,15 @@ public class ProjectRestController {
 
         return ResponseEntity.ok(
                 ApiResponse.success(
-                        projectService.createProject()
+                        createProjectDto()
                 )
         );
+    }
+
+    private ProjectDTO createProjectDto() {
+        ProjectDTO dto = ProjectDtoMapper.toDto(projectService.createProject());
+        dto.setId(0L);
+        return dto;
     }
 
     /**
@@ -599,7 +609,7 @@ public class ProjectRestController {
 
             InputStreamResource file =
                     new InputStreamResource(
-                            projectService.exportToExcel(project)
+                            projectExcelExportService.exportToExcel(project)
                     );
 
             return ResponseEntity.ok()

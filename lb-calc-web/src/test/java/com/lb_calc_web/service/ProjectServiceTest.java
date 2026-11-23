@@ -1,7 +1,6 @@
 package com.lb_calc_web.service;
 
 import com.lb_calc_web.TestDataFactory;
-import com.lb_calc_web.service.export.ProjectExcelExportService;
 import com.lb_calc_web.domain.attributes.Role;
 import com.lb_calc_web.dto.ALSDTO;
 import com.lb_calc_web.domain.attributes.TypeLb;
@@ -40,7 +39,6 @@ class ProjectServiceTest {
     private MockEnvironment environment;
     private ProjectService projectService;
     private EquipmentCatalogService equipmentCatalogService;
-    private ProjectExcelExportService projectExcelExportService;
 
     @BeforeEach
     void setUp() {
@@ -60,7 +58,6 @@ class ProjectServiceTest {
         });
         employeeService = mock(EmployeeService.class);
         equipmentCatalogService = mock(EquipmentCatalogService.class);
-        projectExcelExportService = mock(ProjectExcelExportService.class);
         when(equipmentCatalogService.findDomainCatalogResolver())
                 .thenReturn(EquipmentCatalog::findByCatalogPositionId);
 
@@ -79,8 +76,7 @@ class ProjectServiceTest {
                         employeeService,
                         environment,
                         TestDataFactory.createSizeValidator(),
-                        equipmentCatalogService,
-                        projectExcelExportService
+                        equipmentCatalogService
                 );
     }
 
@@ -99,16 +95,13 @@ class ProjectServiceTest {
         when(employeeService.getCurrentEmployee())
                 .thenReturn(employee);
 
-        ProjectDTO result =
+        com.lb_calc_web.domain.model.Project result =
                 projectService.initProject("TEST_COMPANY");
 
         assertEquals("TEST_COMPANY", result.getCompany());
         assertNotNull(result.getCreatedAt());
         assertNotNull(result.getCreatedBy());
-        assertTrue(
-                result.getName()
-                        .startsWith("TEST_COMPANY_")
-        );
+        assertTrue(result.getName().startsWith("TEST_COMPANY_"));
     }
 
     @Test
@@ -126,16 +119,20 @@ class ProjectServiceTest {
         when(employeeService.getCurrentEmployee())
                 .thenReturn(employee);
 
-        ALSDTO als = TestDataFactory.validALSDTO(10L);
+        ALSDTO alsDto = TestDataFactory.validALSDTO(10L);
+        com.lb_calc_web.domain.model.ALS als = ALSDtoMapper.toDomain(
+                alsDto,
+                value -> new TypeLb(value.getType(), value.getDeltaWidth(),
+                        value.getShelfThick(), value.getServiceZoneWidth()),
+                value -> new TypeLb(value.getType(), value.getDeltaWidth(),
+                        value.getShelfThick(), value.getServiceZoneWidth())
+        );
 
-        when(alsService.createALS())
-                .thenReturn(als);
+        when(alsService.createALS()).thenReturn(als);
 
-        ProjectDTO result =
-                projectService.createProject();
+        com.lb_calc_web.domain.model.Project result = projectService.createProject();
 
-        assertEquals(1, result.getAlsList().size());
-        assertSame(als, result.getAlsList().get(0));
+        assertEquals(1, result.getQuantity(als));
     }
 
     @Test

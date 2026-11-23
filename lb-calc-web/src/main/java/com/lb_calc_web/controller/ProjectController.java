@@ -17,6 +17,7 @@ import com.lb_calc_web.dto.ProjectDTO;
 import com.lb_calc_web.handler.ValidationSizeException;
 import com.lb_calc_web.service.ProjectService;
 import com.lb_calc_web.service.ALSService;
+import com.lb_calc_web.service.export.ProjectExcelExportService;
 import com.lb_calc_web.service.image.ALSImageService;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
@@ -34,13 +35,16 @@ public class ProjectController
 
     private final ProjectService projectService;
     private final ALSService alsService;
+    private final ProjectExcelExportService projectExcelExportService;
 
     public ProjectController(
             ProjectService projectService,
-            ALSService alsService
+            ALSService alsService,
+            ProjectExcelExportService projectExcelExportService
     ) {
         this.projectService = projectService;
         this.alsService = alsService;
+        this.projectExcelExportService = projectExcelExportService;
     }
 
     /**
@@ -65,10 +69,9 @@ public class ProjectController
     public String createProject(
             Model model
     ) {
-        model.addAttribute(
-                "project",
-                addALSImages(projectService.createProject())
-        );
+        ProjectDTO project = ProjectDtoMapper.toDto(projectService.createProject());
+        project.setId(0L);
+        model.addAttribute("project", addALSImages(project));
 
         return "projects/project";
     }
@@ -626,9 +629,7 @@ public class ProjectController
 
         InputStreamResource file =
                 new InputStreamResource(
-                        projectService.exportToExcel(
-                                project
-                        )
+                        projectExcelExportService.exportToExcel(project)
                 );
 
         return ResponseEntity.ok()

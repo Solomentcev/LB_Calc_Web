@@ -8,17 +8,13 @@ import com.lb_calc_web.domain.model.LB;
 import com.lb_calc_web.domain.model.LBC;
 import com.lb_calc_web.domain.model.LC;
 import com.lb_calc_web.domain.model.Project;
-import com.lb_calc_web.dto.ALSDTO;
 import com.lb_calc_web.dto.EmployeeDTO;
-import com.lb_calc_web.dto.ProjectDTO;
 import com.lb_calc_web.dto.validation.ValidationError;
 import com.lb_calc_web.dto.validation.ValidationResult;
 import com.lb_calc_web.entity.ALSEntity;
 import com.lb_calc_web.entity.EmployeeEntity;
 import com.lb_calc_web.entity.ProjectEntity;
 import com.lb_calc_web.handler.ValidationSizeException;
-import com.lb_calc_web.service.export.ProjectExcelExportService;
-import com.lb_calc_web.mapper.dto.ALSDtoMapper;
 import com.lb_calc_web.mapper.dto.EmployeeDtoMapper;
 import com.lb_calc_web.mapper.entity.ProjectEntityMapper;
 import com.lb_calc_web.repository.ALSRepository;
@@ -32,7 +28,6 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.ByteArrayInputStream;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -58,7 +53,6 @@ public class ProjectService {
     private final Environment environment;
     private final SizeValidator sizeValidator;
     private final EquipmentCatalogService equipmentCatalogService;
-    private final ProjectExcelExportService projectExcelExportService;
 
     public ProjectService(
             ProjectRepository projectRepository,
@@ -68,8 +62,7 @@ public class ProjectService {
             EmployeeService employeeService,
             Environment environment,
             SizeValidator sizeValidator,
-            EquipmentCatalogService equipmentCatalogService,
-            ProjectExcelExportService projectExcelExportService
+            EquipmentCatalogService equipmentCatalogService
     ) {
         this.projectRepository = projectRepository;
         this.alsRepository = alsRepository;
@@ -79,7 +72,6 @@ public class ProjectService {
         this.environment = environment;
         this.sizeValidator = sizeValidator;
         this.equipmentCatalogService = equipmentCatalogService;
-        this.projectExcelExportService = projectExcelExportService;
     }
 
     @Transactional(readOnly = true)
@@ -114,64 +106,35 @@ public class ProjectService {
     }
 
     /**
-     * Создаёт DTO для формы создания проекта.
-     *
-     * Сам проект пока не сохраняется.
-     * Сохраняется только при submit формы.
+     * Создаёт доменный проект с начальной конфигурацией ALS.
+     * Сохранение выполняется только после отправки формы.
      */
     @Transactional
-    public ProjectDTO createProject() {
+    public Project createProject() {
         logger.info("Создание проекта...");
 
-        String company =
-                getRequired(
-                        "project.company.default"
-                );
-
-        ProjectDTO project =
-                initProject(company);
-
-        ALSDTO als = ALSDtoMapper.toDto(alsService.createALS());
-
-        project.getAlsList().add(als);
-
+        String company = getRequired("project.company.default");
+        Project project = initProject(company);
+        project.addALS(alsService.createALS());
         return project;
     }
 
     /**
-     * Инициализация нового проекта.
+     * Инициализирует новый доменный проект.
      */
-    public ProjectDTO initProject(
-            String company
-    ) {
+    public Project initProject(String company) {
         Employee currentEmployee =
-                EmployeeDtoMapper.toDomain(
-                        employeeService.getCurrentEmployee()
-                );
+                EmployeeDtoMapper.toDomain(employeeService.getCurrentEmployee());
+        LocalDate today = LocalDate.now();
 
-        LocalDate now =
-                LocalDate.now();
-
-        Project project =
-                new Project(
-                        company,
-                        company,
-                        now,
-                        currentEmployee
-                );
-
-        ProjectDTO dto =
-                ProjectDtoMapper.toDto(
-                        project
-                );
-
-        dto.setId(0L);
-
-        dto.setName(
-                company + "_" + now
+        Project project = new Project(
+                company,
+                company,
+                today,
+                currentEmployee
         );
-
-        return dto;
+        project.setName(company + "_" + today);
+        return project;
     }
 
     /**
@@ -260,17 +223,6 @@ public class ProjectService {
         );
 
         projectRepository.delete(entity);
-    }
-
-    @Transactional(readOnly = true)
-    public ByteArrayInputStream exportToExcel(
-            ProjectDTO projectDTO
-    ) {
-        logger.info(
-                "Экспорт проекта в Excel..."
-        );
-
-        return projectExcelExportService.exportToExcel(projectDTO);
     }
 
     /**
