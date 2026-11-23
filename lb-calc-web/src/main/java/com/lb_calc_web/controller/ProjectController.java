@@ -7,6 +7,7 @@ import com.lb_calc_web.dto.LCDTO;
 import com.lb_calc_web.dto.ProjectDTO;
 import com.lb_calc_web.handler.ValidationSizeException;
 import com.lb_calc_web.service.ProjectService;
+import com.lb_calc_web.service.ALSService;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -22,11 +23,14 @@ public class ProjectController
         extends BaseCatalogController {
 
     private final ProjectService projectService;
+    private final ALSService alsService;
 
     public ProjectController(
-            ProjectService projectService
+            ProjectService projectService,
+            ALSService alsService
     ) {
         this.projectService = projectService;
+        this.alsService = alsService;
     }
 
     /**
@@ -117,8 +121,20 @@ public class ProjectController
      */
     @PostMapping("/{id}/addALS")
     public String addALS(
-            @PathVariable Long id
+            @PathVariable Long id,
+            @ModelAttribute("project") ProjectDTO draft,
+            Model model
     ) {
+        /*
+         * Проект с ID 0 ещё не сохранён. В этом сценарии добавляем
+         * ALS в текущую форму и не пытаемся загружать проект из БД.
+         */
+        if (id == null || id <= 0) {
+            draft.getAlsList().add(alsService.createALS());
+            model.addAttribute("project", draft);
+            return "projects/project";
+        }
+
         ProjectDTO project =
                 projectService.addNewALSandSaveProject(id);
 
