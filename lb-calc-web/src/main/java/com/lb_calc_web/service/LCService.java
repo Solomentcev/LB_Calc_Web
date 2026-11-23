@@ -62,7 +62,7 @@ public class LCService {
      * Создаёт шаблон LC с параметрами по умолчанию.
      * В БД объект не сохраняется.
      */
-    public LCDTO createLC() {
+    public LC createLC() {
 
         logger.info(
                 "Создание нового LC с параметрами по умолчанию"
@@ -81,7 +81,7 @@ public class LCService {
      * Создаёт шаблон LC с заданными базовыми параметрами.
      * В БД объект не сохраняется.
      */
-    public LCDTO createLC(
+    public LC createLC(
             int height,
             int depth,
             int upperFrame,
@@ -163,17 +163,14 @@ public class LCService {
                 equipmentRequirementResolver.resolve(domain.getControlConfiguration())
         );
 
-        LCDTO result = LCDtoMapper.toDto(domain);
-        result.setId(0L);
-
-        return result;
+        return domain;
     }
 
     /**
      * Получить все LC.
      */
     @Transactional(readOnly = true)
-    public List<LCDTO> findAll() {
+    public List<LC> findAll() {
 
         logger.info("Получение списка LC");
         var equipmentResolver = equipmentCatalogService.findDomainCatalogResolver();
@@ -188,7 +185,7 @@ public class LCService {
                                 )
                         )
                 )
-                .map(entity -> LCEntityMapper.toDto(entity, equipmentResolver))
+                .map(entity -> LCEntityMapper.toDomain(entity, equipmentResolver))
                 .toList();
     }
 
@@ -196,7 +193,7 @@ public class LCService {
      * Получить LC по ID.
      */
     @Transactional(readOnly = true)
-    public LCDTO findById(Long id) {
+    public LC findById(Long id) {
 
         logger.info(
                 "Поиск LC по id={}",
@@ -217,133 +214,53 @@ public class LCService {
                                 )
                         );
 
-        return LCEntityMapper.toDto(entity, equipmentCatalogService.findDomainCatalogResolver());
+        return LCEntityMapper.toDomain(entity, equipmentCatalogService.findDomainCatalogResolver());
     }
 
     /**
-     * Сохранить LC.
-     *
-     * <p>Перед сохранением выполняется:
-     * преобразование DTO в Domain,
-     * геометрическая валидация доменной модели,
-     * проверка наличия аналогичной конфигурации,
-     * преобразование Domain -> Entity.</p>
+     * Сохраняет доменную конфигурацию LC.
      */
     @Transactional
-    public LCDTO saveLC(LCDTO dto) {
+    public LC saveLC(LC domain) {
+        Objects.requireNonNull(domain, "LC не должен быть null");
+        logger.info("Сохранение LC: id={}, name={}", domain.getId(), domain.getName());
 
-        Objects.requireNonNull(
-                dto,
-                "LCDTO не должен быть null"
-        );
-
-        logger.info(
-                "Сохранение LC: id={}, display={}",
-                dto.getId(),
-                dto.getDisplay()
-        );
-
-        LC domain;
-        try {
-            Optional<LCEntity> existingEntity = findExistingEntity(dto.getId());
-            Set<String> retainedEquipmentIds = existingEntity
-                    .map(entity -> entity.getEquipment().stream()
-                            .map(item -> item.getCatalogPositionId())
-                            .collect(java.util.stream.Collectors.toUnmodifiableSet()))
-                    .orElseGet(Set::of);
-            var existingEquipmentResolver =
-                    equipmentCatalogService.findExistingConfigurationResolver(retainedEquipmentIds);
-
-            List<EquipmentSelectionDTO> equipmentSelections = dto.getEquipmentSelections();
-            if (equipmentSelections == null && existingEntity.isPresent()) {
-                LCEntity entity = existingEntity.get();
-                equipmentSelections = EquipmentSelectionMapper.mergeDisplaySelection(
-                        entity.getEquipment().stream()
-                                .map(item -> new EquipmentSelectionDTO(
-                                        item.getCatalogPositionId(), item.getQuantity()))
-                                .toList(),
-                        dto.getDisplay(),
-                        dto.getDisplayQuantity(),
-                        existingEquipmentResolver
-                );
-            }
-            domain = LCDtoMapper.toDomain(dto, equipmentSelections, existingEquipmentResolver);
-            domain.setControlConfiguration(
-                    equipmentRequirementResolver.resolve(domain.getControlConfiguration())
-            );
-        } catch (IllegalArgumentException | IllegalStateException | NullPointerException exception) {
-            throw createMappingValidationException(
-                    "LC",
-                    dto.getId(),
-                    exception
-            );
-        }
-
-        ValidationResult validationResult =
-                sizeValidator.validateLC(domain);
-        validationResult.setObjectId(dto.getId());
-
+        domain.setControlConfiguration(equipmentRequirementResolver.resolve(domain.getControlConfiguration()));
+        ValidationResult validationResult = sizeValidator.validateLC(domain);
+        validationResult.setObjectId(domain.getId());
         if (!validationResult.isValid()) {
-            logger.warn(
-                    "LC не прошёл валидацию: {}",
-                    validationResult.getErrors()
-            );
-
-            throw new ValidationSizeException(
-                    validationResult
-            );
+            logger.warn("LC не прошёл валидацию: {}", validationResult.getErrors());
+            throw new ValidationSizeException(validationResult);
         }
 
-        /*
-         * Блокировка удерживается до фиксации результата транзакции.
-         */
         findOrCreateLockService.acquire();
         var equipmentResolver = equipmentCatalogService.findDomainCatalogResolver();
-
-        /*
-         * Проверяем, нет ли уже такой конфигурации.
-         */
-        Optional<LCEntity> existing =
-                lcRepository.findCandidates(
-                        domain.getHeight(),
-                        domain.getWidth(),
-                        domain.getDepth(),
-                        domain.getUpperFrame(),
-                        domain.getBottomFrame(),
-                        domain.getColorBody(),
-                        domain.getColorDoor(),
-                        domain.getControlConfiguration().getPayment()
-                ).stream()
-                        .filter(entity ->
-                                LCEntityMapper.toDomain(entity, equipmentResolver).equals(domain)
-                        )
-                        .findFirst();
-
-        if (existing.isPresent()) {
-
-            logger.info(
-                    "Аналогичный LC уже существует, id={}",
-                    existing.get().getId()
-            );
-
-            return LCEntityMapper.toDto(existing.get(), equipmentResolver);
+        Optional<LCEntity> currentEntity = findExistingEntity(domain.getId());
+        if (domain.getId() != null && currentEntity.isEmpty()) {
+            throw new NoSuchElementException("LC с id=" + domain.getId() + " не найден");
         }
 
-        /*
-         * Domain -> Entity.
-         */
-        LCEntity entity =
-                LCEntityMapper.toEntity(domain);
+        Optional<LCEntity> duplicate = lcRepository.findCandidates(
+                        domain.getHeight(), domain.getWidth(), domain.getDepth(),
+                        domain.getUpperFrame(), domain.getBottomFrame(),
+                        domain.getColorBody(), domain.getColorDoor(),
+                        domain.getControlConfiguration().getPayment())
+                .stream()
+                .filter(entity -> !Objects.equals(entity.getId(), domain.getId()))
+                .filter(entity -> LCEntityMapper.toDomain(entity, equipmentResolver).equals(domain))
+                .findFirst();
 
-        LCEntity saved =
-                lcRepository.save(entity);
+        if (duplicate.isPresent()) {
+            logger.info("Аналогичный LC уже существует, id={}", duplicate.get().getId());
+            return LCEntityMapper.toDomain(duplicate.get(), equipmentResolver);
+        }
 
-        logger.info(
-                "LC сохранён, id={}",
-                saved.getId()
-        );
-
-        return LCEntityMapper.toDto(saved, equipmentResolver);
+        LCEntity entity = currentEntity.orElseGet(() -> LCEntityMapper.toEntity(domain));
+        LCEntityMapper.updateEntity(domain, entity);
+        LCEntity saved = lcRepository.save(entity);
+        domain.setId(saved.getId());
+        logger.info("LC сохранён, id={}", saved.getId());
+        return domain;
     }
 
     /**

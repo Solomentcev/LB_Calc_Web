@@ -18,7 +18,6 @@ import com.lb_calc_web.mapper.dto.EquipmentSelectionMapper;
 import com.lb_calc_web.mapper.dto.LBCDtoMapper;
 import com.lb_calc_web.mapper.entity.LBCEntityMapper;
 import com.lb_calc_web.repository.LBCRepository;
-import com.lb_calc_web.service.image.LBCImageService;
 import com.lb_calc_web.service.validation.size.SizeValidator;
 import com.lb_calc_web.service.factory.TypeLbFactory;
 import org.slf4j.Logger;
@@ -68,7 +67,7 @@ public class LBCService {
      * Создаёт шаблон LBC с параметрами по умолчанию.
      * В БД объект не сохраняется.
      */
-    public LBCDTO createLBC() {
+    public LBC createLBC() {
         return createLBC(
                 requiredInt("size.height.default"),
                 requiredInt("size.depth.default"),
@@ -83,7 +82,7 @@ public class LBCService {
      * Создаёт шаблон LBC с базовыми геометрическими параметрами.
      * В БД объект не сохраняется.
      */
-    public LBCDTO createLBC(
+    public LBC createLBC(
             int height,
             int depth,
             int upperFrame,
@@ -175,13 +174,11 @@ public class LBCService {
         domain.setControlConfiguration(
                 equipmentRequirementResolver.resolve(domain.getControlConfiguration())
         );
-        LBCDTO result = LBCDtoMapper.toDto(domain);
-        result.setId(0L);
-        return addLBCImage(result);
+        return domain;
     }
 
     @Transactional(readOnly = true)
-    public List<LBCDTO> findAll() {
+    public List<LBC> findAll() {
         logger.info("Получение списка LBC");
         var equipmentResolver = equipmentCatalogService.findDomainCatalogResolver();
 
@@ -195,12 +192,12 @@ public class LBCService {
                                 )
                         )
                 )
-                .map(entity -> addLBCImage(LBCEntityMapper.toDto(entity, equipmentResolver)))
+                .map(entity -> LBCEntityMapper.toDomain(entity, equipmentResolver))
                 .toList();
     }
 
     @Transactional(readOnly = true)
-    public LBCDTO findById(Long id) {
+    public LBC findById(Long id) {
         logger.info("Поиск LBC по id={}", id);
         if (id == null || id <= 0) {
             throw new NoSuchElementException("LBC с id=" + id + " не найден");
@@ -217,130 +214,57 @@ public class LBCService {
                                 )
                         );
 
-        return addLBCImage(LBCEntityMapper.toDto(entity, equipmentCatalogService.findDomainCatalogResolver()));
+        return LBCEntityMapper.toDomain(entity, equipmentCatalogService.findDomainCatalogResolver());
     }
 
+    /**
+     * Сохраняет доменную конфигурацию LBC.
+     */
     @Transactional
-    public LBCDTO saveLBC(LBCDTO dto) {
-        Objects.requireNonNull(
-                dto,
-                "LBCDTO не должен быть null"
-        );
+    public LBC saveLBC(LBC domain) {
+        Objects.requireNonNull(domain, "LBC не должен быть null");
+        logger.info("Сохранение LBC: id={}, type={}", domain.getId(), domain.getTypeLb().getType());
 
-        logger.info(
-                "Сохранение LBC: id={}, type={}",
-                dto.getId(),
-                dto.getType()
-        );
-
-        LBC domain;
-        try {
-            TypeLb typeLb = TypeLbFactory.forLBC(environment, dto.getType());
-            Optional<LBCEntity> existingEntity = findExistingEntity(dto.getId());
-            Set<String> retainedEquipmentIds = existingEntity
-                    .map(entity -> entity.getEquipment().stream()
-                            .map(item -> item.getCatalogPositionId())
-                            .collect(java.util.stream.Collectors.toUnmodifiableSet()))
-                    .orElseGet(Set::of);
-            var existingEquipmentResolver =
-                    equipmentCatalogService.findExistingConfigurationResolver(retainedEquipmentIds);
-
-            List<EquipmentSelectionDTO> equipmentSelections = dto.getEquipmentSelections();
-            if (equipmentSelections == null && existingEntity.isPresent()) {
-                LBCEntity entity = existingEntity.get();
-                equipmentSelections = EquipmentSelectionMapper.mergeDisplaySelection(
-                        entity.getEquipment().stream()
-                                .map(item -> new EquipmentSelectionDTO(
-                                        item.getCatalogPositionId(), item.getQuantity()))
-                                .toList(),
-                        dto.getDisplay(),
-                        dto.getDisplayQuantity(),
-                        existingEquipmentResolver
-                );
-            }
-            domain = LBCDtoMapper.toDomain(dto, typeLb, equipmentSelections, existingEquipmentResolver);
-            domain.setControlConfiguration(
-                    equipmentRequirementResolver.resolve(domain.getControlConfiguration())
-            );
-        } catch (IllegalArgumentException | IllegalStateException | NullPointerException exception) {
-            throw createMappingValidationException(
-                    "LBC",
-                    dto.getId(),
-                    exception
-            );
-        }
-
-        ValidationResult validationResult =
-                sizeValidator.validateLBC(domain);
-        validationResult.setObjectId(dto.getId());
-
+        domain.setControlConfiguration(equipmentRequirementResolver.resolve(domain.getControlConfiguration()));
+        ValidationResult validationResult = sizeValidator.validateLBC(domain);
+        validationResult.setObjectId(domain.getId());
         if (!validationResult.isValid()) {
-            logger.warn(
-                    "LBC не прошёл валидацию: {}",
-                    validationResult.getErrors()
-            );
-
-            throw new ValidationSizeException(
-                    validationResult
-            );
+            logger.warn("LBC не прошёл валидацию: {}", validationResult.getErrors());
+            throw new ValidationSizeException(validationResult);
         }
 
-        // Блокировка исключает параллельное создание той же конфигурации.
         findOrCreateLockService.acquire();
         var equipmentResolver = equipmentCatalogService.findDomainCatalogResolver();
-
+        Optional<LBCEntity> currentEntity = findExistingEntity(domain.getId());
+        if (domain.getId() != null && currentEntity.isEmpty()) {
+            throw new NoSuchElementException("LBC с id=" + domain.getId() + " не найден");
+        }
         var typeLb = domain.getTypeLb();
-        Optional<LBCEntity> existing =
-                lbcRepository.findCandidates(
-                        domain.getHeight(),
-                        domain.getWidth(),
-                        domain.getDepth(),
-                        domain.getUpperFrame(),
-                        domain.getBottomFrame(),
-                        domain.getColorBody(),
-                        domain.getColorDoor(),
-                        typeLb.getType(),
-                        typeLb.getDeltaWidth(),
-                        typeLb.getShelfThick(),
-                        typeLb.getServiceZoneWidth(),
-                        domain.getDoorThickness(),
-                        domain.getDirectionDoorOpening(),
-                        domain.getCountCells(),
-                        domain.getControlConfiguration().getPayment()
-                ).stream()
-                        .filter(entity ->
-                                LBCEntityMapper.toDomain(entity, equipmentResolver).equals(domain)
-                        )
-                        .findFirst();
 
-        if (existing.isPresent()) {
-            logger.info(
-                    "Аналогичный LBC уже существует, id={}",
-                    existing.get().getId()
-            );
+        Optional<LBCEntity> duplicate = lbcRepository.findCandidates(
+                        domain.getHeight(), domain.getWidth(), domain.getDepth(),
+                        domain.getUpperFrame(), domain.getBottomFrame(),
+                        domain.getColorBody(), domain.getColorDoor(),
+                        typeLb.getType(), typeLb.getDeltaWidth(), typeLb.getShelfThick(),
+                        typeLb.getServiceZoneWidth(), domain.getDoorThickness(),
+                        domain.getDirectionDoorOpening(), domain.getCountCells(),
+                        domain.getControlConfiguration().getPayment())
+                .stream()
+                .filter(entity -> !Objects.equals(entity.getId(), domain.getId()))
+                .filter(entity -> LBCEntityMapper.toDomain(entity, equipmentResolver).equals(domain))
+                .findFirst();
 
-            return addLBCImage(LBCEntityMapper.toDto(existing.get(), equipmentResolver));
+        if (duplicate.isPresent()) {
+            logger.info("Аналогичный LBC уже существует, id={}", duplicate.get().getId());
+            return LBCEntityMapper.toDomain(duplicate.get(), equipmentResolver);
         }
 
-        LBCEntity entity =
-                LBCEntityMapper.toEntity(domain);
-
-        LBCEntity saved =
-                lbcRepository.save(entity);
-
-        logger.info(
-                "LBC сохранён, id={}",
-                saved.getId()
-        );
-
-        return addLBCImage(LBCEntityMapper.toDto(saved, equipmentResolver));
-    }
-
-    private LBCDTO addLBCImage(LBCDTO dto) {
-        dto.setStringLBCImage(
-                LBCImageService.getStringLBCImage(dto)
-        );
-        return dto;
+        LBCEntity entity = currentEntity.orElseGet(() -> LBCEntityMapper.toEntity(domain));
+        LBCEntityMapper.updateEntity(domain, entity);
+        LBCEntity saved = lbcRepository.save(entity);
+        domain.setId(saved.getId());
+        logger.info("LBC сохранён, id={}", saved.getId());
+        return domain;
     }
 
     private Equipment findDisplay(String idOrName) {
