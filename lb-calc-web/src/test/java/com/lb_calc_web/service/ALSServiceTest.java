@@ -147,6 +147,25 @@ class ALSServiceTest {
     }
 
     @Test
+    void saveALS_domain_shouldReuseExistingConfigurationAndAssignId() {
+        ALS domain = TestDataFactory.validALS(1L);
+        ALSEntity existing = ALSEntityMapper.toEntity(
+                TestDataFactory.validALS(77L),
+                ModuleEntityMapper::toEntity
+        );
+
+        when(alsRepository.findCandidates(
+                anyInt(), anyInt(), anyInt(), anyInt(), any(), any()
+        )).thenReturn(List.of(existing));
+
+        ALS saved = alsService.saveALS(domain);
+
+        assertSame(domain, saved);
+        assertEquals(existing.getId(), saved.getId());
+        verify(alsRepository, never()).save(any());
+    }
+
+    @Test
     void saveALS_shouldPropagateInvalidPersistedAlsCandidate() {
         ALSDTO dto = TestDataFactory.validALSDTO(1L);
         ALSEntity existing = ALSEntityMapper.toEntity(
