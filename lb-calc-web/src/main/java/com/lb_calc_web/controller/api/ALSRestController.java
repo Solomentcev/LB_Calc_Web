@@ -179,9 +179,9 @@ toDto(alsService.createALS())
     ) {
 
             ALS als = alsService.findById(alsId);
-            LBCDTO current = ALSDtoMapper.toDto(als).getLBC();
-            if (current == null || !Objects.equals(current.getId(), lbcId)) {
-                throw new NoSuchElementException(
+            if (!(als.getControlModule() instanceof com.lb_calc_web.domain.model.LBC currentLBC)
+                    || !java.util.Objects.equals(currentLBC.getId(), lbcId)) {
+                throw new java.util.NoSuchElementException(
                         "LBC с id " + lbcId + " не найден в ALS " + alsId
                 );
             }
@@ -190,8 +190,12 @@ toDto(alsService.createALS())
             com.lb_calc_web.domain.model.LBC replacement =
                     alsService.restoreLBC(lbc, als);
             ALS saved = alsService.saveALS(alsService.replaceLBC(als, replacement));
+            com.lb_calc_web.domain.model.LBC savedLBC =
+                    (com.lb_calc_web.domain.model.LBC) saved.getControlModule();
             return ResponseEntity.ok(
-                    ApiResponse.success(LBCDtoMapper.toDto(saved.getControlModule() instanceof com.lb_calc_web.domain.model.LBC value ? value : null))
+                    ApiResponse.success(
+                            com.lb_calc_web.mapper.dto.LBCDtoMapper.toDto(savedLBC)
+                    )
             );
 
     }
