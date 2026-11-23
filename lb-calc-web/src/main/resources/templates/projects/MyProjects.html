@@ -5,14 +5,14 @@
 <body>
 <div th:replace="~{header :: header}"></div>
 <div class="container">
-  <h1>Мои Проекты</h1>
+  <h1 class="page-title">Мои Проекты</h1>
   <div class="page-actions">
     <a th:href="@{/projects/create}" class="btn btn-primary btn-sm">Создать проект</a>
     <a th:href="@{/}" class="btn btn-secondary btn-sm">Назад</a>
   </div>
   
   <div class="table-responsive">
-  <table class="table table-striped js-data-table">
+  <table class="table table-striped table-hover js-data-table">
     <thead>
     <tr>
       <th>ID</th>

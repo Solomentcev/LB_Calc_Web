@@ -5,13 +5,13 @@
 <body>
 <div th:replace="~{header :: header}"></div>
     <div class="container">
-        <h1>Сотрудники</h1>
+        <h1 class="page-title">Сотрудники</h1>
         <div class="page-actions">
             <a th:href="@{/employees/create}" class="btn btn-success btn-sm">Добавить нового сотрудника</a>
         </div>
 
         <div class="table-responsive">
-        <table class="table table-striped js-data-table">
+        <table class="table table-striped table-hover js-data-table">
             <thead>
             <tr>
                 <th>ID</th>

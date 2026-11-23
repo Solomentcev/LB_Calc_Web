@@ -43,6 +43,8 @@ public class ProjectService {
     private static final Logger logger =
             LoggerFactory.getLogger(ProjectService.class);
 
+    private static final String DEFAULT_COMPANY = "Заказчик";
+
     private final ProjectRepository projectRepository;
     private final ALSRepository alsRepository;
     private final EmployeeRepository employeeRepository;
@@ -111,7 +113,7 @@ public class ProjectService {
     public Project createProject() {
         logger.info("Создание проекта...");
 
-        String company = getRequired("project.company.default");
+        String company = getDefaultCompany();
         Project project = initProject(company);
         project.addALS(alsService.createALS());
         return project;
@@ -151,7 +153,7 @@ public class ProjectService {
                 ? requested.getCompany()
                 : existing.getCompany();
         if (company == null || company.isBlank()) {
-            company = getRequired("project.company.default");
+            company = getDefaultCompany();
         }
 
         String name = requested.getName();
@@ -797,11 +799,32 @@ public class ProjectService {
     }
 
 
-    private String getRequired(
-            String key
-    ) {
-        return environment.getRequiredProperty(
-                key
+    /**
+     * Возвращает значение компании по умолчанию.
+     *
+     * <p>Если внешняя настройка содержит строку с типичными признаками
+     * неверно декодированной кириллицы, используется безопасное значение
+     * по умолчанию. Это предотвращает сохранение новых проектов с кракозябрами.</p>
+     *
+     * @return название компании по умолчанию
+     */
+    private String getDefaultCompany() {
+        String configured = environment.getProperty(
+                "project.company.default",
+                DEFAULT_COMPANY
         );
+
+        if (configured.contains("Ð")
+                || configured.contains("Ñ")
+                || configured.contains("Ã")
+                || configured.contains("Â")) {
+            logger.warn(
+                    "Настройка project.company.default содержит некорректно декодированный текст; "
+                            + "используется значение по умолчанию"
+            );
+            return DEFAULT_COMPANY;
+        }
+
+        return configured;
     }
 }
