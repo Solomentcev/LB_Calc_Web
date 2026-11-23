@@ -197,6 +197,46 @@
 
             <div class="card-body">
 
+                <!-- Сохраняем неизменяемую конфигурацию LC при отправке формы ALS. -->
+                <input type="hidden" th:field="*{lc.id}">
+                <input type="hidden" th:field="*{lc.name}">
+                <input type="hidden" th:field="*{lc.description}">
+                <input type="hidden" th:field="*{lc.height}">
+                <input type="hidden" th:field="*{lc.width}">
+                <input type="hidden" th:field="*{lc.depth}">
+                <input type="hidden" th:field="*{lc.upperFrame}">
+                <input type="hidden" th:field="*{lc.bottomFrame}">
+                <input type="hidden" th:field="*{lc.display}">
+                <input type="hidden" th:field="*{lc.barReader}">
+                <input type="hidden" th:field="*{lc.payment}">
+                <input type="hidden" th:field="*{lc.printer}">
+                <input type="hidden" th:field="*{lc.rfidReader}">
+                <input type="hidden" th:field="*{lc.displayQuantity}">
+                <input type="hidden" th:field="*{lc.barReaderQuantity}">
+                <input type="hidden" th:field="*{lc.printerQuantity}">
+                <input type="hidden" th:field="*{lc.rfidReaderQuantity}">
+                <input type="hidden" th:field="*{lc.colorBody}">
+                <input type="hidden" th:field="*{lc.colorDoor}">
+                <input type="hidden" th:field="*{lc.displayWidth}">
+                <input type="hidden" th:field="*{lc.displayHeight}">
+                <input type="hidden"
+                       th:each="method, methodStat : ${als.LC.accessMethods}"
+                       th:name="|lc.accessMethods[${methodStat.index}]|"
+                       th:value="${method}">
+                <input type="hidden"
+                       th:each="option, optionStat : ${als.LC.printOptions}"
+                       th:name="|lc.printOptions[${optionStat.index}]|"
+                       th:value="${option}">
+                <input type="hidden"
+                       th:each="selection, selectionStat : ${als.LC.equipmentSelections}"
+                       th:name="|lc.equipmentSelections[${selectionStat.index}].catalogPositionId|"
+                       th:value="${selection.catalogPositionId}">
+                <input type="hidden"
+                       th:each="selection, selectionStat : ${als.LC.equipmentSelections}"
+                       th:name="|lc.equipmentSelections[${selectionStat.index}].quantity|"
+                       th:value="${selection.quantity}">
+
+
                 <div class="row">
 
                     <div class="col-md-2">
