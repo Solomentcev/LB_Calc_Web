@@ -5,13 +5,6 @@ import com.lb_calc_web.domain.model.Module;
 import com.lb_calc_web.domain.equipment.Equipment;
 import com.lb_calc_web.domain.equipment.EquipmentCatalog;
 import com.lb_calc_web.entity.ALSEntity;
-import com.lb_calc_web.entity.ALSModuleEntity;
-import com.lb_calc_web.entity.ModuleEntity;
-import com.lb_calc_web.entity.LBEntity;
-import com.lb_calc_web.entity.LBCEntity;
-import com.lb_calc_web.entity.LCEntity;
-import com.lb_calc_web.dto.ALSDTO;
-import com.lb_calc_web.mapper.dto.ALSDtoMapper;
 
 import java.util.Comparator;
 import java.util.List;
@@ -76,29 +69,6 @@ public final class ALSEntityMapper {
     }
 
     /**
-     * Восстанавливает persistence ID модулей в DTO по физическому порядку связей.
-     */
-    public static void enrichModuleIds(ALSDTO dto, ALSEntity entity) {
-        Objects.requireNonNull(dto, "ALSDTO не должен быть null");
-        Objects.requireNonNull(entity, "ALSEntity не должен быть null");
-        int lbIndex = 0;
-        List<ALSModuleEntity> associations = entity.getModules().stream()
-                .sorted(Comparator.comparingInt(ALSModuleEntity::getModuleOrder))
-                .toList();
-        for (ALSModuleEntity association : associations) {
-            ModuleEntity module = association.getModule();
-            if (module instanceof LBCEntity && dto.getLBC() != null) {
-                dto.getLBC().setId(module.getId());
-            } else if (module instanceof LCEntity && dto.getLC() != null) {
-                dto.getLC().setId(module.getId());
-            } else if (module instanceof LBEntity && dto.getLbList() != null
-                    && lbIndex < dto.getLbList().size()) {
-                dto.getLbList().get(lbIndex++).setId(module.getId());
-            }
-        }
-    }
-
-    /**
      * Создаёт новую JPA-сущность ALS.
      *
      * @param domain доменный агрегат
@@ -156,26 +126,6 @@ public final class ALSEntityMapper {
         entity.synchronizeModules(moduleEntities);
     }
 
-
-    /**
-     * Преобразует persistence-сущность ALS в DTO с восстановлением ID.
-     */
-    public static ALSDTO toDto(ALSEntity entity) {
-        if (entity == null) return null;
-        ALSDTO dto = ALSDtoMapper.toDto(toDomain(entity));
-        dto.setId(entity.getId());
-        enrichModuleIds(dto, entity);
-        return dto;
-    }
-
-    public static ALSDTO toDto(ALSEntity entity,
-                               Function<String, Equipment> equipmentResolver) {
-        if (entity == null) return null;
-        ALSDTO dto = ALSDtoMapper.toDto(toDomain(entity, equipmentResolver));
-        dto.setId(entity.getId());
-        enrichModuleIds(dto, entity);
-        return dto;
-    }
 
 
 }

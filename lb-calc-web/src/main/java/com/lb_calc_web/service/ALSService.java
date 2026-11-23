@@ -104,7 +104,7 @@ public class ALSService {
                                 ALSEntity::getId
                         )
                 )
-                .map(entity -> addALSImage(ALSEntityMapper.toDto(entity, equipmentResolver)))
+                .map(entity -> addALSImage(ALSDtoMapper.toDto(ALSEntityMapper.toDomain(entity, equipmentResolver))))
                 .toList();
     }
 
@@ -128,7 +128,7 @@ public class ALSService {
                                 )
                         );
 
-        return addALSImage(ALSEntityMapper.toDto(entity, equipmentCatalogService.findDomainCatalogResolver()));
+        return addALSImage(ALSDtoMapper.toDto(ALSEntityMapper.toDomain(entity, equipmentCatalogService.findDomainCatalogResolver())));
     }
 
     /**
@@ -286,7 +286,7 @@ public class ALSService {
                     duplicate.get().getId()
             );
 
-            return addALSImage(ALSEntityMapper.toDto(duplicate.get(), equipmentResolver));
+            return addALSImage(ALSDtoMapper.toDto(ALSEntityMapper.toDomain(duplicate.get(), equipmentResolver)));
         }
 
         /*
@@ -305,7 +305,7 @@ public class ALSService {
                 saved.getId()
         );
 
-        return addALSImage(ALSEntityMapper.toDto(saved, equipmentResolver));
+        return addALSImage(ALSDtoMapper.toDto(ALSEntityMapper.toDomain(saved, equipmentResolver)));
     }
 
     @Transactional
