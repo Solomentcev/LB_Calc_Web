@@ -8,7 +8,7 @@ import com.lb_calc_web.domain.model.ControlConfiguration;
 import com.lb_calc_web.dto.LBCDTO;
 import com.lb_calc_web.dto.LBDTO;
 import com.lb_calc_web.dto.LCDTO;
-import com.lb_calc_web.handler.ValidationSizeException;
+import com.lb_calc_web.service.validation.ValidationSizeException;
 import com.lb_calc_web.entity.ALSEntity;
 import com.lb_calc_web.mapper.dto.ALSDtoMapper;
 import com.lb_calc_web.mapper.entity.ALSEntityMapper;

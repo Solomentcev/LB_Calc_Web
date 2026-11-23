@@ -1,4 +1,4 @@
-package com.lb_calc_web.dto.validation;
+package com.lb_calc_web.service.validation;
 
 import org.junit.jupiter.api.Test;
 

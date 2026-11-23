@@ -1,5 +1,8 @@
-package com.lb_calc_web.dto.validation;
+package com.lb_calc_web.service.validation;
 
+/**
+ * Описание одного нарушения, обнаруженного валидатором.
+ */
 public class ValidationError {
     private String objectType; // ALS, LB, LC
     private Long objectId; // ID объекта, если применимо

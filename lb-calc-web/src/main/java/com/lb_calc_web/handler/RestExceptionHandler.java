@@ -1,5 +1,7 @@
 package com.lb_calc_web.handler;
 
+import com.lb_calc_web.service.validation.ValidationSizeException;
+
 import com.lb_calc_web.controller.api.response.ApiResponse;
 import io.jsonwebtoken.JwtException;
 import jakarta.security.auth.message.AuthException;

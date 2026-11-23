@@ -14,7 +14,7 @@ import com.lb_calc_web.dto.LBCDTO;
 import com.lb_calc_web.dto.LBDTO;
 import com.lb_calc_web.dto.LCDTO;
 import com.lb_calc_web.dto.ProjectDTO;
-import com.lb_calc_web.handler.ValidationSizeException;
+import com.lb_calc_web.service.validation.ValidationSizeException;
 import com.lb_calc_web.service.ProjectService;
 import com.lb_calc_web.service.ALSService;
 import com.lb_calc_web.service.export.ProjectExcelExportService;

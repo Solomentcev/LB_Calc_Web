@@ -4,7 +4,7 @@ import com.lb_calc_web.TestDataFactory;
 import com.lb_calc_web.dto.LCDTO;
 import com.lb_calc_web.domain.model.LC;
 import com.lb_calc_web.entity.LCEntity;
-import com.lb_calc_web.handler.ValidationSizeException;
+import com.lb_calc_web.service.validation.ValidationSizeException;
 import com.lb_calc_web.mapper.dto.LCDtoMapper;
 import com.lb_calc_web.mapper.entity.LCEntityMapper;
 import com.lb_calc_web.repository.LCRepository;

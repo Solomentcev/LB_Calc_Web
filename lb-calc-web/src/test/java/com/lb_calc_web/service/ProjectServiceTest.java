@@ -16,7 +16,7 @@ import com.lb_calc_web.dto.ProjectDTO;
 import com.lb_calc_web.entity.EmployeeEntity;
 import com.lb_calc_web.entity.ProjectEntity;
 import org.springframework.security.access.AccessDeniedException;
-import com.lb_calc_web.handler.ValidationSizeException;
+import com.lb_calc_web.service.validation.ValidationSizeException;
 import com.lb_calc_web.repository.ALSRepository;
 import com.lb_calc_web.repository.EmployeeRepository;
 import com.lb_calc_web.repository.ProjectRepository;

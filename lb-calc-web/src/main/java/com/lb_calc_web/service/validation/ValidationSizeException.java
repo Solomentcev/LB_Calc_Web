@@ -1,9 +1,11 @@
-package com.lb_calc_web.handler;
-import com.lb_calc_web.dto.validation.ValidationError;
-import com.lb_calc_web.dto.validation.ValidationResult;
-
+package com.lb_calc_web.service.validation;
 import java.util.List;
 
+/**
+ * Сигнализирует о нарушении ограничений при проверке доменной конфигурации.
+ *
+ * <p>Исключение относится к прикладной валидации и не зависит от HTTP-слоя.</p>
+ */
 public class ValidationSizeException extends RuntimeException {
     private final ValidationResult validationResult;
 

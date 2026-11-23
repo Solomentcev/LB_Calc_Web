@@ -6,7 +6,7 @@ import com.lb_calc_web.domain.model.LBC;
 import com.lb_calc_web.domain.model.LC;
 import com.lb_calc_web.domain.model.Project;
 import com.lb_calc_web.domain.model.StorageModule;
-import com.lb_calc_web.dto.validation.ValidationResult;
+import com.lb_calc_web.service.validation.ValidationResult;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;

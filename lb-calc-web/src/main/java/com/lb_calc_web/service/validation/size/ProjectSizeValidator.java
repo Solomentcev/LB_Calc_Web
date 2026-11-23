@@ -2,7 +2,7 @@ package com.lb_calc_web.service.validation.size;
 
 import com.lb_calc_web.domain.model.ALS;
 import com.lb_calc_web.domain.model.Project;
-import com.lb_calc_web.dto.validation.ValidationResult;
+import com.lb_calc_web.service.validation.ValidationResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;

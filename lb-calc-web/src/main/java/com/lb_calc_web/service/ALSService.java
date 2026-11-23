@@ -20,7 +20,7 @@ import com.lb_calc_web.entity.LBEntity;
 import com.lb_calc_web.entity.LBCEntity;
 import com.lb_calc_web.entity.LCEntity;
 import com.lb_calc_web.entity.ModuleEntity;
-import com.lb_calc_web.handler.ValidationSizeException;
+import com.lb_calc_web.service.validation.ValidationSizeException;
 import com.lb_calc_web.mapper.dto.ALSDtoMapper;
 import com.lb_calc_web.mapper.dto.EquipmentSelectionMapper;
 import com.lb_calc_web.mapper.dto.LBDtoMapper;
@@ -242,7 +242,7 @@ public class ALSService {
             String field,
             RuntimeException exception
     ) {
-        var result = new com.lb_calc_web.dto.validation.ValidationResult("ALS", dto.getId());
+        var result = new com.lb_calc_web.service.validation.ValidationResult("ALS", dto.getId());
         result.addError(field, exception.getMessage(), null, null, null);
         return new ValidationSizeException(result);
     }
@@ -740,7 +740,7 @@ public class ALSService {
 
         if (!errors.isEmpty()) {
             var validationResult =
-                    new com.lb_calc_web.dto.validation.ValidationResult(
+                    new com.lb_calc_web.service.validation.ValidationResult(
                             "ALS",
                             null
                     );

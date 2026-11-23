@@ -1,9 +1,12 @@
-package com.lb_calc_web.dto.validation;
+package com.lb_calc_web.service.validation;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Результат прикладной проверки геометрических и структурных ограничений.
+ */
 public class ValidationResult {
     private boolean valid;
     private String objectType; // ALS, LB, LC

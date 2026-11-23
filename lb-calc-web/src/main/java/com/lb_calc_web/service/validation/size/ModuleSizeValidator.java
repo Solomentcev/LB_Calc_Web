@@ -6,7 +6,7 @@ import com.lb_calc_web.domain.model.LB;
 import com.lb_calc_web.domain.model.LBC;
 import com.lb_calc_web.domain.model.LC;
 import com.lb_calc_web.domain.model.StorageModule;
-import com.lb_calc_web.dto.validation.ValidationResult;
+import com.lb_calc_web.service.validation.ValidationResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;

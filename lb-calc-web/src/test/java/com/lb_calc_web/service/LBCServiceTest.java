@@ -6,7 +6,7 @@ import com.lb_calc_web.domain.model.LBC;
 import com.lb_calc_web.mapper.dto.LBCDtoMapper;
 import com.lb_calc_web.service.factory.TypeLbFactory;
 import com.lb_calc_web.entity.LBCEntity;
-import com.lb_calc_web.handler.ValidationSizeException;
+import com.lb_calc_web.service.validation.ValidationSizeException;
 import com.lb_calc_web.mapper.entity.LBCEntityMapper;
 import com.lb_calc_web.repository.LBCRepository;
 import com.lb_calc_web.domain.equipment.EquipmentCatalog;
