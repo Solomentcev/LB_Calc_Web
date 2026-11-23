@@ -332,57 +332,6 @@ public class ALSService {
     }
 
     /**
-     * Формирует изменённую конфигурацию ALS с новым LB без сохранения.
-     */
-    @Transactional(readOnly = true)
-    ALSDTO addNewLB(ALSDTO dto) {
-        Objects.requireNonNull(dto, "ALS не должен быть null");
-
-        LB lb = lbService.createLB(
-                dto.getHeight(),
-                dto.getDepth(),
-                dto.getUpperFrame(),
-                dto.getBottomFrame(),
-                Colors.valueOf(dto.getColorBody()),
-                Colors.valueOf(dto.getColorDoor())
-        );
-
-        var domain = restoreALS(dto);
-        domain.addStorageModule(lb);
-
-        return ALSDtoMapper.toDto(domain);
-    }
-
-    /**
-     * Формирует изменённую конфигурацию ALS без указанного LB.
-     */
-    @Transactional(readOnly = true)
-    ALSDTO deleteLB(ALSDTO dto, Long lbId) {
-        Objects.requireNonNull(dto, "ALS не должен быть null");
-        Objects.requireNonNull(lbId, "Идентификатор LB не должен быть null");
-
-        int lbIndex = -1;
-        for (int i = 0; i < dto.getLbList().size(); i++) {
-            if (Objects.equals(dto.getLbList().get(i).getId(), lbId)) {
-                lbIndex = i;
-                break;
-            }
-        }
-
-        if (lbIndex < 0) {
-            throw new NoSuchElementException(
-                    "LB с id " + lbId + " не найден в ALS " + dto.getId()
-            );
-        }
-
-        var domain = restoreALS(dto);
-        int moduleIndex = ALSDtoMapper.findPhysicalLbIndex(domain, lbIndex);
-        domain.removeModuleAt(moduleIndex);
-
-        return ALSDtoMapper.toDto(domain);
-    }
-
-    /**
      * Восстанавливает доменный LB из транспортной модели с конструктивным типом.
      */
     @Transactional(readOnly = true)
@@ -420,23 +369,6 @@ public class ALSService {
         throw new NoSuchElementException(
                 "LB с id " + lbId + " не найден в ALS " + als.getId()
         );
-    }
-
-    /**
-     * Формирует ALS с заменённым LB без сохранения.
-     *
-     * <p>Модуль заменяется в домене по его физической позиции.
-     * Идентификатор DTO используется только для поиска исходного LB.</p>
-     */
-    @Transactional(readOnly = true)
-    ALSDTO replaceLB(ALSDTO als, LBDTO lb) {
-        Objects.requireNonNull(als, "ALS не должен быть null");
-        Objects.requireNonNull(lb, "LB не должен быть null");
-        Objects.requireNonNull(lb.getId(), "Идентификатор LB не должен быть null");
-
-        ALS domain = restoreALS(als);
-        replaceLB(domain, lb.getId(), restoreLB(lb));
-        return ALSDtoMapper.toDto(domain);
     }
 
     /**

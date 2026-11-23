@@ -757,8 +757,8 @@ public class ProjectService {
         ALSDTO currentALS =
                 findALSInProject(project, alsId);
 
-        ALSDTO als =
-                alsService.addNewLB(currentALS);
+        ALS alsDomain = alsService.restoreDomain(currentALS);
+        ALSDTO als = ALSDtoMapper.toDto(alsService.addNewLB(alsDomain));
 
         return replaceALSandSaveProject(
                 project,
@@ -796,8 +796,11 @@ public class ProjectService {
 
         lb.setId(lbId);
 
-        ALSDTO updatedALS =
-                alsService.replaceLB(als, lb);
+        ALS alsDomain = alsService.restoreDomain(als);
+        LB replacement = alsService.restoreLB(lb);
+        ALSDTO updatedALS = ALSDtoMapper.toDto(
+                alsService.replaceLB(alsDomain, lbId, replacement)
+        );
 
         ALSDTO savedALS =
                 replaceALSandSaveProject(
@@ -835,11 +838,12 @@ public class ProjectService {
 
         findLBInProject(project, alsId, lbId);
 
-        ALSDTO als =
-                alsService.deleteLB(
-                        findALSInProject(project, alsId),
-                        lbId
-                );
+        ALS alsDomain = alsService.restoreDomain(
+                findALSInProject(project, alsId)
+        );
+        ALSDTO als = ALSDtoMapper.toDto(
+                alsService.deleteLB(alsDomain, lbId)
+        );
 
         return replaceALSandSaveProject(
                 project,

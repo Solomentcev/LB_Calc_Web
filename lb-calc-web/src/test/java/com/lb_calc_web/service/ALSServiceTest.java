@@ -474,11 +474,14 @@ class ALSServiceTest {
     @Test
     void addNewLB_shouldAddModuleAndRecalculateComposition() {
         ALSDTO source = TestDataFactory.validALSDTO(1L);
+        ALS als = alsService.restoreDomain(source);
+        com.lb_calc_web.domain.model.LB newLB =
+                alsService.restoreLB(TestDataFactory.validLBDTO(99L));
         when(lbService.createLB(
                 anyInt(), anyInt(), anyInt(), anyInt(), any(), any()
-        )).thenReturn(TestDataFactory.validLBDTO(99L));
+        )).thenReturn(newLB);
 
-        ALSDTO result = alsService.addNewLB(source);
+        ALSDTO result = ALSDtoMapper.toDto(alsService.addNewLB(als));
 
         assertEquals(3, result.getLbList().size());
         assertEquals(4, result.getModuleOrder().size());
@@ -489,9 +492,10 @@ class ALSServiceTest {
     @Test
     void deleteLB_shouldRemoveOnlySelectedModule() {
         ALSDTO source = TestDataFactory.validALSDTO(1L);
+        ALS als = alsService.restoreDomain(source);
         Long selectedLbId = source.getLbList().get(0).getId();
 
-        ALSDTO result = alsService.deleteLB(source, selectedLbId);
+        ALSDTO result = ALSDtoMapper.toDto(alsService.deleteLB(als, selectedLbId));
 
         assertEquals(1, result.getLbList().size());
         assertEquals(2, result.getModuleOrder().size());
@@ -502,11 +506,16 @@ class ALSServiceTest {
     @Test
     void replaceLB_shouldChangeSelectedModuleConfiguration() {
         ALSDTO source = TestDataFactory.validALSDTO(1L);
+        ALS als = alsService.restoreDomain(source);
         Long selectedLbId = source.getLbList().get(1).getId();
-        LBDTO replacement = TestDataFactory.validLBDTO(selectedLbId);
-        replacement.setCountCells(4);
+        LBDTO replacementDto = TestDataFactory.validLBDTO(selectedLbId);
+        replacementDto.setCountCells(4);
+        com.lb_calc_web.domain.model.LB replacement =
+                alsService.restoreLB(replacementDto);
 
-        ALSDTO result = alsService.replaceLB(source, replacement);
+        ALSDTO result = ALSDtoMapper.toDto(
+                alsService.replaceLB(als, selectedLbId, replacement)
+        );
 
         assertEquals(2, result.getLbList().size());
         assertEquals(3, result.getModuleOrder().size());
@@ -516,11 +525,14 @@ class ALSServiceTest {
     @Test
     void replaceLB_unknownId_shouldThrow() {
         ALSDTO source = TestDataFactory.validALSDTO(1L);
-        LBDTO replacement = TestDataFactory.validLBDTO(999L);
+        ALS als = alsService.restoreDomain(source);
+        LBDTO replacementDto = TestDataFactory.validLBDTO(999L);
+        com.lb_calc_web.domain.model.LB replacement =
+                alsService.restoreLB(replacementDto);
 
         assertThrows(
                 java.util.NoSuchElementException.class,
-                () -> alsService.replaceLB(source, replacement)
+                () -> alsService.replaceLB(als, 999L, replacement)
         );
     }
 
