@@ -124,7 +124,7 @@ toDto(alsService.createALS())
             dto.setId(id);
 
             ALS savedDomain = alsService.saveALS(alsService.restoreDomain(dto));
-            ALSDTO saved = ALSDtoMapper.toDto(savedDomain);
+            ALSDTO saved = toDto(savedDomain);
 
             return ResponseEntity.ok(
                     ApiResponse.success(saved)
@@ -229,7 +229,7 @@ toDto(alsService.createALS())
     ) {
 
             ALSDTO saved = alsService.deleteLBandSaveALS(alsId, lbId);
-            return ResponseEntity.ok(.body(ApiResponse.success(addALSImage(saved)));
+            return ResponseEntity.ok(ApiResponse.success(addALSImage(saved)));
 
     }
 
