@@ -387,7 +387,7 @@ public class ALSService {
     public LC restoreLC(LCDTO dto, ALS als) {
         Objects.requireNonNull(dto, "LC не должен быть null");
         Objects.requireNonNull(als, "ALS не должен быть null");
-        return restoreLC(dto, createEquipmentRestoreContext(ALSDtoMapper.toDto(als)));
+        return restoreLC(dto, createEquipmentRestoreContext(als));
     }
 
     /**
@@ -398,7 +398,7 @@ public class ALSService {
     public LBC restoreLBC(LBCDTO dto, ALS als) {
         Objects.requireNonNull(dto, "LBC не должен быть null");
         Objects.requireNonNull(als, "ALS не должен быть null");
-        return restoreLBC(dto, createEquipmentRestoreContext(ALSDtoMapper.toDto(als)));
+        return restoreLBC(dto, createEquipmentRestoreContext(als));
     }
 
     /**
@@ -585,10 +585,53 @@ public class ALSService {
     }
 
     private EquipmentRestoreContext createEquipmentRestoreContext(ALSDTO dto) {
-        Long moduleId = dto.getLC() != null
-                ? dto.getLC().getId()
-                : dto.getLBC() != null ? dto.getLBC().getId() : null;
-        ModuleEntity existingModule = findExistingControlModule(dto, moduleId);
+        if (dto.getLC() != null) {
+            return createEquipmentRestoreContext(
+                    dto.getId(),
+                    dto.getLC().getId(),
+                    LCEntity.class
+            );
+        }
+        if (dto.getLBC() != null) {
+            return createEquipmentRestoreContext(
+                    dto.getId(),
+                    dto.getLBC().getId(),
+                    LBCEntity.class
+            );
+        }
+        return createEquipmentRestoreContext(null, null, null);
+    }
+
+    /**
+     * Создаёт контекст восстановления по уже загруженной доменной ALS.
+     * Повторное преобразование Domain в DTO для поиска исходной Entity не требуется.
+     */
+    private EquipmentRestoreContext createEquipmentRestoreContext(ALS als) {
+        ControlModule controlModule = als.getControlModule();
+        if (controlModule instanceof LC lc) {
+            return createEquipmentRestoreContext(
+                    als.getId(),
+                    lc.getId(),
+                    LCEntity.class
+            );
+        }
+        if (controlModule instanceof LBC lbc) {
+            return createEquipmentRestoreContext(
+                    als.getId(),
+                    lbc.getId(),
+                    LBCEntity.class
+            );
+        }
+        return createEquipmentRestoreContext(null, null, null);
+    }
+
+    private EquipmentRestoreContext createEquipmentRestoreContext(
+            Long alsId,
+            Long moduleId,
+            Class<? extends ModuleEntity> moduleType
+    ) {
+        ModuleEntity existingModule =
+                findExistingControlModule(alsId, moduleId, moduleType);
         Set<String> retainedEquipmentIds = getRetainedEquipmentIds(existingModule);
         Function<String, Equipment> equipmentResolver =
                 equipmentCatalogService.findExistingConfigurationResolver(retainedEquipmentIds);
@@ -597,17 +640,23 @@ public class ALSService {
 
     /**
      * Возвращает управляющий модуль только если он действительно входит
-     * в указанную сохранённую ALS и соответствует её типу.
+     * в указанную сохранённую ALS и соответствует ожидаемому типу.
      *
-     * <p>Один лишь ID модуля из входного DTO не даёт права переносить
-     * деактивированное оборудование из произвольной конфигурации.</p>
+     * <p>Один лишь ID модуля не даёт права переносить деактивированное
+     * оборудование из произвольной конфигурации.</p>
      */
-    private ModuleEntity findExistingControlModule(ALSDTO dto, Long moduleId) {
-        if (dto.getId() == null || dto.getId() <= 0 || moduleId == null || moduleId <= 0) {
+    private ModuleEntity findExistingControlModule(
+            Long alsId,
+            Long moduleId,
+            Class<? extends ModuleEntity> moduleType
+    ) {
+        if (alsId == null || alsId <= 0
+                || moduleId == null || moduleId <= 0
+                || moduleType == null) {
             return null;
         }
 
-        ALSEntity existingAls = alsRepository.findById(dto.getId()).orElse(null);
+        ALSEntity existingAls = alsRepository.findById(alsId).orElse(null);
         if (existingAls == null) {
             return null;
         }
@@ -615,9 +664,7 @@ public class ALSService {
         return existingAls.getModules().stream()
                 .map(ALSModuleEntity::getModule)
                 .filter(module -> Objects.equals(module.getId(), moduleId))
-                .filter(module -> dto.getLC() != null
-                        ? module instanceof LCEntity
-                        : module instanceof LBCEntity)
+                .filter(moduleType::isInstance)
                 .findFirst()
                 .orElse(null);
     }
