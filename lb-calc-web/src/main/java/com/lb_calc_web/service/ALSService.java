@@ -292,6 +292,46 @@ public class ALSService {
     }
 
     /**
+     * Добавляет новый модуль хранения к доменной конфигурации ALS.
+     */
+    @Transactional(readOnly = true)
+    public ALS addNewLB(ALS als) {
+        Objects.requireNonNull(als, "ALS не должен быть null");
+        LB lb = lbService.createLB(
+                als.getHeight(),
+                als.getDepth(),
+                als.getUpperFrame(),
+                als.getBottomFrame(),
+                als.getColorBody(),
+                als.getColorDoor()
+        );
+        als.addStorageModule(lb);
+        return als;
+    }
+
+    /**
+     * Удаляет модуль LB по persistence ID из физического списка модулей ALS.
+     */
+    @Transactional(readOnly = true)
+    public ALS deleteLB(ALS als, Long lbId) {
+        Objects.requireNonNull(als, "ALS не должен быть null");
+        Objects.requireNonNull(lbId, "Идентификатор LB не должен быть null");
+
+        List<Module> modules = als.getModules();
+        for (int i = 0; i < modules.size(); i++) {
+            Module module = modules.get(i);
+            if (module instanceof LB lb && Objects.equals(lb.getId(), lbId)) {
+                als.removeModuleAt(i);
+                return als;
+            }
+        }
+
+        throw new NoSuchElementException(
+                "LB с id " + lbId + " не найден в ALS " + als.getId()
+        );
+    }
+
+    /**
      * Формирует изменённую конфигурацию ALS с новым LB без сохранения.
      */
     @Transactional(readOnly = true)
@@ -475,16 +515,16 @@ public class ALSService {
      * Добавляет LB в сохранённую ALS и сохраняет новую конфигурацию.
      */
     @Transactional
-    public ALSDTO addNewLBandSaveALS(Long alsId) {
-        return saveALS(addNewLB(ALSDtoMapper.toDto(findById(alsId))));
+    public ALS addNewLBandSaveALS(Long alsId) {
+        return saveALS(addNewLB(findById(alsId)));
     }
 
     /**
      * Удаляет LB из сохранённой ALS и сохраняет новую конфигурацию.
      */
     @Transactional
-    public ALSDTO deleteLBandSaveALS(Long alsId, Long lbId) {
-        return saveALS(deleteLB(ALSDtoMapper.toDto(findById(alsId)), lbId));
+    public ALS deleteLBandSaveALS(Long alsId, Long lbId) {
+        return saveALS(deleteLB(findById(alsId), lbId));
     }
 
     /**

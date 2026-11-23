@@ -104,9 +104,9 @@ public class ALSController extends BaseCatalogController {
             @PathVariable Long alsId
     ) {
         ALSDTO als =
-                alsService.addNewLBandSaveALS(
+                toDto(alsService.addNewLBandSaveALS(
                         alsId
-                );
+                ));
 
         return "redirect:/alss/"
                 + als.getId();
@@ -187,10 +187,10 @@ public class ALSController extends BaseCatalogController {
             @PathVariable Long lbId
     ) {
         ALSDTO als =
-                alsService.deleteLBandSaveALS(
+                toDto(alsService.deleteLBandSaveALS(
                         alsId,
                         lbId
-                );
+                ));
 
         return "redirect:/alss/"
                 + als.getId();

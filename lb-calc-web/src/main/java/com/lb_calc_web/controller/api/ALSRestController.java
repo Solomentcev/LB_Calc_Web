@@ -212,7 +212,7 @@ toDto(alsService.createALS())
             @PathVariable Long alsId
     ) {
 
-            ALSDTO saved = alsService.addNewLBandSaveALS(alsId);
+            ALSDTO saved = toDto(alsService.addNewLBandSaveALS(alsId));
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body(ApiResponse.success(addALSImage(saved)));
 
@@ -228,7 +228,7 @@ toDto(alsService.createALS())
             @PathVariable Long lbId
     ) {
 
-            ALSDTO saved = alsService.deleteLBandSaveALS(alsId, lbId);
+            ALSDTO saved = toDto(alsService.deleteLBandSaveALS(alsId, lbId));
             return ResponseEntity.ok(ApiResponse.success(addALSImage(saved)));
 
     }
