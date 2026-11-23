@@ -228,7 +228,7 @@ class ALSServiceTest {
                 .findFirst()
                 .orElseThrow();
 
-        assertNull(alsHeightError.getObjectId());
+        assertEquals(1L, alsHeightError.getObjectId());
 
         verify(alsRepository, never()).save(any());
     }
