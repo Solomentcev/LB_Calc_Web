@@ -5,7 +5,12 @@ import com.lb_calc_web.domain.attributes.Colors;
 import com.lb_calc_web.domain.attributes.Payment;
 import com.lb_calc_web.domain.equipment.BarReader;
 import com.lb_calc_web.domain.equipment.Display;
+import com.lb_calc_web.domain.model.LC;
 import com.lb_calc_web.dto.LCDTO;
+import com.lb_calc_web.dto.EquipmentSelectionDTO;
+import com.lb_calc_web.mapper.dto.LCDtoMapper;
+import com.lb_calc_web.mapper.dto.EquipmentSelectionMapper;
+import com.lb_calc_web.service.EquipmentCatalogService;
 import com.lb_calc_web.handler.ValidationSizeException;
 import com.lb_calc_web.service.LCService;
 import org.slf4j.Logger;
@@ -16,6 +21,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/lcs")
@@ -25,6 +33,7 @@ public class LCController {
             LoggerFactory.getLogger(LCController.class);
 
     private final LCService lcService;
+    private final EquipmentCatalogService equipmentCatalogService;
 
     private final List<Colors> colorsList =
             Arrays.asList(Colors.values());
@@ -50,8 +59,9 @@ public class LCController {
                     BarReader.READER_2D.getName()
             );
 
-    public LCController(LCService lcService) {
+    public LCController(LCService lcService, EquipmentCatalogService equipmentCatalogService) {
         this.lcService = lcService;
+        this.equipmentCatalogService = equipmentCatalogService;
     }
 
     /**
@@ -62,7 +72,8 @@ public class LCController {
 
         logger.info("Открытие страницы создания LC");
 
-        LCDTO lc = lcService.createLC();
+        LCDTO lc = LCDtoMapper.toDto(lcService.createLC());
+        lc.setId(0L);
 
         model.addAttribute("lc", lc);
 
@@ -83,7 +94,7 @@ public class LCController {
                 id
         );
 
-        LCDTO lc = lcService.findById(id);
+        LCDTO lc = LCDtoMapper.toDto(lcService.findById(id));
 
         model.addAttribute("lc", lc);
 
@@ -107,8 +118,7 @@ public class LCController {
 
         try {
 
-            LCDTO savedLC =
-                    lcService.saveLC(lc);
+            LC savedLC = lcService.saveLC(toDomain(lc));
 
             return "redirect:/lcs/" + savedLC.getId();
 
@@ -131,6 +141,31 @@ public class LCController {
 
             return "lcs/lc";
         }
+    }
+
+    private LC toDomain(LCDTO dto) {
+        LC existing = dto.getId() == null || dto.getId() <= 0
+                ? null
+                : lcService.findById(dto.getId());
+        Set<String> retainedIds = existing == null ? Set.of()
+                : existing.getEquipment().stream()
+                        .map(item -> item.getCatalogPositionId())
+                        .collect(Collectors.toUnmodifiableSet());
+        Function<String, com.lb_calc_web.domain.equipment.Equipment> resolver =
+                existing == null
+                        ? equipmentCatalogService::resolve
+                        : equipmentCatalogService.findExistingConfigurationResolver(retainedIds);
+
+        List<EquipmentSelectionDTO> selections = dto.getEquipmentSelections();
+        if (selections == null && existing != null) {
+            selections = EquipmentSelectionMapper.mergeDisplaySelection(
+                    LCDtoMapper.toDto(existing).getEquipmentSelections(),
+                    dto.getDisplay(),
+                    dto.getDisplayQuantity(),
+                    resolver
+            );
+        }
+        return LCDtoMapper.toDomain(dto, selections, resolver);
     }
 
     /**

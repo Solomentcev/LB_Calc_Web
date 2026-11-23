@@ -159,7 +159,7 @@ public class ALSService {
                         )
                 );
 
-        LCDTO lc =
+        LC lc =
                 lcService.createLC(
                         height,
                         depth,
@@ -168,9 +168,9 @@ public class ALSService {
                         colorBody
                 );
 
-        lc.setColorDoor(
-                colorDoor.name()
-        );
+        lc.setColorDoor(colorDoor);
+
+        LCDTO lcDto = com.lb_calc_web.mapper.dto.LCDtoMapper.toDto(lc);
 
         LB lb =
                 lbService.createLB(
@@ -205,7 +205,7 @@ public class ALSService {
                 )
         );
 
-        als.setLC(lc);
+        als.setLC(lcDto);
 
         als.getLbList().add(LBDtoMapper.toDto(lb));
 
@@ -500,7 +500,7 @@ public class ALSService {
     public ALSDTO replaceWithNewLBC(ALSDTO als) {
         Objects.requireNonNull(als, "ALS не должен быть null");
 
-        LBCDTO lbc = lbcService.createLBC(
+        LBC lbcDomain = lbcService.createLBC(
                 als.getHeight(),
                 als.getDepth(),
                 als.getUpperFrame(),
@@ -509,6 +509,7 @@ public class ALSService {
                 Colors.valueOf(als.getColorDoor())
         );
 
+        LBCDTO lbc = com.lb_calc_web.mapper.dto.LBCDtoMapper.toDto(lbcDomain);
         if (als.getLBC() != null) {
             lbc.setId(als.getLBC().getId());
             // Восстановление по ID сохранит дополнительное оборудование исходного LBC.
