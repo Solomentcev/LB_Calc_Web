@@ -22,6 +22,8 @@ import com.lb_calc_web.service.image.ALSImageService;
 import com.lb_calc_web.service.image.LBImageService;
 import com.lb_calc_web.service.image.LCImageService;
 import com.lb_calc_web.service.image.LBCImageService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -35,6 +37,8 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/projects")
 public class ProjectController
         extends BaseCatalogController {
+
+    private static final Logger logger = LoggerFactory.getLogger(ProjectController.class);
 
     private final ProjectService projectService;
     private final ALSService alsService;
