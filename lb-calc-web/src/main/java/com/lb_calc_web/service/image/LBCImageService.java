@@ -19,6 +19,9 @@ import java.util.Base64;
 
 public final class LBCImageService {
 
+    private static final Logger logger = LoggerFactory.getLogger(LBCImageService.class);
+
+
     private LBCImageService() {
     }
 
