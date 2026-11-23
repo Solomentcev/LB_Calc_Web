@@ -23,7 +23,6 @@ import com.lb_calc_web.handler.ValidationSizeException;
 import com.lb_calc_web.service.export.ProjectExcelExportService;
 import com.lb_calc_web.mapper.dto.ALSDtoMapper;
 import com.lb_calc_web.mapper.dto.EmployeeDtoMapper;
-import com.lb_calc_web.mapper.dto.ProjectDtoMapper;
 import com.lb_calc_web.mapper.entity.ProjectEntityMapper;
 import com.lb_calc_web.repository.ALSRepository;
 import com.lb_calc_web.repository.EmployeeRepository;
@@ -87,38 +86,34 @@ public class ProjectService {
     }
 
     @Transactional(readOnly = true)
-    public List<ProjectDTO> findAll() {
+    public List<Project> findAll() {
         logger.info("Получение списка проектов...");
-        Function<String, Equipment> equipmentResolver = equipmentCatalogService.findDomainCatalogResolver();
+        Function<String, Equipment> equipmentResolver =
+                equipmentCatalogService.findDomainCatalogResolver();
 
-        return projectRepository
-                .findAllWithUsers()
+        return projectRepository.findAllWithUsers()
                 .stream()
-                .map(entity -> ProjectEntityMapper.toDto(entity, equipmentResolver))
+                .map(entity -> ProjectEntityMapper.toDomain(
+                        entity,
+                        (als, alsEntity) -> { },
+                        equipmentResolver
+                ))
                 .toList();
     }
 
     @Transactional(readOnly = true)
-    public ProjectDTO findById(Long id) {
-        logger.info(
-                "Поиск проекта(id={})...",
-                id
-        );
-        if (id == null || id <= 0) {
+    public Project findById(Long id) {
+        logger.info("Поиск проекта(id={})...", id);
+        ProjectEntity entity = loadExistingProject(id);
+        if (entity == null) {
             throw new NoSuchElementException("Проект с id " + id + " не найден");
         }
 
-        ProjectEntity entity =
-                projectRepository.findById(id)
-                        .orElseThrow(
-                                () -> new NoSuchElementException(
-                                        "Проект с id "
-                                                + id
-                                                + " не найден"
-                                )
-                        );
-
-        return ProjectEntityMapper.toDto(entity, equipmentCatalogService.findDomainCatalogResolver());
+        return ProjectEntityMapper.toDomain(
+                entity,
+                (als, alsEntity) -> { },
+                equipmentCatalogService.findDomainCatalogResolver()
+        );
     }
 
     /**
@@ -318,69 +313,22 @@ public class ProjectService {
      * Находит ALS внутри конкретного проекта.
      */
     @Transactional(readOnly = true)
-    public ALSDTO findALSInProject(
-            Long projectId,
-            Long alsId
-    ) {
-        return findALSInProject(
-                findById(projectId),
-                alsId
-        );
-    }
-
-    /**
-     * Находит конфигурацию ALS в уже загруженном проекте.
-     */
-    private ALSDTO findALSInProject(
-            ProjectDTO project,
-            Long alsId
-    ) {
-        return project.getAlsList()
-                .stream()
-                .filter(
-                        als ->
-                                als != null
-                                        && Objects.equals(
-                                        als.getId(),
-                                        alsId
-                                )
-                )
-                .findFirst()
-                .orElseThrow(
-                        () -> new NoSuchElementException(
-                                "ALS с id "
-                                        + alsId
-                                        + " не найден в проекте "
-                                        + project.getId()
-                        )
-                );
+    public ALS findALSInProject(Long projectId, Long alsId) {
+        return findDomainALS(findDomainProject(projectId), alsId);
     }
 
     /**
      * Находит LC внутри конкретного ALS конкретного проекта.
      */
     @Transactional(readOnly = true)
-    public LCDTO findLCInProject(
-            Long projectId,
-            Long alsId,
-            Long lcId
-    ) {
-        return findLCInProject(findById(projectId), alsId, lcId);
-    }
-
-    private LCDTO findLCInProject(
-            ProjectDTO project,
-            Long alsId,
-            Long lcId
-    ) {
-        LCDTO lc = findALSInProject(project, alsId).getLC();
-
+    public LC findLCInProject(Long projectId, Long alsId, Long lcId) {
+        ALS als = findALSInProject(projectId, alsId);
+        LC lc = als.getLC();
         if (lc == null || !Objects.equals(lc.getId(), lcId)) {
             throw new NoSuchElementException(
                     "LC с id " + lcId + " не найден в ALS " + alsId
             );
         }
-
         return lc;
     }
 
@@ -388,27 +336,14 @@ public class ProjectService {
      * Находит LBC внутри конкретного ALS конкретного проекта.
      */
     @Transactional(readOnly = true)
-    public LBCDTO findLBCInProject(
-            Long projectId,
-            Long alsId,
-            Long lbcId
-    ) {
-        return findLBCInProject(findById(projectId), alsId, lbcId);
-    }
-
-    private LBCDTO findLBCInProject(
-            ProjectDTO project,
-            Long alsId,
-            Long lbcId
-    ) {
-        LBCDTO lbc = findALSInProject(project, alsId).getLBC();
-
+    public LBC findLBCInProject(Long projectId, Long alsId, Long lbcId) {
+        ALS als = findALSInProject(projectId, alsId);
+        LBC lbc = als.getLBC();
         if (lbc == null || !Objects.equals(lbc.getId(), lbcId)) {
             throw new NoSuchElementException(
                     "LBC с id " + lbcId + " не найден в ALS " + alsId
             );
         }
-
         return lbc;
     }
 
@@ -416,29 +351,16 @@ public class ProjectService {
      * Находит LB внутри конкретного ALS конкретного проекта.
      */
     @Transactional(readOnly = true)
-    public LBDTO findLBInProject(
-            Long projectId,
-            Long alsId,
-            Long lbId
-    ) {
-        return findLBInProject(findById(projectId), alsId, lbId);
-    }
-
-    private LBDTO findLBInProject(
-            ProjectDTO project,
-            Long alsId,
-            Long lbId
-    ) {
-        return findALSInProject(project, alsId)
-                .getLbList()
-                .stream()
-                .filter(lb -> lb != null && Objects.equals(lb.getId(), lbId))
+    public LB findLBInProject(Long projectId, Long alsId, Long lbId) {
+        ALS als = findALSInProject(projectId, alsId);
+        return als.getStorageModules().stream()
+                .filter(LB.class::isInstance)
+                .map(LB.class::cast)
+                .filter(lb -> Objects.equals(lb.getId(), lbId))
                 .findFirst()
-                .orElseThrow(
-                        () -> new NoSuchElementException(
-                                "LB с id " + lbId + " не найден в ALS " + alsId
-                        )
-                );
+                .orElseThrow(() -> new NoSuchElementException(
+                        "LB с id " + lbId + " не найден в ALS " + alsId
+                ));
     }
 
     /**

@@ -2,6 +2,10 @@ package com.lb_calc_web.controller;
 
 import com.lb_calc_web.dto.ALSDTO;
 import com.lb_calc_web.mapper.dto.ALSDtoMapper;
+import com.lb_calc_web.mapper.dto.ProjectDtoMapper;
+import com.lb_calc_web.mapper.dto.LCDtoMapper;
+import com.lb_calc_web.mapper.dto.LBCDtoMapper;
+import com.lb_calc_web.mapper.dto.LBDtoMapper;
 import com.lb_calc_web.dto.LBCDTO;
 import com.lb_calc_web.dto.LBDTO;
 import com.lb_calc_web.dto.LCDTO;
@@ -44,7 +48,7 @@ public class ProjectController
     ) {
         model.addAttribute(
                 "projects",
-                projectService.findAll()
+                ProjectDtoMapper.toDtoList(projectService.findAll())
         );
 
         return "projects/projects";
@@ -75,7 +79,7 @@ public class ProjectController
     ) {
         model.addAttribute(
                 "project",
-                addALSImages(projectService.findById(id))
+                addALSImages(ProjectDtoMapper.toDto(projectService.findById(id)))
         );
 
         return "projects/project";
@@ -174,12 +178,11 @@ public class ProjectController
             Model model
     ) {
         ProjectDTO project =
-                projectService.findById(projectId);
+                ProjectDtoMapper.toDto(projectService.findById(projectId));
 
         ALSDTO als =
-                projectService.findALSInProject(
-                        projectId,
-                        alsId
+                ALSDtoMapper.toDto(
+                        projectService.findALSInProject(projectId, alsId)
                 );
 
         model.addAttribute(
@@ -229,7 +232,7 @@ public class ProjectController
 
             model.addAttribute(
                     "project",
-                    addALSImages(projectService.findById(projectId))
+                    addALSImages(ProjectDtoMapper.toDto(projectService.findById(projectId)))
             );
 
             return "projects/project_als";
@@ -249,19 +252,16 @@ public class ProjectController
             Model model
     ) {
         ProjectDTO project =
-                projectService.findById(projectId);
+                ProjectDtoMapper.toDto(projectService.findById(projectId));
 
         ALSDTO als =
-                projectService.findALSInProject(
-                        projectId,
-                        alsId
+                ALSDtoMapper.toDto(
+                        projectService.findALSInProject(projectId, alsId)
                 );
 
         LCDTO lc =
-                projectService.findLCInProject(
-                        projectId,
-                        alsId,
-                        lcId
+                LCDtoMapper.toDto(
+                        projectService.findLCInProject(projectId, alsId, lcId)
                 );
 
         model.addAttribute("project", addALSImages(project));
@@ -310,13 +310,15 @@ public class ProjectController
                     e.getErrors()
             );
 
-            model.addAttribute("project", addALSImages(projectService.findById(projectId)));
+            model.addAttribute(
+                    "project",
+                    addALSImages(ProjectDtoMapper.toDto(projectService.findById(projectId)))
+            );
 
             model.addAttribute(
                     "als",
-                    addALSImage(projectService.findALSInProject(
-                            projectId,
-                            alsId
+                    addALSImage(ALSDtoMapper.toDto(
+                            projectService.findALSInProject(projectId, alsId)
                     ))
             );
 
@@ -357,19 +359,16 @@ public class ProjectController
             Model model
     ) {
         ProjectDTO project =
-                projectService.findById(projectId);
+                ProjectDtoMapper.toDto(projectService.findById(projectId));
 
         ALSDTO als =
-                projectService.findALSInProject(
-                        projectId,
-                        alsId
+                ALSDtoMapper.toDto(
+                        projectService.findALSInProject(projectId, alsId)
                 );
 
         LBCDTO lbc =
-                projectService.findLBCInProject(
-                        projectId,
-                        alsId,
-                        lbcId
+                LBCDtoMapper.toDto(
+                        projectService.findLBCInProject(projectId, alsId, lbcId)
                 );
 
         model.addAttribute("project", addALSImages(project));
@@ -417,9 +416,11 @@ public class ProjectController
                     e.getErrors()
             );
 
-            model.addAttribute("project", addALSImages(projectService.findById(projectId)));
+            model.addAttribute("project", addALSImages(ProjectDtoMapper.toDto(projectService.findById(projectId))));
 
-            model.addAttribute("als", addALSImage(projectService.findALSInProject(projectId, alsId)));
+            model.addAttribute("als", addALSImage(ALSDtoMapper.toDto(
+                    projectService.findALSInProject(projectId, alsId)
+            )));
 
             model.addAttribute(
                     "lbc",
@@ -447,19 +448,16 @@ public class ProjectController
             Model model
     ) {
         ProjectDTO project =
-                projectService.findById(projectId);
+                ProjectDtoMapper.toDto(projectService.findById(projectId));
 
         ALSDTO als =
-                projectService.findALSInProject(
-                        projectId,
-                        alsId
+                ALSDtoMapper.toDto(
+                        projectService.findALSInProject(projectId, alsId)
                 );
 
         LBDTO lb =
-                projectService.findLBInProject(
-                        projectId,
-                        alsId,
-                        lbId
+                LBDtoMapper.toDto(
+                        projectService.findLBInProject(projectId, alsId, lbId)
                 );
 
         model.addAttribute("project", addALSImages(project));
@@ -508,9 +506,9 @@ public class ProjectController
                     e.getErrors()
             );
 
-            model.addAttribute("project", addALSImages(projectService.findById(projectId)));
+            model.addAttribute("project", addALSImages(ProjectDtoMapper.toDto(projectService.findById(projectId))));
 
-            model.addAttribute("als", addALSImage(projectService.findALSInProject(projectId, alsId)));
+            model.addAttribute("als", addALSImage(ALSDtoMapper.toDto(projectService.findALSInProject(projectId, alsId))));
 
             model.addAttribute(
                     "lb",
@@ -612,7 +610,7 @@ public class ProjectController
             @PathVariable Long id
     ) {
         ProjectDTO project =
-                projectService.findById(id);
+                ProjectDtoMapper.toDto(projectService.findById(id));
 
         String filename =
                 project.getName()

@@ -8,6 +8,10 @@ import com.lb_calc_web.dto.LCDTO;
 import com.lb_calc_web.dto.ProjectDTO;
 import com.lb_calc_web.domain.model.Project;
 import com.lb_calc_web.mapper.dto.ProjectDtoMapper;
+import com.lb_calc_web.mapper.dto.ALSDtoMapper;
+import com.lb_calc_web.mapper.dto.LCDtoMapper;
+import com.lb_calc_web.mapper.dto.LBCDtoMapper;
+import com.lb_calc_web.mapper.dto.LBDtoMapper;
 import com.lb_calc_web.service.ALSService;
 import com.lb_calc_web.service.ProjectService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -63,7 +67,7 @@ public class ProjectRestController {
     public ResponseEntity<?> getAllProjects() {
 
         List<ProjectDTO> projects =
-                projectService.findAll();
+                ProjectDtoMapper.toDtoList(projectService.findAll());
 
         return ResponseEntity.ok(
                 ApiResponse.success(
@@ -86,7 +90,7 @@ public class ProjectRestController {
 
             return ResponseEntity.ok(
                     ApiResponse.success(
-                            projectService.findById(id)
+                            ProjectDtoMapper.toDto(projectService.findById(id))
                     )
             );
 
@@ -200,10 +204,7 @@ public class ProjectRestController {
 
             return ResponseEntity.ok(
                     ApiResponse.success(
-                            projectService.findALSInProject(
-                                    projectId,
-                                    alsId
-                            )
+                            ALSDtoMapper.toDto(projectService.findALSInProject(projectId, alsId))
                     )
             );
 
@@ -308,11 +309,7 @@ public class ProjectRestController {
     ) {
 
             LCDTO lc =
-                    projectService.findLCInProject(
-                            projectId,
-                            alsId,
-                            lcId
-                    );
+                    LCDtoMapper.toDto(projectService.findLCInProject(projectId, alsId, lcId));
 
             return ResponseEntity.ok(
                     ApiResponse.success(lc)
@@ -401,11 +398,7 @@ public class ProjectRestController {
     ) {
 
             LBCDTO lbc =
-                    projectService.findLBCInProject(
-                            projectId,
-                            alsId,
-                            lbcId
-                    );
+                    LBCDtoMapper.toDto(projectService.findLBCInProject(projectId, alsId, lbcId));
 
             return ResponseEntity.ok(
                     ApiResponse.success(lbc)
@@ -465,11 +458,7 @@ public class ProjectRestController {
     ) {
 
             LBDTO lb =
-                    projectService.findLBInProject(
-                            projectId,
-                            alsId,
-                            lbId
-                    );
+                    LBDtoMapper.toDto(projectService.findLBInProject(projectId, alsId, lbId));
 
             return ResponseEntity.ok(
                     ApiResponse.success(lb)
@@ -496,10 +485,7 @@ public class ProjectRestController {
             lb.setId(lbId);
 
             ALSDTO currentALS =
-                    projectService.findALSInProject(
-                            projectId,
-                            alsId
-                    );
+                    ALSDtoMapper.toDto(projectService.findALSInProject(projectId, alsId));
             int lbIndex = -1;
             for (int index = 0; index < currentALS.getLbList().size(); index++) {
                 if (Objects.equals(currentALS.getLbList().get(index).getId(), lbId)) {
@@ -605,7 +591,7 @@ public class ProjectRestController {
     ) {
 
             ProjectDTO project =
-                    projectService.findById(id);
+                    ProjectDtoMapper.toDto(projectService.findById(id));
 
             InputStreamResource file =
                     new InputStreamResource(

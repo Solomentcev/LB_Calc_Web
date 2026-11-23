@@ -7,6 +7,7 @@ import com.lb_calc_web.dto.ALSDTO;
 import com.lb_calc_web.domain.attributes.TypeLb;
 import com.lb_calc_web.domain.equipment.EquipmentCatalog;
 import com.lb_calc_web.mapper.dto.ALSDtoMapper;
+import com.lb_calc_web.mapper.dto.ProjectDtoMapper;
 import com.lb_calc_web.dto.EmployeeDTO;
 import com.lb_calc_web.dto.LBCDTO;
 import com.lb_calc_web.dto.LBDTO;
@@ -218,43 +219,21 @@ class ProjectServiceTest {
     }
 
     @Test
-    void findLBCInProject_shouldReturnLBC() {
-        ALSDTO als = TestDataFactory.validLBCALSDTO(10L);
-        LBCDTO lbc = als.getLBC();
-
-        ProjectDTO project = new ProjectDTO();
-        project.setId(1L);
-        project.getAlsList().add(als);
-
-        ProjectService spy = spy(projectService);
-        doReturn(project).when(spy).findById(1L);
-
-        LBCDTO result =
-                spy.findLBCInProject(
-                        1L,
-                        10L,
-                        lbc.getId()
-                );
-
-        assertSame(lbc, result);
+    void findAll_shouldReturnDomainProjects() {
+        when(projectRepository.findAllWithUsers()).thenReturn(java.util.List.of());
+        assertTrue(projectService.findAll().isEmpty());
     }
 
     @Test
-    void findLBCInProject_missing_shouldThrow() {
-        ProjectDTO project =
-                TestDataFactory.validProject(1L);
+    void findById_missingProject_shouldThrow() {
+        when(projectRepository.findById(1L)).thenReturn(Optional.empty());
+        assertThrows(NoSuchElementException.class, () -> projectService.findById(1L));
+    }
 
-        ProjectService spy = spy(projectService);
-        doReturn(project).when(spy).findById(1L);
-
-        assertThrows(
-                NoSuchElementException.class,
-                () -> spy.findLBCInProject(
-                        1L,
-                        999L,
-                        999L
-                )
-        );
+    @Test
+    void findALSInProject_missingProject_shouldThrow() {
+        when(projectRepository.findById(1L)).thenReturn(Optional.empty());
+        assertThrows(NoSuchElementException.class, () -> projectService.findALSInProject(1L, 10L));
     }
 
     @Test
