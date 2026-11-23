@@ -1079,11 +1079,23 @@ public class ProjectService {
             }
         }
 
-        return ProjectEntityMapper.createAlsResolver(
-                savedALS,
-                entitiesById,
-                alsDto -> alsService.restoreDomain(alsDto)
-        );
+        List<Map.Entry<ALS, ALSEntity>> resolved = new ArrayList<>();
+
+        for (ALSDTO dto : savedALS) {
+            ALSEntity entity = entitiesById.get(dto.getId());
+            ALS domain = alsService.restoreDomain(dto);
+
+            if (resolved.stream().noneMatch(entry -> entry.getKey().equals(domain))) {
+                resolved.add(Map.entry(domain, entity));
+            }
+        }
+
+        return requested -> resolved.stream()
+                .filter(entry -> entry.getKey().equals(requested))
+                .map(Map.Entry::getValue)
+                .findFirst()
+                .orElseThrow(() -> new NoSuchElementException(
+                        "Для конфигурации ALS не найдена сохранённая сущность"));
     }
 
     private void validateProject(Project domain) {

@@ -9,16 +9,12 @@ import com.lb_calc_web.entity.ALSEntity;
 import com.lb_calc_web.entity.EmployeeEntity;
 import com.lb_calc_web.entity.ProjectALSEntity;
 import com.lb_calc_web.entity.ProjectEntity;
-import com.lb_calc_web.mapper.dto.ProjectDtoMapper;
-import com.lb_calc_web.dto.ALSDTO;
-import com.lb_calc_web.dto.ProjectDTO;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.NoSuchElementException;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
@@ -157,40 +153,6 @@ public final class ProjectEntityMapper {
             }
         }
         return dto;
-    }
-
-    /**
-     * Создаёт функцию разрешения ALS в persistence-сущность по конфигурации.
-     */
-    public static Function<ALS, ALSEntity> createAlsResolver(
-            List<ALSDTO> savedAls,
-            Map<Long, ALSEntity> entitiesById,
-            Function<ALSDTO, ALS> alsMapper
-    ) {
-        Objects.requireNonNull(savedAls, "Список ALS не должен быть null");
-        Objects.requireNonNull(entitiesById, "Карта ALSEntity не должна быть null");
-        Objects.requireNonNull(alsMapper, "alsMapper не должен быть null");
-
-        List<Map.Entry<ALS, ALSEntity>> resolved = new ArrayList<>();
-        for (ALSDTO dto : savedAls) {
-            if (dto == null || dto.getId() == null) {
-                throw new IllegalStateException("Сохранённая ALS не имеет persistence ID");
-            }
-            ALSEntity entity = entitiesById.get(dto.getId());
-            if (entity == null) {
-                throw new NoSuchElementException("ALS с id " + dto.getId() + " не найдена в БД");
-            }
-            ALS domain = Objects.requireNonNull(alsMapper.apply(dto), "ALS не должна быть null");
-            if (resolved.stream().noneMatch(entry -> entry.getKey().equals(domain))) {
-                resolved.add(Map.entry(domain, entity));
-            }
-        }
-        return requested -> resolved.stream()
-                .filter(entry -> entry.getKey().equals(requested))
-                .map(Map.Entry::getValue)
-                .findFirst()
-                .orElseThrow(() -> new NoSuchElementException(
-                        "Для конфигурации ALS не найдена сохранённая сущность"));
     }
 
     /**
