@@ -36,12 +36,14 @@ public class ProjectSizeValidator {
         List<ValidationResult> results = new ArrayList<>();
 
         if (project == null) {
-            ValidationResult invalid = new ValidationResult("Project", project.getId());
+            ValidationResult invalid = new ValidationResult("Project", null);
             invalid.addError(invalid, "project", "Проект не задан",
                     null, null, null);
             results.add(invalid);
             return results;
         }
+
+        results.add(new ValidationResult("Project", project.getId()));
 
         Map<ALS, Integer> configurations = project.getQuantityALS();
 
