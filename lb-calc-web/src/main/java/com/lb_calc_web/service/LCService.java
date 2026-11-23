@@ -207,11 +207,6 @@ public class LCService {
             throw new NoSuchElementException("LC с id=" + domain.getId() + " не найден");
         }
 
-
-        if (domain.getId() != null && currentEntity.isEmpty()) {
-            throw new NoSuchElementException("LC с id=" + domain.getId() + " не найден");
-        }
-
         Optional<LCEntity> duplicate = lcRepository.findCandidates(
                         domain.getHeight(), domain.getWidth(), domain.getDepth(),
                         domain.getUpperFrame(), domain.getBottomFrame(),

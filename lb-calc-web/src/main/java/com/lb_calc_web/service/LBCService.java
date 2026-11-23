@@ -205,11 +205,6 @@ public class LBCService {
         if (domain.getId() != null && lbcRepository.findById(domain.getId()).isEmpty()) {
             throw new NoSuchElementException("LBC с id=" + domain.getId() + " не найден");
         }
-
-
-        if (domain.getId() != null && currentEntity.isEmpty()) {
-            throw new NoSuchElementException("LBC с id=" + domain.getId() + " не найден");
-        }
         var typeLb = domain.getTypeLb();
 
         Optional<LBCEntity> duplicate = lbcRepository.findCandidates(
