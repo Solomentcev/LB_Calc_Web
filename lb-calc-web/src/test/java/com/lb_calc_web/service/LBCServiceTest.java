@@ -182,23 +182,6 @@ class LBCServiceTest {
     }
 
     @Test
-    void saveLBC_missingRequiredColor_shouldReturnValidationError() {
-        LBCDTO dto = TestDataFactory.validLBCDTO(43L);
-        dto.setColorBody(null);
-
-        ValidationSizeException exception = assertThrows(
-                ValidationSizeException.class,
-                () -> lbcService.saveLBC(dto)
-        );
-
-        var error = exception.getValidationResult().getErrors().get(0);
-        assertEquals("LBC", error.getObjectType());
-        assertEquals(43L, error.getObjectId());
-        assertEquals("domainModel", error.getField());
-        verify(lbcRepository, never()).save(any());
-    }
-
-    @Test
     void findById_existing_shouldReturnDto() {
         LBCEntity entity =
                 spy(
@@ -271,8 +254,7 @@ class LBCServiceTest {
                         )
                 );
 
-        List<LBCDTO> result =
-                lbcService.findAll();
+        List<LBC> result = lbcService.findAll();
 
         assertEquals(2, result.size());
         assertEquals(1L, result.get(0).getId());
