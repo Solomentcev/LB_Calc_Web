@@ -265,49 +265,7 @@ public class ProjectService {
 
         validateProject(domain);
 
-        /*
-         * Сохраняем каждую уникальную конфигурацию агрегата через Domain API.
-         * Project уже сгруппировал одинаковые ALS и хранит их количество,
-         * поэтому повторно сохранять одну конфигурацию для каждой единицы
-         * физического состава не требуется.
-         */
-        List<ALS> savedALS = new ArrayList<>(domain.getQuantityALS().keySet());
-        savedALS.forEach(alsService::saveALS);
-
-        Function<ALS, ALSEntity> alsResolver =
-                resolveALSEntities(savedALS);
-
-        ProjectEntity entity;
-
-        if (existing == null) {
-            entity =
-                    ProjectEntityMapper.toEntity(
-                            domain,
-                            this::resolveEmployee,
-                            alsResolver
-                    );
-        } else {
-            entity = existing;
-
-            ProjectEntityMapper.updateEntity(
-                    domain,
-                    entity,
-                    this::resolveEmployee,
-                    alsResolver
-            );
-        }
-
-        ProjectEntity saved =
-                projectRepository.save(
-                        entity
-                );
-
-        logger.info(
-                "Проект сохранён: id={}",
-                saved.getId()
-        );
-
-        return ProjectEntityMapper.toDto(saved, equipmentCatalogService.findDomainCatalogResolver());
+        return persistProject(domain, existing);
     }
 
     @Transactional
@@ -356,14 +314,9 @@ public class ProjectService {
      */
     @Transactional
     public ProjectDTO addNewALSandSaveProject(Long projectId) {
-        ProjectDTO source = findById(projectId);
-        Project domain = ProjectDtoMapper.toDomain(source, alsDto -> alsService.restoreDomain(alsDto));
-
-        domain.addALS(
-                alsService.createALS()
-        );
-
-        return saveProject(ProjectDtoMapper.toDto(domain, source, alsDto -> alsService.restoreDomain(alsDto)));
+        Project domain = findDomainProject(projectId);
+        domain.addALS(alsService.createALS());
+        return saveDomainProject(domain);
     }
 
     /**
@@ -374,11 +327,8 @@ public class ProjectService {
             Long projectId,
             Long alsId
     ) {
-        ProjectDTO source = findById(projectId);
-        ALSDTO selected = findALSInProject(source, alsId);
-
-        Project domain = ProjectDtoMapper.toDomain(source, alsDto -> alsService.restoreDomain(alsDto));
-        ALS selectedDomain = alsService.restoreDomain(selected);
+        Project domain = findDomainProject(projectId);
+        ALS selectedDomain = findDomainALS(domain, alsId);
 
         if (domain.getQuantity(selectedDomain) == 0) {
             throw new NoSuchElementException(
@@ -389,7 +339,7 @@ public class ProjectService {
 
         domain.removeALS(selectedDomain);
 
-        return saveProject(ProjectDtoMapper.toDto(domain, source, alsDto -> alsService.restoreDomain(alsDto)));
+        return saveDomainProject(domain);
     }
 
     /**
@@ -534,25 +484,13 @@ public class ProjectService {
         Objects.requireNonNull(project, "Проект не должен быть null");
         Objects.requireNonNull(als, "ALS не должен быть null");
 
-        ALSDTO selected = project.getAlsList().stream()
-                .filter(value -> value != null
-                        && Objects.equals(value.getId(), alsId))
-                .findFirst()
-                .orElseThrow(
-                        () -> new NoSuchElementException(
-                                "ALS с id " + alsId
-                                        + " не найден в проекте "
-                                        + project.getId()
-                        )
-                );
-
-        Project domain = ProjectDtoMapper.toDomain(project, alsDto -> alsService.restoreDomain(alsDto));
-        ALS oldConfiguration = alsService.restoreDomain(selected);
+        Project domain = findDomainProject(project.getId());
+        ALS oldConfiguration = findDomainALS(domain, alsId);
         ALS newConfiguration = alsService.restoreDomain(als);
 
         domain.replaceALS(oldConfiguration, newConfiguration);
 
-        ProjectDTO savedProject = saveProject(ProjectDtoMapper.toDto(domain, project, alsDto -> alsService.restoreDomain(alsDto)));
+        ProjectDTO savedProject = saveDomainProject(domain);
 
         return savedProject.getAlsList().stream()
                 .filter(value -> value != null
@@ -563,34 +501,6 @@ public class ProjectService {
                                 "После сохранения изменённая ALS отсутствует в проекте"
                         )
                 );
-    }
-
-    /**
-     * Заменяет LC в ALS и сохраняет проект.
-     */
-    @Transactional
-    public ALSDTO replaceLCandSaveProject(
-            ProjectDTO project,
-            ALSDTO als,
-            Long alsId,
-            LCDTO lc
-    ) {
-        Objects.requireNonNull(
-                lc,
-                "LC не должен быть null"
-        );
-
-        ALS alsDomain = alsService.restoreDomain(als);
-        LC replacement = alsService.restoreLC(lc, alsDomain);
-        ALSDTO updatedALS = ALSDtoMapper.toDto(
-                alsService.replaceLC(alsDomain, replacement)
-        );
-
-        return replaceALSandSaveProject(
-                project,
-                updatedALS,
-                alsId
-        );
     }
 
     /**
@@ -608,61 +518,21 @@ public class ProjectService {
                 "LC не должен быть null"
         );
 
-        ProjectDTO project =
-                findById(projectId);
-
-        ALSDTO als =
-                findALSInProject(project, alsId);
-
-        findLCInProject(
-                project,
-                alsId,
-                lcId
-        );
+        Project domain = findDomainProject(projectId);
+        ALS original = findDomainALS(domain, alsId);
+        LC current = original.getLC();
+        if (current == null || !Objects.equals(current.getId(), lcId)) {
+            throw new NoSuchElementException(
+                    "LC с id " + lcId + " не найден в ALS " + alsId
+            );
+        }
 
         lc.setId(lcId);
+        LC replacement = alsService.restoreLC(lc, original);
+        ALS updated = alsService.replaceLC(original.copy(), replacement);
+        domain.replaceALS(original, updated);
 
-        ALSDTO updatedALS =
-                replaceLCandSaveProject(
-                        project,
-                        als,
-                        alsId,
-                        lc
-                );
-
-        Objects.requireNonNull(
-                updatedALS.getLC(),
-                "После сохранения LC отсутствует в ALS"
-        );
-        return updatedALS;
-    }
-
-    /**
-     * Заменяет LBC в ALS и сохраняет проект.
-     */
-    @Transactional
-    public ALSDTO replaceLBCandSaveProject(
-            ProjectDTO project,
-            ALSDTO als,
-            Long alsId,
-            LBCDTO lbc
-    ) {
-        Objects.requireNonNull(
-                lbc,
-                "LBC не должен быть null"
-        );
-
-        ALS alsDomain = alsService.restoreDomain(als);
-        LBC replacement = alsService.restoreLBC(lbc, alsDomain);
-        ALSDTO updatedALS = ALSDtoMapper.toDto(
-                alsService.replaceLBC(alsDomain, replacement)
-        );
-
-        return replaceALSandSaveProject(
-                project,
-                updatedALS,
-                alsId
-        );
+        return findSavedALS(saveDomainProject(domain), updated);
     }
 
     /**
@@ -680,33 +550,21 @@ public class ProjectService {
                 "LBC не должен быть null"
         );
 
-        ProjectDTO project =
-                findById(projectId);
-
-        ALSDTO als =
-                findALSInProject(project, alsId);
-
-        findLBCInProject(
-                project,
-                alsId,
-                lbcId
-        );
+        Project domain = findDomainProject(projectId);
+        ALS original = findDomainALS(domain, alsId);
+        LBC current = original.getLBC();
+        if (current == null || !Objects.equals(current.getId(), lbcId)) {
+            throw new NoSuchElementException(
+                    "LBC с id " + lbcId + " не найден в ALS " + alsId
+            );
+        }
 
         lbc.setId(lbcId);
+        LBC replacement = alsService.restoreLBC(lbc, original);
+        ALS updated = alsService.replaceLBC(original.copy(), replacement);
+        domain.replaceALS(original, updated);
 
-        ALSDTO updatedALS =
-                replaceLBCandSaveProject(
-                        project,
-                        als,
-                        alsId,
-                        lbc
-                );
-
-        Objects.requireNonNull(
-                updatedALS.getLBC(),
-                "После сохранения LBC отсутствует в ALS"
-        );
-        return updatedALS;
+        return findSavedALS(saveDomainProject(domain), updated);
     }
 
     /**
@@ -717,22 +575,12 @@ public class ProjectService {
             Long projectId,
             Long alsId
     ) {
-        ProjectDTO project =
-                findById(projectId);
+        Project domain = findDomainProject(projectId);
+        ALS original = findDomainALS(domain, alsId);
+        ALS updated = alsService.replaceWithNewLBC(original.copy());
+        domain.replaceALS(original, updated);
 
-        ALSDTO als =
-                findALSInProject(project, alsId);
-
-        ALS alsDomain = alsService.restoreDomain(als);
-        ALSDTO updatedALS = ALSDtoMapper.toDto(
-                alsService.replaceWithNewLBC(alsDomain)
-        );
-
-        return replaceALSandSaveProject(
-                project,
-                updatedALS,
-                alsId
-        );
+        return findSavedALS(saveDomainProject(domain), updated);
     }
 
     /**
@@ -743,20 +591,12 @@ public class ProjectService {
             Long projectId,
             Long alsId
     ) {
-        ProjectDTO project =
-                findById(projectId);
+        Project domain = findDomainProject(projectId);
+        ALS original = findDomainALS(domain, alsId);
+        ALS updated = alsService.addNewLB(original.copy());
+        domain.replaceALS(original, updated);
 
-        ALSDTO currentALS =
-                findALSInProject(project, alsId);
-
-        ALS alsDomain = alsService.restoreDomain(currentALS);
-        ALSDTO als = ALSDtoMapper.toDto(alsService.addNewLB(alsDomain));
-
-        return replaceALSandSaveProject(
-                project,
-                als,
-                alsId
-        );
+        return findSavedALS(saveDomainProject(domain), updated);
     }
 
     /**
@@ -774,32 +614,27 @@ public class ProjectService {
                 "LB не должен быть null"
         );
 
-        ProjectDTO project =
-                findById(projectId);
+        Project domain = findDomainProject(projectId);
+        ALS original = findDomainALS(domain, alsId);
+        if (original.getStorageModules().stream()
+                .filter(LB.class::isInstance)
+                .map(LB.class::cast)
+                .noneMatch(module -> Objects.equals(module.getId(), lbId))) {
+            throw new NoSuchElementException(
+                    "LB с id " + lbId + " не найден в ALS " + alsId
+            );
+        }
 
-        ALSDTO als =
-                findALSInProject(project, alsId);
-
-        findLBInProject(
-                project,
-                alsId,
-                lbId
-        );
+        int originalLbCount = (int) original.getStorageModules().stream()
+                .filter(LB.class::isInstance)
+                .count();
 
         lb.setId(lbId);
-
-        ALS alsDomain = alsService.restoreDomain(als);
         LB replacement = alsService.restoreLB(lb);
-        ALSDTO updatedALS = ALSDtoMapper.toDto(
-                alsService.replaceLB(alsDomain, lbId, replacement)
-        );
+        ALS updated = alsService.replaceLB(original.copy(), lbId, replacement);
+        domain.replaceALS(original, updated);
 
-        ALSDTO savedALS =
-                replaceALSandSaveProject(
-                        project,
-                        updatedALS,
-                        alsId
-                );
+        ALSDTO savedALS = findSavedALS(saveDomainProject(domain), updated);
 
         /*
          * После изменения конфигурации LB получает новый persistence ID.
@@ -807,7 +642,7 @@ public class ProjectService {
          * а не новую конфигурацию.
          */
         if (savedALS.getLbList() == null
-                || savedALS.getLbList().size() != als.getLbList().size()) {
+                || savedALS.getLbList().size() != originalLbCount) {
             throw new IllegalStateException(
                     "После сохранения изменился состав LB в ALS"
             );
@@ -825,25 +660,110 @@ public class ProjectService {
             Long alsId,
             Long lbId
     ) {
-        ProjectDTO project =
-                findById(projectId);
+        Project domain = findDomainProject(projectId);
+        ALS original = findDomainALS(domain, alsId);
+        ALS updated = alsService.deleteLB(original.copy(), lbId);
+        domain.replaceALS(original, updated);
 
-        findLBInProject(project, alsId, lbId);
+        return findSavedALS(saveDomainProject(domain), updated);
+    }
 
-        ALS alsDomain = alsService.restoreDomain(
-                findALSInProject(project, alsId)
-        );
-        ALSDTO als = ALSDtoMapper.toDto(
-                alsService.deleteLB(alsDomain, lbId)
-        );
 
-        return replaceALSandSaveProject(
-                project,
-                als,
-                alsId
+    /**
+     * Загружает проект непосредственно в доменную модель.
+     *
+     * <p>Для восстановления конфигураций используется полный каталог,
+     * включая деактивированные позиции, необходимые историческим проектам.</p>
+     */
+    private Project findDomainProject(Long projectId) {
+        if (projectId == null || projectId <= 0) {
+            throw new NoSuchElementException("Проект с id " + projectId + " не найден");
+        }
+
+        ProjectEntity entity = loadExistingProject(projectId);
+        return ProjectEntityMapper.toDomain(
+                entity,
+                (als, alsEntity) -> { },
+                equipmentCatalogService.findDomainCatalogResolver()
         );
     }
 
+    /**
+     * Находит конкретную конфигурацию ALS по persistence ID в агрегате проекта.
+     */
+    private ALS findDomainALS(Project project, Long alsId) {
+        return project.getQuantityALS().keySet().stream()
+                .filter(als -> Objects.equals(als.getId(), alsId))
+                .findFirst()
+                .orElseThrow(() -> new NoSuchElementException(
+                        "ALS с id " + alsId + " не найден в проекте " + project.getId()
+                ));
+    }
+
+    /**
+     * Сохраняет уже изменённый доменный проект.
+     */
+    private ProjectDTO saveDomainProject(Project domain) {
+        ProjectEntity existing = loadExistingProject(domain.getId());
+        EmployeeDTO currentEmployee = employeeService.getCurrentEmployee();
+        assertCanModifyProject(existing, currentEmployee);
+
+        domain.setUpdatedBy(EmployeeDtoMapper.toDomain(currentEmployee));
+        validateProject(domain);
+
+        return persistProject(domain, existing);
+    }
+
+    /**
+     * Сохраняет доменный проект и все уникальные конфигурации ALS.
+     */
+    private ProjectDTO persistProject(Project domain, ProjectEntity existing) {
+        /*
+         * Project агрегирует одинаковые ALS, поэтому каждая уникальная
+         * конфигурация сохраняется ровно один раз независимо от количества.
+         */
+        List<ALS> savedALS = new ArrayList<>(domain.getQuantityALS().keySet());
+        savedALS.forEach(alsService::saveALS);
+
+        Function<ALS, ALSEntity> alsResolver = resolveALSEntities(savedALS);
+        ProjectEntity entity;
+
+        if (existing == null) {
+            entity = ProjectEntityMapper.toEntity(
+                    domain,
+                    this::resolveEmployee,
+                    alsResolver
+            );
+        } else {
+            entity = existing;
+            ProjectEntityMapper.updateEntity(
+                    domain,
+                    entity,
+                    this::resolveEmployee,
+                    alsResolver
+            );
+        }
+
+        ProjectEntity saved = projectRepository.save(entity);
+        logger.info("Проект сохранён: id={}", saved.getId());
+        return ProjectEntityMapper.toDto(
+                saved,
+                equipmentCatalogService.findDomainCatalogResolver()
+        );
+    }
+
+    /**
+     * Возвращает DTO сохранённой конфигурации ALS по её доменному содержимому.
+     */
+    private ALSDTO findSavedALS(ProjectDTO savedProject, ALS configuration) {
+        return savedProject.getAlsList().stream()
+                .filter(Objects::nonNull)
+                .filter(dto -> alsService.restoreDomain(dto).equals(configuration))
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException(
+                        "После сохранения изменённая ALS отсутствует в проекте"
+                ));
+    }
 
     private ProjectEntity loadExistingProject(
             Long id

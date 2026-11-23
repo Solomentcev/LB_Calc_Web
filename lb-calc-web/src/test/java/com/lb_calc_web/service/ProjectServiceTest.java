@@ -243,40 +243,21 @@ class ProjectServiceTest {
     }
 
     @Test
-    void saveLBAtProject_shouldAcceptNewPersistenceIdAfterConfigurationChange() {
-        ProjectDTO project = new ProjectDTO();
-        project.setId(1L);
+    void saveLBAtProject_missingProject_shouldRejectBeforeRestoringReplacement() {
+        when(projectRepository.findById(1L)).thenReturn(Optional.empty());
 
-        ALSDTO als = TestDataFactory.validALSDTO(10L);
-        project.getAlsList().add(als);
-        Long oldLbId = als.getLbList().get(0).getId();
-        LBDTO requestedLB = TestDataFactory.validLBDTO(oldLbId);
-
-        ALSDTO updatedALS = new ALSDTO();
-        ALSDTO savedALS = new ALSDTO();
-        savedALS.setLbList(java.util.List.of(
-                TestDataFactory.validLBDTO(901L),
-                TestDataFactory.validLBDTO(902L)
-        ));
-
-        ProjectService spy = spy(projectService);
-        doReturn(project).when(spy).findById(1L);
-        when(alsService.replaceLB(als, requestedLB)).thenReturn(updatedALS);
-        doReturn(savedALS).when(spy).replaceALSandSaveProject(
-                project,
-                updatedALS,
-                10L
+        assertThrows(
+                NoSuchElementException.class,
+                () -> projectService.saveLBAtProject(
+                        1L,
+                        10L,
+                        100L,
+                        TestDataFactory.validLBDTO(100L)
+                )
         );
 
-        ALSDTO result = spy.saveLBAtProject(
-                1L,
-                10L,
-                oldLbId,
-                requestedLB
-        );
-
-        assertSame(savedALS, result);
-        assertNotEquals(oldLbId, result.getLbList().get(0).getId());
+        verify(alsService, never()).restoreLB(any(LBDTO.class));
+        verify(projectRepository, never()).save(any(ProjectEntity.class));
     }
 
     @Test
