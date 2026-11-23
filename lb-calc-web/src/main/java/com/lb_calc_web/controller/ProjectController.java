@@ -106,6 +106,7 @@ public class ProjectController
              * ID из URL имеет приоритет над значением формы.
              */
             project.setId(id);
+            populateServerMetadata(project, id);
 
             com.lb_calc_web.domain.model.Project domain =
                     com.lb_calc_web.mapper.dto.ProjectDtoMapper.toDomain(
@@ -129,6 +130,29 @@ public class ProjectController
 
             return "projects/project";
         }
+    }
+
+    /**
+     * Восстанавливает серверные метаданные проекта перед преобразованием DTO в Domain.
+     *
+     * <p>HTML-форма не является источником данных о создателе и датах проекта.
+     * Для нового проекта метаданные формируются для текущего сотрудника,
+     * для существующего — берутся из сохранённого проекта.</p>
+     *
+     * @param dto DTO проекта из формы
+     * @param projectId идентификатор проекта из URL
+     */
+    private void populateServerMetadata(ProjectDTO dto, Long projectId) {
+        com.lb_calc_web.domain.model.Project metadata =
+                projectId != null && projectId > 0
+                        ? projectService.findById(projectId)
+                        : projectService.initProject(dto.getCompany());
+
+        ProjectDTO metadataDto = ProjectDtoMapper.toDto(metadata);
+        dto.setCreatedBy(metadataDto.getCreatedBy());
+        dto.setCreatedAt(metadataDto.getCreatedAt());
+        dto.setUpdatedBy(metadataDto.getUpdatedBy());
+        dto.setUpdatedAt(metadataDto.getUpdatedAt());
     }
 
     /**
