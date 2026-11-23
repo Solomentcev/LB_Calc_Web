@@ -286,37 +286,45 @@ public class EmployeeService implements UserDetailsService {
     }
 
     /**
-     * Возвращает DTO текущего сотрудника.
-     *
-     * В SecurityContext при этом находится EmployeePrincipal.
+     * Возвращает DTO текущего сотрудника для границы представления.
      */
     @Transactional(readOnly = true)
     public EmployeeDTO getCurrentEmployee() {
+        return EmployeeEntityMapper.toDto(getCurrentEmployeeEntity());
+    }
 
+    /**
+     * Возвращает доменную модель текущего сотрудника для прикладной логики.
+     */
+    @Transactional(readOnly = true)
+    public com.lb_calc_web.domain.model.Employee getCurrentEmployeeDomain() {
+        return EmployeeEntityMapper.toDomain(getCurrentEmployeeEntity());
+    }
+
+    private EmployeeEntity getCurrentEmployeeEntity() {
         Authentication authentication =
-                SecurityContextHolder
-                        .getContext()
-                        .getAuthentication();
+                SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication == null
                 || !authentication.isAuthenticated()
                 || authentication instanceof AnonymousAuthenticationToken) {
-
             throw new NoSuchElementException(
                     "Пользователь не аутентифицирован"
             );
         }
 
-        Object principal =
-                authentication.getPrincipal();
-
+        Object principal = authentication.getPrincipal();
         if (principal instanceof EmployeePrincipal employeePrincipal) {
-            return loadUserById(employeePrincipal.getId());
+            return employeeRepository.findById(employeePrincipal.getId())
+                    .orElseThrow(() -> new NoSuchElementException(
+                            "Пользователь с id=" + employeePrincipal.getId() + " не найден"
+                    ));
         }
 
-        return loadUserByEmail(
-                authentication.getName()
-        );
+        return employeeRepository.findByEmail(authentication.getName())
+                .orElseThrow(() -> new NoSuchElementException(
+                        "Пользователь " + authentication.getName() + " не найден"
+                ));
     }
 
 

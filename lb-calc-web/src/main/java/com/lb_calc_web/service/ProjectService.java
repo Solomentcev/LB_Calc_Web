@@ -8,14 +8,12 @@ import com.lb_calc_web.domain.model.LB;
 import com.lb_calc_web.domain.model.LBC;
 import com.lb_calc_web.domain.model.LC;
 import com.lb_calc_web.domain.model.Project;
-import com.lb_calc_web.dto.EmployeeDTO;
 import com.lb_calc_web.dto.validation.ValidationError;
 import com.lb_calc_web.dto.validation.ValidationResult;
 import com.lb_calc_web.entity.ALSEntity;
 import com.lb_calc_web.entity.EmployeeEntity;
 import com.lb_calc_web.entity.ProjectEntity;
 import com.lb_calc_web.handler.ValidationSizeException;
-import com.lb_calc_web.mapper.dto.EmployeeDtoMapper;
 import com.lb_calc_web.mapper.entity.ProjectEntityMapper;
 import com.lb_calc_web.repository.ALSRepository;
 import com.lb_calc_web.repository.EmployeeRepository;
@@ -123,8 +121,7 @@ public class ProjectService {
      * Инициализирует новый доменный проект.
      */
     public Project initProject(String company) {
-        Employee currentEmployee =
-                EmployeeDtoMapper.toDomain(employeeService.getCurrentEmployee());
+        Employee currentEmployee = employeeService.getCurrentEmployeeDomain();
         LocalDate today = LocalDate.now();
 
         Project project = new Project(
@@ -146,10 +143,8 @@ public class ProjectService {
         Objects.requireNonNull(requested, "Проект не должен быть null");
 
         ProjectEntity existing = loadExistingProject(requested.getId());
-        EmployeeDTO currentEmployeeDto = employeeService.getCurrentEmployee();
-        assertCanModifyProject(existing, currentEmployeeDto);
-
-        Employee currentEmployee = EmployeeDtoMapper.toDomain(currentEmployeeDto);
+        Employee currentEmployee = employeeService.getCurrentEmployeeDomain();
+        assertCanModifyProject(existing, currentEmployee);
         LocalDate today = LocalDate.now();
 
         String company = existing == null
@@ -219,7 +214,7 @@ public class ProjectService {
 
         assertCanModifyProject(
                 entity,
-                employeeService.getCurrentEmployee()
+                employeeService.getCurrentEmployeeDomain()
         );
 
         projectRepository.delete(entity);
@@ -562,10 +557,10 @@ public class ProjectService {
      */
     private Project saveDomainProject(Project domain) {
         ProjectEntity existing = loadExistingProject(domain.getId());
-        EmployeeDTO currentEmployee = employeeService.getCurrentEmployee();
+        Employee currentEmployee = employeeService.getCurrentEmployeeDomain();
         assertCanModifyProject(existing, currentEmployee);
 
-        domain.setUpdatedBy(EmployeeDtoMapper.toDomain(currentEmployee));
+        domain.setUpdatedBy(currentEmployee);
         validateProject(domain);
 
         ProjectEntity saved = persistProjectEntity(domain, existing);
@@ -641,7 +636,7 @@ public class ProjectService {
      */
     private void assertCanModifyProject(
             ProjectEntity project,
-            EmployeeDTO currentEmployee
+            Employee currentEmployee
     ) {
         if (project == null) {
             return;

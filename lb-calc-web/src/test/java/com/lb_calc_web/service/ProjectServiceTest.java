@@ -8,7 +8,7 @@ import com.lb_calc_web.domain.equipment.EquipmentCatalog;
 import com.lb_calc_web.mapper.dto.ALSDtoMapper;
 import com.lb_calc_web.mapper.dto.LBDtoMapper;
 import com.lb_calc_web.mapper.dto.ProjectDtoMapper;
-import com.lb_calc_web.dto.EmployeeDTO;
+import com.lb_calc_web.domain.model.Employee;
 import com.lb_calc_web.dto.LBCDTO;
 import com.lb_calc_web.dto.LBDTO;
 import com.lb_calc_web.dto.ProjectDTO;
@@ -82,17 +82,10 @@ class ProjectServiceTest {
 
     @Test
     void initProject_shouldUseCurrentEmployee() {
-        EmployeeDTO employee = new EmployeeDTO();
-        employee.setId(1L);
-        employee.setFirstName("Иван");
-        employee.setLastName("Иванов");
-        employee.setEmail("ivan@example.com");
-        employee.setRegistrationDate(
-                java.time.LocalDate.of(2026, 9, 18)
-        );
-        employee.setRole(Role.ROLE_MANAGER);
+        Employee employee = new Employee(1L, "Иван", "Иванов", "ivan@example.com",
+                java.time.LocalDate.of(2026, 9, 18), Role.ROLE_MANAGER);
 
-        when(employeeService.getCurrentEmployee())
+        when(employeeService.getCurrentEmployeeDomain())
                 .thenReturn(employee);
 
         com.lb_calc_web.domain.model.Project result =
@@ -106,17 +99,10 @@ class ProjectServiceTest {
 
     @Test
     void createProject_shouldAddInitialALS() {
-        EmployeeDTO employee = new EmployeeDTO();
-        employee.setId(1L);
-        employee.setFirstName("Иван");
-        employee.setLastName("Иванов");
-        employee.setEmail("ivan@example.com");
-        employee.setRegistrationDate(
-                java.time.LocalDate.of(2026, 9, 18)
-        );
-        employee.setRole(Role.ROLE_MANAGER);
+        Employee employee = new Employee(1L, "Иван", "Иванов", "ivan@example.com",
+                java.time.LocalDate.of(2026, 9, 18), Role.ROLE_MANAGER);
 
-        when(employeeService.getCurrentEmployee())
+        when(employeeService.getCurrentEmployeeDomain())
                 .thenReturn(employee);
 
         ALSDTO alsDto = TestDataFactory.validALSDTO(10L);
@@ -137,16 +123,9 @@ class ProjectServiceTest {
 
     @Test
     void saveProject_domain_shouldValidateBeforePersistingALS() {
-        EmployeeDTO employee = new EmployeeDTO();
-        employee.setId(1L);
-        employee.setFirstName("Иван");
-        employee.setLastName("Иванов");
-        employee.setEmail("ivan@example.com");
-        employee.setRegistrationDate(
-                java.time.LocalDate.of(2026, 9, 18)
-        );
-        employee.setRole(Role.ROLE_MANAGER);
-        when(employeeService.getCurrentEmployee()).thenReturn(employee);
+        Employee employee = new Employee(1L, "Иван", "Иванов", "ivan@example.com",
+                java.time.LocalDate.of(2026, 9, 18), Role.ROLE_MANAGER);
+        when(employeeService.getCurrentEmployeeDomain()).thenReturn(employee);
 
         ProjectDTO dto = TestDataFactory.validProject(1L);
         dto.setId(null);
@@ -169,11 +148,10 @@ class ProjectServiceTest {
     @Test
     void deleteById_existing_shouldDelete() {
         ProjectEntity entity = new ProjectEntity();
-        EmployeeDTO admin = new EmployeeDTO();
-        admin.setId(1L);
-        admin.setRole(Role.ROLE_ADMIN);
+        Employee admin = new Employee(1L, "Админ", "Админов", "admin@example.com",
+                java.time.LocalDate.of(2026, 9, 18), Role.ROLE_ADMIN);
 
-        when(employeeService.getCurrentEmployee())
+        when(employeeService.getCurrentEmployeeDomain())
                 .thenReturn(admin);
         when(projectRepository.findById(10L))
                 .thenReturn(Optional.of(entity));
@@ -249,10 +227,9 @@ class ProjectServiceTest {
         when(owner.getId()).thenReturn(10L);
         when(projectRepository.findById(1L)).thenReturn(Optional.of(existing));
 
-        EmployeeDTO manager = new EmployeeDTO();
-        manager.setId(11L);
-        manager.setRole(Role.ROLE_MANAGER);
-        when(employeeService.getCurrentEmployee()).thenReturn(manager);
+        Employee manager = new Employee(11L, "Иван", "Иванов", "ivan@example.com",
+                java.time.LocalDate.of(2026, 9, 18), Role.ROLE_MANAGER);
+        when(employeeService.getCurrentEmployeeDomain()).thenReturn(manager);
 
         ProjectDTO dto = TestDataFactory.validProject(1L);
         dto.setId(1L);
@@ -276,10 +253,9 @@ class ProjectServiceTest {
         when(owner.getId()).thenReturn(10L);
         when(projectRepository.findById(1L)).thenReturn(Optional.of(existing));
 
-        EmployeeDTO manager = new EmployeeDTO();
-        manager.setId(11L);
-        manager.setRole(Role.ROLE_MANAGER);
-        when(employeeService.getCurrentEmployee()).thenReturn(manager);
+        Employee manager = new Employee(11L, "Иван", "Иванов", "ivan@example.com",
+                java.time.LocalDate.of(2026, 9, 18), Role.ROLE_MANAGER);
+        when(employeeService.getCurrentEmployeeDomain()).thenReturn(manager);
 
         assertThrows(
                 AccessDeniedException.class,
