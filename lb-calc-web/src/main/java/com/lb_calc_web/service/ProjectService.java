@@ -588,8 +588,11 @@ public class ProjectService {
                 "LC не должен быть null"
         );
 
-        ALSDTO updatedALS =
-                alsService.replaceLC(als, lc);
+        ALS alsDomain = alsService.restoreDomain(als);
+        LC replacement = alsService.restoreLC(lc, alsDomain);
+        ALSDTO updatedALS = ALSDtoMapper.toDto(
+                alsService.replaceLC(alsDomain, replacement)
+        );
 
         return replaceALSandSaveProject(
                 project,
@@ -657,8 +660,11 @@ public class ProjectService {
                 "LBC не должен быть null"
         );
 
-        ALSDTO updatedALS =
-                alsService.replaceLBC(als, lbc);
+        ALS alsDomain = alsService.restoreDomain(als);
+        LBC replacement = alsService.restoreLBC(lbc, alsDomain);
+        ALSDTO updatedALS = ALSDtoMapper.toDto(
+                alsService.replaceLBC(alsDomain, replacement)
+        );
 
         return replaceALSandSaveProject(
                 project,
@@ -725,8 +731,10 @@ public class ProjectService {
         ALSDTO als =
                 findALSInProject(project, alsId);
 
-        ALSDTO updatedALS =
-                alsService.replaceWithNewLBC(als);
+        ALS alsDomain = alsService.restoreDomain(als);
+        ALSDTO updatedALS = ALSDtoMapper.toDto(
+                alsService.replaceWithNewLBC(alsDomain)
+        );
 
         return replaceALSandSaveProject(
                 project,

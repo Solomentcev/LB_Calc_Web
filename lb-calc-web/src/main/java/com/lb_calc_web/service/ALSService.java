@@ -544,80 +544,6 @@ public class ALSService {
     }
 
     /**
-     * Формирует ALS с заменённым управляющим модулем LC без сохранения.
-     */
-    @Transactional(readOnly = true)
-    ALSDTO replaceLC(ALSDTO als, LCDTO lc) {
-        Objects.requireNonNull(als, "ALS не должен быть null");
-        Objects.requireNonNull(lc, "LC не должен быть null");
-
-        if (als.getLC() != null
-                && !Objects.equals(als.getLC().getId(), lc.getId())) {
-            throw new NoSuchElementException(
-                    "LC с id " + lc.getId()
-                            + " не найден в ALS " + als.getId()
-            );
-        }
-
-        EquipmentRestoreContext restoreContext = createEquipmentRestoreContext(als);
-        var domain = restoreALS(als, restoreContext);
-        domain.replaceControlModule(restoreLC(lc, restoreContext));
-
-        return ALSDtoMapper.toDto(domain);
-    }
-
-    /**
-     * Формирует ALS с заменённым управляющим модулем LBC без сохранения.
-     */
-    @Transactional(readOnly = true)
-    ALSDTO replaceLBC(ALSDTO als, LBCDTO lbc) {
-        Objects.requireNonNull(als, "ALS не должен быть null");
-        Objects.requireNonNull(lbc, "LBC не должен быть null");
-
-        if (als.getLBC() != null
-                && !Objects.equals(als.getLBC().getId(), lbc.getId())) {
-            throw new NoSuchElementException(
-                    "LBC с id " + lbc.getId()
-                            + " не найден в ALS " + als.getId()
-            );
-        }
-
-        // Используем общий путь восстановления ALS: он разрешает позиции
-        // каталога и историческое оборудование так же, как при обычном сохранении.
-        EquipmentRestoreContext restoreContext = createEquipmentRestoreContext(als);
-        var domain = restoreALS(als, restoreContext);
-        domain.replaceControlModule(restoreLBC(lbc, restoreContext));
-
-        return ALSDtoMapper.toDto(domain);
-    }
-
-    /**
-     * Создаёт новый LBC и формирует изменённую ALS без сохранения.
-     */
-    @Transactional(readOnly = true)
-    ALSDTO replaceWithNewLBC(ALSDTO als) {
-        Objects.requireNonNull(als, "ALS не должен быть null");
-
-        LBC lbcDomain = lbcService.createLBC(
-                als.getHeight(),
-                als.getDepth(),
-                als.getUpperFrame(),
-                als.getBottomFrame(),
-                Colors.valueOf(als.getColorBody()),
-                Colors.valueOf(als.getColorDoor())
-        );
-
-        LBCDTO lbc = com.lb_calc_web.mapper.dto.LBCDtoMapper.toDto(lbcDomain);
-        if (als.getLBC() != null) {
-            lbc.setId(als.getLBC().getId());
-            // Восстановление по ID сохранит дополнительное оборудование исходного LBC.
-            lbc.setEquipmentSelections(null);
-        }
-
-        return replaceLBC(als, lbc);
-    }
-
-    /**
      * Добавляет LB в сохранённую ALS и сохраняет новую конфигурацию.
      */
     @Transactional
@@ -631,22 +557,6 @@ public class ALSService {
     @Transactional
     public ALS deleteLBandSaveALS(Long alsId, Long lbId) {
         return saveALS(deleteLB(findById(alsId), lbId));
-    }
-
-    /**
-     * Заменяет LC в сохранённой ALS и сохраняет новую конфигурацию.
-     */
-    @Transactional
-    ALSDTO replaceLCandSaveALS(ALSDTO als, LCDTO lc) {
-        return saveALS(replaceLC(als, lc));
-    }
-
-    /**
-     * Заменяет LBC в сохранённой ALS и сохраняет новую конфигурацию.
-     */
-    @Transactional
-    ALSDTO replaceLBCandSaveALS(ALSDTO als, LBCDTO lbc) {
-        return saveALS(replaceLBC(als, lbc));
     }
 
     /**
