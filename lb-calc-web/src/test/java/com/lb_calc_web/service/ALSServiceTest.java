@@ -119,13 +119,12 @@ class ALSServiceTest {
                 TestDataFactory.validLBDTO(20L)
         );
 
-        ALSDTO result = alsService.createALS();
+        ALS result = alsService.createALS();
 
         assertNotNull(result);
-        assertNotNull(result.getLC());
-        assertNull(result.getLBC());
-        assertEquals(1, result.getLbList().size());
-        assertNotNull(result.getStringALSImage());
+        assertInstanceOf(com.lb_calc_web.domain.model.LC.class, result.getControlModule());
+        assertEquals(1, result.getStorageModules().size());
+        assertEquals(2, result.getModules().size());
     }
 
     @Test

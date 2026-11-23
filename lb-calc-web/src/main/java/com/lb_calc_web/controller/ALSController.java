@@ -72,8 +72,8 @@ public class ALSController extends BaseCatalogController {
                 als.setLBC(persisted.getLBC());
             }
 
-            com.lb_calc_web.domain.model.ALS domain = alsService.restoreDomain(als);
-            com.lb_calc_web.domain.model.ALS saved = alsService.saveALS(domain);
+            ALSDTO saved =
+                    alsService.saveALS(als);
 
             return "redirect:/alss/"
                     + saved.getId();
