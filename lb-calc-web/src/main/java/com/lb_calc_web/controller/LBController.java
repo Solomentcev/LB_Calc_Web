@@ -49,7 +49,7 @@ public class LBController {
 
         logger.info("Открытие страницы создания LB");
 
-        LBDTO lb = addLBImage(LBDtoMapper.toDto(lbService.createLB()));
+        LBDTO lb = LBImageService.addImage(LBDtoMapper.toDto(lbService.createLB()));
 
         model.addAttribute("lb", lb);
 
@@ -70,7 +70,7 @@ public class LBController {
                 id
         );
 
-        LBDTO lb = addLBImage(LBDtoMapper.toDto(lbService.findById(id)));
+        LBDTO lb = LBImageService.addImage(LBDtoMapper.toDto(lbService.findById(id)));
 
         model.addAttribute("lb", lb);
 
@@ -113,23 +113,11 @@ public class LBController {
 
             model.addAttribute(
                     "lb",
-                    addLBImage(lb)
+                    LBImageService.addImage(lb)
             );
 
             return "lbs/lb";
         }
-    }
-
-    /**
-     * Формирует изображение LB для отображения в форме.
-     */
-    private LBDTO addLBImage(LBDTO lb) {
-        try {
-            lb.setStringLBImage(LBImageService.getStringLBImage(lb));
-        } catch (RuntimeException exception) {
-            logger.warn("Не удалось сформировать изображение LB id={}: {}", lb.getId(), exception.getMessage());
-        }
-        return lb;
     }
 
     /**

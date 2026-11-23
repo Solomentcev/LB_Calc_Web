@@ -10,6 +10,10 @@ import com.lb_calc_web.domain.equipment.BarReader;
 import com.lb_calc_web.domain.equipment.Display;
 import com.lb_calc_web.domain.equipment.Equipment;
 import com.lb_calc_web.domain.model.LC;
+import com.lb_calc_web.dto.LCDTO;
+import com.lb_calc_web.dto.EquipmentSelectionDTO;
+import com.lb_calc_web.mapper.dto.LCDtoMapper;
+import com.lb_calc_web.mapper.dto.EquipmentSelectionMapper;
 import com.lb_calc_web.service.validation.ValidationResult;
 import com.lb_calc_web.entity.LCEntity;
 import com.lb_calc_web.service.validation.ValidationSizeException;
@@ -28,6 +32,8 @@ import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 public class LCService {
@@ -179,6 +185,42 @@ public class LCService {
                         );
 
         return LCEntityMapper.toDomain(entity, equipmentCatalogService.findDomainCatalogResolver());
+    }
+
+    /**
+     * Восстанавливает доменную конфигурацию LC из DTO с учётом сохранённого оборудования.
+     */
+    @Transactional(readOnly = true)
+    public LC restoreDomain(LCDTO dto) {
+        Objects.requireNonNull(dto, "LC не должен быть null");
+        try {
+            LC existing = dto.getId() == null || dto.getId() <= 0
+                    ? null
+                    : findById(dto.getId());
+            Set<String> retainedIds = existing == null
+                    ? Set.of()
+                    : existing.getEquipment().stream()
+                            .map(item -> item.getCatalogPositionId())
+                            .collect(Collectors.toUnmodifiableSet());
+            Function<String, Equipment> resolver = existing == null
+                    ? equipmentCatalogService::resolve
+                    : equipmentCatalogService.findExistingConfigurationResolver(retainedIds);
+
+            List<EquipmentSelectionDTO> selections = dto.getEquipmentSelections();
+            if (selections == null && existing != null) {
+                selections = EquipmentSelectionMapper.mergeDisplaySelection(
+                        LCDtoMapper.toDto(existing).getEquipmentSelections(),
+                        dto.getDisplay(),
+                        dto.getDisplayQuantity(),
+                        resolver
+                );
+            }
+            return LCDtoMapper.toDomain(dto, selections, resolver);
+        } catch (ValidationSizeException exception) {
+            throw exception;
+        } catch (RuntimeException exception) {
+            throw createMappingValidationException("LC", dto.getId(), exception);
+        }
     }
 
     /**

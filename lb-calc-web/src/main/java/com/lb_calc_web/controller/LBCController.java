@@ -4,15 +4,8 @@ import com.lb_calc_web.domain.attributes.AccessMethod;
 import com.lb_calc_web.domain.attributes.PrintOption;
 import com.lb_calc_web.domain.model.LBC;
 import com.lb_calc_web.dto.LBCDTO;
-import com.lb_calc_web.service.validation.ValidationResult;
-import com.lb_calc_web.dto.EquipmentSelectionDTO;
 import com.lb_calc_web.mapper.dto.LBCDtoMapper;
-import com.lb_calc_web.mapper.dto.EquipmentSelectionMapper;
-import com.lb_calc_web.service.EquipmentCatalogService;
-import com.lb_calc_web.service.factory.TypeLbFactory;
 import com.lb_calc_web.service.image.LBCImageService;
-import com.lb_calc_web.domain.equipment.Equipment;
-import org.springframework.core.env.Environment;
 import com.lb_calc_web.service.validation.ValidationSizeException;
 import com.lb_calc_web.service.LBCService;
 import org.slf4j.Logger;
@@ -23,9 +16,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/lbcs")
@@ -35,14 +25,9 @@ public class LBCController extends BaseCatalogController {
             LoggerFactory.getLogger(LBCController.class);
 
     private final LBCService lbcService;
-    private final EquipmentCatalogService equipmentCatalogService;
-    private final Environment environment;
 
-    public LBCController(LBCService lbcService, EquipmentCatalogService equipmentCatalogService,
-                         Environment environment) {
+    public LBCController(LBCService lbcService) {
         this.lbcService = lbcService;
-        this.equipmentCatalogService = equipmentCatalogService;
-        this.environment = environment;
     }
 
     /**
@@ -52,7 +37,7 @@ public class LBCController extends BaseCatalogController {
     public String lbcs(Model model) {
         model.addAttribute(
                 "lbcs",
-                lbcService.findAll().stream().map(LBCDtoMapper::toDto).map(LBCController::addLBCImage).toList()
+                lbcService.findAll().stream().map(LBCDtoMapper::toDto).map(LBCImageService::addImage).toList()
         );
 
         return "lbcs/lbcs";
@@ -67,7 +52,7 @@ public class LBCController extends BaseCatalogController {
 
         model.addAttribute(
                 "lbc",
-                addLBCImage(LBCDtoMapper.toDto(lbcService.createLBC()))
+                LBCImageService.addImage(LBCDtoMapper.toDto(lbcService.createLBC()))
         );
 
         return "lbcs/lbc";
@@ -88,7 +73,7 @@ public class LBCController extends BaseCatalogController {
 
         model.addAttribute(
                 "lbc",
-                addLBCImage(LBCDtoMapper.toDto(lbcService.findById(id)))
+                LBCImageService.addImage(LBCDtoMapper.toDto(lbcService.findById(id)))
         );
 
         return "lbcs/lbc";
@@ -103,7 +88,7 @@ public class LBCController extends BaseCatalogController {
             Model model
     ) {
         try {
-            LBC saved = lbcService.saveLBC(toDomain(lbc));
+            LBC saved = lbcService.saveLBC(lbcService.restoreDomain(lbc));
 
             return "redirect:/lbcs/" + saved.getId();
 
@@ -114,68 +99,11 @@ public class LBCController extends BaseCatalogController {
             );
             model.addAttribute(
                     "lbc",
-                    addLBCImageSafely(lbc)
+                    LBCImageService.addImage(lbc)
             );
 
             return "lbcs/lbc";
         }
-    }
-
-    private LBC toDomain(LBCDTO dto) {
-        try {
-            return mapToDomain(dto);
-        } catch (ValidationSizeException exception) {
-            throw exception;
-        } catch (RuntimeException exception) {
-            ValidationResult result = new ValidationResult("LBC", dto.getId());
-            result.addError("domainModel", exception.getMessage(), null, null, null);
-            throw new ValidationSizeException(result);
-        }
-    }
-
-    private LBC mapToDomain(LBCDTO dto) {
-        LBC existing = dto.getId() == null || dto.getId() <= 0
-                ? null
-                : lbcService.findById(dto.getId());
-        Set<String> retainedIds = existing == null ? Set.of()
-                : existing.getEquipment().stream()
-                        .map(item -> item.getCatalogPositionId())
-                        .collect(Collectors.toUnmodifiableSet());
-        Function<String, Equipment> resolver = existing == null
-                ? equipmentCatalogService::resolve
-                : equipmentCatalogService.findExistingConfigurationResolver(retainedIds);
-
-        List<EquipmentSelectionDTO> selections = dto.getEquipmentSelections();
-        if (selections == null && existing != null) {
-            selections = EquipmentSelectionMapper.mergeDisplaySelection(
-                    LBCDtoMapper.toDto(existing).getEquipmentSelections(),
-                    dto.getDisplay(),
-                    dto.getDisplayQuantity(),
-                    resolver
-            );
-        }
-        return LBCDtoMapper.toDomain(
-                dto,
-                TypeLbFactory.forLBC(environment, dto.getType()),
-                selections,
-                resolver
-        );
-    }
-
-    private static LBCDTO addLBCImage(LBCDTO dto) {
-        return addLBCImageSafely(dto);
-    }
-
-    /**
-     * Формирует изображение LBC, не подменяя первичную ошибку валидации.
-     */
-    private static LBCDTO addLBCImageSafely(LBCDTO dto) {
-        try {
-            dto.setStringLBCImage(LBCImageService.getStringLBCImage(dto));
-        } catch (RuntimeException exception) {
-            logger.warn("Не удалось сформировать изображение LBC id={}: {}", dto.getId(), exception.getMessage());
-        }
-        return dto;
     }
 
     @ModelAttribute("accessMethodList")

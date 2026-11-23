@@ -3,6 +3,8 @@ package com.lb_calc_web.service.image;
 import com.lb_calc_web.domain.attributes.Colors;
 import com.lb_calc_web.domain.attributes.DirectionDoorOpening;
 import com.lb_calc_web.dto.LBDTO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -15,6 +17,9 @@ import java.io.IOException;
 import java.util.Base64;
 
 public class LBImageService {
+
+    private static final Logger logger = LoggerFactory.getLogger(LBImageService.class);
+
 
     static Image createLBImage(
             LBDTO lb
@@ -374,6 +379,21 @@ public class LBImageService {
         }
 
         g2d.dispose();
+    }
+
+    /**
+     * Формирует изображение LB для представления.
+     */
+    public static LBDTO addImage(LBDTO dto) {
+        if (dto == null) {
+            return null;
+        }
+        try {
+            dto.setStringLBImage(getStringLBImage(dto));
+        } catch (RuntimeException exception) {
+            logger.warn("Не удалось сформировать изображение LB id={}: {}", dto.getId(), exception.getMessage());
+        }
+        return dto;
     }
 
     public static File getFileLBImage(

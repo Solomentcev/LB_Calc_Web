@@ -22,8 +22,9 @@ import com.lb_calc_web.service.image.ALSImageService;
 import com.lb_calc_web.service.image.LBImageService;
 import com.lb_calc_web.service.image.LCImageService;
 import com.lb_calc_web.service.image.LBCImageService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.lb_calc_web.service.image.LBImageService;
+import com.lb_calc_web.service.image.LCImageService;
+import com.lb_calc_web.service.image.LBCImageService;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -37,8 +38,6 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/projects")
 public class ProjectController
         extends BaseCatalogController {
-
-    private static final Logger logger = LoggerFactory.getLogger(ProjectController.class);
 
     private final ProjectService projectService;
     private final ALSService alsService;
@@ -230,7 +229,7 @@ public class ProjectController
 
         model.addAttribute(
                 "als",
-                addALSImage(als)
+                ALSImageService.addImages(als)
         );
 
         return "projects/project_als";
@@ -268,7 +267,7 @@ public class ProjectController
                     ValidationErrorFormatter.format(e.getValidationResult())
             );
 
-            model.addAttribute("als", addALSImage(als));
+            model.addAttribute("als", ALSImageService.addImages(als));
 
             model.addAttribute(
                     "project",
@@ -305,8 +304,8 @@ public class ProjectController
                 );
 
         model.addAttribute("project", addALSImages(project));
-        model.addAttribute("als", addALSImage(als));
-        model.addAttribute("lc", addLCImage(lc));
+        model.addAttribute("als", ALSImageService.addImages(als));
+        model.addAttribute("lc", LCImageService.addImage(lc));
         model.addAttribute("projectId", projectId);
         model.addAttribute("alsId", alsId);
         model.addAttribute("lcId", lcId);
@@ -358,14 +357,14 @@ public class ProjectController
 
             model.addAttribute(
                     "als",
-                    addALSImage(ALSDtoMapper.toDto(
+                    ALSImageService.addImages(ALSDtoMapper.toDto(
                             projectService.findALSInProject(projectId, alsId)
                     ))
             );
 
             model.addAttribute(
                     "lc",
-                    addLCImage(lc)
+                    LCImageService.addImage(lc)
             );
 
             model.addAttribute(
@@ -413,8 +412,8 @@ public class ProjectController
                 );
 
         model.addAttribute("project", addALSImages(project));
-        model.addAttribute("als", addALSImage(als));
-        model.addAttribute("lbc", addLBCImage(lbc));
+        model.addAttribute("als", ALSImageService.addImages(als));
+        model.addAttribute("lbc", LBCImageService.addImage(lbc));
         model.addAttribute("projectId", projectId);
         model.addAttribute("alsId", alsId);
         model.addAttribute("lbcId", lbcId);
@@ -460,13 +459,13 @@ public class ProjectController
 
             model.addAttribute("project", addALSImages(ProjectDtoMapper.toDto(projectService.findById(projectId))));
 
-            model.addAttribute("als", addALSImage(ALSDtoMapper.toDto(
+            model.addAttribute("als", ALSImageService.addImages(ALSDtoMapper.toDto(
                     projectService.findALSInProject(projectId, alsId)
             )));
 
             model.addAttribute(
                     "lbc",
-                    addLBCImage(lbc)
+                    LBCImageService.addImage(lbc)
             );
 
             model.addAttribute("projectId", projectId);
@@ -503,8 +502,8 @@ public class ProjectController
                 );
 
         model.addAttribute("project", addALSImages(project));
-        model.addAttribute("als", addALSImage(als));
-        model.addAttribute("lb", addLBImage(lb));
+        model.addAttribute("als", ALSImageService.addImages(als));
+        model.addAttribute("lb", LBImageService.addImage(lb));
         model.addAttribute("projectId", projectId);
         model.addAttribute("alsId", alsId);
         model.addAttribute("lbId", lbId);
@@ -550,11 +549,11 @@ public class ProjectController
 
             model.addAttribute("project", addALSImages(ProjectDtoMapper.toDto(projectService.findById(projectId))));
 
-            model.addAttribute("als", addALSImage(ALSDtoMapper.toDto(projectService.findALSInProject(projectId, alsId))));
+            model.addAttribute("als", ALSImageService.addImages(ALSDtoMapper.toDto(projectService.findALSInProject(projectId, alsId))));
 
             model.addAttribute(
                     "lb",
-                    addLBImage(lb)
+                    LBImageService.addImage(lb)
             );
 
             model.addAttribute(
@@ -681,52 +680,9 @@ public class ProjectController
     private ProjectDTO addALSImages(ProjectDTO project) {
         if (project != null && project.getAlsList() != null) {
             ProjectDtoMapper.recalculateQuantityALS(project);
-            project.getAlsList().forEach(this::addALSImage);
+            project.getAlsList().forEach(ALSImageService::addImages);
         }
         return project;
-    }
-
-    /**
-     * Формирует изображение конфигурации для представления.
-     */
-    private ALSDTO addALSImage(ALSDTO als) {
-        if (als == null) return null;
-        try {
-            als.setStringALSImage(ALSImageService.getStringALSImage(als));
-        } catch (RuntimeException exception) {
-            logger.warn("Не удалось сформировать изображение ALS id={}: {}", als.getId(), exception.getMessage());
-        }
-        if (als.getLC() != null) addLCImage(als.getLC());
-        if (als.getLBC() != null) addLBCImage(als.getLBC());
-        if (als.getLbList() != null) als.getLbList().forEach(this::addLBImage);
-        return als;
-    }
-
-    private LBDTO addLBImage(LBDTO lb) {
-        try {
-            lb.setStringLBImage(LBImageService.getStringLBImage(lb));
-        } catch (RuntimeException exception) {
-            logger.warn("Не удалось сформировать изображение LB id={}: {}", lb.getId(), exception.getMessage());
-        }
-        return lb;
-    }
-
-    private LCDTO addLCImage(LCDTO lc) {
-        try {
-            lc.setStringLCImage(LCImageService.getStringLCImage(lc));
-        } catch (RuntimeException exception) {
-            logger.warn("Не удалось сформировать изображение LC id={}: {}", lc.getId(), exception.getMessage());
-        }
-        return lc;
-    }
-
-    private LBCDTO addLBCImage(LBCDTO lbc) {
-        try {
-            lbc.setStringLBCImage(LBCImageService.getStringLBCImage(lbc));
-        } catch (RuntimeException exception) {
-            logger.warn("Не удалось сформировать изображение LBC id={}: {}", lbc.getId(), exception.getMessage());
-        }
-        return lbc;
     }
 
 }

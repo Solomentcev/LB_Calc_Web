@@ -7,6 +7,10 @@ import com.lb_calc_web.domain.attributes.Payment;
 import com.lb_calc_web.domain.model.ControlConfiguration;
 import com.lb_calc_web.domain.model.EquipmentConfiguration;
 import com.lb_calc_web.domain.model.LBC;
+import com.lb_calc_web.dto.LBCDTO;
+import com.lb_calc_web.dto.EquipmentSelectionDTO;
+import com.lb_calc_web.mapper.dto.LBCDtoMapper;
+import com.lb_calc_web.mapper.dto.EquipmentSelectionMapper;
 import com.lb_calc_web.domain.attributes.TypeLb;
 import com.lb_calc_web.domain.attributes.DirectionDoorOpening;
 import com.lb_calc_web.domain.equipment.BarReader;
@@ -32,6 +36,7 @@ import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 
 @Service
 public class LBCService {
@@ -178,6 +183,47 @@ public class LBCService {
                         );
 
         return LBCEntityMapper.toDomain(entity, equipmentCatalogService.findDomainCatalogResolver());
+    }
+
+    /**
+     * Восстанавливает доменную конфигурацию LBC из DTO с учётом сохранённого оборудования.
+     */
+    @Transactional(readOnly = true)
+    public LBC restoreDomain(LBCDTO dto) {
+        Objects.requireNonNull(dto, "LBC не должен быть null");
+        try {
+            LBC existing = dto.getId() == null || dto.getId() <= 0
+                    ? null
+                    : findById(dto.getId());
+            Set<String> retainedIds = existing == null
+                    ? Set.of()
+                    : existing.getEquipment().stream()
+                            .map(item -> item.getCatalogPositionId())
+                            .collect(java.util.stream.Collectors.toUnmodifiableSet());
+            Function<String, Equipment> resolver = existing == null
+                    ? equipmentCatalogService::resolve
+                    : equipmentCatalogService.findExistingConfigurationResolver(retainedIds);
+
+            List<EquipmentSelectionDTO> selections = dto.getEquipmentSelections();
+            if (selections == null && existing != null) {
+                selections = EquipmentSelectionMapper.mergeDisplaySelection(
+                        LBCDtoMapper.toDto(existing).getEquipmentSelections(),
+                        dto.getDisplay(),
+                        dto.getDisplayQuantity(),
+                        resolver
+                );
+            }
+            return LBCDtoMapper.toDomain(
+                    dto,
+                    TypeLbFactory.forLBC(environment, dto.getType()),
+                    selections,
+                    resolver
+            );
+        } catch (ValidationSizeException exception) {
+            throw exception;
+        } catch (RuntimeException exception) {
+            throw createMappingValidationException("LBC", dto.getId(), exception);
+        }
     }
 
     /**

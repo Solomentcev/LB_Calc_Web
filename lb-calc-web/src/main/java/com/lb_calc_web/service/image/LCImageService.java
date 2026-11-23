@@ -2,6 +2,8 @@ package com.lb_calc_web.service.image;
 
 import com.lb_calc_web.domain.attributes.Colors;
 import com.lb_calc_web.dto.LCDTO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -14,6 +16,9 @@ import java.io.IOException;
 import java.util.Base64;
 
 public class LCImageService {
+
+    private static final Logger logger = LoggerFactory.getLogger(LCImageService.class);
+
 
     static Image createLCImage(
             LCDTO lc
@@ -185,6 +190,21 @@ public class LCImageService {
         );
 
         g2d.dispose();
+    }
+
+    /**
+     * Формирует изображение LC для представления.
+     */
+    public static LCDTO addImage(LCDTO dto) {
+        if (dto == null) {
+            return null;
+        }
+        try {
+            dto.setStringLCImage(getStringLCImage(dto));
+        } catch (RuntimeException exception) {
+            logger.warn("Не удалось сформировать изображение LC id={}: {}", dto.getId(), exception.getMessage());
+        }
+        return dto;
     }
 
     public static File getFileLCImage(

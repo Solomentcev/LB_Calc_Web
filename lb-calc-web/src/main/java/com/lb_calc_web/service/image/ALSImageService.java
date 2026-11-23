@@ -2,6 +2,8 @@ package com.lb_calc_web.service.image;
 
 import com.lb_calc_web.domain.attributes.PositionControlModule;
 import com.lb_calc_web.dto.ALSDTO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.lb_calc_web.dto.LBDTO;
 
 import javax.imageio.ImageIO;
@@ -16,6 +18,9 @@ import java.util.Base64;
 import java.util.List;
 
 public class ALSImageService {
+
+    private static final Logger logger = LoggerFactory.getLogger(ALSImageService.class);
+
 
     static Image createALSImage(ALSDTO als) {
 
@@ -164,6 +169,30 @@ public class ALSImageService {
         throw new IllegalStateException(
                 "ALS должен содержать модуль управления"
         );
+    }
+
+    /**
+     * Формирует изображения ALS и входящих в неё модулей для представления.
+     */
+    public static ALSDTO addImages(ALSDTO dto) {
+        if (dto == null) {
+            return null;
+        }
+        try {
+            dto.setStringALSImage(getStringALSImage(dto));
+        } catch (RuntimeException exception) {
+            logger.warn("Не удалось сформировать изображение ALS id={}: {}", dto.getId(), exception.getMessage());
+        }
+        if (dto.getLC() != null) {
+            LCImageService.addImage(dto.getLC());
+        }
+        if (dto.getLBC() != null) {
+            LBCImageService.addImage(dto.getLBC());
+        }
+        if (dto.getLbList() != null) {
+            dto.getLbList().forEach(LBImageService::addImage);
+        }
+        return dto;
     }
 
     public static File getFileLCImage(
