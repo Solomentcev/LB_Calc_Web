@@ -6,6 +6,7 @@ import com.lb_calc_web.dto.LBDTO;
 import com.lb_calc_web.dto.validation.ValidationResult;
 import com.lb_calc_web.entity.LBEntity;
 import com.lb_calc_web.handler.ValidationSizeException;
+import com.lb_calc_web.mapper.dto.LBDtoMapper;
 import com.lb_calc_web.mapper.entity.LBEntityMapper;
 import com.lb_calc_web.repository.LBRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,11 +29,8 @@ class LBServiceTest {
 
     @BeforeEach
     void setUp() {
-
         lbRepository = mock(LBRepository.class);
-
         findOrCreateLockService = mock(FindOrCreateLockService.class);
-
         environment = new MockEnvironment()
                 .withProperty("size.height.default", "1940")
                 .withProperty("size.width.default", "500")
@@ -46,160 +44,115 @@ class LBServiceTest {
                 .withProperty("lb.type.TYPE1.delta-width", "100")
                 .withProperty("lb.type.TYPE1.shelf-thick", "5")
                 .withProperty("lb.type.TYPE1.service-zone-width", "40");
-
-        lbService =
-                new LBService(
-                        lbRepository,
-                        findOrCreateLockService,
-                        environment,
-                        TestDataFactory.createSizeValidator()
-                );
+        lbService = new LBService(
+                lbRepository,
+                findOrCreateLockService,
+                environment,
+                TestDataFactory.createSizeValidator()
+        );
     }
 
     @Test
     void createLB_shouldCreateValidDefault() {
-        LBDTO result = lbService.createLB();
-
+        LB result = lbService.createLB();
         assertNotNull(result);
+        assertNull(result.getId());
         assertEquals(1940, result.getHeight());
         assertEquals(500, result.getWidth());
-        assertEquals("TYPE1", result.getType());
-        assertEquals("RIGHT", result.getDirectionDoorOpening());
-        assertTrue(result.getHeightCell() > 0);
-        assertTrue(result.getDepthCell() > 0);
+        assertEquals("TYPE1", result.getTypeLb().getType());
+        assertEquals(com.lb_calc_web.domain.attributes.DirectionDoorOpening.RIGHT,
+                result.getDirectionDoorOpening());
+        assertTrue(result.getCellHeight() > 0);
+        assertTrue(result.getCellDepth() > 0);
         assertNotNull(result.getDescription());
     }
 
     @Test
     void saveLB_shouldReturnExistingByConfiguration() {
-        LBDTO dto = TestDataFactory.validLBDTO(1L);
-        LBEntity existing = LBEntityMapper.toEntity(
-                com.lb_calc_web.mapper.dto.LBDtoMapper.toDomain(dto)
-        );
-
+        LB domain = TestDataFactory.validLB(null);
+        LBEntity existing = LBEntityMapper.toEntity(domain);
+        LBEntity existingWithId = spy(existing);
+        doReturn(7L).when(existingWithId).getId();
         when(lbRepository.findCandidates(
                 anyInt(), anyInt(), anyInt(), anyInt(), anyInt(),
                 anyString(), anyInt(), anyInt(), anyInt(), anyInt(),
                 any(), anyInt(), any(), any()
-        )).thenReturn(List.of(existing));
+        )).thenReturn(List.of(existingWithId));
 
-        LBDTO result = lbService.saveLB(dto);
+        LB result = lbService.saveLB(domain);
 
-        assertNotNull(result);
+        assertEquals(7L, result.getId());
         verify(lbRepository, never()).save(any());
     }
 
     @Test
     void saveLB_shouldPersistNewConfiguration() {
-        LBDTO dto = TestDataFactory.validLBDTO(1L);
-        LBEntity saved =
-                LBEntityMapper.toEntity(
-                        com.lb_calc_web.mapper.dto.LBDtoMapper.toDomain(dto)
-                );
-
+        LB domain = TestDataFactory.validLB(null);
+        LBEntity saved = spy(LBEntityMapper.toEntity(domain));
+        doReturn(9L).when(saved).getId();
         when(lbRepository.findCandidates(
                 anyInt(), anyInt(), anyInt(), anyInt(), anyInt(),
                 anyString(), anyInt(), anyInt(), anyInt(), anyInt(),
                 any(), anyInt(), any(), any()
         )).thenReturn(List.of());
-        when(lbRepository.save(any(LBEntity.class)))
-                .thenReturn(saved);
+        when(lbRepository.save(any(LBEntity.class))).thenReturn(saved);
 
-        LBDTO result = lbService.saveLB(dto);
+        LB result = lbService.saveLB(domain);
 
-        assertNotNull(result);
+        assertEquals(9L, result.getId());
+        assertEquals(9L, domain.getId());
         verify(lbRepository).save(any(LBEntity.class));
     }
 
     @Test
     void saveLB_invalid_shouldThrowValidationException() {
-        LBDTO dto = TestDataFactory.validLBDTO(1L);
+        LBDTO dto = TestDataFactory.validLBDTO(null);
         dto.setHeight(10);
+        LB domain = LBDtoMapper.toDomain(dto);
 
-        assertThrows(
-                ValidationSizeException.class,
-                () -> lbService.saveLB(dto)
-        );
-
+        assertThrows(ValidationSizeException.class, () -> lbService.saveLB(domain));
         verify(lbRepository, never()).save(any());
     }
 
     @Test
     void saveLB_widthBelowMinimum_shouldThrowValidationException() {
-        LBDTO dto = TestDataFactory.validLBDTO(1L);
+        LBDTO dto = TestDataFactory.validLBDTO(null);
         dto.setWidth(159);
+        LB domain = LBDtoMapper.toDomain(dto);
 
-        assertThrows(
-                ValidationSizeException.class,
-                () -> lbService.saveLB(dto)
-        );
-
+        assertThrows(ValidationSizeException.class, () -> lbService.saveLB(domain));
         verify(lbRepository, never()).save(any());
     }
 
     @Test
-    void saveLB_missingRequiredColor_shouldReturnValidationError() {
-        LBDTO dto = TestDataFactory.validLBDTO(41L);
-        dto.setColorBody(null);
+    void findById_existing_shouldReturnDomain() {
+        LB domain = TestDataFactory.validLB(null);
+        LBEntity entity = spy(LBEntityMapper.toEntity(domain));
+        doReturn(1L).when(entity).getId();
+        when(lbRepository.findById(1L)).thenReturn(Optional.of(entity));
 
-        ValidationSizeException exception = assertThrows(
-                ValidationSizeException.class,
-                () -> lbService.saveLB(dto)
-        );
-
-        var error = exception.getValidationResult().getErrors().get(0);
-        assertEquals("LB", error.getObjectType());
-        assertEquals(41L, error.getObjectId());
-        assertEquals("domainModel", error.getField());
-        verify(lbRepository, never()).save(any());
-    }
-
-    @Test
-    void findById_existing_shouldReturnDto() {
-        LBDTO dto = TestDataFactory.validLBDTO(1L);
-        LBEntity entity =
-                LBEntityMapper.toEntity(
-                        com.lb_calc_web.mapper.dto.LBDtoMapper.toDomain(dto)
-                );
-        LBEntity spyEntity = spy(entity);
-        doReturn(1L).when(spyEntity).getId();
-
-        when(lbRepository.findById(1L))
-                .thenReturn(Optional.of(spyEntity));
-
-        LBDTO result = lbService.findById(1L);
+        LB result = lbService.findById(1L);
 
         assertEquals(1L, result.getId());
     }
 
     @Test
     void findById_missing_shouldThrow() {
-        when(lbRepository.findById(1L))
-                .thenReturn(Optional.empty());
-
-        assertThrows(
-                NoSuchElementException.class,
-                () -> lbService.findById(1L)
-        );
+        when(lbRepository.findById(1L)).thenReturn(Optional.empty());
+        assertThrows(NoSuchElementException.class, () -> lbService.findById(1L));
     }
 
     @Test
     void findAll_shouldReturnSortedById() {
         LB first = TestDataFactory.validLB(1L);
         LB second = TestDataFactory.validLB(2L);
-
-        LBEntity firstEntity =
-                spy(LBEntityMapper.toEntity(first));
-        LBEntity secondEntity =
-                spy(LBEntityMapper.toEntity(second));
-
+        LBEntity firstEntity = spy(LBEntityMapper.toEntity(first));
+        LBEntity secondEntity = spy(LBEntityMapper.toEntity(second));
         doReturn(1L).when(firstEntity).getId();
         doReturn(2L).when(secondEntity).getId();
+        when(lbRepository.findAll()).thenReturn(List.of(secondEntity, firstEntity));
 
-        when(lbRepository.findAll())
-                .thenReturn(List.of(secondEntity, firstEntity));
-
-        List<LBDTO> result = lbService.findAll();
+        List<LB> result = lbService.findAll();
 
         assertEquals(2, result.size());
         assertEquals(1L, result.get(0).getId());
