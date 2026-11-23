@@ -1,7 +1,13 @@
 package com.lb_calc_web.controller.api;
 
 import com.lb_calc_web.controller.api.response.ApiResponse;
+import com.lb_calc_web.domain.equipment.Equipment;
+import com.lb_calc_web.domain.model.LC;
+import com.lb_calc_web.dto.EquipmentSelectionDTO;
 import com.lb_calc_web.dto.LCDTO;
+import com.lb_calc_web.mapper.dto.EquipmentSelectionMapper;
+import com.lb_calc_web.mapper.dto.LCDtoMapper;
+import com.lb_calc_web.service.EquipmentCatalogService;
 import com.lb_calc_web.service.LCService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -14,6 +20,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
+import java.util.function.Function;
 
 @RestController
 @RequestMapping("/api/v1/lcs")
@@ -29,9 +37,14 @@ public class LCRestController {
             LoggerFactory.getLogger(LCRestController.class);
 
     private final LCService lcService;
+    private final EquipmentCatalogService equipmentCatalogService;
 
-    public LCRestController(LCService lcService) {
+    public LCRestController(
+            LCService lcService,
+            EquipmentCatalogService equipmentCatalogService
+    ) {
         this.lcService = lcService;
+        this.equipmentCatalogService = equipmentCatalogService;
     }
 
     /**
@@ -43,16 +56,9 @@ public class LCRestController {
             description = "Возвращает список всех модулей управления LC"
     )
     public ResponseEntity<?> getAllLC() {
-
         logger.info("GET /api/v1/lcs");
-
-            List<LCDTO> lcList =
-                    lcService.findAll();
-
-            return ResponseEntity.ok(
-                    ApiResponse.success(lcList)
-            );
-
+        List<LCDTO> lcList = LCDtoMapper.toDtoList(lcService.findAll());
+        return ResponseEntity.ok(ApiResponse.success(lcList));
     }
 
     /**
@@ -64,25 +70,12 @@ public class LCRestController {
             description = "Возвращает модуль управления LC по идентификатору"
     )
     public ResponseEntity<?> getLCById(
-            @Parameter(
-                    description = "Идентификатор LC",
-                    example = "1"
-            )
+            @Parameter(description = "Идентификатор LC", example = "1")
             @PathVariable Long id
     ) {
-
-        logger.info(
-                "GET /api/v1/lcs/{}",
-                id
-        );
-
-            LCDTO lc =
-                    lcService.findById(id);
-
-            return ResponseEntity.ok(
-                    ApiResponse.success(lc)
-            );
-
+        logger.info("GET /api/v1/lcs/{}", id);
+        LCDTO lc = LCDtoMapper.toDto(lcService.findById(id));
+        return ResponseEntity.ok(ApiResponse.success(lc));
     }
 
     /**
@@ -94,18 +87,9 @@ public class LCRestController {
             description = "Возвращает LC с параметрами по умолчанию без сохранения в БД"
     )
     public ResponseEntity<?> createLC() {
-
-        logger.info(
-                "GET /api/v1/lcs/create"
-        );
-
-            LCDTO lc =
-                    lcService.createLC();
-
-            return ResponseEntity.ok(
-                    ApiResponse.success(lc)
-            );
-
+        logger.info("GET /api/v1/lcs/create");
+        LCDTO lc = LCDtoMapper.toDto(lcService.createLC());
+        return ResponseEntity.ok(ApiResponse.success(lc));
     }
 
     /**
@@ -116,25 +100,43 @@ public class LCRestController {
             summary = "Сохранить LC",
             description = "Проверяет и сохраняет модуль управления LC"
     )
-    public ResponseEntity<?> saveLC(
-            @RequestBody LCDTO dto
-    ) {
-
+    public ResponseEntity<?> saveLC(@RequestBody LCDTO dto) {
         logger.info(
                 "POST /api/v1/lcs: display={}",
                 dto != null ? dto.getDisplay() : null
         );
+        LC domain = restoreDomain(dto);
+        LCDTO saved = LCDtoMapper.toDto(lcService.saveLC(domain));
+        return ResponseEntity.ok(
+                ApiResponse.success("LC успешно сохранён", saved)
+        );
+    }
 
+    /**
+     * Восстанавливает входную конфигурацию на границе REST API.
+     */
+    private LC restoreDomain(LCDTO dto) {
+        LC existing = dto.getId() == null || dto.getId() <= 0
+                ? null
+                : lcService.findById(dto.getId());
+        Set<String> retainedIds = existing == null
+                ? Set.of()
+                : existing.getEquipment().stream()
+                        .map(item -> item.getCatalogPositionId())
+                        .collect(java.util.stream.Collectors.toUnmodifiableSet());
+        Function<String, Equipment> resolver = existing == null
+                ? equipmentCatalogService::resolve
+                : equipmentCatalogService.findExistingConfigurationResolver(retainedIds);
 
-            LCDTO saved =
-                    lcService.saveLC(dto);
-
-            return ResponseEntity.ok(
-                    ApiResponse.success(
-                            "LC успешно сохранён",
-                            saved
-                    )
+        List<EquipmentSelectionDTO> selections = dto.getEquipmentSelections();
+        if (selections == null && existing != null) {
+            selections = EquipmentSelectionMapper.mergeDisplaySelection(
+                    LCDtoMapper.toDto(existing).getEquipmentSelections(),
+                    dto.getDisplay(),
+                    dto.getDisplayQuantity(),
+                    resolver
             );
-
+        }
+        return LCDtoMapper.toDomain(dto, selections, resolver);
     }
 }
