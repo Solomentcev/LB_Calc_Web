@@ -137,95 +137,6 @@ class ProjectServiceTest {
     }
 
     @Test
-    void saveProject_invalidGeometry_shouldRejectBeforeSavingALS() {
-        EmployeeDTO employee = new EmployeeDTO();
-        employee.setId(1L);
-        employee.setFirstName("Иван");
-        employee.setLastName("Иванов");
-        employee.setEmail("ivan@example.com");
-        employee.setRegistrationDate(
-                java.time.LocalDate.of(2026, 9, 18)
-        );
-        employee.setRole(Role.ROLE_MANAGER);
-
-        when(employeeService.getCurrentEmployee())
-                .thenReturn(employee);
-
-        ProjectDTO project = TestDataFactory.validProject(1L);
-        project.setId(null);
-
-        ALSDTO invalidALS = TestDataFactory.validALSDTO(10L);
-        invalidALS.setHeight(10);
-        project.setAlsList(java.util.List.of(invalidALS));
-
-        EmployeeDTO originalCreatedBy = new EmployeeDTO();
-        originalCreatedBy.setId(7L);
-        EmployeeDTO originalUpdatedBy = new EmployeeDTO();
-        originalUpdatedBy.setId(8L);
-        project.setCreatedBy(originalCreatedBy);
-        project.setCreatedAt(java.time.LocalDate.of(2025, 1, 2));
-        project.setUpdatedBy(originalUpdatedBy);
-        project.setUpdatedAt(java.time.LocalDate.of(2025, 2, 3));
-        var originalAlsList = project.getAlsList();
-
-        ValidationSizeException exception = assertThrows(
-                ValidationSizeException.class,
-                () -> projectService.saveProject(project)
-        );
-
-        var alsHeightError = exception.getValidationResult()
-                .getErrors()
-                .stream()
-                .filter(error -> "ALS".equals(error.getObjectType())
-                        && "height".equals(error.getField()))
-                .findFirst()
-                .orElseThrow();
-
-        assertEquals(10L, alsHeightError.getObjectId());
-        assertSame(originalCreatedBy, project.getCreatedBy());
-        assertEquals(java.time.LocalDate.of(2025, 1, 2), project.getCreatedAt());
-        assertSame(originalUpdatedBy, project.getUpdatedBy());
-        assertEquals(java.time.LocalDate.of(2025, 2, 3), project.getUpdatedAt());
-        assertSame(originalAlsList, project.getAlsList());
-        verify(alsService, never()).saveALS(any(com.lb_calc_web.domain.model.ALS.class));
-        verify(projectRepository, never()).save(any(ProjectEntity.class));
-    }
-
-    @Test
-    void saveProject_invalidDomainMapping_shouldRejectBeforeSavingALS() {
-        EmployeeDTO employee = new EmployeeDTO();
-        employee.setId(1L);
-        employee.setFirstName("Иван");
-        employee.setLastName("Иванов");
-        employee.setEmail("ivan@example.com");
-        employee.setRegistrationDate(
-                java.time.LocalDate.of(2026, 9, 18)
-        );
-        employee.setRole(Role.ROLE_MANAGER);
-
-        when(employeeService.getCurrentEmployee())
-                .thenReturn(employee);
-
-        ProjectDTO project = TestDataFactory.validProject(1L);
-        project.setId(null);
-
-        ALSDTO invalidALS = TestDataFactory.validALSDTO(11L);
-        invalidALS.setColorBody(null);
-        project.setAlsList(java.util.List.of(invalidALS));
-
-        ValidationSizeException exception = assertThrows(
-                ValidationSizeException.class,
-                () -> projectService.saveProject(project)
-        );
-
-        var error = exception.getValidationResult().getErrors().get(0);
-        assertEquals("Project", error.getObjectType());
-        assertEquals("projectData", error.getField());
-        verify(alsService, never()).saveALS(any(com.lb_calc_web.domain.model.ALS.class));
-        verify(projectRepository, never()).save(any(ProjectEntity.class));
-    }
-
-    @Test
     void saveProject_domain_shouldValidateBeforePersistingALS() {
         EmployeeDTO employee = new EmployeeDTO();
         employee.setId(1L);
@@ -347,7 +258,7 @@ class ProjectServiceTest {
     }
 
     @Test
-    void saveProject_managerNotOwner_shouldRejectBeforeSavingALS() {
+    void saveProject_domain_managerNotOwner_shouldRejectBeforeSavingALS() {
         ProjectEntity existing = mock(ProjectEntity.class);
         EmployeeEntity owner = mock(EmployeeEntity.class);
         when(existing.getCreatedBy()).thenReturn(owner);
@@ -359,8 +270,10 @@ class ProjectServiceTest {
         manager.setRole(Role.ROLE_MANAGER);
         when(employeeService.getCurrentEmployee()).thenReturn(manager);
 
-        ProjectDTO project = new ProjectDTO();
-        project.setId(1L);
+        ProjectDTO dto = TestDataFactory.validProject(1L);
+        dto.setId(1L);
+        com.lb_calc_web.domain.model.Project project =
+                ProjectDtoMapper.toDomain(dto, alsService::restoreDomain);
 
         assertThrows(
                 AccessDeniedException.class,
