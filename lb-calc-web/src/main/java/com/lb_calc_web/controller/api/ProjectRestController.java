@@ -7,6 +7,10 @@ import com.lb_calc_web.dto.LBDTO;
 import com.lb_calc_web.dto.LCDTO;
 import com.lb_calc_web.dto.ProjectDTO;
 import com.lb_calc_web.domain.model.Project;
+import com.lb_calc_web.domain.model.ALS;
+import com.lb_calc_web.domain.model.LB;
+import com.lb_calc_web.domain.model.LC;
+import com.lb_calc_web.domain.model.LBC;
 import com.lb_calc_web.mapper.dto.ProjectDtoMapper;
 import com.lb_calc_web.mapper.dto.ALSDtoMapper;
 import com.lb_calc_web.mapper.dto.LCDtoMapper;
@@ -221,17 +225,14 @@ public class ProjectRestController {
             @PathVariable Long projectId
     ) {
 
-            ProjectDTO project =
-                    projectService.addNewALSandSaveProject(
-                            projectId
-                    );
+            Project project = projectService.addNewALSandSaveProject(projectId);
 
             return ResponseEntity
                     .status(HttpStatus.CREATED)
                     .body(
                             ApiResponse.success(
                                     "ALS added to project successfully",
-                                    project
+                                    ProjectDtoMapper.toDto(project)
                             )
                     );
 
@@ -250,17 +251,19 @@ public class ProjectRestController {
             @RequestBody ALSDTO als
     ) {
 
-            ALSDTO saved =
-                    projectService.replaceALSandSaveProject(
-                            projectId,
-                            alsId,
-                            als
-                    );
+            projectService.findALSInProject(projectId, alsId);
+            als.setId(alsId);
+            ALS replacement = alsService.restoreDomain(als);
+            ALS saved = projectService.replaceALSandSaveProject(
+                    projectId,
+                    alsId,
+                    replacement
+            );
 
             return ResponseEntity.ok(
                     ApiResponse.success(
                             "ALS updated successfully",
-                            saved
+                            ALSDtoMapper.toDto(saved)
                     )
             );
 
@@ -278,16 +281,15 @@ public class ProjectRestController {
             @PathVariable Long alsId
     ) {
 
-            ProjectDTO project =
-                    projectService.deleteALSandSaveProject(
-                            projectId,
-                            alsId
-                    );
+            Project project = projectService.deleteALSandSaveProject(
+                    projectId,
+                    alsId
+            );
 
             return ResponseEntity.ok(
                     ApiResponse.success(
                             "ALS deleted from project successfully",
-                            project
+                            ProjectDtoMapper.toDto(project)
                     )
             );
 
@@ -333,16 +335,17 @@ public class ProjectRestController {
             @RequestBody LCDTO lc
     ) {
 
+            projectService.findLCInProject(projectId, alsId, lcId);
             lc.setId(lcId);
-
-            ALSDTO savedALS =
-                    projectService.saveLCAtProject(
-                            projectId,
-                            alsId,
-                            lcId,
-                            lc
-                    );
-            LCDTO saved = savedALS.getLC();
+            ALS sourceALS = projectService.findALSInProject(projectId, alsId);
+            LC replacement = alsService.restoreLC(lc, sourceALS);
+            ALS savedALS = projectService.saveLCAtProject(
+                    projectId,
+                    alsId,
+                    lcId,
+                    replacement
+            );
+            LCDTO saved = LCDtoMapper.toDto(savedALS.getLC());
 
             return ResponseEntity.ok(
                     ApiResponse.success(
@@ -367,7 +370,7 @@ public class ProjectRestController {
             @PathVariable Long alsId
     ) {
 
-            ALSDTO saved =
+            ALS saved =
                     projectService.replaceWithNewLBCAtProject(
                             projectId,
                             alsId
@@ -376,7 +379,7 @@ public class ProjectRestController {
             return ResponseEntity.ok(
                     ApiResponse.success(
                             "LBC added to ALS successfully",
-                            saved
+                            ALSDtoMapper.toDto(saved)
                     )
             );
 
@@ -422,16 +425,17 @@ public class ProjectRestController {
             @RequestBody LBCDTO lbc
     ) {
 
+            projectService.findLBCInProject(projectId, alsId, lbcId);
             lbc.setId(lbcId);
-
-            ALSDTO savedALS =
-                    projectService.saveLBCAtProject(
-                            projectId,
-                            alsId,
-                            lbcId,
-                            lbc
-                    );
-            LBCDTO saved = savedALS.getLBC();
+            ALS sourceALS = projectService.findALSInProject(projectId, alsId);
+            LBC replacement = alsService.restoreLBC(lbc, sourceALS);
+            ALS savedALS = projectService.saveLBCAtProject(
+                    projectId,
+                    alsId,
+                    lbcId,
+                    replacement
+            );
+            LBCDTO saved = LBCDtoMapper.toDto(savedALS.getLBC());
 
             return ResponseEntity.ok(
                     ApiResponse.success(
@@ -499,14 +503,14 @@ public class ProjectRestController {
                 );
             }
 
-            ALSDTO savedALS =
-                    projectService.saveLBAtProject(
-                            projectId,
-                            alsId,
-                            lbId,
-                            lb
-                    );
-            LBDTO saved = savedALS.getLbList().get(lbIndex);
+            LB replacement = alsService.restoreLB(lb);
+            ALS savedALS = projectService.saveLBAtProject(
+                    projectId,
+                    alsId,
+                    lbId,
+                    replacement
+            );
+            LBDTO saved = ALSDtoMapper.toDto(savedALS).getLbList().get(lbIndex);
 
             return ResponseEntity.ok(
                     ApiResponse.success(
@@ -531,7 +535,7 @@ public class ProjectRestController {
             @PathVariable Long alsId
     ) {
 
-            ALSDTO als =
+            ALS als =
                     projectService.addLBAtProject(
                             projectId,
                             alsId
@@ -542,7 +546,7 @@ public class ProjectRestController {
                     .body(
                             ApiResponse.success(
                                     "LB added successfully",
-                                    als
+                                    ALSDtoMapper.toDto(als)
                             )
                     );
 
@@ -563,7 +567,7 @@ public class ProjectRestController {
             @PathVariable Long lbId
     ) {
 
-            ALSDTO als =
+            ALS als =
                     projectService.deleteLBatProject(
                             projectId,
                             alsId,
@@ -573,7 +577,7 @@ public class ProjectRestController {
             return ResponseEntity.ok(
                     ApiResponse.success(
                             "LB deleted successfully",
-                            als
+                            ALSDtoMapper.toDto(als)
                     )
             );
 

@@ -7,6 +7,7 @@ import com.lb_calc_web.dto.ALSDTO;
 import com.lb_calc_web.domain.attributes.TypeLb;
 import com.lb_calc_web.domain.equipment.EquipmentCatalog;
 import com.lb_calc_web.mapper.dto.ALSDtoMapper;
+import com.lb_calc_web.mapper.dto.LBDtoMapper;
 import com.lb_calc_web.mapper.dto.ProjectDtoMapper;
 import com.lb_calc_web.dto.EmployeeDTO;
 import com.lb_calc_web.dto.LBCDTO;
@@ -195,7 +196,7 @@ class ProjectServiceTest {
                         1L,
                         10L,
                         100L,
-                        TestDataFactory.validLBDTO(100L)
+                        LBDtoMapper.toDomain(TestDataFactory.validLBDTO(100L))
                 )
         );
 
@@ -207,7 +208,14 @@ class ProjectServiceTest {
     void replaceALSandSaveProject_missingProject_shouldRejectBeforeRestoringALS() {
         when(projectRepository.findById(1L)).thenReturn(Optional.empty());
 
-        ALSDTO replacement = TestDataFactory.validALSDTO(10L);
+        ALSDTO replacementDto = TestDataFactory.validALSDTO(10L);
+        com.lb_calc_web.domain.model.ALS replacement = ALSDtoMapper.toDomain(
+                replacementDto,
+                value -> new TypeLb(value.getType(), value.getDeltaWidth(),
+                        value.getShelfThick(), value.getServiceZoneWidth()),
+                value -> new TypeLb(value.getType(), value.getDeltaWidth(),
+                        value.getShelfThick(), value.getServiceZoneWidth())
+        );
 
         assertThrows(
                 NoSuchElementException.class,

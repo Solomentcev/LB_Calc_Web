@@ -1,6 +1,10 @@
 package com.lb_calc_web.controller;
 
 import com.lb_calc_web.dto.ALSDTO;
+import com.lb_calc_web.domain.model.ALS;
+import com.lb_calc_web.domain.model.LB;
+import com.lb_calc_web.domain.model.LC;
+import com.lb_calc_web.domain.model.LBC;
 import com.lb_calc_web.mapper.dto.ALSDtoMapper;
 import com.lb_calc_web.mapper.dto.ProjectDtoMapper;
 import com.lb_calc_web.mapper.dto.LCDtoMapper;
@@ -143,7 +147,7 @@ public class ProjectController
             return "projects/project";
         }
 
-        ProjectDTO project =
+        com.lb_calc_web.domain.model.Project project =
                 projectService.addNewALSandSaveProject(id);
 
         return "redirect:/projects/"
@@ -158,7 +162,7 @@ public class ProjectController
             @PathVariable Long projectId,
             @PathVariable Long alsId
     ) {
-        ProjectDTO project =
+        com.lb_calc_web.domain.model.Project project =
                 projectService.deleteALSandSaveProject(
                         projectId,
                         alsId
@@ -209,12 +213,14 @@ public class ProjectController
             Model model
     ) {
         try {
-            ALSDTO savedALS =
-                    projectService.replaceALSandSaveProject(
-                            projectId,
-                            alsId,
-                            als
-                    );
+            projectService.findALSInProject(projectId, alsId);
+            als.setId(alsId);
+            ALS replacement = alsService.restoreDomain(als);
+            ALS savedALS = projectService.replaceALSandSaveProject(
+                    projectId,
+                    alsId,
+                    replacement
+            );
 
             return "redirect:/projects/"
                     + projectId
@@ -289,14 +295,15 @@ public class ProjectController
     ) {
         try {
             lc.setId(lcId);
-
-            ALSDTO savedALS =
-                    projectService.saveLCAtProject(
-                            projectId,
-                            alsId,
-                            lcId,
-                            lc
-                    );
+            projectService.findLCInProject(projectId, alsId, lcId);
+            ALS sourceALS = projectService.findALSInProject(projectId, alsId);
+            LC replacement = alsService.restoreLC(lc, sourceALS);
+            ALS savedALS = projectService.saveLCAtProject(
+                    projectId,
+                    alsId,
+                    lcId,
+                    replacement
+            );
 
             return "redirect:/projects/"
                     + projectId
@@ -396,14 +403,15 @@ public class ProjectController
     ) {
         try {
             lbc.setId(lbcId);
-
-            ALSDTO savedALS =
-                    projectService.saveLBCAtProject(
-                            projectId,
-                            alsId,
-                            lbcId,
-                            lbc
-                    );
+            projectService.findLBCInProject(projectId, alsId, lbcId);
+            ALS sourceALS = projectService.findALSInProject(projectId, alsId);
+            LBC replacement = alsService.restoreLBC(lbc, sourceALS);
+            ALS savedALS = projectService.saveLBCAtProject(
+                    projectId,
+                    alsId,
+                    lbcId,
+                    replacement
+            );
 
             return "redirect:/projects/"
                     + projectId
@@ -484,15 +492,15 @@ public class ProjectController
             Model model
     ) {
         try {
+            projectService.findLBInProject(projectId, alsId, lbId);
             lb.setId(lbId);
-
-            ALSDTO savedALS =
-                    projectService.saveLBAtProject(
-                            projectId,
-                            alsId,
-                            lbId,
-                            lb
-                    );
+            LB replacement = alsService.restoreLB(lb);
+            ALS savedALS = projectService.saveLBAtProject(
+                    projectId,
+                    alsId,
+                    lbId,
+                    replacement
+            );
 
             return "redirect:/projects/"
                     + projectId
@@ -544,7 +552,7 @@ public class ProjectController
             @PathVariable Long projectId,
             @PathVariable Long alsId
     ) {
-        ALSDTO als =
+        ALS als =
                 projectService.replaceWithNewLBCAtProject(
                         projectId,
                         alsId
@@ -566,7 +574,7 @@ public class ProjectController
             @PathVariable Long projectId,
             @PathVariable Long alsId
     ) {
-        ALSDTO als =
+        ALS als =
                 projectService.addLBAtProject(
                         projectId,
                         alsId
@@ -589,7 +597,7 @@ public class ProjectController
             @PathVariable Long alsId,
             @PathVariable Long lbId
     ) {
-        ALSDTO als =
+        ALS als =
                 projectService.deleteLBatProject(
                         projectId,
                         alsId,
