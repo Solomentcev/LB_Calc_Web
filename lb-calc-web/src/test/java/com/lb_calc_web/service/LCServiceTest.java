@@ -109,6 +109,30 @@ class LCServiceTest {
     }
 
     @Test
+    void restoreDomain_shouldTreatMissingAccessInProvidedFunctionalConfigurationAsEmpty() {
+        Equipment equipment = new Equipment(
+                76L, EquipmentFunctionalType.ACCESS, AccessPurpose.RFID,
+                EquipmentCategory.RFID_READER, "RFID", "", 100, 50, 30);
+        ControlConfiguration fallback = new ControlConfiguration(
+                TestDataFactory.validLC(null).getControlConfiguration().getFunctionalConfiguration(),
+                Map.of(equipment, 1)
+        );
+        LCDTO dto = TestDataFactory.validLCDTO(20L);
+        var functional = new com.lb_calc_web.dto.FunctionalConfigurationDTO();
+        functional.setDisplay(com.lb_calc_web.domain.equipment.DisplayPurpose.INCH_19);
+        functional.setPayment(com.lb_calc_web.domain.equipment.PaymentPurpose.NONE);
+        functional.setPrinter(com.lb_calc_web.domain.equipment.PrinterPurpose.ABSENT);
+        dto.setFunctionalConfiguration(functional);
+        dto.setEquipmentSelections(null);
+
+        LC restored = service.restoreDomain(dto, fallback);
+
+        assertTrue(restored.getControlConfiguration().getFunctionalConfiguration()
+                .getAccess().isEmpty());
+        assertEquals(fallback.getEquipment(), restored.getEquipment());
+    }
+
+    @Test
     void restoreDomain_shouldPreserveFunctionalConfigurationWhenNestedDtoIsEmpty() {
         Equipment equipment = new Equipment(
                 75L, EquipmentFunctionalType.ACCESS, AccessPurpose.RFID,
