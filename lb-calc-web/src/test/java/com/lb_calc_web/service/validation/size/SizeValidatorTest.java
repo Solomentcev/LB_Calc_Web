@@ -4,6 +4,11 @@ import com.lb_calc_web.TestDataFactory;
 import com.lb_calc_web.domain.attributes.Colors;
 import com.lb_calc_web.domain.attributes.DirectionDoorOpening;
 import com.lb_calc_web.domain.attributes.Role;
+import com.lb_calc_web.domain.equipment.DisplayPurpose;
+import com.lb_calc_web.domain.equipment.Equipment;
+import com.lb_calc_web.domain.equipment.EquipmentCategory;
+import com.lb_calc_web.domain.equipment.EquipmentFunctionalType;
+import com.lb_calc_web.domain.model.ControlConfiguration;
 import com.lb_calc_web.domain.model.ALS;
 import com.lb_calc_web.domain.model.Employee;
 import com.lb_calc_web.domain.model.LB;
@@ -17,6 +22,7 @@ import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -103,6 +109,21 @@ class SizeValidatorTest {
 
     @Test
     void validateLC_widthBelowEquipmentRequirement_shouldFail() {
+        Equipment display = new Equipment(
+                101L,
+                EquipmentFunctionalType.DISPLAY,
+                DisplayPurpose.INCH_10,
+                EquipmentCategory.DISPLAY,
+                "Дисплей 10",
+                "",
+                300,
+                180,
+                30
+        );
+        ControlConfiguration configuration = new ControlConfiguration(
+                lc.getControlConfiguration().getFunctionalConfiguration(),
+                Map.of(display, 1)
+        );
         LC narrowLC = new LC(
                 lc.getHeight(),
                 100,
@@ -111,7 +132,7 @@ class SizeValidatorTest {
                 lc.getBottomFrame(),
                 lc.getColorBody(),
                 lc.getColorDoor(),
-                lc.getControlConfiguration().copy()
+                configuration
         );
 
         ValidationResult result = sizeValidator.validateLC(narrowLC);
