@@ -115,7 +115,9 @@ class ALSEntityMapperTest {
 
         ALSEntityMapper.toEntity(domain, module -> {
             resolvedModules[0]++;
-            return ModuleEntityMapper.toEntity(module);
+            return ModuleEntityMapper.toEntity(module, equipment -> {
+                throw new AssertionError("В этом тесте не ожидается разрешение оборудования");
+            });
         });
 
         assertEquals(domain.getModules().size(), resolvedModules[0]);
