@@ -5,9 +5,9 @@
 <body>
 <div th:replace="~{header :: header}"></div>
 <div class="container">
-    <h1>Профиль</h1>
+    <h1 class="page-title">Профиль</h1>
     <div class="table-responsive">
-    <table class="table table-striped">
+    <table class="table table-striped table-hover people-table">
         <thead>
         <tr>
             <th>ID</th>
@@ -20,8 +20,8 @@
         </thead>
         <tbody>
         <tr>
-            <td th:text="${employee.getId()}"></td>
-            <td th:text="${employee.getFirstName()}"></td>
+            <td th:text="${employee.id}"></td>
+            <td th:text="${employee.firstName}"></td>
             <td th:text="${employee.lastName}"></td>
             <td th:text="${employee.email}"></td>
             <td th:text="${employee.role}"></td>
