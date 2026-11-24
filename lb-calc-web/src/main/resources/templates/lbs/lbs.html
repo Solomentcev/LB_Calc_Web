@@ -4,12 +4,12 @@
 <body><div th:replace="~{header :: header}"></div><div class="container">
 <h1 class="page-title">Модули хранения</h1><div class="page-actions"><a th:href="@{/lbs/create}" class="btn btn-primary btn-sm">Создать модуль хранения</a><a th:href="@{/}" class="btn btn-secondary btn-sm">Назад</a></div>
 <div class="table-responsive"><table class="table table-striped table-hover js-data-table catalog-table">
-<colgroup><col style="width:3%"><col style="width:8%"><col style="width:11%"><col style="width:4%"><col style="width:4%"><col style="width:5%"><col style="width:5%"><col style="width:5%"><col style="width:6%"><col style="width:6%"><col style="width:5%"><col style="width:6%"><col style="width:6%"><col style="width:6%"><col style="width:7%"><col style="width:5%"><col style="width:5%"><col style="width:3%"></colgroup>
-<thead><tr><th>ID</th><th>Название</th><th>Описание</th><th>Тип</th><th>Ячейки</th><th>Высота</th><th>Ширина</th><th>Глубина</th><th>Верхняя рама</th><th>Нижняя рама</th><th>Δ ширины</th><th>Высота ячейки</th><th>Ширина ячейки</th><th>Глубина ячейки</th><th>Открывание</th><th>Цвет корпуса</th><th>Цвет дверей</th><th>Действие</th></tr></thead>
+<colgroup><col style="width:4%"><col style="width:9%"><col style="width:11%"><col style="width:5%"><col style="width:5%"><col style="width:6%"><col style="width:6%"><col style="width:6%"><col style="width:7%"><col style="width:7%"><col style="width:8%"><col style="width:8%"><col style="width:9%"><col style="width:9%"></colgroup>
+<thead><tr><th>ID</th><th>Название</th><th>Описание</th><th>Тип</th><th>Ячейки</th><th>Высота</th><th>Ширина</th><th>Глубина</th><th>Верхняя рама</th><th>Нижняя рама</th><th>Открывание</th><th>Цвет корпуса</th><th>Цвет дверей</th><th>Действие</th></tr></thead>
 <tbody><tr th:each="lb : ${lbs}">
 <td th:text="${lb.id}"></td><td th:text="${lb.name}"></td><td th:text="${lb.description}"></td><td th:text="${lb.type}"></td><td th:text="${lb.countCells}"></td>
 <td th:text="${lb.height}"></td><td th:text="${lb.width}"></td><td th:text="${lb.depth}"></td><td th:text="${lb.upperFrame}"></td><td th:text="${lb.bottomFrame}"></td>
-<td th:text="${lb.deltaWidth}"></td><td th:text="${lb.heightCell}"></td><td th:text="${lb.widthCell}"></td><td th:text="${lb.depthCell}"></td><td th:text="${lb.directionDoorOpening}"></td>
+<td th:text="${lb.directionDoorOpening}"></td>
 <td th:text="${lb.colorBody}"></td><td th:text="${lb.colorDoor}"></td>
 <td><a th:href="@{/lbs/{id}(id=${lb.id})}" class="btn btn-primary btn-sm">Изменить</a></td></tr></tbody></table></div>
 </div><div th:replace="~{footer :: footer}"></div></body></html>
