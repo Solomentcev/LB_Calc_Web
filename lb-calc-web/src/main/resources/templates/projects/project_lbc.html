@@ -48,6 +48,7 @@
         </select>
     </div>
     <div class="col-md-6"><label class="form-label">Способы доступа</label>
+        <input type="hidden" name="_functionalConfiguration.access" value="on">
         <select multiple class="form-control" th:field="*{functionalConfiguration.access}">
             <option th:each="purpose : ${accessPurposes}" th:value="${purpose}" th:text="${purpose}"></option>
         </select>
