@@ -76,10 +76,9 @@ public class LCService {
     ) {
         FunctionalConfiguration functional = new FunctionalConfiguration(
                 enumProperty("lc.display-purpose.default", DisplayPurpose.class, DisplayPurpose.INCH_10),
-                enumSetProperty("lc.access-methods.default", AccessPurpose.class),
-                enumProperty("lc.payment.default", PaymentPurpose.class, PaymentPurpose.NONE),
-                booleanProperty("lc.printer.default")
-                        ? PrinterPurpose.PRESENT : PrinterPurpose.ABSENT
+                enumSetProperty("lc.access-purposes.default", AccessPurpose.class),
+                enumProperty("lc.payment-purpose.default", PaymentPurpose.class, PaymentPurpose.NONE),
+                enumProperty("lc.printer-purpose.default", PrinterPurpose.class, PrinterPurpose.ABSENT)
         );
 
         return new LC(
@@ -163,10 +162,6 @@ public class LCService {
 
     private int requiredInt(String key) {
         return environment.getRequiredProperty(key, Integer.class);
-    }
-
-    private boolean booleanProperty(String key) {
-        return environment.getProperty(key, Boolean.class, false);
     }
 
     private Colors requiredColor(String key) {

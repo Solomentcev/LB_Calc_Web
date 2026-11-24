@@ -83,10 +83,9 @@ public class LBCService {
                 environment, environment.getRequiredProperty("lbc.type.default"));
         FunctionalConfiguration functional = new FunctionalConfiguration(
                 enumProperty("lbc.display-purpose.default", DisplayPurpose.class, DisplayPurpose.INCH_10),
-                enumSetProperty("lbc.access-methods.default", AccessPurpose.class),
-                enumProperty("lbc.payment.default", PaymentPurpose.class, PaymentPurpose.NONE),
-                booleanProperty("lbc.printer.default")
-                        ? PrinterPurpose.PRESENT : PrinterPurpose.ABSENT
+                enumSetProperty("lbc.access-purposes.default", AccessPurpose.class),
+                enumProperty("lbc.payment-purpose.default", PaymentPurpose.class, PaymentPurpose.NONE),
+                enumProperty("lbc.printer-purpose.default", PrinterPurpose.class, PrinterPurpose.ABSENT)
         );
 
         return new LBC(
@@ -179,10 +178,6 @@ public class LBCService {
         domain.setId(saved.getId());
         logger.info("LBC сохранён, id={}", saved.getId());
         return domain;
-    }
-
-    private boolean booleanProperty(String key) {
-        return environment.getProperty(key, Boolean.class, false);
     }
 
     private Colors requiredColor(String key) {
