@@ -3,6 +3,10 @@ package com.lb_calc_web.controller;
 import com.lb_calc_web.dto.ALSDTO;
 import com.lb_calc_web.dto.LBCDTO;
 import com.lb_calc_web.dto.LCDTO;
+import com.lb_calc_web.dto.LBDTO;
+import com.lb_calc_web.domain.model.ALS;
+import com.lb_calc_web.domain.model.LB;
+import com.lb_calc_web.domain.model.Module;
 import com.lb_calc_web.domain.equipment.AccessPurpose;
 import com.lb_calc_web.domain.equipment.DisplayPurpose;
 import com.lb_calc_web.domain.equipment.PaymentPurpose;
@@ -12,9 +16,11 @@ import com.lb_calc_web.service.EquipmentCatalogService;
 import com.lb_calc_web.mapper.dto.ALSDtoMapper;
 import com.lb_calc_web.mapper.dto.LBCDtoMapper;
 import com.lb_calc_web.mapper.dto.LCDtoMapper;
+import com.lb_calc_web.mapper.dto.LBDtoMapper;
 import com.lb_calc_web.service.image.ALSImageService;
 import com.lb_calc_web.service.image.LBCImageService;
 import com.lb_calc_web.service.image.LCImageService;
+import com.lb_calc_web.service.image.LBImageService;
 import com.lb_calc_web.service.validation.ValidationSizeException;
 import com.lb_calc_web.service.ALSService;
 import org.springframework.stereotype.Controller;
@@ -22,6 +28,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Objects;
 
 @Controller
 @RequestMapping("/alss")
@@ -78,6 +86,60 @@ public class ALSController extends BaseCatalogController {
     public String addLB(@PathVariable Long alsId) {
         ALSDTO als = ALSDtoMapper.toDto(alsService.addNewLBandSaveALS(alsId));
         return "redirect:/alss/" + als.getId();
+    }
+
+    /**
+     * Форма редактирования LB внутри ALS.
+     */
+    @GetMapping("/{alsId}/lbs/{lbId}")
+    public String editLB(
+            @PathVariable Long alsId,
+            @PathVariable Long lbId,
+            Model model
+    ) {
+        ALS als = alsService.findById(alsId);
+        LB lb = findLBInALS(als, lbId);
+
+        model.addAttribute("als", ALSImageService.addImages(ALSDtoMapper.toDto(als)));
+        model.addAttribute("lb", LBImageService.addImage(LBDtoMapper.toDto(lb)));
+        return "alss/alss_lb";
+    }
+
+    /**
+     * Сохраняет изменения выбранного LB внутри ALS.
+     */
+    @PostMapping("/{alsId}/lbs/{lbId}/save")
+    public String saveLB(
+            @PathVariable Long alsId,
+            @PathVariable Long lbId,
+            @ModelAttribute("lb") LBDTO lb,
+            Model model
+    ) {
+        try {
+            ALS als = alsService.findById(alsId);
+            findLBInALS(als, lbId);
+            lb.setId(lbId);
+
+            LB replacement = alsService.restoreLB(lb);
+            ALS saved = alsService.saveALS(alsService.replaceLB(als, lbId, replacement));
+            return "redirect:/alss/" + saved.getId();
+        } catch (ValidationSizeException e) {
+            model.addAttribute("errors", ValidationErrorFormatter.format(e.getValidationResult()));
+            ALS als = alsService.findById(alsId);
+            model.addAttribute("als", ALSImageService.addImages(ALSDtoMapper.toDto(als)));
+            model.addAttribute("lb", LBImageService.addImage(lb));
+            return "alss/alss_lb";
+        }
+    }
+
+    private LB findLBInALS(ALS als, Long lbId) {
+        return als.getModules().stream()
+                .filter(LB.class::isInstance)
+                .map(LB.class::cast)
+                .filter(candidate -> Objects.equals(candidate.getId(), lbId))
+                .findFirst()
+                .orElseThrow(() -> new NoSuchElementException(
+                        "LB с id " + lbId + " не найден в ALS " + als.getId()));
     }
 
     /**
