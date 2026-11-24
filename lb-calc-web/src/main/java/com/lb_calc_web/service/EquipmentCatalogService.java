@@ -1,7 +1,6 @@
 package com.lb_calc_web.service;
 
 import com.lb_calc_web.domain.equipment.BarReader;
-import com.lb_calc_web.domain.equipment.CatalogEquipment;
 import com.lb_calc_web.domain.equipment.Display;
 import com.lb_calc_web.domain.equipment.Equipment;
 import com.lb_calc_web.entity.EquipmentCatalogEntity;
@@ -167,7 +166,7 @@ public class EquipmentCatalogService {
 
     /** Преобразует запись каталога в независимую доменную позицию. */
     public Equipment toDomain(EquipmentCatalogEntity item) {
-        return new CatalogEquipment(item.getCatalogPositionId(), item.getCategory(),
+        return new Equipment(item.getCatalogPositionId(), item.getCategory(),
                 item.getName(), item.getDescription(), item.getWidth(), item.getHeight(),
                 item.getDepth(), item.getMinimumModuleWidth(), item.getDisplayWidth(),
                 item.getDisplayHeight(), item.isSupportsBarcode1d(),

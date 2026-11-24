@@ -3,7 +3,6 @@ package com.lb_calc_web.service;
 import com.lb_calc_web.domain.attributes.AccessMethod;
 import com.lb_calc_web.domain.attributes.Payment;
 import com.lb_calc_web.domain.attributes.PrintOption;
-import com.lb_calc_web.domain.equipment.CatalogEquipment;
 import com.lb_calc_web.domain.equipment.Equipment;
 import com.lb_calc_web.domain.equipment.EquipmentItem;
 import com.lb_calc_web.domain.model.ControlConfiguration;
@@ -248,7 +247,7 @@ class EquipmentRequirementResolverTest {
 
     private Equipment equipment(String category, String id, boolean barcode1d,
                                 boolean barcode2d, boolean rfid, boolean print) {
-        return new CatalogEquipment(id, category, id, "", 0, 0, 0,
+        return new Equipment(id, category, id, "", 0, 0, 0,
                 0, 0, 0, barcode1d, barcode2d, rfid, print);
     }
 
