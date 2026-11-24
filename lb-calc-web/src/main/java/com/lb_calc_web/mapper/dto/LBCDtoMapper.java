@@ -107,7 +107,7 @@ public final class LBCDtoMapper {
                 dto.getDisplayPurpose() != null
                         || dto.getPaymentPurpose() != null
                         || dto.getPrinterPurpose() != null
-                        || (dto.getAccessPurposes() != null && !dto.getAccessPurposes().isEmpty());
+                        || dto.getAccessPurposes() != null;
 
         FunctionalConfiguration functional = !functionalConfigurationProvided
                 && fallbackConfiguration != null

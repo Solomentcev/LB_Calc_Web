@@ -39,7 +39,7 @@ public class LCDTO {
 
     private List<EquipmentSelectionDTO> equipmentSelections;
     private String displayPurpose;
-    private List<String> accessPurposes = new ArrayList<>();
+    private List<String> accessPurposes;
     private String paymentPurpose;
     private String printerPurpose;
 
@@ -197,7 +197,7 @@ public class LCDTO {
 
     public List<String> getAccessPurposes() { return accessPurposes; }
     public void setAccessPurposes(List<String> values) {
-        accessPurposes = values == null ? new ArrayList<>() : new ArrayList<>(values);
+        accessPurposes = values == null ? null : new ArrayList<>(values);
     }
 
     public String getPaymentPurpose() { return paymentPurpose; }
