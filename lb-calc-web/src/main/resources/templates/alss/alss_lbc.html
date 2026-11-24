@@ -63,7 +63,7 @@
                 <option value="">Выберите модель</option>
                 <option th:each="item : ${equipmentList}" th:value="${item.id}"
                         th:selected="${item.id == selection.equipmentId}"
-                        th:text="|[${item.functionalType}] ${item.name} — ${item.purpose}|"></option>
+                        th:text="|[${item.functionalType}] ${item.name} — ${item.purpose} (${item.width}×${item.height}×${item.depth} мм)|"></option>
             </select>
         </div>
         <div class="col-md-2">
@@ -83,7 +83,7 @@
             <select class="form-select" name="equipmentSelections[__INDEX__].equipmentId">
                 <option value="">Выберите модель</option>
                 <option th:each="item : ${equipmentList}" th:value="${item.id}"
-                        th:text="|[${item.functionalType}] ${item.name} — ${item.purpose}|"></option>
+                        th:text="|[${item.functionalType}] ${item.name} — ${item.purpose} (${item.width}×${item.height}×${item.depth} мм)|"></option>
             </select>
         </div>
         <div class="col-md-2">
