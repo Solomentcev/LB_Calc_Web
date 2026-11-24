@@ -71,7 +71,7 @@ class LCServiceTest {
     }
 
     @Test
-    void restoreDomain_shouldResolveEquipmentByLongId() {
+    void restoreDomain_shouldResolveEquipmentByLongId() throws Exception {
         Equipment equipment = new Equipment(
                 71L, EquipmentFunctionalType.ACCESS, AccessPurpose.RFID,
                 EquipmentCategory.RFID_READER, "RFID", "", 100, 50, 30);

@@ -7,6 +7,7 @@ import com.lb_calc_web.domain.model.LBC;
 import com.lb_calc_web.dto.EquipmentSelectionDTO;
 import com.lb_calc_web.dto.LBCDTO;
 import com.lb_calc_web.entity.LBCEntity;
+import com.lb_calc_web.entity.EquipmentEntity;
 import com.lb_calc_web.mapper.entity.LBCEntityMapper;
 import com.lb_calc_web.mapper.entity.EquipmentEntityMapper;
 import com.lb_calc_web.repository.LBCRepository;
@@ -73,7 +74,7 @@ class LBCServiceTest {
     }
 
     @Test
-    void restoreDomain_shouldResolveEquipmentByLongId() {
+    void restoreDomain_shouldResolveEquipmentByLongId() throws Exception {
         var equipment = new com.lb_calc_web.domain.equipment.Equipment(
                 72L,
                 com.lb_calc_web.domain.equipment.EquipmentFunctionalType.ACCESS,
