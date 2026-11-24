@@ -3,15 +3,25 @@ package com.lb_calc_web.mapper.dto;
 import com.lb_calc_web.domain.attributes.Colors;
 import com.lb_calc_web.domain.attributes.DirectionDoorOpening;
 import com.lb_calc_web.domain.attributes.TypeLb;
-import com.lb_calc_web.domain.equipment.Display;
+import com.lb_calc_web.domain.equipment.AccessPurpose;
+import com.lb_calc_web.domain.equipment.DisplayPurpose;
 import com.lb_calc_web.domain.equipment.Equipment;
+import com.lb_calc_web.domain.equipment.PaymentPurpose;
+import com.lb_calc_web.domain.equipment.PrinterPurpose;
 import com.lb_calc_web.domain.model.ControlConfiguration;
+import com.lb_calc_web.domain.model.FunctionalConfiguration;
 import com.lb_calc_web.domain.model.LBC;
+import com.lb_calc_web.dto.EquipmentSelectionDTO;
 import com.lb_calc_web.dto.LBCDTO;
 
+import java.util.EnumSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 
+/** Преобразует LBC между транспортной и доменной моделями. */
 public final class LBCDtoMapper {
 
     private LBCDtoMapper() {
@@ -24,103 +34,36 @@ public final class LBCDtoMapper {
 
         LBCDTO dto = new LBCDTO();
         dto.setId(domain.getId());
-
         dto.setName(domain.getName());
         dto.setDescription(domain.getDescription());
-
         dto.setType(domain.getTypeLb().getType());
         dto.setDeltaWidth(domain.getTypeLb().getDeltaWidth());
         dto.setShelfThick(domain.getTypeLb().getShelfThick());
-        dto.setServiceZoneWidth(
-                domain.getTypeLb().getServiceZoneWidth()
-        );
-
+        dto.setServiceZoneWidth(domain.getTypeLb().getServiceZoneWidth());
         dto.setHeight(domain.getHeight());
         dto.setWidth(domain.getWidth());
         dto.setDepth(domain.getDepth());
-
         dto.setUpperFrame(domain.getUpperFrame());
         dto.setBottomFrame(domain.getBottomFrame());
-
         dto.setCountCells(domain.getCountCells());
-
         dto.setHeightCell(domain.getCellHeight());
         dto.setWidthCell(domain.getCellWidth());
         dto.setDepthCell(domain.getCellDepth());
-
         dto.setDoorThickness(domain.getDoorThickness());
+        dto.setDirectionDoorOpening(domain.getDirectionDoorOpening().name());
+        dto.setColorBody(domain.getColorBody().name());
+        dto.setColorDoor(domain.getColorDoor().name());
 
-        dto.setDirectionDoorOpening(
-                domain.getDirectionDoorOpening().name()
-        );
-
-        dto.setColorBody(
-                domain.getColorBody().name()
-        );
-
-        dto.setColorDoor(
-                domain.getColorDoor().name()
-        );
-
-        ControlConfiguration configuration =
-                domain.getControlConfiguration();
-
-        List<Equipment> equipment =
-                configuration.getEquipmentConfiguration()
-                        .getAllEquipment();
-
-        Equipment display = equipment.stream()
-                .filter(Equipment::isDisplay)
-                .filter(value -> !Display.NONE_ID.equals(value.getCatalogPositionId()))
-                .findFirst()
-                .orElse(null);
-
-        Equipment barReader = equipment.stream()
-                .filter(Equipment::isBarReader)
-                .filter(value -> !BarReader.NONE_ID.equals(value.getCatalogPositionId()))
-                .findFirst()
-                .orElse(null);
-
-        dto.setDisplay(
-                display != null
-                        ? display.getName()
-                        : Display.NONE.getName()
-        );
-        dto.setDisplayWidth(display == null ? 0 : display.getDisplayWidth());
-        dto.setDisplayHeight(display == null ? 0 : display.getDisplayHeight());
-
-        dto.setBarReader(
-                barReader != null
-                        ? barReader.getName()
-                        : BarReader.NONE.getName()
-        );
-
-        dto.setPrinter(
-                equipment.stream()
-                        .anyMatch(Equipment::isPrinter)
-        );
-
-        dto.setRfidReader(
-                equipment.stream().anyMatch(Equipment::isRfidReader)
-        );
-
-        EquipmentConfiguration equipmentConfiguration =
-                configuration.getEquipmentConfiguration();
-        dto.setEquipmentSelections(equipmentConfiguration.getAllItems().stream()
-                .map(item -> new EquipmentSelectionDTO(
-                        item.equipment().getCatalogPositionId(), item.quantity()))
+        ControlConfiguration configuration = domain.getControlConfiguration();
+        FunctionalConfiguration functional = configuration.getFunctionalConfiguration();
+        dto.setDisplayPurpose(functional.getDisplay().name());
+        dto.setAccessPurposes(functional.getAccess().stream().map(Enum::name).sorted().toList());
+        dto.setPaymentPurpose(functional.getPayment().name());
+        dto.setPrinterPurpose(functional.getPrinter().name());
+        dto.setEquipmentSelections(configuration.getEquipment().entrySet().stream()
+                .map(entry -> new EquipmentSelectionDTO(
+                        entry.getKey().getId(), entry.getValue()))
                 .toList());
-        dto.setDisplayQuantity(display == null ? 0
-                : equipmentConfiguration.getQuantity(display));
-        dto.setBarReaderQuantity(barReader == null ? 0
-                : equipmentConfiguration.getQuantity(barReader));
-        dto.setPrinterQuantity(equipment.stream()
-                .filter(Equipment::isPrinter).findFirst()
-                .map(equipmentConfiguration::getQuantity).orElse(0));
-        dto.setRfidReaderQuantity(equipment.stream()
-                .filter(Equipment::isRfidReader).findFirst()
-                .map(equipmentConfiguration::getQuantity).orElse(0));
-
         return dto;
     }
 
@@ -128,70 +71,46 @@ public final class LBCDtoMapper {
         if (dto == null) {
             return null;
         }
-
         TypeLb typeLb = new TypeLb(
-                dto.getType(),
-                dto.getDeltaWidth(),
-                dto.getShelfThick(),
-                dto.getServiceZoneWidth()
-        );
-
-        return toDomain(dto, typeLb);
+                dto.getType(), dto.getDeltaWidth(), dto.getShelfThick(), dto.getServiceZoneWidth());
+        return toDomain(dto, typeLb, id -> {
+            throw new IllegalStateException(
+                    "Для восстановления оборудования требуется Equipment resolver");
+        });
     }
 
-    /**
-     * Преобразует DTO в доменную модель с конструктивным типом,
-     * разрешённым application-слоем.
-     */
-    public static LBC toDomain(LBCDTO dto, TypeLb typeLb) {
-        return toDomain(dto, typeLb, EquipmentCatalog::resolve);
-    }
-
-    public static LBC toDomain(LBCDTO dto, TypeLb typeLb,
-                               Function<String, Equipment> equipmentResolver) {
-        return toDomain(
-                dto,
-                typeLb,
-                dto == null ? null : dto.getEquipmentSelections(),
-                equipmentResolver
-        );
-    }
-
-    /**
-     * Преобразует DTO в доменную модель с явно переданным составом оборудования.
-     * Исходный DTO не изменяется.
-     */
     public static LBC toDomain(
             LBCDTO dto,
             TypeLb typeLb,
-            List<EquipmentSelectionDTO> equipmentSelections,
-            Function<String, Equipment> equipmentResolver
+            Function<Long, Equipment> equipmentResolver
     ) {
         if (dto == null) {
             return null;
         }
-
-        java.util.Objects.requireNonNull(typeLb, "Тип LBC не должен быть null");
-        java.util.Objects.requireNonNull(equipmentResolver, "equipmentResolver не должен быть null");
-        if (!java.util.Objects.equals(dto.getType(), typeLb.getType())) {
+        Objects.requireNonNull(typeLb, "Тип LBC не должен быть null");
+        Objects.requireNonNull(equipmentResolver, "equipmentResolver не должен быть null");
+        if (!Objects.equals(dto.getType(), typeLb.getType())) {
             throw new IllegalArgumentException(
-                    "Переданный конструктивный тип не соответствует типу DTO LBC"
-            );
+                    "Переданный конструктивный тип не соответствует типу DTO LBC");
         }
 
-        EquipmentConfiguration equipmentConfiguration =
-                equipmentSelections != null
-                        ? ControlEquipmentResolver.resolve(
-                                equipmentSelections, equipmentResolver)
-                        : ControlEquipmentResolver.resolve(
-                                dto.getDisplay(), dto.getDisplayQuantity(),
-                                dto.getBarReader(), dto.getBarReaderQuantity(),
-                                dto.isPrinter(), dto.getPrinterQuantity(),
-                                dto.isRfidReader(), dto.getRfidReaderQuantity(),
-                                "LBC", equipmentResolver);
-
-        ControlConfiguration controlConfiguration =
-                new ControlConfiguration(equipmentConfiguration)
+        FunctionalConfiguration functional = new FunctionalConfiguration(
+                parseDisplayPurpose(dto.getDisplayPurpose()),
+                parseAccessPurposes(dto.getAccessPurposes()),
+                parsePaymentPurpose(dto.getPaymentPurpose()),
+                parsePrinterPurpose(dto.getPrinterPurpose())
+        );
+        Map<Equipment, Integer> equipment = new LinkedHashMap<>();
+        if (dto.getEquipmentSelections() != null) {
+            for (EquipmentSelectionDTO selection : dto.getEquipmentSelections()) {
+                Objects.requireNonNull(selection, "Позиция оборудования не должна быть null");
+                Equipment model = Objects.requireNonNull(
+                        equipmentResolver.apply(selection.getEquipmentId()),
+                        "Модель оборудования не найдена: " + selection.getEquipmentId()
+                );
+                equipment.merge(model, selection.getQuantity(), Math::addExact);
+            }
+        }
 
         LBC domain = new LBC(
                 dto.getHeight(),
@@ -203,38 +122,39 @@ public final class LBCDtoMapper {
                 Colors.valueOf(dto.getColorDoor()),
                 typeLb,
                 dto.getCountCells(),
-                DirectionDoorOpening.valueOf(
-                        dto.getDirectionDoorOpening()
-                ),
+                DirectionDoorOpening.valueOf(dto.getDirectionDoorOpening()),
                 dto.getDoorThickness(),
-                controlConfiguration
+                new ControlConfiguration(functional, equipment)
         );
         domain.setId(dto.getId() == null || dto.getId() <= 0 ? null : dto.getId());
         return domain;
     }
 
-    public static List<LBCDTO> toDtoList(
-            List<LBC> domains
-    ) {
-        if (domains == null) {
-            return List.of();
-        }
-
-        return domains.stream()
-                .map(LBCDtoMapper::toDto)
-                .toList();
+    private static DisplayPurpose parseDisplayPurpose(String value) {
+        return value == null || value.isBlank()
+                ? DisplayPurpose.NONE : DisplayPurpose.valueOf(value);
     }
 
-    public static List<LBC> toDomainList(
-            List<LBCDTO> dtos
-    ) {
-        if (dtos == null) {
-            return List.of();
+    private static java.util.Set<AccessPurpose> parseAccessPurposes(List<String> values) {
+        EnumSet<AccessPurpose> result = EnumSet.noneOf(AccessPurpose.class);
+        if (values != null) {
+            values.stream().filter(Objects::nonNull).filter(value -> !value.isBlank())
+                    .map(AccessPurpose::valueOf).forEach(result::add);
         }
-
-        return dtos.stream()
-                .map(LBCDtoMapper::toDomain)
-                .toList();
+        return result;
     }
 
+    private static PaymentPurpose parsePaymentPurpose(String value) {
+        return value == null || value.isBlank()
+                ? PaymentPurpose.NONE : PaymentPurpose.valueOf(value);
+    }
+
+    private static PrinterPurpose parsePrinterPurpose(String value) {
+        return value == null || value.isBlank()
+                ? PrinterPurpose.ABSENT : PrinterPurpose.valueOf(value);
+    }
+
+    public static List<LBCDTO> toDtoList(List<LBC> domains) {
+        return domains == null ? List.of() : domains.stream().map(LBCDtoMapper::toDto).toList();
+    }
 }

@@ -54,6 +54,11 @@ public class LBCDTO {
     private int displayHeight;
 
     private List<EquipmentSelectionDTO> equipmentSelections;
+    private String displayPurpose;
+    private List<String> accessPurposes = new ArrayList<>();
+    private String paymentPurpose;
+    private String printerPurpose;
+
     private List<String> accessMethods = new ArrayList<>();
     private List<String> printOptions = new ArrayList<>();
 
@@ -282,6 +287,20 @@ public class LBCDTO {
     public void setEquipmentSelections(List<EquipmentSelectionDTO> selections) {
         this.equipmentSelections = selections == null ? null : new ArrayList<>(selections);
     }
+
+    public String getDisplayPurpose() { return displayPurpose; }
+    public void setDisplayPurpose(String value) { displayPurpose = value; }
+
+    public List<String> getAccessPurposes() { return accessPurposes; }
+    public void setAccessPurposes(List<String> values) {
+        accessPurposes = values == null ? new ArrayList<>() : new ArrayList<>(values);
+    }
+
+    public String getPaymentPurpose() { return paymentPurpose; }
+    public void setPaymentPurpose(String value) { paymentPurpose = value; }
+
+    public String getPrinterPurpose() { return printerPurpose; }
+    public void setPrinterPurpose(String value) { printerPurpose = value; }
 
     public List<String> getAccessMethods() {
         return accessMethods;
