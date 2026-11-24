@@ -115,6 +115,6 @@ public class EquipmentEntity {
 
     @Override
     public int hashCode() {
-        return id == null ? System.identityHashCode(this) : id.hashCode();
+        return getClass().hashCode();
     }
 }

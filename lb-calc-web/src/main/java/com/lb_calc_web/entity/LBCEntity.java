@@ -1,15 +1,11 @@
 package com.lb_calc_web.entity;
 
-import jakarta.persistence.CollectionTable;
-import jakarta.persistence.Column;
-import jakarta.persistence.ElementCollection;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
+import com.lb_calc_web.domain.equipment.AccessPurpose;
+import com.lb_calc_web.domain.equipment.DisplayPurpose;
+import com.lb_calc_web.domain.equipment.PaymentPurpose;
+import com.lb_calc_web.domain.equipment.PrinterPurpose;
+import com.lb_calc_web.domain.model.FunctionalConfiguration;
+import jakarta.persistence.*;
 import org.hibernate.annotations.BatchSize;
 
 import java.util.EnumSet;
@@ -17,20 +13,11 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.Objects;
 
-/**
- * JPA-сущность комбинированного модуля LBC.
- *
- * <p>LBC является одновременно модулем хранения и модулем управления,
- * поэтому наследует storage-параметры от {@link StorageModuleEntity}
- * и содержит дополнительные параметры управления.</p>
- */
+/** JPA-сущность комбинированного модуля LBC. */
 @Entity
 @Table(name = "lbc")
 public class LBCEntity extends StorageModuleEntity {
 
-    /**
-     * Физический состав оборудования модуля с количеством каждой позиции.
-     */
     @BatchSize(size = 50)
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(
@@ -38,52 +25,34 @@ public class LBCEntity extends StorageModuleEntity {
             joinColumns = @JoinColumn(name = "lbc_id"),
             uniqueConstraints = @UniqueConstraint(
                     name = "uk_lbc_equipment",
-                    columnNames = {"lbc_id", "catalog_position_id"}
+                    columnNames = {"lbc_id", "equipment_id"}
             )
     )
     private Set<EquipmentQuantityEmbeddable> equipment = new HashSet<>();
 
-    /**
-     * Способ оплаты.
-     */
     @Enumerated(EnumType.STRING)
-    @Column(name = "payment", nullable = false, length = 50)
-    private Payment payment;
+    @Column(name = "display_purpose", nullable = false, length = 50)
+    private DisplayPurpose displayPurpose = DisplayPurpose.NONE;
 
-
-
-    /**
-     * Допустимые способы доступа.
-     */
     @BatchSize(size = 50)
     @ElementCollection
     @CollectionTable(
-            name = "lbc_access_method",
+            name = "lbc_access_purpose",
             joinColumns = @JoinColumn(name = "lbc_id")
     )
     @Enumerated(EnumType.STRING)
-    @Column(name = "access_method", nullable = false, length = 50)
-    private Set<AccessMethod> accessMethods =
-            EnumSet.noneOf(AccessMethod.class);
+    @Column(name = "access_purpose", nullable = false, length = 50)
+    private Set<AccessPurpose> accessPurposes = EnumSet.noneOf(AccessPurpose.class);
 
-    /**
-     * Варианты печати.
-     */
-    @BatchSize(size = 50)
-    @ElementCollection
-    @CollectionTable(
-            name = "lbc_print_option",
-            joinColumns = @JoinColumn(name = "lbc_id")
-    )
     @Enumerated(EnumType.STRING)
-    @Column(name = "print_option", nullable = false, length = 50)
-    private Set<PrintOption> printOptions =
-            EnumSet.noneOf(PrintOption.class);
+    @Column(name = "payment_purpose", nullable = false, length = 50)
+    private PaymentPurpose paymentPurpose = PaymentPurpose.NONE;
 
-    /**
-     * Конструктор для JPA.
-     */
-    public LBCEntity() {
+    @Enumerated(EnumType.STRING)
+    @Column(name = "printer_purpose", nullable = false, length = 50)
+    private PrinterPurpose printerPurpose = PrinterPurpose.ABSENT;
+
+    protected LBCEntity() {
     }
 
     public Set<EquipmentQuantityEmbeddable> getEquipment() {
@@ -91,90 +60,43 @@ public class LBCEntity extends StorageModuleEntity {
     }
 
     public void setEquipment(Set<EquipmentQuantityEmbeddable> equipment) {
-        Objects.requireNonNull(
-                equipment,
-                "Состав оборудования LBC не должен быть null"
-        );
-
-        Set<String> catalogPositionIds = new HashSet<>();
+        Objects.requireNonNull(equipment, "Состав оборудования LBC не должен быть null");
+        Set<Long> equipmentIds = new HashSet<>();
         for (EquipmentQuantityEmbeddable item : equipment) {
-            Objects.requireNonNull(
-                    item,
-                    "Позиция оборудования LBC не должна быть null"
-            );
-            if (!catalogPositionIds.add(item.getCatalogPositionId())) {
+            Objects.requireNonNull(item, "Позиция оборудования LBC не должна быть null");
+            Long id = Objects.requireNonNull(
+                    item.getEquipment().getId(),
+                    "Физическая модель оборудования должна быть сохранена до привязки к LBC");
+            if (!equipmentIds.add(id)) {
                 throw new IllegalArgumentException(
-                        "Позиция оборудования LBC не может быть указана несколько раз: "
-                                + item.getCatalogPositionId()
-                );
+                        "Модель оборудования LBC не может быть указана несколько раз: " + id);
             }
         }
-
         this.equipment.clear();
         this.equipment.addAll(equipment);
     }
 
-    public Payment getPayment() {
-        return payment;
+    public FunctionalConfiguration getFunctionalConfiguration() {
+        return new FunctionalConfiguration(
+                displayPurpose, accessPurposes, paymentPurpose, printerPurpose);
     }
 
-    public void setPayment(Payment payment) {
-        this.payment = Objects.requireNonNull(
-                payment,
-                "Способ оплаты не должен быть null"
-        );
-    }
-
-
-
-    public Set<AccessMethod> getAccessMethods() {
-        return Set.copyOf(accessMethods);
-    }
-
-    public void setAccessMethods(Set<AccessMethod> accessMethods) {
-        this.accessMethods.clear();
-
-        if (accessMethods != null) {
-            this.accessMethods.addAll(accessMethods);
-        }
-    }
-
-    public Set<PrintOption> getPrintOptions() {
-        return Set.copyOf(printOptions);
-    }
-
-    public void setPrintOptions(Set<PrintOption> printOptions) {
-        this.printOptions.clear();
-
-        if (printOptions != null) {
-            this.printOptions.addAll(printOptions);
-        }
+    public void setFunctionalConfiguration(FunctionalConfiguration configuration) {
+        Objects.requireNonNull(configuration, "Функциональная конфигурация LBC не должна быть null");
+        displayPurpose = configuration.getDisplay();
+        accessPurposes.clear();
+        accessPurposes.addAll(configuration.getAccess());
+        paymentPurpose = configuration.getPayment();
+        printerPurpose = configuration.getPrinter();
     }
 
     @Override
     public String toString() {
         return "LBCEntity{" +
                 "id=" + getId() +
-                ", name='" + getName() + '\'' +
-                ", description='" + getDescription() + '\'' +
-                ", height=" + getHeight() +
-                ", width=" + getWidth() +
-                ", depth=" + getDepth() +
-                ", upperFrame=" + getUpperFrame() +
-                ", bottomFrame=" + getBottomFrame() +
-                ", colorBody=" + getColorBody() +
-                ", colorDoor=" + getColorDoor() +
-                ", type='" + getType() + '\'' +
-                ", deltaWidth=" + getDeltaWidth() +
-                ", shelfThick=" + getShelfThick() +
-                ", serviceZoneWidth=" + getServiceZoneWidth() +
-                ", doorThickness=" + getDoorThickness() +
-                ", directionDoorOpening=" + getDirectionDoorOpening() +
-                ", countCells=" + getCountCells() +
-                ", heightCell=" + getHeightCell() +
-                ", widthCell=" + getWidthCell() +
-                ", depthCell=" + getDepthCell() +
-                ", payment=" + payment +
+                ", name='" + getName() + ''' +
+                ", functionalConfiguration=" + getFunctionalConfiguration() +
+                ", equipment=" + equipment +
                 '}';
     }
 }
