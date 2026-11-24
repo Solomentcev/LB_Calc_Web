@@ -117,9 +117,19 @@ public class LCService {
     /** Восстанавливает LC из DTO, разрешая выбранное оборудование по Long ID. */
     @Transactional(readOnly = true)
     public LC restoreDomain(LCDTO dto) {
+        ControlConfiguration fallback = dto != null && dto.getId() != null && dto.getId() > 0
+                ? findById(dto.getId()).getControlConfiguration()
+                : null;
+        return restoreDomain(dto, fallback);
+    }
+
+    /** Восстанавливает LC с сохранением пропущенных параметров текущей конфигурации. */
+    @Transactional(readOnly = true)
+    public LC restoreDomain(LCDTO dto, ControlConfiguration fallbackConfiguration) {
         Objects.requireNonNull(dto, "LC не должен быть null");
         try {
-            return LCDtoMapper.toDomain(dto, equipmentEntityResolver::resolveDomain);
+            return LCDtoMapper.toDomain(
+                    dto, equipmentEntityResolver::resolveDomain, fallbackConfiguration);
         } catch (RuntimeException exception) {
             throw createMappingValidationException("LC", dto.getId(), exception);
         }

@@ -129,12 +129,22 @@ public class LBCService {
     /** Восстанавливает LBC из DTO, разрешая выбранное оборудование по Long ID. */
     @Transactional(readOnly = true)
     public LBC restoreDomain(LBCDTO dto) {
+        ControlConfiguration fallback = dto != null && dto.getId() != null && dto.getId() > 0
+                ? findById(dto.getId()).getControlConfiguration()
+                : null;
+        return restoreDomain(dto, fallback);
+    }
+
+    /** Восстанавливает LBC с сохранением пропущенных параметров текущей конфигурации. */
+    @Transactional(readOnly = true)
+    public LBC restoreDomain(LBCDTO dto, ControlConfiguration fallbackConfiguration) {
         Objects.requireNonNull(dto, "LBC не должен быть null");
         try {
             return LBCDtoMapper.toDomain(
                     dto,
                     TypeLbFactory.forLBC(environment, dto.getType()),
-                    equipmentEntityResolver::resolveDomain
+                    equipmentEntityResolver::resolveDomain,
+                    fallbackConfiguration
             );
         } catch (RuntimeException exception) {
             throw createMappingValidationException("LBC", dto.getId(), exception);
