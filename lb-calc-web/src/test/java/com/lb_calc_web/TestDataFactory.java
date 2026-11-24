@@ -3,7 +3,10 @@ package com.lb_calc_web;
 import com.lb_calc_web.domain.attributes.Colors;
 import com.lb_calc_web.domain.attributes.DirectionDoorOpening;
 import com.lb_calc_web.domain.attributes.TypeLb;
-import com.lb_calc_web.domain.equipment.Display;
+import com.lb_calc_web.domain.equipment.AccessPurpose;
+import com.lb_calc_web.domain.equipment.DisplayPurpose;
+import com.lb_calc_web.domain.equipment.PaymentPurpose;
+import com.lb_calc_web.domain.equipment.PrinterPurpose;
 import com.lb_calc_web.domain.model.ALS;
 import com.lb_calc_web.domain.model.LBC;
 import com.lb_calc_web.domain.model.LB;
@@ -86,14 +89,14 @@ public final class TestDataFactory {
 
         lc.setId(id);
         lc.setHeight(1940);
-        lc.setWidth(Display.LC10.getWidth());
+        lc.setWidth(500);
         lc.setDepth(500);
         lc.setUpperFrame(50);
         lc.setBottomFrame(50);
 
-        lc.setDisplay(Display.LC10.getName());
-        lc.setBarReader(BarReader.NONE.getName());
-        lc.setPayment(Payment.NONE.name());
+        lc.setDisplay("LC10");
+        lc.setBarReader("NONE");
+        lc.setPayment(PaymentPurpose.NONE.name());
         lc.setPrinter(false);
         lc.setRfidReader(true);
         lc.setDisplayQuantity(1);
@@ -104,6 +107,10 @@ public final class TestDataFactory {
         lc.setColorBody(Colors.Blue.name());
         lc.setColorDoor(Colors.White.name());
 
+        lc.setDisplayPurpose(DisplayPurpose.INCH_10.name());
+        lc.setAccessPurposes(List.of(AccessPurpose.RFID.name()));
+        lc.setPaymentPurpose(PaymentPurpose.NONE.name());
+        lc.setPrinterPurpose(PrinterPurpose.ABSENT.name());
         lc.setAccessMethods(List.of());
         lc.setPrintOptions(List.of());
 
@@ -173,15 +180,19 @@ public final class TestDataFactory {
         lbc.setColorBody(Colors.Blue.name());
         lbc.setColorDoor(Colors.White.name());
 
-        lbc.setDisplay(Display.LC10.getName());
-        lbc.setBarReader(BarReader.NONE.getName());
-        lbc.setPayment(Payment.NONE.name());
+        lbc.setDisplay("LC10");
+        lbc.setBarReader("NONE");
+        lbc.setPayment(PaymentPurpose.NONE.name());
         lbc.setPrinter(false);
         lbc.setRfidReader(true);
         lbc.setDisplayQuantity(1);
         lbc.setBarReaderQuantity(0);
         lbc.setPrinterQuantity(0);
         lbc.setRfidReaderQuantity(1);
+        lbc.setDisplayPurpose(DisplayPurpose.INCH_10.name());
+        lbc.setAccessPurposes(List.of(AccessPurpose.RFID.name()));
+        lbc.setPaymentPurpose(PaymentPurpose.NONE.name());
+        lbc.setPrinterPurpose(PrinterPurpose.ABSENT.name());
         lbc.setAccessMethods(List.of());
         lbc.setPrintOptions(List.of());
 

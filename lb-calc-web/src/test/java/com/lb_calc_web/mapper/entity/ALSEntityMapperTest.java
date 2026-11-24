@@ -15,13 +15,21 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class ALSEntityMapperTest {
 
+    private static com.lb_calc_web.entity.ModuleEntity toEntity(
+            com.lb_calc_web.domain.model.Module module
+    ) {
+        return ModuleEntityMapper.toEntity(module, equipment -> {
+            throw new AssertionError("В этом тесте не ожидается разрешение оборудования");
+        });
+    }
+
     @Test
     void roundTrip_shouldPreserveModuleCompositionAndPhysicalOrder() {
         ALS domain = TestDataFactory.validALS(null);
 
         ALSEntity entity = ALSEntityMapper.toEntity(
                 domain,
-                ModuleEntityMapper::toEntity
+                ALSEntityMapperTest::toEntity
         );
 
         assertEquals(domain.getModules().size(), entity.getModules().size());

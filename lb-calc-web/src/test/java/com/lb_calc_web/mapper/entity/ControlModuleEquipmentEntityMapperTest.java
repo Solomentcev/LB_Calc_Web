@@ -1,184 +1,129 @@
 package com.lb_calc_web.mapper.entity;
 
-import com.lb_calc_web.TestDataFactory;
+import com.lb_calc_web.domain.equipment.AccessPurpose;
+import com.lb_calc_web.domain.equipment.DisplayPurpose;
+import com.lb_calc_web.domain.equipment.Equipment;
+import com.lb_calc_web.domain.equipment.EquipmentCategory;
+import com.lb_calc_web.domain.equipment.EquipmentFunctionalType;
+import com.lb_calc_web.domain.equipment.PaymentPurpose;
+import com.lb_calc_web.domain.equipment.PrinterPurpose;
 import com.lb_calc_web.domain.model.ControlConfiguration;
+import com.lb_calc_web.domain.model.FunctionalConfiguration;
 import com.lb_calc_web.domain.model.LBC;
 import com.lb_calc_web.domain.model.LC;
+import com.lb_calc_web.entity.EquipmentEntity;
 import com.lb_calc_web.entity.LBCEntity;
 import com.lb_calc_web.entity.LCEntity;
+import com.lb_calc_web.service.EquipmentEntityResolver;
+import com.lb_calc_web.repository.EquipmentRepository;
 import org.junit.jupiter.api.Test;
 
-import java.util.HashSet;
-import java.util.List;
+import java.lang.reflect.Field;
+import java.util.Map;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
-/**
- * Проверяет сохранение физического состава оборудования LC/LBC.
- */
 class ControlModuleEquipmentEntityMapperTest {
 
-    @Test
-    void lc_shouldPreserveAllEquipmentPositionsAndQuantities() {
-        LC domain = withBarReaders(TestDataFactory.validLC(1L), 1);
+    private static final FunctionalConfiguration FUNCTIONAL = new FunctionalConfiguration(
+            DisplayPurpose.INCH_10,
+            Set.of(AccessPurpose.RFID, AccessPurpose.BAR_CODE),
+            PaymentPurpose.NONE,
+            PrinterPurpose.ABSENT
+    );
 
-        LCEntity entity = LCEntityMapper.toEntity(domain);
+    private EquipmentEntity persisted(Equipment equipment) throws Exception {
+        EquipmentEntity entity = EquipmentEntityMapper.toEntity(equipment);
+        Field id = EquipmentEntity.class.getDeclaredField("id");
+        id.setAccessible(true);
+        id.set(entity, equipment.getId());
+        return entity;
+    }
+
+    private Equipment equipment(
+            long id,
+            EquipmentFunctionalType type,
+            com.lb_calc_web.domain.equipment.EquipmentPurpose purpose,
+            EquipmentCategory category,
+            String name
+    ) {
+        return new Equipment(id, type, purpose, category, name, "", 100, 50, 30);
+    }
+
+    @Test
+    void lc_shouldRoundTripFunctionalConfigurationAndEquipmentPositions() throws Exception {
+        Equipment display = equipment(1, EquipmentFunctionalType.DISPLAY,
+                DisplayPurpose.INCH_10, EquipmentCategory.DISPLAY, "Дисплей 10");
+        Equipment rfid = equipment(2, EquipmentFunctionalType.ACCESS,
+                AccessPurpose.RFID, EquipmentCategory.RFID_READER, "RFID");
+        Equipment barcode = equipment(3, EquipmentFunctionalType.ACCESS,
+                AccessPurpose.BAR_CODE, EquipmentCategory.BAR_READER, "Сканер штрихкода");
+        Map<Equipment, Integer> positions = Map.of(display, 1, rfid, 2, barcode, 1);
+        LC source = new LC(1940, 500, 500, 50, 50,
+                com.lb_calc_web.domain.attributes.Colors.Blue,
+                com.lb_calc_web.domain.attributes.Colors.White,
+                new ControlConfiguration(FUNCTIONAL, positions));
+        Map<Long, EquipmentEntity> entities = Map.of(
+                1L, persisted(display), 2L, persisted(rfid), 3L, persisted(barcode));
+
+        LCEntity entity = LCEntityMapper.toEntity(source, item -> entities.get(item.getId()));
         LC restored = LCEntityMapper.toDomain(entity);
 
-        assertEquals(
-                domain.getControlConfiguration().getEquipmentConfiguration()
-                        .getAllItems().size(),
-                entity.getEquipment().size()
-        );
+        assertEquals(source, restored);
+        assertEquals(FUNCTIONAL, entity.getFunctionalConfiguration());
+        assertEquals(3, entity.getEquipment().size());
         assertEquals(2, entity.getEquipment().stream()
-                .filter(item -> item.getCatalogPositionId().startsWith("BAR_READER"))
-                .count());
-        assertEquals(domain, restored);
+                .filter(item -> item.getEquipment().getId().equals(2L))
+                .findFirst().orElseThrow().getQuantity());
     }
 
     @Test
-    void lbc_shouldPreserveAllEquipmentPositionsAndQuantities() {
-        LBC domain = withBarReaders(TestDataFactory.validLBC(1L), 1);
+    void lbc_shouldRoundTripFunctionalConfigurationAndEquipmentPositions() throws Exception {
+        Equipment rfid = equipment(2, EquipmentFunctionalType.ACCESS,
+                AccessPurpose.RFID, EquipmentCategory.RFID_READER, "RFID");
+        var sourceBase = com.lb_calc_web.TestDataFactory.validLBC(null);
+        LBC source = new LBC(
+                sourceBase.getHeight(), sourceBase.getWidth(), sourceBase.getDepth(),
+                sourceBase.getUpperFrame(), sourceBase.getBottomFrame(),
+                sourceBase.getColorBody(), sourceBase.getColorDoor(), sourceBase.getTypeLb(),
+                sourceBase.getCountCells(), sourceBase.getDirectionDoorOpening(),
+                sourceBase.getDoorThickness(),
+                new ControlConfiguration(FUNCTIONAL, Map.of(rfid, 2))
+        );
+        EquipmentEntity persisted = persisted(rfid);
 
-        LBCEntity entity = LBCEntityMapper.toEntity(domain);
+        LBCEntity entity = LBCEntityMapper.toEntity(source, item -> persisted);
         LBC restored = LBCEntityMapper.toDomain(entity);
 
-        assertEquals(
-                domain.getControlConfiguration().getEquipmentConfiguration()
-                        .getAllItems().size(),
-                entity.getEquipment().size()
-        );
-        assertEquals(2, entity.getEquipment().stream()
-                .filter(item -> item.getCatalogPositionId().startsWith("BAR_READER"))
-                .count());
-        assertEquals(domain, restored);
+        assertEquals(source, restored);
+        assertEquals(FUNCTIONAL, entity.getFunctionalConfiguration());
+        assertEquals(2, entity.getEquipment().iterator().next().getQuantity());
     }
 
     @Test
-    void lbc_shouldPersistEveryEquipmentPositionAndQuantity() {
-        LBC domain = withBarReaders(TestDataFactory.validLBC(1L), 3);
-        EquipmentConfiguration configuration =
-                domain.getControlConfiguration().getEquipmentConfiguration();
+    void equipmentResolver_shouldReturnExistingManagedEntityByDomainId() throws Exception {
+        Equipment equipment = equipment(44, EquipmentFunctionalType.ACCESS,
+                AccessPurpose.RFID, EquipmentCategory.RFID_READER, "RFID");
+        EquipmentEntity entity = persisted(equipment);
+        EquipmentRepository repository = mock(EquipmentRepository.class);
+        when(repository.findById(44L)).thenReturn(java.util.Optional.of(entity));
 
-        LBCEntity entity = LBCEntityMapper.toEntity(domain);
+        EquipmentEntityResolver resolver = new EquipmentEntityResolver(repository);
 
-        assertEquals(
-                configuration.getAllItems().size(),
-                entity.getEquipment().size()
-        );
-        assertEquals(
-                2,
-                entity.getEquipment().stream()
-                        .filter(item -> item.getCatalogPositionId()
-                                .equals(BarReader.READER_1D_ID))
-                        .findFirst().orElseThrow().getQuantity()
-        );
-        assertEquals(
-                3,
-                entity.getEquipment().stream()
-                        .filter(item -> item.getCatalogPositionId()
-                                .equals(BarReader.READER_2D_ID))
-                        .findFirst().orElseThrow().getQuantity()
-        );
-        assertEquals(domain, LBCEntityMapper.toDomain(entity));
+        assertSame(entity, resolver.resolve(equipment));
+        verify(repository).findById(44L);
     }
 
     @Test
-    void equipmentValue_shouldIncludeQuantity() {
-        EquipmentQuantityEmbeddable one =
-                new EquipmentQuantityEmbeddable("BAR_READER_1D", 1);
-        EquipmentQuantityEmbeddable two =
-                new EquipmentQuantityEmbeddable("BAR_READER_1D", 2);
+    void equipmentResolver_shouldRejectUnsavedDomainEquipment() {
+        Equipment equipment = equipment(0, EquipmentFunctionalType.ACCESS,
+                AccessPurpose.RFID, EquipmentCategory.RFID_READER, "RFID");
+        EquipmentRepository repository = mock(EquipmentRepository.class);
+        EquipmentEntityResolver resolver = new EquipmentEntityResolver(repository);
 
-        assertNotEquals(one, two);
-        assertEquals(2, new HashSet<>(List.of(one, two)).size());
-
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> new LCEntity().setEquipment(Set.of(one, two))
-        );
-    }
-
-    @Test
-    void lc_shouldPersistEveryEquipmentPositionAndQuantity() {
-        LC domain = withBarReaders(TestDataFactory.validLC(1L), 3);
-        EquipmentConfiguration configuration =
-                domain.getControlConfiguration().getEquipmentConfiguration();
-
-        LCEntity entity = LCEntityMapper.toEntity(domain);
-
-        assertEquals(
-                configuration.getAllItems().size(),
-                entity.getEquipment().size()
-        );
-        assertEquals(
-                2,
-                entity.getEquipment().stream()
-                        .filter(item -> item.getCatalogPositionId()
-                                .equals(BarReader.READER_1D_ID))
-                        .findFirst().orElseThrow().getQuantity()
-        );
-        assertEquals(domain, LCEntityMapper.toDomain(entity));
-    }
-
-    private LC withBarReaders(LC source, int secondReaderQuantity) {
-        EquipmentConfiguration equipment =
-                source.getControlConfiguration().getEquipmentConfiguration();
-        equipment.addRequiredEquipment(BarReader.READER_1D, 2);
-        equipment.addAdditionalEquipment(
-                BarReader.READER_2D,
-                secondReaderQuantity
-        );
-
-        ControlConfiguration configuration = new ControlConfiguration(
-                source.getControlConfiguration().getPayment(),
-                source.getControlConfiguration().getAccessMethods(),
-                source.getControlConfiguration().getPrintOptions(),
-                equipment
-        );
-
-        return new LC(
-                source.getHeight(),
-                source.getWidth(),
-                source.getDepth(),
-                source.getUpperFrame(),
-                source.getBottomFrame(),
-                source.getColorBody(),
-                source.getColorDoor(),
-                configuration
-        );
-    }
-
-    private LBC withBarReaders(LBC source, int secondReaderQuantity) {
-        EquipmentConfiguration equipment =
-                source.getControlConfiguration().getEquipmentConfiguration();
-        equipment.addRequiredEquipment(BarReader.READER_1D, 2);
-        equipment.addAdditionalEquipment(
-                BarReader.READER_2D,
-                secondReaderQuantity
-        );
-
-        ControlConfiguration configuration = new ControlConfiguration(
-                source.getControlConfiguration().getPayment(),
-                source.getControlConfiguration().getAccessMethods(),
-                source.getControlConfiguration().getPrintOptions(),
-                equipment
-        );
-
-        return new LBC(
-                source.getHeight(),
-                source.getWidth(),
-                source.getDepth(),
-                source.getUpperFrame(),
-                source.getBottomFrame(),
-                source.getColorBody(),
-                source.getColorDoor(),
-                source.getTypeLb(),
-                source.getCountCells(),
-                source.getDirectionDoorOpening(),
-                source.getDoorThickness(),
-                configuration
-        );
+        assertThrows(IllegalArgumentException.class, () -> resolver.resolve(equipment));
+        verifyNoInteractions(repository);
     }
 }
