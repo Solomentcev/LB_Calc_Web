@@ -13,12 +13,15 @@ import com.lb_calc_web.dto.LCDTO;
 import com.lb_calc_web.entity.EquipmentEntity;
 import com.lb_calc_web.entity.LCEntity;
 import com.lb_calc_web.mapper.entity.LCEntityMapper;
+import com.lb_calc_web.mapper.entity.EquipmentEntityMapper;
 import com.lb_calc_web.repository.LCRepository;
+import com.lb_calc_web.repository.EquipmentRepository;
 import com.lb_calc_web.service.validation.ValidationSizeException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.env.MockEnvironment;
 
+import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -31,7 +34,7 @@ class LCServiceTest {
 
     private FindOrCreateLockService lockService;
     private LCRepository repository;
-    private EquipmentEntityResolver equipmentResolver;
+    private EquipmentRepository equipmentRepository;
     private MockEnvironment environment;
     private LCService service;
 
@@ -39,7 +42,7 @@ class LCServiceTest {
     void setUp() {
         lockService = mock(FindOrCreateLockService.class);
         repository = mock(LCRepository.class);
-        equipmentResolver = mock(EquipmentEntityResolver.class);
+        equipmentRepository = mock(EquipmentRepository.class);
         environment = new MockEnvironment()
                 .withProperty("size.height.default", "1940")
                 .withProperty("size.width.default", "500")
@@ -53,7 +56,7 @@ class LCServiceTest {
                 .withProperty("lc.color.door.default", "White");
         service = new LCService(
                 repository, lockService, environment,
-                TestDataFactory.createSizeValidator(), equipmentResolver);
+                TestDataFactory.createSizeValidator(), equipmentRepository);
     }
 
     @Test
@@ -72,14 +75,18 @@ class LCServiceTest {
         Equipment equipment = new Equipment(
                 71L, EquipmentFunctionalType.ACCESS, AccessPurpose.RFID,
                 EquipmentCategory.RFID_READER, "RFID", "", 100, 50, 30);
-        when(equipmentResolver.resolveDomain(71L)).thenReturn(equipment);
+        EquipmentEntity equipmentEntity = EquipmentEntityMapper.toEntity(equipment);
+        Field id = EquipmentEntity.class.getDeclaredField("id");
+        id.setAccessible(true);
+        id.set(equipmentEntity, 71L);
+        when(equipmentRepository.findById(71L)).thenReturn(Optional.of(equipmentEntity));
         LCDTO dto = TestDataFactory.validLCDTO(null);
         dto.setEquipmentSelections(List.of(new EquipmentSelectionDTO(71L, 2)));
 
         LC restored = service.restoreDomain(dto);
 
         assertEquals(2, restored.getControlConfiguration().getQuantity(equipment));
-        verify(equipmentResolver).resolveDomain(71L);
+        verify(equipmentRepository).findById(71L);
     }
 
     @Test
@@ -101,7 +108,7 @@ class LCServiceTest {
         LC restored = service.restoreDomain(dto, fallback);
 
         assertEquals(fallback, restored.getControlConfiguration());
-        verifyNoInteractions(equipmentResolver);
+        verifyNoInteractions(equipmentRepository);
     }
 
     @Test

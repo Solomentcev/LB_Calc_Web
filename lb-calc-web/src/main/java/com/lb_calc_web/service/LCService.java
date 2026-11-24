@@ -10,9 +10,12 @@ import com.lb_calc_web.domain.model.FunctionalConfiguration;
 import com.lb_calc_web.domain.model.LC;
 import com.lb_calc_web.dto.LCDTO;
 import com.lb_calc_web.entity.LCEntity;
+import com.lb_calc_web.entity.EquipmentEntity;
 import com.lb_calc_web.mapper.dto.LCDtoMapper;
 import com.lb_calc_web.mapper.entity.LCEntityMapper;
+import com.lb_calc_web.mapper.entity.EquipmentEntityMapper;
 import com.lb_calc_web.repository.LCRepository;
+import com.lb_calc_web.repository.EquipmentRepository;
 import com.lb_calc_web.service.validation.ValidationResult;
 import com.lb_calc_web.service.validation.ValidationSizeException;
 import com.lb_calc_web.service.validation.size.SizeValidator;
@@ -39,20 +42,20 @@ public class LCService {
     private final LCRepository lcRepository;
     private final Environment environment;
     private final SizeValidator sizeValidator;
-    private final EquipmentEntityResolver equipmentEntityResolver;
+    private final EquipmentRepository equipmentRepository;
 
     public LCService(
             LCRepository lcRepository,
             FindOrCreateLockService findOrCreateLockService,
             Environment environment,
             SizeValidator sizeValidator,
-            EquipmentEntityResolver equipmentEntityResolver
+            EquipmentRepository equipmentRepository
     ) {
         this.lcRepository = Objects.requireNonNull(lcRepository);
         this.findOrCreateLockService = Objects.requireNonNull(findOrCreateLockService);
         this.environment = Objects.requireNonNull(environment);
         this.sizeValidator = Objects.requireNonNull(sizeValidator);
-        this.equipmentEntityResolver = Objects.requireNonNull(equipmentEntityResolver);
+        this.equipmentRepository = Objects.requireNonNull(equipmentRepository);
     }
 
     /** Создаёт несохранённый LC с параметрами по умолчанию. */
@@ -129,7 +132,7 @@ public class LCService {
         Objects.requireNonNull(dto, "LC не должен быть null");
         try {
             return LCDtoMapper.toDomain(
-                    dto, equipmentEntityResolver::resolveDomain, fallbackConfiguration);
+                    dto, this::findEquipment, fallbackConfiguration);
         } catch (RuntimeException exception) {
             throw createMappingValidationException("LC", dto.getId(), exception);
         }
@@ -164,7 +167,7 @@ public class LCService {
         }
 
         LCEntity saved = lcRepository.save(
-                LCEntityMapper.toEntity(domain, equipmentEntityResolver::resolve));
+                LCEntityMapper.toEntity(domain, this::findEquipmentEntity));
         domain.setId(saved.getId());
         logger.info("LC сохранён, id={}", saved.getId());
         return domain;
@@ -192,6 +195,31 @@ public class LCService {
             }
         }
         return result;
+    }
+
+    private com.lb_calc_web.domain.equipment.Equipment findEquipment(Long id) {
+        if (id == null || id <= 0) {
+            throw new IllegalArgumentException(
+                    "Идентификатор модели оборудования должен быть положительным");
+        }
+        EquipmentEntity entity = equipmentRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException(
+                        "Модель оборудования с id=" + id + " не найдена"));
+        return EquipmentEntityMapper.toDomain(entity);
+    }
+
+    private EquipmentEntity findEquipmentEntity(
+            com.lb_calc_web.domain.equipment.Equipment equipment
+    ) {
+        Objects.requireNonNull(equipment, "Оборудование не должно быть null");
+        Long id = equipment.getId();
+        if (id == null || id <= 0) {
+            throw new IllegalArgumentException(
+                    "Модель оборудования должна иметь положительный идентификатор");
+        }
+        return equipmentRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException(
+                        "Модель оборудования с id=" + id + " не найдена"));
     }
 
     private ValidationSizeException createMappingValidationException(
