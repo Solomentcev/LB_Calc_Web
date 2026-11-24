@@ -55,17 +55,6 @@ public final class ProjectEntityMapper {
                 entity,
                 "ProjectEntity не должен быть null"
         );
-        return toDomain(entity, alsObserver);
-    }
-
-    public static Project toDomain(
-            ProjectEntity entity,
-            BiConsumer<ALS, ALSEntity> alsObserver
-    ) {
-        Objects.requireNonNull(
-                entity,
-                "ProjectEntity не должен быть null"
-        );
         Objects.requireNonNull(
                 alsObserver,
                 "alsObserver не должен быть null"
