@@ -89,9 +89,10 @@ class ALSServiceTest {
 
     @Test
     void findById_shouldRestoreDomainFromEntity() {
-        ALSEntity entity = ALSEntityMapper.toEntity(
+        ALSEntity entity = spy(ALSEntityMapper.toEntity(
                 TestDataFactory.validALS(15L),
-                module -> ModuleEntityMapper.toEntity(module, equipment -> null));
+                module -> ModuleEntityMapper.toEntity(module, equipment -> null)));
+        doReturn(15L).when(entity).getId();
         when(alsRepository.findById(15L)).thenReturn(Optional.of(entity));
 
         ALS result = service.findById(15L);
@@ -102,9 +103,10 @@ class ALSServiceTest {
     @Test
     void saveALS_shouldReuseExistingIdenticalConfiguration() {
         ALS domain = TestDataFactory.validALS(1L);
-        ALSEntity existing = ALSEntityMapper.toEntity(
+        ALSEntity existing = spy(ALSEntityMapper.toEntity(
                 TestDataFactory.validALS(77L),
-                module -> ModuleEntityMapper.toEntity(module, equipment -> null));
+                module -> ModuleEntityMapper.toEntity(module, equipment -> null)));
+        doReturn(77L).when(existing).getId();
         when(alsRepository.findCandidates(anyInt(), anyInt(), anyInt(), anyInt(), any(), any()))
                 .thenReturn(List.of(existing));
 
