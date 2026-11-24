@@ -110,7 +110,7 @@
             <input type="hidden" th:field="*{LBC.functionalConfiguration.printer}">
             <input type="hidden"
                    th:each="purpose, purposeStat : ${als.LBC.functionalConfiguration.access}"
-                   th:name="|LBC.functionalConfiguration.access[${purposeStat.index}]|"
+                   th:name="LBC.functionalConfiguration.access"
                    th:value="${purpose}">
             <input type="hidden"
                    th:each="selection, selectionStat : ${als.LBC.equipmentSelections}"
@@ -155,7 +155,7 @@
             <input type="hidden" th:field="*{LC.functionalConfiguration.printer}">
             <input type="hidden"
                    th:each="purpose, purposeStat : ${als.LC.functionalConfiguration.access}"
-                   th:name="|LC.functionalConfiguration.access[${purposeStat.index}]|"
+                   th:name="LC.functionalConfiguration.access"
                    th:value="${purpose}">
             <input type="hidden"
                    th:each="selection, selectionStat : ${als.LC.equipmentSelections}"
