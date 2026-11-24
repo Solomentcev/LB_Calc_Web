@@ -195,7 +195,7 @@ public final class LBCDtoMapper {
                                 "LBC", equipmentResolver);
 
         ControlConfiguration controlConfiguration =
-                new ControlConfiguration(equipmentConfiguration);
+                new ControlConfiguration(equipmentConfiguration)
 
         LBC domain = new LBC(
                 dto.getHeight(),
@@ -240,6 +240,5 @@ public final class LBCDtoMapper {
                 .map(LBCDtoMapper::toDomain)
                 .toList();
     }
-
 
 }

@@ -140,7 +140,7 @@ public final class LCDtoMapper {
                                 "LC", equipmentResolver);
 
         ControlConfiguration controlConfiguration =
-                new ControlConfiguration(equipmentConfiguration);
+                new ControlConfiguration(equipmentConfiguration)
 
         LC domain = new LC(
                 dto.getHeight(),
