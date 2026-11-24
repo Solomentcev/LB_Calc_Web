@@ -22,7 +22,7 @@
         <h1 class="h4" th:text="*{description}">Модуль хранения и управления</h1>
         <input type="hidden" th:field="*{id}">
         <input type="hidden" th:field="*{name}">
-        <div class="row g-3">
+        <div class="row mt-3">
             <div class="col-md-3"><label class="form-label">Тип</label><input class="form-control" th:field="*{type}" readonly></div>
             <div class="col-md-3"><label class="form-label">Количество ячеек</label><input class="form-control" type="number" min="1" th:field="*{countCells}"></div>
             <div class="col-md-3"><label class="form-label">Высота</label><input class="form-control" type="number" th:field="*{height}"></div>
@@ -31,29 +31,29 @@
             <div class="col-md-3"><label class="form-label">Верхняя рама</label><input class="form-control" type="number" th:field="*{upperFrame}"></div>
             <div class="col-md-3"><label class="form-label">Нижняя рама</label><input class="form-control" type="number" th:field="*{bottomFrame}"></div>
             <div class="col-md-3"><label class="form-label">Толщина дверцы</label><input class="form-control" type="number" th:field="*{doorThickness}"></div>
-            <div class="col-md-3"><label class="form-label">Направление дверей</label><select class="form-select" th:field="*{directionDoorOpening}"><option th:each="direction : ${directionDoorOpeningList}" th:value="${direction}" th:text="${direction}"></option></select></div>
-            <div class="col-md-3"><label class="form-label">Цвет корпуса</label><select class="form-select" th:field="*{colorBody}"><option th:each="color : ${colorsList}" th:value="${color}" th:text="${color}"></option></select></div>
-            <div class="col-md-3"><label class="form-label">Цвет дверей</label><select class="form-select" th:field="*{colorDoor}"><option th:each="color : ${colorsList}" th:value="${color}" th:text="${color}"></option></select></div>
+            <div class="col-md-3"><label class="form-label">Направление дверей</label><select class="form-control" th:field="*{directionDoorOpening}"><option th:each="direction : ${directionDoorOpeningList}" th:value="${direction}" th:text="${direction}"></option></select></div>
+            <div class="col-md-3"><label class="form-label">Цвет корпуса</label><select class="form-control" th:field="*{colorBody}"><option th:each="color : ${colorsList}" th:value="${color}" th:text="${color}"></option></select></div>
+            <div class="col-md-3"><label class="form-label">Цвет дверей</label><select class="form-control" th:field="*{colorDoor}"><option th:each="color : ${colorsList}" th:value="${color}" th:text="${color}"></option></select></div>
         </div>
         <h2 class="h5 mt-4">Функциональные назначения</h2>
-<div class="row g-3">
+<div class="row mt-3">
     <div class="col-md-6"><label class="form-label">Дисплей</label>
-        <select class="form-select" th:field="*{functionalConfiguration.display}">
+        <select class="form-control" th:field="*{functionalConfiguration.display}">
             <option th:each="purpose : ${displayPurposes}" th:value="${purpose}" th:text="${purpose}"></option>
         </select>
     </div>
     <div class="col-md-6"><label class="form-label">Оплата</label>
-        <select class="form-select" th:field="*{functionalConfiguration.payment}">
+        <select class="form-control" th:field="*{functionalConfiguration.payment}">
             <option th:each="purpose : ${paymentPurposes}" th:value="${purpose}" th:text="${purpose}"></option>
         </select>
     </div>
     <div class="col-md-6"><label class="form-label">Способы доступа</label>
-        <select multiple class="form-select" th:field="*{functionalConfiguration.access}">
+        <select multiple class="form-control" th:field="*{functionalConfiguration.access}">
             <option th:each="purpose : ${accessPurposes}" th:value="${purpose}" th:text="${purpose}"></option>
         </select>
     </div>
     <div class="col-md-6"><label class="form-label">Печать</label>
-        <select class="form-select" th:field="*{functionalConfiguration.printer}">
+        <select class="form-control" th:field="*{functionalConfiguration.printer}">
             <option th:each="purpose : ${printerPurposes}" th:value="${purpose}" th:text="${purpose}"></option>
         </select>
     </div>
@@ -61,11 +61,11 @@
 <h2 class="h5 mt-4">Физическое оборудование</h2>
 <p class="text-muted">Выбор моделей выполняется независимо от функциональных назначений. При изменении состава оборудования связанные назначения пересчитываются доменной моделью.</p>
 <div id="equipment-selection-list">
-    <div class="row g-2 align-items-end mb-2 equipment-selection-row"
+    <div class="row align-items-end mb-2 equipment-selection-row"
          th:each="selection, selectionStat : *{equipmentSelections}">
         <div class="col-md-8">
             <label class="form-label">Модель оборудования</label>
-            <select class="form-select" th:name="|equipmentSelections[${selectionStat.index}].equipmentId|">
+            <select class="form-control" th:name="|equipmentSelections[${selectionStat.index}].equipmentId|">
                 <option value="">Выберите модель</option>
                 <option th:each="item : ${equipmentList}" th:value="${item.id}"
                         th:selected="${item.id == selection.equipmentId}"
@@ -83,10 +83,10 @@
 </div>
 <button type="button" id="add-equipment" class="btn btn-outline-primary btn-sm mt-2">Добавить модель</button>
 <template id="equipment-selection-row-template">
-    <div class="row g-2 align-items-end mb-2 equipment-selection-row">
+    <div class="row align-items-end mb-2 equipment-selection-row">
         <div class="col-md-8">
             <label class="form-label">Модель оборудования</label>
-            <select class="form-select" name="equipmentSelections[__INDEX__].equipmentId">
+            <select class="form-control" name="equipmentSelections[__INDEX__].equipmentId">
                 <option value="">Выберите модель</option>
                 <option th:each="item : ${equipmentList}" th:value="${item.id}"
                         th:text="|[${item.functionalType}] ${item.name} — ${item.purpose} (${item.width}×${item.height}×${item.depth} мм)|"></option>
