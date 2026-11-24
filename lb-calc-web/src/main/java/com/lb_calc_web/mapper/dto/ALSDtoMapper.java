@@ -119,7 +119,7 @@ public final class ALSDtoMapper {
 
     /**
      * Восстанавливает ALS без физических позиций оборудования.
-     * Для DTO с выбранными позициями следует передать явный equipmentResolver.
+     * Для DTO с выбранными позициями следует передать явный equipmentLookup.
      */
     public static ALS toDomain(
             ALSDTO dto,
@@ -136,16 +136,16 @@ public final class ALSDtoMapper {
             ALSDTO dto,
             Function<LBDTO, TypeLb> lbTypeResolver,
             Function<LBCDTO, TypeLb> lbcTypeResolver,
-            Function<Long, com.lb_calc_web.domain.equipment.Equipment> equipmentResolver
+            Function<Long, com.lb_calc_web.domain.equipment.Equipment> equipmentLookup
     ) {
-        return toDomain(dto, lbTypeResolver, lbcTypeResolver, equipmentResolver, null);
+        return toDomain(dto, lbTypeResolver, lbcTypeResolver, equipmentLookup, null);
     }
 
     public static ALS toDomain(
             ALSDTO dto,
             Function<LBDTO, TypeLb> lbTypeResolver,
             Function<LBCDTO, TypeLb> lbcTypeResolver,
-            Function<Long, com.lb_calc_web.domain.equipment.Equipment> equipmentResolver,
+            Function<Long, com.lb_calc_web.domain.equipment.Equipment> equipmentLookup,
             com.lb_calc_web.domain.model.ControlConfiguration fallbackConfiguration
     ) {
         if (dto == null) {
@@ -153,7 +153,7 @@ public final class ALSDtoMapper {
         }
         Objects.requireNonNull(lbTypeResolver, "lbTypeResolver не должен быть null");
         Objects.requireNonNull(lbcTypeResolver, "lbcTypeResolver не должен быть null");
-        Objects.requireNonNull(equipmentResolver, "equipmentResolver не должен быть null");
+        Objects.requireNonNull(equipmentLookup, "equipmentLookup не должен быть null");
 
         if (dto.getLC() != null && dto.getLBC() != null) {
             throw new IllegalStateException("ALS не может одновременно содержать LC и LBC");
@@ -163,8 +163,8 @@ public final class ALSDtoMapper {
         }
 
         List<Module> modules = dto.getModuleOrder() == null
-                ? restoreLegacyOrder(dto, lbTypeResolver, lbcTypeResolver, equipmentResolver, fallbackConfiguration)
-                : restoreExplicitOrder(dto, lbTypeResolver, lbcTypeResolver, equipmentResolver, fallbackConfiguration);
+                ? restoreLegacyOrder(dto, lbTypeResolver, lbcTypeResolver, equipmentLookup, fallbackConfiguration)
+                : restoreExplicitOrder(dto, lbTypeResolver, lbcTypeResolver, equipmentLookup, fallbackConfiguration);
 
         ALS domain = new ALS(
                 dto.getHeight(),
@@ -191,7 +191,7 @@ public final class ALSDtoMapper {
             ALSDTO dto,
             Function<LBDTO, TypeLb> lbTypeResolver,
             Function<LBCDTO, TypeLb> lbcTypeResolver,
-            Function<Long, com.lb_calc_web.domain.equipment.Equipment> equipmentResolver,
+            Function<Long, com.lb_calc_web.domain.equipment.Equipment> equipmentLookup,
             com.lb_calc_web.domain.model.ControlConfiguration fallbackConfiguration
     ) {
         List<LBDTO> lbDtos = dto.getLbList() == null ? List.of() : dto.getLbList();
@@ -204,8 +204,8 @@ public final class ALSDtoMapper {
         }
 
         Module control = dto.getLBC() != null
-                ? LBCDtoMapper.toDomain(dto.getLBC(), lbcTypeResolver.apply(dto.getLBC()), equipmentResolver, fallbackConfiguration)
-                : LCDtoMapper.toDomain(dto.getLC(), equipmentResolver, fallbackConfiguration);
+                ? LBCDtoMapper.toDomain(dto.getLBC(), lbcTypeResolver.apply(dto.getLBC()), equipmentLookup, fallbackConfiguration)
+                : LCDtoMapper.toDomain(dto.getLC(), equipmentLookup, fallbackConfiguration);
         return insertControlModule(modules, control, dto.getPositionControlModule());
     }
 
@@ -213,7 +213,7 @@ public final class ALSDtoMapper {
             ALSDTO dto,
             Function<LBDTO, TypeLb> lbTypeResolver,
             Function<LBCDTO, TypeLb> lbcTypeResolver,
-            Function<Long, com.lb_calc_web.domain.equipment.Equipment> equipmentResolver,
+            Function<Long, com.lb_calc_web.domain.equipment.Equipment> equipmentLookup,
             com.lb_calc_web.domain.model.ControlConfiguration fallbackConfiguration
     ) {
         List<LBDTO> lbDtos = dto.getLbList() == null ? List.of() : dto.getLbList();
@@ -244,7 +244,7 @@ public final class ALSDtoMapper {
                         throw new IllegalStateException("moduleOrder содержит недопустимую ссылку на LC");
                     }
                     controlModuleUsed = true;
-                    modules.add(LCDtoMapper.toDomain(dto.getLC(), equipmentResolver, fallbackConfiguration));
+                    modules.add(LCDtoMapper.toDomain(dto.getLC(), equipmentLookup, fallbackConfiguration));
                 }
                 case "LBC" -> {
                     if (item.getIndex() != 0 || dto.getLBC() == null || controlModuleUsed) {
@@ -252,7 +252,7 @@ public final class ALSDtoMapper {
                     }
                     controlModuleUsed = true;
                     modules.add(LBCDtoMapper.toDomain(
-                            dto.getLBC(), lbcTypeResolver.apply(dto.getLBC()), equipmentResolver, fallbackConfiguration));
+                            dto.getLBC(), lbcTypeResolver.apply(dto.getLBC()), equipmentLookup, fallbackConfiguration));
                 }
                 default -> throw new IllegalStateException(
                         "Неизвестный тип модуля в moduleOrder: " + item.getType());

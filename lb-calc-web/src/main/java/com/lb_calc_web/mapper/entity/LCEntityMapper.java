@@ -68,25 +68,25 @@ public final class LCEntityMapper {
 
     public static LCEntity toEntity(
             LC domain,
-            Function<Equipment, EquipmentEntity> equipmentResolver
+            Function<Equipment, EquipmentEntity> equipmentLookup
     ) {
         if (domain == null) {
             return null;
         }
         LCEntity entity = LCEntity.create();
-        updateEntity(domain, entity, equipmentResolver);
+        updateEntity(domain, entity, equipmentLookup);
         return entity;
     }
 
     public static void updateEntity(
             LC domain,
             LCEntity entity,
-            Function<Equipment, EquipmentEntity> equipmentResolver
+            Function<Equipment, EquipmentEntity> equipmentLookup
     ) {
         if (domain == null || entity == null) {
             throw new IllegalArgumentException("LC и LCEntity не должны быть null");
         }
-        Objects.requireNonNull(equipmentResolver, "equipmentResolver не должен быть null");
+        Objects.requireNonNull(equipmentLookup, "equipmentLookup не должен быть null");
 
         entity.setName(domain.getName());
         entity.setDescription(domain.getDescription());
@@ -104,8 +104,8 @@ public final class LCEntityMapper {
                 .stream()
                 .map(entry -> new EquipmentQuantityEmbeddable(
                         Objects.requireNonNull(
-                                equipmentResolver.apply(entry.getKey()),
-                                "equipmentResolver вернул null"
+                                equipmentLookup.apply(entry.getKey()),
+                                "equipmentLookup вернул null"
                         ),
                         entry.getValue()
                 ))

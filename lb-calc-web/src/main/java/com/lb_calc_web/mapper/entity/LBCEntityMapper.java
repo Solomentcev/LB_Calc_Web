@@ -83,25 +83,25 @@ public final class LBCEntityMapper {
 
     public static LBCEntity toEntity(
             LBC domain,
-            Function<Equipment, EquipmentEntity> equipmentResolver
+            Function<Equipment, EquipmentEntity> equipmentLookup
     ) {
         if (domain == null) {
             return null;
         }
         LBCEntity entity = LBCEntity.create();
-        updateEntity(domain, entity, equipmentResolver);
+        updateEntity(domain, entity, equipmentLookup);
         return entity;
     }
 
     public static void updateEntity(
             LBC domain,
             LBCEntity entity,
-            Function<Equipment, EquipmentEntity> equipmentResolver
+            Function<Equipment, EquipmentEntity> equipmentLookup
     ) {
         if (domain == null || entity == null) {
             throw new IllegalArgumentException("LBC и LBCEntity не должны быть null");
         }
-        Objects.requireNonNull(equipmentResolver, "equipmentResolver не должен быть null");
+        Objects.requireNonNull(equipmentLookup, "equipmentLookup не должен быть null");
 
         entity.setName(domain.getName());
         entity.setDescription(domain.getDescription());
@@ -132,8 +132,8 @@ public final class LBCEntityMapper {
                 .stream()
                 .map(entry -> new EquipmentQuantityEmbeddable(
                         Objects.requireNonNull(
-                                equipmentResolver.apply(entry.getKey()),
-                                "equipmentResolver вернул null"
+                                equipmentLookup.apply(entry.getKey()),
+                                "equipmentLookup вернул null"
                         ),
                         entry.getValue()
                 ))

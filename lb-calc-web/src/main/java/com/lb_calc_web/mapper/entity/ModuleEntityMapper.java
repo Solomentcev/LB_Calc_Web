@@ -44,19 +44,19 @@ public final class ModuleEntityMapper {
 
     public static ModuleEntity toEntity(
             Module domain,
-            Function<Equipment, EquipmentEntity> equipmentResolver
+            Function<Equipment, EquipmentEntity> equipmentLookup
     ) {
         Objects.requireNonNull(domain, "Доменный модуль не должен быть null");
-        Objects.requireNonNull(equipmentResolver, "equipmentResolver не должен быть null");
+        Objects.requireNonNull(equipmentLookup, "equipmentLookup не должен быть null");
 
         if (domain instanceof LBC lbc) {
-            return LBCEntityMapper.toEntity(lbc, equipmentResolver);
+            return LBCEntityMapper.toEntity(lbc, equipmentLookup);
         }
         if (domain instanceof LB lb) {
             return LBEntityMapper.toEntity(lb);
         }
         if (domain instanceof LC lc) {
-            return LCEntityMapper.toEntity(lc, equipmentResolver);
+            return LCEntityMapper.toEntity(lc, equipmentLookup);
         }
 
         throw new IllegalArgumentException(
