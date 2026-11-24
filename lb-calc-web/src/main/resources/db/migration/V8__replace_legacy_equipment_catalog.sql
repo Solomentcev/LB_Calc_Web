@@ -75,7 +75,7 @@ CREATE TABLE lc_equipment_new (
     equipment_id BIGINT NOT NULL,
     quantity INT NOT NULL,
     CONSTRAINT uk_lc_equipment UNIQUE (lc_id, equipment_id),
-    CONSTRAINT chk_lc_equipment_quantity CHECK (quantity >= 1),
+    CONSTRAINT chk_lc_equipment_quantity_v8 CHECK (quantity >= 1),
     CONSTRAINT fk_lc_equipment_lc_v8
         FOREIGN KEY (lc_id) REFERENCES lc (id) ON DELETE CASCADE,
     CONSTRAINT fk_lc_equipment_equipment_v8
@@ -94,7 +94,7 @@ CREATE TABLE lbc_equipment_new (
     equipment_id BIGINT NOT NULL,
     quantity INT NOT NULL,
     CONSTRAINT uk_lbc_equipment UNIQUE (lbc_id, equipment_id),
-    CONSTRAINT chk_lbc_equipment_quantity CHECK (quantity >= 1),
+    CONSTRAINT chk_lbc_equipment_quantity_v8 CHECK (quantity >= 1),
     CONSTRAINT fk_lbc_equipment_lbc_v8
         FOREIGN KEY (lbc_id) REFERENCES lbc (id) ON DELETE CASCADE,
     CONSTRAINT fk_lbc_equipment_equipment_v8
