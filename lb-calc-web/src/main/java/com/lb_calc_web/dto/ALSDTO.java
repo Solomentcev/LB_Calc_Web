@@ -283,6 +283,7 @@ public class ALSDTO {
                 && countCells == alsdto.countCells
                 && Objects.equals(lc, alsdto.lc)
                 && Objects.equals(lbc, alsdto.lbc)
+                && Objects.equals(functionalConfiguration, alsdto.functionalConfiguration)
                 && Objects.equals(
                 positionControlModule,
                 alsdto.positionControlModule
@@ -312,6 +313,7 @@ public class ALSDTO {
                 countCells,
                 lc,
                 lbc,
+                functionalConfiguration,
                 positionControlModule,
                 colorDoor,
                 colorBody,

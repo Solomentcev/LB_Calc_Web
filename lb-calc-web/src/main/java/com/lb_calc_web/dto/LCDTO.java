@@ -20,7 +20,7 @@ public class LCDTO {
     private int bottomFrame;
 
     private FunctionalConfigurationDTO functionalConfiguration;
-    private List<EquipmentSelectionDTO> equipmentSelections = new ArrayList<>();
+    private List<EquipmentSelectionDTO> equipmentSelections;
 
     @JsonIgnore
     private String stringLCImage;

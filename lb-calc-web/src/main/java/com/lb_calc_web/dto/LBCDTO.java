@@ -39,7 +39,7 @@ public class LBCDTO {
     private String colorBody;
 
     private FunctionalConfigurationDTO functionalConfiguration;
-    private List<EquipmentSelectionDTO> equipmentSelections = new ArrayList<>();
+    private List<EquipmentSelectionDTO> equipmentSelections;
 
     @JsonIgnore
     private String stringLBCImage;

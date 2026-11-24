@@ -7,6 +7,7 @@ import com.lb_calc_web.domain.equipment.PrinterPurpose;
 
 import java.util.EnumSet;
 import java.util.Set;
+import java.util.Objects;
 
 /** Транспортное представление функциональных назначений ALS и управляющего модуля. */
 public class FunctionalConfigurationDTO {
@@ -30,4 +31,16 @@ public class FunctionalConfigurationDTO {
 
     public PrinterPurpose getPrinter() { return printer; }
     public void setPrinter(PrinterPurpose printer) { this.printer = printer; }
+    @Override
+    public boolean equals(Object object) {
+        if (this == object) return true;
+        if (!(object instanceof FunctionalConfigurationDTO other)) return false;
+        return display == other.display && Objects.equals(access, other.access)
+                && payment == other.payment && printer == other.printer;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(display, access, payment, printer);
+    }
 }
