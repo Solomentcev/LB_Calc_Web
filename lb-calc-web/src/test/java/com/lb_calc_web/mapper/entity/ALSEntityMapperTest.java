@@ -71,17 +71,22 @@ class ALSEntityMapperTest {
     }
 
     @Test
-    void toDomain_shouldRejectStaleDerivedWidth() {
+    void toDomain_shouldRecalculateDerivedFieldsWhenStoredValuesAreStale() {
+        ALS expected = TestDataFactory.validALS(null);
         ALSEntity entity = ALSEntityMapper.toEntity(
-                TestDataFactory.validALS(null),
+                expected,
                 ALSEntityMapperTest::toEntity
         );
+        entity.setName("Устаревшее название");
+        entity.setDescription("Устаревшее описание");
         entity.setWidth(entity.getWidth() + 1);
 
-        assertThrows(
-                IllegalStateException.class,
-                () -> ALSEntityMapper.toDomain(entity)
-        );
+        ALS restored = ALSEntityMapper.toDomain(entity);
+
+        assertEquals(expected.getName(), restored.getName());
+        assertEquals(expected.getDescription(), restored.getDescription());
+        assertEquals(expected.getWidth(), restored.getWidth());
+        assertEquals(expected, restored);
     }
 
     @Test
