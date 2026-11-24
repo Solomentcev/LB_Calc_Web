@@ -70,9 +70,17 @@ public class EquipmentEntityResolver {
                 ));
 
         Equipment persisted = EquipmentEntityMapper.toDomain(entity);
-        if (!persisted.equals(equipment)) {
+        if (!persisted.equals(equipment)
+                || !persisted.getFunctionalType().equals(equipment.getFunctionalType())
+                || !persisted.getPurpose().equals(equipment.getPurpose())
+                || !persisted.getCategory().equals(equipment.getCategory())
+                || !persisted.getName().equals(equipment.getName())
+                || !persisted.getDescription().equals(equipment.getDescription())
+                || persisted.getWidth() != equipment.getWidth()
+                || persisted.getHeight() != equipment.getHeight()
+                || persisted.getDepth() != equipment.getDepth()) {
             throw new IllegalStateException(
-                    "Идентификатор оборудования не соответствует сохранённой модели: " + id
+                    "Доменная модель оборудования не соответствует записи каталога с id=" + id
             );
         }
         return entity;
