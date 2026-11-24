@@ -6,7 +6,7 @@ import java.util.Objects;
 public class EquipmentSelectionDTO {
 
     private Long equipmentId;
-    private int quantity;
+    private int quantity = 1;
 
     public EquipmentSelectionDTO() {
     }
@@ -21,7 +21,7 @@ public class EquipmentSelectionDTO {
     }
 
     public void setEquipmentId(Long equipmentId) {
-        if (equipmentId == null || equipmentId <= 0) {
+        if (equipmentId != null && equipmentId <= 0) {
             throw new IllegalArgumentException(
                     "Идентификатор модели оборудования должен быть положительным");
         }
