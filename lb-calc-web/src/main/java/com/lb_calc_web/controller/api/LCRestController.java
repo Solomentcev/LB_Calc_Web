@@ -92,7 +92,7 @@ public class LCRestController {
     public ResponseEntity<?> saveLC(@RequestBody LCDTO dto) {
         logger.info(
                 "POST /api/v1/lcs: display={}",
-                dto != null ? dto.getDisplay() : null
+                dto != null ? dto.getDisplayPurpose() : null
         );
         LC domain = lcService.restoreDomain(dto);
         LCDTO saved = LCDtoMapper.toDto(lcService.saveLC(domain));
