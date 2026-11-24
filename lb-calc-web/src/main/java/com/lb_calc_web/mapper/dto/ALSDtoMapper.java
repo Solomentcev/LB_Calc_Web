@@ -21,6 +21,7 @@ import com.lb_calc_web.mapper.dto.LCDtoMapper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Function;
 
 /** Преобразует транспортную модель ALS в доменную конфигурацию и обратно. */
