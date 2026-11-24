@@ -36,13 +36,12 @@ public final class ALSEntityMapper {
                 modules
         );
 
-        if (!domain.getName().equals(entity.getName())
-                || !domain.getDescription().equals(entity.getDescription())
-                || domain.getWidth() != entity.getWidth()) {
-            throw new IllegalStateException(
-                    "Производные характеристики ALS в БД не соответствуют составу модулей"
-            );
-        }
+        /*
+         * Наименование, описание и ширина являются производными
+         * характеристиками. Доменная модель пересчитывает их из состава
+         * модулей, поэтому сохранённые в БД значения не используются
+         * при восстановлении агрегата.
+         */
 
         domain.setId(entity.getId());
         return domain;
