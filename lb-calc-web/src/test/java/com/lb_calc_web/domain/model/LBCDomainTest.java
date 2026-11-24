@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -19,13 +20,13 @@ class LBCDomainTest {
 
     @Test
     void lbcActsAsControlAndStorageModule() {
-        ControlConfiguration control = new ControlConfiguration(
+        FunctionalConfiguration functional = new FunctionalConfiguration(
                 DisplayPurpose.NONE,
-                AccessPurpose.PIN,
+                Set.of(AccessPurpose.PIN),
                 PaymentPurpose.NONE,
-                PrinterPurpose.ABSENT,
-                Map.of()
+                PrinterPurpose.ABSENT
         );
+        ControlConfiguration control = new ControlConfiguration(functional, Map.of());
 
         LBC lbc = new LBC(
                 1940,

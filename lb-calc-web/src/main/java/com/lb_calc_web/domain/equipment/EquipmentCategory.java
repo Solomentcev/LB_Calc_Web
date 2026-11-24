@@ -7,7 +7,11 @@ public enum EquipmentCategory {
     RFID_READER(EquipmentFunctionalType.ACCESS),
     PAYMENT_TERMINAL(EquipmentFunctionalType.PAYMENT),
     CASH_ACCEPTOR(EquipmentFunctionalType.PAYMENT),
-    PRINTER(EquipmentFunctionalType.PRINTER);
+    PRINTER(EquipmentFunctionalType.PRINTER),
+    COMPUTER(EquipmentFunctionalType.SYSTEM),
+    LOCK_CONTROL(EquipmentFunctionalType.SYSTEM),
+    POWER_SUPPLY(EquipmentFunctionalType.SYSTEM),
+    BACKUP_POWER(EquipmentFunctionalType.SYSTEM);
 
     private final EquipmentFunctionalType functionalType;
 
@@ -35,6 +39,10 @@ public enum EquipmentCategory {
                     || purpose == PaymentPurpose.CARDS_AND_CASH;
             case PRINTER -> purpose == PrinterPurpose.PRESENT
                     || purpose == PrinterPurpose.OTHER;
+            case COMPUTER -> purpose == SystemPurpose.COMPUTER;
+            case LOCK_CONTROL -> purpose == SystemPurpose.LOCK_CONTROL;
+            case POWER_SUPPLY -> purpose == SystemPurpose.POWER_SUPPLY;
+            case BACKUP_POWER -> purpose == SystemPurpose.BACKUP_POWER;
         };
     }
 }

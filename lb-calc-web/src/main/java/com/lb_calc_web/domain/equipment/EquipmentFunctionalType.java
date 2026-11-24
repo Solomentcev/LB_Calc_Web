@@ -5,8 +5,8 @@ public enum EquipmentFunctionalType {
     DISPLAY(DisplayPurpose.class),
     ACCESS(AccessPurpose.class),
     PAYMENT(PaymentPurpose.class),
-    PRINTER(PrinterPurpose.class);
-
+    PRINTER(PrinterPurpose.class),
+    SYSTEM(SystemPurpose.class);
 
     private final Class<? extends Enum<?>> purposeType;
 
