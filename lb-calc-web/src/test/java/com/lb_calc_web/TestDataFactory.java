@@ -15,6 +15,7 @@ import com.lb_calc_web.dto.ALSDTO;
 import com.lb_calc_web.dto.LBCDTO;
 import com.lb_calc_web.dto.LBDTO;
 import com.lb_calc_web.dto.LCDTO;
+import com.lb_calc_web.dto.FunctionalConfigurationDTO;
 import com.lb_calc_web.dto.ProjectDTO;
 import com.lb_calc_web.mapper.dto.ALSDtoMapper;
 import com.lb_calc_web.mapper.dto.LBCDtoMapper;
@@ -94,25 +95,12 @@ public final class TestDataFactory {
         lc.setUpperFrame(50);
         lc.setBottomFrame(50);
 
-        lc.setDisplay("LC10");
-        lc.setBarReader("NONE");
-        lc.setPayment(PaymentPurpose.NONE.name());
-        lc.setPrinter(false);
-        lc.setRfidReader(true);
-        lc.setDisplayQuantity(1);
-        lc.setBarReaderQuantity(0);
-        lc.setPrinterQuantity(0);
-        lc.setRfidReaderQuantity(1);
-
-        lc.setColorBody(Colors.Blue.name());
-        lc.setColorDoor(Colors.White.name());
-
-        lc.setDisplayPurpose(DisplayPurpose.INCH_10.name());
-        lc.setAccessPurposes(List.of(AccessPurpose.RFID.name()));
-        lc.setPaymentPurpose(PaymentPurpose.NONE.name());
-        lc.setPrinterPurpose(PrinterPurpose.ABSENT.name());
-        lc.setAccessMethods(List.of());
-        lc.setPrintOptions(List.of());
+        FunctionalConfigurationDTO functional = new FunctionalConfigurationDTO();
+        functional.setDisplay(DisplayPurpose.INCH_10);
+        functional.setAccess(java.util.Set.of(AccessPurpose.RFID));
+        functional.setPayment(PaymentPurpose.NONE);
+        functional.setPrinter(PrinterPurpose.ABSENT);
+        lc.setFunctionalConfiguration(functional);
 
         return lc;
     }
@@ -180,21 +168,12 @@ public final class TestDataFactory {
         lbc.setColorBody(Colors.Blue.name());
         lbc.setColorDoor(Colors.White.name());
 
-        lbc.setDisplay("LC10");
-        lbc.setBarReader("NONE");
-        lbc.setPayment(PaymentPurpose.NONE.name());
-        lbc.setPrinter(false);
-        lbc.setRfidReader(true);
-        lbc.setDisplayQuantity(1);
-        lbc.setBarReaderQuantity(0);
-        lbc.setPrinterQuantity(0);
-        lbc.setRfidReaderQuantity(1);
-        lbc.setDisplayPurpose(DisplayPurpose.INCH_10.name());
-        lbc.setAccessPurposes(List.of(AccessPurpose.RFID.name()));
-        lbc.setPaymentPurpose(PaymentPurpose.NONE.name());
-        lbc.setPrinterPurpose(PrinterPurpose.ABSENT.name());
-        lbc.setAccessMethods(List.of());
-        lbc.setPrintOptions(List.of());
+        FunctionalConfigurationDTO functional = new FunctionalConfigurationDTO();
+        functional.setDisplay(DisplayPurpose.INCH_10);
+        functional.setAccess(java.util.Set.of(AccessPurpose.RFID));
+        functional.setPayment(PaymentPurpose.NONE);
+        functional.setPrinter(PrinterPurpose.ABSENT);
+        lbc.setFunctionalConfiguration(functional);
 
         return lbc;
     }

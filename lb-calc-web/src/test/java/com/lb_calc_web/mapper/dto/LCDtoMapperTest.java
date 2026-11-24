@@ -7,9 +7,11 @@ import com.lb_calc_web.domain.equipment.EquipmentCategory;
 import com.lb_calc_web.domain.equipment.EquipmentFunctionalType;
 import com.lb_calc_web.domain.model.ControlConfiguration;
 import com.lb_calc_web.domain.model.LC;
+import com.lb_calc_web.dto.EquipmentSelectionDTO;
 import com.lb_calc_web.dto.LCDTO;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -17,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class LCDtoMapperTest {
 
     @Test
-    void toDto_shouldPopulateLegacyEquipmentFieldsFromPhysicalPositions() {
+    void toDto_shouldMapFunctionalConfigurationAndPhysicalEquipmentSeparately() {
         LC source = TestDataFactory.validLC(null);
         Equipment scanner = new Equipment(
                 501L,
@@ -40,16 +42,14 @@ class LCDtoMapperTest {
                 source.getColorDoor(),
                 new ControlConfiguration(
                         source.getControlConfiguration().getFunctionalConfiguration(),
-                        Map.of(scanner, 1)
+                        Map.of(scanner, 2)
                 )
         );
 
         LCDTO dto = LCDtoMapper.toDto(domain);
 
-        assertEquals(1, dto.getBarReaderQuantity());
-        assertEquals("Сканер штрихкода", dto.getBarReader());
-        assertEquals(0, dto.getDisplayQuantity());
-        assertEquals(0, dto.getPrinterQuantity());
-        assertEquals(0, dto.getRfidReaderQuantity());
+        assertEquals(AccessPurpose.RFID,
+                dto.getFunctionalConfiguration().getAccess().iterator().next());
+        assertEquals(List.of(new EquipmentSelectionDTO(501L, 2)), dto.getEquipmentSelections());
     }
 }
