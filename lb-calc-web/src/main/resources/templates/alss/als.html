@@ -105,27 +105,28 @@
             <input type="hidden" th:field="*{LBC.directionDoorOpening}">
             <input type="hidden" th:field="*{LBC.colorDoor}">
             <input type="hidden" th:field="*{LBC.colorBody}">
-            <input type="hidden" th:field="*{LBC.display}">
-            <input type="hidden" th:field="*{LBC.barReader}">
-            <input type="hidden" th:field="*{LBC.payment}">
-            <input type="hidden" th:field="*{LBC.printer}">
-            <input type="hidden" th:field="*{LBC.rfidReader}">
-
+            <input type="hidden" th:field="*{LBC.functionalConfiguration.display}">
+            <input type="hidden" th:field="*{LBC.functionalConfiguration.payment}">
+            <input type="hidden" th:field="*{LBC.functionalConfiguration.printer}">
             <input type="hidden"
-                   th:each="method, methodStat : ${als.LBC.accessMethods}"
-                   th:name="|LBC.accessMethods[${methodStat.index}]|"
-                   th:value="${method}">
+                   th:each="purpose, purposeStat : ${als.LBC.functionalConfiguration.access}"
+                   th:name="|LBC.functionalConfiguration.access[${purposeStat.index}]|"
+                   th:value="${purpose}">
             <input type="hidden"
-                   th:each="option, optionStat : ${als.LBC.printOptions}"
-                   th:name="|LBC.printOptions[${optionStat.index}]|"
-                   th:value="${option}">
+                   th:each="selection, selectionStat : ${als.LBC.equipmentSelections}"
+                   th:name="|LBC.equipmentSelections[${selectionStat.index}].equipmentId|"
+                   th:value="${selection.equipmentId}">
+            <input type="hidden"
+                   th:each="selection, selectionStat : ${als.LBC.equipmentSelections}"
+                   th:name="|LBC.equipmentSelections[${selectionStat.index}].quantity|"
+                   th:value="${selection.quantity}">
 
             <div class="row">
                 <div class="col-md-2"><strong>ID:</strong> <span th:text="${als.LBC.id}"></span></div>
                 <div class="col-md-2"><strong>Тип:</strong> <span th:text="${als.LBC.type}"></span></div>
                 <div class="col-md-2"><strong>Ячеек:</strong> <span th:text="${als.LBC.countCells}"></span></div>
-                <div class="col-md-3"><strong>Display:</strong> <span th:text="${als.LBC.display}"></span></div>
-                <div class="col-md-3"><strong>Payment:</strong> <span th:text="${als.LBC.payment}"></span></div>
+                <div class="col-md-3"><strong>Дисплей:</strong> <span th:text="${als.LBC.functionalConfiguration.display}"></span></div>
+                <div class="col-md-3"><strong>Оплата:</strong> <span th:text="${als.LBC.functionalConfiguration.payment}"></span></div>
             </div>
             <div class="mt-3">
                 <a th:href="@{/alss/{alsId}/lbcs/{lbcId}(alsId=${als.id},lbcId=${als.LBC.id})}"
@@ -149,24 +150,26 @@
             <input type="hidden" th:field="*{LC.bottomFrame}">
             <input type="hidden" th:field="*{LC.colorBody}">
             <input type="hidden" th:field="*{LC.colorDoor}">
-            <input type="hidden" th:field="*{LC.display}">
-            <input type="hidden" th:field="*{LC.payment}">
-            <input type="hidden" th:field="*{LC.printer}">
-            <input type="hidden" th:field="*{LC.barReader}">
-            <input type="hidden" th:field="*{LC.rfidReader}">
+            <input type="hidden" th:field="*{LC.functionalConfiguration.display}">
+            <input type="hidden" th:field="*{LC.functionalConfiguration.payment}">
+            <input type="hidden" th:field="*{LC.functionalConfiguration.printer}">
             <input type="hidden"
-                   th:each="method, methodStat : ${als.LC.accessMethods}"
-                   th:name="|LC.accessMethods[${methodStat.index}]|"
-                   th:value="${method}">
+                   th:each="purpose, purposeStat : ${als.LC.functionalConfiguration.access}"
+                   th:name="|LC.functionalConfiguration.access[${purposeStat.index}]|"
+                   th:value="${purpose}">
             <input type="hidden"
-                   th:each="option, optionStat : ${als.LC.printOptions}"
-                   th:name="|LC.printOptions[${optionStat.index}]|"
-                   th:value="${option}">
+                   th:each="selection, selectionStat : ${als.LC.equipmentSelections}"
+                   th:name="|LC.equipmentSelections[${selectionStat.index}].equipmentId|"
+                   th:value="${selection.equipmentId}">
+            <input type="hidden"
+                   th:each="selection, selectionStat : ${als.LC.equipmentSelections}"
+                   th:name="|LC.equipmentSelections[${selectionStat.index}].quantity|"
+                   th:value="${selection.quantity}">
             <div class="row">
                 <div class="col-md-2"><strong>ID:</strong> <span th:text="${als.LC.id}"></span></div>
-                <div class="col-md-3"><strong>Display:</strong> <span th:text="${als.LC.display}"></span></div>
-                <div class="col-md-3"><strong>Payment:</strong> <span th:text="${als.LC.payment}"></span></div>
-                <div class="col-md-4"><strong>Equipment:</strong> <span th:text="${als.LC.barReader}"></span></div>
+                <div class="col-md-3"><strong>Дисплей:</strong> <span th:text="${als.LC.functionalConfiguration.display}"></span></div>
+                <div class="col-md-3"><strong>Оплата:</strong> <span th:text="${als.LC.functionalConfiguration.payment}"></span></div>
+                <div class="col-md-4"><strong>Способы доступа:</strong> <span th:text="${als.LC.functionalConfiguration.access}"></span></div>
             </div>
             <div class="mt-3">
                 <a th:href="@{/lcs/{id}(id=${als.LC.id})}" class="btn btn-primary btn-sm">Редактировать LC</a>
