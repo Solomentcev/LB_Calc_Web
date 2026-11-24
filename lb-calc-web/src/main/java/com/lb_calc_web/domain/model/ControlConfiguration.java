@@ -1,43 +1,29 @@
 package com.lb_calc_web.domain.model;
 
-import com.lb_calc_web.domain.equipment.AccessPurpose;
-import com.lb_calc_web.domain.equipment.DisplayPurpose;
 import com.lb_calc_web.domain.equipment.Equipment;
 import com.lb_calc_web.domain.equipment.EquipmentCategory;
-import com.lb_calc_web.domain.equipment.PaymentPurpose;
-import com.lb_calc_web.domain.equipment.PrinterPurpose;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 
 /**
- * Конфигурация функциональных возможностей и фактически установленного
- * оборудования модуля управления.
- *
- * <p>Назначения функциональных областей независимы от состава оборудования:
- * функция может быть предусмотрена конфигурацией без установленного
- * устройства, которое её реализует.</p>
+ * Конфигурация управляющего модуля: функциональные возможности
+ * и фактически установленное оборудование.
  */
 public class ControlConfiguration {
 
-    private final DisplayPurpose display;
-    private final AccessPurpose access;
-    private final PaymentPurpose payment;
-    private final PrinterPurpose printer;
+    private FunctionalConfiguration functionalConfiguration;
     private final Map<Equipment, Integer> equipment;
 
     public ControlConfiguration(
-            DisplayPurpose display,
-            AccessPurpose access,
-            PaymentPurpose payment,
-            PrinterPurpose printer,
+            FunctionalConfiguration functionalConfiguration,
             Map<Equipment, Integer> equipment
     ) {
-        this.display = Objects.requireNonNull(display, "Назначение дисплея не должно быть null");
-        this.access = Objects.requireNonNull(access, "Назначение доступа не должно быть null");
-        this.payment = Objects.requireNonNull(payment, "Назначение оплаты не должно быть null");
-        this.printer = Objects.requireNonNull(printer, "Назначение принтера не должно быть null");
+        this.functionalConfiguration = Objects.requireNonNull(
+                functionalConfiguration,
+                "Функциональная конфигурация не должна быть null"
+        ).copy();
         this.equipment = copyEquipment(equipment);
         validateEquipment();
     }
@@ -74,10 +60,19 @@ public class ControlConfiguration {
         }
     }
 
-    public DisplayPurpose getDisplay() { return display; }
-    public AccessPurpose getAccess() { return access; }
-    public PaymentPurpose getPayment() { return payment; }
-    public PrinterPurpose getPrinter() { return printer; }
+    public FunctionalConfiguration getFunctionalConfiguration() {
+        return functionalConfiguration.copy();
+    }
+
+    /**
+     * Обновляет функциональные назначения, не изменяя установленное оборудование.
+     */
+    public void setFunctionalConfiguration(FunctionalConfiguration functionalConfiguration) {
+        this.functionalConfiguration = Objects.requireNonNull(
+                functionalConfiguration,
+                "Функциональная конфигурация не должна быть null"
+        ).copy();
+    }
 
     /** @return неизменяемое соответствие моделей оборудования и их количества */
     public Map<Equipment, Integer> getEquipment() {
@@ -118,32 +113,26 @@ public class ControlConfiguration {
     }
 
     public ControlConfiguration copy() {
-        return new ControlConfiguration(display, access, payment, printer, equipment);
+        return new ControlConfiguration(functionalConfiguration, equipment);
     }
 
     @Override
     public boolean equals(Object object) {
         if (this == object) return true;
         if (!(object instanceof ControlConfiguration other)) return false;
-        return display == other.display
-                && access == other.access
-                && payment == other.payment
-                && printer == other.printer
+        return functionalConfiguration.equals(other.functionalConfiguration)
                 && equipment.equals(other.equipment);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(display, access, payment, printer, equipment);
+        return Objects.hash(functionalConfiguration, equipment);
     }
 
     @Override
     public String toString() {
         return "ControlConfiguration{" +
-                "display=" + display +
-                ", access=" + access +
-                ", payment=" + payment +
-                ", printer=" + printer +
+                "functionalConfiguration=" + functionalConfiguration +
                 ", equipment=" + equipment +
                 '}';
     }

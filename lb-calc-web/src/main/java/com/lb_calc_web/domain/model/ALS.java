@@ -92,6 +92,11 @@ public class ALS {
     private Colors colorDoor;
 
     /**
+     * Функциональные возможности ALS, синхронизируемые с управляющим модулем.
+     */
+    private FunctionalConfiguration functionalConfiguration;
+
+    /**
      * Физический порядок модулей слева направо.
      */
     private final List<Module> modules = new ArrayList<>();
@@ -145,6 +150,8 @@ public class ALS {
             );
         }
 
+        this.functionalConfiguration = getControlModule().getControlConfiguration()
+                .getFunctionalConfiguration();
         recalculate();
     }
 
@@ -165,10 +172,41 @@ public class ALS {
                 bottomFrame,
                 colorBody,
                 colorDoor,
+                functionalConfiguration,
                 modules
         );
+        copy.functionalConfiguration = functionalConfiguration.copy();
         copy.setId(id);
         return copy;
+    }
+
+    /** @return независимая копия функциональной конфигурации ALS */
+    public FunctionalConfiguration getFunctionalConfiguration() {
+        return functionalConfiguration.copy();
+    }
+
+    /**
+     * Обновляет функциональные возможности ALS и её управляющего модуля.
+     *
+     * @param configuration новая функциональная конфигурация
+     */
+    public void setFunctionalConfiguration(FunctionalConfiguration configuration) {
+        Objects.requireNonNull(configuration, "Функциональная конфигурация не должна быть null");
+        mutate(candidate -> candidate.functionalConfiguration = configuration.copy());
+    }
+
+    /**
+     * Обновляет конфигурацию управляющего модуля и синхронизирует ALS.
+     *
+     * @param configuration новая конфигурация управляющего модуля
+     */
+    public void setControlConfiguration(ControlConfiguration configuration) {
+        Objects.requireNonNull(configuration, "Конфигурация управления не должна быть null");
+        mutate(candidate -> {
+            ControlModule controlModule = (ControlModule) candidate.getControlModuleAsModule();
+            controlModule.setControlConfiguration(configuration);
+            candidate.functionalConfiguration = configuration.getFunctionalConfiguration();
+        });
     }
 
     /**
@@ -414,7 +452,13 @@ public class ALS {
         }
 
         Module replacementCopy = replacement.copy();
-        mutate(candidate -> candidate.modules.set(moduleIndex, replacementCopy));
+        mutate(candidate -> {
+            if (replacementCopy instanceof ControlModule controlModule) {
+                candidate.functionalConfiguration = controlModule.getControlConfiguration()
+                        .getFunctionalConfiguration();
+            }
+            candidate.modules.set(moduleIndex, replacementCopy);
+        });
     }
 
     /**
@@ -442,6 +486,7 @@ public class ALS {
                 .map(Module::copy)
                 .forEach(modules::add);
 
+        functionalConfiguration = candidate.functionalConfiguration.copy();
         width = candidate.width;
         name = candidate.name;
         description = candidate.description;
@@ -471,6 +516,8 @@ public class ALS {
         Module replacementCopy = replacement.copy();
 
         mutate(candidate -> {
+            candidate.functionalConfiguration = ((ControlModule) replacementCopy)
+                    .getControlConfiguration().getFunctionalConfiguration();
             int controlIndex = candidate.getControlModuleIndex();
             candidate.modules.set(controlIndex, replacementCopy);
         });
@@ -629,6 +676,9 @@ public class ALS {
      */
     private void synchronizeModules() {
         for (Module module : modules) {
+            if (module instanceof ControlModule controlModule) {
+                controlModule.setFunctionalConfiguration(functionalConfiguration);
+            }
             module.setHeight(height);
             module.setDepth(depth);
             module.setUpperFrame(upperFrame);
@@ -902,6 +952,7 @@ public class ALS {
                 ", bottomFrame=" + bottomFrame +
                 ", colorBody=" + colorBody +
                 ", colorDoor=" + colorDoor +
+                ", functionalConfiguration=" + functionalConfiguration +
                 ", positionLC=" + getPositionControlModule() +
                 ", countCells=" + getCountCells() +
                 ", modules=" + modules +
@@ -937,6 +988,7 @@ public class ALS {
                 && bottomFrame == other.bottomFrame
                 && colorBody == other.colorBody
                 && colorDoor == other.colorDoor
+                && Objects.equals(functionalConfiguration, other.functionalConfiguration)
                 && Objects.equals(modules, other.modules);
     }
 

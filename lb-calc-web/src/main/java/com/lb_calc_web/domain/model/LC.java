@@ -60,11 +60,19 @@ public class LC extends Module implements ControlModule {
         return controlConfiguration.copy();
     }
 
+    /** Заменяет функциональные назначения, сохраняя установленное оборудование. */
+    @Override
+    public void setFunctionalConfiguration(FunctionalConfiguration configuration) {
+        controlConfiguration.setFunctionalConfiguration(configuration);
+        recalculate();
+    }
+
     /**
      * Заменяет конфигурацию управления LC.
      *
      * @param controlConfiguration новая конфигурация управления
      */
+    @Override
     public void setControlConfiguration(ControlConfiguration controlConfiguration) {
         this.controlConfiguration = Objects.requireNonNull(
                 controlConfiguration,

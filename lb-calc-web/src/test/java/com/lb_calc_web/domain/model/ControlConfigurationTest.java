@@ -4,25 +4,34 @@ import com.lb_calc_web.domain.equipment.*;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class ControlConfigurationTest {
 
+    private FunctionalConfiguration functionalConfiguration(
+            DisplayPurpose display,
+            Set<AccessPurpose> access,
+            PaymentPurpose payment,
+            PrinterPurpose printer
+    ) {
+        return new FunctionalConfiguration(display, access, payment, printer);
+    }
+
     @Test
     void shouldKeepFunctionalPurposesIndependentFromInstalledEquipment() {
-        ControlConfiguration configuration = new ControlConfiguration(
+        FunctionalConfiguration functional = functionalConfiguration(
                 DisplayPurpose.INCH_10,
-                AccessPurpose.RFID,
+                Set.of(AccessPurpose.RFID, AccessPurpose.QR_CODE),
                 PaymentPurpose.CARDS,
-                PrinterPurpose.PRESENT,
-                Map.of()
+                PrinterPurpose.PRESENT
         );
+        ControlConfiguration configuration = new ControlConfiguration(functional, Map.of());
 
-        assertEquals(DisplayPurpose.INCH_10, configuration.getDisplay());
-        assertEquals(AccessPurpose.RFID, configuration.getAccess());
-        assertEquals(PaymentPurpose.CARDS, configuration.getPayment());
-        assertEquals(PrinterPurpose.PRESENT, configuration.getPrinter());
+        assertEquals(functional, configuration.getFunctionalConfiguration());
+        assertEquals(Set.of(AccessPurpose.RFID, AccessPurpose.QR_CODE),
+                configuration.getFunctionalConfiguration().getAccess());
         assertTrue(configuration.getEquipment().isEmpty());
     }
 
@@ -33,10 +42,12 @@ class ControlConfigurationTest {
                 EquipmentCategory.BAR_READER, "Сканер", "", 0, 0, 0);
 
         ControlConfiguration configuration = new ControlConfiguration(
-                DisplayPurpose.NONE,
-                AccessPurpose.BAR_CODE,
-                PaymentPurpose.NONE,
-                PrinterPurpose.ABSENT,
+                functionalConfiguration(
+                        DisplayPurpose.NONE,
+                        Set.of(AccessPurpose.BAR_CODE),
+                        PaymentPurpose.NONE,
+                        PrinterPurpose.ABSENT
+                ),
                 Map.of(scanner, 2)
         );
 
@@ -54,10 +65,12 @@ class ControlConfigurationTest {
                 EquipmentCategory.DISPLAY, "Дисплей 17", "", 0, 0, 0);
 
         assertThrows(IllegalArgumentException.class, () -> new ControlConfiguration(
-                DisplayPurpose.CUSTOM,
-                AccessPurpose.PIN,
-                PaymentPurpose.NONE,
-                PrinterPurpose.ABSENT,
+                functionalConfiguration(
+                        DisplayPurpose.CUSTOM,
+                        Set.of(AccessPurpose.PIN),
+                        PaymentPurpose.NONE,
+                        PrinterPurpose.ABSENT
+                ),
                 Map.of(first, 1, second, 1)
         ));
     }
@@ -68,10 +81,42 @@ class ControlConfigurationTest {
                 10L, EquipmentFunctionalType.ACCESS, AccessPurpose.BAR_CODE,
                 EquipmentCategory.BAR_READER, "Сканер", "", 0, 0, 0);
         ControlConfiguration configuration = new ControlConfiguration(
-                DisplayPurpose.NONE, AccessPurpose.BAR_CODE, PaymentPurpose.NONE,
-                PrinterPurpose.ABSENT, Map.of(scanner, 1));
+                functionalConfiguration(
+                        DisplayPurpose.NONE,
+                        Set.of(AccessPurpose.BAR_CODE),
+                        PaymentPurpose.NONE,
+                        PrinterPurpose.ABSENT
+                ),
+                Map.of(scanner, 1));
 
         assertThrows(UnsupportedOperationException.class,
                 () -> configuration.getEquipment().put(scanner, 5));
+    }
+
+    @Test
+    void shouldPreserveEquipmentWhenFunctionalConfigurationChanges() {
+        Equipment scanner = new Equipment(
+                10L, EquipmentFunctionalType.ACCESS, AccessPurpose.BAR_CODE,
+                EquipmentCategory.BAR_READER, "Сканер", "", 0, 0, 0);
+        ControlConfiguration configuration = new ControlConfiguration(
+                functionalConfiguration(
+                        DisplayPurpose.NONE,
+                        Set.of(AccessPurpose.BAR_CODE),
+                        PaymentPurpose.NONE,
+                        PrinterPurpose.ABSENT
+                ),
+                Map.of(scanner, 2)
+        );
+
+        FunctionalConfiguration updated = functionalConfiguration(
+                DisplayPurpose.INCH_17,
+                Set.of(AccessPurpose.PIN, AccessPurpose.RFID, AccessPurpose.QR_CODE),
+                PaymentPurpose.CARDS_AND_CASH,
+                PrinterPurpose.OTHER
+        );
+        configuration.setFunctionalConfiguration(updated);
+
+        assertEquals(updated, configuration.getFunctionalConfiguration());
+        assertEquals(Map.of(scanner, 2), configuration.getEquipment());
     }
 }
