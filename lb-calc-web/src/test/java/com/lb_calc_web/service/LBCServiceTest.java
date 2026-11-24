@@ -116,8 +116,12 @@ class LBCServiceTest {
 
     @Test
     void saveLBC_shouldRejectInvalidGeometryBeforeSaving() {
-        LBC domain = TestDataFactory.validLBC(null);
-        domain.setHeight(10);
+        LBC source = TestDataFactory.validLBC(null);
+        LBC domain = new LBC(
+                10, source.getWidth(), source.getDepth(), source.getUpperFrame(),
+                source.getBottomFrame(), source.getColorBody(), source.getColorDoor(),
+                source.getTypeLb(), source.getCountCells(), source.getDirectionDoorOpening(),
+                source.getDoorThickness(), source.getControlConfiguration());
 
         assertThrows(ValidationSizeException.class, () -> service.saveLBC(domain));
         verify(repository, never()).save(any());

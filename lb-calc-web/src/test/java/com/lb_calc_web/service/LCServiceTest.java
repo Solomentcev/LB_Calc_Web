@@ -157,8 +157,11 @@ class LCServiceTest {
 
     @Test
     void saveLC_shouldRejectInvalidGeometryBeforeSaving() {
-        LC domain = TestDataFactory.validLC(null);
-        domain.setHeight(10);
+        LC source = TestDataFactory.validLC(null);
+        LC domain = new LC(
+                10, source.getWidth(), source.getDepth(), source.getUpperFrame(),
+                source.getBottomFrame(), source.getColorBody(), source.getColorDoor(),
+                source.getControlConfiguration());
 
         assertThrows(ValidationSizeException.class, () -> service.saveLC(domain));
         verify(repository, never()).save(any());
