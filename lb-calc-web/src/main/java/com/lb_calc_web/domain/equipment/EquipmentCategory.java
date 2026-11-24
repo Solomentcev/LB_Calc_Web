@@ -29,7 +29,10 @@ public enum EquipmentCategory {
             return false;
         }
         return switch (this) {
-            case DISPLAY -> purpose instanceof DisplayPurpose;
+            case DISPLAY -> purpose == DisplayPurpose.INCH_10
+                    || purpose == DisplayPurpose.INCH_17
+                    || purpose == DisplayPurpose.INCH_19
+                    || purpose == DisplayPurpose.CUSTOM;
             case BAR_READER -> purpose == AccessPurpose.BAR_CODE
                     || purpose == AccessPurpose.QR_CODE;
             case RFID_READER -> purpose == AccessPurpose.RFID;

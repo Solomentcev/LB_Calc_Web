@@ -74,6 +74,12 @@ class EquipmentTest {
     }
 
     @Test
+    void displayCategory_shouldRejectAbsenceAsPhysicalEquipment() {
+        assertFalse(EquipmentCategory.DISPLAY.supports(DisplayPurpose.NONE));
+        assertTrue(EquipmentCategory.DISPLAY.supports(DisplayPurpose.INCH_10));
+    }
+
+    @Test
     void systemEquipment_shouldAcceptOnlyMatchingSystemPurpose() {
         Equipment computer = new Equipment(
                 1L,
