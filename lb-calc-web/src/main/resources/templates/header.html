@@ -6,26 +6,15 @@
 
         <ul class="navbar-nav flex-row flex-wrap mr-auto mb-0"
             sec:authorize="isAuthenticated()">
-            <li class="nav-item">
-                <a class="nav-link px-2" th:href="@{/myprofile}">Мой профиль</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link px-2" th:href="@{/projects}">Проекты</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link px-2" th:href="@{/alss}">АКХ</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link px-2" th:href="@{/lbs}">Модули хранения</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link px-2" th:href="@{/lcs}">Модули управления</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link px-2" th:href="@{/lbcs}">Модуль хранения и управления</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link px-2" th:href="@{/profiles}">Профили сотрудников</a>
+            <li class="nav-item"><a class="nav-link px-2" th:href="@{/myprofile}">Мой профиль</a></li>
+            <li class="nav-item"><a class="nav-link px-2" th:href="@{/projects}">Проекты</a></li>
+            <li class="nav-item"><a class="nav-link px-2" th:href="@{/alss}">АКХ</a></li>
+            <li class="nav-item"><a class="nav-link px-2" th:href="@{/lbs}">Модули хранения</a></li>
+            <li class="nav-item"><a class="nav-link px-2" th:href="@{/lcs}">Модули управления</a></li>
+            <li class="nav-item"><a class="nav-link px-2" th:href="@{/lbcs}">Модуль хранения и управления</a></li>
+            <li class="nav-item"><a class="nav-link px-2" th:href="@{/profiles}">Профили сотрудников</a></li>
+            <li class="nav-item" sec:authorize="hasAuthority('ROLE_ADMIN')">
+                <a class="nav-link px-2" th:href="@{/equipment}">Каталог оборудования</a>
             </li>
             <li class="nav-item" sec:authorize="hasAuthority('ROLE_ADMIN')">
                 <a class="nav-link px-2" th:href="@{/employees}">Сотрудники</a>
@@ -33,16 +22,10 @@
         </ul>
 
         <ul class="navbar-nav flex-row flex-wrap align-items-center mb-0">
-            <li class="nav-item" sec:authorize="isAnonymous()">
-                <a class="nav-link px-2" th:href="@{/registration}">Регистрация</a>
-            </li>
-            <li class="nav-item" sec:authorize="isAnonymous()">
-                <a class="nav-link px-2" th:href="@{/login}">Вход</a>
-            </li>
+            <li class="nav-item" sec:authorize="isAnonymous()"><a class="nav-link px-2" th:href="@{/registration}">Регистрация</a></li>
+            <li class="nav-item" sec:authorize="isAnonymous()"><a class="nav-link px-2" th:href="@{/login}">Вход</a></li>
             <li class="nav-item" sec:authorize="isAuthenticated()">
-                <span class="navbar-text px-2">
-                    <span sec:authentication="name"></span>
-                </span>
+                <span class="navbar-text px-2"><span sec:authentication="name"></span></span>
             </li>
             <li class="nav-item" sec:authorize="isAuthenticated()">
                 <form th:action="@{/logout}" method="post" class="form-inline mb-0">

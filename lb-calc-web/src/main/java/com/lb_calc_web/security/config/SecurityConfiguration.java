@@ -3,8 +3,11 @@ package com.lb_calc_web.security.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lb_calc_web.controller.api.response.ApiResponse;
 import com.lb_calc_web.security.jwt.JwtAuthentificationFilter;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -15,9 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import jakarta.servlet.http.HttpServletResponse;
+
 import java.io.IOException;
 
 @Configuration
@@ -37,95 +38,42 @@ public class SecurityConfiguration {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(
-            HttpSecurity http
-    ) throws Exception {
-
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(
-                        AbstractHttpConfigurer::disable
-                )
-
+                .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session ->
-                        session.sessionCreationPolicy(
-                                SessionCreationPolicy.STATELESS
-                        )
-                )
-
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-
+                        .requestMatchers("/", "/login/**", "/registration/**", "/error").permitAll()
                         .requestMatchers(
-                                "/",
-                                "/login/**",
-                                "/registration/**",
-                                "/error"
+                                "/swagger-ui.html", "/swagger-ui/**",
+                                "/v3/api-docs", "/v3/api-docs/**", "/v3/api-docs.yaml"
                         ).permitAll()
-
                         .requestMatchers(
-                                "/swagger-ui.html",
-                                "/swagger-ui/**",
-                                "/v3/api-docs",
-                                "/v3/api-docs/**",
-                                "/v3/api-docs.yaml"
+                                "/api/v1/login", "/api/v1/registration",
+                                "/api/v1/logout", "/api/v1/refresh"
                         ).permitAll()
-
-                        .requestMatchers(
-                                "/api/v1/login",
-                                "/api/v1/registration",
-                                "/api/v1/logout",
-                                "/api/v1/refresh"
-                        ).permitAll()
-
-                        .requestMatchers(
-                                "/employees/**"
-                        ).hasAuthority("ROLE_ADMIN")
-
-                        .anyRequest().authenticated()
-                )
-
+                        .requestMatchers("/employees/**", "/equipment/**", "/api/v1/equipment/**")
+                        .hasAuthority("ROLE_ADMIN")
+                        .anyRequest().authenticated())
                 .exceptionHandling(exceptionHandling -> exceptionHandling
-
                         .defaultAuthenticationEntryPointFor(
                                 (request, response, exception) -> writeApiError(
-                                        response,
-                                        HttpStatus.UNAUTHORIZED,
-                                        "Требуется аутентификация"
-                                ),
-                                request -> request.getRequestURI().startsWith("/api/")
-                        )
+                                        response, HttpStatus.UNAUTHORIZED, "Требуется аутентификация"),
+                                request -> request.getRequestURI().startsWith("/api/"))
                         .defaultAccessDeniedHandlerFor(
                                 (request, response, exception) -> writeApiError(
-                                        response,
-                                        HttpStatus.FORBIDDEN,
-                                        "Недостаточно прав для выполнения операции"
-                                ),
-                                request -> request.getRequestURI().startsWith("/api/")
-                        )
-
+                                        response, HttpStatus.FORBIDDEN,
+                                        "Недостаточно прав для выполнения операции"),
+                                request -> request.getRequestURI().startsWith("/api/"))
                         .defaultAuthenticationEntryPointFor(
-                                new LoginUrlAuthenticationEntryPoint(
-                                        "/login"
-                                ),
-                                request -> true
-                        )
-                )
-
-                .logout(logout ->
-                        logout
-                                .logoutUrl("/logout")
-                                .deleteCookies(
-                                        "jwtAccess",
-                                        "jwtRefresh"
-                                )
-                                .logoutSuccessUrl(
-                                        "/"
-                                )
-                )
-
-                .addFilterBefore(
-                        jwtAuthentificationFilter,
-                        UsernamePasswordAuthenticationFilter.class
-                );
+                                new LoginUrlAuthenticationEntryPoint("/login"),
+                                request -> true))
+                .logout(logout -> logout
+                        .logoutUrl("/logout")
+                        .deleteCookies("jwtAccess", "jwtRefresh")
+                        .logoutSuccessUrl("/"))
+                .addFilterBefore(jwtAuthentificationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
