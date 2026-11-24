@@ -117,6 +117,17 @@ class ControlModuleEquipmentEntityMapperTest {
     }
 
     @Test
+    void equipmentResolver_shouldRejectUnknownCatalogId() {
+        EquipmentRepository repository = mock(EquipmentRepository.class);
+        when(repository.findById(45L)).thenReturn(java.util.Optional.empty());
+        EquipmentEntityResolver resolver = new EquipmentEntityResolver(repository);
+
+        assertThrows(java.util.NoSuchElementException.class,
+                () -> resolver.resolveDomain(45L));
+        verify(repository).findById(45L);
+    }
+
+    @Test
     void equipmentResolver_shouldRejectUnsavedDomainEquipment() {
         Equipment equipment = equipment(0, EquipmentFunctionalType.ACCESS,
                 AccessPurpose.RFID, EquipmentCategory.RFID_READER, "RFID");
