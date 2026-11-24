@@ -37,9 +37,14 @@ class LBCDtoMapperTest {
         assertEquals(source.getWidth(), result.getWidth());
         assertEquals(source.getDepth(), result.getDepth());
         assertEquals(source.getCountCells(), result.getCountCells());
-        assertEquals(source.getDisplayPurpose(), result.getDisplayPurpose());
-        assertEquals(source.getAccessPurposes(), result.getAccessPurposes());
-        assertEquals(source.getPaymentPurpose(), result.getPaymentPurpose());
-        assertEquals(source.getPrinterPurpose(), result.getPrinterPurpose());
+        assertEquals(source.getFunctionalConfiguration().getDisplay(),
+                result.getFunctionalConfiguration().getDisplay());
+        assertEquals(source.getFunctionalConfiguration().getAccess(),
+                result.getFunctionalConfiguration().getAccess());
+        assertEquals(source.getFunctionalConfiguration().getPayment(),
+                result.getFunctionalConfiguration().getPayment());
+        assertEquals(source.getFunctionalConfiguration().getPrinter(),
+                result.getFunctionalConfiguration().getPrinter());
+        assertEquals(source.getEquipmentSelections(), result.getEquipmentSelections());
     }
 }
