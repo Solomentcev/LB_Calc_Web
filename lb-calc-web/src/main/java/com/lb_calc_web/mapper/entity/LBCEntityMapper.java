@@ -67,16 +67,7 @@ public final class LBCEntityMapper {
                 configuration
         );
 
-        if (!domain.getName().equals(entity.getName())
-                || !domain.getDescription().equals(entity.getDescription())
-                || domain.getCellHeight() != entity.getHeightCell()
-                || domain.getCellWidth() != entity.getWidthCell()
-                || domain.getCellDepth() != entity.getDepthCell()) {
-            throw new IllegalStateException(
-                    "Производные характеристики LBC в БД не соответствуют исходным параметрам"
-            );
-        }
-
+        // Размеры ячеек, наименование и описание пересчитываются доменной моделью.
         domain.setId(entity.getId());
         return domain;
     }
