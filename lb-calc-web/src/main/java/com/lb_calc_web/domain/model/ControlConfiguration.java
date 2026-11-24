@@ -7,25 +7,21 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 
-/**
- * Конфигурация управляющего модуля: функциональные возможности
- * и фактически установленное оборудование.
- */
+/** Конфигурация управляющего модуля: функциональные возможности и установленное оборудование. */
 public class ControlConfiguration {
+
+    private static final FunctionalConfigurationResolver RESOLVER =
+            new FunctionalConfigurationResolver();
 
     private FunctionalConfiguration functionalConfiguration;
     private final Map<Equipment, Integer> equipment;
 
-    public ControlConfiguration(
-            FunctionalConfiguration functionalConfiguration,
-            Map<Equipment, Integer> equipment
-    ) {
+    public ControlConfiguration(FunctionalConfiguration functionalConfiguration,
+                                Map<Equipment, Integer> equipment) {
         this.functionalConfiguration = Objects.requireNonNull(
-                functionalConfiguration,
-                "Функциональная конфигурация не должна быть null"
-        ).copy();
+                functionalConfiguration, "Функциональная конфигурация не должна быть null").copy();
         this.equipment = copyEquipment(equipment);
-        validateEquipment();
+        validateEquipment(this.equipment);
     }
 
     private static Map<Equipment, Integer> copyEquipment(Map<Equipment, Integer> source) {
@@ -34,9 +30,8 @@ public class ControlConfiguration {
         source.forEach((item, quantity) -> {
             Equipment model = Objects.requireNonNull(item, "Оборудование не должно быть null");
             Integer count = Objects.requireNonNull(quantity, "Количество оборудования не должно быть null");
-            if (count < 1) {
-                throw new IllegalArgumentException("Количество оборудования должно быть не меньше 1");
-            }
+            if (count < 1) throw new IllegalArgumentException(
+                    "Количество оборудования должно быть не меньше 1");
             result.merge(model, count, (first, second) -> {
                 try {
                     return Math.addExact(first, second);
@@ -49,11 +44,10 @@ public class ControlConfiguration {
         return result;
     }
 
-    private void validateEquipment() {
+    private static void validateEquipment(Map<Equipment, Integer> equipment) {
         long displayCount = equipment.entrySet().stream()
                 .filter(entry -> entry.getKey().getCategory() == EquipmentCategory.DISPLAY)
-                .mapToLong(Map.Entry::getValue)
-                .sum();
+                .mapToLong(Map.Entry::getValue).sum();
         if (displayCount > 1) {
             throw new IllegalArgumentException(
                     "В модуле управления может быть установлен только один дисплей");
@@ -64,14 +58,10 @@ public class ControlConfiguration {
         return functionalConfiguration.copy();
     }
 
-    /**
-     * Обновляет функциональные назначения, не изменяя установленное оборудование.
-     */
-    public void setFunctionalConfiguration(FunctionalConfiguration functionalConfiguration) {
-        this.functionalConfiguration = Objects.requireNonNull(
-                functionalConfiguration,
-                "Функциональная конфигурация не должна быть null"
-        ).copy();
+    /** Обновляет назначения, сохраняя установленное оборудование. */
+    public void setFunctionalConfiguration(FunctionalConfiguration configuration) {
+        functionalConfiguration = Objects.requireNonNull(
+                configuration, "Функциональная конфигурация не должна быть null").copy();
     }
 
     /** @return неизменяемое соответствие моделей оборудования и их количества */
@@ -84,32 +74,43 @@ public class ControlConfiguration {
                 Objects.requireNonNull(item, "Оборудование не должно быть null"), 0);
     }
 
+    /** Добавляет оборудование и пересчитывает связанные функциональные назначения. */
     public void addEquipment(Equipment item, int quantity) {
         Equipment model = Objects.requireNonNull(item, "Оборудование не должно быть null");
-        if (quantity < 1) {
-            throw new IllegalArgumentException("Количество оборудования должно быть не меньше 1");
-        }
-
-        int updated;
+        if (quantity < 1) throw new IllegalArgumentException(
+                "Количество оборудования должно быть не меньше 1");
+        Map<Equipment, Integer> updated = new LinkedHashMap<>(equipment);
         try {
-            updated = Math.addExact(equipment.getOrDefault(model, 0), quantity);
+            updated.merge(model, quantity, Math::addExact);
         } catch (ArithmeticException exception) {
             throw new IllegalArgumentException(
                     "Количество оборудования превышает допустимый диапазон", exception);
         }
-
-        if (model.getCategory() == EquipmentCategory.DISPLAY
-                && (updated > 1 || equipment.keySet().stream().anyMatch(existing ->
-                existing.getCategory() == EquipmentCategory.DISPLAY && !existing.equals(model)))) {
-            throw new IllegalArgumentException(
-                    "В модуле управления может быть установлен только один дисплей");
-        }
-        equipment.put(model, updated);
+        replaceEquipment(updated);
     }
 
+    /** Удаляет модель и пересчитывает связанные назначения. */
     public boolean removeEquipment(Equipment item) {
-        return equipment.remove(
-                Objects.requireNonNull(item, "Оборудование не должно быть null")) != null;
+        Equipment model = Objects.requireNonNull(item, "Оборудование не должно быть null");
+        if (!equipment.containsKey(model)) return false;
+        Map<Equipment, Integer> updated = new LinkedHashMap<>(equipment);
+        updated.remove(model);
+        replaceEquipment(updated);
+        return true;
+    }
+
+    /** Заменяет состав оборудования с пересчётом только затронутых функциональных областей. */
+    public void setEquipment(Map<Equipment, Integer> equipment) {
+        replaceEquipment(copyEquipment(equipment));
+    }
+
+    private void replaceEquipment(Map<Equipment, Integer> updated) {
+        validateEquipment(updated);
+        FunctionalConfiguration resolved = RESOLVER.resolve(
+                functionalConfiguration, equipment, updated);
+        equipment.clear();
+        equipment.putAll(updated);
+        functionalConfiguration = resolved;
     }
 
     public ControlConfiguration copy() {

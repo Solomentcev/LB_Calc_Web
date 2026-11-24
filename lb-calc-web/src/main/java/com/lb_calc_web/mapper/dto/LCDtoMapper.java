@@ -95,11 +95,11 @@ public final class LCDtoMapper {
     public static LC toDomain(LCDTO dto) {
         return toDomain(dto, id -> {
             throw new IllegalStateException(
-                    "Для восстановления оборудования требуется Equipment resolver");
+                    "Для восстановления оборудования требуется загрузчик оборудования");
         }, null);
     }
 
-    public static LC toDomain(LCDTO dto, Function<Long, Equipment> equipmentResolver) {
+    public static LC toDomain(LCDTO dto, Function<Long, Equipment> equipmentLookup) {
         return toDomain(dto, equipmentResolver, null);
     }
 
@@ -143,6 +143,14 @@ public final class LCDtoMapper {
             }
         }
 
+        ControlConfiguration configuration = fallbackConfiguration == null
+                ? new ControlConfiguration(functional, Map.of())
+                : fallbackConfiguration.copy();
+        configuration.setFunctionalConfiguration(functional);
+        if (dto.getEquipmentSelections() != null || fallbackConfiguration == null) {
+            configuration.setEquipment(equipment);
+        }
+
         LC domain = new LC(
                 dto.getHeight(),
                 dto.getWidth(),
@@ -151,7 +159,7 @@ public final class LCDtoMapper {
                 dto.getBottomFrame(),
                 Colors.valueOf(dto.getColorBody()),
                 Colors.valueOf(dto.getColorDoor()),
-                new ControlConfiguration(functional, equipment)
+                configuration
         );
         domain.setId(dto.getId() == null || dto.getId() <= 0 ? null : dto.getId());
         return domain;

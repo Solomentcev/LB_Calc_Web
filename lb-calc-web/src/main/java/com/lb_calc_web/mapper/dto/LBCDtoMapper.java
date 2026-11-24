@@ -112,14 +112,14 @@ public final class LBCDtoMapper {
                 dto.getType(), dto.getDeltaWidth(), dto.getShelfThick(), dto.getServiceZoneWidth());
         return toDomain(dto, typeLb, id -> {
             throw new IllegalStateException(
-                    "Для восстановления оборудования требуется Equipment resolver");
+                    "Для восстановления оборудования требуется загрузчик оборудования");
         }, null);
     }
 
     public static LBC toDomain(
             LBCDTO dto,
             TypeLb typeLb,
-            Function<Long, Equipment> equipmentResolver
+            Function<Long, Equipment> equipmentLookup
     ) {
         return toDomain(dto, typeLb, equipmentResolver, null);
     }
@@ -169,6 +169,14 @@ public final class LBCDtoMapper {
             }
         }
 
+        ControlConfiguration configuration = fallbackConfiguration == null
+                ? new ControlConfiguration(functional, Map.of())
+                : fallbackConfiguration.copy();
+        configuration.setFunctionalConfiguration(functional);
+        if (dto.getEquipmentSelections() != null || fallbackConfiguration == null) {
+            configuration.setEquipment(equipment);
+        }
+
         LBC domain = new LBC(
                 dto.getHeight(),
                 dto.getWidth(),
@@ -181,7 +189,7 @@ public final class LBCDtoMapper {
                 dto.getCountCells(),
                 DirectionDoorOpening.valueOf(dto.getDirectionDoorOpening()),
                 dto.getDoorThickness(),
-                new ControlConfiguration(functional, equipment)
+                configuration
         );
         domain.setId(dto.getId() == null || dto.getId() <= 0 ? null : dto.getId());
         return domain;

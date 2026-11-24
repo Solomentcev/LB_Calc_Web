@@ -207,7 +207,11 @@ public class ALS {
      */
     public void setFunctionalConfiguration(FunctionalConfiguration configuration) {
         Objects.requireNonNull(configuration, "Функциональная конфигурация не должна быть null");
-        mutate(candidate -> candidate.functionalConfiguration = configuration.copy());
+        mutate(candidate -> {
+            ControlModule controlModule = (ControlModule) candidate.getControlModuleAsModule();
+            controlModule.setFunctionalConfiguration(configuration);
+            candidate.functionalConfiguration = configuration.copy();
+        });
     }
 
     /**
@@ -221,6 +225,28 @@ public class ALS {
             ControlModule controlModule = (ControlModule) candidate.getControlModuleAsModule();
             controlModule.setControlConfiguration(configuration);
             candidate.functionalConfiguration = configuration.getFunctionalConfiguration();
+        });
+    }
+
+    /** Добавляет оборудование в управляющий модуль и синхронизирует функции ALS. */
+    public void addEquipment(com.lb_calc_web.domain.equipment.Equipment equipment, int quantity) {
+        Objects.requireNonNull(equipment, "Оборудование не должно быть null");
+        mutate(candidate -> {
+            ControlModule controlModule = (ControlModule) candidate.getControlModuleAsModule();
+            controlModule.addEquipment(equipment, quantity);
+            candidate.functionalConfiguration =
+                    controlModule.getControlConfiguration().getFunctionalConfiguration();
+        });
+    }
+
+    /** Удаляет оборудование из управляющего модуля и синхронизирует функции ALS. */
+    public void removeEquipment(com.lb_calc_web.domain.equipment.Equipment equipment) {
+        Objects.requireNonNull(equipment, "Оборудование не должно быть null");
+        mutate(candidate -> {
+            ControlModule controlModule = (ControlModule) candidate.getControlModuleAsModule();
+            controlModule.removeEquipment(equipment);
+            candidate.functionalConfiguration =
+                    controlModule.getControlConfiguration().getFunctionalConfiguration();
         });
     }
 
@@ -673,6 +699,7 @@ public class ALS {
      */
     public void recalculate() {
         validateStructure();
+        validateFunctionalConfigurationConsistency();
 
         synchronizeModules();
         recalculateDoorDirections();
@@ -689,11 +716,18 @@ public class ALS {
     /**
      * Передаёт модулям общие конструктивные параметры ALS.
      */
+    private void validateFunctionalConfigurationConsistency() {
+        ControlModule controlModule = (ControlModule) getControlModuleAsModule();
+        FunctionalConfiguration moduleConfiguration =
+                controlModule.getControlConfiguration().getFunctionalConfiguration();
+        if (!functionalConfiguration.equals(moduleConfiguration)) {
+            throw new IllegalStateException(
+                    "Функциональная конфигурация ALS не соответствует управляющему модулю");
+        }
+    }
+
     private void synchronizeModules() {
         for (Module module : modules) {
-            if (module instanceof ControlModule controlModule) {
-                controlModule.setFunctionalConfiguration(functionalConfiguration);
-            }
             module.setHeight(height);
             module.setDepth(depth);
             module.setUpperFrame(upperFrame);
