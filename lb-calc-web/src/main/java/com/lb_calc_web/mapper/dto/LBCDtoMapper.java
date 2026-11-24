@@ -3,20 +3,16 @@ package com.lb_calc_web.mapper.dto;
 import com.lb_calc_web.domain.attributes.Colors;
 import com.lb_calc_web.domain.attributes.DirectionDoorOpening;
 import com.lb_calc_web.domain.attributes.TypeLb;
-import com.lb_calc_web.domain.equipment.AccessPurpose;
-import com.lb_calc_web.domain.equipment.DisplayPurpose;
 import com.lb_calc_web.domain.equipment.Equipment;
-import com.lb_calc_web.domain.equipment.EquipmentCategory;
-import com.lb_calc_web.domain.equipment.PaymentPurpose;
-import com.lb_calc_web.domain.equipment.PrinterPurpose;
 import com.lb_calc_web.domain.model.ControlConfiguration;
 import com.lb_calc_web.domain.model.FunctionalConfiguration;
 import com.lb_calc_web.domain.model.LBC;
 import com.lb_calc_web.dto.EquipmentSelectionDTO;
+import com.lb_calc_web.dto.FunctionalConfigurationDTO;
 import com.lb_calc_web.dto.LBCDTO;
 
-import java.util.EnumSet;
 import java.util.LinkedHashMap;
+import java.util.Set;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -26,16 +22,6 @@ import java.util.function.Function;
 public final class LBCDtoMapper {
 
     private LBCDtoMapper() {
-    }
-
-    private static int quantityForCategory(
-            ControlConfiguration configuration,
-            EquipmentCategory category
-    ) {
-        return configuration.getEquipment().entrySet().stream()
-                .filter(entry -> entry.getKey().getCategory() == category)
-                .mapToInt(Map.Entry::getValue)
-                .sum();
     }
 
     public static LBCDTO toDto(LBC domain) {
@@ -66,41 +52,19 @@ public final class LBCDtoMapper {
         dto.setColorDoor(domain.getColorDoor().name());
 
         ControlConfiguration configuration = domain.getControlConfiguration();
-        FunctionalConfiguration functional = configuration.getFunctionalConfiguration();
-        dto.setDisplayPurpose(functional.getDisplay().name());
-        dto.setAccessPurposes(functional.getAccess().stream().map(Enum::name).sorted().toList());
-        dto.setPaymentPurpose(functional.getPayment().name());
-        dto.setPrinterPurpose(functional.getPrinter().name());
-
-        int displayQuantity = quantityForCategory(configuration, EquipmentCategory.DISPLAY);
-        int barReaderQuantity = quantityForCategory(configuration, EquipmentCategory.BAR_READER);
-        int printerQuantity = quantityForCategory(configuration, EquipmentCategory.PRINTER);
-        int rfidReaderQuantity = quantityForCategory(configuration, EquipmentCategory.RFID_READER);
-        dto.setDisplayQuantity(displayQuantity);
-        dto.setBarReaderQuantity(barReaderQuantity);
-        dto.setPrinterQuantity(printerQuantity);
-        dto.setRfidReaderQuantity(rfidReaderQuantity);
-        dto.setPrinter(printerQuantity > 0);
-        dto.setRfidReader(rfidReaderQuantity > 0);
-        dto.setPayment(functional.getPayment().name());
-
-        configuration.getEquipment().keySet().stream()
-                .filter(item -> item.getCategory() == EquipmentCategory.BAR_READER)
-                .findFirst()
-                .ifPresent(scanner -> dto.setBarReader(scanner.getName()));
-
+        dto.setFunctionalConfiguration(toDto(configuration.getFunctionalConfiguration()));
         dto.setEquipmentSelections(configuration.getEquipment().entrySet().stream()
-                .map(entry -> new EquipmentSelectionDTO(
-                        entry.getKey().getId(), entry.getValue()))
+                .map(entry -> new EquipmentSelectionDTO(entry.getKey().getId(), entry.getValue()))
                 .toList());
-        configuration.getEquipment().keySet().stream()
-                .filter(item -> item.getCategory() == EquipmentCategory.DISPLAY)
-                .findFirst()
-                .ifPresent(display -> {
-                    dto.setDisplay(display.getName());
-                    dto.setDisplayWidth(display.getWidth());
-                    dto.setDisplayHeight(display.getHeight());
-                });
+        return dto;
+    }
+
+    private static FunctionalConfigurationDTO toDto(FunctionalConfiguration configuration) {
+        FunctionalConfigurationDTO dto = new FunctionalConfigurationDTO();
+        dto.setDisplay(configuration.getDisplay());
+        dto.setAccess(configuration.getAccess());
+        dto.setPayment(configuration.getPayment());
+        dto.setPrinter(configuration.getPrinter());
         return dto;
     }
 
@@ -140,27 +104,18 @@ public final class LBCDtoMapper {
                     "Переданный конструктивный тип не соответствует типу DTO LBC");
         }
 
-        boolean functionalConfigurationProvided =
-                dto.getDisplayPurpose() != null
-                        || dto.getPaymentPurpose() != null
-                        || dto.getPrinterPurpose() != null
-                        || dto.getAccessPurposes() != null;
+        FunctionalConfiguration functional = toDomain(
+                dto.getFunctionalConfiguration(), fallbackConfiguration);
 
-        FunctionalConfiguration functional = !functionalConfigurationProvided
-                && fallbackConfiguration != null
-                ? fallbackConfiguration.getFunctionalConfiguration()
-                : new FunctionalConfiguration(
-                        parseDisplayPurpose(dto.getDisplayPurpose()),
-                        parseAccessPurposes(dto.getAccessPurposes()),
-                        parsePaymentPurpose(dto.getPaymentPurpose()),
-                        parsePrinterPurpose(dto.getPrinterPurpose())
-                );
         Map<Equipment, Integer> equipment = new LinkedHashMap<>();
         if (dto.getEquipmentSelections() == null && fallbackConfiguration != null) {
             equipment.putAll(fallbackConfiguration.getEquipment());
         } else if (dto.getEquipmentSelections() != null) {
             for (EquipmentSelectionDTO selection : dto.getEquipmentSelections()) {
                 Objects.requireNonNull(selection, "Позиция оборудования не должна быть null");
+                if (selection.getEquipmentId() == null) {
+                    continue;
+                }
                 Equipment model = Objects.requireNonNull(
                         equipmentLookup.apply(selection.getEquipmentId()),
                         "Модель оборудования не найдена: " + selection.getEquipmentId()
@@ -195,28 +150,28 @@ public final class LBCDtoMapper {
         return domain;
     }
 
-    private static DisplayPurpose parseDisplayPurpose(String value) {
-        return value == null || value.isBlank()
-                ? DisplayPurpose.NONE : DisplayPurpose.valueOf(value);
-    }
-
-    private static java.util.Set<AccessPurpose> parseAccessPurposes(List<String> values) {
-        EnumSet<AccessPurpose> result = EnumSet.noneOf(AccessPurpose.class);
-        if (values != null) {
-            values.stream().filter(Objects::nonNull).filter(value -> !value.isBlank())
-                    .map(AccessPurpose::valueOf).forEach(result::add);
+    private static FunctionalConfiguration toDomain(
+            FunctionalConfigurationDTO dto,
+            ControlConfiguration fallback
+    ) {
+        FunctionalConfiguration current = fallback == null ? null : fallback.getFunctionalConfiguration();
+        if (dto == null && current != null) {
+            return current;
         }
-        return result;
-    }
-
-    private static PaymentPurpose parsePaymentPurpose(String value) {
-        return value == null || value.isBlank()
-                ? PaymentPurpose.NONE : PaymentPurpose.valueOf(value);
-    }
-
-    private static PrinterPurpose parsePrinterPurpose(String value) {
-        return value == null || value.isBlank()
-                ? PrinterPurpose.ABSENT : PrinterPurpose.valueOf(value);
+        return new FunctionalConfiguration(
+                dto == null || dto.getDisplay() == null
+                        ? current == null ? com.lb_calc_web.domain.equipment.DisplayPurpose.NONE : current.getDisplay()
+                        : dto.getDisplay(),
+                dto == null || dto.getAccess() == null
+                        ? current == null ? Set.of() : current.getAccess()
+                        : dto.getAccess(),
+                dto == null || dto.getPayment() == null
+                        ? current == null ? com.lb_calc_web.domain.equipment.PaymentPurpose.NONE : current.getPayment()
+                        : dto.getPayment(),
+                dto == null || dto.getPrinter() == null
+                        ? current == null ? com.lb_calc_web.domain.equipment.PrinterPurpose.ABSENT : current.getPrinter()
+                        : dto.getPrinter()
+        );
     }
 
     public static List<LBCDTO> toDtoList(List<LBC> domains) {
