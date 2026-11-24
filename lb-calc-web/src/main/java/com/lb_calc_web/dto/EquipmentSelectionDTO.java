@@ -51,4 +51,8 @@ public class EquipmentSelectionDTO {
     public int hashCode() {
         return Objects.hash(equipmentId, quantity);
     }
+    @Override
+    public String toString() {
+        return "Оборудование ID=" + equipmentId + ", количество=" + quantity;
+    }
 }
