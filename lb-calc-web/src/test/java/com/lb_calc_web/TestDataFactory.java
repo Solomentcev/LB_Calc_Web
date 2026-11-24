@@ -94,6 +94,8 @@ public final class TestDataFactory {
         lc.setDepth(500);
         lc.setUpperFrame(50);
         lc.setBottomFrame(50);
+        lc.setColorBody(Colors.Blue.name());
+        lc.setColorDoor(Colors.White.name());
 
         FunctionalConfigurationDTO functional = new FunctionalConfigurationDTO();
         functional.setDisplay(DisplayPurpose.INCH_10);
