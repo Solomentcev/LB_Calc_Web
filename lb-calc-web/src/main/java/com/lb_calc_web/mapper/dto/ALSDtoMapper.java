@@ -1,4 +1,4 @@
-package com.lb_calc_web.mapper.entity;
+package com.lb_calc_web.mapper.dto;
 
 import com.lb_calc_web.domain.attributes.PositionControlModule;
 import com.lb_calc_web.domain.attributes.TypeLb;

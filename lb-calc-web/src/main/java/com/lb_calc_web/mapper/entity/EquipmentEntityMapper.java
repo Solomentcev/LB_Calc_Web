@@ -46,7 +46,7 @@ public final class EquipmentEntityMapper {
         entity.setName(domain.getName());
         entity.setDescription(domain.getDescription());
         entity.setFunctionalType(domain.getFunctionalType());
-        entity.setPurpose(domain.getPurpose().name());
+        entity.setPurpose(domain.getPurpose().toString());
         entity.setCategory(domain.getCategory());
         entity.setWidth(domain.getWidth());
         entity.setHeight(domain.getHeight());

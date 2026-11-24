@@ -1,7 +1,9 @@
 package com.lb_calc_web.controller;
 
 import com.lb_calc_web.domain.attributes.Colors;
-import com.lb_calc_web.domain.equipment.Display;
+import com.lb_calc_web.domain.equipment.AccessPurpose;
+import com.lb_calc_web.domain.equipment.DisplayPurpose;
+import com.lb_calc_web.domain.equipment.PaymentPurpose;
 import com.lb_calc_web.domain.model.LC;
 import com.lb_calc_web.dto.LCDTO;
 import com.lb_calc_web.mapper.dto.LCDtoMapper;
@@ -29,25 +31,20 @@ public class LCController {
     private final List<Colors> colorsList =
             Arrays.asList(Colors.values());
 
-    private final List<Payment> paymentList =
-            Arrays.asList(Payment.values());
+    private final List<PaymentPurpose> paymentList =
+            Arrays.asList(PaymentPurpose.values());
 
-    private final List<AccessMethod> accessMethodList =
-            Arrays.asList(AccessMethod.values());
+    private final List<AccessPurpose> accessMethodList =
+            Arrays.asList(AccessPurpose.values());
 
     private final List<String> displayList =
-            List.of(
-                    Display.NONE.getName(),
-                    Display.LC10.getName(),
-                    Display.LC17.getName(),
-                    Display.LC19.getName()
-            );
+            Arrays.stream(DisplayPurpose.values()).map(Enum::name).toList();
 
     private final List<String> barReaderList =
             List.of(
-                    BarReader.NONE.getName(),
-                    BarReader.READER_1D.getName(),
-                    BarReader.READER_2D.getName()
+                    AccessPurpose.BAR_CODE.name(),
+                    AccessPurpose.QR_CODE.name(),
+                    AccessPurpose.RFID.name()
             );
 
     public LCController(LCService lcService) {
@@ -103,7 +100,7 @@ public class LCController {
         logger.info(
                 "Сохранение LC id={}, display={}",
                 lc.getId(),
-                lc.getDisplay()
+                lc.getDisplayPurpose()
         );
 
         try {
@@ -145,7 +142,7 @@ public class LCController {
      * Список способов оплаты.
      */
     @ModelAttribute("paymentList")
-    public List<Payment> paymentList() {
+    public List<PaymentPurpose> paymentList() {
         return paymentList;
     }
 
@@ -153,7 +150,7 @@ public class LCController {
      * Список способов доступа.
      */
     @ModelAttribute("accessMethodList")
-    public List<AccessMethod> accessMethodList() {
+    public List<AccessPurpose> accessMethodList() {
         return accessMethodList;
     }
 

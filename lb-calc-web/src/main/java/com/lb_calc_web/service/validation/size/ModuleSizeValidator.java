@@ -144,7 +144,7 @@ public class ModuleSizeValidator {
         ValidationResult result = new ValidationResult("LC", lc.getId());
         logger.info("Валидация размеров доменной модели LC");
 
-        long requiredWidth = lc.getEquipment().stream()
+        long requiredWidth = lc.getEquipment().keySet().stream()
                 .mapToLong(Equipment::getWidth)
                 .max()
                 .orElse(0L);
@@ -398,7 +398,7 @@ public class ModuleSizeValidator {
     }
 
     private long requiredLBCControlWidth(LBC lbc) {
-        return lbc.getEquipment().stream()
+        return lbc.getEquipment().keySet().stream()
                 .mapToLong(Equipment::getWidth)
                 .max()
                 .orElse(0L);

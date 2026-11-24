@@ -12,8 +12,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Arrays;
-import java.util.List;
 
 @Controller
 @RequestMapping("/lbcs")
@@ -104,13 +102,4 @@ public class LBCController extends BaseCatalogController {
         }
     }
 
-    @ModelAttribute("accessMethodList")
-    public List<AccessMethod> accessMethodList() {
-        return Arrays.asList(AccessMethod.values());
-    }
-
-    @ModelAttribute("printOptionList")
-    public List<PrintOption> printOptionList() {
-        return Arrays.asList(PrintOption.values());
-    }
 }
