@@ -2,6 +2,7 @@ package com.lb_calc_web.controller;
 
 import com.lb_calc_web.dto.ALSDTO;
 import com.lb_calc_web.dto.LBCDTO;
+import com.lb_calc_web.dto.LCDTO;
 import com.lb_calc_web.domain.equipment.AccessPurpose;
 import com.lb_calc_web.domain.equipment.DisplayPurpose;
 import com.lb_calc_web.domain.equipment.PaymentPurpose;
@@ -10,8 +11,10 @@ import com.lb_calc_web.mapper.dto.EquipmentDtoMapper;
 import com.lb_calc_web.service.EquipmentCatalogService;
 import com.lb_calc_web.mapper.dto.ALSDtoMapper;
 import com.lb_calc_web.mapper.dto.LBCDtoMapper;
+import com.lb_calc_web.mapper.dto.LCDtoMapper;
 import com.lb_calc_web.service.image.ALSImageService;
 import com.lb_calc_web.service.image.LBCImageService;
+import com.lb_calc_web.service.image.LCImageService;
 import com.lb_calc_web.service.validation.ValidationSizeException;
 import com.lb_calc_web.service.ALSService;
 import org.springframework.stereotype.Controller;
@@ -36,39 +39,21 @@ public class ALSController extends BaseCatalogController {
     }
 
     @GetMapping("/create")
-    public String createALS(
-            Model model
-    ) {
+    public String createALS(Model model) {
         ALSDTO als = ALSImageService.addImages(ALSDtoMapper.toDto(alsService.createALS()));
-
-        model.addAttribute(
-                "als",
-                als
-        );
-
+        model.addAttribute("als", als);
         return "alss/als";
     }
 
     @GetMapping("/{id}")
-    public String editALS(
-            @PathVariable Long id,
-            Model model
-    ) {
+    public String editALS(@PathVariable Long id, Model model) {
         ALSDTO als = ALSImageService.addImages(ALSDtoMapper.toDto(alsService.findById(id)));
-
-        model.addAttribute(
-                "als",
-                als
-        );
-
+        model.addAttribute("als", als);
         return "alss/als";
     }
 
     @PostMapping("/save")
-    public String saveALS(
-            @ModelAttribute("als") ALSDTO als,
-            Model model
-    ) {
+    public String saveALS(@ModelAttribute("als") ALSDTO als, Model model) {
         try {
             // Главная форма ALS редактирует параметры агрегата, но не состав LC/LBC.
             // Восстанавливаем управляющий модуль из БД, чтобы форма не теряла
@@ -81,37 +66,80 @@ public class ALSController extends BaseCatalogController {
 
             com.lb_calc_web.domain.model.ALS domain = alsService.restoreDomain(als);
             com.lb_calc_web.domain.model.ALS saved = alsService.saveALS(domain);
-
-            return "redirect:/alss/"
-                    + saved.getId();
-
+            return "redirect:/alss/" + saved.getId();
         } catch (ValidationSizeException e) {
-
-            model.addAttribute(
-                    "ALSErrors",
-                    ValidationErrorFormatter.format(e.getValidationResult())
-            );
-
-            model.addAttribute(
-                    "als",
-                    ALSImageService.addImages(als)
-            );
-
+            model.addAttribute("ALSErrors", ValidationErrorFormatter.format(e.getValidationResult()));
+            model.addAttribute("als", ALSImageService.addImages(als));
             return "alss/als";
         }
     }
 
     @PostMapping("/{alsId}/addLB")
-    public String addLB(
-            @PathVariable Long alsId
-    ) {
-        ALSDTO als =
-                ALSDtoMapper.toDto(alsService.addNewLBandSaveALS(
-                        alsId
-                ));
+    public String addLB(@PathVariable Long alsId) {
+        ALSDTO als = ALSDtoMapper.toDto(alsService.addNewLBandSaveALS(alsId));
+        return "redirect:/alss/" + als.getId();
+    }
 
-        return "redirect:/alss/"
-                + als.getId();
+    /**
+     * Форма редактирования LC внутри ALS.
+     */
+    @GetMapping("/{alsId}/lcs/{lcId}")
+    public String editLC(
+            @PathVariable Long alsId,
+            @PathVariable Long lcId,
+            Model model
+    ) {
+        com.lb_calc_web.domain.model.ALS domain = alsService.findById(alsId);
+        com.lb_calc_web.domain.model.LC lc = domain.getLC();
+        if (lc == null || !java.util.Objects.equals(lc.getId(), lcId)) {
+            throw new java.util.NoSuchElementException(
+                    "LC с id " + lcId + " не найден в ALS " + alsId);
+        }
+
+        model.addAttribute("als", ALSImageService.addImages(ALSDtoMapper.toDto(domain)));
+        prepareLCForm(model, LCImageService.addImage(LCDtoMapper.toDto(lc)));
+        return "alss/alss_lc";
+    }
+
+    /**
+     * Сохраняет изменения LC в составе ALS.
+     */
+    @PostMapping("/{alsId}/lcs/{lcId}/save")
+    public String saveLC(
+            @PathVariable Long alsId,
+            @PathVariable Long lcId,
+            @ModelAttribute("lc") LCDTO lc,
+            Model model
+    ) {
+        try {
+            com.lb_calc_web.domain.model.ALS als = alsService.findById(alsId);
+            if (als.getLC() == null || !java.util.Objects.equals(als.getLC().getId(), lcId)) {
+                throw new java.util.NoSuchElementException(
+                        "LC с id " + lcId + " не найден в ALS " + alsId);
+            }
+            lc.setId(lcId);
+
+            com.lb_calc_web.domain.model.LC replacement = alsService.restoreLC(lc, als);
+            com.lb_calc_web.domain.model.ALS saved =
+                    alsService.saveALS(alsService.replaceLC(als, replacement));
+            return "redirect:/alss/" + saved.getId();
+        } catch (ValidationSizeException e) {
+            model.addAttribute("errors", ValidationErrorFormatter.format(e.getValidationResult()));
+            com.lb_calc_web.domain.model.ALS als = alsService.findById(alsId);
+            model.addAttribute("als", ALSImageService.addImages(ALSDtoMapper.toDto(als)));
+            prepareLCForm(model, LCImageService.addImage(lc));
+            return "alss/alss_lc";
+        }
+    }
+
+    private void prepareLCForm(Model model, LCDTO lc) {
+        model.addAttribute("lc", lc);
+        model.addAttribute("equipmentList", equipmentCatalogService.findAll().stream()
+                .map(EquipmentDtoMapper::toDto).toList());
+        model.addAttribute("displayPurposes", List.of(DisplayPurpose.values()));
+        model.addAttribute("accessPurposes", List.of(AccessPurpose.values()));
+        model.addAttribute("paymentPurposes", List.of(PaymentPurpose.values()));
+        model.addAttribute("printerPurposes", List.of(PrinterPurpose.values()));
     }
 
     /**
@@ -129,7 +157,6 @@ public class ALSController extends BaseCatalogController {
         model.addAttribute("als", als);
         prepareLBCForm(model,
                 LBCImageService.addImage(LBCDtoMapper.toDto(alsService.findLBCInALS(domain, lbcId))));
-
         return "alss/alss_lbc";
     }
 
@@ -140,26 +167,21 @@ public class ALSController extends BaseCatalogController {
     public String saveLBC(
             @PathVariable Long alsId,
             @PathVariable Long lbcId,
-            @ModelAttribute("lbc") com.lb_calc_web.dto.LBCDTO lbc,
+            @ModelAttribute("lbc") LBCDTO lbc,
             Model model
     ) {
         try {
-            com.lb_calc_web.domain.model.ALS als =
-                    alsService.findById(alsId);
+            com.lb_calc_web.domain.model.ALS als = alsService.findById(alsId);
             lbc.setId(lbcId);
 
-            com.lb_calc_web.domain.model.LBC replacement =
-                    alsService.restoreLBC(lbc, als);
+            com.lb_calc_web.domain.model.LBC replacement = alsService.restoreLBC(lbc, als);
             com.lb_calc_web.domain.model.ALS saved =
                     alsService.saveALS(alsService.replaceLBC(als, replacement));
-
-            return "redirect:/alss/"
-                    + saved.getId();
+            return "redirect:/alss/" + saved.getId();
         } catch (ValidationSizeException e) {
             model.addAttribute("errors", ValidationErrorFormatter.format(e.getValidationResult()));
             model.addAttribute("als", ALSImageService.addImages(ALSDtoMapper.toDto(alsService.findById(alsId))));
             prepareLBCForm(model, LBCImageService.addImage(lbc));
-
             return "alss/alss_lbc";
         }
     }
@@ -178,14 +200,9 @@ public class ALSController extends BaseCatalogController {
      * Заменяет текущий control-модуль на новый LBC.
      */
     @PostMapping("/{alsId}/replaceLBC")
-    public String replaceLBC(
-            @PathVariable Long alsId
-    ) {
-        com.lb_calc_web.domain.model.ALS saved =
-                alsService.replaceWithNewLBCandSaveALS(alsId);
-
-        return "redirect:/alss/"
-                + saved.getId();
+    public String replaceLBC(@PathVariable Long alsId) {
+        com.lb_calc_web.domain.model.ALS saved = alsService.replaceWithNewLBCandSaveALS(alsId);
+        return "redirect:/alss/" + saved.getId();
     }
 
     @PostMapping("/{alsId}/lbs/{lbId}/delete")
@@ -193,13 +210,7 @@ public class ALSController extends BaseCatalogController {
             @PathVariable Long alsId,
             @PathVariable Long lbId
     ) {
-        ALSDTO als =
-                ALSDtoMapper.toDto(alsService.deleteLBandSaveALS(
-                        alsId,
-                        lbId
-                ));
-
-        return "redirect:/alss/"
-                + als.getId();
+        ALSDTO als = ALSDtoMapper.toDto(alsService.deleteLBandSaveALS(alsId, lbId));
+        return "redirect:/alss/" + als.getId();
     }
 }
