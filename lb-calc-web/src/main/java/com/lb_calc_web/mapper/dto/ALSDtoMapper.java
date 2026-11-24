@@ -86,11 +86,19 @@ public final class ALSDtoMapper {
             FunctionalConfigurationDTO dto,
             FunctionalConfiguration current
     ) {
+        boolean provided = dto.getDisplay() != null || dto.getAccess() != null
+                || dto.getPayment() != null || dto.getPrinter() != null;
+        if (!provided) {
+            return current;
+        }
         return new FunctionalConfiguration(
-                dto.getDisplay() == null ? current.getDisplay() : dto.getDisplay(),
-                dto.getAccess() == null ? current.getAccess() : dto.getAccess(),
-                dto.getPayment() == null ? current.getPayment() : dto.getPayment(),
-                dto.getPrinter() == null ? current.getPrinter() : dto.getPrinter()
+                dto.getDisplay() == null
+                        ? com.lb_calc_web.domain.equipment.DisplayPurpose.NONE : dto.getDisplay(),
+                dto.getAccess() == null ? Set.of() : dto.getAccess(),
+                dto.getPayment() == null
+                        ? com.lb_calc_web.domain.equipment.PaymentPurpose.NONE : dto.getPayment(),
+                dto.getPrinter() == null
+                        ? com.lb_calc_web.domain.equipment.PrinterPurpose.ABSENT : dto.getPrinter()
         );
     }
 

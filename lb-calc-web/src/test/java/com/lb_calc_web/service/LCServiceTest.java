@@ -109,6 +109,26 @@ class LCServiceTest {
     }
 
     @Test
+    void restoreDomain_shouldPreserveFunctionalConfigurationWhenNestedDtoIsEmpty() {
+        Equipment equipment = new Equipment(
+                75L, EquipmentFunctionalType.ACCESS, AccessPurpose.RFID,
+                EquipmentCategory.RFID_READER, "RFID", "", 100, 50, 30);
+        ControlConfiguration fallback = new ControlConfiguration(
+                TestDataFactory.validLC(null).getControlConfiguration().getFunctionalConfiguration(),
+                Map.of(equipment, 1)
+        );
+        LCDTO dto = TestDataFactory.validLCDTO(19L);
+        dto.setFunctionalConfiguration(new com.lb_calc_web.dto.FunctionalConfigurationDTO());
+        dto.setEquipmentSelections(null);
+
+        LC restored = service.restoreDomain(dto, fallback);
+
+        assertEquals(fallback.getFunctionalConfiguration(),
+                restored.getControlConfiguration().getFunctionalConfiguration());
+        assertEquals(fallback.getEquipment(), restored.getEquipment());
+    }
+
+    @Test
     void restoreDomain_shouldClearEquipmentWhenEmptySelectionListIsExplicit() {
         Equipment equipment = new Equipment(
                 74L, EquipmentFunctionalType.ACCESS, AccessPurpose.RFID,

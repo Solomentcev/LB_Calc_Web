@@ -166,7 +166,11 @@ public final class LBCDtoMapper {
             FunctionalConfigurationDTO dto,
             ControlConfiguration fallback
     ) {
-        if (dto == null && fallback != null) {
+        boolean provided = dto != null && (dto.getDisplay() != null
+                || dto.getAccess() != null
+                || dto.getPayment() != null
+                || dto.getPrinter() != null);
+        if (!provided && fallback != null) {
             return fallback.getFunctionalConfiguration();
         }
         return new FunctionalConfiguration(
