@@ -119,7 +119,9 @@ class ALSServiceTest {
 
     @Test
     void restoreDomain_shouldConvertDtoWithoutLegacyCatalogDependencies() {
-        ALS result = service.restoreDomain(TestDataFactory.validALSDTO(3L));
+        var dto = TestDataFactory.validALSDTO(3L);
+        dto.setId(null);
+        ALS result = service.restoreDomain(dto);
 
         assertNotNull(result);
         assertEquals(2, result.getModules().size());
