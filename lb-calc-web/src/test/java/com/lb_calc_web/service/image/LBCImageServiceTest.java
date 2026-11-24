@@ -6,14 +6,16 @@ import com.lb_calc_web.domain.attributes.DirectionDoorOpening;
 import com.lb_calc_web.dto.LBCDTO;
 import com.lb_calc_web.mapper.dto.LBCDtoMapper;
 import com.lb_calc_web.domain.model.ControlConfiguration;
+import com.lb_calc_web.domain.model.FunctionalConfiguration;
+import com.lb_calc_web.domain.equipment.DisplayPurpose;
+import com.lb_calc_web.domain.equipment.PaymentPurpose;
+import com.lb_calc_web.domain.equipment.PrinterPurpose;
 import com.lb_calc_web.domain.model.LBC;
 import com.lb_calc_web.domain.attributes.TypeLb;
-import com.lb_calc_web.domain.equipment.Display;
 import org.junit.jupiter.api.Test;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
-import java.util.List;
 import java.util.Set;
 
 import javax.imageio.ImageIO;
@@ -27,13 +29,13 @@ class LBCImageServiceTest {
     void rendersCombinedLBCAsOneImage() throws Exception {
         ControlConfiguration control =
                 new ControlConfiguration(
-                        Payment.NONE,
-                        Set.<AccessMethod>of(),
-                        Set.<PrintOption>of(),
-                        new EquipmentConfiguration(
-                                List.of(Display.LC10),
-                                List.of()
-                        )
+                        new FunctionalConfiguration(
+                                DisplayPurpose.INCH_10,
+                                Set.of(),
+                                PaymentPurpose.NONE,
+                                PrinterPurpose.ABSENT
+                        ),
+                        java.util.Map.of()
                 );
 
         LBC lbc =

@@ -4,93 +4,41 @@ import com.lb_calc_web.domain.attributes.Colors;
 import com.lb_calc_web.domain.attributes.DirectionDoorOpening;
 import com.lb_calc_web.domain.attributes.PositionControlModule;
 import com.lb_calc_web.domain.attributes.PositionLC;
-import com.lb_calc_web.domain.equipment.Display;
+import com.lb_calc_web.domain.equipment.AccessPurpose;
+import com.lb_calc_web.domain.equipment.DisplayPurpose;
+import com.lb_calc_web.domain.equipment.PaymentPurpose;
+import com.lb_calc_web.domain.equipment.PrinterPurpose;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.ModelAttribute;
 
 import java.util.Arrays;
 import java.util.List;
 
+/** Общие справочные значения для серверных представлений. */
 public abstract class BaseCatalogController {
 
-    /**
-     * Цвета корпуса и дверей.
-     */
-    protected final List<Colors> colorsList =
-            Arrays.asList(Colors.values());
-
-    /**
-     * Положение модуля управления внутри ALS.
-     */
-    protected final List<PositionControlModule>
-            positionControlModuleList =
+    protected final List<Colors> colorsList = Arrays.asList(Colors.values());
+    protected final List<PositionControlModule> positionControlModuleList =
             Arrays.asList(PositionControlModule.values());
 
-    /**
-     * Старое имя оставлено для совместимости старых шаблонов.
-     */
     @Deprecated
-    protected final List<PositionLC> positionLCList =
-            Arrays.asList(PositionLC.values());
+    protected final List<PositionLC> positionLCList = Arrays.asList(PositionLC.values());
 
-    /**
-     * Способы доступа LBC.
-     */
-    protected final List<AccessMethod> accessMethodList =
-            Arrays.asList(AccessMethod.values());
-
-    /**
-     * Варианты печати LBC.
-     */
-    protected final List<PrintOption> printOptionList =
-            Arrays.asList(PrintOption.values());
-
-    /**
-     * Способы оплаты.
-     */
-    protected final List<Payment> paymentList =
-            Arrays.asList(Payment.values());
-
-    /**
-     * Доступные дисплеи LC.
-     *
-     * <p>Display больше не enum, поэтому передаём
-     * в шаблон имена оборудования.</p>
-     */
+    protected final List<AccessPurpose> accessMethodList = Arrays.asList(AccessPurpose.values());
+    protected final List<PrinterPurpose> printOptionList = Arrays.asList(PrinterPurpose.values());
+    protected final List<PaymentPurpose> paymentList = Arrays.asList(PaymentPurpose.values());
     protected final List<String> displayList =
-            List.of(
-                    Display.NONE.getName(),
-                    Display.LC10.getName(),
-                    Display.LC17.getName(),
-                    Display.LC19.getName()
-            );
+            Arrays.stream(DisplayPurpose.values()).map(Enum::name).toList();
+    protected final List<String> barReaderList = List.of(
+            AccessPurpose.BAR_CODE.name(),
+            AccessPurpose.QR_CODE.name(),
+            AccessPurpose.RFID.name()
+    );
 
-    /**
-     * Доступные сканеры штрихкода.
-     *
-     * <p>BarReader больше не enum.</p>
-     */
-    protected final List<String> barReaderList =
-            List.of(
-                    BarReader.NONE.getName(),
-                    BarReader.READER_1D.getName(),
-                    BarReader.READER_2D.getName()
-            );
-
-    /**
-     * Список типов LB из конфигурации.
-     *
-     * <p>TypeLb больше не enum.
-     * Типы задаются в size-bounds.properties.</p>
-     */
     @Value("${lb.types}")
     private String lbTypes;
 
-    /**
-     * Направление открытия дверей.
-     */
-    protected final List<DirectionDoorOpening>
-            directionDoorOpeningList =
+    protected final List<DirectionDoorOpening> directionDoorOpeningList =
             Arrays.asList(DirectionDoorOpening.values());
 
     @ModelAttribute("colorsList")
@@ -99,8 +47,7 @@ public abstract class BaseCatalogController {
     }
 
     @ModelAttribute("positionControlModuleList")
-    public List<PositionControlModule>
-    positionControlModuleList() {
+    public List<PositionControlModule> positionControlModuleList() {
         return positionControlModuleList;
     }
 
@@ -111,17 +58,17 @@ public abstract class BaseCatalogController {
     }
 
     @ModelAttribute("accessMethodList")
-    public List<AccessMethod> accessMethodList() {
+    public List<AccessPurpose> accessMethodList() {
         return accessMethodList;
     }
 
     @ModelAttribute("printOptionList")
-    public List<PrintOption> printOptionList() {
+    public List<PrinterPurpose> printOptionList() {
         return printOptionList;
     }
 
     @ModelAttribute("paymentList")
-    public List<Payment> paymentList() {
+    public List<PaymentPurpose> paymentList() {
         return paymentList;
     }
 
@@ -135,25 +82,18 @@ public abstract class BaseCatalogController {
         return barReaderList;
     }
 
-    /**
-     * Список типов LB.
-     */
     @ModelAttribute("typeList")
     public List<String> typeList() {
         return getTypeLbList();
     }
 
-    /**
-     * Список типов LB.
-     */
     @ModelAttribute("typeLbList")
     public List<String> typeLbList() {
         return getTypeLbList();
     }
 
     @ModelAttribute("directionDoorOpeningList")
-    public List<DirectionDoorOpening>
-    directionDoorOpeningList() {
+    public List<DirectionDoorOpening> directionDoorOpeningList() {
         return directionDoorOpeningList;
     }
 
@@ -161,7 +101,6 @@ public abstract class BaseCatalogController {
         if (lbTypes == null || lbTypes.isBlank()) {
             return List.of();
         }
-
         return Arrays.stream(lbTypes.split(","))
                 .map(String::trim)
                 .filter(type -> !type.isBlank())

@@ -282,7 +282,9 @@ public final class LBCImageService {
 
         g2d.setColor(Color.BLACK);
 
-        if (!BarReader.NONE.getName().equals(lbc.getBarReader())) {
+        if (lbc.getAccessPurposes() != null
+                && (lbc.getAccessPurposes().contains("BAR_CODE")
+                || lbc.getAccessPurposes().contains("QR_CODE"))) {
             g2d.fillRect(
                     panelX + panelMargin + 2,
                     panelY + 2,

@@ -19,6 +19,14 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class ProjectEntityMapperTest {
 
+    private static com.lb_calc_web.entity.ModuleEntity toEntity(
+            com.lb_calc_web.domain.model.Module module
+    ) {
+        return ModuleEntityMapper.toEntity(module, equipment -> {
+            throw new AssertionError("В этом тесте не ожидается разрешение оборудования");
+        });
+    }
+
     @Test
     void roundTrip_shouldPreserveProjectFieldsAndAggregatedAlsQuantity() {
         LocalDate createdAt = LocalDate.of(2026, 10, 1);
@@ -44,7 +52,7 @@ class ProjectEntityMapperTest {
         employeeEntity.setEncryptedPassword("HASH");
         ALSEntity alsEntity = ALSEntityMapper.toEntity(
                 als,
-                ModuleEntityMapper::toEntity
+                ProjectEntityMapperTest::toEntity
         );
 
         ProjectEntity entity = ProjectEntityMapper.toEntity(
@@ -123,7 +131,7 @@ class ProjectEntityMapperTest {
         ALS als = TestDataFactory.validALS(null);
         ALSEntity alsEntity = ALSEntityMapper.toEntity(
                 als,
-                ModuleEntityMapper::toEntity
+                ProjectEntityMapperTest::toEntity
         );
 
         Project initial = new Project("Проект", "Компания", createdAt, employee);

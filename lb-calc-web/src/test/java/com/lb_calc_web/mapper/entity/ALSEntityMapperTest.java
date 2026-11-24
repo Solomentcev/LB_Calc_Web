@@ -49,7 +49,7 @@ class ALSEntityMapperTest {
         ALS domain = TestDataFactory.validALS(null);
         ALSEntity entity = ALSEntityMapper.toEntity(
                 domain,
-                ModuleEntityMapper::toEntity
+                ALSEntityMapperTest::toEntity
         );
 
         var originalAssociations = List.copyOf(entity.getModules());
@@ -74,7 +74,7 @@ class ALSEntityMapperTest {
     void toDomain_shouldRejectStaleDerivedWidth() {
         ALSEntity entity = ALSEntityMapper.toEntity(
                 TestDataFactory.validALS(null),
-                ModuleEntityMapper::toEntity
+                ALSEntityMapperTest::toEntity
         );
         entity.setWidth(entity.getWidth() + 1);
 
@@ -88,7 +88,7 @@ class ALSEntityMapperTest {
     void updateEntity_shouldReplaceAssociationsWhenPhysicalOrderChanges() {
         ALSEntity entity = ALSEntityMapper.toEntity(
                 TestDataFactory.validALS(null),
-                ModuleEntityMapper::toEntity
+                ALSEntityMapperTest::toEntity
         );
         var originalAssociations = List.copyOf(entity.getModules());
         List<com.lb_calc_web.entity.ModuleEntity> reorderedModules = List.of(
