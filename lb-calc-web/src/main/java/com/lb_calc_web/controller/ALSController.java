@@ -6,7 +6,6 @@ import com.lb_calc_web.dto.LCDTO;
 import com.lb_calc_web.dto.LBDTO;
 import com.lb_calc_web.domain.model.ALS;
 import com.lb_calc_web.domain.model.LB;
-import com.lb_calc_web.domain.model.Module;
 import com.lb_calc_web.domain.equipment.AccessPurpose;
 import com.lb_calc_web.domain.equipment.DisplayPurpose;
 import com.lb_calc_web.domain.equipment.PaymentPurpose;
