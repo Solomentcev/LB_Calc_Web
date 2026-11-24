@@ -1021,6 +1021,7 @@ public class ALS {
                 bottomFrame,
                 colorBody,
                 colorDoor,
+                functionalConfiguration,
                 modules
         );
     }

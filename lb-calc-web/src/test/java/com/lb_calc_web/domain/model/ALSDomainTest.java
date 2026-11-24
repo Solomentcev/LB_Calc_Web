@@ -27,6 +27,16 @@ class ALSDomainTest {
         );
     }
 
+
+    @Test
+    void copy_shouldPreserveEqualityAndHashCodeContract() {
+        ALS original = TestDataFactory.validALS(1L);
+        ALS copy = original.copy();
+
+        assertEquals(original, copy);
+        assertEquals(original.hashCode(), copy.hashCode());
+    }
+
     @Test
     void constructor_shouldRejectUnbalancedCenterComposition() {
         assertThrows(
