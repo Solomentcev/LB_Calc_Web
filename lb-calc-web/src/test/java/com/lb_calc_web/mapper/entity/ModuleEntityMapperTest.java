@@ -46,17 +46,35 @@ class ModuleEntityMapperTest {
     }
 
     @Test
-    void toDomain_shouldRejectStaleLcDescription() {
-        LCEntity entity = (LCEntity) toEntity(TestDataFactory.validLC(null));
+    void toDomain_shouldRecalculateStaleLcDerivedCharacteristics() {
+        var expected = TestDataFactory.validLC(null);
+        LCEntity entity = (LCEntity) toEntity(expected);
+        entity.setName("Устаревшее наименование");
         entity.setDescription("Устаревшее описание");
-        assertThrows(IllegalStateException.class, () -> ModuleEntityMapper.toDomain(entity));
+
+        var restored = ModuleEntityMapper.toDomain(entity);
+
+        assertEquals(expected.getName(), restored.getName());
+        assertEquals(expected.getDescription(), restored.getDescription());
     }
 
     @Test
-    void toDomain_shouldRejectStaleLbcCellDimensions() {
-        LBCEntity entity = (LBCEntity) toEntity(TestDataFactory.validLBC(null));
+    void toDomain_shouldRecalculateStaleLbcDerivedCharacteristics() {
+        var expected = TestDataFactory.validLBC(null);
+        LBCEntity entity = (LBCEntity) toEntity(expected);
+        entity.setName("Устаревшее наименование");
+        entity.setDescription("Устаревшее описание");
+        entity.setHeightCell(entity.getHeightCell() + 1);
+        entity.setWidthCell(entity.getWidthCell() + 1);
         entity.setDepthCell(entity.getDepthCell() + 1);
-        assertThrows(IllegalStateException.class, () -> ModuleEntityMapper.toDomain(entity));
+
+        var restored = ModuleEntityMapper.toDomain(entity);
+
+        assertEquals(expected.getName(), restored.getName());
+        assertEquals(expected.getDescription(), restored.getDescription());
+        assertEquals(expected.getCellHeight(), ((com.lb_calc_web.domain.model.LBC) restored).getCellHeight());
+        assertEquals(expected.getCellWidth(), ((com.lb_calc_web.domain.model.LBC) restored).getCellWidth());
+        assertEquals(expected.getCellDepth(), ((com.lb_calc_web.domain.model.LBC) restored).getCellDepth());
     }
 
     @Test
