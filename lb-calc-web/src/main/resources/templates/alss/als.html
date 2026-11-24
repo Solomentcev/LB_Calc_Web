@@ -108,6 +108,7 @@
             <input type="hidden" th:field="*{LBC.functionalConfiguration.display}">
             <input type="hidden" th:field="*{LBC.functionalConfiguration.payment}">
             <input type="hidden" th:field="*{LBC.functionalConfiguration.printer}">
+            <input type="hidden" name="_LBC.functionalConfiguration.access" value="on">
             <input type="hidden"
                    th:each="purpose, purposeStat : ${als.LBC.functionalConfiguration.access}"
                    th:name="LBC.functionalConfiguration.access"
