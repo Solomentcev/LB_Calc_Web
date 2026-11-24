@@ -5,20 +5,20 @@ import com.lb_calc_web.domain.equipment.DisplayPurpose;
 import com.lb_calc_web.domain.equipment.Equipment;
 import com.lb_calc_web.domain.equipment.PaymentPurpose;
 import com.lb_calc_web.domain.equipment.PrinterPurpose;
-import com.lb_calc_web.domain.equipment.SystemPurpose;
 
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Stream;
 
 /**
- * Конфигурация функциональных возможностей и оборудования модуля управления.
+ * Конфигурация функциональных возможностей и фактически установленного
+ * оборудования модуля управления.
  *
- * <p>Назначение каждой функциональной области хранится отдельно от состава
- * физически установленного оборудования.</p>
+ * <p>Назначения функциональных областей независимы от состава оборудования:
+ * функция может быть предусмотрена конфигурацией без установленного
+ * устройства, которое её реализует.</p>
  */
 public class ControlConfiguration {
 
@@ -26,80 +26,53 @@ public class ControlConfiguration {
     private final AccessPurpose access;
     private final PaymentPurpose payment;
     private final PrinterPurpose printer;
-
     private final Map<Equipment, Integer> equipment;
 
     /**
      * Создаёт конфигурацию управления.
      *
-     * @param display выбранное назначение дисплея
-     * @param access выбранное назначение доступа
-     * @param payment выбранное назначение оплаты
-     * @param printer выбранное назначение принтера
-     * @param system выбранное системное назначение
-     * @param equipment установленное оборудование и его количество
+     * @param display назначение дисплея
+     * @param access назначение доступа
+     * @param payment назначение оплаты
+     * @param printer назначение принтера
+     * @param equipment фактически установленное оборудование и его количество
      */
     public ControlConfiguration(
             DisplayPurpose display,
             AccessPurpose access,
             PaymentPurpose payment,
             PrinterPurpose printer,
-            SystemPurpose system,
             Map<Equipment, Integer> equipment
     ) {
         this.display = display;
         this.access = access;
         this.payment = payment;
         this.printer = printer;
-        this.system = system;
         this.equipment = copyEquipment(equipment);
         validateEquipment();
     }
 
-    /**
-     * Создаёт конфигурацию из прежнего представления состава оборудования.
-     *
-     * <p>Конструктор оставлен для совместимости существующих DTO-мапперов
-     * на время их последовательного перевода на новую модель.</p>
-     *
-     * @param configuration прежняя конфигурация оборудования
-     */
-    public ControlConfiguration(EquipmentConfiguration configuration) {
-        this(null, null, null, null, null, toEquipmentMap(configuration));
-    }
-
-    private static Map<Equipment, Integer> toEquipmentMap(
-            EquipmentConfiguration configuration
-    ) {
-        Objects.requireNonNull(
-                configuration,
-                "Конфигурация оборудования не должна быть null"
-        );
-        Map<Equipment, Integer> result = new LinkedHashMap<>();
-        configuration.getAllItems().forEach(item ->
-                result.put(item.equipment(), item.quantity()));
-        return result;
-    }
-
-    private static Map<Equipment, Integer> copyEquipment(
-            Map<Equipment, Integer> source
-    ) {
+    private static Map<Equipment, Integer> copyEquipment(Map<Equipment, Integer> source) {
         Objects.requireNonNull(source, "Состав оборудования не должен быть null");
         Map<Equipment, Integer> result = new LinkedHashMap<>();
-        source.forEach((position, quantity) -> {
-            Equipment equipment = Objects.requireNonNull(
-                    position,
-                    "Оборудование не должно быть null"
-            );
-            int count = Objects.requireNonNull(
-                    quantity,
-                    "Количество оборудования не должно быть null"
-            );
+        source.forEach((item, quantity) -> {
+            Equipment equipment = Objects.requireNonNull(item,
+                    "Оборудование не должно быть null");
+            Integer count = Objects.requireNonNull(quantity,
+                    "Количество оборудования не должно быть null");
             if (count < 1) {
                 throw new IllegalArgumentException(
                         "Количество оборудования должно быть не меньше 1");
             }
-            result.put(equipment, count);
+            result.merge(equipment, count, (first, second) -> {
+                try {
+                    return Math.addExact(first, second);
+                } catch (ArithmeticException exception) {
+                    throw new IllegalArgumentException(
+                            "Количество оборудования превышает допустимый диапазон",
+                            exception);
+                }
+            });
         });
         return result;
     }
@@ -109,150 +82,100 @@ public class ControlConfiguration {
                 .filter(entry -> entry.getKey().isDisplay())
                 .mapToLong(Map.Entry::getValue)
                 .sum();
-
         if (displayCount > 1) {
             throw new IllegalArgumentException(
                     "В модуле управления может быть установлен только один дисплей");
         }
     }
 
-    /** @return выбранное назначение дисплея или null */
-    public DisplayPurpose getDisplay() {
-        return display;
-    }
+    public DisplayPurpose getDisplay() { return display; }
+    public AccessPurpose getAccess() { return access; }
+    public PaymentPurpose getPayment() { return payment; }
+    public PrinterPurpose getPrinter() { return printer; }
 
-    /** @return выбранное назначение доступа или null */
-    public AccessPurpose getAccess() {
-        return access;
-    }
-
-    /** @return выбранное назначение оплаты или null */
-    public PaymentPurpose getPayment() {
-        return payment;
-    }
-
-    /** @return выбранное назначение принтера или null */
-    public PrinterPurpose getPrinter() {
-        return printer;
-    }
-
-    /** @return выбранное системное назначение или null */
-    public SystemPurpose getSystem() {
-        return system;
-    }
-
-    /**
-     * Возвращает независимую копию состава оборудования.
-     *
-     * @return оборудование и его количество
-     */
+    /** @return неизменяемое представление состава оборудования */
     public Map<Equipment, Integer> getEquipmentQuantities() {
         return Map.copyOf(equipment);
     }
 
-    /**
-     * Возвращает позиции оборудования в стабильном порядке по ID каталога.
-     *
-     * @return неизменяемый список оборудования
-     */
+    /** @return оборудование в стабильном порядке по идентификатору */
     public List<Equipment> getAllEquipment() {
         return equipment.keySet().stream()
-                .sorted(Comparator.comparing(Equipment::getCatalogPositionId))
+                .sorted(Comparator.comparing(Equipment::getId))
                 .toList();
     }
 
     /**
-     * Возвращает количество указанной позиции оборудования.
+     * Возвращает количество модели в конфигурации.
      *
-     * @param position позиция оборудования
-     * @return количество или ноль, если позиция отсутствует
+     * @param item модель оборудования
+     * @return количество или ноль, если модель не установлена
      */
-    public int getQuantity(Equipment position) {
+    public int getQuantity(Equipment item) {
         return equipment.getOrDefault(
-                Objects.requireNonNull(position, "Оборудование не должно быть null"),
-                0
-        );
+                Objects.requireNonNull(item, "Оборудование не должно быть null"), 0);
     }
 
     /**
-     * Добавляет оборудование или увеличивает количество существующей позиции.
+     * Добавляет оборудование или увеличивает количество установленной модели.
      *
-     * @param position добавляемая позиция
+     * @param item модель оборудования
      * @param quantity добавляемое количество
      */
-    public void addEquipment(Equipment position, int quantity) {
-        Equipment item = Objects.requireNonNull(
-                position,
-                "Оборудование не должно быть null"
-        );
+    public void addEquipment(Equipment item, int quantity) {
+        Equipment equipmentItem = Objects.requireNonNull(item,
+                "Оборудование не должно быть null");
         if (quantity < 1) {
             throw new IllegalArgumentException(
                     "Количество оборудования должно быть не меньше 1");
         }
-
-        int newQuantity;
+        int current = equipment.getOrDefault(equipmentItem, 0);
+        final int updated;
         try {
-            newQuantity = Math.addExact(equipment.getOrDefault(item, 0), quantity);
+            updated = Math.addExact(current, quantity);
         } catch (ArithmeticException exception) {
             throw new IllegalArgumentException(
-                    "Количество оборудования превышает допустимый диапазон",
-                    exception
-            );
+                    "Количество оборудования превышает допустимый диапазон", exception);
         }
-
-        if (item.isDisplay() && newQuantity > 1) {
-            throw new IllegalArgumentException(
-                    "Количество дисплеев в модуле должно быть равно 1");
-        }
-        if (item.isDisplay() && equipment.keySet().stream()
-                .anyMatch(existing -> existing.isDisplay() && !existing.equals(item))) {
+        if (equipmentItem.isDisplay()
+                && (updated > 1 || equipment.keySet().stream()
+                .anyMatch(existing -> existing.isDisplay() && !existing.equals(equipmentItem)))) {
             throw new IllegalArgumentException(
                     "В модуле управления может быть установлен только один дисплей");
         }
-        equipment.put(item, newQuantity);
+        equipment.put(equipmentItem, updated);
     }
 
     /**
-     * Удаляет позицию оборудования целиком.
+     * Удаляет модель оборудования из конфигурации.
      *
-     * @param position удаляемая позиция
-     * @return true, если позиция присутствовала в конфигурации
+     * @param item удаляемая модель
+     * @return true, если модель была установлена
      */
-    public boolean removeEquipment(Equipment position) {
+    public boolean removeEquipment(Equipment item) {
         return equipment.remove(
-                Objects.requireNonNull(position, "Оборудование не должно быть null")
-        ) != null;
+                Objects.requireNonNull(item, "Оборудование не должно быть null")) != null;
     }
 
-    /**
-     * Создаёт независимую копию конфигурации.
-     *
-     * @return копия конфигурации
-     */
+    /** @return независимая копия конфигурации */
     public ControlConfiguration copy() {
-        return new ControlConfiguration(
-                display, access, payment, printer, system, equipment);
+        return new ControlConfiguration(display, access, payment, printer, equipment);
     }
 
     @Override
     public boolean equals(Object object) {
-        if (this == object) {
-            return true;
-        }
-        if (!(object instanceof ControlConfiguration other)) {
-            return false;
-        }
+        if (this == object) return true;
+        if (!(object instanceof ControlConfiguration other)) return false;
         return display == other.display
                 && access == other.access
                 && payment == other.payment
                 && printer == other.printer
-                && system == other.system
                 && equipment.equals(other.equipment);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(display, access, payment, printer, system, equipment);
+        return Objects.hash(display, access, payment, printer, equipment);
     }
 
     @Override
@@ -262,7 +185,6 @@ public class ControlConfiguration {
                 ", access=" + access +
                 ", payment=" + payment +
                 ", printer=" + printer +
-                ", system=" + system +
                 ", equipment=" + equipment +
                 '}';
     }

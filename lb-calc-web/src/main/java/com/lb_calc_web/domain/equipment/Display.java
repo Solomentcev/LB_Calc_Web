@@ -7,8 +7,12 @@ public class Display extends Equipment {
     public static final String LC17_ID = "DISPLAY_LC17";
     public static final String LC19_ID = "DISPLAY_LC19";
 
+    /**
+     * Условная позиция «без дисплея» сохранена для совместимости со старым
+     * представлением конфигураций. Она не является реальной моделью каталога.
+     */
     public static final Display NONE = new Display(
-            NONE_ID, "Без дисплея", SystemPurpose.OTHER, EquipmentCategory.OTHER, 0, 0, 300);
+            NONE_ID, "Без дисплея", DisplayPurpose.NONE, EquipmentCategory.DISPLAY, 0, 0, 300);
     public static final Display LC10 = new Display(
             LC10_ID, "LC10", DisplayPurpose.INCH_10, EquipmentCategory.DISPLAY, 255, 174, 300);
     public static final Display LC17 = new Display(
@@ -31,7 +35,6 @@ public class Display extends Equipment {
 
     @Override public boolean isDisplay() { return true; }
     @Override public String getCategory() { return "DISPLAY"; }
-
     public int getDisplayWidth() { return displayWidth; }
     public int getDisplayHeight() { return displayHeight; }
     public int getMinimumModuleWidth() { return minimumModuleWidth; }

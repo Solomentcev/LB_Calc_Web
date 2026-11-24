@@ -2,9 +2,9 @@ package com.lb_calc_web.domain.equipment;
 
 import java.util.Objects;
 
-/** Конкретная позиция оборудования из каталога. */
+/** Конкретная модель физического оборудования. */
 public class Equipment {
-    private final String catalogPositionId;
+    private final String id;
     private final EquipmentFunctionalType functionalType;
     private final EquipmentPurpose purpose;
     private final EquipmentCategory equipmentCategory;
@@ -15,9 +15,19 @@ public class Equipment {
     private final int depth;
 
     /**
-     * Создаёт каталожную позицию с явно заданной функциональной принадлежностью.
+     * Создаёт модель оборудования.
+     *
+     * @param id идентификатор модели
+     * @param functionalType функциональная область
+     * @param purpose назначение модели
+     * @param equipmentCategory физическая категория
+     * @param name наименование
+     * @param description описание
+     * @param width ширина, мм
+     * @param height высота, мм
+     * @param depth глубина, мм
      */
-    public Equipment(String catalogPositionId,
+    public Equipment(String id,
                      EquipmentFunctionalType functionalType,
                      EquipmentPurpose purpose,
                      EquipmentCategory equipmentCategory,
@@ -26,8 +36,8 @@ public class Equipment {
                      int width,
                      int height,
                      int depth) {
-        if (catalogPositionId == null || catalogPositionId.isBlank()) {
-            throw new IllegalArgumentException("Идентификатор позиции каталога не должен быть пустым");
+        if (id == null || id.isBlank()) {
+            throw new IllegalArgumentException("Идентификатор оборудования не должен быть пустым");
         }
         if (name == null || name.isBlank()) {
             throw new IllegalArgumentException("Название оборудования не должно быть пустым");
@@ -47,7 +57,7 @@ public class Equipment {
         if (width < 0 || height < 0 || depth < 0) {
             throw new IllegalArgumentException("Габариты оборудования не могут быть отрицательными");
         }
-        this.catalogPositionId = catalogPositionId;
+        this.id = id;
         this.name = name;
         this.description = Objects.requireNonNullElse(description, "");
         this.width = width;
@@ -55,7 +65,7 @@ public class Equipment {
         this.depth = depth;
     }
 
-    public String getCatalogPositionId() { return catalogPositionId; }
+    public String getId() { return id; }
     public EquipmentFunctionalType getFunctionalType() { return functionalType; }
     public EquipmentPurpose getPurpose() { return purpose; }
     public EquipmentCategory getEquipmentCategory() { return equipmentCategory; }
@@ -66,6 +76,15 @@ public class Equipment {
     public int getHeight() { return height; }
     public int getDepth() { return depth; }
 
+    /**
+     * Возвращает идентификатор модели в прежнем формате.
+     *
+     * @return идентификатор оборудования
+     * @deprecated используйте {@link #getId()}
+     */
+    @Deprecated
+    public String getCatalogPositionId() { return id; }
+
     public boolean isDisplay() { return equipmentCategory == EquipmentCategory.DISPLAY; }
     public boolean isBarReader() { return equipmentCategory == EquipmentCategory.BAR_READER; }
     public boolean isPrinter() { return equipmentCategory == EquipmentCategory.PRINTER; }
@@ -74,17 +93,17 @@ public class Equipment {
     @Override
     public final boolean equals(Object object) {
         return this == object || object instanceof Equipment other
-                && catalogPositionId.equals(other.catalogPositionId);
+                && id.equals(other.id);
     }
 
     @Override
     public final int hashCode() {
-        return Objects.hash(catalogPositionId);
+        return Objects.hash(id);
     }
 
     @Override
     public String toString() {
-        return "Equipment{catalogPositionId='" + catalogPositionId
+        return "Equipment{id='" + id
                 + "', functionalType=" + functionalType
                 + ", purpose=" + purpose
                 + ", category=" + equipmentCategory
