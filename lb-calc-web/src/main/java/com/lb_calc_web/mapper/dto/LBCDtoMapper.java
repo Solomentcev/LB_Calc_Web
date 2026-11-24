@@ -108,7 +108,8 @@ public final class LBCDtoMapper {
                 dto.getFunctionalConfiguration(), fallbackConfiguration);
 
         Map<Equipment, Integer> equipment = new LinkedHashMap<>();
-        if (dto.getEquipmentSelections() == null && fallbackConfiguration != null) {
+        if (dto.getEquipmentSelections() == null && !dto.isEquipmentSelectionsProvided()
+                && fallbackConfiguration != null) {
             equipment.putAll(fallbackConfiguration.getEquipment());
         } else if (dto.getEquipmentSelections() != null) {
             for (EquipmentSelectionDTO selection : dto.getEquipmentSelections()) {
@@ -128,7 +129,8 @@ public final class LBCDtoMapper {
                 ? new ControlConfiguration(functional, Map.of())
                 : fallbackConfiguration.copy();
         configuration.setFunctionalConfiguration(functional);
-        if (dto.getEquipmentSelections() != null || fallbackConfiguration == null) {
+        if (dto.getEquipmentSelections() != null || dto.isEquipmentSelectionsProvided()
+                || fallbackConfiguration == null) {
             configuration.setEquipment(equipment);
         }
 

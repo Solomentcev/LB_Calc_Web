@@ -40,6 +40,7 @@ public class LBCDTO {
 
     private FunctionalConfigurationDTO functionalConfiguration;
     private List<EquipmentSelectionDTO> equipmentSelections;
+    private boolean equipmentSelectionsProvided;
 
     @JsonIgnore
     private String stringLBCImage;
@@ -221,6 +222,14 @@ public class LBCDTO {
 
     public void setEquipmentSelections(List<EquipmentSelectionDTO> selections) {
         this.equipmentSelections = selections == null ? null : new ArrayList<>(selections);
+    }
+
+    public boolean isEquipmentSelectionsProvided() {
+        return equipmentSelectionsProvided;
+    }
+
+    public void setEquipmentSelectionsProvided(boolean provided) {
+        this.equipmentSelectionsProvided = provided;
     }
 
     public String getStringLBCImage() {
