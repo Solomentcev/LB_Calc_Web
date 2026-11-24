@@ -1,49 +1,71 @@
 package com.lb_calc_web.mapper.entity;
 
 import com.lb_calc_web.domain.attributes.TypeLb;
-import com.lb_calc_web.mapper.dto.LBCDtoMapper;
-import com.lb_calc_web.dto.LBCDTO;
-import com.lb_calc_web.domain.equipment.Display;
 import com.lb_calc_web.domain.equipment.Equipment;
 import com.lb_calc_web.domain.model.ControlConfiguration;
 import com.lb_calc_web.domain.model.LBC;
+import com.lb_calc_web.dto.LBCDTO;
+import com.lb_calc_web.entity.EquipmentEntity;
+import com.lb_calc_web.entity.EquipmentQuantityEmbeddable;
 import com.lb_calc_web.entity.LBCEntity;
+import com.lb_calc_web.mapper.dto.LBCDtoMapper;
 
-import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /** Преобразует LBC между доменной и persistence-моделями. */
 public final class LBCEntityMapper {
-    private LBCEntityMapper() { }
 
-    public static LBC toDomain(LBCEntity entity) {
-        return toDomain(entity, id -> EquipmentCatalog.findByCatalogPositionId(id));
+    private LBCEntityMapper() {
     }
 
-    public static LBC toDomain(LBCEntity entity,
-                                         Function<String, Equipment> equipmentResolver) {
-        if (entity == null) return null;
-        Objects.requireNonNull(equipmentResolver, "equipmentResolver не должен быть null");
-        TypeLb typeLb = new TypeLb(entity.getType(), entity.getDeltaWidth(),
-                entity.getShelfThick(), entity.getServiceZoneWidth());
+    public static LBC toDomain(LBCEntity entity) {
+        if (entity == null) {
+            return null;
+        }
+
+        Map<Equipment, Integer> equipment = entity.getEquipment().stream()
+                .collect(Collectors.toMap(
+                        item -> EquipmentEntityMapper.toDomain(item.getEquipment()),
+                        EquipmentQuantityEmbeddable::getQuantity,
+                        (first, second) -> {
+                            throw new IllegalStateException(
+                                    "Модель оборудования LBC сохранена в нескольких позициях");
+                        },
+                        LinkedHashMap::new
+                ));
+
+        TypeLb typeLb = new TypeLb(
+                entity.getType(),
+                entity.getDeltaWidth(),
+                entity.getShelfThick(),
+                entity.getServiceZoneWidth()
+        );
         ControlConfiguration configuration = new ControlConfiguration(
-                Objects.requireNonNull(entity.getPayment(),
-                        "Способ оплаты LBC не должен быть null"),
-                entity.getAccessMethods(), entity.getPrintOptions(),
-                toEquipmentConfiguration(entity, equipmentResolver));
+                entity.getFunctionalConfiguration(),
+                equipment
+        );
         LBC domain = new LBC(
-                entity.getHeight(), entity.getWidth(), entity.getDepth(),
-                entity.getUpperFrame(), entity.getBottomFrame(),
+                entity.getHeight(),
+                entity.getWidth(),
+                entity.getDepth(),
+                entity.getUpperFrame(),
+                entity.getBottomFrame(),
                 Objects.requireNonNull(entity.getColorBody(),
                         "Цвет корпуса LBC не должен быть null"),
                 Objects.requireNonNull(entity.getColorDoor(),
                         "Цвет дверей LBC не должен быть null"),
-                typeLb, entity.getCountCells(),
+                typeLb,
+                entity.getCountCells(),
                 Objects.requireNonNull(entity.getDirectionDoorOpening(),
                         "Направление открытия дверей LBC не должно быть null"),
-                entity.getDoorThickness(), configuration);
+                entity.getDoorThickness(),
+                configuration
+        );
 
         if (!domain.getName().equals(entity.getName())
                 || !domain.getDescription().equals(entity.getDescription())
@@ -59,17 +81,28 @@ public final class LBCEntityMapper {
         return domain;
     }
 
-    public static LBCEntity toEntity(LBC domain) {
-        if (domain == null) return null;
+    public static LBCEntity toEntity(
+            LBC domain,
+            Function<Equipment, EquipmentEntity> equipmentResolver
+    ) {
+        if (domain == null) {
+            return null;
+        }
         LBCEntity entity = new LBCEntity();
-        updateEntity(domain, entity);
+        updateEntity(domain, entity, equipmentResolver);
         return entity;
     }
 
-    public static void updateEntity(LBC domain, LBCEntity entity) {
+    public static void updateEntity(
+            LBC domain,
+            LBCEntity entity,
+            Function<Equipment, EquipmentEntity> equipmentResolver
+    ) {
         if (domain == null || entity == null) {
             throw new IllegalArgumentException("LBC и LBCEntity не должны быть null");
         }
+        Objects.requireNonNull(equipmentResolver, "equipmentResolver не должен быть null");
+
         entity.setName(domain.getName());
         entity.setDescription(domain.getDescription());
         entity.setHeightCell(domain.getCellHeight());
@@ -94,65 +127,27 @@ public final class LBCEntityMapper {
         entity.setCountCells(domain.getCountCells());
 
         ControlConfiguration configuration = domain.getControlConfiguration();
-        entity.setPayment(configuration.getPayment());
-        entity.setAccessMethods(configuration.getAccessMethods());
-        entity.setPrintOptions(configuration.getPrintOptions());
-        updateEquipment(configuration.getEquipmentConfiguration(), entity);
-    }
-
-    private static EquipmentConfiguration toEquipmentConfiguration(LBCEntity entity,
-                                                                       Function<String, Equipment> equipmentResolver) {
-        EquipmentConfiguration result = new EquipmentConfiguration(List.of(), List.of());
-        entity.getEquipment().forEach(item ->
-                addPersistedEquipment(
-                        item.getCatalogPositionId(),
-                        item.getQuantity(),
-                        result,
-                        equipmentResolver
-                )
-        );
-        return result;
-    }
-
-    private static void addPersistedEquipment(
-            String catalogPositionId,
-            int quantity,
-            EquipmentConfiguration target,
-            Function<String, Equipment> equipmentResolver
-    ) {
-        Equipment equipment = equipmentResolver.apply(catalogPositionId);
-        if (equipment == Display.NONE || equipment == BarReader.NONE) {
-            return;
-        }
-        target.addRequiredEquipment(equipment, quantity);
-    }
-
-    private static void updateEquipment(
-            EquipmentConfiguration configuration,
-            LBCEntity entity
-    ) {
-        entity.setEquipment(configuration.getAllEquipment().stream()
-                .filter(item -> item != Display.NONE && item != BarReader.NONE)
-                .map(item -> new EquipmentQuantityEmbeddable(
-                        item.getCatalogPositionId(),
-                        configuration.getQuantity(item)
+        entity.setFunctionalConfiguration(configuration.getFunctionalConfiguration());
+        Set<EquipmentQuantityEmbeddable> equipment = configuration.getEquipment().entrySet()
+                .stream()
+                .map(entry -> new EquipmentQuantityEmbeddable(
+                        Objects.requireNonNull(
+                                equipmentResolver.apply(entry.getKey()),
+                                "equipmentResolver вернул null"
+                        ),
+                        entry.getValue()
                 ))
-                .collect(Collectors.toSet()));
+                .collect(Collectors.toSet());
+        entity.setEquipment(equipment);
     }
 
-    /**
-     * Преобразует LBCEntity в DTO, восстанавливая persistence ID.
-     */
+    /** Преобразует LBCEntity в DTO, сохраняя persistence ID. */
     public static LBCDTO toDto(LBCEntity entity) {
-        return toDto(entity, id -> EquipmentCatalog.findByCatalogPositionId(id));
-    }
-
-    public static LBCDTO toDto(LBCEntity entity,
-                                   Function<String, Equipment> equipmentResolver) {
-        if (entity == null) return null;
-        LBCDTO dto = LBCDtoMapper.toDto(toDomain(entity, equipmentResolver));
+        if (entity == null) {
+            return null;
+        }
+        LBCDTO dto = LBCDtoMapper.toDto(toDomain(entity));
         dto.setId(entity.getId());
         return dto;
     }
-
 }
