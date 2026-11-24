@@ -74,6 +74,33 @@ class EquipmentTest {
     }
 
     @Test
+    void systemEquipment_shouldAcceptOnlyMatchingSystemPurpose() {
+        Equipment computer = new Equipment(
+                1L,
+                EquipmentFunctionalType.SYSTEM,
+                SystemPurpose.COMPUTER,
+                EquipmentCategory.COMPUTER,
+                "Промышленный компьютер",
+                "",
+                0,
+                0,
+                0
+        );
+
+        assertEquals(EquipmentFunctionalType.SYSTEM, computer.getFunctionalType());
+        assertEquals(SystemPurpose.COMPUTER, computer.getPurpose());
+        assertTrue(EquipmentCategory.COMPUTER.supports(SystemPurpose.COMPUTER));
+        assertFalse(EquipmentCategory.COMPUTER.supports(SystemPurpose.POWER_SUPPLY));
+    }
+
+    @Test
+    void functionalType_shouldExposeItsPurposeEnum() {
+        assertEquals(SystemPurpose.class, EquipmentFunctionalType.SYSTEM.getPurposeType());
+        assertTrue(EquipmentFunctionalType.SYSTEM.supports(SystemPurpose.BACKUP_POWER));
+        assertFalse(EquipmentFunctionalType.ACCESS.supports(SystemPurpose.LOCK_CONTROL));
+    }
+
+    @Test
     void transientModels_shouldNotBeEqual() {
         Equipment first = new Equipment(
                 null, EquipmentFunctionalType.ACCESS, AccessPurpose.RFID,

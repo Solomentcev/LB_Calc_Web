@@ -123,6 +123,27 @@ public class ALS {
             Colors colorDoor,
             List<Module> modules
     ) {
+        this(height, depth, upperFrame, bottomFrame, colorBody, colorDoor, null, modules);
+    }
+
+    /**
+     * Создаёт ALS с явно заданными функциональными назначениями.
+     *
+     * <p>Конструктор используется при копировании агрегата, чтобы
+     * сохранить функциональную конфигурацию независимо от состояния
+     * переданных модулей. При обычном создании она берётся из
+     * управляющего модуля.</p>
+     */
+    private ALS(
+            int height,
+            int depth,
+            int upperFrame,
+            int bottomFrame,
+            Colors colorBody,
+            Colors colorDoor,
+            FunctionalConfiguration functionalConfiguration,
+            List<Module> modules
+    ) {
         this.height = height;
         this.depth = depth;
         this.upperFrame = upperFrame;
@@ -136,22 +157,16 @@ public class ALS {
                 "Цвет дверей не должен быть null"
         );
 
-        Objects.requireNonNull(
-                modules,
-                "Список модулей не должен быть null"
-        );
-
+        Objects.requireNonNull(modules, "Список модулей не должен быть null");
         for (Module module : modules) {
             this.modules.add(
-                    Objects.requireNonNull(
-                            module,
-                            "Модуль не должен быть null"
-                    ).copy()
+                    Objects.requireNonNull(module, "Модуль не должен быть null").copy()
             );
         }
 
-        this.functionalConfiguration = getControlModule().getControlConfiguration()
-                .getFunctionalConfiguration();
+        this.functionalConfiguration = functionalConfiguration == null
+                ? getControlModule().getControlConfiguration().getFunctionalConfiguration()
+                : functionalConfiguration.copy();
         recalculate();
     }
 
