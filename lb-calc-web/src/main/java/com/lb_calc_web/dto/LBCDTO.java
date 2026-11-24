@@ -40,6 +40,7 @@ public class LBCDTO {
 
     private FunctionalConfigurationDTO functionalConfiguration;
     private List<EquipmentSelectionDTO> equipmentSelections;
+    @JsonIgnore
     private boolean equipmentSelectionsProvided;
 
     @JsonIgnore
