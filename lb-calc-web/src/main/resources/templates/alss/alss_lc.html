@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/common :: head('Модуль управления в составе АКХ')}"></head>
+<body>
+<div th:replace="~{header :: header}"></div>
+<main class="container">
+    <form th:action="@{/alss/{alsId}/lcs/{lcId}/save(alsId=${als.id},lcId=${lc.id})}" th:object="${lc}" method="post">
+        <input type="hidden" name="equipmentSelectionsProvided" value="true">
+        <div class="mb-3">
+            <button type="submit" class="btn btn-primary btn-sm">Сохранить модуль управления</button>
+            <a th:href="@{/alss/{id}(id=${als.id})}" class="btn btn-secondary btn-sm">Вернуться к ALS</a>
+        </div>
+        <div th:if="${errors != null}" class="alert alert-danger">
+            <div th:each="error : ${errors}" th:text="${error}">Ошибка</div>
+        </div>
+        <h1 class="h4" th:text="*{description}">Модуль управления</h1>
+        <input type="hidden" th:field="*{id}">
+        <input type="hidden" th:field="*{height}">
+        <input type="hidden" th:field="*{width}">
+        <input type="hidden" th:field="*{depth}">
+        <input type="hidden" th:field="*{upperFrame}">
+        <input type="hidden" th:field="*{bottomFrame}">
+        <input type="hidden" th:field="*{colorBody}">
+        <input type="hidden" th:field="*{colorDoor}">
+        <input type="hidden" th:field="*{name}">
+        <div class="row g-3">
+            <div class="col-md-3"><label class="form-label">Высота</label><input class="form-control" type="number" th:field="*{height}" readonly></div>
+            <div class="col-md-3"><label class="form-label">Ширина</label><input class="form-control" type="number" th:field="*{width}" readonly></div>
+            <div class="col-md-3"><label class="form-label">Глубина</label><input class="form-control" type="number" th:field="*{depth}" readonly></div>
+            <div class="col-md-3"><label class="form-label">Верхняя рама</label><input class="form-control" type="number" th:field="*{upperFrame}" readonly></div>
+            <div class="col-md-3"><label class="form-label">Нижняя рама</label><input class="form-control" type="number" th:field="*{bottomFrame}" readonly></div>
+            <div class="col-md-3"><label class="form-label">Цвет корпуса</label><input class="form-control" type="text" th:value="*{colorBody}" readonly></div>
+            <div class="col-md-3"><label class="form-label">Цвет дверей</label><input class="form-control" type="text" th:value="*{colorDoor}" readonly></div>
+        </div>
+        <h2 class="h5 mt-4">Функциональные назначения</h2>
+<div class="row g-3">
+    <div class="col-md-6"><label class="form-label">Дисплей</label>
+        <select class="form-select" th:field="*{functionalConfiguration.display}">
+            <option th:each="purpose : ${displayPurposes}" th:value="${purpose}" th:text="${purpose}"></option>
+        </select>
+    </div>
+    <div class="col-md-6"><label class="form-label">Оплата</label>
+        <select class="form-select" th:field="*{functionalConfiguration.payment}">
+            <option th:each="purpose : ${paymentPurposes}" th:value="${purpose}" th:text="${purpose}"></option>
+        </select>
+    </div>
+    <div class="col-md-6"><label class="form-label">Способы доступа</label>
+        <select multiple class="form-select" th:field="*{functionalConfiguration.access}">
+            <option th:each="purpose : ${accessPurposes}" th:value="${purpose}" th:text="${purpose}"></option>
+        </select>
+    </div>
+    <div class="col-md-6"><label class="form-label">Печать</label>
+        <select class="form-select" th:field="*{functionalConfiguration.printer}">
+            <option th:each="purpose : ${printerPurposes}" th:value="${purpose}" th:text="${purpose}"></option>
+        </select>
+    </div>
+</div>
+<h2 class="h5 mt-4">Физическое оборудование</h2>
+<p class="text-muted">Выбор моделей выполняется независимо от функциональных назначений. При изменении состава оборудования связанные назначения пересчитываются доменной моделью.</p>
+<div id="equipment-selection-list">
+    <div class="row g-2 align-items-end mb-2 equipment-selection-row"
+         th:each="selection, selectionStat : *{equipmentSelections}">
+        <div class="col-md-8">
+            <label class="form-label">Модель оборудования</label>
+            <select class="form-select" th:name="|equipmentSelections[${selectionStat.index}].equipmentId|">
+                <option value="">Выберите модель</option>
+                <option th:each="item : ${equipmentList}" th:value="${item.id}"
+                        th:selected="${item.id == selection.equipmentId}"
+                        th:text="|[${item.functionalType}] ${item.name} — ${item.purpose} (${item.width}×${item.height}×${item.depth} мм)|"></option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">Количество</label>
+            <input class="form-control" type="number" min="1"
+                   th:name="|equipmentSelections[${selectionStat.index}].quantity|"
+                   th:value="${selection.quantity}">
+        </div>
+        <div class="col-md-2"><button type="button" class="btn btn-outline-danger remove-equipment">Удалить</button></div>
+    </div>
+</div>
+<button type="button" id="add-equipment" class="btn btn-outline-primary btn-sm mt-2">Добавить модель</button>
+<template id="equipment-selection-row-template">
+    <div class="row g-2 align-items-end mb-2 equipment-selection-row">
+        <div class="col-md-8">
+            <label class="form-label">Модель оборудования</label>
+            <select class="form-select" name="equipmentSelections[__INDEX__].equipmentId">
+                <option value="">Выберите модель</option>
+                <option th:each="item : ${equipmentList}" th:value="${item.id}"
+                        th:text="|[${item.functionalType}] ${item.name} — ${item.purpose} (${item.width}×${item.height}×${item.depth} мм)|"></option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">Количество</label>
+            <input class="form-control" type="number" min="1" value="1"
+                   name="equipmentSelections[__INDEX__].quantity">
+        </div>
+        <div class="col-md-2"><button type="button" class="btn btn-outline-danger remove-equipment">Удалить</button></div>
+    </div>
+</template>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const list = document.getElementById("equipment-selection-list");
+    const template = document.getElementById("equipment-selection-row-template");
+    const addButton = document.getElementById("add-equipment");
+    if (!list || !template || !addButton) return;
+    function reindex() {
+        list.querySelectorAll(".equipment-selection-row").forEach((row, index) => {
+            row.querySelectorAll("[name]").forEach(input => {
+                input.name = input.name.replace(/equipmentSelections\[\d+\]/,
+                        "equipmentSelections[" + index + "]");
+            });
+        });
+    }
+    addButton.addEventListener("click", function () {
+        const index = list.querySelectorAll(".equipment-selection-row").length;
+        const fragment = template.content.cloneNode(true);
+        fragment.querySelectorAll("[name]").forEach(input => {
+            input.name = input.name.replaceAll("__INDEX__", String(index));
+        });
+        list.append(fragment);
+    });
+    list.addEventListener("click", function (event) {
+        if (event.target.classList.contains("remove-equipment")) {
+            event.target.closest(".equipment-selection-row").remove();
+            reindex();
+        }
+    });
+});
+</script>
+        <div class="row mt-4"><div class="col-lg-6"><img class="img-thumbnail" th:src="'data:image/png;base64,' + ${lc.stringLCImage}" alt="Модуль управления"></div></div>
+    </form>
+</main>
+<div th:replace="~{footer :: footer}"></div>
+</body>
+</html>
