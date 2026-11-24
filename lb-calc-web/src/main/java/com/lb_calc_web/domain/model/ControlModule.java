@@ -2,7 +2,6 @@ package com.lb_calc_web.domain.model;
 
 import com.lb_calc_web.domain.equipment.Equipment;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -14,11 +13,7 @@ public interface ControlModule {
     /** @return независимая копия конфигурации управления */
     ControlConfiguration getControlConfiguration();
 
-    /**
-     * Формирует описание назначений и фактически установленного оборудования.
-     *
-     * @return описание конфигурации управления
-     */
+    /** Формирует описание назначений и фактически установленного оборудования. */
     default String getControlDescription() {
         ControlConfiguration configuration = getControlConfiguration();
         String purposes = Stream.of(
@@ -30,9 +25,11 @@ public interface ControlModule {
                 .map(Enum::name)
                 .collect(Collectors.joining(", ", "[", "]"));
 
-        String equipment = configuration.getEquipmentQuantities().entrySet().stream()
+        String equipment = configuration.getEquipment().entrySet().stream()
                 .sorted(Map.Entry.comparingByKey(
-                        java.util.Comparator.comparing(Equipment::getId, java.util.Comparator.nullsLast(java.util.Comparator.naturalOrder()))))
+                        java.util.Comparator.comparing(
+                                Equipment::getId,
+                                java.util.Comparator.nullsLast(java.util.Comparator.naturalOrder()))))
                 .map(ControlModule::formatEquipment)
                 .collect(Collectors.joining(", "));
 
@@ -45,9 +42,9 @@ public interface ControlModule {
         return entry.getValue() == 1 ? name : name + " (" + entry.getValue() + " шт.)";
     }
 
-    List<Equipment> getEquipment();
+    Map<Equipment, Integer> getEquipment();
 
-    void addEquipment(Equipment equipment);
+    void addEquipment(Equipment equipment, int quantity);
 
     void removeEquipment(Equipment equipment);
 

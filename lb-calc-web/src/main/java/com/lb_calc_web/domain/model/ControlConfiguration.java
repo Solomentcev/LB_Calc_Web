@@ -7,9 +7,7 @@ import com.lb_calc_web.domain.equipment.EquipmentCategory;
 import com.lb_calc_web.domain.equipment.PaymentPurpose;
 import com.lb_calc_web.domain.equipment.PrinterPurpose;
 
-import java.util.Comparator;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -29,15 +27,6 @@ public class ControlConfiguration {
     private final PrinterPurpose printer;
     private final Map<Equipment, Integer> equipment;
 
-    /**
-     * Создаёт конфигурацию управления.
-     *
-     * @param display назначение дисплея
-     * @param access назначение доступа
-     * @param payment назначение оплаты
-     * @param printer назначение принтера
-     * @param equipment фактически установленное оборудование и его количество
-     */
     public ControlConfiguration(
             DisplayPurpose display,
             AccessPurpose access,
@@ -45,10 +34,10 @@ public class ControlConfiguration {
             PrinterPurpose printer,
             Map<Equipment, Integer> equipment
     ) {
-        this.display = display;
-        this.access = access;
-        this.payment = payment;
-        this.printer = printer;
+        this.display = Objects.requireNonNull(display, "Назначение дисплея не должно быть null");
+        this.access = Objects.requireNonNull(access, "Назначение доступа не должно быть null");
+        this.payment = Objects.requireNonNull(payment, "Назначение оплаты не должно быть null");
+        this.printer = Objects.requireNonNull(printer, "Назначение принтера не должно быть null");
         this.equipment = copyEquipment(equipment);
         validateEquipment();
     }
@@ -57,21 +46,17 @@ public class ControlConfiguration {
         Objects.requireNonNull(source, "Состав оборудования не должен быть null");
         Map<Equipment, Integer> result = new LinkedHashMap<>();
         source.forEach((item, quantity) -> {
-            Equipment equipment = Objects.requireNonNull(item,
-                    "Оборудование не должно быть null");
-            Integer count = Objects.requireNonNull(quantity,
-                    "Количество оборудования не должно быть null");
+            Equipment model = Objects.requireNonNull(item, "Оборудование не должно быть null");
+            Integer count = Objects.requireNonNull(quantity, "Количество оборудования не должно быть null");
             if (count < 1) {
-                throw new IllegalArgumentException(
-                        "Количество оборудования должно быть не меньше 1");
+                throw new IllegalArgumentException("Количество оборудования должно быть не меньше 1");
             }
-            result.merge(equipment, count, (first, second) -> {
+            result.merge(model, count, (first, second) -> {
                 try {
                     return Math.addExact(first, second);
                 } catch (ArithmeticException exception) {
                     throw new IllegalArgumentException(
-                            "Количество оборудования превышает допустимый диапазон",
-                            exception);
+                            "Количество оборудования превышает допустимый диапазон", exception);
                 }
             });
         });
@@ -80,7 +65,7 @@ public class ControlConfiguration {
 
     private void validateEquipment() {
         long displayCount = equipment.entrySet().stream()
-                .filter(entry -> entry.getKey().isDisplay())
+                .filter(entry -> entry.getKey().getCategory() == EquipmentCategory.DISPLAY)
                 .mapToLong(Map.Entry::getValue)
                 .sum();
         if (displayCount > 1) {
@@ -94,71 +79,44 @@ public class ControlConfiguration {
     public PaymentPurpose getPayment() { return payment; }
     public PrinterPurpose getPrinter() { return printer; }
 
-    /** @return неизменяемое представление состава оборудования */
-    public Map<Equipment, Integer> getEquipmentQuantities() {
+    /** @return неизменяемое соответствие моделей оборудования и их количества */
+    public Map<Equipment, Integer> getEquipment() {
         return Map.copyOf(equipment);
     }
 
-    /** @return оборудование в стабильном порядке по идентификатору */
-    public List<Equipment> getAllEquipment() {
-        return equipment.keySet().stream()
-                .sorted(Comparator.comparing(Equipment::getId))
-                .toList();
-    }
-
-    /**
-     * Возвращает количество модели в конфигурации.
-     *
-     * @param item модель оборудования
-     * @return количество или ноль, если модель не установлена
-     */
     public int getQuantity(Equipment item) {
         return equipment.getOrDefault(
                 Objects.requireNonNull(item, "Оборудование не должно быть null"), 0);
     }
 
-    /**
-     * Добавляет оборудование или увеличивает количество установленной модели.
-     *
-     * @param item модель оборудования
-     * @param quantity добавляемое количество
-     */
     public void addEquipment(Equipment item, int quantity) {
-        Equipment equipmentItem = Objects.requireNonNull(item,
-                "Оборудование не должно быть null");
+        Equipment model = Objects.requireNonNull(item, "Оборудование не должно быть null");
         if (quantity < 1) {
-            throw new IllegalArgumentException(
-                    "Количество оборудования должно быть не меньше 1");
+            throw new IllegalArgumentException("Количество оборудования должно быть не меньше 1");
         }
-        int current = equipment.getOrDefault(equipmentItem, 0);
-        final int updated;
+
+        int updated;
         try {
-            updated = Math.addExact(current, quantity);
+            updated = Math.addExact(equipment.getOrDefault(model, 0), quantity);
         } catch (ArithmeticException exception) {
             throw new IllegalArgumentException(
                     "Количество оборудования превышает допустимый диапазон", exception);
         }
-        if (equipmentItem.isDisplay()
-                && (updated > 1 || equipment.keySet().stream()
-                .anyMatch(existing -> existing.isDisplay() && !existing.equals(equipmentItem)))) {
+
+        if (model.getCategory() == EquipmentCategory.DISPLAY
+                && (updated > 1 || equipment.keySet().stream().anyMatch(existing ->
+                existing.getCategory() == EquipmentCategory.DISPLAY && !existing.equals(model)))) {
             throw new IllegalArgumentException(
                     "В модуле управления может быть установлен только один дисплей");
         }
-        equipment.put(equipmentItem, updated);
+        equipment.put(model, updated);
     }
 
-    /**
-     * Удаляет модель оборудования из конфигурации.
-     *
-     * @param item удаляемая модель
-     * @return true, если модель была установлена
-     */
     public boolean removeEquipment(Equipment item) {
         return equipment.remove(
                 Objects.requireNonNull(item, "Оборудование не должно быть null")) != null;
     }
 
-    /** @return независимая копия конфигурации */
     public ControlConfiguration copy() {
         return new ControlConfiguration(display, access, payment, printer, equipment);
     }
