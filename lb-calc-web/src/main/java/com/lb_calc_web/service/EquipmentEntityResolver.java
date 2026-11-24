@@ -29,6 +29,25 @@ public class EquipmentEntityResolver {
     }
 
     /**
+     * Восстанавливает доменную модель оборудования по идентификатору каталога.
+     *
+     * @param id идентификатор физической модели
+     * @return доменная модель оборудования
+     * @throws IllegalArgumentException если идентификатор некорректен
+     * @throws NoSuchElementException если запись каталога не найдена
+     */
+    public Equipment resolveDomain(Long id) {
+        if (id == null || id <= 0) {
+            throw new IllegalArgumentException(
+                    "Идентификатор модели оборудования должен быть положительным");
+        }
+        EquipmentEntity entity = equipmentRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException(
+                        "Модель оборудования с id=" + id + " не найдена"));
+        return EquipmentEntityMapper.toDomain(entity);
+    }
+
+    /**
      * Возвращает сохранённую модель оборудования по доменному идентификатору.
      *
      * @param equipment доменная модель оборудования
