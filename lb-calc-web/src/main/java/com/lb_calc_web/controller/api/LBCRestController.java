@@ -1,12 +1,10 @@
 package com.lb_calc_web.controller.api;
 
 import com.lb_calc_web.controller.api.response.ApiResponse;
-import com.lb_calc_web.domain.equipment.Equipment;
 import com.lb_calc_web.domain.model.LBC;
 import com.lb_calc_web.dto.LBCDTO;
 import com.lb_calc_web.mapper.dto.LBCDtoMapper;
 import com.lb_calc_web.service.LBCService;
-import com.lb_calc_web.service.factory.TypeLbFactory;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -18,8 +16,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Set;
-import java.util.function.Function;
 
 @RestController
 @RequestMapping("/api/v1/lbcs")
@@ -32,17 +28,9 @@ import java.util.function.Function;
 public class LBCRestController {
 
     private final LBCService lbcService;
-    private final EquipmentCatalogService equipmentCatalogService;
-    private final Environment environment;
 
-    public LBCRestController(
-            LBCService lbcService,
-            EquipmentCatalogService equipmentCatalogService,
-            Environment environment
-    ) {
+    public LBCRestController(LBCService lbcService) {
         this.lbcService = lbcService;
-        this.equipmentCatalogService = equipmentCatalogService;
-        this.environment = environment;
     }
 
     @GetMapping
@@ -74,42 +62,10 @@ public class LBCRestController {
     @PostMapping
     @Operation(summary = "Сохранить LBC")
     public ResponseEntity<?> saveLBC(@RequestBody LBCDTO dto) {
-        LBC domain = restoreDomain(dto);
+        LBC domain = lbcService.restoreDomain(dto);
         LBCDTO saved = LBCDtoMapper.toDto(lbcService.saveLBC(domain));
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success("LBC успешно сохранён", saved));
     }
 
-    /**
-     * Восстанавливает входную конфигурацию на границе REST API.
-     */
-    private LBC restoreDomain(LBCDTO dto) {
-        LBC existing = dto.getId() == null || dto.getId() <= 0
-                ? null
-                : lbcService.findById(dto.getId());
-        Set<String> retainedIds = existing == null
-                ? Set.of()
-                : existing.getEquipment().stream()
-                        .map(item -> item.getCatalogPositionId())
-                        .collect(java.util.stream.Collectors.toUnmodifiableSet());
-        Function<String, Equipment> resolver = existing == null
-                ? equipmentCatalogService::resolve
-                : equipmentCatalogService.findExistingConfigurationResolver(retainedIds);
-
-        List<EquipmentSelectionDTO> selections = dto.getEquipmentSelections();
-        if (selections == null && existing != null) {
-            selections = EquipmentSelectionMapper.mergeDisplaySelection(
-                    LBCDtoMapper.toDto(existing).getEquipmentSelections(),
-                    dto.getDisplay(),
-                    dto.getDisplayQuantity(),
-                    resolver
-            );
-        }
-        return LBCDtoMapper.toDomain(
-                dto,
-                TypeLbFactory.forLBC(environment, dto.getType()),
-                selections,
-                resolver
-        );
-    }
 }

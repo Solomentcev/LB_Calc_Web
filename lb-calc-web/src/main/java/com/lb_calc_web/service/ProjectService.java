@@ -1,7 +1,6 @@
 package com.lb_calc_web.service;
 
 import com.lb_calc_web.domain.attributes.Role;
-import com.lb_calc_web.domain.equipment.Equipment;
 import com.lb_calc_web.domain.model.ALS;
 import com.lb_calc_web.domain.model.Employee;
 import com.lb_calc_web.domain.model.LB;
@@ -52,7 +51,6 @@ public class ProjectService {
     private final EmployeeService employeeService;
     private final Environment environment;
     private final SizeValidator sizeValidator;
-    private final EquipmentCatalogService equipmentCatalogService;
 
     public ProjectService(
             ProjectRepository projectRepository,
@@ -61,8 +59,7 @@ public class ProjectService {
             ALSService alsService,
             EmployeeService employeeService,
             Environment environment,
-            SizeValidator sizeValidator,
-            EquipmentCatalogService equipmentCatalogService
+            SizeValidator sizeValidator
     ) {
         this.projectRepository = projectRepository;
         this.alsRepository = alsRepository;
@@ -71,21 +68,16 @@ public class ProjectService {
         this.employeeService = employeeService;
         this.environment = environment;
         this.sizeValidator = sizeValidator;
-        this.equipmentCatalogService = equipmentCatalogService;
     }
 
     @Transactional(readOnly = true)
     public List<Project> findAll() {
         logger.info("Получение списка проектов...");
-        Function<String, Equipment> equipmentResolver =
-                equipmentCatalogService.findDomainCatalogResolver();
-
-        return projectRepository.findAllWithUsers()
+return projectRepository.findAllWithUsers()
                 .stream()
                 .map(entity -> ProjectEntityMapper.toDomain(
                         entity,
-                        (als, alsEntity) -> { },
-                        equipmentResolver
+                        (als, alsEntity) -> { }
                 ))
                 .toList();
     }
@@ -100,8 +92,7 @@ public class ProjectService {
 
         return ProjectEntityMapper.toDomain(
                 entity,
-                (als, alsEntity) -> { },
-                equipmentCatalogService.findDomainCatalogResolver()
+                (als, alsEntity) -> { }
         );
     }
 
@@ -187,8 +178,7 @@ public class ProjectService {
         ProjectEntity saved = persistProjectEntity(domain, existing);
         return ProjectEntityMapper.toDomain(
                 saved,
-                (als, alsEntity) -> { },
-                equipmentCatalogService.findDomainCatalogResolver()
+                (als, alsEntity) -> { }
         );
     }
 
@@ -522,8 +512,7 @@ public class ProjectService {
         ProjectEntity entity = loadExistingProject(projectId);
         return ProjectEntityMapper.toDomain(
                 entity,
-                (als, alsEntity) -> { },
-                equipmentCatalogService.findDomainCatalogResolver()
+                (als, alsEntity) -> { }
         );
     }
 
@@ -568,8 +557,7 @@ public class ProjectService {
         ProjectEntity saved = persistProjectEntity(domain, existing);
         return ProjectEntityMapper.toDomain(
                 saved,
-                (als, alsEntity) -> { },
-                equipmentCatalogService.findDomainCatalogResolver()
+                (als, alsEntity) -> { }
         );
     }
 
