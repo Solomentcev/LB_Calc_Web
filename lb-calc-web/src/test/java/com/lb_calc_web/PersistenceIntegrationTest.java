@@ -1,6 +1,7 @@
 package com.lb_calc_web;
 
 import com.lb_calc_web.domain.model.ALS;
+import com.lb_calc_web.domain.model.ControlConfiguration;
 import com.lb_calc_web.domain.attributes.TypeLb;
 import com.lb_calc_web.domain.equipment.AccessPurpose;
 import com.lb_calc_web.domain.equipment.DisplayPurpose;
@@ -26,6 +27,7 @@ import com.lb_calc_web.dto.ProjectDTO;
 import com.lb_calc_web.service.ProjectService;
 import com.lb_calc_web.service.ALSService;
 import com.lb_calc_web.service.EquipmentEntityResolver;
+import com.lb_calc_web.service.EquipmentCatalogService;
 import com.lb_calc_web.entity.ALSEntity;
 import com.lb_calc_web.entity.EmployeeEntity;
 import com.lb_calc_web.entity.LCEntity;
@@ -54,6 +56,7 @@ import com.lb_calc_web.security.EmployeePrincipal;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.annotation.Propagation;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -87,6 +90,9 @@ class PersistenceIntegrationTest {
     private EquipmentEntityResolver equipmentEntityResolver;
 
     @Autowired
+    private EquipmentCatalogService equipmentCatalogService;
+
+    @Autowired
     private ALSRepository alsRepository;
 
     @Autowired
@@ -97,6 +103,103 @@ class PersistenceIntegrationTest {
 
     @Autowired
     private ALSService alsService;
+
+    @Test
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    void saveAls_shouldRollbackWhenEquipmentIdCannotBeResolved() {
+        long moduleCountBefore = moduleRepository.count();
+        long alsCountBefore = alsRepository.count();
+
+        ALS domainALS = restoreAlsDto(TestDataFactory.validLBCALSDTO(2L));
+        domainALS.addStorageModule(TestDataFactory.validLB(null));
+
+        Equipment missingEquipment = new Equipment(
+                999999L,
+                EquipmentFunctionalType.ACCESS,
+                AccessPurpose.BAR_CODE,
+                EquipmentCategory.BAR_READER,
+                "Отсутствующая модель",
+                "",
+                120,
+                50,
+                30
+        );
+        domainALS.setControlConfiguration(new ControlConfiguration(
+                domainALS.getFunctionalConfiguration(),
+                Map.of(missingEquipment, 1)
+        ));
+
+        assertThrows(
+                java.util.NoSuchElementException.class,
+                () -> alsService.saveALS(domainALS)
+        );
+
+        assertEquals(moduleCountBefore, moduleRepository.count(),
+                "Модули, сохранённые до ошибки, должны откатиться вместе с транзакцией");
+        assertEquals(alsCountBefore, alsRepository.count(),
+                "ALS не должна сохраняться при ошибке разрешения оборудования");
+    }
+
+    @Test
+    void equipmentCatalog_shouldRoundTripAndRejectDeletionWhileInUse() {
+        Equipment initial = persistEquipment(
+                EquipmentFunctionalType.ACCESS,
+                AccessPurpose.BAR_CODE,
+                EquipmentCategory.BAR_READER,
+                "Сканер до изменения"
+        );
+
+        Equipment updated = new Equipment(
+                initial.getId(),
+                initial.getFunctionalType(),
+                initial.getPurpose(),
+                initial.getCategory(),
+                "Сканер после изменения",
+                "Обновлённое описание",
+                121,
+                51,
+                31
+        );
+        Equipment saved = equipmentCatalogService.save(updated);
+
+        assertEquals(initial.getId(), saved.getId());
+        assertEquals("Сканер после изменения", saved.getName());
+        assertEquals("Обновлённое описание", saved.getDescription());
+        assertEquals(121, saved.getWidth());
+
+        ALSDTO dto = TestDataFactory.validLBCALSDTO(2L);
+        dto.getLBC().setDisplayPurpose(DisplayPurpose.INCH_10.name());
+        dto.getLBC().setAccessPurposes(List.of(AccessPurpose.BAR_CODE.name()));
+        dto.getLBC().setPaymentPurpose(PaymentPurpose.NONE.name());
+        dto.getLBC().setPrinterPurpose(PrinterPurpose.ABSENT.name());
+        dto.getLBC().setEquipmentSelections(List.of(
+                new EquipmentSelectionDTO(saved.getId(), 1)
+        ));
+
+        ALS domainALS = restoreAlsDto(dto);
+        Map<Module, ModuleEntity> resolvedModules = new HashMap<>();
+        ALSEntity alsEntity = ALSEntityMapper.toEntity(
+                domainALS,
+                module -> resolvedModules.computeIfAbsent(
+                        module,
+                        candidate -> moduleRepository.saveAndFlush(
+                                ModuleEntityMapper.toEntity(candidate, equipmentEntityResolver::resolve)
+                        )
+                )
+        );
+        alsRepository.saveAndFlush(alsEntity);
+        entityManager.clear();
+
+        Equipment restored = equipmentCatalogService.findById(saved.getId());
+        assertEquals("Сканер после изменения", restored.getName());
+        assertEquals(AccessPurpose.BAR_CODE, restored.getPurpose());
+
+        assertThrows(
+                IllegalStateException.class,
+                () -> equipmentCatalogService.delete(saved.getId())
+        );
+        assertTrue(equipmentRepository.existsById(saved.getId()));
+    }
 
     @Test
     void projectAggregate_shouldRoundTripThroughMySqlWithoutLosingAssociations() {
