@@ -38,6 +38,7 @@ public class ALSDTO {
     private LBCDTO lbc;
 
     /** Функциональные возможности ALS, синхронизированные с управляющим модулем. */
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private FunctionalConfigurationDTO functionalConfiguration;
 
     /**

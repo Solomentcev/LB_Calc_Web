@@ -7,7 +7,6 @@ import com.lb_calc_web.domain.model.LB;
 import com.lb_calc_web.domain.model.LBC;
 import com.lb_calc_web.domain.model.LC;
 import com.lb_calc_web.domain.model.Module;
-import com.lb_calc_web.domain.model.ControlModule;
 import com.lb_calc_web.dto.ALSDTO;
 import com.lb_calc_web.dto.FunctionalConfigurationDTO;
 import com.lb_calc_web.domain.model.FunctionalConfiguration;
@@ -21,7 +20,6 @@ import com.lb_calc_web.mapper.dto.LCDtoMapper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import java.util.function.Function;
 
 /** Преобразует транспортную модель ALS в доменную конфигурацию и обратно. */
@@ -81,26 +79,6 @@ public final class ALSDtoMapper {
         dto.setPayment(configuration.getPayment());
         dto.setPrinter(configuration.getPrinter());
         return dto;
-    }
-
-    private static FunctionalConfiguration toDomain(
-            FunctionalConfigurationDTO dto,
-            FunctionalConfiguration current
-    ) {
-        boolean provided = dto.getDisplay() != null || dto.getAccess() != null
-                || dto.getPayment() != null || dto.getPrinter() != null;
-        if (!provided) {
-            return current;
-        }
-        return new FunctionalConfiguration(
-                dto.getDisplay() == null
-                        ? com.lb_calc_web.domain.equipment.DisplayPurpose.NONE : dto.getDisplay(),
-                dto.getAccess() == null ? Set.of() : dto.getAccess(),
-                dto.getPayment() == null
-                        ? com.lb_calc_web.domain.equipment.PaymentPurpose.NONE : dto.getPayment(),
-                dto.getPrinter() == null
-                        ? com.lb_calc_web.domain.equipment.PrinterPurpose.ABSENT : dto.getPrinter()
-        );
     }
 
     public static void updateCalculatedFields(ALSDTO target, ALS domain) {
@@ -195,19 +173,6 @@ public final class ALSDtoMapper {
         List<Module> modules = dto.getModuleOrder() == null
                 ? restoreLegacyOrder(dto, lbTypeResolver, lbcTypeResolver, equipmentLookup, fallbackConfiguration)
                 : restoreExplicitOrder(dto, lbTypeResolver, lbcTypeResolver, equipmentLookup, fallbackConfiguration);
-
-        if (dto.getFunctionalConfiguration() != null) {
-            ControlModule controlModule = modules.stream()
-                    .filter(ControlModule.class::isInstance)
-                    .map(ControlModule.class::cast)
-                    .findFirst()
-                    .orElseThrow(() -> new IllegalStateException(
-                            "ALS не содержит управляющий модуль"));
-            controlModule.setFunctionalConfiguration(toDomain(
-                    dto.getFunctionalConfiguration(),
-                    controlModule.getControlConfiguration().getFunctionalConfiguration()
-            ));
-        }
 
         ALS domain = new ALS(
                 dto.getHeight(),
