@@ -322,8 +322,8 @@
              class="card mb-4">
 
             <div class="card-header">
-                <h4 th:text="${'LBC — ' + als.LBC.name}">LBC</h4>
-                <img class="img-thumbnail mt-2" th:if="${als.LBC.stringLBCImage != null}" th:src="|data:image/png;base64,${als.LBC.stringLBCImage}|" alt="Чертёж LBC">
+                <h4 th:text="${'Модуль хранения и управления — ' + als.LBC.name}">Модуль хранения и управления</h4>
+                <img class="img-thumbnail mt-2" th:if="${als.LBC.stringLBCImage != null}" th:src="|data:image/png;base64,${als.LBC.stringLBCImage}|" alt="Модуль хранения и управления">
             </div>
 
             <div class="card-body">
@@ -390,7 +390,7 @@
                             alsId=${alsId},
                             lbcId=${als.LBC.id})}"
                    class="btn btn-primary btn-sm">
-                    Редактировать LBC
+                    Редактировать модуль хранения и управления
                 </a>
             </div>
         </div>

@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html lang="ru" xmlns="http://www.w3.org/1999/xhtml"
       xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/common :: head('LBC')}"></head>
+<head th:replace="~{fragments/common :: head('Модуль хранения и управления')}"></head>
 <body>
 <div th:replace="~{header :: header}"></div>
 
 <main class="container">
     <form th:action="@{/lbcs/save}" th:object="${lbc}" method="post">
         <div class="mb-3">
-            <button type="submit" class="btn btn-primary btn-sm">Сохранить LBC</button>
-            <a th:href="@{/lbcs}" class="btn btn-secondary btn-sm">К списку LBC</a>
+            <button type="submit" class="btn btn-primary btn-sm">Сохранить модуль хранения и управления</button>
+            <a th:href="@{/lbcs}" class="btn btn-secondary btn-sm">К списку модулей хранения и управления</a>
         </div>
 
         <div th:if="${errors != null}" class="alert alert-danger">
@@ -18,7 +18,7 @@
 
         <div class="row">
             <div class="col-lg-6">
-                <h1 class="h4" th:text="${lbc.description}">Комбинированный модуль</h1>
+                <h1 class="h4" th:text="${lbc.description}">Модуль хранения и управления</h1>
                 <input type="hidden" th:field="*{id}">
                 <input type="hidden" th:field="*{name}">
                 <input type="hidden" th:field="*{description}">
@@ -49,7 +49,7 @@
                     </table>
                 </div>
 
-                <h2 class="h5 mt-4">Модуль управления внутри LBC</h2>
+                <h2 class="h5 mt-4">Модуль управления внутри модуля хранения и управления</h2>
                 <div class="table-responsive">
                     <table class="table table-striped">
                         <tbody>
@@ -71,8 +71,8 @@
             </div>
 
             <div class="col-lg-6">
-                <h2 class="h5">Физическая модель LBC</h2>
-                <img class="img-thumbnail" th:src="'data:image/png;base64,' + ${lbc.stringLBCImage}" alt="LBC Image">
+                <h2 class="h5">Физическая модель модуля хранения и управления</h2>
+                <img class="img-thumbnail" th:src="'data:image/png;base64,' + ${lbc.stringLBCImage}" alt="Модуль хранения и управления">
             </div>
         </div>
     </form>

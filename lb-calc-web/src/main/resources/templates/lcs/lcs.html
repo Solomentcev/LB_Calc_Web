@@ -4,13 +4,15 @@
 <body><div th:replace="~{header :: header}"></div><div class="container">
 <h1 class="page-title">Модули управления</h1><div class="page-actions"><a th:href="@{/lcs/create}" class="btn btn-primary btn-sm">Создать модуль управления</a><a th:href="@{/}" class="btn btn-secondary btn-sm">Назад</a></div>
 <div class="table-responsive"><table class="table table-striped table-hover js-data-table catalog-table">
-<colgroup><col style="width:4%"><col style="width:8%"><col style="width:11%"><col style="width:5%"><col style="width:4%"><col style="width:4%"><col style="width:5%"><col style="width:5%"><col style="width:7%"><col style="width:6%"><col style="width:5%"><col style="width:4%"><col style="width:4%"><col style="width:8%"><col style="width:7%"><col style="width:4%"><col style="width:5%"><col style="width:4%"></colgroup>
-<thead><tr><th>ID</th><th>Название</th><th>Описание</th><th>Высота</th><th>Ширина</th><th>Глубина</th><th>Рамы верх/низ</th><th>Дисплей</th><th>Размер дисплея</th><th>Сканер</th><th>Оплата</th><th>Принтер</th><th>RFID</th><th>Способы доступа</th><th>Печать</th><th>Доп. оборудование</th><th>Цвета</th><th>Действие</th></tr></thead>
+<colgroup><col style="width:3%"><col style="width:7%"><col style="width:10%"><col style="width:4%"><col style="width:4%"><col style="width:4%"><col style="width:5%"><col style="width:5%"><col style="width:5%"><col style="width:6%"><col style="width:5%"><col style="width:3%"><col style="width:3%"><col style="width:8%"><col style="width:7%"><col style="width:6%"><col style="width:4%"><col style="width:4%"><col style="width:7%"></colgroup>
+<thead><tr><th>ID</th><th>Название</th><th>Описание</th><th>Высота</th><th>Ширина</th><th>Глубина</th><th>Верхняя рама</th><th>Нижняя рама</th><th>Дисплей</th><th>Сканер</th><th>Оплата</th><th>Принтер</th><th>RFID</th><th>Способы доступа</th><th>Печать</th><th>Доп. оборудование</th><th>Цвет корпуса</th><th>Цвет дверей</th><th>Действие</th></tr></thead>
 <tbody><tr th:each="lc : ${lcs}">
-<td th:text="${lc.id}"></td><td th:text="${lc.name}"></td><td th:text="${lc.description}"></td><td th:text="${lc.height}"></td><td th:text="${lc.width}"></td><td th:text="${lc.depth}"></td>
-<td th:text="${lc.upperFrame + ' / ' + lc.bottomFrame}"></td><td th:text="${lc.display}"></td><td th:text="${lc.displayWidth + ' × ' + lc.displayHeight + ' мм; ' + lc.displayQuantity + ' шт.'}"></td>
-<td th:text="${lc.barReader + (lc.barReaderQuantity != null ? ' (' + lc.barReaderQuantity + ')' : '')}"></td><td th:text="${lc.payment}"></td><td th:text="${lc.printer ? 'Да' : 'Нет'}"></td><td th:text="${lc.rfidReader ? 'Да' : 'Нет'}"></td>
+<td th:text="${lc.id}"></td><td th:text="${lc.name}"></td><td th:text="${lc.description}"></td>
+<td th:text="${lc.height}"></td><td th:text="${lc.width}"></td><td th:text="${lc.depth}"></td><td th:text="${lc.upperFrame}"></td><td th:text="${lc.bottomFrame}"></td>
+<td th:text="${lc.display}"></td><td th:text="${lc.barReader + (lc.barReaderQuantity != null ? ' (' + lc.barReaderQuantity + ')' : '')}"></td><td th:text="${lc.payment}"></td>
+<td th:text="${lc.printer ? 'Да' : 'Нет'}"></td><td th:text="${lc.rfidReader ? 'Да' : 'Нет'}"></td>
 <td th:text="${#strings.listJoin(lc.accessMethods, ', ')}"></td><td th:text="${#strings.listJoin(lc.printOptions, ', ')}"></td>
-<td th:text="${lc.equipmentSelections != null ? #lists.size(lc.equipmentSelections) : 0}"></td><td th:text="${lc.colorBody + ' / ' + lc.colorDoor}"></td><td><a th:href="@{/lcs/{id}(id=${lc.id})}" class="btn btn-primary btn-sm">Изменить</a></td>
-</tr></tbody></table></div>
+<td th:text="${lc.equipmentSelections != null ? #lists.size(lc.equipmentSelections) : 0}"></td>
+<td th:text="${lc.colorBody}"></td><td th:text="${lc.colorDoor}"></td>
+<td><a th:href="@{/lcs/{id}(id=${lc.id})}" class="btn btn-primary btn-sm">Изменить</a></td></tr></tbody></table></div>
 </div><div th:replace="~{footer :: footer}"></div></body></html>

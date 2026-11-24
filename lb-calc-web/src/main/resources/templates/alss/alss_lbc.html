@@ -1,19 +1,19 @@
 
 <!DOCTYPE html>
 <html lang="ru" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/common :: head('LBC в составе АКХ')}"></head>
+<head th:replace="~{fragments/common :: head('Модуль хранения и управления в составе АКХ')}"></head>
 <body>
 <div th:replace="~{header :: header}"></div>
 <div class="container">
 <form th:action="@{/alss/{alsId}/lbcs/{lbcId}/save(alsId=${als.id},lbcId=${lbc.id})}" th:object="${lbc}" method="post">
-<button type="submit" class="btn btn-primary btn-sm mb-3">Сохранить LBC</button>
+<button type="submit" class="btn btn-primary btn-sm mb-3">Сохранить модуль хранения и управления</button>
 <a th:href="@{/alss/{id}(id=${als.id})}" class="btn btn-secondary btn-sm mb-3">Вернуться к ALS</a>
 <div th:if="${errors != null}" class="alert alert-danger">
 <div th:each="error : ${errors}" th:text="${error}">Error</div>
 </div>
 <div class="row"><div class="col-lg-6">
 <input type="hidden" th:field="*{id}"><input type="hidden" th:field="*{name}"><input type="hidden" th:field="*{description}">
-<h1 class="h4" th:text="${lbc.description}">LBC</h1>
+<h1 class="h4" th:text="${lbc.description}">Модуль хранения и управления</h1>
 <div class="table-responsive">
 <table class="table table-striped">
 <tr><th>Тип</th><td><select class="form-control" th:field="*{type}">
@@ -37,7 +37,7 @@
 </select></td></tr>
 </table>
 </div>
-<h2 class="h5 mt-4">Управление LBC</h2>
+<h2 class="h5 mt-4">Управление модулем хранения и управления</h2>
 <div class="table-responsive">
 <table class="table table-striped">
 <tr><th>Дисплей</th><td><select class="form-control" th:field="*{display}">
@@ -54,7 +54,7 @@
 </select></td></tr>
 </table>
 </div></div><div class="col-lg-6">
-<img class="img-thumbnail" th:src="'data:image/png;base64,' + ${lbc.stringLBCImage}" alt="LBC Image">
+<img class="img-thumbnail" th:src="'data:image/png;base64,' + ${lbc.stringLBCImage}" alt="Модуль хранения и управления">
 </div></div>
 </form></div>
 <div th:replace="~{footer :: footer}"></div>

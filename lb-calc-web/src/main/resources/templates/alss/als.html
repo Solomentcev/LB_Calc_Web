@@ -12,7 +12,7 @@
         <a th:href="@{/alss}" class="btn btn-secondary btn-sm">К списку АКХ</a>
         <button type="submit" class="btn btn-warning btn-sm"
                 th:formaction="@{/alss/{alsId}/replaceLBC(alsId=${als.id})}">
-            Заменить модуль управления на LBC
+            Заменить модуль управления на модуль хранения и управления
         </button>
         <button type="submit" class="btn btn-primary btn-sm"
                 th:formaction="@{/alss/{alsId}/addLB(alsId=${als.id})}">
@@ -82,7 +82,7 @@
 
     <div th:if="${als.LBC != null}" class="card mb-4">
         <div class="card-header">
-            <h5 th:text="${'LBC — ' + als.LBC.name}">LBC</h5>
+            <h5 th:text="${'Модуль хранения и управления — ' + als.LBC.name}">Модуль хранения и управления</h5>
         </div>
         <div class="card-body">
             <input type="hidden" th:field="*{LBC.id}">
@@ -130,7 +130,7 @@
             <div class="mt-3">
                 <a th:href="@{/alss/{alsId}/lbcs/{lbcId}(alsId=${als.id},lbcId=${als.LBC.id})}"
                    class="btn btn-primary btn-sm">
-                    Редактировать LBC
+                    Редактировать модуль хранения и управления
                 </a>
             </div>
         </div>
@@ -216,7 +216,7 @@
             </div>
 
             <div th:if="${als.lbList == null or als.lbList.isEmpty()}" class="text-muted">
-                Обычных LB нет. LBC, если присутствует, уже считается модулем хранения.
+                Обычных модулей хранения нет. Модуль хранения и управления, если присутствует, уже считается модулем хранения.
             </div>
         </div>
     </div>

@@ -428,13 +428,13 @@
                 <div th:if="${als.LBC != null}"
                      class="border rounded p-3 mb-3">
 
-                    <h5 th:text="${'LBC — ' + als.LBC.name}">
-                        LBC
+                    <h5 th:text="${'Модуль хранения и управления — ' + als.LBC.name}">
+                        Модуль хранения и управления
                     </h5>
                     <img class="img-thumbnail mb-2" style="max-height: 220px"
                          th:if="${als.LBC.stringLBCImage != null}"
                          th:src="|data:image/png;base64,${als.LBC.stringLBCImage}|"
-                         alt="Чертёж LBC">
+                         alt="Модуль хранения и управления">
 
                     <input type="hidden"
                            th:field="*{alsList[__${item.index}__].LBC.id}">
@@ -526,7 +526,7 @@
                                     alsId=${als.id},
                                     lbcId=${als.LBC.id})}"
                            class="btn btn-primary btn-sm">
-                            Редактировать LBC
+                            Редактировать модуль хранения и управления
                         </a>
                         <button th:if="${project.id != null and project.id > 0 and als.id != null}"
                                 type="submit"
@@ -534,7 +534,7 @@
                                 th:formaction="@{/projects/{projectId}/alss/{alsId}/replaceLBC(
                                     projectId=${project.id},
                                     alsId=${als.id})}">
-                            Пересоздать LBC
+                            Пересоздать модуль хранения и управления
                         </button>
                     </div>
                 </div>
