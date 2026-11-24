@@ -121,7 +121,11 @@ public final class LBCDtoMapper {
             for (EquipmentSelectionDTO selection : dto.getEquipmentSelections()) {
                 Objects.requireNonNull(selection, "Позиция оборудования не должна быть null");
                 if (selection.getEquipmentId() == null) {
-                    continue;
+                    if (dto.isEquipmentSelectionsProvided()) {
+                        continue;
+                    }
+                    throw new IllegalArgumentException(
+                            "Идентификатор модели оборудования не должен быть null");
                 }
                 Equipment model = Objects.requireNonNull(
                         equipmentLookup.apply(selection.getEquipmentId()),
