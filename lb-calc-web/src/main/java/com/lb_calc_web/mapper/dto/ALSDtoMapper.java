@@ -117,6 +117,21 @@ public final class ALSDtoMapper {
         );
     }
 
+    /**
+     * Восстанавливает ALS без физических позиций оборудования.
+     * Для DTO с выбранными позициями следует передать явный equipmentResolver.
+     */
+    public static ALS toDomain(
+            ALSDTO dto,
+            Function<LBDTO, TypeLb> lbTypeResolver,
+            Function<LBCDTO, TypeLb> lbcTypeResolver
+    ) {
+        return toDomain(dto, lbTypeResolver, lbcTypeResolver, id -> {
+            throw new IllegalStateException(
+                    "Для восстановления оборудования требуется Equipment resolver");
+        });
+    }
+
     public static ALS toDomain(
             ALSDTO dto,
             Function<LBDTO, TypeLb> lbTypeResolver,
