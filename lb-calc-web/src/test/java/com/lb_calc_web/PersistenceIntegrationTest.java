@@ -564,7 +564,8 @@ class PersistenceIntegrationTest {
                     projectId,
                     changedWithLBC.getId()
             );
-            assertNotEquals(changedWithLBC.getLBC().getId(), regeneratedLBC.getLBC().getId());
+            // Идентичная конфигурация LBC переиспользуется глобальным Find-or-Create.
+            assertEquals(changedWithLBC.getLBC().getId(), regeneratedLBC.getLBC().getId());
             assertNotEquals(independentAlsId, regeneratedLBC.getId());
 
             entityManager.flush();
