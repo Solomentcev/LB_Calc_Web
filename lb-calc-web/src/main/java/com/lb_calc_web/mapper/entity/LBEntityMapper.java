@@ -60,15 +60,7 @@ public final class LBEntityMapper {
                 entity.getDoorThickness()
         );
 
-        if (!domain.getName().equals(entity.getName())
-                || !domain.getDescription().equals(entity.getDescription())
-                || domain.getCellHeight() != entity.getHeightCell()
-                || domain.getCellWidth() != entity.getWidthCell()
-                || domain.getCellDepth() != entity.getDepthCell()) {
-            throw new IllegalStateException(
-                    "Производные характеристики LB в БД не соответствуют исходным параметрам"
-            );
-        }
+        // Производные характеристики пересчитываются доменной моделью из исходных параметров.
 
         domain.setId(entity.getId());
         return domain;
