@@ -5,6 +5,7 @@
 <div th:replace="~{header :: header}"></div>
 <main class="container">
     <form th:action="@{/lcs/save}" th:object="${lc}" method="post">
+        <input type="hidden" name="equipmentSelectionsProvided" value="true">
         <div class="mb-3">
             <button type="submit" class="btn btn-primary btn-sm">Сохранить модуль управления</button>
             <a th:href="@{/lcs}" class="btn btn-secondary btn-sm">К списку модулей</a>
