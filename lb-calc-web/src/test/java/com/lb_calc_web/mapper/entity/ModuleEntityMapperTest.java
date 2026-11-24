@@ -78,10 +78,22 @@ class ModuleEntityMapperTest {
     }
 
     @Test
-    void toDomain_shouldRejectStaleDerivedCellDimensions() {
-        LBEntity entity = (LBEntity) toEntity(TestDataFactory.validLB(null));
+    void toDomain_shouldRecalculateStaleLbDerivedCharacteristics() {
+        var expected = TestDataFactory.validLB(null);
+        LBEntity entity = (LBEntity) toEntity(expected);
+        entity.setName("Устаревшее наименование");
+        entity.setDescription("Устаревшее описание");
+        entity.setHeightCell(entity.getHeightCell() + 1);
         entity.setWidthCell(entity.getWidthCell() + 1);
-        assertThrows(IllegalStateException.class, () -> ModuleEntityMapper.toDomain(entity));
+        entity.setDepthCell(entity.getDepthCell() + 1);
+
+        var restored = ModuleEntityMapper.toDomain(entity);
+
+        assertEquals(expected.getName(), restored.getName());
+        assertEquals(expected.getDescription(), restored.getDescription());
+        assertEquals(expected.getCellHeight(), ((com.lb_calc_web.domain.model.LB) restored).getCellHeight());
+        assertEquals(expected.getCellWidth(), ((com.lb_calc_web.domain.model.LB) restored).getCellWidth());
+        assertEquals(expected.getCellDepth(), ((com.lb_calc_web.domain.model.LB) restored).getCellDepth());
     }
 
     @Test
