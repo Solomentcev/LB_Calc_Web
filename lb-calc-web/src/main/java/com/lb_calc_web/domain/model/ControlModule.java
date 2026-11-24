@@ -1,10 +1,11 @@
 package com.lb_calc_web.domain.model;
 
 import com.lb_calc_web.domain.equipment.Equipment;
-import com.lb_calc_web.domain.equipment.EquipmentItem;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Общий контракт доменных модулей управления.
@@ -19,26 +20,28 @@ public interface ControlModule {
     ControlConfiguration getControlConfiguration();
 
     /**
-     * Формирует описание функций и установленного оборудования.
-     *
-     * <p>Функции определяются назначениями оборудования, поэтому
-     * отдельные признаки доступа, оплаты и печати не дублируются.</p>
+     * Формирует описание функциональных назначений и установленного оборудования.
      *
      * @return описание конфигурации управления
      */
     default String getControlDescription() {
         ControlConfiguration configuration = getControlConfiguration();
 
-        String purposes = configuration.getAllEquipment().stream()
-                .map(equipment -> equipment.getPurpose().name())
-                .distinct()
-                .sorted()
+        String purposes = Stream.of(
+                        configuration.getDisplay(),
+                        configuration.getAccess(),
+                        configuration.getPayment(),
+                        configuration.getPrinter(),
+                        configuration.getSystem()
+                )
+                .filter(java.util.Objects::nonNull)
+                .map(Enum::name)
                 .collect(Collectors.joining(", ", "[", "]"));
 
-        String equipment = configuration.getEquipmentConfiguration()
-                .getAllItems()
-                .stream()
-                .map(ControlModule::formatEquipmentItem)
+        String equipment = configuration.getEquipmentQuantities().entrySet().stream()
+                .sorted(Map.Entry.comparingByKey(
+                        java.util.Comparator.comparing(Equipment::getCatalogPositionId)))
+                .map(ControlModule::formatEquipment)
                 .collect(Collectors.joining(", "));
 
         return "Функции: " + purposes + ";\n"
@@ -48,14 +51,14 @@ public interface ControlModule {
     /**
      * Форматирует позицию оборудования с учётом количества.
      *
-     * @param item позиция оборудования
+     * @param entry позиция оборудования и её количество
      * @return наименование и количество
      */
-    private static String formatEquipmentItem(EquipmentItem item) {
-        String name = item.equipment().getName();
-        return item.quantity() == 1
+    private static String formatEquipment(Map.Entry<Equipment, Integer> entry) {
+        String name = entry.getKey().getName();
+        return entry.getValue() == 1
                 ? name
-                : name + " (" + item.quantity() + " шт.)";
+                : name + " (" + entry.getValue() + " шт.)";
     }
 
     List<Equipment> getEquipment();

@@ -24,9 +24,7 @@ import java.util.Objects;
  */
 public class LBC extends StorageModule implements ControlModule {
 
-    /**
-     * Конфигурация функций управления LBC.
-     */
+    /** Конфигурация функций управления LBC. */
     private ControlConfiguration controlConfiguration;
 
     /**
@@ -45,22 +43,11 @@ public class LBC extends StorageModule implements ControlModule {
      * @param doorThickness толщина дверцы, мм
      * @param controlConfiguration конфигурация управления
      */
-    public LBC(
-            int height,
-            int width,
-            int depth,
-            int upperFrame,
-            int bottomFrame,
-            Colors colorBody,
-            Colors colorDoor,
-            TypeLb typeLb,
-            int countCells,
-            DirectionDoorOpening directionDoorOpening,
-            int doorThickness,
-            ControlConfiguration controlConfiguration
-    ) {
+    public LBC(int height, int width, int depth, int upperFrame, int bottomFrame,
+               Colors colorBody, Colors colorDoor, TypeLb typeLb, int countCells,
+               DirectionDoorOpening directionDoorOpening, int doorThickness,
+               ControlConfiguration controlConfiguration) {
         super(doorThickness);
-
         setHeight(height);
         setWidth(width);
         setDepth(depth);
@@ -70,25 +57,15 @@ public class LBC extends StorageModule implements ControlModule {
         setColorDoor(colorDoor);
         setTypeLb(typeLb);
         setDirectionDoorOpening(directionDoorOpening);
-
         this.controlConfiguration = Objects.requireNonNull(
                 controlConfiguration,
                 "Конфигурация управления не должна быть null"
         ).copy();
-
         setCells(createCells(countCells));
-
         recalculate();
     }
 
-    /**
-     * Возвращает независимую копию конфигурации управления LBC.
-     *
-     * <p>Изменение возвращённого объекта не влияет на состояние модуля.
-     * Для изменения конфигурации следует использовать методы самого модуля.</p>
-     *
-     * @return копия конфигурации управления
-     */
+    /** @return независимая копия конфигурации управления LBC */
     @Override
     public ControlConfiguration getControlConfiguration() {
         return controlConfiguration.copy();
@@ -98,77 +75,46 @@ public class LBC extends StorageModule implements ControlModule {
      * Заменяет конфигурацию управления LBC.
      *
      * @param controlConfiguration новая конфигурация управления
-     * @throws NullPointerException если конфигурация не задана
      */
-    public void setControlConfiguration(
-            ControlConfiguration controlConfiguration
-    ) {
+    public void setControlConfiguration(ControlConfiguration controlConfiguration) {
         this.controlConfiguration = Objects.requireNonNull(
                 controlConfiguration,
                 "Конфигурация управления не должна быть null"
         ).copy();
-
         recalculate();
     }
 
-    /**
-     * Возвращает всё оборудование LBC.
-     *
-     * @return список обязательного и дополнительного оборудования
-     */
+    /** @return позиции оборудования LBC */
     @Override
     public List<Equipment> getEquipment() {
         return controlConfiguration.getAllEquipment();
     }
 
     /**
-     * Добавляет оборудование в конфигурацию управления.
-     *
-     * <p>Добавленное оборудование считается дополнительным.</p>
+     * Добавляет позицию оборудования в конфигурацию управления.
      *
      * @param equipment добавляемое оборудование
-     * @throws NullPointerException если оборудование не задано
      */
     @Override
     public void addEquipment(Equipment equipment) {
-        controlConfiguration.addAdditionalEquipment(
-                Objects.requireNonNull(
-                        equipment,
-                        "Оборудование не должно быть null"
-                )
-        );
-
+        controlConfiguration.addEquipment(
+                Objects.requireNonNull(equipment, "Оборудование не должно быть null"), 1);
         recalculate();
     }
 
     /**
-     * Удаляет оборудование из конфигурации управления.
-     *
-     * <p>Оборудование удаляется как из обязательного,
-     * так и из дополнительного набора.</p>
+     * Удаляет позицию оборудования из конфигурации управления.
      *
      * @param equipment удаляемое оборудование
-     * @throws NullPointerException если оборудование не задано
      */
     @Override
     public void removeEquipment(Equipment equipment) {
-        Objects.requireNonNull(
-                equipment,
-                "Оборудование не должно быть null"
-        );
-
-        controlConfiguration.removeEquipment(equipment);
-
+        controlConfiguration.removeEquipment(
+                Objects.requireNonNull(equipment, "Оборудование не должно быть null"));
         recalculate();
     }
 
-    /**
-     * Возвращает максимальную высоту установленного оборудования.
-     *
-     * <p>Если оборудование отсутствует, возвращается {@code 0}.</p>
-     *
-     * @return максимальная высота оборудования, мм
-     */
+    /** @return максимальная высота установленного оборудования, мм */
     @Override
     public int getEquipmentHeight() {
         return getEquipment().stream()
@@ -177,30 +123,17 @@ public class LBC extends StorageModule implements ControlModule {
                 .orElse(0);
     }
 
-    /**
-     * Пересчитывает размеры ячеек LBC.
-     */
+    /** Пересчитывает размеры ячеек LBC. */
     @Override
     public void recalculateCells() {
         recalculateStorageCells();
     }
 
-    /**
-     * Пересчитывает производные характеристики LBC.
-     *
-     * <p>Пересчитываются размеры ячеек, после чего формируются
-     * наименование и описание модуля.</p>
-     */
+    /** Пересчитывает производные характеристики LBC. */
     @Override
     public void recalculate() {
         recalculateCells();
-
-        setName(
-                "Комбинированный модуль на "
-                        + getCountCells()
-                        + " ячеек"
-        );
-
+        setName("Комбинированный модуль на " + getCountCells() + " ячеек");
         setDescription(String.format(
                 "Комбинированный модуль на %d ячеек тип-%s "
                         + "(%.1fx%dx%d), ВхШхГ,мм: %dx%dx%d, "
@@ -220,59 +153,28 @@ public class LBC extends StorageModule implements ControlModule {
         ) + ";\n" + getControlDescription());
     }
 
-    /**
-     * Создаёт независимую копию LBC.
-     *
-     * @return копия LBC с независимыми ячейками и конфигурацией управления
-     */
+    /** @return независимая копия LBC */
     @Override
     public LBC copy() {
         LBC copy = new LBC(
-                getHeight(),
-                getWidth(),
-                getDepth(),
-                getUpperFrame(),
-                getBottomFrame(),
-                getColorBody(),
-                getColorDoor(),
-                getTypeLb(),
-                getCountCells(),
-                getDirectionDoorOpening(),
-                getDoorThickness(),
-                controlConfiguration
-        );
+                getHeight(), getWidth(), getDepth(),
+                getUpperFrame(), getBottomFrame(),
+                getColorBody(), getColorDoor(), getTypeLb(),
+                getCountCells(), getDirectionDoorOpening(),
+                getDoorThickness(), controlConfiguration);
         copy.copyCellNumbersFrom(this);
         return copyIdentityTo(copy);
     }
 
-    /**
-     * Сравнивает LBC по его конфигурации.
-     *
-     * <p>В сравнении участвуют параметры, определяющие конфигурацию
-     * модуля, включая направление открытия дверей и конфигурацию
-     * управления.</p>
-     *
-     * <p>Имя, описание и рассчитанные размеры ячеек не участвуют
-     * в сравнении, поскольку являются производными значениями.</p>
-     *
-     * <p>Номера {@link StorageCell} также не участвуют в сравнении,
-     * поскольку назначаются конкретным ALS.</p>
-     *
-     * @param o объект для сравнения
-     * @return {@code true}, если конфигурации LBC совпадают
-     */
     @Override
-    public boolean equals(Object o) {
-        if (this == o) {
+    public boolean equals(Object object) {
+        if (this == object) {
             return true;
         }
-
-        if (o == null || getClass() != o.getClass()) {
+        if (object == null || getClass() != object.getClass()) {
             return false;
         }
-
-        LBC other = (LBC) o;
-
+        LBC other = (LBC) object;
         return getHeight() == other.getHeight()
                 && getWidth() == other.getWidth()
                 && getDepth() == other.getDepth()
@@ -281,44 +183,21 @@ public class LBC extends StorageModule implements ControlModule {
                 && getDoorThickness() == other.getDoorThickness()
                 && getCountCells() == other.getCountCells()
                 && Objects.equals(getTypeLb(), other.getTypeLb())
-                && getDirectionDoorOpening()
-                == other.getDirectionDoorOpening()
+                && getDirectionDoorOpening() == other.getDirectionDoorOpening()
                 && getColorBody() == other.getColorBody()
                 && getColorDoor() == other.getColorDoor()
-                && Objects.equals(
-                controlConfiguration,
-                other.controlConfiguration
-        );
+                && Objects.equals(controlConfiguration, other.controlConfiguration);
     }
 
-    /**
-     * Возвращает хэш-код конфигурации LBC.
-     *
-     * @return хэш-код конфигурации
-     */
     @Override
     public int hashCode() {
         return Objects.hash(
-                getHeight(),
-                getWidth(),
-                getDepth(),
-                getUpperFrame(),
-                getBottomFrame(),
-                getDoorThickness(),
-                getCountCells(),
-                getTypeLb(),
-                getDirectionDoorOpening(),
-                getColorBody(),
-                getColorDoor(),
-                controlConfiguration
-        );
+                getHeight(), getWidth(), getDepth(),
+                getUpperFrame(), getBottomFrame(), getDoorThickness(),
+                getCountCells(), getTypeLb(), getDirectionDoorOpening(),
+                getColorBody(), getColorDoor(), controlConfiguration);
     }
 
-    /**
-     * Возвращает подробное строковое представление LBC.
-     *
-     * @return строковое представление конфигурации LBC
-     */
     @Override
     public String toString() {
         return "LBC{" +
@@ -335,12 +214,10 @@ public class LBC extends StorageModule implements ControlModule {
                 ", cellHeight=" + getCellHeight() +
                 ", cellWidth=" + getCellWidth() +
                 ", cellDepth=" + getCellDepth() +
-                ", directionDoorOpening=" +
-                getDirectionDoorOpening() +
+                ", directionDoorOpening=" + getDirectionDoorOpening() +
                 ", colorBody=" + getColorBody() +
                 ", colorDoor=" + getColorDoor() +
-                ", controlConfiguration=" +
-                controlConfiguration +
+                ", controlConfiguration=" + controlConfiguration +
                 '}';
     }
 }

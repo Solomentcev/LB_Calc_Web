@@ -22,9 +22,7 @@ import java.util.Objects;
  */
 public class LC extends Module implements ControlModule {
 
-    /**
-     * Конфигурация функций управления LC.
-     */
+    /** Конфигурация функций управления LC. */
     private ControlConfiguration controlConfiguration;
 
     /**
@@ -38,44 +36,25 @@ public class LC extends Module implements ControlModule {
      * @param colorBody цвет корпуса
      * @param colorDoor цвет дверей
      * @param controlConfiguration конфигурация управления
-     * @throws NullPointerException если цвет корпуса, цвет дверей
-     *                              или конфигурация управления не заданы
      */
-    public LC(
-            int height,
-            int width,
-            int depth,
-            int upperFrame,
-            int bottomFrame,
-            Colors colorBody,
-            Colors colorDoor,
-            ControlConfiguration controlConfiguration
-    ) {
+    public LC(int height, int width, int depth, int upperFrame, int bottomFrame,
+              Colors colorBody, Colors colorDoor,
+              ControlConfiguration controlConfiguration) {
         setHeight(height);
         setWidth(width);
         setDepth(depth);
         setUpperFrame(upperFrame);
         setBottomFrame(bottomFrame);
-
         setColorBody(colorBody);
         setColorDoor(colorDoor);
-
         this.controlConfiguration = Objects.requireNonNull(
                 controlConfiguration,
                 "Конфигурация управления не должна быть null"
         ).copy();
-
         recalculate();
     }
 
-    /**
-     * Возвращает независимую копию конфигурации управления LC.
-     *
-     * <p>Изменение возвращённого объекта не влияет на состояние модуля.
-     * Для изменения конфигурации следует использовать методы самого модуля.</p>
-     *
-     * @return копия конфигурации управления
-     */
+    /** @return независимая копия конфигурации управления LC */
     @Override
     public ControlConfiguration getControlConfiguration() {
         return controlConfiguration.copy();
@@ -85,78 +64,46 @@ public class LC extends Module implements ControlModule {
      * Заменяет конфигурацию управления LC.
      *
      * @param controlConfiguration новая конфигурация управления
-     * @throws NullPointerException если конфигурация не задана
      */
-    public void setControlConfiguration(
-            ControlConfiguration controlConfiguration
-    ) {
+    public void setControlConfiguration(ControlConfiguration controlConfiguration) {
         this.controlConfiguration = Objects.requireNonNull(
                 controlConfiguration,
                 "Конфигурация управления не должна быть null"
         ).copy();
-
         recalculate();
     }
 
-    /**
-     * Возвращает всё оборудование, входящее в конфигурацию LC.
-     *
-     * @return список обязательного и дополнительного оборудования
-     */
+    /** @return позиции оборудования LC */
     @Override
     public List<Equipment> getEquipment() {
         return controlConfiguration.getAllEquipment();
     }
 
     /**
-     * Добавляет оборудование в конфигурацию LC.
-     *
-     * <p>Добавляемое оборудование помещается в список дополнительного
-     * оборудования.</p>
+     * Добавляет позицию оборудования в конфигурацию LC.
      *
      * @param equipment добавляемое оборудование
-     * @throws NullPointerException если оборудование не задано
      */
     @Override
     public void addEquipment(Equipment equipment) {
-        Objects.requireNonNull(
-                equipment,
-                "Оборудование не должно быть null"
-        );
-
-        controlConfiguration.addAdditionalEquipment(equipment);
-
+        controlConfiguration.addEquipment(
+                Objects.requireNonNull(equipment, "Оборудование не должно быть null"), 1);
         recalculate();
     }
 
     /**
-     * Удаляет оборудование из конфигурации LC.
-     *
-     * <p>Оборудование удаляется как из обязательного, так и из
-     * дополнительного набора.</p>
+     * Удаляет позицию оборудования из конфигурации LC.
      *
      * @param equipment удаляемое оборудование
-     * @throws NullPointerException если оборудование не задано
      */
     @Override
     public void removeEquipment(Equipment equipment) {
-        Objects.requireNonNull(
-                equipment,
-                "Оборудование не должно быть null"
-        );
-
-        controlConfiguration.removeEquipment(equipment);
-
+        controlConfiguration.removeEquipment(
+                Objects.requireNonNull(equipment, "Оборудование не должно быть null"));
         recalculate();
     }
 
-    /**
-     * Возвращает максимальную высоту установленного оборудования.
-     *
-     * <p>Если оборудование отсутствует, возвращается {@code 0}.</p>
-     *
-     * @return максимальная высота оборудования, мм
-     */
+    /** @return максимальная высота установленного оборудования, мм */
     @Override
     public int getEquipmentHeight() {
         return getEquipment().stream()
@@ -165,91 +112,51 @@ public class LC extends Module implements ControlModule {
                 .orElse(0);
     }
 
-    /**
-     * Пересчитывает производные характеристики LC.
-     *
-     * <p>При пересчёте обновляются производные наименование и описание.
-     * Допустимость геометрических параметров проверяется валидатором.</p>
-     */
+    /** Пересчитывает производные характеристики LC. */
     @Override
     public void recalculate() {
         updateNameAndDescription();
     }
 
-    /**
-     * Обновляет производные наименование и описание LC.
-     */
     private void updateNameAndDescription() {
         Equipment display = getEquipment().stream()
                 .filter(Equipment::isDisplay)
                 .findFirst()
                 .orElse(null);
-
-        String displayName = display != null
-                ? display.getName()
-                : "Без дисплея";
-
-        String controlDescription = getControlDescription();
+        String displayName = display != null ? display.getName() : "Без дисплея";
 
         setName("Модуль управления " + displayName);
-
         setDescription(
                 "Модуль управления " + displayName + ";\n"
                         + "Размеры (ВхШхГ, мм): "
-                        + getHeight() + "x"
-                        + getWidth() + "x"
-                        + getDepth() + ";\n"
+                        + getHeight() + "x" + getWidth() + "x" + getDepth() + ";\n"
                         + "Рамы (верх/низ, мм): "
-                        + getUpperFrame() + "/"
-                        + getBottomFrame() + ";\n"
-                        + controlDescription + ";\n"
+                        + getUpperFrame() + "/" + getBottomFrame() + ";\n"
+                        + getControlDescription() + ";\n"
                         + "Цвет корпуса: " + getColorBody() + ";\n"
                         + "Цвет дверей: " + getColorDoor()
         );
     }
 
-    /**
-     * Создаёт независимую копию LC.
-     *
-     * @return копия LC с независимой конфигурацией управления
-     */
+    /** @return независимая копия LC */
     @Override
     public LC copy() {
         LC copy = new LC(
-                getHeight(),
-                getWidth(),
-                getDepth(),
-                getUpperFrame(),
-                getBottomFrame(),
-                getColorBody(),
-                getColorDoor(),
-                controlConfiguration
-        );
+                getHeight(), getWidth(), getDepth(),
+                getUpperFrame(), getBottomFrame(),
+                getColorBody(), getColorDoor(), controlConfiguration);
         return copyIdentityTo(copy);
     }
 
-    /**
-     * Сравнивает LC по его конфигурации.
-     *
-     * <p>В сравнении участвуют физические параметры модуля,
-     * цвета и конфигурация управления. Наименование и описание
-     * не участвуют, поскольку являются производными значениями.</p>
-     *
-     * @param o объект для сравнения
-     * @return {@code true}, если конфигурации LC совпадают
-     */
     @Override
-    public boolean equals(Object o) {
-        if (this == o) {
+    public boolean equals(Object object) {
+        if (this == object) {
             return true;
         }
-
-        if (o == null || getClass() != o.getClass()) {
+        if (object == null || getClass() != object.getClass()) {
             return false;
         }
-
-        LC other = (LC) o;
-
+        LC other = (LC) object;
         return getHeight() == other.getHeight()
                 && getWidth() == other.getWidth()
                 && getDepth() == other.getDepth()
@@ -257,36 +164,17 @@ public class LC extends Module implements ControlModule {
                 && getBottomFrame() == other.getBottomFrame()
                 && getColorBody() == other.getColorBody()
                 && getColorDoor() == other.getColorDoor()
-                && Objects.equals(
-                controlConfiguration,
-                other.controlConfiguration
-        );
+                && Objects.equals(controlConfiguration, other.controlConfiguration);
     }
 
-    /**
-     * Возвращает хэш-код конфигурации LC.
-     *
-     * @return хэш-код конфигурации
-     */
     @Override
     public int hashCode() {
         return Objects.hash(
-                getHeight(),
-                getWidth(),
-                getDepth(),
-                getUpperFrame(),
-                getBottomFrame(),
-                getColorBody(),
-                getColorDoor(),
-                controlConfiguration
-        );
+                getHeight(), getWidth(), getDepth(),
+                getUpperFrame(), getBottomFrame(),
+                getColorBody(), getColorDoor(), controlConfiguration);
     }
 
-    /**
-     * Возвращает подробное строковое представление LC.
-     *
-     * @return строковое представление конфигурации LC
-     */
     @Override
     public String toString() {
         return "LC{" +
@@ -299,8 +187,7 @@ public class LC extends Module implements ControlModule {
                 ", bottomFrame=" + getBottomFrame() +
                 ", colorBody=" + getColorBody() +
                 ", colorDoor=" + getColorDoor() +
-                ", controlConfiguration=" +
-                controlConfiguration +
+                ", controlConfiguration=" + controlConfiguration +
                 '}';
     }
 }
