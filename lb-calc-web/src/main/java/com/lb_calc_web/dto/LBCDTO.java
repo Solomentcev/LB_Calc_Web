@@ -38,29 +38,8 @@ public class LBCDTO {
     private String colorDoor;
     private String colorBody;
 
-    private String display;
-    private String barReader;
-    private String payment;
-
-    private boolean printer;
-    private boolean rfidReader;
-
-    private Integer displayQuantity;
-    private Integer barReaderQuantity;
-    private Integer printerQuantity;
-    private Integer rfidReaderQuantity;
-
-    private int displayWidth;
-    private int displayHeight;
-
-    private List<EquipmentSelectionDTO> equipmentSelections;
-    private String displayPurpose;
-    private List<String> accessPurposes;
-    private String paymentPurpose;
-    private String printerPurpose;
-
-    private List<String> accessMethods = new ArrayList<>();
-    private List<String> printOptions = new ArrayList<>();
+    private FunctionalConfigurationDTO functionalConfiguration;
+    private List<EquipmentSelectionDTO> equipmentSelections = new ArrayList<>();
 
     @JsonIgnore
     private String stringLBCImage;
