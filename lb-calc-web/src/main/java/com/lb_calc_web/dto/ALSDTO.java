@@ -302,6 +302,7 @@ public class ALSDTO {
                 ", countCells=" + countCells +
                 ", lc=" + lc +
                 ", lbc=" + lbc +
+                ", functionalConfiguration=" + functionalConfiguration +
                 ", positionControlModule='" +
                 positionControlModule + '\'' +
                 ", colorDoor='" + colorDoor + '\'' +

@@ -7,6 +7,7 @@ import com.lb_calc_web.domain.model.LB;
 import com.lb_calc_web.domain.model.LBC;
 import com.lb_calc_web.domain.model.LC;
 import com.lb_calc_web.domain.model.Module;
+import com.lb_calc_web.domain.model.ControlModule;
 import com.lb_calc_web.dto.ALSDTO;
 import com.lb_calc_web.dto.FunctionalConfigurationDTO;
 import com.lb_calc_web.domain.model.FunctionalConfiguration;
@@ -18,9 +19,7 @@ import com.lb_calc_web.mapper.dto.LBCDtoMapper;
 import com.lb_calc_web.mapper.dto.LCDtoMapper;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 
@@ -83,6 +82,18 @@ public final class ALSDtoMapper {
         return dto;
     }
 
+    private static FunctionalConfiguration toDomain(
+            FunctionalConfigurationDTO dto,
+            FunctionalConfiguration current
+    ) {
+        return new FunctionalConfiguration(
+                dto.getDisplay() == null ? current.getDisplay() : dto.getDisplay(),
+                dto.getAccess() == null ? current.getAccess() : dto.getAccess(),
+                dto.getPayment() == null ? current.getPayment() : dto.getPayment(),
+                dto.getPrinter() == null ? current.getPrinter() : dto.getPrinter()
+        );
+    }
+
     public static void updateCalculatedFields(ALSDTO target, ALS domain) {
         Objects.requireNonNull(target, "Целевой ALSDTO не должен быть null");
         Objects.requireNonNull(domain, "ALS не должна быть null");
@@ -93,6 +104,7 @@ public final class ALSDtoMapper {
         target.setCountCells(calculated.getCountCells());
         target.setDepthCell(calculated.getDepthCell());
         target.setPositionControlModule(calculated.getPositionControlModule());
+        target.setFunctionalConfiguration(calculated.getFunctionalConfiguration());
         target.setModuleOrder(calculated.getModuleOrder());
     }
 
@@ -174,6 +186,19 @@ public final class ALSDtoMapper {
         List<Module> modules = dto.getModuleOrder() == null
                 ? restoreLegacyOrder(dto, lbTypeResolver, lbcTypeResolver, equipmentLookup, fallbackConfiguration)
                 : restoreExplicitOrder(dto, lbTypeResolver, lbcTypeResolver, equipmentLookup, fallbackConfiguration);
+
+        if (dto.getFunctionalConfiguration() != null) {
+            ControlModule controlModule = modules.stream()
+                    .filter(ControlModule.class::isInstance)
+                    .map(ControlModule.class::cast)
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalStateException(
+                            "ALS не содержит управляющий модуль"));
+            controlModule.setFunctionalConfiguration(toDomain(
+                    dto.getFunctionalConfiguration(),
+                    controlModule.getControlConfiguration().getFunctionalConfiguration()
+            ));
+        }
 
         ALS domain = new ALS(
                 dto.getHeight(),
