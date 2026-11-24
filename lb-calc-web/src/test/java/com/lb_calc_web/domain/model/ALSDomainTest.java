@@ -80,4 +80,41 @@ class ALSDomainTest {
         assertEquals("CENTER", als.getPositionControlModule().name());
         assertEquals(5, als.getModules().size());
     }
+    @Test
+    void equipmentAndFunctionalConfigurationChanges_shouldStaySynchronized() {
+        ALS als = TestDataFactory.validALS(71L);
+        var scanner = new com.lb_calc_web.domain.equipment.Equipment(
+                71L,
+                com.lb_calc_web.domain.equipment.EquipmentFunctionalType.ACCESS,
+                com.lb_calc_web.domain.equipment.AccessPurpose.BAR_CODE,
+                com.lb_calc_web.domain.equipment.EquipmentCategory.BAR_READER,
+                "Сканер", "", 0, 0, 0);
+
+        als.addEquipment(scanner, 1);
+        assertEquals(java.util.Set.of(com.lb_calc_web.domain.equipment.AccessPurpose.BAR_CODE),
+                als.getFunctionalConfiguration().getAccess());
+        assertEquals(als.getFunctionalConfiguration(),
+                als.getControlModule().getControlConfiguration().getFunctionalConfiguration());
+
+        FunctionalConfiguration manual = new FunctionalConfiguration(
+                com.lb_calc_web.domain.equipment.DisplayPurpose.INCH_17,
+                java.util.Set.of(com.lb_calc_web.domain.equipment.AccessPurpose.RFID),
+                com.lb_calc_web.domain.equipment.PaymentPurpose.CARDS,
+                com.lb_calc_web.domain.equipment.PrinterPurpose.PRESENT);
+        als.setFunctionalConfiguration(manual);
+
+        assertEquals(manual, als.getControlModule()
+                .getControlConfiguration().getFunctionalConfiguration());
+        assertEquals(1, als.getControlModule().getEquipment().size());
+
+        als.removeEquipment(scanner);
+        assertTrue(als.getFunctionalConfiguration().getAccess().isEmpty());
+        assertEquals(com.lb_calc_web.domain.equipment.DisplayPurpose.INCH_17,
+                als.getFunctionalConfiguration().getDisplay());
+        assertEquals(com.lb_calc_web.domain.equipment.PaymentPurpose.CARDS,
+                als.getFunctionalConfiguration().getPayment());
+        assertEquals(com.lb_calc_web.domain.equipment.PrinterPurpose.PRESENT,
+                als.getFunctionalConfiguration().getPrinter());
+    }
+
 }

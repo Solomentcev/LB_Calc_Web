@@ -14,8 +14,6 @@ import com.lb_calc_web.domain.model.LC;
 import com.lb_calc_web.entity.EquipmentEntity;
 import com.lb_calc_web.entity.LBCEntity;
 import com.lb_calc_web.entity.LCEntity;
-import com.lb_calc_web.service.EquipmentEntityResolver;
-import com.lb_calc_web.repository.EquipmentRepository;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
@@ -102,39 +100,4 @@ class ControlModuleEquipmentEntityMapperTest {
         assertEquals(2, entity.getEquipment().iterator().next().getQuantity());
     }
 
-    @Test
-    void equipmentResolver_shouldReturnExistingManagedEntityByDomainId() throws Exception {
-        Equipment equipment = equipment(44, EquipmentFunctionalType.ACCESS,
-                AccessPurpose.RFID, EquipmentCategory.RFID_READER, "RFID");
-        EquipmentEntity entity = persisted(equipment);
-        EquipmentRepository repository = mock(EquipmentRepository.class);
-        when(repository.findById(44L)).thenReturn(java.util.Optional.of(entity));
-
-        EquipmentEntityResolver resolver = new EquipmentEntityResolver(repository);
-
-        assertSame(entity, resolver.resolve(equipment));
-        verify(repository).findById(44L);
-    }
-
-    @Test
-    void equipmentResolver_shouldRejectUnknownCatalogId() {
-        EquipmentRepository repository = mock(EquipmentRepository.class);
-        when(repository.findById(45L)).thenReturn(java.util.Optional.empty());
-        EquipmentEntityResolver resolver = new EquipmentEntityResolver(repository);
-
-        assertThrows(java.util.NoSuchElementException.class,
-                () -> resolver.resolveDomain(45L));
-        verify(repository).findById(45L);
-    }
-
-    @Test
-    void equipmentResolver_shouldRejectUnsavedDomainEquipment() {
-        Equipment equipment = equipment(0, EquipmentFunctionalType.ACCESS,
-                AccessPurpose.RFID, EquipmentCategory.RFID_READER, "RFID");
-        EquipmentRepository repository = mock(EquipmentRepository.class);
-        EquipmentEntityResolver resolver = new EquipmentEntityResolver(repository);
-
-        assertThrows(IllegalArgumentException.class, () -> resolver.resolve(equipment));
-        verifyNoInteractions(repository);
-    }
 }

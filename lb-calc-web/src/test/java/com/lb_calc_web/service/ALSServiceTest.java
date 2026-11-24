@@ -6,6 +6,7 @@ import com.lb_calc_web.entity.ALSEntity;
 import com.lb_calc_web.mapper.entity.ALSEntityMapper;
 import com.lb_calc_web.mapper.entity.ModuleEntityMapper;
 import com.lb_calc_web.repository.ALSRepository;
+import com.lb_calc_web.repository.EquipmentRepository;
 import com.lb_calc_web.repository.ModuleEntityRepository;
 import com.lb_calc_web.repository.ProjectALSRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,7 +28,7 @@ class ALSServiceTest {
     private LCService lcService;
     private LBCService lbcService;
     private FindOrCreateLockService lockService;
-    private EquipmentEntityResolver equipmentResolver;
+    private EquipmentRepository equipmentRepository;
     private ALSService service;
 
     @BeforeEach
@@ -39,7 +40,7 @@ class ALSServiceTest {
         lcService = mock(LCService.class);
         lbcService = mock(LBCService.class);
         lockService = mock(FindOrCreateLockService.class);
-        equipmentResolver = mock(EquipmentEntityResolver.class);
+        equipmentRepository = mock(EquipmentRepository.class);
 
         MockEnvironment environment = new MockEnvironment()
                 .withProperty("size.height.default", "1940")
@@ -57,7 +58,7 @@ class ALSServiceTest {
         service = new ALSService(
                 alsRepository, projectALSRepository, moduleRepository,
                 lbService, lcService, lbcService, lockService,
-                environment, TestDataFactory.createSizeValidator(), equipmentResolver);
+                environment, TestDataFactory.createSizeValidator(), equipmentRepository);
     }
 
     @Test
@@ -143,6 +144,6 @@ class ALSServiceTest {
 
         assertNotNull(result);
         assertEquals(3, result.getModules().size());
-        verifyNoInteractions(equipmentResolver);
+        verifyNoInteractions(equipmentRepository);
     }
 }

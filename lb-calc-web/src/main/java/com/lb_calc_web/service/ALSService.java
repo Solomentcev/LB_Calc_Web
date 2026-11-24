@@ -14,6 +14,7 @@ import com.lb_calc_web.dto.LBCDTO;
 import com.lb_calc_web.dto.LBDTO;
 import com.lb_calc_web.dto.LCDTO;
 import com.lb_calc_web.entity.ALSEntity;
+import com.lb_calc_web.entity.EquipmentEntity;
 import com.lb_calc_web.entity.ALSModuleEntity;
 import com.lb_calc_web.entity.LBEntity;
 import com.lb_calc_web.entity.LBCEntity;
@@ -23,7 +24,9 @@ import com.lb_calc_web.mapper.dto.ALSDtoMapper;
 import com.lb_calc_web.mapper.dto.LBDtoMapper;
 import com.lb_calc_web.mapper.entity.ALSEntityMapper;
 import com.lb_calc_web.mapper.entity.ModuleEntityMapper;
+import com.lb_calc_web.mapper.entity.EquipmentEntityMapper;
 import com.lb_calc_web.repository.ALSRepository;
+import com.lb_calc_web.repository.EquipmentRepository;
 import com.lb_calc_web.repository.ModuleEntityRepository;
 import com.lb_calc_web.repository.ProjectALSRepository;
 import com.lb_calc_web.service.factory.TypeLbFactory;
@@ -56,7 +59,7 @@ public class ALSService {
     private final LBCService lbcService;
     private final Environment environment;
     private final SizeValidator sizeValidator;
-    private final EquipmentEntityResolver equipmentEntityResolver;
+    private final EquipmentRepository equipmentRepository;
 
     public ALSService(
             ALSRepository alsRepository,
@@ -68,7 +71,7 @@ public class ALSService {
             FindOrCreateLockService findOrCreateLockService,
             Environment environment,
             SizeValidator sizeValidator,
-            EquipmentEntityResolver equipmentEntityResolver
+            EquipmentRepository equipmentRepository
     ) {
         this.alsRepository = Objects.requireNonNull(alsRepository);
         this.projectALSRepository = Objects.requireNonNull(projectALSRepository);
@@ -79,7 +82,7 @@ public class ALSService {
         this.findOrCreateLockService = Objects.requireNonNull(findOrCreateLockService);
         this.environment = Objects.requireNonNull(environment);
         this.sizeValidator = Objects.requireNonNull(sizeValidator);
-        this.equipmentEntityResolver = Objects.requireNonNull(equipmentEntityResolver);
+        this.equipmentRepository = Objects.requireNonNull(equipmentRepository);
     }
 
     @Transactional(readOnly = true)
@@ -331,7 +334,7 @@ public class ALSService {
                     dto,
                     candidate -> TypeLbFactory.forLB(environment, candidate.getType()),
                     candidate -> TypeLbFactory.forLBC(environment, candidate.getType()),
-                    equipmentEntityResolver::resolveDomain,
+                    this::findEquipment,
                     fallback
             );
         } catch (IllegalStateException exception) {
@@ -379,7 +382,7 @@ public class ALSService {
             }
         }
 
-        ModuleEntity created = ModuleEntityMapper.toEntity(domain, equipmentEntityResolver::resolve);
+        ModuleEntity created = ModuleEntityMapper.toEntity(domain, this::findEquipmentEntity);
         ModuleEntity saved = moduleRepository.save(created);
         cache.add(saved);
         return saved;
@@ -389,6 +392,31 @@ public class ALSService {
         return (domain instanceof LBC && entity instanceof LBCEntity)
                 || (domain instanceof LB && entity instanceof LBEntity)
                 || (domain instanceof LC && entity instanceof LCEntity);
+    }
+
+    private com.lb_calc_web.domain.equipment.Equipment findEquipment(Long id) {
+        if (id == null || id <= 0) {
+            throw new IllegalArgumentException(
+                    "Идентификатор модели оборудования должен быть положительным");
+        }
+        EquipmentEntity entity = equipmentRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException(
+                        "Модель оборудования с id=" + id + " не найдена"));
+        return EquipmentEntityMapper.toDomain(entity);
+    }
+
+    private EquipmentEntity findEquipmentEntity(
+            com.lb_calc_web.domain.equipment.Equipment equipment
+    ) {
+        Objects.requireNonNull(equipment, "Оборудование не должно быть null");
+        Long id = equipment.getId();
+        if (id == null || id <= 0) {
+            throw new IllegalArgumentException(
+                    "Модель оборудования должна иметь положительный идентификатор");
+        }
+        return equipmentRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException(
+                        "Модель оборудования с id=" + id + " не найдена"));
     }
 
     private void validate(ALS domain) {
