@@ -55,6 +55,35 @@ class LBCDomainTest {
 
         assertTrue(lbc instanceof ControlModule);
         assertTrue(lbc instanceof StorageModule);
+        assertEquals(functional, als.getFunctionalConfiguration());
+        assertEquals(
+                functional,
+                als.getLBC().getControlConfiguration().getFunctionalConfiguration()
+        );
+
+        FunctionalConfiguration updated = new FunctionalConfiguration(
+                DisplayPurpose.INCH_10,
+                Set.of(AccessPurpose.RFID, AccessPurpose.QR_CODE),
+                PaymentPurpose.CARDS,
+                PrinterPurpose.PRESENT
+        );
+        ALS copy = als.copy();
+        copy.setFunctionalConfiguration(updated);
+
+        assertEquals(functional, als.getFunctionalConfiguration());
+        assertEquals(updated, copy.getFunctionalConfiguration());
+        assertEquals(
+                updated,
+                copy.getLBC().getControlConfiguration().getFunctionalConfiguration()
+        );
+
+        als.setFunctionalConfiguration(updated);
+        assertEquals(updated, als.getFunctionalConfiguration());
+        assertEquals(
+                updated,
+                als.getLBC().getControlConfiguration().getFunctionalConfiguration()
+        );
+
         assertEquals(1, als.getStorageModules().size());
         assertEquals(10, als.getCountCells());
         assertEquals(500, als.getWidth());
