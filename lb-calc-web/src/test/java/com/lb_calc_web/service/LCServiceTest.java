@@ -83,6 +83,45 @@ class LCServiceTest {
     }
 
     @Test
+    void restoreDomain_shouldRetainEquipmentWhenSelectionListIsOmitted() {
+        Equipment equipment = new Equipment(
+                73L, EquipmentFunctionalType.ACCESS, AccessPurpose.RFID,
+                EquipmentCategory.RFID_READER, "RFID", "", 100, 50, 30);
+        ControlConfiguration fallback = new ControlConfiguration(
+                TestDataFactory.validLC(null).getControlConfiguration().getFunctionalConfiguration(),
+                Map.of(equipment, 2)
+        );
+        LCDTO dto = TestDataFactory.validLCDTO(17L);
+        dto.setDisplayPurpose(null);
+        dto.setAccessPurposes(null);
+        dto.setPaymentPurpose(null);
+        dto.setPrinterPurpose(null);
+        dto.setEquipmentSelections(null);
+
+        LC restored = service.restoreDomain(dto, fallback);
+
+        assertEquals(fallback, restored.getControlConfiguration());
+        verifyNoInteractions(equipmentResolver);
+    }
+
+    @Test
+    void restoreDomain_shouldClearEquipmentWhenEmptySelectionListIsExplicit() {
+        Equipment equipment = new Equipment(
+                74L, EquipmentFunctionalType.ACCESS, AccessPurpose.RFID,
+                EquipmentCategory.RFID_READER, "RFID", "", 100, 50, 30);
+        ControlConfiguration fallback = new ControlConfiguration(
+                TestDataFactory.validLC(null).getControlConfiguration().getFunctionalConfiguration(),
+                Map.of(equipment, 1)
+        );
+        LCDTO dto = TestDataFactory.validLCDTO(18L);
+        dto.setEquipmentSelections(List.of());
+
+        LC restored = service.restoreDomain(dto, fallback);
+
+        assertTrue(restored.getControlConfiguration().getEquipment().isEmpty());
+    }
+
+    @Test
     void findById_shouldReturnMappedDomain() {
         LCEntity entity = spy(LCEntityMapper.toEntity(
                 TestDataFactory.validLC(null), equipment -> null));
