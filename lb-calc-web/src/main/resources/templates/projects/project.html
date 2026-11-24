@@ -508,7 +508,7 @@
                             <select class="form-control"
                                     th:field="*{alsList[__${item.index}__].lbList[__${lbItem.index}__].type}" aria-label="alsList[index].lbList[__${lbItem.index}__].type">
 
-                                <option th:each="type : ${typeList}"
+                                <option th:each="type : ${typeLbList}"
                                         th:value="${type}"
                                         th:text="${type}">
                                 </option>
