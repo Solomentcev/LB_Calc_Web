@@ -6,7 +6,7 @@
 <main class="container">
     <nav aria-label="breadcrumb" class="mt-3"><ol class="breadcrumb">
 <li class="breadcrumb-item"><a th:href="@{/projects/{id}(id=${projectId})}" th:text="${project.name}">Проект</a></li>
-<li class="breadcrumb-item"><a th:href="${back}" th:text="${als.name}">ALS</a></li>
+<li class="breadcrumb-item"><a th:href="@{/projects/{projectId}/alss/{alsId}(projectId=${projectId},alsId=${alsId})}" th:text="${als.name}">ALS</a></li>
 <li class="breadcrumb-item active" aria-current="page">Модуль управления</li>
 </ol></nav>
 
