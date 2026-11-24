@@ -37,7 +37,6 @@ class ProjectServiceTest {
     private EmployeeService employeeService;
     private MockEnvironment environment;
     private ProjectService projectService;
-    private EquipmentCatalogService equipmentCatalogService;
 
     @BeforeEach
     void setUp() {
@@ -56,11 +55,7 @@ class ProjectServiceTest {
             );
         });
         employeeService = mock(EmployeeService.class);
-        equipmentCatalogService = mock(EquipmentCatalogService.class);
-        when(equipmentCatalogService.findDomainCatalogResolver())
-                .thenReturn(EquipmentCatalog::findByCatalogPositionId);
-
-        environment = new MockEnvironment()
+environment = new MockEnvironment()
                 .withProperty("project.company.default", "TEST_COMPANY")
                 .withProperty("lb.type.TYPE1.delta-width", "100")
                 .withProperty("lb.type.TYPE1.shelf-thick", "5")
@@ -74,8 +69,7 @@ class ProjectServiceTest {
                         alsService,
                         employeeService,
                         environment,
-                        TestDataFactory.createSizeValidator(),
-                        equipmentCatalogService
+                        TestDataFactory.createSizeValidator()
                 );
     }
 

@@ -10,12 +10,9 @@ import static org.junit.jupiter.api.Assertions.*;
 class LBCDtoMapperTest {
 
     @Test
-    void toDomain_shouldMapLBCConfiguration() {
-        LBCDTO dto =
-                TestDataFactory.validLBCDTO(1L);
-
-        LBC domain =
-                LBCDtoMapper.toDomain(dto);
+    void toDomain_shouldMapFunctionalAndStructuralConfiguration() {
+        LBCDTO dto = TestDataFactory.validLBCDTO(1L);
+        LBC domain = LBCDtoMapper.toDomain(dto);
 
         assertNotNull(domain);
         assertEquals(dto.getHeight(), domain.getHeight());
@@ -23,30 +20,26 @@ class LBCDtoMapperTest {
         assertEquals(dto.getDepth(), domain.getDepth());
         assertEquals(dto.getCountCells(), domain.getCountCells());
         assertEquals(dto.getType(), domain.getTypeLb().getType());
-        assertNotNull(domain.getControlConfiguration());
+        assertEquals("INCH_10",
+                domain.getControlConfiguration().getFunctionalConfiguration().getDisplay().name());
+        assertTrue(domain.getControlConfiguration().getFunctionalConfiguration()
+                .getAccess().contains(com.lb_calc_web.domain.equipment.AccessPurpose.RFID));
     }
 
     @Test
-    void roundTrip_shouldPreserveLBCConfiguration() {
-        LBCDTO source =
-                TestDataFactory.validLBCDTO(1L);
-
-        LBC domain =
-                LBCDtoMapper.toDomain(source);
-
-        LBCDTO result =
-                LBCDtoMapper.toDto(domain);
+    void roundTrip_shouldPreserveFunctionalConfiguration() {
+        LBCDTO source = TestDataFactory.validLBCDTO(1L);
+        LBC domain = LBCDtoMapper.toDomain(source);
+        LBCDTO result = LBCDtoMapper.toDto(domain);
 
         assertEquals(source.getType(), result.getType());
         assertEquals(source.getHeight(), result.getHeight());
         assertEquals(source.getWidth(), result.getWidth());
         assertEquals(source.getDepth(), result.getDepth());
         assertEquals(source.getCountCells(), result.getCountCells());
-        assertEquals(source.getDisplay(), result.getDisplay());
-        assertEquals(source.getPayment(), result.getPayment());
-        assertEquals(source.isPrinter(), result.isPrinter());
-        assertEquals(source.isRfidReader(), result.isRfidReader());
-        assertEquals(source.getAccessMethods(), result.getAccessMethods());
-        assertEquals(source.getPrintOptions(), result.getPrintOptions());
+        assertEquals(source.getDisplayPurpose(), result.getDisplayPurpose());
+        assertEquals(source.getAccessPurposes(), result.getAccessPurposes());
+        assertEquals(source.getPaymentPurpose(), result.getPaymentPurpose());
+        assertEquals(source.getPrinterPurpose(), result.getPrinterPurpose());
     }
 }
