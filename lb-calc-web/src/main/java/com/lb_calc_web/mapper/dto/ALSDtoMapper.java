@@ -8,6 +8,8 @@ import com.lb_calc_web.domain.model.LBC;
 import com.lb_calc_web.domain.model.LC;
 import com.lb_calc_web.domain.model.Module;
 import com.lb_calc_web.dto.ALSDTO;
+import com.lb_calc_web.dto.FunctionalConfigurationDTO;
+import com.lb_calc_web.domain.model.FunctionalConfiguration;
 import com.lb_calc_web.dto.ALSModuleOrderDTO;
 import com.lb_calc_web.dto.LBDTO;
 import com.lb_calc_web.dto.LBCDTO;
@@ -47,6 +49,7 @@ public final class ALSDtoMapper {
         dto.setColorBody(domain.getColorBody().name());
         dto.setColorDoor(domain.getColorDoor().name());
         dto.setPositionControlModule(domain.getPositionControlModule().name());
+        dto.setFunctionalConfiguration(toDto(domain.getFunctionalConfiguration()));
 
         List<LBDTO> lbList = new ArrayList<>();
         Map<LBDTO, Integer> quantityLB = new LinkedHashMap<>();
@@ -71,6 +74,15 @@ public final class ALSDtoMapper {
         dto.setLbList(lbList);
         dto.setQuantityLB(quantityLB);
         dto.setModuleOrder(moduleOrder);
+        return dto;
+    }
+
+    private static FunctionalConfigurationDTO toDto(FunctionalConfiguration configuration) {
+        FunctionalConfigurationDTO dto = new FunctionalConfigurationDTO();
+        dto.setDisplay(configuration.getDisplay());
+        dto.setAccess(configuration.getAccess());
+        dto.setPayment(configuration.getPayment());
+        dto.setPrinter(configuration.getPrinter());
         return dto;
     }
 
@@ -112,7 +124,7 @@ public final class ALSDtoMapper {
                         value.getShelfThick(), value.getServiceZoneWidth()),
                 id -> {
                     throw new IllegalStateException(
-                            "Для восстановления оборудования требуется Equipment resolver");
+                            "Для восстановления оборудования требуется загрузчик каталога");
                 }
         );
     }

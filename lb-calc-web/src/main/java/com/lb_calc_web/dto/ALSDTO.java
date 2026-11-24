@@ -40,6 +40,9 @@ public class ALSDTO {
      */
     private LBCDTO lbc;
 
+    /** Функциональные возможности ALS, синхронизированные с управляющим модулем. */
+    private FunctionalConfigurationDTO functionalConfiguration;
+
     /**
      * Положение единственного модуля управления.
      *
@@ -185,6 +188,14 @@ public class ALSDTO {
 
     public void setLBC(LBCDTO lbc) {
         this.lbc = lbc;
+    }
+
+    public FunctionalConfigurationDTO getFunctionalConfiguration() {
+        return functionalConfiguration;
+    }
+
+    public void setFunctionalConfiguration(FunctionalConfigurationDTO configuration) {
+        this.functionalConfiguration = configuration;
     }
 
     public String getPositionControlModule() {
