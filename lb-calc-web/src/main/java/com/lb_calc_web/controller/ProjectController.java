@@ -1,6 +1,12 @@
 package com.lb_calc_web.controller;
 
 import com.lb_calc_web.dto.ALSDTO;
+import com.lb_calc_web.domain.equipment.AccessPurpose;
+import com.lb_calc_web.domain.equipment.DisplayPurpose;
+import com.lb_calc_web.domain.equipment.PaymentPurpose;
+import com.lb_calc_web.domain.equipment.PrinterPurpose;
+import com.lb_calc_web.mapper.dto.EquipmentDtoMapper;
+import com.lb_calc_web.service.EquipmentCatalogService;
 import com.lb_calc_web.domain.model.ALS;
 import com.lb_calc_web.domain.model.LB;
 import com.lb_calc_web.domain.model.LC;
@@ -31,6 +37,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Controller
 @RequestMapping("/projects")
 public class ProjectController
@@ -39,15 +47,18 @@ public class ProjectController
     private final ProjectService projectService;
     private final ALSService alsService;
     private final ProjectExcelExportService projectExcelExportService;
+    private final EquipmentCatalogService equipmentCatalogService;
 
     public ProjectController(
             ProjectService projectService,
             ALSService alsService,
-            ProjectExcelExportService projectExcelExportService
+            ProjectExcelExportService projectExcelExportService,
+            EquipmentCatalogService equipmentCatalogService
     ) {
         this.projectService = projectService;
         this.alsService = alsService;
         this.projectExcelExportService = projectExcelExportService;
+        this.equipmentCatalogService = equipmentCatalogService;
     }
 
     /**
@@ -302,7 +313,7 @@ public class ProjectController
 
         model.addAttribute("project", addALSImages(project));
         model.addAttribute("als", ALSImageService.addImages(als));
-        model.addAttribute("lc", LCImageService.addImage(lc));
+        prepareLCForm(model, LCImageService.addImage(lc));
         model.addAttribute("projectId", projectId);
         model.addAttribute("alsId", alsId);
         model.addAttribute("lcId", lcId);
@@ -359,10 +370,7 @@ public class ProjectController
                     ))
             );
 
-            model.addAttribute(
-                    "lc",
-                    LCImageService.addImage(lc)
-            );
+            prepareLCForm(model, LCImageService.addImage(lc));
 
             model.addAttribute(
                     "projectId",
@@ -410,7 +418,7 @@ public class ProjectController
 
         model.addAttribute("project", addALSImages(project));
         model.addAttribute("als", ALSImageService.addImages(als));
-        model.addAttribute("lbc", LBCImageService.addImage(lbc));
+        prepareLBCForm(model, LBCImageService.addImage(lbc));
         model.addAttribute("projectId", projectId);
         model.addAttribute("alsId", alsId);
         model.addAttribute("lbcId", lbcId);
@@ -460,10 +468,7 @@ public class ProjectController
                     projectService.findALSInProject(projectId, alsId)
             )));
 
-            model.addAttribute(
-                    "lbc",
-                    LBCImageService.addImage(lbc)
-            );
+            prepareLBCForm(model, LBCImageService.addImage(lbc));
 
             model.addAttribute("projectId", projectId);
             model.addAttribute("alsId", alsId);
@@ -681,5 +686,27 @@ public class ProjectController
         }
         return project;
     }
+
+
+    private void prepareLCForm(Model model, LCDTO lc) {
+        model.addAttribute("lc", lc);
+        model.addAttribute("equipmentList", equipmentCatalogService.findAll().stream()
+                .map(EquipmentDtoMapper::toDto).toList());
+        model.addAttribute("displayPurposes", List.of(DisplayPurpose.values()));
+        model.addAttribute("accessPurposes", List.of(AccessPurpose.values()));
+        model.addAttribute("paymentPurposes", List.of(PaymentPurpose.values()));
+        model.addAttribute("printerPurposes", List.of(PrinterPurpose.values()));
+    }
+
+    private void prepareLBCForm(Model model, LBCDTO lbc) {
+        model.addAttribute("lbc", lbc);
+        model.addAttribute("equipmentList", equipmentCatalogService.findAll().stream()
+                .map(EquipmentDtoMapper::toDto).toList());
+        model.addAttribute("displayPurposes", List.of(DisplayPurpose.values()));
+        model.addAttribute("accessPurposes", List.of(AccessPurpose.values()));
+        model.addAttribute("paymentPurposes", List.of(PaymentPurpose.values()));
+        model.addAttribute("printerPurposes", List.of(PrinterPurpose.values()));
+    }
+
 
 }
