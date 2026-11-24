@@ -232,7 +232,8 @@ public class ALSService {
     public LC restoreLC(LCDTO dto, ALS als) {
         Objects.requireNonNull(als, "ALS не должен быть null");
         ControlModule control = als.getControlModule();
-        ControlConfiguration fallback = control == null ? null : control.getControlConfiguration();
+        ControlConfiguration fallback = control instanceof LC
+                ? control.getControlConfiguration() : null;
         return lcService.restoreDomain(dto, fallback);
     }
 
@@ -240,7 +241,8 @@ public class ALSService {
     public LBC restoreLBC(LBCDTO dto, ALS als) {
         Objects.requireNonNull(als, "ALS не должен быть null");
         ControlModule control = als.getControlModule();
-        ControlConfiguration fallback = control == null ? null : control.getControlConfiguration();
+        ControlConfiguration fallback = control instanceof LBC
+                ? control.getControlConfiguration() : null;
         return lbcService.restoreDomain(dto, fallback);
     }
 
@@ -314,9 +316,14 @@ public class ALSService {
     public ALS restoreDomain(ALSDTO dto) {
         Objects.requireNonNull(dto, "ALS не должен быть null");
         try {
-            ControlConfiguration fallback = dto.getId() != null && dto.getId() > 0
-                    ? findById(dto.getId()).getControlModule().getControlConfiguration()
-                    : null;
+            ControlConfiguration fallback = null;
+            if (dto.getId() != null && dto.getId() > 0) {
+                ControlModule existingControl = findById(dto.getId()).getControlModule();
+                if ((dto.getLC() != null && existingControl instanceof LC)
+                        || (dto.getLBC() != null && existingControl instanceof LBC)) {
+                    fallback = existingControl.getControlConfiguration();
+                }
+            }
             return ALSDtoMapper.toDomain(
                     dto,
                     candidate -> TypeLbFactory.forLB(environment, candidate.getType()),
