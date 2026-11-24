@@ -280,10 +280,13 @@ public class ALSService {
         LBC replacement = lbcService.createLBC(
                 als.getHeight(), als.getDepth(), als.getUpperFrame(), als.getBottomFrame(),
                 als.getColorBody(), als.getColorDoor());
-        if (als.getControlModule() instanceof LBC current) {
+        ControlModule current = als.getControlModule();
+        if (current != null) {
             replacement.setControlConfiguration(current.getControlConfiguration());
         }
-        return replaceLBC(als, replacement);
+        // Новый LBC получает новую идентичность, поэтому не проходит проверку замены по старому ID.
+        als.replaceControlModule(replacement);
+        return als;
     }
 
     @Transactional

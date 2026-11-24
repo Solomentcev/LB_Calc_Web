@@ -75,6 +75,24 @@ class ALSServiceTest {
     }
 
     @Test
+    void replaceWithNewLBC_shouldPreserveConfigurationAndCreateNewModuleIdentity() {
+        ALS als = TestDataFactory.validALS(9L);
+        var current = TestDataFactory.validLBC(42L);
+        als.replaceControlModule(current);
+
+        var replacement = TestDataFactory.validLBC(null);
+        when(lbcService.createLBC(anyInt(), anyInt(), anyInt(), anyInt(), any(), any()))
+                .thenReturn(replacement);
+
+        ALS result = service.replaceWithNewLBC(als);
+
+        assertSame(als, result);
+        assertNotSame(current, result.getControlModule());
+        assertNull(result.getLBC().getId());
+        assertEquals(current.getControlConfiguration(), result.getLBC().getControlConfiguration());
+    }
+
+    @Test
     void deleteALS_shouldRejectConfigurationUsedByProject() {
         ALSEntity entity = mock(ALSEntity.class);
         when(alsRepository.findById(15L)).thenReturn(Optional.of(entity));
