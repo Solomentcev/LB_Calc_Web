@@ -38,7 +38,7 @@ public class EquipmentController {
     public String list(Model model) {
         model.addAttribute("equipmentList", equipmentCatalogService.findAll()
                 .stream().map(EquipmentDtoMapper::toDto).toList());
-        return "equipment/equipment_list";
+        return "equipment/equipment";
     }
 
     @GetMapping("/create")
