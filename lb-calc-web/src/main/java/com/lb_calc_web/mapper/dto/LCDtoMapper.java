@@ -38,6 +38,12 @@ public final class LCDtoMapper {
         dto.setBottomFrame(domain.getBottomFrame());
         dto.setColorBody(domain.getColorBody().name());
         dto.setColorDoor(domain.getColorDoor().name());
+        domain.getControlConfiguration().getEquipment().keySet().stream()
+                .filter(item -> item.getFunctionalType() == com.lb_calc_web.domain.equipment.EquipmentFunctionalType.DISPLAY)
+                .findFirst().ifPresent(display -> {
+                    dto.setDisplayWidth(display.getWidth());
+                    dto.setDisplayHeight(display.getHeight());
+                });
 
         ControlConfiguration configuration = domain.getControlConfiguration();
         dto.setFunctionalConfiguration(toDto(configuration.getFunctionalConfiguration()));

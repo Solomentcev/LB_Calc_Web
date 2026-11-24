@@ -317,15 +317,11 @@ public class ProjectExcelExportService {
             );
         }
 
-        for (
-                Map.Entry<LBDTO, Integer> entry
-                : als.getQuantityLB().entrySet()
-        ) {
-
+        for (LBDTO lb : als.getLbList()) {
             r = lbRow(
                     sheet,
-                    entry.getKey(),
-                    entry.getValue(),
+                    lb,
+                    1,
                     i++,
                     s,
                     r
