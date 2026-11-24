@@ -213,7 +213,7 @@
                     </div>
                 </div>
                 <div class="mt-2">
-                    <a th:href="@{/lbs/{id}(id=${lb.id})}" class="btn btn-primary btn-sm">Редактировать LB</a>
+                    <a th:href="@{/alss/{alsId}/lbs/{lbId}(alsId=${als.id},lbId=${lb.id})}" class="btn btn-primary btn-sm">Редактировать LB</a>
                     <button type="submit" class="btn btn-danger btn-sm"
                             th:formaction="@{/alss/{alsId}/lbs/{lbId}/delete(alsId=${als.id},lbId=${lb.id})}">
                         Удалить
