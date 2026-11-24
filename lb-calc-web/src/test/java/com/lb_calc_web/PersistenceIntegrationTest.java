@@ -20,6 +20,7 @@ import com.lb_calc_web.mapper.dto.LCDtoMapper;
 import com.lb_calc_web.mapper.dto.ProjectDtoMapper;
 import com.lb_calc_web.dto.ALSDTO;
 import com.lb_calc_web.dto.LCDTO;
+import com.lb_calc_web.dto.FunctionalConfigurationDTO;
 import com.lb_calc_web.dto.EquipmentSelectionDTO;
 import com.lb_calc_web.dto.LBCDTO;
 import com.lb_calc_web.dto.LBDTO;
@@ -164,10 +165,11 @@ class PersistenceIntegrationTest {
         assertEquals(121, saved.getWidth());
 
         ALSDTO dto = TestDataFactory.validLBCALSDTO(2L);
-        dto.getLBC().setDisplayPurpose(DisplayPurpose.INCH_10.name());
-        dto.getLBC().setAccessPurposes(List.of(AccessPurpose.BAR_CODE.name()));
-        dto.getLBC().setPaymentPurpose(PaymentPurpose.NONE.name());
-        dto.getLBC().setPrinterPurpose(PrinterPurpose.ABSENT.name());
+        FunctionalConfigurationDTO lbcFunctional = dto.getLBC().getFunctionalConfiguration();
+        lbcFunctional.setDisplay(DisplayPurpose.INCH_10);
+        lbcFunctional.setAccess(Set.of(AccessPurpose.BAR_CODE));
+        lbcFunctional.setPayment(PaymentPurpose.NONE);
+        lbcFunctional.setPrinter(PrinterPurpose.ABSENT);
         dto.getLBC().setEquipmentSelections(List.of(
                 new EquipmentSelectionDTO(saved.getId(), 1)
         ));
@@ -322,11 +324,11 @@ class PersistenceIntegrationTest {
         Equipment rfid = persistEquipment(
                 EquipmentFunctionalType.ACCESS, AccessPurpose.RFID,
                 EquipmentCategory.RFID_READER, "RFID-считыватель");
-        lbcALS.getLBC().setDisplayPurpose(DisplayPurpose.INCH_10.name());
-        lbcALS.getLBC().setAccessPurposes(List.of(
-                AccessPurpose.RFID.name(), AccessPurpose.BAR_CODE.name()));
-        lbcALS.getLBC().setPaymentPurpose(PaymentPurpose.NONE.name());
-        lbcALS.getLBC().setPrinterPurpose(PrinterPurpose.ABSENT.name());
+        FunctionalConfigurationDTO lbcFunctional = lbcALS.getLBC().getFunctionalConfiguration();
+        lbcFunctional.setDisplay(DisplayPurpose.INCH_10);
+        lbcFunctional.setAccess(Set.of(AccessPurpose.RFID, AccessPurpose.BAR_CODE));
+        lbcFunctional.setPayment(PaymentPurpose.NONE);
+        lbcFunctional.setPrinter(PrinterPurpose.ABSENT);
         lbcALS.getLBC().setEquipmentSelections(List.of(
                 new EquipmentSelectionDTO(display.getId(), 1),
                 new EquipmentSelectionDTO(barcode.getId(), 2),
@@ -646,7 +648,7 @@ class PersistenceIntegrationTest {
             Equipment barcodeScanner = persistEquipment(
                     EquipmentFunctionalType.ACCESS, AccessPurpose.BAR_CODE,
                     EquipmentCategory.BAR_READER, "Сканер штрихкода для LC");
-            changedLCDTO.setAccessPurposes(List.of(AccessPurpose.BAR_CODE.name()));
+            changedLCDTO.getFunctionalConfiguration().setAccess(Set.of(AccessPurpose.BAR_CODE));
             changedLCDTO.setEquipmentSelections(List.of(
                     new EquipmentSelectionDTO(barcodeScanner.getId(), 1)));
             ALS changedWithLC = projectService.saveLCAtProject(
@@ -656,12 +658,12 @@ class PersistenceIntegrationTest {
                     alsService.restoreLC(changedLCDTO, changedALS)
             );
             assertEquals(
-                    1,
-                    LCDtoMapper.toDto(changedWithLC.getLC()).getBarReaderQuantity()
+                    List.of(new EquipmentSelectionDTO(barcodeScanner.getId(), 1)),
+                    LCDtoMapper.toDto(changedWithLC.getLC()).getEquipmentSelections()
             );
 
             LBCDTO changedLBCDTO = LBCDtoMapper.toDto(independentConfiguration.getLBC());
-            changedLBCDTO.setAccessPurposes(List.of(AccessPurpose.BAR_CODE.name()));
+            changedLBCDTO.getFunctionalConfiguration().setAccess(Set.of(AccessPurpose.BAR_CODE));
             changedLBCDTO.setEquipmentSelections(List.of(
                     new EquipmentSelectionDTO(barcodeScanner.getId(), 1)));
             ALS changedWithLBC = projectService.saveLBCAtProject(
@@ -671,8 +673,9 @@ class PersistenceIntegrationTest {
                     alsService.restoreLBC(changedLBCDTO, independentConfiguration)
             );
             assertEquals(
-                    List.of(AccessPurpose.BAR_CODE.name()),
-                    LBCDtoMapper.toDto(changedWithLBC.getLBC()).getAccessPurposes()
+                    Set.of(AccessPurpose.BAR_CODE),
+                    LBCDtoMapper.toDto(changedWithLBC.getLBC())
+                            .getFunctionalConfiguration().getAccess()
             );
 
             ALS regeneratedLBC = projectService.replaceWithNewLBCAtProject(
@@ -720,15 +723,20 @@ class PersistenceIntegrationTest {
                     .filter(value -> value.getId().equals(changedWithLC.getId()))
                     .findFirst()
                     .orElseThrow();
-            assertEquals(1, persistedLCConfiguration.getLC().getBarReaderQuantity());
+            assertEquals(
+                    List.of(new EquipmentSelectionDTO(barcodeScanner.getId(), 1)),
+                    persistedLCConfiguration.getLC().getEquipmentSelections()
+            );
 
             ALSDTO persistedLBCConfiguration = restoredDTO.getAlsList().stream()
                     .filter(value -> value.getId().equals(regeneratedLBC.getId()))
                     .findFirst()
                     .orElseThrow();
             assertEquals(
-                    LBCDtoMapper.toDto(regeneratedLBC.getLBC()).getAccessMethods(),
-                    persistedLBCConfiguration.getLBC().getAccessMethods()
+                    LBCDtoMapper.toDto(regeneratedLBC.getLBC())
+                            .getFunctionalConfiguration().getAccess(),
+                    persistedLBCConfiguration.getLBC()
+                            .getFunctionalConfiguration().getAccess()
             );
         } finally {
             SecurityContextHolder.clearContext();

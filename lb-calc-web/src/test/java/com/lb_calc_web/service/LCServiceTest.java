@@ -99,10 +99,7 @@ class LCServiceTest {
                 Map.of(equipment, 2)
         );
         LCDTO dto = TestDataFactory.validLCDTO(17L);
-        dto.setDisplayPurpose(null);
-        dto.setAccessPurposes(null);
-        dto.setPaymentPurpose(null);
-        dto.setPrinterPurpose(null);
+        dto.setFunctionalConfiguration(null);
         dto.setEquipmentSelections(null);
 
         LC restored = service.restoreDomain(dto, fallback);
