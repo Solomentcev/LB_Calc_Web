@@ -65,7 +65,7 @@ class EquipmentRequirementResolverTest {
     void resolve_barcode_shouldAddCompatibleReaderAndPrinter() {
         stubDefaults();
         when(catalog.findActiveDefault("BAR_READER"))
-                .thenReturn(equipment("BAR_READER", "BAR_READER_1D", true, false, false, false));
+                .thenReturn(equipment("BAR_READER", "BAR_READER_1D"));
 
         ControlConfiguration source = configurationWithAccess(AccessMethod.BARCODE);
         ControlConfiguration result = resolver.resolve(source);
@@ -77,7 +77,7 @@ class EquipmentRequirementResolverTest {
     void resolve_qrCode_shouldRequireTwoDimensionalReaderAndPrinter() {
         stubDefaults();
         when(catalog.findActiveDefault("BAR_READER"))
-                .thenReturn(equipment("BAR_READER", "BAR_READER_2D", true, true, false, false));
+                .thenReturn(equipment("BAR_READER", "BAR_READER_2D"));
 
         ControlConfiguration source = configurationWithAccess(AccessMethod.QR_CODE);
         ControlConfiguration result = resolver.resolve(source);
@@ -89,7 +89,7 @@ class EquipmentRequirementResolverTest {
     void resolve_rfid_shouldAddReaderWithoutPrinter() {
         stubDefaults();
         when(catalog.findActiveDefault("RFID_READER"))
-                .thenReturn(equipment("RFID_READER", "RFID_READER_STANDARD", false, false, true, false));
+                .thenReturn(equipment("RFID_READER", "RFID_READER_STANDARD"));
 
         ControlConfiguration source = configurationWithAccess(AccessMethod.RFID);
         ControlConfiguration result = resolver.resolve(source);
@@ -242,13 +242,23 @@ class EquipmentRequirementResolverTest {
     }
 
     private Equipment equipment(String category, String id) {
-        return equipment(category, id, false, false, false, "PRINTER".equals(category));
-    }
-
-    private Equipment equipment(String category, String id, boolean barcode1d,
-                                boolean barcode2d, boolean rfid, boolean print) {
-        return new Equipment(id, category, id, "", 0, 0, 0,
-                0, 0, 0, barcode1d, barcode2d, rfid, print);
+        EquipmentCategory equipmentCategory = EquipmentCategory.valueOf(category);
+        EquipmentPurpose purpose = switch (equipmentCategory) {
+            case DISPLAY -> DisplayPurpose.INCH_10;
+            case BAR_READER -> id.endsWith("_2D")
+                    ? AccessPurpose.QR_CODE : AccessPurpose.BAR_CODE;
+            case RFID_READER -> AccessPurpose.RFID;
+            case PAYMENT_TERMINAL -> PaymentPurpose.CARDS;
+            case CASH_ACCEPTOR -> PaymentPurpose.CASH;
+            case PRINTER -> PrinterPurpose.PRESENT;
+            case COMPUTER -> SystemPurpose.COMPUTER;
+            case LOCK_CONTROLLER -> SystemPurpose.LOCK_CONTROL;
+            case POWER_SUPPLY -> SystemPurpose.POWER_SUPPLY;
+            case UPS -> SystemPurpose.BACKUP_POWER;
+            case MODEM, ROUTER, ANTENNA, OTHER -> SystemPurpose.OTHER;
+        };
+        return new Equipment(id, equipmentCategory.getFunctionalType(), purpose,
+                equipmentCategory, id, "", 0, 0, 0);
     }
 
     private boolean hasCategory(ControlConfiguration configuration, String category) {

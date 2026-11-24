@@ -3,7 +3,12 @@ package com.lb_calc_web.domain.equipment;
 /** Принтер, устанавливаемый в модуль управления. */
 public class Printer extends Equipment {
     public static final String CATALOG_POSITION_ID = "PRINTER_STANDARD";
-    public Printer() { super(CATALOG_POSITION_ID, "Принтер"); }
+
+    public Printer() {
+        super(CATALOG_POSITION_ID, EquipmentFunctionalType.PRINTER, PrinterPurpose.PRESENT,
+                EquipmentCategory.PRINTER, "Принтер", "Принтер", 0, 0, 0);
+    }
+
     @Override public boolean isPrinter() { return true; }
     @Override public String getCategory() { return "PRINTER"; }
     @Override public int getWidth() { return 0; }

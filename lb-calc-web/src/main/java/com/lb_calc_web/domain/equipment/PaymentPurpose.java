@@ -1,9 +1,14 @@
 package com.lb_calc_web.domain.equipment;
 
-/** Способы оплаты, поддерживаемые оборудованием. */
-public enum PaymentPurpose {
+/** Назначение оборудования для проведения платежей. */
+public enum PaymentPurpose implements EquipmentPurpose {
     NONE,
     CARDS,
     CASH,
-    CARDS_AND_CASH
+    CARDS_AND_CASH;
+
+    @Override
+    public EquipmentFunctionalType getFunctionalType() {
+        return EquipmentFunctionalType.PAYMENT;
+    }
 }

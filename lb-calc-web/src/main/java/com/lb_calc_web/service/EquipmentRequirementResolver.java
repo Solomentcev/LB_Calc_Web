@@ -2,8 +2,10 @@ package com.lb_calc_web.service;
 
 import com.lb_calc_web.domain.attributes.AccessMethod;
 import com.lb_calc_web.domain.attributes.Payment;
+import com.lb_calc_web.domain.equipment.AccessPurpose;
 import com.lb_calc_web.domain.equipment.Equipment;
 import com.lb_calc_web.domain.equipment.EquipmentItem;
+import com.lb_calc_web.domain.equipment.PrinterPurpose;
 import com.lb_calc_web.domain.model.ControlConfiguration;
 import com.lb_calc_web.domain.model.EquipmentConfiguration;
 import org.springframework.stereotype.Service;
@@ -63,7 +65,6 @@ public class EquipmentRequirementResolver {
 
         if (requiresBarcode || requiresQrCode) requiredCategories.add("BAR_READER");
         if (requiresRfid) requiredCategories.add("RFID_READER");
-        // Дисплей — самостоятельный функциональный выбор; PIN также требует его.
         if (requiresDisplay || requiresPin) requiredCategories.add("DISPLAY");
 
         boolean requiresPrinter = configuration.getPayment() != Payment.NONE
@@ -85,7 +86,6 @@ public class EquipmentRequirementResolver {
         if (requiresDisplay || requiresPin) {
             ensureSingleEquipment(selected, "DISPLAY", "Для модуля выбран дисплей");
         }
-
         if (requiredCategories.contains(PAYMENT_TERMINAL)) {
             ensureSingleEquipment(selected, PAYMENT_TERMINAL,
                     "Для безналичной оплаты нужен банковский терминал");
@@ -98,21 +98,24 @@ public class EquipmentRequirementResolver {
         if (requiresBarcode || requiresQrCode) {
             ensureSingleEquipment(selected, "BAR_READER",
                     "Для выбранных способов доступа нужен один сканер штрихкодов");
-            Predicate<Equipment> barcodeCompatibility = equipment ->
-                    (!requiresBarcode || equipment.supportsBarcode1d()
-                            || equipment.supportsBarcode2d())
-                            && (!requiresQrCode || equipment.supportsBarcode2d());
+            Predicate<Equipment> compatibility = equipment ->
+                    equipment.getPurpose() == AccessPurpose.BAR_CODE
+                            || equipment.getPurpose() == AccessPurpose.QR_CODE;
+            if (requiresQrCode) {
+                compatibility = equipment -> equipment.getPurpose() == AccessPurpose.QR_CODE;
+            }
             String message = requiresQrCode
-                    ? "Для выбранных способов доступа нужен совместимый 2D-сканер"
-                    : "Для доступа по штрихкоду нужен совместимый сканер";
-            ensureEquipment(selected, "BAR_READER", barcodeCompatibility, message);
+                    ? "Для выбранных способов доступа нужен сканер с назначением QR_CODE"
+                    : "Для доступа по штрихкоду нужен сканер с назначением BAR_CODE";
+            ensureEquipment(selected, "BAR_READER", compatibility, message);
         }
 
         if (requiresRfid) {
             ensureSingleEquipment(selected, "RFID_READER",
                     "Для доступа по RFID нужен один RFID-считыватель");
-            ensureEquipment(selected, "RFID_READER", Equipment::supportsRfid,
-                    "Для доступа по RFID нужен совместимый RFID-считыватель");
+            ensureEquipment(selected, "RFID_READER",
+                    equipment -> equipment.getPurpose() == AccessPurpose.RFID,
+                    "Для доступа по RFID нужен RFID-считыватель с назначением RFID");
         }
 
         if (requiresPin) {
@@ -123,8 +126,9 @@ public class EquipmentRequirementResolver {
         if (requiresPrinter) {
             ensureSingleEquipment(selected, "PRINTER",
                     "Для выбранных функций нужен один принтер");
-            ensureEquipment(selected, "PRINTER", Equipment::supportsPrint,
-                    "Для выбранных функций нужен совместимый принтер");
+            ensureEquipment(selected, "PRINTER",
+                    equipment -> equipment.getPurpose() == PrinterPurpose.PRESENT,
+                    "Для выбранных функций нужен принтер");
         }
 
         return new ControlConfiguration(
@@ -163,7 +167,7 @@ public class EquipmentRequirementResolver {
         if (!categoryItems.isEmpty()) {
             if (categoryItems.stream().noneMatch(compatibility)) {
                 throw new IllegalArgumentException(errorMessage
-                        + ". Выбранная модель не поддерживает требуемую функцию.");
+                        + ". Выбранная модель не соответствует требуемому назначению.");
             }
             return;
         }

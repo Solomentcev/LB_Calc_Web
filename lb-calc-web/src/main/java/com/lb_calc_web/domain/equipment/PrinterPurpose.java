@@ -1,8 +1,13 @@
 package com.lb_calc_web.domain.equipment;
 
-/** Вариант наличия и типа принтера. */
-public enum PrinterPurpose {
+/** Назначение принтера в управляющем модуле. */
+public enum PrinterPurpose implements EquipmentPurpose {
     PRESENT,
     ABSENT,
-    OTHER
+    OTHER;
+
+    @Override
+    public EquipmentFunctionalType getFunctionalType() {
+        return EquipmentFunctionalType.PRINTER;
+    }
 }

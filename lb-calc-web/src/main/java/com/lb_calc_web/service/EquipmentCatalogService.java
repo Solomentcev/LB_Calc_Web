@@ -166,11 +166,45 @@ public class EquipmentCatalogService {
 
     /** Преобразует запись каталога в независимую доменную позицию. */
     public Equipment toDomain(EquipmentCatalogEntity item) {
-        return new Equipment(item.getCatalogPositionId(), item.getCategory(),
-                item.getName(), item.getDescription(), item.getWidth(), item.getHeight(),
-                item.getDepth(), item.getMinimumModuleWidth(), item.getDisplayWidth(),
-                item.getDisplayHeight(), item.isSupportsBarcode1d(),
-                item.isSupportsBarcode2d(), item.isSupportsRfid(), item.isSupportsPrint());
+        com.lb_calc_web.domain.equipment.EquipmentCategory category =
+                com.lb_calc_web.domain.equipment.EquipmentCategory.valueOf(item.getCategory());
+        com.lb_calc_web.domain.equipment.EquipmentFunctionalType functionalType =
+                category.getFunctionalType();
+        com.lb_calc_web.domain.equipment.EquipmentPurpose purpose = resolvePurpose(item, category);
+
+        int width = category == com.lb_calc_web.domain.equipment.EquipmentCategory.DISPLAY
+                ? item.getMinimumModuleWidth() : item.getWidth();
+        int height = category == com.lb_calc_web.domain.equipment.EquipmentCategory.DISPLAY
+                ? item.getDisplayHeight() : item.getHeight();
+
+        return new Equipment(item.getCatalogPositionId(), functionalType, purpose, category,
+                item.getName(), item.getDescription(), width, height, item.getDepth());
+    }
+
+    private com.lb_calc_web.domain.equipment.EquipmentPurpose resolvePurpose(
+            EquipmentCatalogEntity item,
+            com.lb_calc_web.domain.equipment.EquipmentCategory category) {
+        return switch (category) {
+            case DISPLAY -> switch (item.getCatalogPositionId()) {
+                case "DISPLAY_LC10" -> com.lb_calc_web.domain.equipment.DisplayPurpose.INCH_10;
+                case "DISPLAY_LC17" -> com.lb_calc_web.domain.equipment.DisplayPurpose.INCH_17;
+                case "DISPLAY_LC19" -> com.lb_calc_web.domain.equipment.DisplayPurpose.INCH_19;
+                default -> com.lb_calc_web.domain.equipment.DisplayPurpose.CUSTOM;
+            };
+            case BAR_READER -> item.getCatalogPositionId().endsWith("_2D")
+                    ? com.lb_calc_web.domain.equipment.AccessPurpose.QR_CODE
+                    : com.lb_calc_web.domain.equipment.AccessPurpose.BAR_CODE;
+            case RFID_READER -> com.lb_calc_web.domain.equipment.AccessPurpose.RFID;
+            case PAYMENT_TERMINAL -> com.lb_calc_web.domain.equipment.PaymentPurpose.CARDS;
+            case CASH_ACCEPTOR -> com.lb_calc_web.domain.equipment.PaymentPurpose.CASH;
+            case PRINTER -> com.lb_calc_web.domain.equipment.PrinterPurpose.PRESENT;
+            case COMPUTER -> com.lb_calc_web.domain.equipment.SystemPurpose.COMPUTER;
+            case LOCK_CONTROLLER -> com.lb_calc_web.domain.equipment.SystemPurpose.LOCK_CONTROL;
+            case POWER_SUPPLY -> com.lb_calc_web.domain.equipment.SystemPurpose.POWER_SUPPLY;
+            case UPS -> com.lb_calc_web.domain.equipment.SystemPurpose.BACKUP_POWER;
+            case MODEM, ROUTER, ANTENNA, OTHER ->
+                    com.lb_calc_web.domain.equipment.SystemPurpose.OTHER;
+        };
     }
 
     public List<EquipmentCatalogEntity> findActive() {
@@ -272,6 +306,11 @@ public class EquipmentCatalogService {
                                       boolean barcode2d, boolean rfid, boolean print) {
         if (category == null || category.isBlank()) {
             throw new IllegalArgumentException("Категория оборудования обязательна");
+        }
+        try {
+            com.lb_calc_web.domain.equipment.EquipmentCategory.valueOf(category);
+        } catch (IllegalArgumentException exception) {
+            throw new IllegalArgumentException("Неизвестная категория оборудования: " + category, exception);
         }
         boolean valid = switch (category) {
             case "DISPLAY" -> !barcode1d && !barcode2d && !rfid && !print;

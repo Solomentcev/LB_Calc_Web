@@ -3,7 +3,12 @@ package com.lb_calc_web.domain.equipment;
 /** RFID-считыватель, устанавливаемый в модуль управления. */
 public class RfidReader extends Equipment {
     public static final String CATALOG_POSITION_ID = "RFID_READER_STANDARD";
-    public RfidReader() { super(CATALOG_POSITION_ID, "RFID-считыватель"); }
+
+    public RfidReader() {
+        super(CATALOG_POSITION_ID, EquipmentFunctionalType.ACCESS, AccessPurpose.RFID,
+                EquipmentCategory.RFID_READER, "RFID-считыватель", "RFID-считыватель", 0, 0, 0);
+    }
+
     @Override public boolean isRfidReader() { return true; }
     @Override public String getCategory() { return "RFID_READER"; }
     @Override public int getWidth() { return 0; }
