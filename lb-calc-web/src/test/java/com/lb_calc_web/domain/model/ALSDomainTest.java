@@ -117,4 +117,31 @@ class ALSDomainTest {
                 als.getFunctionalConfiguration().getPrinter());
     }
 
+    @Test
+    void setControlConfiguration_shouldUpdateAlsFunctionalConfiguration() {
+        ALS als = TestDataFactory.validALS(72L);
+        FunctionalConfiguration functional = new FunctionalConfiguration(
+                com.lb_calc_web.domain.equipment.DisplayPurpose.INCH_19,
+                java.util.Set.of(com.lb_calc_web.domain.equipment.AccessPurpose.PIN),
+                com.lb_calc_web.domain.equipment.PaymentPurpose.CARDS_AND_CASH,
+                com.lb_calc_web.domain.equipment.PrinterPurpose.PRESENT
+        );
+        var scanner = new com.lb_calc_web.domain.equipment.Equipment(
+                72L,
+                com.lb_calc_web.domain.equipment.EquipmentFunctionalType.ACCESS,
+                com.lb_calc_web.domain.equipment.AccessPurpose.PIN,
+                com.lb_calc_web.domain.equipment.EquipmentCategory.PIN_PAD,
+                "PIN-панель", "", 0, 0, 0
+        );
+        ControlConfiguration configuration =
+                new ControlConfiguration(functional, java.util.Map.of(scanner, 1));
+
+        als.setControlConfiguration(configuration);
+
+        assertEquals(functional, als.getFunctionalConfiguration());
+        assertEquals(functional, als.getControlModule()
+                .getControlConfiguration().getFunctionalConfiguration());
+        assertEquals(java.util.Map.of(scanner, 1), als.getControlModule().getEquipment());
+    }
+
 }
