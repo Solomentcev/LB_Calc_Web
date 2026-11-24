@@ -23,7 +23,6 @@ public interface LCRepository extends JpaRepository<LCEntity, Long> {
               and entity.bottomFrame = :bottomFrame
               and entity.colorBody = :colorBody
               and entity.colorDoor = :colorDoor
-              and entity.payment = :payment
             """)
     List<LCEntity> findCandidates(
             @Param("height") int height,
@@ -32,7 +31,6 @@ public interface LCRepository extends JpaRepository<LCEntity, Long> {
             @Param("upperFrame") int upperFrame,
             @Param("bottomFrame") int bottomFrame,
             @Param("colorBody") Colors colorBody,
-            @Param("colorDoor") Colors colorDoor,
-            @Param("payment") Payment payment
+            @Param("colorDoor") Colors colorDoor
     );
 }

@@ -31,7 +31,6 @@ public interface LBCRepository extends JpaRepository<LBCEntity, Long> {
               and entity.doorThickness = :doorThickness
               and entity.directionDoorOpening = :directionDoorOpening
               and entity.countCells = :countCells
-              and entity.payment = :payment
             """)
     List<LBCEntity> findCandidates(
             @Param("height") int height,
@@ -47,7 +46,6 @@ public interface LBCRepository extends JpaRepository<LBCEntity, Long> {
             @Param("serviceZoneWidth") int serviceZoneWidth,
             @Param("doorThickness") int doorThickness,
             @Param("directionDoorOpening") DirectionDoorOpening directionDoorOpening,
-            @Param("countCells") int countCells,
-            @Param("payment") Payment payment
+            @Param("countCells") int countCells
     );
 }
