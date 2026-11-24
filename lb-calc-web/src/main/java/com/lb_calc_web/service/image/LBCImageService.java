@@ -283,6 +283,7 @@ public final class LBCImageService {
         g2d.setColor(Color.BLACK);
 
         if (lbc.getFunctionalConfiguration() != null
+                && lbc.getFunctionalConfiguration().getAccess() != null
                 && (lbc.getFunctionalConfiguration().getAccess().contains(
                         com.lb_calc_web.domain.equipment.AccessPurpose.BAR_CODE)
                 || lbc.getFunctionalConfiguration().getAccess().contains(
@@ -296,6 +297,7 @@ public final class LBCImageService {
         }
 
         if (lbc.getFunctionalConfiguration() != null
+                && lbc.getFunctionalConfiguration().getPrinter() != null
                 && lbc.getFunctionalConfiguration().getPrinter()
                 != com.lb_calc_web.domain.equipment.PrinterPurpose.ABSENT) {
             g2d.fillRect(
@@ -307,6 +309,7 @@ public final class LBCImageService {
         }
 
         if (lbc.getFunctionalConfiguration() != null
+                && lbc.getFunctionalConfiguration().getAccess() != null
                 && lbc.getFunctionalConfiguration().getAccess().contains(
                         com.lb_calc_web.domain.equipment.AccessPurpose.RFID)) {
             g2d.fillRect(
