@@ -325,6 +325,7 @@
                         <input type="hidden" th:field="*{alsList[__${item.index}__].LC.functionalConfiguration.payment}">
                         <input type="hidden" th:field="*{alsList[__${item.index}__].LC.functionalConfiguration.printer}">
                         <input type="hidden" th:name="|alsList[${item.index}].LC.equipmentSelectionsProvided|" value="true">
+                        <input type="hidden" th:name="|_alsList[${item.index}].LC.functionalConfiguration.access|" value="on">
                         <input type="hidden"
                                th:each="purpose : ${als.LC.functionalConfiguration.access}"
                                th:name="|alsList[${item.index}].LC.functionalConfiguration.access|"
@@ -391,6 +392,7 @@
                         <input type="hidden" th:field="*{alsList[__${item.index}__].LBC.functionalConfiguration.payment}">
                         <input type="hidden" th:field="*{alsList[__${item.index}__].LBC.functionalConfiguration.printer}">
                         <input type="hidden" th:name="|alsList[${item.index}].LBC.equipmentSelectionsProvided|" value="true">
+                        <input type="hidden" th:name="|_alsList[${item.index}].LBC.functionalConfiguration.access|" value="on">
                         <input type="hidden"
                                th:each="purpose : ${als.LBC.functionalConfiguration.access}"
                                th:name="|alsList[${item.index}].LBC.functionalConfiguration.access|"
