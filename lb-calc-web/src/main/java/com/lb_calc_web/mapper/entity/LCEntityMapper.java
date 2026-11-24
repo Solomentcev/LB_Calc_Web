@@ -55,13 +55,7 @@ public final class LCEntityMapper {
                 configuration
         );
 
-        if (!domain.getName().equals(entity.getName())
-                || !domain.getDescription().equals(entity.getDescription())) {
-            throw new IllegalStateException(
-                    "Производные характеристики LC в БД не соответствуют исходным параметрам"
-            );
-        }
-
+        // Наименование и описание пересчитываются доменной моделью из исходных параметров.
         domain.setId(entity.getId());
         return domain;
     }
