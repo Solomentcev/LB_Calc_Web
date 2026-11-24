@@ -211,31 +211,20 @@
                 <input type="hidden" th:field="*{LC.depth}">
                 <input type="hidden" th:field="*{LC.upperFrame}">
                 <input type="hidden" th:field="*{LC.bottomFrame}">
-                <input type="hidden" th:field="*{LC.display}">
-                <input type="hidden" th:field="*{LC.barReader}">
-                <input type="hidden" th:field="*{LC.payment}">
-                <input type="hidden" th:field="*{LC.printer}">
-                <input type="hidden" th:field="*{LC.rfidReader}">
-                <input type="hidden" th:field="*{LC.displayQuantity}">
-                <input type="hidden" th:field="*{LC.barReaderQuantity}">
-                <input type="hidden" th:field="*{LC.printerQuantity}">
-                <input type="hidden" th:field="*{LC.rfidReaderQuantity}">
+                <input type="hidden" name="LC.equipmentSelectionsProvided" value="true">
+                <input type="hidden" th:field="*{LC.functionalConfiguration.display}">
+                <input type="hidden" th:field="*{LC.functionalConfiguration.payment}">
+                <input type="hidden" th:field="*{LC.functionalConfiguration.printer}">
                 <input type="hidden" th:field="*{LC.colorBody}">
                 <input type="hidden" th:field="*{LC.colorDoor}">
-                <input type="hidden" th:field="*{LC.displayWidth}">
-                <input type="hidden" th:field="*{LC.displayHeight}">
                 <input type="hidden"
-                       th:each="method, methodStat : ${als.LC.accessMethods}"
-                       th:name="|LC.accessMethods[${methodStat.index}]|"
-                       th:value="${method}">
-                <input type="hidden"
-                       th:each="option, optionStat : ${als.LC.printOptions}"
-                       th:name="|LC.printOptions[${optionStat.index}]|"
-                       th:value="${option}">
+                       th:each="purpose, purposeStat : ${als.LC.functionalConfiguration.access}"
+                       th:name="|LC.functionalConfiguration.access[${purposeStat.index}]|"
+                       th:value="${purpose}">
                 <input type="hidden"
                        th:each="selection, selectionStat : ${als.LC.equipmentSelections}"
-                       th:name="|LC.equipmentSelections[${selectionStat.index}].catalogPositionId|"
-                       th:value="${selection.catalogPositionId}">
+                       th:name="|LC.equipmentSelections[${selectionStat.index}].equipmentId|"
+                       th:value="${selection.equipmentId}">
                 <input type="hidden"
                        th:each="selection, selectionStat : ${als.LC.equipmentSelections}"
                        th:name="|LC.equipmentSelections[${selectionStat.index}].quantity|"
@@ -257,7 +246,7 @@
 
                         <input type="text"
                                class="form-control"
-                               th:value="${als.LC.display}"
+                               th:value="${als.LC.functionalConfiguration.display}"
                                readonly aria-label="Поле формы">
                     </div>
 
@@ -266,7 +255,7 @@
 
                         <input type="text"
                                class="form-control"
-                               th:value="${als.LC.payment}"
+                               th:value="${als.LC.functionalConfiguration.payment}"
                                readonly aria-label="Поле формы">
                     </div>
 
@@ -275,7 +264,7 @@
 
                         <input type="text"
                                class="form-control"
-                               th:value="${als.LC.printer}"
+                               th:value="${als.LC.functionalConfiguration.printer}"
                                readonly aria-label="Поле формы">
                     </div>
 
@@ -284,7 +273,7 @@
 
                         <input type="text"
                                class="form-control"
-                               th:value="${als.LC.barReader}"
+                               th:value="${als.LC.functionalConfiguration.access}"
                                readonly aria-label="Поле формы">
                     </div>
 
@@ -293,7 +282,7 @@
 
                         <input type="text"
                                class="form-control"
-                               th:value="${als.LC.rfidReader}"
+                               th:value="${als.LC.functionalConfiguration.access}"
                                readonly aria-label="Поле формы">
                     </div>
 
@@ -347,20 +336,22 @@
                 <input type="hidden" th:field="*{LBC.directionDoorOpening}">
                 <input type="hidden" th:field="*{LBC.colorBody}">
                 <input type="hidden" th:field="*{LBC.colorDoor}">
-                <input type="hidden" th:field="*{LBC.display}">
-                <input type="hidden" th:field="*{LBC.barReader}">
-                <input type="hidden" th:field="*{LBC.payment}">
-                <input type="hidden" th:field="*{LBC.printer}">
-                <input type="hidden" th:field="*{LBC.rfidReader}">
-
+                <input type="hidden" name="LBC.equipmentSelectionsProvided" value="true">
+                <input type="hidden" th:field="*{LBC.functionalConfiguration.display}">
+                <input type="hidden" th:field="*{LBC.functionalConfiguration.payment}">
+                <input type="hidden" th:field="*{LBC.functionalConfiguration.printer}">
                 <input type="hidden"
-                       th:each="method, methodStat : ${als.LBC.accessMethods}"
-                       th:name="|LBC.accessMethods[${methodStat.index}]|"
-                       th:value="${method}">
+                       th:each="purpose, purposeStat : ${als.LBC.functionalConfiguration.access}"
+                       th:name="|LBC.functionalConfiguration.access[${purposeStat.index}]|"
+                       th:value="${purpose}">
                 <input type="hidden"
-                       th:each="option, optionStat : ${als.LBC.printOptions}"
-                       th:name="|LBC.printOptions[${optionStat.index}]|"
-                       th:value="${option}">
+                       th:each="selection, selectionStat : ${als.LBC.equipmentSelections}"
+                       th:name="|LBC.equipmentSelections[${selectionStat.index}].equipmentId|"
+                       th:value="${selection.equipmentId}">
+                <input type="hidden"
+                       th:each="selection, selectionStat : ${als.LBC.equipmentSelections}"
+                       th:name="|LBC.equipmentSelections[${selectionStat.index}].quantity|"
+                       th:value="${selection.quantity}">
 
                 <div class="row">
                     <div class="col-md-2">
@@ -377,11 +368,11 @@
                     </div>
                     <div class="col-md-3">
                         <strong>Display:</strong>
-                        <span th:text="${als.LBC.display}"></span>
+                        <span th:text="${als.LBC.functionalConfiguration.display}"></span>
                     </div>
                     <div class="col-md-3">
                         <strong>Payment:</strong>
-                        <span th:text="${als.LBC.payment}"></span>
+                        <span th:text="${als.LBC.functionalConfiguration.payment}"></span>
                     </div>
                 </div>
 
