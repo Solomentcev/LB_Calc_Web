@@ -1,7 +1,6 @@
 package com.lb_calc_web.mapper.dto;
 
 import com.lb_calc_web.domain.equipment.CatalogEquipment;
-import com.lb_calc_web.dto.EquipmentSelectionDTO;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;

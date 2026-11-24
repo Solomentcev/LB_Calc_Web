@@ -6,7 +6,6 @@ import com.lb_calc_web.domain.equipment.Equipment;
 import com.lb_calc_web.domain.model.ControlConfiguration;
 import com.lb_calc_web.domain.model.LC;
 import com.lb_calc_web.dto.LCDTO;
-import com.lb_calc_web.dto.EquipmentSelectionDTO;
 
 import java.util.List;
 import java.util.function.Function;

@@ -1,8 +1,6 @@
 package com.lb_calc_web.controller.api;
 
-import com.lb_calc_web.entity.EquipmentCatalogEntity;
 import com.lb_calc_web.handler.RestExceptionHandler;
-import com.lb_calc_web.service.EquipmentCatalogService;
 import com.lb_calc_web.security.jwt.JwtService;
 import com.lb_calc_web.service.EmployeeService;
 import org.junit.jupiter.api.Test;

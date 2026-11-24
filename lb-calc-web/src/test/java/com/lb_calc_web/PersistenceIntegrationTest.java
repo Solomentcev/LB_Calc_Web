@@ -10,7 +10,6 @@ import com.lb_calc_web.mapper.dto.LBDtoMapper;
 import com.lb_calc_web.mapper.dto.LCDtoMapper;
 import com.lb_calc_web.mapper.dto.ProjectDtoMapper;
 import com.lb_calc_web.dto.ALSDTO;
-import com.lb_calc_web.dto.EquipmentSelectionDTO;
 import com.lb_calc_web.dto.LCDTO;
 import com.lb_calc_web.dto.LBCDTO;
 import com.lb_calc_web.dto.LBDTO;

@@ -6,7 +6,6 @@ import com.lb_calc_web.domain.equipment.Display;
 import com.lb_calc_web.domain.equipment.Equipment;
 import com.lb_calc_web.domain.model.LC;
 import com.lb_calc_web.dto.LCDTO;
-import com.lb_calc_web.dto.EquipmentSelectionDTO;
 import com.lb_calc_web.mapper.dto.LCDtoMapper;
 import com.lb_calc_web.service.validation.ValidationResult;
 import com.lb_calc_web.entity.LCEntity;

@@ -13,7 +13,6 @@ import com.lb_calc_web.dto.ALSDTO;
 import com.lb_calc_web.dto.ALSModuleOrderDTO;
 import com.lb_calc_web.dto.LBDTO;
 import com.lb_calc_web.dto.LBCDTO;
-import com.lb_calc_web.dto.EquipmentSelectionDTO;
 
 import java.util.function.Function;
 

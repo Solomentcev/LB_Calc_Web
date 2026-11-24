@@ -8,7 +8,6 @@ import com.lb_calc_web.domain.equipment.Equipment;
 import com.lb_calc_web.domain.model.ControlConfiguration;
 import com.lb_calc_web.domain.model.LBC;
 import com.lb_calc_web.entity.LBCEntity;
-import com.lb_calc_web.entity.EquipmentQuantityEmbeddable;
 
 import java.util.List;
 import java.util.Objects;

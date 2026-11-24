@@ -1,6 +1,5 @@
 package com.lb_calc_web.service;
 
-import com.lb_calc_web.entity.EquipmentCatalogEntity;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
