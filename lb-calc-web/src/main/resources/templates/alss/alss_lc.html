@@ -24,11 +24,11 @@
         <input type="hidden" th:field="*{colorDoor}">
         <input type="hidden" th:field="*{name}">
         <div class="row g-3">
-            <div class="col-md-3"><label class="form-label">Высота</label><input class="form-control" type="number" th:field="*{height}" readonly></div>
-            <div class="col-md-3"><label class="form-label">Ширина</label><input class="form-control" type="number" th:field="*{width}" readonly></div>
-            <div class="col-md-3"><label class="form-label">Глубина</label><input class="form-control" type="number" th:field="*{depth}" readonly></div>
-            <div class="col-md-3"><label class="form-label">Верхняя рама</label><input class="form-control" type="number" th:field="*{upperFrame}" readonly></div>
-            <div class="col-md-3"><label class="form-label">Нижняя рама</label><input class="form-control" type="number" th:field="*{bottomFrame}" readonly></div>
+            <div class="col-md-3"><label class="form-label">Высота</label><input class="form-control" type="number" th:value="*{height}" readonly></div>
+            <div class="col-md-3"><label class="form-label">Ширина</label><input class="form-control" type="number" th:value="*{width}" readonly></div>
+            <div class="col-md-3"><label class="form-label">Глубина</label><input class="form-control" type="number" th:value="*{depth}" readonly></div>
+            <div class="col-md-3"><label class="form-label">Верхняя рама</label><input class="form-control" type="number" th:value="*{upperFrame}" readonly></div>
+            <div class="col-md-3"><label class="form-label">Нижняя рама</label><input class="form-control" type="number" th:value="*{bottomFrame}" readonly></div>
             <div class="col-md-3"><label class="form-label">Цвет корпуса</label><input class="form-control" type="text" th:value="*{colorBody}" readonly></div>
             <div class="col-md-3"><label class="form-label">Цвет дверей</label><input class="form-control" type="text" th:value="*{colorDoor}" readonly></div>
         </div>
