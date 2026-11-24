@@ -5,7 +5,6 @@ import com.lb_calc_web.domain.equipment.AccessPurpose;
 import com.lb_calc_web.domain.equipment.DisplayPurpose;
 import com.lb_calc_web.domain.equipment.PaymentPurpose;
 import com.lb_calc_web.domain.equipment.PrinterPurpose;
-import com.lb_calc_web.dto.EquipmentDTO;
 import com.lb_calc_web.mapper.dto.EquipmentDtoMapper;
 import com.lb_calc_web.service.EquipmentCatalogService;
 import com.lb_calc_web.domain.model.LC;
@@ -91,7 +90,7 @@ public class LCController {
         logger.info(
                 "Сохранение LC id={}, display={}",
                 lc.getId(),
-                lc.getDisplayPurpose()
+                lc.getFunctionalConfiguration()
         );
 
         try {

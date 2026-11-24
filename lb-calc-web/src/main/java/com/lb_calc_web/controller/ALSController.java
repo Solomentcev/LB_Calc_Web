@@ -2,7 +2,6 @@ package com.lb_calc_web.controller;
 
 import com.lb_calc_web.dto.ALSDTO;
 import com.lb_calc_web.dto.LBCDTO;
-import com.lb_calc_web.dto.EquipmentDTO;
 import com.lb_calc_web.domain.equipment.AccessPurpose;
 import com.lb_calc_web.domain.equipment.DisplayPurpose;
 import com.lb_calc_web.domain.equipment.PaymentPurpose;
@@ -128,10 +127,8 @@ public class ALSController extends BaseCatalogController {
         ALSDTO als = ALSImageService.addImages(ALSDtoMapper.toDto(domain));
 
         model.addAttribute("als", als);
-        model.addAttribute(
-                "lbc",
-                LBCImageService.addImage(LBCDtoMapper.toDto(alsService.findLBCInALS(domain, lbcId)))
-        );
+        prepareLBCForm(model,
+                LBCImageService.addImage(LBCDtoMapper.toDto(alsService.findLBCInALS(domain, lbcId))));
 
         return "alss/alss_lbc";
     }
