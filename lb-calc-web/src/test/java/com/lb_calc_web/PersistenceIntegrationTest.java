@@ -26,7 +26,6 @@ import com.lb_calc_web.dto.LBDTO;
 import com.lb_calc_web.dto.ProjectDTO;
 import com.lb_calc_web.service.ProjectService;
 import com.lb_calc_web.service.ALSService;
-import com.lb_calc_web.service.EquipmentEntityResolver;
 import com.lb_calc_web.service.EquipmentCatalogService;
 import com.lb_calc_web.entity.ALSEntity;
 import com.lb_calc_web.entity.EmployeeEntity;
@@ -85,9 +84,6 @@ class PersistenceIntegrationTest {
 
     @Autowired
     private EquipmentRepository equipmentRepository;
-
-    @Autowired
-    private EquipmentEntityResolver equipmentEntityResolver;
 
     @Autowired
     private EquipmentCatalogService equipmentCatalogService;
@@ -183,7 +179,7 @@ class PersistenceIntegrationTest {
                 module -> resolvedModules.computeIfAbsent(
                         module,
                         candidate -> moduleRepository.saveAndFlush(
-                                ModuleEntityMapper.toEntity(candidate, equipmentEntityResolver::resolve)
+                                ModuleEntityMapper.toEntity(candidate, equipment -> equipmentRepository.findById(equipment.getId()).orElseThrow())
                         )
                 )
         );
@@ -239,7 +235,7 @@ class PersistenceIntegrationTest {
                 module -> resolvedModules.computeIfAbsent(
                         module,
                         candidate -> moduleRepository.saveAndFlush(
-                                ModuleEntityMapper.toEntity(candidate, equipmentEntityResolver::resolve)
+                                ModuleEntityMapper.toEntity(candidate, equipment -> equipmentRepository.findById(equipment.getId()).orElseThrow())
                         )
                 )
         );
@@ -344,7 +340,7 @@ class PersistenceIntegrationTest {
                 module -> resolvedModules.computeIfAbsent(
                         module,
                         candidate -> moduleRepository.saveAndFlush(
-                                ModuleEntityMapper.toEntity(candidate, equipmentEntityResolver::resolve)
+                                ModuleEntityMapper.toEntity(candidate, equipment -> equipmentRepository.findById(equipment.getId()).orElseThrow())
                         )
                 )
         );
@@ -399,7 +395,7 @@ class PersistenceIntegrationTest {
                 module -> resolvedModules.computeIfAbsent(
                         module,
                         candidate -> moduleRepository.saveAndFlush(
-                                ModuleEntityMapper.toEntity(candidate, equipmentEntityResolver::resolve)
+                                ModuleEntityMapper.toEntity(candidate, equipment -> equipmentRepository.findById(equipment.getId()).orElseThrow())
                         )
                 );
 
@@ -760,7 +756,7 @@ class PersistenceIntegrationTest {
                         value.getShelfThick(), value.getServiceZoneWidth()),
                 value -> new TypeLb(value.getType(), value.getDeltaWidth(),
                         value.getShelfThick(), value.getServiceZoneWidth()),
-                equipmentEntityResolver::resolveDomain
+                equipmentCatalogService::findById
         );
     }
 
