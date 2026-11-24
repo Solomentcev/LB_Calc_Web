@@ -3,13 +3,9 @@ package com.lb_calc_web.service.image;
 
 import com.lb_calc_web.domain.attributes.Colors;
 import com.lb_calc_web.domain.attributes.DirectionDoorOpening;
-import com.lb_calc_web.domain.attributes.Payment;
-import com.lb_calc_web.domain.attributes.AccessMethod;
-import com.lb_calc_web.domain.attributes.PrintOption;
 import com.lb_calc_web.dto.LBCDTO;
 import com.lb_calc_web.mapper.dto.LBCDtoMapper;
 import com.lb_calc_web.domain.model.ControlConfiguration;
-import com.lb_calc_web.domain.model.EquipmentConfiguration;
 import com.lb_calc_web.domain.model.LBC;
 import com.lb_calc_web.domain.attributes.TypeLb;
 import com.lb_calc_web.domain.equipment.Display;

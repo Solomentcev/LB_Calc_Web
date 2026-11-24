@@ -1,9 +1,7 @@
 package com.lb_calc_web.mapper.entity;
 
 import com.lb_calc_web.TestDataFactory;
-import com.lb_calc_web.domain.equipment.BarReader;
 import com.lb_calc_web.domain.model.ControlConfiguration;
-import com.lb_calc_web.domain.model.EquipmentConfiguration;
 import com.lb_calc_web.domain.model.LBC;
 import com.lb_calc_web.domain.model.LC;
 import com.lb_calc_web.entity.EquipmentQuantityEmbeddable;

@@ -1,8 +1,6 @@
 package com.lb_calc_web.domain.model;
 
-import com.lb_calc_web.domain.equipment.BarReader;
 import com.lb_calc_web.domain.equipment.Display;
-import com.lb_calc_web.domain.equipment.RfidReader;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;

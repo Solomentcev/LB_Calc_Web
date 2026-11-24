@@ -1,12 +1,7 @@
 package com.lb_calc_web.service;
 
-import com.lb_calc_web.domain.attributes.AccessMethod;
-import com.lb_calc_web.domain.attributes.Payment;
-import com.lb_calc_web.domain.attributes.PrintOption;
 import com.lb_calc_web.domain.equipment.Equipment;
-import com.lb_calc_web.domain.equipment.EquipmentItem;
 import com.lb_calc_web.domain.model.ControlConfiguration;
-import com.lb_calc_web.domain.model.EquipmentConfiguration;
 import org.junit.jupiter.api.Test;
 
 import java.util.EnumSet;

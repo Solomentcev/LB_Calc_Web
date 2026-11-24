@@ -1,9 +1,6 @@
 package com.lb_calc_web.controller;
 
-import com.lb_calc_web.domain.attributes.AccessMethod;
 import com.lb_calc_web.domain.attributes.Colors;
-import com.lb_calc_web.domain.attributes.Payment;
-import com.lb_calc_web.domain.equipment.BarReader;
 import com.lb_calc_web.domain.equipment.Display;
 import com.lb_calc_web.domain.model.LC;
 import com.lb_calc_web.dto.LCDTO;

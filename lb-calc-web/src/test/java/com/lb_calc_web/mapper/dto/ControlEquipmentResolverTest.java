@@ -1,10 +1,7 @@
 package com.lb_calc_web.mapper.dto;
 
-import com.lb_calc_web.domain.equipment.BarReader;
 import com.lb_calc_web.domain.equipment.Display;
 import com.lb_calc_web.domain.equipment.Printer;
-import com.lb_calc_web.domain.equipment.RfidReader;
-import com.lb_calc_web.domain.model.EquipmentConfiguration;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;

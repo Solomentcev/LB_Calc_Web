@@ -1,7 +1,5 @@
 package com.lb_calc_web.controller;
 
-import com.lb_calc_web.domain.attributes.AccessMethod;
-import com.lb_calc_web.domain.attributes.PrintOption;
 import com.lb_calc_web.domain.model.LBC;
 import com.lb_calc_web.dto.LBCDTO;
 import com.lb_calc_web.mapper.dto.LBCDtoMapper;

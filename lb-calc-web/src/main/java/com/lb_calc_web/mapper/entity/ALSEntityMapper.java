@@ -3,7 +3,6 @@ package com.lb_calc_web.mapper.entity;
 import com.lb_calc_web.domain.model.ALS;
 import com.lb_calc_web.domain.model.Module;
 import com.lb_calc_web.domain.equipment.Equipment;
-import com.lb_calc_web.domain.equipment.EquipmentCatalog;
 import com.lb_calc_web.entity.ALSEntity;
 import com.lb_calc_web.entity.ALSModuleEntity;
 import com.lb_calc_web.entity.ModuleEntity;

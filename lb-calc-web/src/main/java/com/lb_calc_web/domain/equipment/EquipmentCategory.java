@@ -7,15 +7,16 @@ public enum EquipmentCategory {
     RFID_READER(EquipmentFunctionalType.ACCESS),
     PAYMENT_TERMINAL(EquipmentFunctionalType.PAYMENT),
     CASH_ACCEPTOR(EquipmentFunctionalType.PAYMENT),
-    PRINTER(EquipmentFunctionalType.PRINTER),
-    COMPUTER(EquipmentFunctionalType.SYSTEM),
-    LOCK_CONTROLLER(EquipmentFunctionalType.SYSTEM),
-    POWER_SUPPLY(EquipmentFunctionalType.SYSTEM),
-    UPS(EquipmentFunctionalType.SYSTEM),
-    MODEM(EquipmentFunctionalType.SYSTEM),
-    ROUTER(EquipmentFunctionalType.SYSTEM),
-    ANTENNA(EquipmentFunctionalType.SYSTEM),
-    OTHER(EquipmentFunctionalType.SYSTEM);
+    PRINTER(EquipmentFunctionalType.PRINTER)
+//    COMPUTER(EquipmentFunctionalType.SYSTEM),
+//    LOCK_CONTROLLER(EquipmentFunctionalType.SYSTEM),
+//    POWER_SUPPLY(EquipmentFunctionalType.SYSTEM),
+//    UPS(EquipmentFunctionalType.SYSTEM),
+//    MODEM(EquipmentFunctionalType.SYSTEM),
+//    ROUTER(EquipmentFunctionalType.SYSTEM),
+//    ANTENNA(EquipmentFunctionalType.SYSTEM),
+//    OTHER(EquipmentFunctionalType.SYSTEM)
+;
 
     private final EquipmentFunctionalType functionalType;
 
@@ -41,11 +42,11 @@ public enum EquipmentCategory {
             case PAYMENT_TERMINAL -> purpose == PaymentPurpose.CARDS;
             case CASH_ACCEPTOR -> purpose == PaymentPurpose.CASH;
             case PRINTER -> purpose == PrinterPurpose.PRESENT;
-            case COMPUTER -> purpose == SystemPurpose.COMPUTER;
-            case LOCK_CONTROLLER -> purpose == SystemPurpose.LOCK_CONTROL;
-            case POWER_SUPPLY -> purpose == SystemPurpose.POWER_SUPPLY;
-            case UPS -> purpose == SystemPurpose.BACKUP_POWER;
-            case MODEM, ROUTER, ANTENNA, OTHER -> purpose == SystemPurpose.OTHER;
+//            case COMPUTER -> purpose == SystemPurpose.COMPUTER;
+//            case LOCK_CONTROLLER -> purpose == SystemPurpose.LOCK_CONTROL;
+//            case POWER_SUPPLY -> purpose == SystemPurpose.POWER_SUPPLY;
+//            case UPS -> purpose == SystemPurpose.BACKUP_POWER;
+//            case MODEM, ROUTER, ANTENNA, OTHER -> purpose == SystemPurpose.OTHER;
         };
     }
 }

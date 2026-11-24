@@ -5,7 +5,6 @@ import com.lb_calc_web.domain.model.LBC;
 import com.lb_calc_web.domain.model.LC;
 import com.lb_calc_web.domain.model.Module;
 import com.lb_calc_web.domain.equipment.Equipment;
-import com.lb_calc_web.domain.equipment.EquipmentCatalog;
 import com.lb_calc_web.entity.LBEntity;
 import com.lb_calc_web.entity.LBCEntity;
 import com.lb_calc_web.entity.LCEntity;

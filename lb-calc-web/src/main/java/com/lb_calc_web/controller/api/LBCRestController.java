@@ -5,7 +5,6 @@ import com.lb_calc_web.domain.equipment.Equipment;
 import com.lb_calc_web.domain.model.LBC;
 import com.lb_calc_web.dto.EquipmentSelectionDTO;
 import com.lb_calc_web.dto.LBCDTO;
-import com.lb_calc_web.mapper.dto.EquipmentSelectionMapper;
 import com.lb_calc_web.mapper.dto.LBCDtoMapper;
 import com.lb_calc_web.service.EquipmentCatalogService;
 import com.lb_calc_web.service.LBCService;

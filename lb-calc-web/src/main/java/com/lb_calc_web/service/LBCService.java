@@ -1,19 +1,13 @@
 package com.lb_calc_web.service;
 
-import com.lb_calc_web.domain.attributes.AccessMethod;
 import com.lb_calc_web.domain.attributes.Colors;
-import com.lb_calc_web.domain.attributes.PrintOption;
-import com.lb_calc_web.domain.attributes.Payment;
 import com.lb_calc_web.domain.model.ControlConfiguration;
-import com.lb_calc_web.domain.model.EquipmentConfiguration;
 import com.lb_calc_web.domain.model.LBC;
 import com.lb_calc_web.dto.LBCDTO;
 import com.lb_calc_web.dto.EquipmentSelectionDTO;
 import com.lb_calc_web.mapper.dto.LBCDtoMapper;
-import com.lb_calc_web.mapper.dto.EquipmentSelectionMapper;
 import com.lb_calc_web.domain.attributes.TypeLb;
 import com.lb_calc_web.domain.attributes.DirectionDoorOpening;
-import com.lb_calc_web.domain.equipment.BarReader;
 import com.lb_calc_web.domain.equipment.Display;
 import com.lb_calc_web.domain.equipment.Equipment;
 import com.lb_calc_web.service.validation.ValidationResult;
@@ -29,7 +23,6 @@ import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.NoSuchElementException;

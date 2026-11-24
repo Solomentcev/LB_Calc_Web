@@ -1,10 +1,8 @@
 package com.lb_calc_web.service;
 
-import com.lb_calc_web.domain.equipment.BarReader;
 import com.lb_calc_web.domain.equipment.Display;
 import com.lb_calc_web.domain.equipment.Equipment;
 import com.lb_calc_web.entity.EquipmentCatalogEntity;
-import com.lb_calc_web.repository.EquipmentCatalogRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

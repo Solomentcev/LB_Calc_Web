@@ -1,8 +1,5 @@
 package com.lb_calc_web.entity;
 
-import com.lb_calc_web.domain.attributes.AccessMethod;
-import com.lb_calc_web.domain.attributes.Payment;
-import com.lb_calc_web.domain.attributes.PrintOption;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;

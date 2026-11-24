@@ -9,7 +9,6 @@ import com.lb_calc_web.entity.LBCEntity;
 import com.lb_calc_web.service.validation.ValidationSizeException;
 import com.lb_calc_web.mapper.entity.LBCEntityMapper;
 import com.lb_calc_web.repository.LBCRepository;
-import com.lb_calc_web.domain.equipment.EquipmentCatalog;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.env.MockEnvironment;

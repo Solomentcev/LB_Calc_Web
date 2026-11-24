@@ -2,7 +2,6 @@ package com.lb_calc_web.service.image;
 
 import com.lb_calc_web.domain.attributes.Colors;
 import com.lb_calc_web.domain.attributes.DirectionDoorOpening;
-import com.lb_calc_web.domain.equipment.BarReader;
 import com.lb_calc_web.dto.LBCDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

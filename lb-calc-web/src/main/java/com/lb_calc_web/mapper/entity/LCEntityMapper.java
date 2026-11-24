@@ -1,14 +1,10 @@
 package com.lb_calc_web.mapper.entity;
 
-import com.lb_calc_web.domain.attributes.Payment;
 import com.lb_calc_web.mapper.dto.LCDtoMapper;
 import com.lb_calc_web.dto.LCDTO;
-import com.lb_calc_web.domain.equipment.BarReader;
 import com.lb_calc_web.domain.equipment.Display;
 import com.lb_calc_web.domain.equipment.Equipment;
-import com.lb_calc_web.domain.equipment.EquipmentCatalog;
 import com.lb_calc_web.domain.model.ControlConfiguration;
-import com.lb_calc_web.domain.model.EquipmentConfiguration;
 import com.lb_calc_web.domain.model.LC;
 import com.lb_calc_web.entity.LCEntity;
 import com.lb_calc_web.entity.EquipmentQuantityEmbeddable;

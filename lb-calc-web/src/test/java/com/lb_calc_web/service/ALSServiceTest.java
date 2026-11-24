@@ -2,7 +2,6 @@ package com.lb_calc_web.service;
 
 import com.lb_calc_web.TestDataFactory;
 import com.lb_calc_web.dto.ALSDTO;
-import com.lb_calc_web.domain.attributes.Payment;
 import com.lb_calc_web.domain.model.ALS;
 import com.lb_calc_web.domain.model.ControlConfiguration;
 import com.lb_calc_web.dto.LBCDTO;
@@ -16,7 +15,6 @@ import com.lb_calc_web.mapper.entity.ModuleEntityMapper;
 import com.lb_calc_web.repository.ALSRepository;
 import com.lb_calc_web.repository.ProjectALSRepository;
 import com.lb_calc_web.repository.ModuleEntityRepository;
-import com.lb_calc_web.domain.equipment.EquipmentCatalog;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.env.MockEnvironment;

@@ -22,7 +22,6 @@ import com.lb_calc_web.entity.LCEntity;
 import com.lb_calc_web.entity.ModuleEntity;
 import com.lb_calc_web.service.validation.ValidationSizeException;
 import com.lb_calc_web.mapper.dto.ALSDtoMapper;
-import com.lb_calc_web.mapper.dto.EquipmentSelectionMapper;
 import com.lb_calc_web.mapper.dto.LBDtoMapper;
 import com.lb_calc_web.mapper.dto.LCDtoMapper;
 import com.lb_calc_web.mapper.dto.LBCDtoMapper;

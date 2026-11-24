@@ -26,7 +26,7 @@ public class ControlConfiguration {
     private final AccessPurpose access;
     private final PaymentPurpose payment;
     private final PrinterPurpose printer;
-    private final SystemPurpose system;
+
     private final Map<Equipment, Integer> equipment;
 
     /**

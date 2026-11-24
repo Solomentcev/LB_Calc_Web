@@ -1,19 +1,13 @@
 package com.lb_calc_web.service;
 
-import com.lb_calc_web.domain.attributes.AccessMethod;
-import com.lb_calc_web.domain.attributes.Payment;
-import com.lb_calc_web.domain.attributes.PrintOption;
 import com.lb_calc_web.domain.model.ControlConfiguration;
-import com.lb_calc_web.domain.model.EquipmentConfiguration;
 import com.lb_calc_web.domain.attributes.Colors;
-import com.lb_calc_web.domain.equipment.BarReader;
 import com.lb_calc_web.domain.equipment.Display;
 import com.lb_calc_web.domain.equipment.Equipment;
 import com.lb_calc_web.domain.model.LC;
 import com.lb_calc_web.dto.LCDTO;
 import com.lb_calc_web.dto.EquipmentSelectionDTO;
 import com.lb_calc_web.mapper.dto.LCDtoMapper;
-import com.lb_calc_web.mapper.dto.EquipmentSelectionMapper;
 import com.lb_calc_web.service.validation.ValidationResult;
 import com.lb_calc_web.entity.LCEntity;
 import com.lb_calc_web.service.validation.ValidationSizeException;
