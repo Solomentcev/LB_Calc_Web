@@ -208,8 +208,6 @@ public final class TestDataFactory {
 
         als.setLbList(lbList);
 
-        als.getQuantityLB().put(lb1, 1);
-        als.getQuantityLB().put(lb2, 1);
 
         als.setCountCells(
                 lb1.getCountCells()

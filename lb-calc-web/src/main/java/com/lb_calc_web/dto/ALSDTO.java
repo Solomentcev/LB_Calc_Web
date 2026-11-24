@@ -1,13 +1,10 @@
 package com.lb_calc_web.dto;
 
-import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 public class ALSDTO {
@@ -50,7 +47,6 @@ public class ALSDTO {
      * как LC, так и LBC.</p>
      */
     @JsonProperty("positionControlModule")
-    @JsonAlias("positionLC")
     private String positionControlModule;
 
     /**
@@ -60,9 +56,6 @@ public class ALSDTO {
      * он также входит в storage-модули ALS.</p>
      */
     private List<LBDTO> lbList = new ArrayList<>();
-
-    @JsonIgnore
-    private Map<LBDTO, Integer> quantityLB = new HashMap<>();
 
     /**
      * Физический порядок модулей слева направо.
@@ -208,22 +201,6 @@ public class ALSDTO {
         this.positionControlModule = positionControlModule;
     }
 
-    /**
-     * Обратная совместимость с прежним именованием.
-     */
-    @Deprecated
-    public String getPositionLC() {
-        return getPositionControlModule();
-    }
-
-    /**
-     * Обратная совместимость с прежним именованием.
-     */
-    @Deprecated
-    public void setPositionLC(String positionLC) {
-        setPositionControlModule(positionLC);
-    }
-
     public List<LBDTO> getLbList() {
         return lbList;
     }
@@ -241,17 +218,6 @@ public class ALSDTO {
 
     public void setModuleOrder(List<ALSModuleOrderDTO> moduleOrder) {
         this.moduleOrder = moduleOrder;
-    }
-
-    public Map<LBDTO, Integer> getQuantityLB() {
-        return quantityLB;
-    }
-
-    public void setQuantityLB(Map<LBDTO, Integer> quantityLB) {
-        this.quantityLB =
-                quantityLB == null
-                        ? new HashMap<>()
-                        : quantityLB;
     }
 
     public String getStringALSImage() {
@@ -297,7 +263,6 @@ public class ALSDTO {
                 alsdto.colorBody
         )
                 && Objects.equals(lbList, alsdto.lbList)
-                && Objects.equals(quantityLB, alsdto.quantityLB)
                 && Objects.equals(moduleOrder, alsdto.moduleOrder);
     }
 
@@ -318,7 +283,6 @@ public class ALSDTO {
                 colorDoor,
                 colorBody,
                 lbList,
-                quantityLB,
                 moduleOrder
         );
     }
@@ -343,7 +307,6 @@ public class ALSDTO {
                 ", colorDoor='" + colorDoor + '\'' +
                 ", colorBody='" + colorBody + '\'' +
                 ", lbList=" + lbList +
-                ", quantityLB=" + quantityLB +
                 '}';
     }
 }

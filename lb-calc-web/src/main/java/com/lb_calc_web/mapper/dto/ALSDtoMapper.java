@@ -52,7 +52,6 @@ public final class ALSDtoMapper {
         dto.setFunctionalConfiguration(toDto(domain.getFunctionalConfiguration()));
 
         List<LBDTO> lbList = new ArrayList<>();
-        Map<LBDTO, Integer> quantityLB = new LinkedHashMap<>();
         List<ALSModuleOrderDTO> moduleOrder = new ArrayList<>();
 
         for (Module module : domain.getModules()) {
@@ -67,12 +66,10 @@ public final class ALSDtoMapper {
                 int index = lbList.size();
                 lbList.add(lbDto);
                 moduleOrder.add(new ALSModuleOrderDTO("LB", index));
-                quantityLB.merge(lbDto, 1, Integer::sum);
             }
         }
 
         dto.setLbList(lbList);
-        dto.setQuantityLB(quantityLB);
         dto.setModuleOrder(moduleOrder);
         return dto;
     }
