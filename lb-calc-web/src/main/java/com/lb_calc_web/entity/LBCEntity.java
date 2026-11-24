@@ -99,7 +99,7 @@ public class LBCEntity extends StorageModuleEntity {
     public String toString() {
         return "LBCEntity{" +
                 "id=" + getId() +
-                ", name='" + getName() + ''' +
+                ", name='" + getName() + '\'' +
                 ", functionalConfiguration=" + getFunctionalConfiguration() +
                 ", equipment=" + equipment +
                 '}';

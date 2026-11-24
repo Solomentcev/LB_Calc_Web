@@ -99,7 +99,7 @@ public class LCEntity extends ModuleEntity {
     public String toString() {
         return "LCEntity{" +
                 "id=" + getId() +
-                ", name='" + getName() + ''' +
+                ", name='" + getName() + '\'' +
                 ", functionalConfiguration=" + getFunctionalConfiguration() +
                 ", equipment=" + equipment +
                 '}';
