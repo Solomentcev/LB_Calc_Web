@@ -26,6 +26,16 @@ public final class LCDtoMapper {
     private LCDtoMapper() {
     }
 
+    private static int quantityForCategory(
+            ControlConfiguration configuration,
+            EquipmentCategory category
+    ) {
+        return configuration.getEquipment().entrySet().stream()
+                .filter(entry -> entry.getKey().getCategory() == category)
+                .mapToInt(Map.Entry::getValue)
+                .sum();
+    }
+
     public static LCDTO toDto(LC domain) {
         if (domain == null) {
             return null;
@@ -49,6 +59,24 @@ public final class LCDtoMapper {
         dto.setAccessPurposes(functional.getAccess().stream().map(Enum::name).sorted().toList());
         dto.setPaymentPurpose(functional.getPayment().name());
         dto.setPrinterPurpose(functional.getPrinter().name());
+
+        int displayQuantity = quantityForCategory(configuration, EquipmentCategory.DISPLAY);
+        int barReaderQuantity = quantityForCategory(configuration, EquipmentCategory.BAR_READER);
+        int printerQuantity = quantityForCategory(configuration, EquipmentCategory.PRINTER);
+        int rfidReaderQuantity = quantityForCategory(configuration, EquipmentCategory.RFID_READER);
+        dto.setDisplayQuantity(displayQuantity);
+        dto.setBarReaderQuantity(barReaderQuantity);
+        dto.setPrinterQuantity(printerQuantity);
+        dto.setRfidReaderQuantity(rfidReaderQuantity);
+        dto.setPrinter(printerQuantity > 0);
+        dto.setRfidReader(rfidReaderQuantity > 0);
+        dto.setPayment(functional.getPayment().name());
+
+        configuration.getEquipment().keySet().stream()
+                .filter(item -> item.getCategory() == EquipmentCategory.BAR_READER)
+                .findFirst()
+                .ifPresent(scanner -> dto.setBarReader(scanner.getName()));
+
         dto.setEquipmentSelections(configuration.getEquipment().entrySet().stream()
                 .map(entry -> new EquipmentSelectionDTO(
                         entry.getKey().getId(), entry.getValue()))
