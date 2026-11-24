@@ -175,7 +175,7 @@
                 <div class="col-md-4"><strong>Способы доступа:</strong> <span th:text="${als.LC.functionalConfiguration.access}"></span></div>
             </div>
             <div class="mt-3">
-                <a th:href="@{/lcs/{id}(id=${als.LC.id})}" class="btn btn-primary btn-sm">Редактировать LC</a>
+                <a th:href="@{/alss/{alsId}/lcs/{lcId}(alsId=${als.id},lcId=${als.LC.id})}" class="btn btn-primary btn-sm">Редактировать LC</a>
             </div>
         </div>
     </div>
