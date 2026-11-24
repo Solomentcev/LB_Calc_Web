@@ -131,23 +131,17 @@ public final class LCDtoMapper {
             FunctionalConfigurationDTO dto,
             ControlConfiguration fallback
     ) {
-        FunctionalConfiguration current = fallback == null ? null : fallback.getFunctionalConfiguration();
-        if (dto == null && current != null) {
-            return current;
+        if (dto == null && fallback != null) {
+            return fallback.getFunctionalConfiguration();
         }
         return new FunctionalConfiguration(
                 dto == null || dto.getDisplay() == null
-                        ? current == null ? com.lb_calc_web.domain.equipment.DisplayPurpose.NONE : current.getDisplay()
-                        : dto.getDisplay(),
-                dto == null || dto.getAccess() == null
-                        ? current == null ? Set.of() : current.getAccess()
-                        : dto.getAccess(),
+                        ? com.lb_calc_web.domain.equipment.DisplayPurpose.NONE : dto.getDisplay(),
+                dto == null || dto.getAccess() == null ? Set.of() : dto.getAccess(),
                 dto == null || dto.getPayment() == null
-                        ? current == null ? com.lb_calc_web.domain.equipment.PaymentPurpose.NONE : current.getPayment()
-                        : dto.getPayment(),
+                        ? com.lb_calc_web.domain.equipment.PaymentPurpose.NONE : dto.getPayment(),
                 dto == null || dto.getPrinter() == null
-                        ? current == null ? com.lb_calc_web.domain.equipment.PrinterPurpose.ABSENT : current.getPrinter()
-                        : dto.getPrinter()
+                        ? com.lb_calc_web.domain.equipment.PrinterPurpose.ABSENT : dto.getPrinter()
         );
     }
 
