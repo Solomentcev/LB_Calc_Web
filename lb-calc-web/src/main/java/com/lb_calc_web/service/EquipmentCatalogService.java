@@ -47,6 +47,12 @@ public class EquipmentCatalogService {
             entity = EquipmentEntity.create();
         } else {
             entity = findEntity(equipment.getId());
+            if (equipmentRepository.countModuleReferencesByEquipmentId(equipment.getId()) > 0
+                    && hasChanged(equipment, entity)) {
+                throw new IllegalStateException(
+                        "Нельзя изменить модель оборудования, пока она установлена в LC/LBC. "
+                                + "Создайте новую модель и замените оборудование в конфигурациях");
+            }
         }
 
         EquipmentEntityMapper.updateEntity(equipment, entity);
@@ -62,6 +68,17 @@ public class EquipmentCatalogService {
         }
         equipmentRepository.delete(entity);
         equipmentRepository.flush();
+    }
+
+    private boolean hasChanged(Equipment equipment, EquipmentEntity entity) {
+        return equipment.getFunctionalType() != entity.getFunctionalType()
+                || !equipment.getPurpose().toString().equals(entity.getPurpose())
+                || equipment.getCategory() != entity.getCategory()
+                || !equipment.getName().equals(entity.getName())
+                || !equipment.getDescription().equals(entity.getDescription())
+                || equipment.getWidth() != entity.getWidth()
+                || equipment.getHeight() != entity.getHeight()
+                || equipment.getDepth() != entity.getDepth();
     }
 
     private EquipmentEntity findEntity(Long id) {

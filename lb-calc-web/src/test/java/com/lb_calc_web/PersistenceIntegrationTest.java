@@ -194,6 +194,22 @@ class PersistenceIntegrationTest {
         assertEquals("Сканер после изменения", restored.getName());
         assertEquals(AccessPurpose.BAR_CODE, restored.getPurpose());
 
+        Equipment changedAfterUse = new Equipment(
+                saved.getId(),
+                saved.getFunctionalType(),
+                saved.getPurpose(),
+                saved.getCategory(),
+                "Переименование после установки",
+                saved.getDescription(),
+                saved.getWidth(),
+                saved.getHeight(),
+                saved.getDepth()
+        );
+        assertThrows(
+                IllegalStateException.class,
+                () -> equipmentCatalogService.save(changedAfterUse)
+        );
+
         assertThrows(
                 IllegalStateException.class,
                 () -> equipmentCatalogService.delete(saved.getId())

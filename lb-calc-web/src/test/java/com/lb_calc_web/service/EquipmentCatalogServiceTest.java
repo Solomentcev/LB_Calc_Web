@@ -59,6 +59,22 @@ class EquipmentCatalogServiceTest {
     }
 
     @Test
+    void save_shouldRejectChangesWhenEquipmentIsUsedByControlModule() {
+        Equipment equipment = equipment(12L);
+        EquipmentEntity entity = EquipmentEntity.create();
+        EquipmentEntityMapper.updateEntity(equipment, entity);
+        when(equipmentRepository.findById(12L)).thenReturn(Optional.of(entity));
+        when(equipmentRepository.countModuleReferencesByEquipmentId(12L)).thenReturn(1L);
+
+        Equipment changed = new Equipment(
+                12L, EquipmentFunctionalType.ACCESS, AccessPurpose.QR_CODE,
+                EquipmentCategory.BAR_READER, "Renamed scanner", "Changed", 110, 55, 35);
+
+        assertThrows(IllegalStateException.class, () -> service.save(changed));
+        verify(equipmentRepository, never()).saveAndFlush(any(EquipmentEntity.class));
+    }
+
+    @Test
     void delete_shouldRejectEquipmentUsedByControlModule() {
         EquipmentEntity entity = EquipmentEntity.create();
         when(equipmentRepository.findById(12L)).thenReturn(Optional.of(entity));
