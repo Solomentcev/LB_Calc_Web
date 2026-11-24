@@ -6,7 +6,6 @@ import com.lb_calc_web.domain.model.ALS;
 import com.lb_calc_web.domain.model.ControlModule;
 import com.lb_calc_web.domain.model.LB;
 import com.lb_calc_web.domain.model.LBC;
-import com.lb_calc_web.domain.equipment.Equipment;
 import com.lb_calc_web.domain.model.LC;
 import com.lb_calc_web.domain.model.Module;
 import com.lb_calc_web.dto.ALSDTO;
@@ -19,18 +18,16 @@ import com.lb_calc_web.entity.LBEntity;
 import com.lb_calc_web.entity.LBCEntity;
 import com.lb_calc_web.entity.LCEntity;
 import com.lb_calc_web.entity.ModuleEntity;
-import com.lb_calc_web.service.validation.ValidationSizeException;
 import com.lb_calc_web.mapper.dto.ALSDtoMapper;
 import com.lb_calc_web.mapper.dto.LBDtoMapper;
-import com.lb_calc_web.mapper.dto.LCDtoMapper;
-import com.lb_calc_web.mapper.dto.LBCDtoMapper;
 import com.lb_calc_web.mapper.entity.ALSEntityMapper;
 import com.lb_calc_web.mapper.entity.ModuleEntityMapper;
 import com.lb_calc_web.repository.ALSRepository;
-import com.lb_calc_web.repository.ProjectALSRepository;
 import com.lb_calc_web.repository.ModuleEntityRepository;
-import com.lb_calc_web.service.validation.size.SizeValidator;
+import com.lb_calc_web.repository.ProjectALSRepository;
 import com.lb_calc_web.service.factory.TypeLbFactory;
+import com.lb_calc_web.service.validation.ValidationSizeException;
+import com.lb_calc_web.service.validation.size.SizeValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.env.Environment;
@@ -43,14 +40,11 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
-import java.util.function.Function;
 
 @Service
 public class ALSService {
 
-    private static final Logger logger =
-            LoggerFactory.getLogger(ALSService.class);
+    private static final Logger logger = LoggerFactory.getLogger(ALSService.class);
 
     private final FindOrCreateLockService findOrCreateLockService;
     private final ALSRepository alsRepository;
@@ -61,8 +55,7 @@ public class ALSService {
     private final LBCService lbcService;
     private final Environment environment;
     private final SizeValidator sizeValidator;
-    private final EquipmentCatalogService equipmentCatalogService;
-    private final EquipmentRequirementResolver equipmentRequirementResolver;
+    private final EquipmentEntityResolver equipmentEntityResolver;
 
     public ALSService(
             ALSRepository alsRepository,
@@ -74,104 +67,56 @@ public class ALSService {
             FindOrCreateLockService findOrCreateLockService,
             Environment environment,
             SizeValidator sizeValidator,
-            EquipmentCatalogService equipmentCatalogService,
-            EquipmentRequirementResolver equipmentRequirementResolver
+            EquipmentEntityResolver equipmentEntityResolver
     ) {
-        this.alsRepository = alsRepository;
-        this.projectALSRepository = projectALSRepository;
-        this.moduleRepository = moduleRepository;
-        this.lbService = lbService;
-        this.lcService = lcService;
-        this.lbcService = lbcService;
-        this.findOrCreateLockService = findOrCreateLockService;
-        this.environment = environment;
-        this.sizeValidator = sizeValidator;
-        this.equipmentCatalogService = equipmentCatalogService;
-        this.equipmentRequirementResolver = equipmentRequirementResolver;
+        this.alsRepository = Objects.requireNonNull(alsRepository);
+        this.projectALSRepository = Objects.requireNonNull(projectALSRepository);
+        this.moduleRepository = Objects.requireNonNull(moduleRepository);
+        this.lbService = Objects.requireNonNull(lbService);
+        this.lcService = Objects.requireNonNull(lcService);
+        this.lbcService = Objects.requireNonNull(lbcService);
+        this.findOrCreateLockService = Objects.requireNonNull(findOrCreateLockService);
+        this.environment = Objects.requireNonNull(environment);
+        this.sizeValidator = Objects.requireNonNull(sizeValidator);
+        this.equipmentEntityResolver = Objects.requireNonNull(equipmentEntityResolver);
     }
 
     @Transactional(readOnly = true)
     public List<ALS> findAll() {
-        logger.info("Получение списка АКХ...");
-        Function<String, Equipment> equipmentResolver = equipmentCatalogService.findDomainCatalogResolver();
-
-        return alsRepository.findAll()
-                .stream()
-                .sorted(
-                        Comparator.comparing(
-                                ALSEntity::getId
-                        )
-                )
-                .map(entity -> ALSEntityMapper.toDomain(entity, equipmentResolver))
+        logger.info("Получение списка АКХ");
+        return alsRepository.findAll().stream()
+                .sorted(Comparator.comparing(ALSEntity::getId))
+                .map(ALSEntityMapper::toDomain)
                 .toList();
     }
 
     @Transactional(readOnly = true)
     public ALS findById(Long id) {
-        logger.info(
-                "Поиск АКХ(id{})...",
-                id
-        );
         if (id == null || id <= 0) {
             throw new NoSuchElementException("АКХ с id=" + id + " не найдена");
         }
-
-        ALSEntity entity =
-                alsRepository.findById(id)
-                        .orElseThrow(
-                                () -> new NoSuchElementException(
-                                        "АКХ с id"
-                                                + id
-                                                + " не найдена"
-                                )
-                        );
-
-        return ALSEntityMapper.toDomain(
-                entity,
-                equipmentCatalogService.findDomainCatalogResolver()
-        );
+        ALSEntity entity = alsRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("АКХ с id=" + id + " не найдена"));
+        return ALSEntityMapper.toDomain(entity);
     }
 
-    /**
-     * Создаёт доменную конфигурацию ALS с параметрами по умолчанию.
-     *
-     * <p>Значения базовой геометрии и положение управляющего модуля
-     * берутся из конфигурации приложения.</p>
-     */
+    /** Создаёт доменную конфигурацию ALS с параметрами по умолчанию. */
     @Transactional
     public ALS createALS() {
-        logger.info("Создание АКХ...");
-
-        int height = getInt("size.height.default");
-        int depth = getInt("size.depth.default");
-        int upperFrame = getInt("size.frame.upper.default");
-        int bottomFrame = getInt("size.frame.bottom.default");
-
+        int height = requiredInt("size.height.default");
+        int depth = requiredInt("size.depth.default");
+        int upperFrame = requiredInt("size.frame.upper.default");
+        int bottomFrame = requiredInt("size.frame.bottom.default");
         Colors colorBody = Colors.valueOf(getRequired("als.color.body.default"));
         Colors colorDoor = Colors.valueOf(getRequired("als.color.door.default"));
 
-        LC lc = lcService.createLC(
-                height,
-                depth,
-                upperFrame,
-                bottomFrame,
-                colorBody
-        );
-        LB lb = lbService.createLB(
-                height,
-                depth,
-                upperFrame,
-                bottomFrame,
-                colorBody,
-                colorDoor
-        );
+        LC lc = lcService.createLC(height, depth, upperFrame, bottomFrame, colorBody);
+        LB lb = lbService.createLB(height, depth, upperFrame, bottomFrame, colorBody, colorDoor);
 
         String configuredPosition = environment.getProperty(
-                "als.position.control-module.default"
+                "als.position.control-module.default",
+                getRequired("als.position.lc.default")
         );
-        if (configuredPosition == null) {
-            configuredPosition = getRequired("als.position.lc.default");
-        }
         PositionControlModule position = PositionControlModule.valueOf(configuredPosition);
 
         List<Module> modules = new ArrayList<>();
@@ -185,54 +130,258 @@ public class ALSService {
                 modules.add(lc);
             }
             case CENTER -> throw new IllegalStateException(
-                    "Положение CENTER недопустимо для ALS с одним LB"
-            );
+                    "Положение CENTER недопустимо для ALS с одним LB");
         }
 
-        ALS als = new ALS(
-                height,
-                depth,
-                upperFrame,
-                bottomFrame,
-                colorBody,
-                colorDoor,
-                modules
-        );
-
+        ALS als = new ALS(height, depth, upperFrame, bottomFrame, colorBody, colorDoor, modules);
         logger.info("Создана АКХ: {}", als.getName());
         return als;
     }
 
-    /**
-     * Сохраняет доменную конфигурацию ALS.
-     *
-     * <p>Существующие конфигурации неизменяемы: при совпадении
-     * возвращается идентификатор существующей конфигурации.</p>
-     */
+    /** Сохраняет доменную конфигурацию ALS, переиспользуя идентичные модули и агрегаты. */
     @Transactional
     public ALS saveALS(ALS domain) {
         Objects.requireNonNull(domain, "ALS не должен быть null");
-
-        logger.info("Сохранение АКХ(id={}, name={})...", domain.getId(), domain.getName());
         validate(domain);
-
-        // Блокировка удерживается до завершения транзакции, включая сохранение модулей.
         findOrCreateLockService.acquire();
-        Function<String, Equipment> equipmentResolver = equipmentCatalogService.findDomainCatalogResolver();
 
-        Optional<ALSEntity> duplicate = findDuplicate(domain, equipmentResolver);
+        Optional<ALSEntity> duplicate = findDuplicate(domain);
         if (duplicate.isPresent()) {
             domain.setId(duplicate.get().getId());
             logger.info("Такая ALS уже существует: id={}", domain.getId());
             return domain;
         }
 
-        ALSEntity entity = createEntity(domain, equipmentResolver);
-        ALSEntity saved = alsRepository.save(entity);
+        ALSEntity saved = alsRepository.save(createEntity(domain));
         domain.setId(saved.getId());
-
         logger.info("АКХ сохранена: id={}", saved.getId());
         return domain;
+    }
+
+    @Transactional
+    public void deleteALS(Long id) {
+        if (id == null || id <= 0) {
+            throw new NoSuchElementException("АКХ с id=" + id + " не найдена");
+        }
+        ALSEntity entity = alsRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("АКХ с id=" + id + " не найдена"));
+        if (projectALSRepository.existsByAls_Id(id)) {
+            throw new IllegalStateException(
+                    "Нельзя удалить ALS с id=" + id + ": конфигурация используется в проектах");
+        }
+        alsRepository.delete(entity);
+    }
+
+    @Transactional(readOnly = true)
+    public ALS addNewLB(ALS als) {
+        Objects.requireNonNull(als, "ALS не должен быть null");
+        als.addStorageModule(lbService.createLB(
+                als.getHeight(), als.getDepth(), als.getUpperFrame(), als.getBottomFrame(),
+                als.getColorBody(), als.getColorDoor()));
+        return als;
+    }
+
+    @Transactional(readOnly = true)
+    public ALS deleteLB(ALS als, Long lbId) {
+        Objects.requireNonNull(als, "ALS не должен быть null");
+        Objects.requireNonNull(lbId, "Идентификатор LB не должен быть null");
+        List<Module> modules = als.getModules();
+        for (int index = 0; index < modules.size(); index++) {
+            Module module = modules.get(index);
+            if (module instanceof LB lb && Objects.equals(lb.getId(), lbId)) {
+                als.removeModuleAt(index);
+                return als;
+            }
+        }
+        throw new NoSuchElementException("LB с id " + lbId + " не найден в ALS " + als.getId());
+    }
+
+    @Transactional(readOnly = true)
+    public LB restoreLB(LBDTO dto) {
+        Objects.requireNonNull(dto, "LB не должен быть null");
+        return LBDtoMapper.toDomain(dto, TypeLbFactory.forLB(environment, dto.getType()));
+    }
+
+    @Transactional(readOnly = true)
+    public ALS replaceLB(ALS als, Long lbId, LB replacement) {
+        Objects.requireNonNull(als, "ALS не должен быть null");
+        Objects.requireNonNull(lbId, "Идентификатор LB не должен быть null");
+        Objects.requireNonNull(replacement, "Новый LB не должен быть null");
+        List<Module> modules = als.getModules();
+        for (int index = 0; index < modules.size(); index++) {
+            Module module = modules.get(index);
+            if (module instanceof LB current && Objects.equals(current.getId(), lbId)) {
+                als.replaceModuleAt(index, replacement);
+                return als;
+            }
+        }
+        throw new NoSuchElementException("LB с id " + lbId + " не найден в ALS " + als.getId());
+    }
+
+    public LBC findLBCInALS(ALS als, Long lbcId) {
+        Objects.requireNonNull(als, "ALS не должен быть null");
+        LBC lbc = als.getLBC();
+        if (lbc == null || !Objects.equals(lbc.getId(), lbcId)) {
+            throw new NoSuchElementException("LBC с id " + lbcId + " не найден в ALS " + als.getId());
+        }
+        return lbc;
+    }
+
+    @Transactional(readOnly = true)
+    public LC restoreLC(LCDTO dto, ALS als) {
+        Objects.requireNonNull(als, "ALS не должен быть null");
+        return lcService.restoreDomain(dto);
+    }
+
+    @Transactional(readOnly = true)
+    public LBC restoreLBC(LBCDTO dto, ALS als) {
+        Objects.requireNonNull(als, "ALS не должен быть null");
+        return lbcService.restoreDomain(dto);
+    }
+
+    @Transactional(readOnly = true)
+    public ALS replaceLC(ALS als, LC replacement) {
+        Objects.requireNonNull(als, "ALS не должен быть null");
+        Objects.requireNonNull(replacement, "Новый LC не должен быть null");
+        ControlModule current = als.getControlModule();
+        if (current instanceof LC currentLC
+                && !Objects.equals(currentLC.getId(), replacement.getId())) {
+            throw new NoSuchElementException(
+                    "LC с id " + replacement.getId() + " не найден в ALS " + als.getId());
+        }
+        als.replaceControlModule(replacement);
+        return als;
+    }
+
+    @Transactional(readOnly = true)
+    public ALS replaceLBC(ALS als, LBC replacement) {
+        Objects.requireNonNull(als, "ALS не должен быть null");
+        Objects.requireNonNull(replacement, "Новый LBC не должен быть null");
+        ControlModule current = als.getControlModule();
+        if (current instanceof LBC currentLBC
+                && !Objects.equals(currentLBC.getId(), replacement.getId())) {
+            throw new NoSuchElementException(
+                    "LBC с id " + replacement.getId() + " не найден в ALS " + als.getId());
+        }
+        als.replaceControlModule(replacement);
+        return als;
+    }
+
+    @Transactional(readOnly = true)
+    public ALS replaceWithNewLBC(ALS als) {
+        Objects.requireNonNull(als, "ALS не должен быть null");
+        LBC replacement = lbcService.createLBC(
+                als.getHeight(), als.getDepth(), als.getUpperFrame(), als.getBottomFrame(),
+                als.getColorBody(), als.getColorDoor());
+        if (als.getControlModule() instanceof LBC current) {
+            replacement.setControlConfiguration(current.getControlConfiguration());
+        }
+        return replaceLBC(als, replacement);
+    }
+
+    @Transactional
+    public ALS addNewLBandSaveALS(Long alsId) {
+        return saveALS(addNewLB(findById(alsId)));
+    }
+
+    @Transactional
+    public ALS deleteLBandSaveALS(Long alsId, Long lbId) {
+        return saveALS(deleteLB(findById(alsId), lbId));
+    }
+
+    @Transactional
+    public ALS replaceLCandSaveALS(ALS als, LC replacement) {
+        return saveALS(replaceLC(als, replacement));
+    }
+
+    @Transactional
+    public ALS replaceLBCandSaveALS(ALS als, LBC replacement) {
+        return saveALS(replaceLBC(als, replacement));
+    }
+
+    @Transactional
+    public ALS replaceWithNewLBCandSaveALS(Long alsId) {
+        return saveALS(replaceWithNewLBC(findById(alsId)));
+    }
+
+    /** Восстанавливает доменную ALS из DTO, разрешая оборудование по Long ID. */
+    @Transactional(readOnly = true)
+    public ALS restoreDomain(ALSDTO dto) {
+        Objects.requireNonNull(dto, "ALS не должен быть null");
+        try {
+            return ALSDtoMapper.toDomain(
+                    dto,
+                    candidate -> TypeLbFactory.forLB(environment, candidate.getType()),
+                    candidate -> TypeLbFactory.forLBC(environment, candidate.getType()),
+                    equipmentEntityResolver::resolveDomain
+            );
+        } catch (IllegalStateException exception) {
+            throw createValidationException(dto, "structure", exception);
+        } catch (IllegalArgumentException | NullPointerException exception) {
+            throw createValidationException(dto, "domainModel", exception);
+        }
+    }
+
+    private Optional<ALSEntity> findDuplicate(ALS domain) {
+        return alsRepository.findCandidates(
+                        domain.getHeight(), domain.getDepth(), domain.getUpperFrame(),
+                        domain.getBottomFrame(), domain.getColorBody(), domain.getColorDoor())
+                .stream()
+                .filter(entity -> domain.equals(ALSEntityMapper.toDomain(entity)))
+                .findFirst();
+    }
+
+    private ALSEntity createEntity(ALS domain) {
+        List<ModuleEntity> cache = new ArrayList<>();
+        return ALSEntityMapper.toEntity(
+                domain,
+                module -> resolveModule(module, cache)
+        );
+    }
+
+    private ModuleEntity resolveModule(Module domain, List<ModuleEntity> cache) {
+        for (ModuleEntity entity : cache) {
+            if (isSameModuleType(domain, entity)
+                    && domain.equals(ModuleEntityMapper.toDomain(entity))) {
+                return entity;
+            }
+        }
+
+        List<ModuleEntity> candidates = moduleRepository.findCandidates(
+                domain.getHeight(), domain.getWidth(), domain.getDepth(),
+                domain.getUpperFrame(), domain.getBottomFrame(),
+                domain.getColorBody(), domain.getColorDoor());
+        cache.addAll(candidates);
+
+        for (ModuleEntity entity : candidates) {
+            if (isSameModuleType(domain, entity)
+                    && domain.equals(ModuleEntityMapper.toDomain(entity))) {
+                return entity;
+            }
+        }
+
+        ModuleEntity created = ModuleEntityMapper.toEntity(domain, equipmentEntityResolver::resolve);
+        ModuleEntity saved = moduleRepository.save(created);
+        cache.add(saved);
+        return saved;
+    }
+
+    private boolean isSameModuleType(Module domain, ModuleEntity entity) {
+        return (domain instanceof LBC && entity instanceof LBCEntity)
+                || (domain instanceof LB && entity instanceof LBEntity)
+                || (domain instanceof LC && entity instanceof LCEntity);
+    }
+
+    private void validate(ALS domain) {
+        var errors = sizeValidator.deepValidateALS(domain).stream()
+                .filter(result -> !result.isValid())
+                .flatMap(result -> result.getErrors().stream())
+                .toList();
+        if (!errors.isEmpty()) {
+            var result = new com.lb_calc_web.service.validation.ValidationResult("ALS", null);
+            errors.forEach(result::addError);
+            throw new ValidationSizeException(result);
+        }
     }
 
     private ValidationSizeException createValidationException(
@@ -245,630 +394,11 @@ public class ALSService {
         return new ValidationSizeException(result);
     }
 
-    @Transactional
-    public void deleteALS(Long id) {
-        logger.info(
-                "Удаление АКХ(id={})...",
-                id
-        );
-
-        if (id == null || id <= 0) {
-            throw new NoSuchElementException("АКХ с id=" + id + " не найдена");
-        }
-
-        ALSEntity entity =
-                alsRepository.findById(id)
-                        .orElseThrow(
-                                () -> new NoSuchElementException(
-                                        "АКХ с id"
-                                                + id
-                                                + " не найдена"
-                                )
-                        );
-
-        if (projectALSRepository.existsByAls_Id(id)) {
-            throw new IllegalStateException(
-                    "Нельзя удалить ALS с id=" + id
-                            + ": конфигурация используется в проектах"
-            );
-        }
-
-        alsRepository.delete(entity);
+    private String getRequired(String key) {
+        return environment.getRequiredProperty(key);
     }
 
-    /**
-     * Добавляет новый модуль хранения к доменной конфигурации ALS.
-     */
-    @Transactional(readOnly = true)
-    public ALS addNewLB(ALS als) {
-        Objects.requireNonNull(als, "ALS не должен быть null");
-        LB lb = lbService.createLB(
-                als.getHeight(),
-                als.getDepth(),
-                als.getUpperFrame(),
-                als.getBottomFrame(),
-                als.getColorBody(),
-                als.getColorDoor()
-        );
-        als.addStorageModule(lb);
-        return als;
-    }
-
-    /**
-     * Удаляет модуль LB по persistence ID из физического списка модулей ALS.
-     */
-    @Transactional(readOnly = true)
-    public ALS deleteLB(ALS als, Long lbId) {
-        Objects.requireNonNull(als, "ALS не должен быть null");
-        Objects.requireNonNull(lbId, "Идентификатор LB не должен быть null");
-
-        List<Module> modules = als.getModules();
-        for (int i = 0; i < modules.size(); i++) {
-            Module module = modules.get(i);
-            if (module instanceof LB lb && Objects.equals(lb.getId(), lbId)) {
-                als.removeModuleAt(i);
-                return als;
-            }
-        }
-
-        throw new NoSuchElementException(
-                "LB с id " + lbId + " не найден в ALS " + als.getId()
-        );
-    }
-
-    /**
-     * Восстанавливает доменный LB из транспортной модели с конструктивным типом.
-     */
-    @Transactional(readOnly = true)
-    public LB restoreLB(LBDTO dto) {
-        Objects.requireNonNull(dto, "LB не должен быть null");
-        return LBDtoMapper.toDomain(
-                dto,
-                TypeLbFactory.forLB(environment, dto.getType())
-        );
-    }
-
-    /**
-     * Заменяет LB в доменной ALS, сохраняя его физическую позицию.
-     *
-     * @param als доменная конфигурация
-     * @param lbId идентификатор заменяемого LB
-     * @param replacement новая доменная конфигурация LB
-     * @return изменённая ALS
-     */
-    @Transactional(readOnly = true)
-    public ALS replaceLB(ALS als, Long lbId, LB replacement) {
-        Objects.requireNonNull(als, "ALS не должен быть null");
-        Objects.requireNonNull(lbId, "Идентификатор LB не должен быть null");
-        Objects.requireNonNull(replacement, "Новый LB не должен быть null");
-
-        List<Module> modules = als.getModules();
-        for (int i = 0; i < modules.size(); i++) {
-            Module module = modules.get(i);
-            if (module instanceof LB current && Objects.equals(current.getId(), lbId)) {
-                als.replaceModuleAt(i, replacement);
-                return als;
-            }
-        }
-
-        throw new NoSuchElementException(
-                "LB с id " + lbId + " не найден в ALS " + als.getId()
-        );
-    }
-
-    /**
-     * Находит LBC по идентификатору внутри доменной ALS.
-     */
-    public LBC findLBCInALS(ALS als, Long lbcId) {
-        Objects.requireNonNull(als, "ALS не должен быть null");
-
-        LBC lbc = als.getLBC();
-        if (lbc == null || !Objects.equals(lbc.getId(), lbcId)) {
-            throw new NoSuchElementException(
-                    "LBC с id " + lbcId + " не найден в ALS " + als.getId()
-            );
-        }
-
-        return lbc;
-    }
-
-    /**
-     * Восстанавливает доменный LC для замены управляющего модуля ALS.
-     * Историческое оборудование разрешается только из исходной сохранённой конфигурации.
-     */
-    @Transactional(readOnly = true)
-    public LC restoreLC(LCDTO dto, ALS als) {
-        Objects.requireNonNull(dto, "LC не должен быть null");
-        Objects.requireNonNull(als, "ALS не должен быть null");
-        return restoreLC(dto, createEquipmentRestoreContext(als));
-    }
-
-    /**
-     * Восстанавливает доменный LBC для замены управляющего модуля ALS.
-     * Список оборудования null сохраняет оборудование исходного модуля.
-     */
-    @Transactional(readOnly = true)
-    public LBC restoreLBC(LBCDTO dto, ALS als) {
-        Objects.requireNonNull(dto, "LBC не должен быть null");
-        Objects.requireNonNull(als, "ALS не должен быть null");
-        return restoreLBC(dto, createEquipmentRestoreContext(als));
-    }
-
-    /**
-     * Заменяет управляющий LC в доменной конфигурации ALS.
-     */
-    @Transactional(readOnly = true)
-    public ALS replaceLC(ALS als, LC replacement) {
-        Objects.requireNonNull(als, "ALS не должен быть null");
-        Objects.requireNonNull(replacement, "Новый LC не должен быть null");
-        ControlModule current = als.getControlModule();
-        if (current instanceof LC currentLC
-                && !Objects.equals(currentLC.getId(), replacement.getId())) {
-            throw new NoSuchElementException(
-                    "LC с id " + replacement.getId()
-                            + " не найден в ALS " + als.getId()
-            );
-        }
-        als.replaceControlModule(replacement);
-        return als;
-    }
-
-    /**
-     * Заменяет управляющий LBC в доменной конфигурации ALS.
-     */
-    @Transactional(readOnly = true)
-    public ALS replaceLBC(ALS als, LBC replacement) {
-        Objects.requireNonNull(als, "ALS не должен быть null");
-        Objects.requireNonNull(replacement, "Новый LBC не должен быть null");
-        ControlModule current = als.getControlModule();
-        if (current instanceof LBC currentLBC
-                && !Objects.equals(currentLBC.getId(), replacement.getId())) {
-            throw new NoSuchElementException(
-                    "LBC с id " + replacement.getId()
-                            + " не найден в ALS " + als.getId()
-            );
-        }
-        als.replaceControlModule(replacement);
-        return als;
-    }
-
-    /**
-     * Создаёт новый управляющий LBC, сохраняя дополнительное оборудование
-     * ранее установленного LBC, если он существовал.
-     */
-    @Transactional(readOnly = true)
-    public ALS replaceWithNewLBC(ALS als) {
-        Objects.requireNonNull(als, "ALS не должен быть null");
-        LBC replacement = lbcService.createLBC(
-                als.getHeight(),
-                als.getDepth(),
-                als.getUpperFrame(),
-                als.getBottomFrame(),
-                als.getColorBody(),
-                als.getColorDoor()
-        );
-        ControlModule current = als.getControlModule();
-        if (current instanceof LBC currentLBC) {
-            LBCDTO dto = LBCDtoMapper.toDto(replacement);
-            dto.setId(currentLBC.getId());
-            dto.setEquipmentSelections(null);
-            replacement = restoreLBC(dto, als);
-        }
-        return replaceLBC(als, replacement);
-    }
-
-    /**
-     * Добавляет LB в сохранённую ALS и сохраняет новую конфигурацию.
-     */
-    @Transactional
-    public ALS addNewLBandSaveALS(Long alsId) {
-        return saveALS(addNewLB(findById(alsId)));
-    }
-
-    /**
-     * Удаляет LB из сохранённой ALS и сохраняет новую конфигурацию.
-     */
-    @Transactional
-    public ALS deleteLBandSaveALS(Long alsId, Long lbId) {
-        return saveALS(deleteLB(findById(alsId), lbId));
-    }
-
-    /**
-     * Заменяет LC в доменной ALS и сохраняет новую конфигурацию.
-     */
-    @Transactional
-    public ALS replaceLCandSaveALS(ALS als, LC replacement) {
-        return saveALS(replaceLC(als, replacement));
-    }
-
-    /**
-     * Заменяет LBC в доменной ALS и сохраняет новую конфигурацию.
-     */
-    @Transactional
-    public ALS replaceLBCandSaveALS(ALS als, LBC replacement) {
-        return saveALS(replaceLBC(als, replacement));
-    }
-
-    /**
-     * Создаёт новый LBC для сохранённой ALS и сохраняет результат.
-     */
-    @Transactional
-    public ALS replaceWithNewLBCandSaveALS(Long alsId) {
-        return saveALS(replaceWithNewLBC(findById(alsId)));
-    }
-
-    /**
-     * Восстанавливает доменную ALS для других прикладных сценариев
-     * с учётом каталога оборудования и исторических позиций.
-     */
-    @Transactional(readOnly = true)
-    public ALS restoreDomain(ALSDTO dto) {
-        Objects.requireNonNull(dto, "ALS не должен быть null");
-        try {
-            return restoreALS(dto);
-        } catch (IllegalStateException exception) {
-            throw createValidationException(dto, "structure", exception);
-        } catch (IllegalArgumentException | NullPointerException exception) {
-            throw createValidationException(dto, "domainModel", exception);
-        }
-    }
-
-    private ALS restoreALS(ALSDTO dto) {
-        return restoreALS(dto, createEquipmentRestoreContext(dto));
-    }
-
-    private ALS restoreALS(ALSDTO dto, EquipmentRestoreContext restoreContext) {
-        ModuleEntity existingModule = restoreContext.existingModule();
-        Function<String, Equipment> equipmentResolver = restoreContext.equipmentResolver();
-
-        List<EquipmentSelectionDTO> lcEquipmentSelections = dto.getLC() == null
-                ? null
-                : resolveEquipmentSelections(dto.getLC(), existingModule, equipmentResolver);
-        List<EquipmentSelectionDTO> lbcEquipmentSelections = dto.getLBC() == null
-                ? null
-                : resolveEquipmentSelections(dto.getLBC(), existingModule, equipmentResolver);
-
-        ALS domain = ALSDtoMapper.toDomain(
-                dto,
-                candidate -> TypeLbFactory.forLB(environment, candidate.getType()),
-                candidate -> TypeLbFactory.forLBC(environment, candidate.getType()),
-                equipmentResolver,
-                lcEquipmentSelections,
-                lbcEquipmentSelections
-        );
-        ControlModule controlModule = domain.getControlModule();
-        if (controlModule instanceof LC lc) {
-            lc.setControlConfiguration(
-                    equipmentRequirementResolver.resolve(lc.getControlConfiguration()));
-            domain.replaceControlModule(lc);
-        } else if (controlModule instanceof LBC lbc) {
-            lbc.setControlConfiguration(
-                    equipmentRequirementResolver.resolve(lbc.getControlConfiguration()));
-            domain.replaceControlModule(lbc);
-        }
-
-        return domain;
-    }
-
-    private LC restoreLC(LCDTO dto, EquipmentRestoreContext restoreContext) {
-        ModuleEntity existingModule = restoreContext.existingModule();
-        Function<String, Equipment> equipmentResolver = restoreContext.equipmentResolver();
-        List<EquipmentSelectionDTO> equipmentSelections =
-                resolveEquipmentSelections(dto, existingModule, equipmentResolver);
-        LC domain = LCDtoMapper.toDomain(dto, equipmentSelections, equipmentResolver);
-        domain.setControlConfiguration(
-                equipmentRequirementResolver.resolve(domain.getControlConfiguration()));
-        return domain;
-    }
-
-    private LBC restoreLBC(LBCDTO dto, EquipmentRestoreContext restoreContext) {
-        ModuleEntity existingModule = restoreContext.existingModule();
-        Function<String, Equipment> equipmentResolver = restoreContext.equipmentResolver();
-        List<EquipmentSelectionDTO> equipmentSelections =
-                resolveEquipmentSelections(dto, existingModule, equipmentResolver);
-        LBC domain = LBCDtoMapper.toDomain(
-                dto,
-                TypeLbFactory.forLBC(environment, dto.getType()),
-                equipmentSelections,
-                equipmentResolver
-        );
-        domain.setControlConfiguration(
-                equipmentRequirementResolver.resolve(domain.getControlConfiguration()));
-        return domain;
-    }
-
-    private EquipmentRestoreContext createEquipmentRestoreContext(ALSDTO dto) {
-        if (dto.getLC() != null) {
-            return createEquipmentRestoreContext(
-                    dto.getId(),
-                    dto.getLC().getId(),
-                    LCEntity.class
-            );
-        }
-        if (dto.getLBC() != null) {
-            return createEquipmentRestoreContext(
-                    dto.getId(),
-                    dto.getLBC().getId(),
-                    LBCEntity.class
-            );
-        }
-        return createEquipmentRestoreContext(null, null, null);
-    }
-
-    /**
-     * Создаёт контекст восстановления по уже загруженной доменной ALS.
-     * Повторное преобразование Domain в DTO для поиска исходной Entity не требуется.
-     */
-    private EquipmentRestoreContext createEquipmentRestoreContext(ALS als) {
-        ControlModule controlModule = als.getControlModule();
-        if (controlModule instanceof LC lc) {
-            return createEquipmentRestoreContext(
-                    als.getId(),
-                    lc.getId(),
-                    LCEntity.class
-            );
-        }
-        if (controlModule instanceof LBC lbc) {
-            return createEquipmentRestoreContext(
-                    als.getId(),
-                    lbc.getId(),
-                    LBCEntity.class
-            );
-        }
-        return createEquipmentRestoreContext(null, null, null);
-    }
-
-    private EquipmentRestoreContext createEquipmentRestoreContext(
-            Long alsId,
-            Long moduleId,
-            Class<? extends ModuleEntity> moduleType
-    ) {
-        ModuleEntity existingModule =
-                findExistingControlModule(alsId, moduleId, moduleType);
-        Set<String> retainedEquipmentIds = getRetainedEquipmentIds(existingModule);
-        Function<String, Equipment> equipmentResolver =
-                equipmentCatalogService.findExistingConfigurationResolver(retainedEquipmentIds);
-        return new EquipmentRestoreContext(existingModule, equipmentResolver);
-    }
-
-    /**
-     * Возвращает управляющий модуль только если он действительно входит
-     * в указанную сохранённую ALS и соответствует ожидаемому типу.
-     *
-     * <p>Один лишь ID модуля не даёт права переносить деактивированное
-     * оборудование из произвольной конфигурации.</p>
-     */
-    private ModuleEntity findExistingControlModule(
-            Long alsId,
-            Long moduleId,
-            Class<? extends ModuleEntity> moduleType
-    ) {
-        if (alsId == null || alsId <= 0
-                || moduleId == null || moduleId <= 0
-                || moduleType == null) {
-            return null;
-        }
-
-        ALSEntity existingAls = alsRepository.findById(alsId).orElse(null);
-        if (existingAls == null) {
-            return null;
-        }
-
-        return existingAls.getModules().stream()
-                .map(ALSModuleEntity::getModule)
-                .filter(module -> Objects.equals(module.getId(), moduleId))
-                .filter(moduleType::isInstance)
-                .findFirst()
-                .orElse(null);
-    }
-
-    private record EquipmentRestoreContext(
-            ModuleEntity existingModule,
-            Function<String, Equipment> equipmentResolver
-    ) {
-    }
-
-    private List<EquipmentSelectionDTO> resolveEquipmentSelections(
-            LCDTO dto,
-            ModuleEntity existingModule,
-            Function<String, Equipment> equipmentResolver
-    ) {
-        if (dto.getEquipmentSelections() != null) {
-            return dto.getEquipmentSelections();
-        }
-        if (!(existingModule instanceof LCEntity entity)) {
-            return null;
-        }
-        return EquipmentSelectionMapper.mergeDisplaySelection(
-                entity.getEquipment().stream()
-                        .map(item -> new EquipmentSelectionDTO(
-                                item.getCatalogPositionId(), item.getQuantity()))
-                        .toList(),
-                dto.getDisplay(),
-                dto.getDisplayQuantity(),
-                equipmentResolver
-        );
-    }
-
-    private List<EquipmentSelectionDTO> resolveEquipmentSelections(
-            LBCDTO dto,
-            ModuleEntity existingModule,
-            Function<String, Equipment> equipmentResolver
-    ) {
-        if (dto.getEquipmentSelections() != null) {
-            return dto.getEquipmentSelections();
-        }
-        if (!(existingModule instanceof LBCEntity entity)) {
-            return null;
-        }
-        return EquipmentSelectionMapper.mergeDisplaySelection(
-                entity.getEquipment().stream()
-                        .map(item -> new EquipmentSelectionDTO(
-                                item.getCatalogPositionId(), item.getQuantity()))
-                        .toList(),
-                dto.getDisplay(),
-                dto.getDisplayQuantity(),
-                equipmentResolver
-        );
-    }
-
-    private Set<String> getRetainedEquipmentIds(ModuleEntity module) {
-        if (module instanceof LCEntity lcEntity) {
-            return lcEntity.getEquipment().stream()
-                    .map(item -> item.getCatalogPositionId())
-                    .collect(java.util.stream.Collectors.toUnmodifiableSet());
-        }
-
-        if (module instanceof LBCEntity lbcEntity) {
-            return lbcEntity.getEquipment().stream()
-                    .map(item -> item.getCatalogPositionId())
-                    .collect(java.util.stream.Collectors.toUnmodifiableSet());
-        }
-
-        return Set.of();
-    }
-
-    private void validate(ALS domain) {
-        var results = sizeValidator.deepValidateALS(domain);
-
-        var errors = results.stream()
-                .filter(result -> !result.isValid())
-                .flatMap(result -> result.getErrors().stream())
-                .toList();
-
-        if (!errors.isEmpty()) {
-            var validationResult =
-                    new com.lb_calc_web.service.validation.ValidationResult(
-                            "ALS",
-                            null
-                    );
-
-            errors.forEach(validationResult::addError);
-
-            throw new ValidationSizeException(validationResult);
-        }
-    }
-
-    /**
-     * Ищет уже сохранённую конфигурацию с тем же доменным содержимым.
-     *
-     * <p>Идентификатор входного DTO намеренно не учитывается:
-     * сохранённая конфигурация неизменяема. Изменённая ALS должна
-     * получить новую запись, а совпадающая конфигурация переиспользует
-     * существующую.</p>
-     */
-    private Optional<ALSEntity> findDuplicate(
-            com.lb_calc_web.domain.model.ALS domain,
-            Function<String, Equipment> equipmentResolver
-    ) {
-        return alsRepository.findCandidates(
-                        domain.getHeight(),
-                        domain.getDepth(),
-                        domain.getUpperFrame(),
-                        domain.getBottomFrame(),
-                        domain.getColorBody(),
-                        domain.getColorDoor()
-                ).stream()
-                .filter(entity ->
-                        domain.equals(ALSEntityMapper.toDomain(entity, equipmentResolver))
-                )
-                .findFirst();
-    }
-
-    private ALSEntity createEntity(
-            com.lb_calc_web.domain.model.ALS domain,
-            Function<String, Equipment> equipmentResolver
-    ) {
-        List<ModuleEntity> moduleCache =
-                new ArrayList<>();
-
-        return ALSEntityMapper.toEntity(
-                domain,
-                module ->
-                        resolveModule(
-                                module,
-                                moduleCache,
-                                equipmentResolver
-                        )
-        );
-    }
-
-    private ModuleEntity resolveModule(
-            com.lb_calc_web.domain.model.Module domainModule,
-            List<ModuleEntity> cache,
-            Function<String, Equipment> equipmentResolver
-    ) {
-        for (ModuleEntity entity : cache) {
-            if (isSameModuleType(domainModule, entity)
-                    && domainModule.equals(ModuleEntityMapper.toDomain(entity, equipmentResolver))) {
-                return entity;
-            }
-        }
-
-        List<ModuleEntity> candidates =
-                moduleRepository.findCandidates(
-                        domainModule.getHeight(),
-                        domainModule.getWidth(),
-                        domainModule.getDepth(),
-                        domainModule.getUpperFrame(),
-                        domainModule.getBottomFrame(),
-                        domainModule.getColorBody(),
-                        domainModule.getColorDoor()
-                );
-
-        cache.addAll(candidates);
-
-        for (ModuleEntity entity : candidates) {
-            if (isSameModuleType(domainModule, entity)
-                    && domainModule.equals(ModuleEntityMapper.toDomain(entity, equipmentResolver))) {
-                return entity;
-            }
-        }
-
-        ModuleEntity newEntity =
-                ModuleEntityMapper.toEntity(
-                        domainModule
-                );
-
-        ModuleEntity saved =
-                moduleRepository.save(
-                        newEntity
-                );
-
-        cache.add(saved);
-
-        return saved;
-    }
-
-    /**
-     * Проверяет соответствие конкретного типа доменного модуля типу Entity.
-     *
-     * <p>Общий запрос кандидатов возвращает разные типы модулей
-     * с одинаковыми базовыми размерами. Восстанавливать нужно только
-     * сущности того же конкретного типа.</p>
-     */
-    private boolean isSameModuleType(
-            com.lb_calc_web.domain.model.Module domainModule,
-            ModuleEntity entity
-    ) {
-        return (domainModule instanceof LBC && entity instanceof LBCEntity)
-                || (domainModule instanceof LB && entity instanceof LBEntity)
-                || (domainModule instanceof LC && entity instanceof LCEntity);
-    }
-
-    private String getRequired(
-            String key
-    ) {
-        return environment.getRequiredProperty(
-                key
-        );
-    }
-
-    private int getInt(
-            String key
-    ) {
-        return Integer.parseInt(
-                getRequired(key)
-        );
+    private int requiredInt(String key) {
+        return environment.getRequiredProperty(key, Integer.class);
     }
 }
