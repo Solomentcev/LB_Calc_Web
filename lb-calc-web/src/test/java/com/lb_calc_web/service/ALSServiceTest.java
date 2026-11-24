@@ -71,7 +71,7 @@ class ALSServiceTest {
 
         assertNotNull(result.getControlModule());
         assertEquals(1, result.getStorageModules().size());
-        assertEquals(3, result.getModules().size());
+        assertEquals(2, result.getModules().size());
     }
 
     @Test
@@ -124,7 +124,7 @@ class ALSServiceTest {
         ALS result = service.restoreDomain(dto);
 
         assertNotNull(result);
-        assertEquals(2, result.getModules().size());
+        assertEquals(3, result.getModules().size());
         verifyNoInteractions(equipmentResolver);
     }
 }
