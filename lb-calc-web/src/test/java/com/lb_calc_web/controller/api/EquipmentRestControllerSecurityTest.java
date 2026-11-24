@@ -3,6 +3,8 @@ package com.lb_calc_web.controller.api;
 import com.lb_calc_web.handler.RestExceptionHandler;
 import com.lb_calc_web.security.jwt.JwtService;
 import com.lb_calc_web.service.EquipmentCatalogService;
+import com.lb_calc_web.service.EmployeeService;
+import com.lb_calc_web.service.AuthService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -43,6 +45,12 @@ class EquipmentRestControllerSecurityTest {
 
     @MockitoBean
     private JwtService jwtService;
+
+    @MockitoBean
+    private EmployeeService employeeService;
+
+    @MockitoBean
+    private AuthService authService;
 
     @Test
     void catalog_shouldRequireAuthentication() throws Exception {
