@@ -55,6 +55,11 @@ public class LBCEntity extends StorageModuleEntity {
     protected LBCEntity() {
     }
 
+    /** Создаёт новую JPA-сущность LBC для заполнения маппером. */
+    public static LBCEntity create() {
+        return new LBCEntity();
+    }
+
     public Set<EquipmentQuantityEmbeddable> getEquipment() {
         return Set.copyOf(equipment);
     }

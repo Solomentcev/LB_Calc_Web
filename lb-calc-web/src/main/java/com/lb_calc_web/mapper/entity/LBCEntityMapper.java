@@ -88,7 +88,7 @@ public final class LBCEntityMapper {
         if (domain == null) {
             return null;
         }
-        LBCEntity entity = new LBCEntity();
+        LBCEntity entity = LBCEntity.create();
         updateEntity(domain, entity, equipmentResolver);
         return entity;
     }

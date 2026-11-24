@@ -73,7 +73,7 @@ public final class LCEntityMapper {
         if (domain == null) {
             return null;
         }
-        LCEntity entity = new LCEntity();
+        LCEntity entity = LCEntity.create();
         updateEntity(domain, entity, equipmentResolver);
         return entity;
     }

@@ -34,7 +34,7 @@ public final class EquipmentEntityMapper {
     public static EquipmentEntity toEntity(Equipment domain) {
         if (domain == null) return null;
 
-        EquipmentEntity entity = new EquipmentEntity();
+        EquipmentEntity entity = EquipmentEntity.create();
         updateEntity(domain, entity);
         return entity;
     }

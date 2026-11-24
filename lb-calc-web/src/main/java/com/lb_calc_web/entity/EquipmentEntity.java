@@ -49,6 +49,11 @@ public class EquipmentEntity {
     protected EquipmentEntity() {
     }
 
+    /** Создаёт новую сущность каталога оборудования для заполнения маппером. */
+    public static EquipmentEntity create() {
+        return new EquipmentEntity();
+    }
+
     public Long getId() { return id; }
     public String getName() { return name; }
     public String getDescription() { return description; }

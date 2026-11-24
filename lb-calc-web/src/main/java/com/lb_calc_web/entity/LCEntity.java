@@ -55,6 +55,11 @@ public class LCEntity extends ModuleEntity {
     protected LCEntity() {
     }
 
+    /** Создаёт новую JPA-сущность LC для заполнения маппером. */
+    public static LCEntity create() {
+        return new LCEntity();
+    }
+
     public Set<EquipmentQuantityEmbeddable> getEquipment() {
         return Set.copyOf(equipment);
     }
