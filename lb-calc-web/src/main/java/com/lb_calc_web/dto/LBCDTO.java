@@ -228,98 +228,20 @@ public class LBCDTO {
         this.colorBody = colorBody;
     }
 
-    public String getDisplay() {
-        return display;
+    public FunctionalConfigurationDTO getFunctionalConfiguration() {
+        return functionalConfiguration;
     }
 
-    public void setDisplay(String display) {
-        this.display = display;
+    public void setFunctionalConfiguration(FunctionalConfigurationDTO configuration) {
+        this.functionalConfiguration = configuration;
     }
 
-    public String getBarReader() {
-        return barReader;
+    public List<EquipmentSelectionDTO> getEquipmentSelections() {
+        return equipmentSelections;
     }
-
-    public void setBarReader(String barReader) {
-        this.barReader = barReader;
-    }
-
-    public String getPayment() {
-        return payment;
-    }
-
-    public void setPayment(String payment) {
-        this.payment = payment;
-    }
-
-    public boolean isPrinter() {
-        return printer;
-    }
-
-    public void setPrinter(boolean printer) {
-        this.printer = printer;
-    }
-
-    public boolean isRfidReader() {
-        return rfidReader;
-    }
-
-    public void setRfidReader(boolean rfidReader) {
-        this.rfidReader = rfidReader;
-    }
-
-    public Integer getDisplayQuantity() { return displayQuantity; }
-    public void setDisplayQuantity(Integer value) { displayQuantity = value; }
-    public Integer getBarReaderQuantity() { return barReaderQuantity; }
-    public void setBarReaderQuantity(Integer value) { barReaderQuantity = value; }
-    public Integer getPrinterQuantity() { return printerQuantity; }
-    public void setPrinterQuantity(Integer value) { printerQuantity = value; }
-    public Integer getRfidReaderQuantity() { return rfidReaderQuantity; }
-    public void setRfidReaderQuantity(Integer value) { rfidReaderQuantity = value; }
-
-    public int getDisplayWidth() { return displayWidth; }
-    public void setDisplayWidth(int value) { displayWidth = value; }
-    public int getDisplayHeight() { return displayHeight; }
-    public void setDisplayHeight(int value) { displayHeight = value; }
-
-    public List<EquipmentSelectionDTO> getEquipmentSelections() { return equipmentSelections; }
 
     public void setEquipmentSelections(List<EquipmentSelectionDTO> selections) {
         this.equipmentSelections = selections == null ? null : new ArrayList<>(selections);
-    }
-
-    public String getDisplayPurpose() { return displayPurpose; }
-    public void setDisplayPurpose(String value) { displayPurpose = value; }
-
-    public List<String> getAccessPurposes() { return accessPurposes; }
-    public void setAccessPurposes(List<String> values) {
-        accessPurposes = values == null ? null : new ArrayList<>(values);
-    }
-
-    public String getPaymentPurpose() { return paymentPurpose; }
-    public void setPaymentPurpose(String value) { paymentPurpose = value; }
-
-    public String getPrinterPurpose() { return printerPurpose; }
-    public void setPrinterPurpose(String value) { printerPurpose = value; }
-
-    public List<String> getAccessMethods() {
-        return accessMethods;
-    }
-
-    public void setAccessMethods(List<String> accessMethods) {
-        this.accessMethods = accessMethods == null
-                ? new ArrayList<>()
-                : new ArrayList<>(accessMethods);
-    }
-
-    public List<String> getPrintOptions() {
-        return printOptions;
-    }
-
-    public void setPrintOptions(List<String> printOptions) {
-        this.printOptions = printOptions == null
-                ? new ArrayList<>()
-                : new ArrayList<>(printOptions);
     }
 
     public String getStringLBCImage() {
@@ -331,92 +253,28 @@ public class LBCDTO {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-
-        LBCDTO lbcdto = (LBCDTO) o;
-
-        return height == lbcdto.height
-                && width == lbcdto.width
-                && depth == lbcdto.depth
-                && upperFrame == lbcdto.upperFrame
-                && bottomFrame == lbcdto.bottomFrame
-                && shelfThick == lbcdto.shelfThick
-                && deltaWidth == lbcdto.deltaWidth
-                && serviceZoneWidth == lbcdto.serviceZoneWidth
-                && doorThickness == lbcdto.doorThickness
-                && countCells == lbcdto.countCells
-                && Double.compare(heightCell, lbcdto.heightCell) == 0
-                && widthCell == lbcdto.widthCell
-                && depthCell == lbcdto.depthCell
-                && printer == lbcdto.printer
-                && rfidReader == lbcdto.rfidReader
-                && Objects.equals(displayQuantity, lbcdto.displayQuantity)
-                && Objects.equals(barReaderQuantity, lbcdto.barReaderQuantity)
-                && Objects.equals(printerQuantity, lbcdto.printerQuantity)
-                && Objects.equals(rfidReaderQuantity, lbcdto.rfidReaderQuantity)
-                && Objects.equals(type, lbcdto.type)
-                && Objects.equals(
-                directionDoorOpening,
-                lbcdto.directionDoorOpening
-        )
-                && Objects.equals(colorDoor, lbcdto.colorDoor)
-                && Objects.equals(colorBody, lbcdto.colorBody)
-                && Objects.equals(display, lbcdto.display)
-                && Objects.equals(displayPurpose, lbcdto.displayPurpose)
-                && Objects.equals(accessPurposes, lbcdto.accessPurposes)
-                && Objects.equals(paymentPurpose, lbcdto.paymentPurpose)
-                && Objects.equals(printerPurpose, lbcdto.printerPurpose)
-                && Objects.equals(barReader, lbcdto.barReader)
-                && Objects.equals(payment, lbcdto.payment)
-                && Objects.equals(equipmentSelections, lbcdto.equipmentSelections)
-                && Objects.equals(accessMethods, lbcdto.accessMethods)
-                && Objects.equals(printOptions, lbcdto.printOptions);
+    public boolean equals(Object object) {
+        if (this == object) return true;
+        if (!(object instanceof LBCDTO other)) return false;
+        return height == other.height && width == other.width && depth == other.depth
+                && upperFrame == other.upperFrame && bottomFrame == other.bottomFrame
+                && shelfThick == other.shelfThick && deltaWidth == other.deltaWidth
+                && serviceZoneWidth == other.serviceZoneWidth && doorThickness == other.doorThickness
+                && countCells == other.countCells && Double.compare(heightCell, other.heightCell) == 0
+                && widthCell == other.widthCell && depthCell == other.depthCell
+                && Objects.equals(type, other.type)
+                && Objects.equals(directionDoorOpening, other.directionDoorOpening)
+                && Objects.equals(colorDoor, other.colorDoor) && Objects.equals(colorBody, other.colorBody)
+                && Objects.equals(functionalConfiguration, other.functionalConfiguration)
+                && Objects.equals(equipmentSelections, other.equipmentSelections);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(
-                type,
-                height,
-                width,
-                depth,
-                upperFrame,
-                bottomFrame,
-                shelfThick,
-                deltaWidth,
-                serviceZoneWidth,
-                doorThickness,
-                countCells,
-                heightCell,
-                widthCell,
-                depthCell,
-                directionDoorOpening,
-                colorDoor,
-                colorBody,
-                display,
-                barReader,
-                payment,
-                printer,
-                rfidReader,
-                displayQuantity,
-                barReaderQuantity,
-                printerQuantity,
-                rfidReaderQuantity,
-                equipmentSelections,
-                displayPurpose,
-                accessPurposes,
-                paymentPurpose,
-                printerPurpose,
-                accessMethods,
-                printOptions
-        );
+        return Objects.hash(type, height, width, depth, upperFrame, bottomFrame, shelfThick,
+                deltaWidth, serviceZoneWidth, doorThickness, countCells, heightCell,
+                widthCell, depthCell, directionDoorOpening, colorDoor, colorBody,
+                functionalConfiguration, equipmentSelections);
     }
 
     @Override
@@ -425,35 +283,8 @@ public class LBCDTO {
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
-                ", type='" + type + '\'' +
-                ", height=" + height +
-                ", width=" + width +
-                ", depth=" + depth +
-                ", upperFrame=" + upperFrame +
-                ", bottomFrame=" + bottomFrame +
-                ", shelfThick=" + shelfThick +
-                ", deltaWidth=" + deltaWidth +
-                ", serviceZoneWidth=" + serviceZoneWidth +
-                ", doorThickness=" + doorThickness +
-                ", countCells=" + countCells +
-                ", heightCell=" + heightCell +
-                ", widthCell=" + widthCell +
-                ", depthCell=" + depthCell +
-                ", directionDoorOpening='" + directionDoorOpening + '\'' +
-                ", colorDoor='" + colorDoor + '\'' +
-                ", colorBody='" + colorBody + '\'' +
-                ", display='" + display + '\'' +
-                ", barReader='" + barReader + '\'' +
-                ", payment='" + payment + '\'' +
-                ", printer=" + printer +
-                ", rfidReader=" + rfidReader +
-                ", displayQuantity=" + displayQuantity +
-                ", barReaderQuantity=" + barReaderQuantity +
-                ", printerQuantity=" + printerQuantity +
-                ", rfidReaderQuantity=" + rfidReaderQuantity +
+                ", functionalConfiguration=" + functionalConfiguration +
                 ", equipmentSelections=" + equipmentSelections +
-                ", accessMethods=" + accessMethods +
-                ", printOptions=" + printOptions +
                 '}';
     }
 }
