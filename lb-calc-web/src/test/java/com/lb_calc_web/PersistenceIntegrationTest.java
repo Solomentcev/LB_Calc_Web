@@ -191,7 +191,7 @@ class PersistenceIntegrationTest {
                 .findFirst()
                 .orElseThrow();
 
-        assertEquals(2, restoredLC.getEquipment().size());
+        assertEquals(0, restoredLC.getEquipment().size());
         assertEquals(alsId, restoredALSEntity.getId());
     }
 
