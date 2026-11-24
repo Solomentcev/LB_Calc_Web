@@ -1,80 +1,27 @@
 package com.lb_calc_web.domain.model;
 
-import com.lb_calc_web.domain.attributes.AccessMethod;
-import com.lb_calc_web.domain.attributes.Payment;
-import com.lb_calc_web.domain.attributes.PrintOption;
 import com.lb_calc_web.domain.equipment.Equipment;
 
-import java.util.Collections;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 /**
- * Конфигурация функций управления модулем.
+ * Конфигурация оборудования модуля управления.
  *
- * <p>Определяет способ оплаты, доступные способы доступа,
- * варианты печати и состав оборудования, используемого
- * модулем управления.</p>
- *
- * <p>Порядок {@link AccessMethod} и {@link PrintOption} не имеет
- * значения, поэтому они хранятся как множества.</p>
- *
- * <p>Значения по умолчанию не зашиваются в domain-класс.
- * Конфигурационный слой приложения может получить их из
- * {@code size-bounds.properties} и передать готовую конфигурацию
- * при создании объекта.</p>
+ * <p>Функциональные возможности модуля определяются назначениями
+ * установленного оборудования. Отдельные списки способов доступа,
+ * оплаты и печати не хранятся, поскольку дублируют данные оборудования.</p>
  */
 public class ControlConfiguration {
 
-    /**
-     * Способ оплаты.
-     */
-    private final Payment payment;
-
-    /**
-     * Допустимые способы доступа.
-     */
-    private final Set<AccessMethod> accessMethods;
-
-    /**
-     * Доступные варианты печати.
-     */
-    private final Set<PrintOption> printOptions;
-
-    /**
-     * Конфигурация оборудования.
-     */
     private final EquipmentConfiguration equipmentConfiguration;
 
     /**
      * Создаёт конфигурацию управления.
      *
-     * <p>Если список способов доступа или печати не задан,
-     * используется пустое множество.</p>
-     *
-     * @param payment способ оплаты
-     * @param accessMethods допустимые способы доступа
-     * @param printOptions варианты печати
-     * @param equipmentConfiguration конфигурация оборудования
-     * @throws NullPointerException если {@code payment} или
-     *                              {@code equipmentConfiguration} равны null
+     * @param equipmentConfiguration состав оборудования
      */
-    public ControlConfiguration(
-            Payment payment,
-            Set<AccessMethod> accessMethods,
-            Set<PrintOption> printOptions,
-            EquipmentConfiguration equipmentConfiguration
-    ) {
-        this.payment = Objects.requireNonNull(
-                payment,
-                "Способ оплаты не должен быть null"
-        );
-
-        this.accessMethods = copyAccessMethods(accessMethods);
-        this.printOptions = copyPrintOptions(printOptions);
-
+    public ControlConfiguration(EquipmentConfiguration equipmentConfiguration) {
         this.equipmentConfiguration = Objects.requireNonNull(
                 equipmentConfiguration,
                 "Конфигурация оборудования не должна быть null"
@@ -82,139 +29,57 @@ public class ControlConfiguration {
     }
 
     /**
-     * Копирует набор способов доступа в независимый {@link EnumSet}.
+     * Создаёт независимую копию конфигурации.
      *
-     * @param accessMethods исходный набор
-     * @return копия набора или пустой набор
-     */
-    private Set<AccessMethod> copyAccessMethods(
-            Set<AccessMethod> accessMethods
-    ) {
-        EnumSet<AccessMethod> result =
-                EnumSet.noneOf(AccessMethod.class);
-
-        if (accessMethods != null) {
-            result.addAll(accessMethods);
-        }
-
-        return result;
-    }
-
-    /**
-     * Копирует набор вариантов печати в независимый {@link EnumSet}.
-     *
-     * @param printOptions исходный набор
-     * @return копия набора или пустой набор
-     */
-    private Set<PrintOption> copyPrintOptions(
-            Set<PrintOption> printOptions
-    ) {
-        EnumSet<PrintOption> result =
-                EnumSet.noneOf(PrintOption.class);
-
-        if (printOptions != null) {
-            result.addAll(printOptions);
-        }
-
-        return result;
-    }
-
-    /**
-     * Создаёт независимую копию конфигурации управления.
-     *
-     * @return копия с независимыми наборами и конфигурацией оборудования
+     * @return копия конфигурации
      */
     public ControlConfiguration copy() {
-        return new ControlConfiguration(
-                payment,
-                accessMethods,
-                printOptions,
-                equipmentConfiguration
-        );
-    }
-
-    /**
-     * Возвращает способ оплаты.
-     *
-     * @return способ оплаты
-     */
-    public Payment getPayment() {
-        return payment;
-    }
-
-    /**
-     * Возвращает доступные способы доступа.
-     *
-     * <p>Возвращается представление только для чтения.</p>
-     *
-     * @return набор способов доступа
-     */
-    public Set<AccessMethod> getAccessMethods() {
-        return Collections.unmodifiableSet(accessMethods);
-    }
-
-    /**
-     * Возвращает варианты печати.
-     *
-     * <p>Возвращается представление только для чтения.</p>
-     *
-     * @return набор вариантов печати
-     */
-    public Set<PrintOption> getPrintOptions() {
-        return Collections.unmodifiableSet(printOptions);
+        return new ControlConfiguration(equipmentConfiguration);
     }
 
     /**
      * Возвращает независимую копию конфигурации оборудования.
      *
-     * <p>Изменение возвращённого объекта не влияет на текущую конфигурацию.</p>
-     *
-     * @return копия конфигурации оборудования
+     * @return конфигурация оборудования
      */
     public EquipmentConfiguration getEquipmentConfiguration() {
         return equipmentConfiguration.copy();
     }
 
     /**
-     * Возвращает всё оборудование конфигурации.
+     * Возвращает все позиции оборудования.
      *
-     * @return неизменяемый список обязательного и дополнительного оборудования
+     * @return неизменяемый список оборудования
      */
     public List<Equipment> getAllEquipment() {
         return equipmentConfiguration.getAllEquipment();
     }
 
     /**
-     * Добавляет оборудование в обязательный набор.
+     * Добавляет оборудование в обязательный состав.
      *
      * @param equipment добавляемое оборудование
      */
-    public void addRequiredEquipment(
-            Equipment equipment
-    ) {
+    public void addRequiredEquipment(Equipment equipment) {
         equipmentConfiguration.addRequiredEquipment(equipment);
     }
 
     /**
-     * Добавляет оборудование в дополнительный набор.
+     * Добавляет оборудование в дополнительный состав.
      *
      * @param equipment добавляемое оборудование
      */
-    public void addAdditionalEquipment(
-            Equipment equipment
-    ) {
+    public void addAdditionalEquipment(Equipment equipment) {
         equipmentConfiguration.addAdditionalEquipment(equipment);
     }
 
     /**
-     * Удаляет оборудование из обязательного и дополнительного наборов.
+     * Удаляет оборудование из конфигурации.
      *
      * @param equipment удаляемое оборудование
-     * @return {@code true}, если оборудование было удалено хотя бы из одного набора
+     * @return true, если позиция была удалена
      */
-    public boolean removeEquipment(
-            Equipment equipment
-    ) {
+    public boolean removeEquipment(Equipment equipment) {
         Objects.requireNonNull(
                 equipment,
                 "Оборудование не должно быть null"
@@ -228,65 +93,26 @@ public class ControlConfiguration {
         return removedRequired || removedAdditional;
     }
 
-    /**
-     * Сравнивает конфигурации управления по всем параметрам.
-     *
-     * @param o объект для сравнения
-     * @return {@code true}, если конфигурации совпадают
-     */
     @Override
-    public boolean equals(Object o) {
-        if (this == o) {
+    public boolean equals(Object object) {
+        if (this == object) {
             return true;
         }
-
-        if (!(o instanceof ControlConfiguration other)) {
+        if (!(object instanceof ControlConfiguration other)) {
             return false;
         }
-
-        return payment == other.payment
-                && Objects.equals(
-                accessMethods,
-                other.accessMethods
-        )
-                && Objects.equals(
-                printOptions,
-                other.printOptions
-        )
-                && Objects.equals(
-                equipmentConfiguration,
-                other.equipmentConfiguration
-        );
+        return equipmentConfiguration.equals(other.equipmentConfiguration);
     }
 
-    /**
-     * Возвращает хэш-код конфигурации управления.
-     *
-     * @return хэш-код конфигурации
-     */
     @Override
     public int hashCode() {
-        return Objects.hash(
-                payment,
-                accessMethods,
-                printOptions,
-                equipmentConfiguration
-        );
+        return equipmentConfiguration.hashCode();
     }
 
-    /**
-     * Возвращает подробное строковое представление конфигурации.
-     *
-     * @return строковое представление конфигурации управления
-     */
     @Override
     public String toString() {
         return "ControlConfiguration{" +
-                "payment=" + payment +
-                ", accessMethods=" + accessMethods +
-                ", printOptions=" + printOptions +
-                ", equipmentConfiguration=" +
-                equipmentConfiguration +
+                "equipmentConfiguration=" + equipmentConfiguration +
                 '}';
     }
 }

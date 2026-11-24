@@ -1,9 +1,6 @@
 package com.lb_calc_web.mapper.dto;
 
-import com.lb_calc_web.domain.attributes.AccessMethod;
 import com.lb_calc_web.domain.attributes.Colors;
-import com.lb_calc_web.domain.attributes.Payment;
-import com.lb_calc_web.domain.attributes.PrintOption;
 import com.lb_calc_web.domain.equipment.BarReader;
 import com.lb_calc_web.domain.equipment.Display;
 import com.lb_calc_web.domain.equipment.Equipment;
@@ -13,9 +10,7 @@ import com.lb_calc_web.domain.model.LC;
 import com.lb_calc_web.dto.LCDTO;
 import com.lb_calc_web.dto.EquipmentSelectionDTO;
 
-import java.util.EnumSet;
 import java.util.List;
-import java.util.Set;
 import java.util.function.Function;
 import com.lb_calc_web.domain.equipment.EquipmentCatalog;
 
@@ -47,24 +42,6 @@ public final class LCDtoMapper {
 
         ControlConfiguration configuration =
                 domain.getControlConfiguration();
-
-        dto.setPayment(
-                configuration.getPayment().name()
-        );
-
-        dto.setAccessMethods(
-                configuration.getAccessMethods()
-                        .stream()
-                        .map(Enum::name)
-                        .toList()
-        );
-
-        dto.setPrintOptions(
-                configuration.getPrintOptions()
-                        .stream()
-                        .map(Enum::name)
-                        .toList()
-        );
 
         List<Equipment> equipment =
                 configuration.getEquipmentConfiguration()
@@ -163,12 +140,7 @@ public final class LCDtoMapper {
                                 "LC", equipmentResolver);
 
         ControlConfiguration controlConfiguration =
-                new ControlConfiguration(
-                        Payment.valueOf(dto.getPayment()),
-                        toAccessMethods(dto.getAccessMethods()),
-                        toPrintOptions(dto.getPrintOptions()),
-                        equipmentConfiguration
-                );
+                new ControlConfiguration(equipmentConfiguration);
 
         LC domain = new LC(
                 dto.getHeight(),
@@ -182,44 +154,6 @@ public final class LCDtoMapper {
         );
         domain.setId(dto.getId() == null || dto.getId() <= 0 ? null : dto.getId());
         return domain;
-    }
-
-    private static Set<AccessMethod> toAccessMethods(
-            List<String> values
-    ) {
-        EnumSet<AccessMethod> result =
-                EnumSet.noneOf(AccessMethod.class);
-
-        if (values == null) {
-            return result;
-        }
-
-        for (String value : values) {
-            if (value != null && !value.isBlank()) {
-                result.add(AccessMethod.valueOf(value));
-            }
-        }
-
-        return result;
-    }
-
-    private static Set<PrintOption> toPrintOptions(
-            List<String> values
-    ) {
-        EnumSet<PrintOption> result =
-                EnumSet.noneOf(PrintOption.class);
-
-        if (values == null) {
-            return result;
-        }
-
-        for (String value : values) {
-            if (value != null && !value.isBlank()) {
-                result.add(PrintOption.valueOf(value));
-            }
-        }
-
-        return result;
     }
 
     public static List<LCDTO> toDtoList(

@@ -14,28 +14,25 @@ public interface ControlModule {
     /**
      * Возвращает независимую копию конфигурации управления.
      *
-     * @return копия конфигурации, изменение которой не влияет на модуль
+     * @return копия конфигурации
      */
     ControlConfiguration getControlConfiguration();
 
     /**
-     * Формирует текстовое описание функциональной конфигурации
-     * управляющего модуля.
+     * Формирует описание функций и установленного оборудования.
      *
-     * <p>В описании отражается физическое количество каждой позиции
-     * оборудования, поскольку количество является частью комплектации.</p>
+     * <p>Функции определяются назначениями оборудования, поэтому
+     * отдельные признаки доступа, оплаты и печати не дублируются.</p>
      *
-     * @return описание способов доступа, печати, оплаты и оборудования
+     * @return описание конфигурации управления
      */
     default String getControlDescription() {
         ControlConfiguration configuration = getControlConfiguration();
 
-        String accessMethods = configuration.getAccessMethods().stream()
-                .map(Enum::name)
-                .collect(Collectors.joining(", ", "[", "]"));
-
-        String printOptions = configuration.getPrintOptions().stream()
-                .map(Enum::name)
+        String purposes = configuration.getAllEquipment().stream()
+                .map(equipment -> equipment.getPurpose().name())
+                .distinct()
+                .sorted()
                 .collect(Collectors.joining(", ", "[", "]"));
 
         String equipment = configuration.getEquipmentConfiguration()
@@ -44,21 +41,18 @@ public interface ControlModule {
                 .map(ControlModule::formatEquipmentItem)
                 .collect(Collectors.joining(", "));
 
-        return "Способы доступа: " + accessMethods + ";\n"
-                + "Печать: " + printOptions + ";\n"
-                + "Оплата: " + configuration.getPayment() + ";\n"
+        return "Функции: " + purposes + ";\n"
                 + "Оборудование: " + equipment;
     }
 
     /**
-     * Форматирует позицию оборудования с учётом её количества.
+     * Форматирует позицию оборудования с учётом количества.
      *
      * @param item позиция оборудования
-     * @return наименование и количество, если оно больше единицы
+     * @return наименование и количество
      */
     private static String formatEquipmentItem(EquipmentItem item) {
         String name = item.equipment().getName();
-
         return item.quantity() == 1
                 ? name
                 : name + " (" + item.quantity() + " шт.)";
