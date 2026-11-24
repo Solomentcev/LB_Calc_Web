@@ -4,6 +4,7 @@ import com.lb_calc_web.domain.attributes.Colors;
 import com.lb_calc_web.domain.equipment.AccessPurpose;
 import com.lb_calc_web.domain.equipment.DisplayPurpose;
 import com.lb_calc_web.domain.equipment.Equipment;
+import com.lb_calc_web.domain.equipment.EquipmentCategory;
 import com.lb_calc_web.domain.equipment.PaymentPurpose;
 import com.lb_calc_web.domain.equipment.PrinterPurpose;
 import com.lb_calc_web.domain.model.ControlConfiguration;
@@ -52,6 +53,14 @@ public final class LCDtoMapper {
                 .map(entry -> new EquipmentSelectionDTO(
                         entry.getKey().getId(), entry.getValue()))
                 .toList());
+        configuration.getEquipment().keySet().stream()
+                .filter(item -> item.getCategory() == EquipmentCategory.DISPLAY)
+                .findFirst()
+                .ifPresent(display -> {
+                    dto.setDisplay(display.getName());
+                    dto.setDisplayWidth(display.getWidth());
+                    dto.setDisplayHeight(display.getHeight());
+                });
         return dto;
     }
 
