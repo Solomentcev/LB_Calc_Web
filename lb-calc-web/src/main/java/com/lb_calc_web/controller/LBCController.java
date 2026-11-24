@@ -1,6 +1,13 @@
 package com.lb_calc_web.controller;
 
 import com.lb_calc_web.domain.model.LBC;
+import com.lb_calc_web.domain.equipment.AccessPurpose;
+import com.lb_calc_web.domain.equipment.DisplayPurpose;
+import com.lb_calc_web.domain.equipment.PaymentPurpose;
+import com.lb_calc_web.domain.equipment.PrinterPurpose;
+import com.lb_calc_web.dto.EquipmentDTO;
+import com.lb_calc_web.mapper.dto.EquipmentDtoMapper;
+import com.lb_calc_web.service.EquipmentCatalogService;
 import com.lb_calc_web.dto.LBCDTO;
 import com.lb_calc_web.mapper.dto.LBCDtoMapper;
 import com.lb_calc_web.service.image.LBCImageService;
@@ -12,6 +19,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 
 @Controller
 @RequestMapping("/lbcs")
@@ -21,9 +30,11 @@ public class LBCController extends BaseCatalogController {
             LoggerFactory.getLogger(LBCController.class);
 
     private final LBCService lbcService;
+    private final EquipmentCatalogService equipmentCatalogService;
 
-    public LBCController(LBCService lbcService) {
+    public LBCController(LBCService lbcService, EquipmentCatalogService equipmentCatalogService) {
         this.lbcService = lbcService;
+        this.equipmentCatalogService = equipmentCatalogService;
     }
 
     /**
@@ -46,10 +57,7 @@ public class LBCController extends BaseCatalogController {
     public String createLBC(Model model) {
         logger.info("Открытие страницы создания LBC");
 
-        model.addAttribute(
-                "lbc",
-                LBCImageService.addImage(LBCDtoMapper.toDto(lbcService.createLBC()))
-        );
+        prepareForm(model, LBCImageService.addImage(LBCDtoMapper.toDto(lbcService.createLBC())));
 
         return "lbcs/lbc";
     }
@@ -67,10 +75,7 @@ public class LBCController extends BaseCatalogController {
                 id
         );
 
-        model.addAttribute(
-                "lbc",
-                LBCImageService.addImage(LBCDtoMapper.toDto(lbcService.findById(id)))
-        );
+        prepareForm(model, LBCImageService.addImage(LBCDtoMapper.toDto(lbcService.findById(id))));
 
         return "lbcs/lbc";
     }
@@ -93,13 +98,19 @@ public class LBCController extends BaseCatalogController {
                     "errors",
                     ValidationErrorFormatter.format(e.getValidationResult())
             );
-            model.addAttribute(
-                    "lbc",
-                    LBCImageService.addImage(lbc)
-            );
+            prepareForm(model, LBCImageService.addImage(lbc));
 
             return "lbcs/lbc";
         }
     }
 
+    private void prepareForm(Model model, LBCDTO lbc) {
+        model.addAttribute("lbc", lbc);
+        model.addAttribute("equipmentList", equipmentCatalogService.findAll().stream()
+                .map(EquipmentDtoMapper::toDto).toList());
+        model.addAttribute("displayPurposes", List.of(DisplayPurpose.values()));
+        model.addAttribute("accessPurposes", List.of(AccessPurpose.values()));
+        model.addAttribute("paymentPurposes", List.of(PaymentPurpose.values()));
+        model.addAttribute("printerPurposes", List.of(PrinterPurpose.values()));
+    }
 }

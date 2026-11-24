@@ -4,6 +4,10 @@ import com.lb_calc_web.domain.attributes.Colors;
 import com.lb_calc_web.domain.equipment.AccessPurpose;
 import com.lb_calc_web.domain.equipment.DisplayPurpose;
 import com.lb_calc_web.domain.equipment.PaymentPurpose;
+import com.lb_calc_web.domain.equipment.PrinterPurpose;
+import com.lb_calc_web.dto.EquipmentDTO;
+import com.lb_calc_web.mapper.dto.EquipmentDtoMapper;
+import com.lb_calc_web.service.EquipmentCatalogService;
 import com.lb_calc_web.domain.model.LC;
 import com.lb_calc_web.dto.LCDTO;
 import com.lb_calc_web.mapper.dto.LCDtoMapper;
@@ -31,24 +35,11 @@ public class LCController {
     private final List<Colors> colorsList =
             Arrays.asList(Colors.values());
 
-    private final List<PaymentPurpose> paymentList =
-            Arrays.asList(PaymentPurpose.values());
+    private final EquipmentCatalogService equipmentCatalogService;
 
-    private final List<AccessPurpose> accessMethodList =
-            Arrays.asList(AccessPurpose.values());
-
-    private final List<String> displayList =
-            Arrays.stream(DisplayPurpose.values()).map(Enum::name).toList();
-
-    private final List<String> barReaderList =
-            List.of(
-                    AccessPurpose.BAR_CODE.name(),
-                    AccessPurpose.QR_CODE.name(),
-                    AccessPurpose.RFID.name()
-            );
-
-    public LCController(LCService lcService) {
+    public LCController(LCService lcService, EquipmentCatalogService equipmentCatalogService) {
         this.lcService = lcService;
+        this.equipmentCatalogService = equipmentCatalogService;
     }
 
     /**
@@ -62,7 +53,7 @@ public class LCController {
         LCDTO lc = LCImageService.addImage(LCDtoMapper.toDto(lcService.createLC()));
         lc.setId(0L);
 
-        model.addAttribute("lc", lc);
+        prepareForm(model, lc);
 
         return "lcs/lc";
     }
@@ -83,7 +74,7 @@ public class LCController {
 
         LCDTO lc = LCImageService.addImage(LCDtoMapper.toDto(lcService.findById(id)));
 
-        model.addAttribute("lc", lc);
+        prepareForm(model, lc);
 
         return "lcs/lc";
     }
@@ -121,10 +112,7 @@ public class LCController {
                     ValidationErrorFormatter.format(e.getValidationResult())
             );
 
-            model.addAttribute(
-                    "lc",
-                    LCImageService.addImage(lc)
-            );
+            prepareForm(model, LCImageService.addImage(lc));
 
             return "lcs/lc";
         }
@@ -138,35 +126,13 @@ public class LCController {
         return colorsList;
     }
 
-    /**
-     * Список способов оплаты.
-     */
-    @ModelAttribute("paymentList")
-    public List<PaymentPurpose> paymentList() {
-        return paymentList;
-    }
-
-    /**
-     * Список способов доступа.
-     */
-    @ModelAttribute("accessMethodList")
-    public List<AccessPurpose> accessMethodList() {
-        return accessMethodList;
-    }
-
-    /**
-     * Список доступных дисплеев.
-     */
-    @ModelAttribute("displayList")
-    public List<String> displayList() {
-        return displayList;
-    }
-
-    /**
-     * Список доступных сканеров штрихкода.
-     */
-    @ModelAttribute("barReaderList")
-    public List<String> barReaderList() {
-        return barReaderList;
+    private void prepareForm(Model model, LCDTO lc) {
+        model.addAttribute("lc", lc);
+        model.addAttribute("equipmentList", equipmentCatalogService.findAll().stream()
+                .map(EquipmentDtoMapper::toDto).toList());
+        model.addAttribute("displayPurposes", List.of(DisplayPurpose.values()));
+        model.addAttribute("accessPurposes", List.of(AccessPurpose.values()));
+        model.addAttribute("paymentPurposes", List.of(PaymentPurpose.values()));
+        model.addAttribute("printerPurposes", List.of(PrinterPurpose.values()));
     }
 }

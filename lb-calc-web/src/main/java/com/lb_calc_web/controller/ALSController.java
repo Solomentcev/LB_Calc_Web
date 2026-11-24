@@ -1,6 +1,14 @@
 package com.lb_calc_web.controller;
 
 import com.lb_calc_web.dto.ALSDTO;
+import com.lb_calc_web.dto.LBCDTO;
+import com.lb_calc_web.dto.EquipmentDTO;
+import com.lb_calc_web.domain.equipment.AccessPurpose;
+import com.lb_calc_web.domain.equipment.DisplayPurpose;
+import com.lb_calc_web.domain.equipment.PaymentPurpose;
+import com.lb_calc_web.domain.equipment.PrinterPurpose;
+import com.lb_calc_web.mapper.dto.EquipmentDtoMapper;
+import com.lb_calc_web.service.EquipmentCatalogService;
 import com.lb_calc_web.mapper.dto.ALSDtoMapper;
 import com.lb_calc_web.mapper.dto.LBCDtoMapper;
 import com.lb_calc_web.service.image.ALSImageService;
@@ -11,16 +19,21 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Controller
 @RequestMapping("/alss")
 public class ALSController extends BaseCatalogController {
 
     private final ALSService alsService;
+    private final EquipmentCatalogService equipmentCatalogService;
 
     public ALSController(
-            ALSService alsService
+            ALSService alsService,
+            EquipmentCatalogService equipmentCatalogService
     ) {
         this.alsService = alsService;
+        this.equipmentCatalogService = equipmentCatalogService;
     }
 
     @GetMapping("/create")
@@ -148,10 +161,20 @@ public class ALSController extends BaseCatalogController {
         } catch (ValidationSizeException e) {
             model.addAttribute("errors", ValidationErrorFormatter.format(e.getValidationResult()));
             model.addAttribute("als", ALSImageService.addImages(ALSDtoMapper.toDto(alsService.findById(alsId))));
-            model.addAttribute("lbc", LBCImageService.addImage(lbc));
+            prepareLBCForm(model, LBCImageService.addImage(lbc));
 
             return "alss/alss_lbc";
         }
+    }
+
+    private void prepareLBCForm(Model model, LBCDTO lbc) {
+        model.addAttribute("lbc", lbc);
+        model.addAttribute("equipmentList", equipmentCatalogService.findAll().stream()
+                .map(EquipmentDtoMapper::toDto).toList());
+        model.addAttribute("displayPurposes", List.of(DisplayPurpose.values()));
+        model.addAttribute("accessPurposes", List.of(AccessPurpose.values()));
+        model.addAttribute("paymentPurposes", List.of(PaymentPurpose.values()));
+        model.addAttribute("printerPurposes", List.of(PrinterPurpose.values()));
     }
 
     /**
