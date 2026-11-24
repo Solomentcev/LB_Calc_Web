@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/common :: head('Каталог оборудования')}"></head>
+<body>
+<div th:replace="~{header :: header}"></div>
+<div class="container">
+    <h1 class="page-title">Каталог оборудования</h1>
+    <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+    <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+    <div class="page-actions">
+        <a th:href="@{/equipment/create}" class="btn btn-primary btn-sm">Добавить модель</a>
+        <a th:href="@{/}" class="btn btn-secondary btn-sm">Назад</a>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-striped table-hover js-data-table catalog-table">
+            <thead><tr>
+                <th>ID</th><th>Название</th><th>Функциональный тип</th><th>Категория</th>
+                <th>Назначение</th><th>Размеры (Ш × В × Г)</th><th>Описание</th><th>Действия</th>
+            </tr></thead>
+            <tbody>
+            <tr th:each="item : ${equipmentList}">
+                <td th:text="${item.id}"></td>
+                <td th:text="${item.name}"></td>
+                <td th:text="${item.functionalType}"></td>
+                <td th:text="${item.category}"></td>
+                <td th:text="${item.purpose}"></td>
+                <td th:text="${item.width + ' × ' + item.height + ' × ' + item.depth}"></td>
+                <td th:text="${item.description}"></td>
+                <td>
+                    <a th:href="@{/equipment/{id}(id=${item.id})}" class="btn btn-primary btn-sm">Изменить</a>
+                    <form th:action="@{/equipment/{id}/delete(id=${item.id})}" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-danger btn-sm"
+                                onclick="return confirm('Удалить модель оборудования?')">Удалить</button>
+                    </form>
+                </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(equipmentList)}"><td colspan="8" class="text-center">Каталог пуст</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+<div th:replace="~{footer :: footer}"></div>
+</body>
+</html>

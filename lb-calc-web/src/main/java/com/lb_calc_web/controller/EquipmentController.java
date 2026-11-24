@@ -38,19 +38,19 @@ public class EquipmentController {
     public String list(Model model) {
         model.addAttribute("equipmentList", equipmentCatalogService.findAll()
                 .stream().map(EquipmentDtoMapper::toDto).toList());
-        return "equipment/equipment";
+        return "equipment/equipments";
     }
 
     @GetMapping("/create")
     public String createForm(Model model) {
         prepareForm(model, new EquipmentDTO());
-        return "equipment/equipment_form";
+        return "equipment/equipment";
     }
 
     @GetMapping("/{id}")
     public String editForm(@PathVariable Long id, Model model) {
         prepareForm(model, EquipmentDtoMapper.toDto(equipmentCatalogService.findById(id)));
-        return "equipment/equipment_form";
+        return "equipment/equipment";
     }
 
     @PostMapping("/save")
@@ -62,7 +62,7 @@ public class EquipmentController {
     ) {
         if (bindingResult.hasErrors()) {
             prepareForm(model, dto);
-            return "equipment/equipment_form";
+            return "equipment/equipment";
         }
 
         try {
@@ -73,7 +73,7 @@ public class EquipmentController {
         } catch (IllegalArgumentException exception) {
             model.addAttribute("errorMessage", exception.getMessage());
             prepareForm(model, dto);
-            return "equipment/equipment_form";
+            return "equipment/equipment";
         }
     }
 
