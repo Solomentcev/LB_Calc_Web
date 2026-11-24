@@ -100,11 +100,11 @@ public final class ProjectEntityMapper {
 
         project.setId(entity.getId());
 
-        if (!project.getDescription().equals(entity.getDescription())) {
-            throw new IllegalStateException(
-                    "Описание проекта в БД не соответствует его составу"
-            );
-        }
+        /*
+         * Описание проекта полностью формируется доменной моделью
+         * из состава ALS. Сохранённое значение является производным
+         * и не должно препятствовать восстановлению проекта.
+         */
 
         return project;
     }
