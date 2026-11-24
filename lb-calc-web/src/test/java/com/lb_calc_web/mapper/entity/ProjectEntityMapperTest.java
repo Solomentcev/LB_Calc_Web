@@ -88,7 +88,7 @@ class ProjectEntityMapperTest {
     }
 
     @Test
-    void toDomain_shouldRejectStaleDerivedDescription() {
+    void toDomain_shouldRecalculateDescriptionWhenStoredValueIsStale() {
         LocalDate createdAt = LocalDate.of(2026, 10, 1);
         Employee employee = new Employee(
                 "Иван",
@@ -109,10 +109,9 @@ class ProjectEntityMapperTest {
         );
         entity.setDescription("Устаревшее описание");
 
-        assertThrows(
-                IllegalStateException.class,
-                () -> ProjectEntityMapper.toDomain(entity)
-        );
+        Project restored = ProjectEntityMapper.toDomain(entity);
+
+        assertEquals(domain.getDescription(), restored.getDescription());
     }
 
     @Test
