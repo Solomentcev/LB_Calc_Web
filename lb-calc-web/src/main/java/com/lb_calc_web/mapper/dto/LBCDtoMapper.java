@@ -121,20 +121,20 @@ public final class LBCDtoMapper {
             TypeLb typeLb,
             Function<Long, Equipment> equipmentLookup
     ) {
-        return toDomain(dto, typeLb, equipmentResolver, null);
+        return toDomain(dto, typeLb, equipmentLookup, null);
     }
 
     public static LBC toDomain(
             LBCDTO dto,
             TypeLb typeLb,
-            Function<Long, Equipment> equipmentResolver,
+            Function<Long, Equipment> equipmentLookup,
             ControlConfiguration fallbackConfiguration
     ) {
         if (dto == null) {
             return null;
         }
         Objects.requireNonNull(typeLb, "Тип LBC не должен быть null");
-        Objects.requireNonNull(equipmentResolver, "equipmentResolver не должен быть null");
+        Objects.requireNonNull(equipmentLookup, "equipmentLookup не должен быть null");
         if (!Objects.equals(dto.getType(), typeLb.getType())) {
             throw new IllegalArgumentException(
                     "Переданный конструктивный тип не соответствует типу DTO LBC");
@@ -162,7 +162,7 @@ public final class LBCDtoMapper {
             for (EquipmentSelectionDTO selection : dto.getEquipmentSelections()) {
                 Objects.requireNonNull(selection, "Позиция оборудования не должна быть null");
                 Equipment model = Objects.requireNonNull(
-                        equipmentResolver.apply(selection.getEquipmentId()),
+                        equipmentLookup.apply(selection.getEquipmentId()),
                         "Модель оборудования не найдена: " + selection.getEquipmentId()
                 );
                 equipment.merge(model, selection.getQuantity(), Math::addExact);

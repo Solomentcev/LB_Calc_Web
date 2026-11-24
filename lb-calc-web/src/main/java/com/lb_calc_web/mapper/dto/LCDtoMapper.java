@@ -100,18 +100,18 @@ public final class LCDtoMapper {
     }
 
     public static LC toDomain(LCDTO dto, Function<Long, Equipment> equipmentLookup) {
-        return toDomain(dto, equipmentResolver, null);
+        return toDomain(dto, equipmentLookup, null);
     }
 
     public static LC toDomain(
             LCDTO dto,
-            Function<Long, Equipment> equipmentResolver,
+            Function<Long, Equipment> equipmentLookup,
             ControlConfiguration fallbackConfiguration
     ) {
         if (dto == null) {
             return null;
         }
-        Objects.requireNonNull(equipmentResolver, "equipmentResolver не должен быть null");
+        Objects.requireNonNull(equipmentLookup, "equipmentLookup не должен быть null");
 
         boolean functionalConfigurationProvided =
                 dto.getDisplayPurpose() != null
@@ -136,7 +136,7 @@ public final class LCDtoMapper {
             for (EquipmentSelectionDTO selection : dto.getEquipmentSelections()) {
                 Objects.requireNonNull(selection, "Позиция оборудования не должна быть null");
                 Equipment model = Objects.requireNonNull(
-                        equipmentResolver.apply(selection.getEquipmentId()),
+                        equipmentLookup.apply(selection.getEquipmentId()),
                         "Модель оборудования не найдена: " + selection.getEquipmentId()
                 );
                 equipment.merge(model, selection.getQuantity(), Math::addExact);
