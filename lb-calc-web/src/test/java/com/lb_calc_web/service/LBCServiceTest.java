@@ -45,7 +45,7 @@ class LBCServiceTest {
                 .withProperty("lbc.type.default", "TYPE1")
                 .withProperty("lbc.payment.default", "NONE")
                 .withProperty("lbc.printer.default", "false")
-                .withProperty("lbc.access-methods.default", "RFID")
+                .withProperty("lbc.access-purposes.default", "RFID")
                 .withProperty("lbc.color.body.default", "Blue")
                 .withProperty("lbc.color.door.default", "White")
                 .withProperty("lbc.direction.default", "LEFT")

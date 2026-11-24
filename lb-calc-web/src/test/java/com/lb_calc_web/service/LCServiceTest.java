@@ -48,7 +48,7 @@ class LCServiceTest {
                 .withProperty("size.frame.bottom.default", "50")
                 .withProperty("lc.payment.default", "NONE")
                 .withProperty("lc.printer.default", "false")
-                .withProperty("lc.access-methods.default", "RFID")
+                .withProperty("lc.access-purposes.default", "RFID")
                 .withProperty("lc.color.body.default", "Blue")
                 .withProperty("lc.color.door.default", "White");
         service = new LCService(
