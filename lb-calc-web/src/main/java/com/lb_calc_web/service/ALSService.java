@@ -4,6 +4,7 @@ import com.lb_calc_web.domain.attributes.Colors;
 import com.lb_calc_web.domain.attributes.PositionControlModule;
 import com.lb_calc_web.domain.model.ALS;
 import com.lb_calc_web.domain.model.ControlModule;
+import com.lb_calc_web.domain.model.ControlConfiguration;
 import com.lb_calc_web.domain.model.LB;
 import com.lb_calc_web.domain.model.LBC;
 import com.lb_calc_web.domain.model.LC;
@@ -230,13 +231,17 @@ public class ALSService {
     @Transactional(readOnly = true)
     public LC restoreLC(LCDTO dto, ALS als) {
         Objects.requireNonNull(als, "ALS не должен быть null");
-        return lcService.restoreDomain(dto);
+        ControlModule control = als.getControlModule();
+        ControlConfiguration fallback = control == null ? null : control.getControlConfiguration();
+        return lcService.restoreDomain(dto, fallback);
     }
 
     @Transactional(readOnly = true)
     public LBC restoreLBC(LBCDTO dto, ALS als) {
         Objects.requireNonNull(als, "ALS не должен быть null");
-        return lbcService.restoreDomain(dto);
+        ControlModule control = als.getControlModule();
+        ControlConfiguration fallback = control == null ? null : control.getControlConfiguration();
+        return lbcService.restoreDomain(dto, fallback);
     }
 
     @Transactional(readOnly = true)
@@ -309,11 +314,15 @@ public class ALSService {
     public ALS restoreDomain(ALSDTO dto) {
         Objects.requireNonNull(dto, "ALS не должен быть null");
         try {
+            ControlConfiguration fallback = dto.getId() != null && dto.getId() > 0
+                    ? findById(dto.getId()).getControlModule().getControlConfiguration()
+                    : null;
             return ALSDtoMapper.toDomain(
                     dto,
                     candidate -> TypeLbFactory.forLB(environment, candidate.getType()),
                     candidate -> TypeLbFactory.forLBC(environment, candidate.getType()),
-                    equipmentEntityResolver::resolveDomain
+                    equipmentEntityResolver::resolveDomain,
+                    fallback
             );
         } catch (IllegalStateException exception) {
             throw createValidationException(dto, "structure", exception);
