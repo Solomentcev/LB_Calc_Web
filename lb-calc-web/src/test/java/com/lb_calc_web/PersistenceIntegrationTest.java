@@ -1,6 +1,14 @@
 package com.lb_calc_web;
 
 import com.lb_calc_web.domain.model.ALS;
+import com.lb_calc_web.domain.attributes.TypeLb;
+import com.lb_calc_web.domain.equipment.AccessPurpose;
+import com.lb_calc_web.domain.equipment.DisplayPurpose;
+import com.lb_calc_web.domain.equipment.Equipment;
+import com.lb_calc_web.domain.equipment.EquipmentCategory;
+import com.lb_calc_web.domain.equipment.EquipmentFunctionalType;
+import com.lb_calc_web.domain.equipment.PaymentPurpose;
+import com.lb_calc_web.domain.equipment.PrinterPurpose;
 import com.lb_calc_web.domain.model.Employee;
 import com.lb_calc_web.domain.model.Module;
 import com.lb_calc_web.domain.model.LB;
@@ -11,24 +19,29 @@ import com.lb_calc_web.mapper.dto.LCDtoMapper;
 import com.lb_calc_web.mapper.dto.ProjectDtoMapper;
 import com.lb_calc_web.dto.ALSDTO;
 import com.lb_calc_web.dto.LCDTO;
+import com.lb_calc_web.dto.EquipmentSelectionDTO;
 import com.lb_calc_web.dto.LBCDTO;
 import com.lb_calc_web.dto.LBDTO;
 import com.lb_calc_web.dto.ProjectDTO;
 import com.lb_calc_web.service.ProjectService;
 import com.lb_calc_web.service.ALSService;
+import com.lb_calc_web.service.EquipmentEntityResolver;
 import com.lb_calc_web.entity.ALSEntity;
 import com.lb_calc_web.entity.EmployeeEntity;
 import com.lb_calc_web.entity.LCEntity;
 import com.lb_calc_web.entity.LBCEntity;
+import com.lb_calc_web.entity.EquipmentEntity;
 import com.lb_calc_web.entity.ModuleEntity;
 import com.lb_calc_web.entity.ProjectEntity;
 import com.lb_calc_web.mapper.dto.ALSDtoMapper;
 import com.lb_calc_web.mapper.entity.ALSEntityMapper;
 import com.lb_calc_web.mapper.entity.EmployeeEntityMapper;
 import com.lb_calc_web.mapper.entity.ModuleEntityMapper;
+import com.lb_calc_web.mapper.entity.EquipmentEntityMapper;
 import com.lb_calc_web.mapper.entity.ProjectEntityMapper;
 import com.lb_calc_web.repository.ALSRepository;
 import com.lb_calc_web.repository.EmployeeRepository;
+import com.lb_calc_web.repository.EquipmentRepository;
 import com.lb_calc_web.repository.ModuleEntityRepository;
 import com.lb_calc_web.repository.ProjectRepository;
 import com.lb_calc_web.domain.attributes.Role;
@@ -68,6 +81,12 @@ class PersistenceIntegrationTest {
     private ModuleEntityRepository moduleRepository;
 
     @Autowired
+    private EquipmentRepository equipmentRepository;
+
+    @Autowired
+    private EquipmentEntityResolver equipmentEntityResolver;
+
+    @Autowired
     private ALSRepository alsRepository;
 
     @Autowired
@@ -101,7 +120,7 @@ class PersistenceIntegrationTest {
                 module -> resolvedModules.computeIfAbsent(
                         module,
                         candidate -> moduleRepository.saveAndFlush(
-                                ModuleEntityMapper.toEntity(candidate)
+                                ModuleEntityMapper.toEntity(candidate, equipmentEntityResolver::resolve)
                         )
                 )
         );
@@ -179,12 +198,26 @@ class PersistenceIntegrationTest {
     @Test
     void lbcAggregate_shouldRoundTripEquipmentQuantitiesAndControlOptions() {
         var lbcALS = TestDataFactory.validLBCALSDTO(2L);
-        lbcALS.getLBC().setBarReader(BarReader.READER_1D.getName());
-        lbcALS.getLBC().setBarReaderQuantity(2);
-        lbcALS.getLBC().setAccessMethods(List.of(AccessMethod.RFID.name()));
-        lbcALS.getLBC().setPrintOptions(List.of(PrintOption.BARCODE.name()));
+        Equipment display = persistEquipment(
+                EquipmentFunctionalType.DISPLAY, DisplayPurpose.INCH_10,
+                EquipmentCategory.DISPLAY, "Дисплей 10");
+        Equipment barcode = persistEquipment(
+                EquipmentFunctionalType.ACCESS, AccessPurpose.BAR_CODE,
+                EquipmentCategory.BAR_READER, "Сканер штрихкода");
+        Equipment rfid = persistEquipment(
+                EquipmentFunctionalType.ACCESS, AccessPurpose.RFID,
+                EquipmentCategory.RFID_READER, "RFID-считыватель");
+        lbcALS.getLBC().setDisplayPurpose(DisplayPurpose.INCH_10.name());
+        lbcALS.getLBC().setAccessPurposes(List.of(
+                AccessPurpose.RFID.name(), AccessPurpose.BAR_CODE.name()));
+        lbcALS.getLBC().setPaymentPurpose(PaymentPurpose.NONE.name());
+        lbcALS.getLBC().setPrinterPurpose(PrinterPurpose.ABSENT.name());
+        lbcALS.getLBC().setEquipmentSelections(List.of(
+                new EquipmentSelectionDTO(display.getId(), 1),
+                new EquipmentSelectionDTO(barcode.getId(), 2),
+                new EquipmentSelectionDTO(rfid.getId(), 1)));
 
-        ALS domainALS = ALSDtoMapper.toDomain(lbcALS);
+        ALS domainALS = restoreAlsDto(lbcALS);
         Map<Module, ModuleEntity> resolvedModules = new HashMap<>();
 
         ALSEntity alsEntity = ALSEntityMapper.toEntity(
@@ -192,7 +225,7 @@ class PersistenceIntegrationTest {
                 module -> resolvedModules.computeIfAbsent(
                         module,
                         candidate -> moduleRepository.saveAndFlush(
-                                ModuleEntityMapper.toEntity(candidate)
+                                ModuleEntityMapper.toEntity(candidate, equipmentEntityResolver::resolve)
                         )
                 )
         );
@@ -211,14 +244,15 @@ class PersistenceIntegrationTest {
         assertEquals(
                 2,
                 restoredLBC.getEquipment().stream()
-                        .filter(item -> BarReader.READER_1D_ID.equals(
-                                item.getCatalogPositionId()))
+                        .filter(item -> item.getEquipment().getId().equals(barcode.getId()))
                         .findFirst()
                         .orElseThrow()
                         .getQuantity()
         );
-        assertEquals(Set.of(AccessMethod.RFID), restoredLBC.getAccessMethods());
-        assertEquals(Set.of(PrintOption.BARCODE), restoredLBC.getPrintOptions());
+        assertEquals(Set.of(AccessPurpose.RFID, AccessPurpose.BAR_CODE),
+                restoredLBC.getFunctionalConfiguration().getAccess());
+        assertEquals(PaymentPurpose.NONE,
+                restoredLBC.getFunctionalConfiguration().getPayment());
     }
 
     @Test
@@ -246,7 +280,7 @@ class PersistenceIntegrationTest {
                 module -> resolvedModules.computeIfAbsent(
                         module,
                         candidate -> moduleRepository.saveAndFlush(
-                                ModuleEntityMapper.toEntity(candidate)
+                                ModuleEntityMapper.toEntity(candidate, equipmentEntityResolver::resolve)
                         )
                 );
 
@@ -494,17 +528,12 @@ class PersistenceIntegrationTest {
             assertEquals(2, changedALS.getStorageModules().size());
 
             LCDTO changedLCDTO = LCDtoMapper.toDto(changedALS.getLC());
-            changedLCDTO.setAccessMethods(List.of(AccessMethod.BARCODE.name()));
-            changedLCDTO.setBarReader(BarReader.READER_1D.getName());
-            changedLCDTO.setBarReaderQuantity(1);
-            List<EquipmentSelectionDTO> changedEquipmentSelections =
-                    new ArrayList<>(changedLCDTO.getEquipmentSelections().stream()
-                            .filter(selection -> !selection.catalogPositionId()
-                                    .startsWith("BAR_READER"))
-                            .toList());
-            changedEquipmentSelections.add(
-                    new EquipmentSelectionDTO(BarReader.READER_1D_ID, 1));
-            changedLCDTO.setEquipmentSelections(changedEquipmentSelections);
+            Equipment barcodeScanner = persistEquipment(
+                    EquipmentFunctionalType.ACCESS, AccessPurpose.BAR_CODE,
+                    EquipmentCategory.BAR_READER, "Сканер штрихкода для LC");
+            changedLCDTO.setAccessPurposes(List.of(AccessPurpose.BAR_CODE.name()));
+            changedLCDTO.setEquipmentSelections(List.of(
+                    new EquipmentSelectionDTO(barcodeScanner.getId(), 1)));
             ALS changedWithLC = projectService.saveLCAtProject(
                     projectId,
                     changedALS.getId(),
@@ -517,7 +546,9 @@ class PersistenceIntegrationTest {
             );
 
             LBCDTO changedLBCDTO = LBCDtoMapper.toDto(independentConfiguration.getLBC());
-            changedLBCDTO.setAccessMethods(List.of(AccessMethod.BARCODE.name()));
+            changedLBCDTO.setAccessPurposes(List.of(AccessPurpose.BAR_CODE.name()));
+            changedLBCDTO.setEquipmentSelections(List.of(
+                    new EquipmentSelectionDTO(barcodeScanner.getId(), 1)));
             ALS changedWithLBC = projectService.saveLBCAtProject(
                     projectId,
                     independentAlsId,
@@ -525,8 +556,8 @@ class PersistenceIntegrationTest {
                     alsService.restoreLBC(changedLBCDTO, independentConfiguration)
             );
             assertEquals(
-                    List.of(AccessMethod.BARCODE.name()),
-                    LBCDtoMapper.toDto(changedWithLBC.getLBC()).getAccessMethods()
+                    List.of(AccessPurpose.BAR_CODE.name()),
+                    LBCDtoMapper.toDto(changedWithLBC.getLBC()).getAccessPurposes()
             );
 
             ALS regeneratedLBC = projectService.replaceWithNewLBCAtProject(
@@ -587,4 +618,30 @@ class PersistenceIntegrationTest {
             SecurityContextHolder.clearContext();
         }
     }
+    private Equipment persistEquipment(
+            EquipmentFunctionalType functionalType,
+            com.lb_calc_web.domain.equipment.EquipmentPurpose purpose,
+            EquipmentCategory category,
+            String name
+    ) {
+        Equipment domain = new Equipment(
+                null, functionalType, purpose, category, name, "",
+                120, 50, 30
+        );
+        EquipmentEntity saved = equipmentRepository.saveAndFlush(
+                EquipmentEntityMapper.toEntity(domain));
+        return EquipmentEntityMapper.toDomain(saved);
+    }
+
+    private ALS restoreAlsDto(ALSDTO dto) {
+        return ALSDtoMapper.toDomain(
+                dto,
+                value -> new TypeLb(value.getType(), value.getDeltaWidth(),
+                        value.getShelfThick(), value.getServiceZoneWidth()),
+                value -> new TypeLb(value.getType(), value.getDeltaWidth(),
+                        value.getShelfThick(), value.getServiceZoneWidth()),
+                equipmentEntityResolver::resolveDomain
+        );
+    }
+
 }
