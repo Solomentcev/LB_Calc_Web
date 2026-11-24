@@ -32,7 +32,7 @@ public interface ControlModule {
 
         String equipment = configuration.getEquipmentQuantities().entrySet().stream()
                 .sorted(Map.Entry.comparingByKey(
-                        java.util.Comparator.comparing(Equipment::getId)))
+                        java.util.Comparator.comparing(Equipment::getId, java.util.Comparator.nullsLast(java.util.Comparator.naturalOrder()))))
                 .map(ControlModule::formatEquipment)
                 .collect(Collectors.joining(", "));
 

@@ -2,15 +2,14 @@ package com.lb_calc_web.domain.equipment;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 class EquipmentTest {
 
     @Test
-    void constructor_shouldKeepFunctionalTypePurposeAndCategory() {
+    void constructor_shouldKeepDomainCharacteristics() {
         Equipment equipment = new Equipment(
-                "BAR_READER_1D",
+                1L,
                 EquipmentFunctionalType.ACCESS,
                 AccessPurpose.BAR_CODE,
                 EquipmentCategory.BAR_READER,
@@ -21,30 +20,48 @@ class EquipmentTest {
                 0
         );
 
+        assertEquals(1L, equipment.getId());
         assertEquals(EquipmentFunctionalType.ACCESS, equipment.getFunctionalType());
         assertEquals(AccessPurpose.BAR_CODE, equipment.getPurpose());
-        assertEquals(EquipmentCategory.BAR_READER, equipment.getEquipmentCategory());
+        assertEquals(EquipmentCategory.BAR_READER, equipment.getCategory());
+    }
+
+    @Test
+    void constructor_shouldAllowUnpersistedModelWithoutId() {
+        Equipment equipment = new Equipment(
+                null,
+                EquipmentFunctionalType.DISPLAY,
+                DisplayPurpose.INCH_10,
+                EquipmentCategory.DISPLAY,
+                "Дисплей 10",
+                "",
+                255,
+                174,
+                30
+        );
+
+        assertNull(equipment.getId());
     }
 
     @Test
     void constructor_shouldRejectPurposeFromAnotherFunctionalType() {
         assertThrows(IllegalArgumentException.class, () -> new Equipment(
-                "DISPLAY_LC10",
+                1L,
                 EquipmentFunctionalType.DISPLAY,
                 AccessPurpose.BAR_CODE,
                 EquipmentCategory.DISPLAY,
-                "LC10",
+                "Дисплей",
                 "",
                 300,
                 174,
-                0
+                30
         ));
     }
 
     @Test
     void constructor_shouldRejectPurposeIncompatibleWithCategory() {
         assertThrows(IllegalArgumentException.class, () -> new Equipment(
-                "RFID_READER_STANDARD",
+                1L,
                 EquipmentFunctionalType.ACCESS,
                 AccessPurpose.BAR_CODE,
                 EquipmentCategory.RFID_READER,
@@ -57,17 +74,14 @@ class EquipmentTest {
     }
 
     @Test
-    void constructor_shouldRejectFunctionalTypeIncompatibleWithCategory() {
-        assertThrows(IllegalArgumentException.class, () -> new Equipment(
-                "COMPUTER_STANDARD",
-                EquipmentFunctionalType.ACCESS,
-                AccessPurpose.RFID,
-                EquipmentCategory.COMPUTER,
-                "Компьютер",
-                "",
-                0,
-                0,
-                0
-        ));
+    void transientModels_shouldNotBeEqual() {
+        Equipment first = new Equipment(
+                null, EquipmentFunctionalType.ACCESS, AccessPurpose.RFID,
+                EquipmentCategory.RFID_READER, "RFID 1", "", 0, 0, 0);
+        Equipment second = new Equipment(
+                null, EquipmentFunctionalType.ACCESS, AccessPurpose.RFID,
+                EquipmentCategory.RFID_READER, "RFID 1", "", 0, 0, 0);
+
+        assertNotEquals(first, second);
     }
 }

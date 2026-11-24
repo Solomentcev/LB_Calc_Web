@@ -3,7 +3,7 @@ package com.lb_calc_web.domain.model;
 import com.lb_calc_web.domain.attributes.Colors;
 import com.lb_calc_web.domain.equipment.Equipment;
 
-import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -75,8 +75,8 @@ public class LC extends Module implements ControlModule {
 
     /** @return позиции оборудования LC */
     @Override
-    public List<Equipment> getEquipment() {
-        return controlConfiguration.getAllEquipment();
+    public Map<Equipment, Integer> getEquipment() {
+        return controlConfiguration.getEquipment();
     }
 
     /**
@@ -85,9 +85,9 @@ public class LC extends Module implements ControlModule {
      * @param equipment добавляемое оборудование
      */
     @Override
-    public void addEquipment(Equipment equipment) {
+    public void addEquipment(Equipment equipment, int quantity) {
         controlConfiguration.addEquipment(
-                Objects.requireNonNull(equipment, "Оборудование не должно быть null"), 1);
+                Objects.requireNonNull(equipment, "Оборудование не должно быть null"), quantity);
         recalculate();
     }
 
@@ -106,7 +106,7 @@ public class LC extends Module implements ControlModule {
     /** @return максимальная высота установленного оборудования, мм */
     @Override
     public int getEquipmentHeight() {
-        return getEquipment().stream()
+        return getEquipment().keySet().stream()
                 .mapToInt(Equipment::getHeight)
                 .max()
                 .orElse(0);
@@ -119,8 +119,8 @@ public class LC extends Module implements ControlModule {
     }
 
     private void updateNameAndDescription() {
-        Equipment display = getEquipment().stream()
-                .filter(Equipment::isDisplay)
+        Equipment display = getEquipment().keySet().stream()
+                .filter(item -> item.getCategory() == com.lb_calc_web.domain.equipment.EquipmentCategory.DISPLAY)
                 .findFirst()
                 .orElse(null);
         String displayName = display != null ? display.getName() : "Без дисплея";

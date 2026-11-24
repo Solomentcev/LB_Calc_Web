@@ -5,7 +5,7 @@ import com.lb_calc_web.domain.attributes.DirectionDoorOpening;
 import com.lb_calc_web.domain.attributes.TypeLb;
 import com.lb_calc_web.domain.equipment.Equipment;
 
-import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -86,8 +86,8 @@ public class LBC extends StorageModule implements ControlModule {
 
     /** @return позиции оборудования LBC */
     @Override
-    public List<Equipment> getEquipment() {
-        return controlConfiguration.getAllEquipment();
+    public Map<Equipment, Integer> getEquipment() {
+        return controlConfiguration.getEquipment();
     }
 
     /**
@@ -96,9 +96,9 @@ public class LBC extends StorageModule implements ControlModule {
      * @param equipment добавляемое оборудование
      */
     @Override
-    public void addEquipment(Equipment equipment) {
+    public void addEquipment(Equipment equipment, int quantity) {
         controlConfiguration.addEquipment(
-                Objects.requireNonNull(equipment, "Оборудование не должно быть null"), 1);
+                Objects.requireNonNull(equipment, "Оборудование не должно быть null"), quantity);
         recalculate();
     }
 
@@ -117,7 +117,7 @@ public class LBC extends StorageModule implements ControlModule {
     /** @return максимальная высота установленного оборудования, мм */
     @Override
     public int getEquipmentHeight() {
-        return getEquipment().stream()
+        return getEquipment().keySet().stream()
                 .mapToInt(Equipment::getHeight)
                 .max()
                 .orElse(0);
