@@ -76,13 +76,22 @@ public final class LBCDtoMapper {
         return toDomain(dto, typeLb, id -> {
             throw new IllegalStateException(
                     "Для восстановления оборудования требуется Equipment resolver");
-        });
+        }, null);
     }
 
     public static LBC toDomain(
             LBCDTO dto,
             TypeLb typeLb,
             Function<Long, Equipment> equipmentResolver
+    ) {
+        return toDomain(dto, typeLb, equipmentResolver, null);
+    }
+
+    public static LBC toDomain(
+            LBCDTO dto,
+            TypeLb typeLb,
+            Function<Long, Equipment> equipmentResolver,
+            ControlConfiguration fallbackConfiguration
     ) {
         if (dto == null) {
             return null;
@@ -94,14 +103,25 @@ public final class LBCDtoMapper {
                     "Переданный конструктивный тип не соответствует типу DTO LBC");
         }
 
-        FunctionalConfiguration functional = new FunctionalConfiguration(
-                parseDisplayPurpose(dto.getDisplayPurpose()),
-                parseAccessPurposes(dto.getAccessPurposes()),
-                parsePaymentPurpose(dto.getPaymentPurpose()),
-                parsePrinterPurpose(dto.getPrinterPurpose())
-        );
+        boolean functionalConfigurationProvided =
+                dto.getDisplayPurpose() != null
+                        || dto.getPaymentPurpose() != null
+                        || dto.getPrinterPurpose() != null
+                        || (dto.getAccessPurposes() != null && !dto.getAccessPurposes().isEmpty());
+
+        FunctionalConfiguration functional = !functionalConfigurationProvided
+                && fallbackConfiguration != null
+                ? fallbackConfiguration.getFunctionalConfiguration()
+                : new FunctionalConfiguration(
+                        parseDisplayPurpose(dto.getDisplayPurpose()),
+                        parseAccessPurposes(dto.getAccessPurposes()),
+                        parsePaymentPurpose(dto.getPaymentPurpose()),
+                        parsePrinterPurpose(dto.getPrinterPurpose())
+                );
         Map<Equipment, Integer> equipment = new LinkedHashMap<>();
-        if (dto.getEquipmentSelections() != null) {
+        if (dto.getEquipmentSelections() == null && fallbackConfiguration != null) {
+            equipment.putAll(fallbackConfiguration.getEquipment());
+        } else if (dto.getEquipmentSelections() != null) {
             for (EquipmentSelectionDTO selection : dto.getEquipmentSelections()) {
                 Objects.requireNonNull(selection, "Позиция оборудования не должна быть null");
                 Equipment model = Objects.requireNonNull(
