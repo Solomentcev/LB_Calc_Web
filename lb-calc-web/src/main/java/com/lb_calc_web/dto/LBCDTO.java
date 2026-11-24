@@ -369,6 +369,10 @@ public class LBCDTO {
                 && Objects.equals(colorDoor, lbcdto.colorDoor)
                 && Objects.equals(colorBody, lbcdto.colorBody)
                 && Objects.equals(display, lbcdto.display)
+                && Objects.equals(displayPurpose, lbcdto.displayPurpose)
+                && Objects.equals(accessPurposes, lbcdto.accessPurposes)
+                && Objects.equals(paymentPurpose, lbcdto.paymentPurpose)
+                && Objects.equals(printerPurpose, lbcdto.printerPurpose)
                 && Objects.equals(barReader, lbcdto.barReader)
                 && Objects.equals(payment, lbcdto.payment)
                 && Objects.equals(equipmentSelections, lbcdto.equipmentSelections)
@@ -406,6 +410,10 @@ public class LBCDTO {
                 printerQuantity,
                 rfidReaderQuantity,
                 equipmentSelections,
+                displayPurpose,
+                accessPurposes,
+                paymentPurpose,
+                printerPurpose,
                 accessMethods,
                 printOptions
         );

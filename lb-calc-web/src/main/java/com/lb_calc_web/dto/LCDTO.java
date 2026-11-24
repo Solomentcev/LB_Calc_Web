@@ -258,6 +258,10 @@ public class LCDTO {
                 && Objects.equals(printerQuantity, lcdto.printerQuantity)
                 && Objects.equals(rfidReaderQuantity, lcdto.rfidReaderQuantity)
                 && Objects.equals(display, lcdto.display)
+                && Objects.equals(displayPurpose, lcdto.displayPurpose)
+                && Objects.equals(accessPurposes, lcdto.accessPurposes)
+                && Objects.equals(paymentPurpose, lcdto.paymentPurpose)
+                && Objects.equals(printerPurpose, lcdto.printerPurpose)
                 && Objects.equals(barReader, lcdto.barReader)
                 && Objects.equals(payment, lcdto.payment)
                 && Objects.equals(colorBody, lcdto.colorBody)
@@ -283,6 +287,10 @@ public class LCDTO {
                 colorBody,
                 colorDoor,
                 equipmentSelections,
+                displayPurpose,
+                accessPurposes,
+                paymentPurpose,
+                printerPurpose,
                 accessMethods,
                 printOptions
         );
