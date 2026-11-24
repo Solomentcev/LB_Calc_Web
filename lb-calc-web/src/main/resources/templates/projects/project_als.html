@@ -268,22 +268,18 @@
                                readonly aria-label="Поле формы">
                     </div>
 
-                    <div class="col-md-2">
-                        <label>Сканер штрихкодов</label>
-
-                        <input type="text"
-                               class="form-control"
+                    <div class="col-md-3">
+                        <label>Способы доступа</label>
+                        <input type="text" class="form-control"
                                th:value="${als.LC.functionalConfiguration.access}"
-                               readonly aria-label="Поле формы">
+                               readonly aria-label="Способы доступа">
                     </div>
 
-                    <div class="col-md-2">
-                        <label>RFID-считыватель</label>
-
-                        <input type="text"
-                               class="form-control"
-                               th:value="${als.LC.functionalConfiguration.access}"
-                               readonly aria-label="Поле формы">
+                    <div class="col-md-3">
+                        <label>Физическое оборудование</label>
+                        <input type="text" class="form-control"
+                               th:value="${als.LC.equipmentSelections}"
+                               readonly aria-label="Физическое оборудование">
                     </div>
 
                 </div>
@@ -370,9 +366,17 @@
                         <strong>Display:</strong>
                         <span th:text="${als.LBC.functionalConfiguration.display}"></span>
                     </div>
-                    <div class="col-md-3">
-                        <strong>Payment:</strong>
+                    <div class="col-md-2">
+                        <strong>Оплата:</strong>
                         <span th:text="${als.LBC.functionalConfiguration.payment}"></span>
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Доступ:</strong>
+                        <span th:text="${als.LBC.functionalConfiguration.access}"></span>
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Оборудование:</strong>
+                        <span th:text="${als.LBC.equipmentSelections}"></span>
                     </div>
                 </div>
 

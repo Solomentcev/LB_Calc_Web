@@ -127,6 +127,9 @@
                 <div class="col-md-2"><strong>Ячеек:</strong> <span th:text="${als.LBC.countCells}"></span></div>
                 <div class="col-md-3"><strong>Дисплей:</strong> <span th:text="${als.LBC.functionalConfiguration.display}"></span></div>
                 <div class="col-md-3"><strong>Оплата:</strong> <span th:text="${als.LBC.functionalConfiguration.payment}"></span></div>
+                 <div class="col-md-3"><strong>Доступ:</strong> <span th:text="${als.LBC.functionalConfiguration.access}"></span></div>
+                 <div class="col-md-3"><strong>Печать:</strong> <span th:text="${als.LBC.functionalConfiguration.printer}"></span></div>
+                 <div class="col-md-3"><strong>Оборудование:</strong> <span th:text="${als.LBC.equipmentSelections}"></span></div>
             </div>
             <div class="mt-3">
                 <a th:href="@{/alss/{alsId}/lbcs/{lbcId}(alsId=${als.id},lbcId=${als.LBC.id})}"
