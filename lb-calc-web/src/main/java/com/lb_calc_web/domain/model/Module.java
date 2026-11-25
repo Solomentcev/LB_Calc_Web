@@ -75,7 +75,7 @@ public abstract class Module {
         Module restored = source.copy();
         restored.setName(name);
         // Нормализуем старые описания, в которых переносы были сохранены как "\\n".
-        restored.setDescription(description == null ? null : description.replace("\\\\n", "\\n"));
+        restored.setDescription(description == null ? null : description.replace("\\n", "\n"));
         return restored;
     }
 
