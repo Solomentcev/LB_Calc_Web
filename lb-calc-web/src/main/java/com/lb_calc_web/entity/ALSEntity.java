@@ -121,11 +121,12 @@ public class ALSEntity {
 
     /** Общее количество ячеек во всех модулях хранения ALS. */
     @org.hibernate.annotations.Formula(
-            "(select coalesce(sum(storage_module.count_cells), 0) "
-                    + "from als_module am "
-                    + "join (select id, count_cells from lb union all select id, count_cells from lbc) storage_module "
-                    + "on storage_module.id = am.module_id "
-                    + "where am.als_id = {alias}.id)"
+            "((select coalesce(sum(lb_module.count_cells), 0) "
+                    + "from als_module am join lb lb_module on lb_module.id = am.module_id "
+                    + "where am.als_id = {alias}.id) "
+                    + "+ (select coalesce(sum(lbc_module.count_cells), 0) "
+                    + "from als_module am join lbc lbc_module on lbc_module.id = am.module_id "
+                    + "where am.als_id = {alias}.id))"
     )
     private int countCells;
 
@@ -136,7 +137,7 @@ public class ALSEntity {
                     + "then 'CENTER' "
                     + "when (select min(am.module_order) from als_module am "
                     + "where am.als_id = {alias}.id "
-                    + "and am.module_id in (select id from lc union select id from lbc)) = 0 "
+                    + "and am.module_id in (select lc_module.id from lc lc_module union select lbc_module.id from lbc lbc_module)) = 0 "
                     + "then 'LEFT' "
                     + "when (select min(am.module_order) from als_module am "
                     + "where am.als_id = {alias}.id "
