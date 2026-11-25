@@ -18,8 +18,7 @@ public interface ControlModule {
 
     /** Формирует описание функциональных назначений и установленного оборудования. */
     default String getControlDescription() {
-        return ModuleTextFormatter.functionalDescription(this) + "\n"
-                + ModuleTextFormatter.equipmentDescription(this);
+        return ModuleTextFormatter.controlDetailsDescription(this);
     }
 
     Map<Equipment, Integer> getEquipment();
