@@ -66,13 +66,17 @@ final class ModuleTextFormatter {
     }
 
     static String controlDescription(ControlModule controlModule, Module module) {
-        return "Модуль управления\n"
-                + "Габариты модуля (В×Ш×Г): " + dimensions(module) + "\n"
-                + "Верхняя рама: " + module.getUpperFrame() + " мм\n"
-                + "Нижняя рама: " + module.getBottomFrame() + " мм\n"
-                + functionalDescription(controlModule) + "\n"
-                + equipmentDescription(controlModule) + "\n"
+        return "Модуль управления\\n"
+                + "Габариты модуля (В×Ш×Г): " + dimensions(module) + "\\n"
+                + "Верхняя рама: " + module.getUpperFrame() + " мм\\n"
+                + "Нижняя рама: " + module.getBottomFrame() + " мм\\n"
+                + controlDetailsDescription(controlModule) + "\\n"
                 + colors(module);
+    }
+
+    static String controlDetailsDescription(ControlModule controlModule) {
+        return functionalDescription(controlModule) + "\\n"
+                + equipmentDescription(controlModule);
     }
 
     static String controlNameDetails(ControlModule controlModule) {
