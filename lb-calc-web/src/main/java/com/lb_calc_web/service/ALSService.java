@@ -336,10 +336,12 @@ public class ALSService {
         try {
             ControlConfiguration fallback = null;
             if (dto.getId() != null && dto.getId() > 0) {
-                ControlModule existingControl = findById(dto.getId()).getControlModule();
+                ALS existingALS = findById(dto.getId());
+                ControlModule existingControl = existingALS.getControlModule();
                 if ((dto.getLC() != null && existingControl instanceof LC)
                         || (dto.getLBC() != null && existingControl instanceof LBC)) {
                     fallback = existingControl.getControlConfiguration();
+                    fallback.setFunctionalConfiguration(existingALS.getFunctionalConfiguration());
                 }
             }
             return ALSDtoMapper.toDomain(

@@ -21,7 +21,6 @@ public interface ProjectRepository
     Page<ProjectEntity> findByNameContainingIgnoreCaseOrCompanyContainingIgnoreCaseOrDescriptionContainingIgnoreCase(
             String name, String company, String description, Pageable pageable);
 
-    @EntityGraph(attributePaths = {"createdBy", "updatedBy"})
     @Query(value = """
             SELECT p FROM ProjectEntity p
             LEFT JOIN FETCH p.createdBy
