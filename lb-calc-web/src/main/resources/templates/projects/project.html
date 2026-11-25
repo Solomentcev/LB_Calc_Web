@@ -122,7 +122,10 @@
             <div class="card-header d-flex flex-wrap align-items-center justify-content-between">
                 <div>
                     <div class="text-muted small" th:text="|Конфигурация №${item.count}|">Конфигурация</div>
-                    <h3 class="h5 mb-0" th:text="${als.name}">Название АКХ</h3>
+                    <div class="d-flex flex-wrap align-items-baseline">
+                        <h3 class="h5 mb-0 mr-2" th:text="${als.name}">Название АКХ</h3>
+                        <span class="text-muted small" th:text="|ID: ${als.id}|">ID АКХ</span>
+                    </div>
                 </div>
                 <span class="badge badge-secondary project-als-card__quantity"
                       th:text="|Экземпляров: ${project.quantityALS.get(als)}|">Экземпляров</span>
