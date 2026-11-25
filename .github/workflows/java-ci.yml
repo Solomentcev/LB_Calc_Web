@@ -5,6 +5,7 @@ on:
     branches:
       - master
       - refactor-main
+      - refactor/catalog-column-filters
       - maintenance/master-recovery
   pull_request:
     branches:
