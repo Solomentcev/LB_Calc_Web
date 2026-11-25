@@ -10,11 +10,13 @@ public final class CatalogSpecifications {
     private CatalogSpecifications() {
     }
 
+    /** Создаёт спецификацию точного совпадения идентификатора записи. */
     public static <T> Specification<T> id(Long value) {
         return value == null ? null : (root, query, builder) ->
                 builder.equal(root.get("id"), value);
     }
 
+    /** Создаёт спецификацию поиска подстроки без учёта регистра. */
     public static <T> Specification<T> containsIgnoreCase(String field, String value) {
         if (value == null || value.isBlank()) return null;
         String pattern = "%" + value.trim().toLowerCase(java.util.Locale.ROOT) + "%";
@@ -22,6 +24,7 @@ public final class CatalogSpecifications {
                 builder.like(builder.lower(root.get(field)), pattern);
     }
 
+    /** Создаёт спецификацию точного совпадения значения поля; пустые строки игнорируются. */
     public static <T, V> Specification<T> equal(String field, V value) {
         if (value == null) {
             return null;
@@ -38,6 +41,7 @@ public final class CatalogSpecifications {
                 builder.equal(root.get(field), value);
     }
 
+    /** Создаёт спецификацию проверки числового значения по одной или двум границам. */
     public static <T> Specification<T> integerRange(String field, Integer minimum, Integer maximum) {
         if (minimum == null && maximum == null) return null;
         return (root, query, builder) -> {
@@ -49,6 +53,7 @@ public final class CatalogSpecifications {
         };
     }
 
+    /** Создаёт спецификацию проверки наличия значения в коллекционном поле. */
     public static <T, V> Specification<T> collectionContains(String field, V value) {
         if (value == null) return null;
         return (root, query, builder) -> {
@@ -60,6 +65,7 @@ public final class CatalogSpecifications {
         };
     }
 
+    /** Объединяет непустые спецификации логическим AND. */
     public static <T> Specification<T> all(List<Specification<T>> specifications) {
         return specifications.stream()
                 .filter(java.util.Objects::nonNull)

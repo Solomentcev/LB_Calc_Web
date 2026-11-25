@@ -46,6 +46,7 @@ public final class TypeLbFactory {
         return create(environment, typeName, prefix, fallbackPrefix);
     }
 
+    /** Собирает конструктивный тип из разрешённых значений конфигурации. */
     private static TypeLb create(
             Environment environment,
             String typeName,
@@ -60,6 +61,7 @@ public final class TypeLbFactory {
         );
     }
 
+    /** Формирует префикс ключей настроек для выбранного семейства модулей. */
     private static String typePrefix(String module, String typeName) {
         if (typeName == null || typeName.isBlank()) {
             throw new IllegalArgumentException("Тип модуля не указан");
@@ -67,6 +69,7 @@ public final class TypeLbFactory {
         return module + ".type." + typeName;
     }
 
+    /** Читает обязательный целочисленный параметр конструктивного типа. */
     private static int requiredInt(
             Environment environment,
             String prefix,
