@@ -20,6 +20,7 @@ public final class Equipment {
     private final int height;
     private final int depth;
 
+    /** Создаёт модель оборудования и проверяет согласованность назначения, категории и габаритов. */
     public Equipment(
             Long id,
             EquipmentFunctionalType functionalType,

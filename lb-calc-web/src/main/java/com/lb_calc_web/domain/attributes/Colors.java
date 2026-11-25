@@ -2,6 +2,7 @@ package com.lb_calc_web.domain.attributes;
 
 import java.awt.*;
 
+/** Цвета корпуса и дверей модулей, сопоставленные с цветами {@link java.awt.Color}. */
 public enum Colors {
     Black(Color.BLACK),
     Blue(Color.BLUE),
@@ -23,10 +24,12 @@ public enum Colors {
         name= String.valueOf(this);
     }
 
+    /** @return цвет для построения графического представления */
     public Color getColor() {
         return color;
     }
 
+    /** @return имя константы цвета */
     public String getName() {
         return name;
     }

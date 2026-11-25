@@ -4,15 +4,23 @@ import com.lb_calc_web.domain.attributes.Colors;
 
 import java.util.Objects;
 
+/**
+ * Базовая доменная модель физического модуля автоматизированной камеры хранения.
+ *
+ * <p>Содержит общие идентификационные, геометрические и визуальные характеристики.
+ * Специфические параметры и правила пересчёта определяются конкретными типами модулей.</p>
+ */
 public abstract class Module {
 
     /** Идентификатор сохранённого модуля. */
     private Long id;
 
+    /** @return идентификатор сохранённого модуля или {@code null} для нового */
     public Long getId() {
         return id;
     }
 
+    /** @param id идентификатор, назначенный хранилищем */
     public void setId(Long id) {
         this.id = id;
     }
@@ -121,5 +129,6 @@ public abstract class Module {
      */
     public abstract Module copy();
 
+    /** Пересчитывает производные характеристики после изменения исходных параметров. */
     public abstract void recalculate();
 }

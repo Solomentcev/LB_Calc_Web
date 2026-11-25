@@ -19,6 +19,14 @@ import java.util.stream.Collectors;
  */
 public final class FunctionalConfigurationResolver {
 
+    /**
+     * Сохраняет назначения неизменившихся областей и пересчитывает только изменённые.
+     *
+     * @param current текущая функциональная конфигурация
+     * @param previousEquipment состав оборудования до изменения
+     * @param updatedEquipment состав оборудования после изменения
+     * @return согласованная функциональная конфигурация
+     */
     public FunctionalConfiguration resolve(
             FunctionalConfiguration current,
             Map<Equipment, Integer> previousEquipment,
@@ -45,12 +53,14 @@ public final class FunctionalConfigurationResolver {
         );
     }
 
+    /** Проверяет, изменился ли состав оборудования заданной функциональной области. */
     private boolean hasChanged(EquipmentFunctionalType type,
                                Map<Equipment, Integer> previous,
                                Map<Equipment, Integer> updated) {
         return !equipmentOfType(previous, type).equals(equipmentOfType(updated, type));
     }
 
+    /** Выбирает модели оборудования заданного функционального типа. */
     private Map<Equipment, Integer> equipmentOfType(
             Map<Equipment, Integer> equipment, EquipmentFunctionalType type) {
         return equipment.entrySet().stream()
@@ -58,6 +68,7 @@ public final class FunctionalConfigurationResolver {
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
+    /** Определяет назначение дисплея по установленному оборудованию. */
     private DisplayPurpose resolveDisplay(Map<Equipment, Integer> equipment) {
         return equipment.keySet().stream()
                 .filter(item -> item.getFunctionalType() == EquipmentFunctionalType.DISPLAY)
@@ -65,6 +76,7 @@ public final class FunctionalConfigurationResolver {
                 .findFirst().orElse(DisplayPurpose.NONE);
     }
 
+    /** Определяет набор назначений доступа по установленным считывателям. */
     private Set<AccessPurpose> resolveAccess(Map<Equipment, Integer> equipment) {
         EnumSet<AccessPurpose> purposes = EnumSet.noneOf(AccessPurpose.class);
         equipment.keySet().stream()
@@ -74,6 +86,7 @@ public final class FunctionalConfigurationResolver {
         return purposes;
     }
 
+    /** Объединяет возможности установленных платёжных устройств. */
     private PaymentPurpose resolvePayment(Map<Equipment, Integer> equipment) {
         boolean cards = false;
         boolean cash = false;
@@ -89,6 +102,7 @@ public final class FunctionalConfigurationResolver {
         return PaymentPurpose.NONE;
     }
 
+    /** Определяет наличие и тип установленного принтера. */
     private PrinterPurpose resolvePrinter(Map<Equipment, Integer> equipment) {
         boolean present = false;
         boolean other = false;

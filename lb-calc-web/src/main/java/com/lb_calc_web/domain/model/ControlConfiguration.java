@@ -24,6 +24,7 @@ public class ControlConfiguration {
         validateEquipment(this.equipment);
     }
 
+    /** Создаёт независимую карту оборудования и проверяет количества моделей. */
     private static Map<Equipment, Integer> copyEquipment(Map<Equipment, Integer> source) {
         Objects.requireNonNull(source, "Состав оборудования не должен быть null");
         Map<Equipment, Integer> result = new LinkedHashMap<>();
@@ -44,6 +45,7 @@ public class ControlConfiguration {
         return result;
     }
 
+    /** Проверяет ограничения состава установленного оборудования. */
     private static void validateEquipment(Map<Equipment, Integer> equipment) {
         long displayCount = equipment.entrySet().stream()
                 .filter(entry -> entry.getKey().getCategory() == EquipmentCategory.DISPLAY)
@@ -54,6 +56,7 @@ public class ControlConfiguration {
         }
     }
 
+    /** @return копия функциональных назначений, исключающая внешнюю модификацию состояния */
     public FunctionalConfiguration getFunctionalConfiguration() {
         return functionalConfiguration.copy();
     }
@@ -69,6 +72,7 @@ public class ControlConfiguration {
         return Map.copyOf(equipment);
     }
 
+    /** @return установленное количество модели или {@code 0}, если она отсутствует */
     public int getQuantity(Equipment item) {
         return equipment.getOrDefault(
                 Objects.requireNonNull(item, "Оборудование не должно быть null"), 0);
@@ -104,6 +108,7 @@ public class ControlConfiguration {
         replaceEquipment(copyEquipment(equipment));
     }
 
+    /** Заменяет состав оборудования и синхронизирует затронутые функциональные назначения. */
     private void replaceEquipment(Map<Equipment, Integer> updated) {
         validateEquipment(updated);
         FunctionalConfiguration resolved = RESOLVER.resolve(
@@ -113,6 +118,7 @@ public class ControlConfiguration {
         functionalConfiguration = resolved;
     }
 
+    /** @return независимая копия функциональных назначений и установленного оборудования */
     public ControlConfiguration copy() {
         return new ControlConfiguration(functionalConfiguration, equipment);
     }

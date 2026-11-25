@@ -21,6 +21,7 @@ public final class FunctionalConfiguration {
     private final PaymentPurpose payment;
     private final PrinterPurpose printer;
 
+    /** Создаёт функциональную конфигурацию с проверкой обязательных назначений. */
     public FunctionalConfiguration(
             DisplayPurpose display,
             Set<AccessPurpose> access,
@@ -39,6 +40,7 @@ public final class FunctionalConfiguration {
     public PaymentPurpose getPayment() { return payment; }
     public PrinterPurpose getPrinter() { return printer; }
 
+    /** @return независимая копия функциональной конфигурации */
     public FunctionalConfiguration copy() {
         return new FunctionalConfiguration(display, access, payment, printer);
     }
