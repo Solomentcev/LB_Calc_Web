@@ -88,6 +88,18 @@ public class LBService {
 
     /** Возвращает все сохранённые LB, отсортированные по идентификатору. */
     @Transactional(readOnly = true)
+    public org.springframework.data.domain.Page<LB> findPage(
+            String query, org.springframework.data.domain.Pageable pageable
+    ) {
+        String term = query == null ? "" : query.trim();
+        var entities = term.isEmpty()
+                ? lbRepository.findAll(pageable)
+                : lbRepository.findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(
+                        term, term, pageable);
+        return entities.map(LBEntityMapper::toDomain);
+    }
+
+    @Transactional(readOnly = true)
     public List<LB> findAll() {
         logger.info("Получение списка LB");
         return lbRepository.findAll().stream()

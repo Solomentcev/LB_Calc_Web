@@ -16,6 +16,9 @@ import com.lb_calc_web.service.LBCService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
+import org.springframework.data.domain.Pageable;
+
+import java.util.Set;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
@@ -41,12 +44,23 @@ public class LBCController extends BaseCatalogController {
      * Список всех LBC.
      */
     @GetMapping
-    public String lbcs(Model model) {
-        model.addAttribute(
-                "lbcs",
-                lbcService.findAll().stream().map(LBCDtoMapper::toDto).map(LBCImageService::addImage).toList()
-        );
-
+    public String lbcs(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "") String q,
+            @RequestParam(defaultValue = "id") String sort,
+            @RequestParam(defaultValue = "asc") String direction,
+            Model model
+    ) {
+        Pageable pageable = CatalogPageSupport.pageable(page, size, sort, direction, "id",
+                Set.of("id", "name", "type", "countCells", "height", "width", "depth"));
+        var result = lbcService.findPage(q, pageable).map(
+                LBCDtoMapper::toDto).map(LBCImageService::addImage);
+        model.addAttribute("lbcs", result.getContent());
+        CatalogPageSupport.addModelAttributes(model, result, q, pageable, "/lbcs",
+                CatalogPageSupport.sortOptions("id", "ID", "name", "Название", "type", "Тип",
+                        "countCells", "Ячейки", "height", "Высота", "width", "Ширина",
+                        "depth", "Глубина"));
         return "lbcs/lbcs";
     }
 

@@ -1,12 +1,17 @@
 package com.lb_calc_web.repository;
 
 import com.lb_calc_web.entity.EquipmentEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 /** Репозиторий физических моделей оборудования. */
 public interface EquipmentRepository extends JpaRepository<EquipmentEntity, Long> {
+
+    Page<EquipmentEntity> findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCaseOrPurposeContainingIgnoreCase(
+            String name, String description, String purpose, Pageable pageable);
 
     /**
      * Возвращает число ссылок на модель из комплектаций управляющих модулей.

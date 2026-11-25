@@ -1,7 +1,10 @@
 package com.lb_calc_web.repository;
 
 import com.lb_calc_web.entity.ProjectEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
@@ -13,6 +16,18 @@ import java.util.List;
 @Repository
 public interface ProjectRepository
         extends JpaRepository<ProjectEntity, Long> {
+
+    @EntityGraph(attributePaths = {"createdBy", "updatedBy"})
+    Page<ProjectEntity> findByNameContainingIgnoreCaseOrCompanyContainingIgnoreCaseOrDescriptionContainingIgnoreCase(
+            String name, String company, String description, Pageable pageable);
+
+    @EntityGraph(attributePaths = {"createdBy", "updatedBy"})
+    @Query(value = """
+            SELECT p FROM ProjectEntity p
+            LEFT JOIN FETCH p.createdBy
+            LEFT JOIN FETCH p.updatedBy
+            """, countQuery = "SELECT COUNT(p) FROM ProjectEntity p")
+    Page<ProjectEntity> findAllWithUsers(Pageable pageable);
 
     /**
      * Возвращает проекты вместе с сотрудниками,

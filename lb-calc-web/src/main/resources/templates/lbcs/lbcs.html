@@ -9,11 +9,12 @@
         <a th:href="@{/lbcs/create}" class="btn btn-primary btn-sm">Создать LBC</a>
         <a th:href="@{/}" class="btn btn-secondary btn-sm">Назад</a>
     </div>
-    <div class="table-responsive">
-        <table class="table table-striped table-hover js-data-table catalog-table">
+    <div th:replace="~{fragments/pagination :: controls('/lbcs', ${q}, ${sort}, ${direction}, ${size}, ${sortOptions})}"></div>
+<div class="table-responsive">
+        <table class="table table-striped table-hover catalog-table">
             <thead><tr>
                 <th>ID</th><th>Название</th><th>Тип</th><th>Ячейки</th><th>Высота</th><th>Ширина</th><th>Глубина</th>
-                <th>Дисплей</th><th>Доступ</th><th>Оплата</th><th>Печать</th><th>Физическое оборудование</th>
+                <th>Display</th><th>Access</th><th>Payment</th><th>Printer</th>
                 <th>Цвет корпуса</th><th>Цвет дверей</th><th>Действие</th>
             </tr></thead>
             <tbody>
@@ -24,8 +25,7 @@
                 <td th:text="${lbc.functionalConfiguration.access}"></td>
                 <td th:text="${lbc.functionalConfiguration.payment}"></td>
                 <td th:text="${lbc.functionalConfiguration.printer}"></td>
-                <td><span th:each="selection, stat : ${lbc.equipmentSelections}"
-                          th:text="|ID ${selection.equipmentId}: ${selection.quantity} шт.|"></span></td>
+
                 <td th:text="${lbc.colorBody}"></td><td th:text="${lbc.colorDoor}"></td>
                 <td><a th:href="@{/lbcs/{id}(id=${lbc.id})}" class="btn btn-primary btn-sm">Изменить</a></td>
             </tr>

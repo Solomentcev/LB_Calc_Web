@@ -39,7 +39,7 @@ public class ALSDTO {
 
     /** Функциональные возможности ALS, синхронизированные с управляющим модулем. */
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    private FunctionalConfigurationDTO functionalConfiguration;
+    private FunctionalConfigurationDTO functionalConfiguration = new FunctionalConfigurationDTO();
 
     /**
      * Положение единственного модуля управления.

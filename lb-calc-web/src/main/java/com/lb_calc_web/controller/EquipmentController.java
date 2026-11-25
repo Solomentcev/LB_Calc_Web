@@ -14,6 +14,9 @@ import com.lb_calc_web.service.EquipmentCatalogService;
 import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
+import org.springframework.data.domain.Pageable;
+
+import java.util.Set;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -35,9 +38,23 @@ public class EquipmentController {
     }
 
     @GetMapping
-    public String list(Model model) {
-        model.addAttribute("equipmentList", equipmentCatalogService.findAll()
-                .stream().map(EquipmentDtoMapper::toDto).toList());
+    public String list(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "") String q,
+            @RequestParam(defaultValue = "id") String sort,
+            @RequestParam(defaultValue = "asc") String direction,
+            Model model
+    ) {
+        Pageable pageable = CatalogPageSupport.pageable(page, size, sort, direction, "id",
+                Set.of("id", "name", "functionalType", "category", "purpose", "width", "height", "depth"));
+        var result = equipmentCatalogService.findPage(q, pageable).map(EquipmentDtoMapper::toDto);
+        model.addAttribute("equipmentList", result.getContent());
+        CatalogPageSupport.addModelAttributes(model, result, q, pageable, "/equipment",
+                CatalogPageSupport.sortOptions("id", "ID", "name", "Название",
+                        "functionalType", "Функциональный тип", "category", "Категория",
+                        "purpose", "Назначение", "width", "Ширина", "height", "Высота",
+                        "depth", "Глубина"));
         return "equipment/equipments";
     }
 

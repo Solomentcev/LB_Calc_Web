@@ -11,8 +11,9 @@
         <a th:href="@{/equipment/create}" class="btn btn-primary btn-sm">Добавить модель</a>
         <a th:href="@{/}" class="btn btn-secondary btn-sm">Назад</a>
     </div>
-    <div class="table-responsive">
-        <table class="table table-striped table-hover js-data-table catalog-table">
+    <div th:replace="~{fragments/pagination :: controls('/equipment', ${q}, ${sort}, ${direction}, ${size}, ${sortOptions})}"></div>
+<div class="table-responsive">
+        <table class="table table-striped table-hover catalog-table">
             <thead><tr>
                 <th>ID</th><th>Название</th><th>Функциональный тип</th><th>Категория</th>
                 <th>Назначение</th><th>Размеры (Ш × В × Г)</th><th>Описание</th><th>Действия</th>

@@ -7,6 +7,14 @@
         
         <div class="container editor-page">
         <form th:action="@{/alss/save}" th:object="${als}" method="post">
+            <input type="hidden" th:field="*{functionalConfiguration.display}">
+            <input type="hidden" th:field="*{functionalConfiguration.payment}">
+            <input type="hidden" th:field="*{functionalConfiguration.printer}">
+            <input type="hidden" name="_functionalConfiguration.access" value="on">
+            <input type="hidden"
+                   th:each="purpose : *{functionalConfiguration.access}"
+                   name="functionalConfiguration.access" th:value="${purpose}">
+
             <div class="page-actions">
                 <button type="submit" class="btn btn-primary btn-sm">Сохранить АКХ</button>
                 <a th:href="@{/alss}" class="btn btn-secondary btn-sm">К списку АКХ</a>
@@ -294,6 +302,14 @@
                         alsId=${alsId})}"
                   th:object="${als}"
                   method="post">
+            <input type="hidden" th:field="*{functionalConfiguration.display}">
+            <input type="hidden" th:field="*{functionalConfiguration.payment}">
+            <input type="hidden" th:field="*{functionalConfiguration.printer}">
+            <input type="hidden" name="_functionalConfiguration.access" value="on">
+            <input type="hidden"
+                   th:each="purpose : *{functionalConfiguration.access}"
+                   name="functionalConfiguration.access" th:value="${purpose}">
+
         
                 <div class="page-actions">
         

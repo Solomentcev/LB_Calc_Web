@@ -3,12 +3,13 @@
 <head th:replace="~{fragments/common :: head('Автоматические камеры хранения')}"></head>
 <body><div th:replace="~{header :: header}"></div><div class="container">
 <h1 class="page-title">Автоматические камеры хранения</h1><div class="page-actions"><a th:href="@{/alss/create}" class="btn btn-primary btn-sm">Создать АКХ</a><a th:href="@{/}" class="btn btn-secondary btn-sm">Назад</a></div>
-<div class="table-responsive"><table class="table table-striped table-hover js-data-table catalog-table">
+<div th:replace="~{fragments/pagination :: controls('/alss', ${q}, ${sort}, ${direction}, ${size}, ${sortOptions})}"></div>
+<div class="table-responsive"><table class="table table-striped table-hover catalog-table">
 <colgroup><col style="width:4%"><col style="width:10%"><col style="width:15%"><col style="width:6%"><col style="width:6%"><col style="width:6%"><col style="width:6%"><col style="width:7%"><col style="width:7%"><col style="width:10%"><col style="width:7%"><col style="width:7%"><col style="width:9%"></colgroup>
-<thead><tr><th>ID</th><th>Название</th><th>Описание</th><th>Ячейки</th><th>Высота</th><th>Ширина</th><th>Глубина</th><th>Верхняя рама</th><th>Нижняя рама</th><th>Положение модуля управления</th><th>Цвет корпуса</th><th>Цвет дверей</th><th>Действие</th></tr></thead>
+<thead><tr><th>ID</th><th>Название</th><th>Ячейки</th><th>Высота</th><th>Ширина</th><th>Глубина</th><th>Верхняя рама</th><th>Нижняя рама</th><th>Положение модуля управления</th><th>Display</th><th>Access</th><th>Payment</th><th>Printer</th><th>Цвет корпуса</th><th>Цвет дверей</th><th>Действия</th></tr></thead>
 <tbody><tr th:each="als : ${alss}">
-<td th:text="${als.id}"></td><td th:text="${als.name}"></td><td th:text="${als.description}"></td><td th:text="${als.countCells}"></td>
+<td th:text="${als.id}"></td><td th:text="${als.name}"></td><td th:text="${als.countCells}"></td>
 <td th:text="${als.height}"></td><td th:text="${als.width}"></td><td th:text="${als.depth}"></td><td th:text="${als.upperFrame}"></td><td th:text="${als.bottomFrame}"></td>
-<td th:text="${als.positionControlModule}"></td><td th:text="${als.colorBody}"></td><td th:text="${als.colorDoor}"></td>
+<td th:text="${als.positionControlModule}"></td><td th:text="${als.functionalConfiguration.display}"></td><td th:text="${als.functionalConfiguration.access}"></td><td th:text="${als.functionalConfiguration.payment}"></td><td th:text="${als.functionalConfiguration.printer}"></td><td th:text="${als.colorBody}"></td><td th:text="${als.colorDoor}"></td>
 <td><a th:href="@{/alss/{id}(id=${als.id})}" class="btn btn-primary btn-sm">Изменить</a></td></tr></tbody></table></div>
 </div><div th:replace="~{footer :: footer}"></div></body></html>

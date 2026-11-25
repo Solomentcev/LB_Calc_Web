@@ -71,6 +71,19 @@ public class ProjectService {
     }
 
     @Transactional(readOnly = true)
+    public org.springframework.data.domain.Page<Project> findPage(
+            String query, org.springframework.data.domain.Pageable pageable
+    ) {
+        String term = query == null ? "" : query.trim();
+        var entities = term.isEmpty()
+                ? projectRepository.findAllWithUsers(pageable)
+                : projectRepository.findByNameContainingIgnoreCaseOrCompanyContainingIgnoreCaseOrDescriptionContainingIgnoreCase(
+                        term, term, term, pageable);
+        return entities.map(entity -> ProjectEntityMapper.toDomain(
+                entity, (als, alsEntity) -> { }));
+    }
+
+    @Transactional(readOnly = true)
     public List<Project> findAll() {
         logger.info("Получение списка проектов...");
 return projectRepository.findAllWithUsers()

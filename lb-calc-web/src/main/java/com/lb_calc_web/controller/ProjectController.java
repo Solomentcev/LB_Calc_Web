@@ -34,6 +34,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.data.domain.Pageable;
+
+import java.util.Set;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
@@ -71,13 +74,21 @@ public class ProjectController
      */
     @GetMapping
     public String projects(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "") String q,
+            @RequestParam(defaultValue = "id") String sort,
+            @RequestParam(defaultValue = "asc") String direction,
             Model model
     ) {
-        model.addAttribute(
-                "projects",
-                ProjectDtoMapper.toDtoList(projectService.findAll())
-        );
-
+        Pageable pageable = CatalogPageSupport.pageable(page, size, sort, direction, "id",
+                Set.of("id", "name", "company", "createdAt", "updatedAt"));
+        var result = projectService.findPage(q, pageable).map(ProjectDtoMapper::toDto);
+        model.addAttribute("projects", result.getContent());
+        CatalogPageSupport.addModelAttributes(model, result, q, pageable, "/projects",
+                CatalogPageSupport.sortOptions("id", "ID", "name", "Название",
+                        "company", "Компания", "createdAt", "Дата создания",
+                        "updatedAt", "Дата изменения"));
         return "projects/projects";
     }
 

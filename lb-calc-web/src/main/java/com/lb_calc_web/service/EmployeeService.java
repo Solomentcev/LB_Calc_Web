@@ -236,6 +236,28 @@ public class EmployeeService implements UserDetailsService {
                 ));
     }
 
+    /** Возвращает страницу профилей с фильтрацией на уровне базы данных. */
+    @Transactional(readOnly = true)
+    public org.springframework.data.domain.Page<ProfileDTO> findProfilesPage(
+            String query, org.springframework.data.domain.Pageable pageable
+    ) {
+        String term = query == null ? "" : query.trim();
+        var entities = term.isEmpty()
+                ? employeeRepository.findAll(pageable)
+                : employeeRepository.findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCaseOrEmailContainingIgnoreCase(
+                        term, term, term, pageable);
+        return entities.map(EmployeeEntityMapper::toProfileDto);
+    }
+
+    /** Возвращает статусы только для сотрудников текущей страницы каталога. */
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @Transactional(readOnly = true)
+    public java.util.Map<Long, Boolean> getActiveStatuses(Iterable<Long> ids) {
+        return employeeRepository.findAllById(ids).stream()
+                .collect(java.util.stream.Collectors.toMap(
+                        EmployeeEntity::getId, EmployeeEntity::isActive));
+    }
+
     private EmployeeEntity getRequiredEntity(Long id) {
         if (id == null || id <= 0) {
             throw new NoSuchElementException("Сотрудник с id=" + id + " не найден");

@@ -13,6 +13,37 @@ import static org.junit.jupiter.api.Assertions.*;
 class ALSDtoMapperTest {
 
     @Test
+    void toDomain_shouldApplyAlsFunctionalConfigurationToControlModule() {
+        ALSDTO dto = TestDataFactory.validALSDTO(7L);
+        com.lb_calc_web.dto.FunctionalConfigurationDTO functional =
+                new com.lb_calc_web.dto.FunctionalConfigurationDTO();
+        functional.setDisplay(com.lb_calc_web.domain.equipment.DisplayPurpose.INCH_17);
+        functional.setAccess(java.util.Set.of(
+                com.lb_calc_web.domain.equipment.AccessPurpose.RFID,
+                com.lb_calc_web.domain.equipment.AccessPurpose.QR_CODE
+        ));
+        functional.setPayment(com.lb_calc_web.domain.equipment.PaymentPurpose.CARDS_AND_CASH);
+        functional.setPrinter(com.lb_calc_web.domain.equipment.PrinterPurpose.PRESENT);
+        dto.setFunctionalConfiguration(functional);
+
+        ALS restored = ALSDtoMapper.toDomain(dto);
+
+        assertEquals(
+                new com.lb_calc_web.domain.model.FunctionalConfiguration(
+                        functional.getDisplay(),
+                        functional.getAccess(),
+                        functional.getPayment(),
+                        functional.getPrinter()
+                ),
+                restored.getFunctionalConfiguration()
+        );
+        assertEquals(
+                restored.getFunctionalConfiguration(),
+                restored.getControlModule().getControlConfiguration().getFunctionalConfiguration()
+        );
+    }
+
+    @Test
     void toDtoAndBack_shouldPreservePhysicalOrderForMoreThanThreeModules() {
         ALS source = TestDataFactory.validALS(1L);
         source.addStorageModule(TestDataFactory.validLB(301L));

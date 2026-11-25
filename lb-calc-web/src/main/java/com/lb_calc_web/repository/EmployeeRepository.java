@@ -1,6 +1,8 @@
 package com.lb_calc_web.repository;
 
 import com.lb_calc_web.entity.EmployeeEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
@@ -9,6 +11,9 @@ import java.util.Optional;
  * Репозиторий для работы с сотрудниками.
  */
 public interface EmployeeRepository extends JpaRepository<EmployeeEntity, Long> {
+
+    Page<EmployeeEntity> findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCaseOrEmailContainingIgnoreCase(
+            String firstName, String lastName, String email, Pageable pageable);
 
     /**
      * Находит сотрудника по email.

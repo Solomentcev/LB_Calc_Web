@@ -9,23 +9,23 @@
         <a th:href="@{/lcs/create}" class="btn btn-primary btn-sm">Создать LC</a>
         <a th:href="@{/}" class="btn btn-secondary btn-sm">Назад</a>
     </div>
-    <div class="table-responsive">
-        <table class="table table-striped table-hover js-data-table catalog-table">
+    <div th:replace="~{fragments/pagination :: controls('/lcs', ${q}, ${sort}, ${direction}, ${size}, ${sortOptions})}"></div>
+<div class="table-responsive">
+        <table class="table table-striped table-hover catalog-table">
             <thead><tr>
-                <th>ID</th><th>Название</th><th>Описание</th><th>Высота</th><th>Ширина</th><th>Глубина</th>
-                <th>Дисплей</th><th>Доступ</th><th>Оплата</th><th>Печать</th><th>Физическое оборудование</th>
+                <th>ID</th><th>Название</th><th>Высота</th><th>Ширина</th><th>Глубина</th>
+                <th>Display</th><th>Access</th><th>Payment</th><th>Printer</th>
                 <th>Цвет корпуса</th><th>Цвет дверей</th><th>Действие</th>
             </tr></thead>
             <tbody>
             <tr th:each="lc : ${lcs}">
-                <td th:text="${lc.id}"></td><td th:text="${lc.name}"></td><td th:text="${lc.description}"></td>
+                <td th:text="${lc.id}"></td><td th:text="${lc.name}"></td>
                 <td th:text="${lc.height}"></td><td th:text="${lc.width}"></td><td th:text="${lc.depth}"></td>
                 <td th:text="${lc.functionalConfiguration.display}"></td>
                 <td th:text="${lc.functionalConfiguration.access}"></td>
                 <td th:text="${lc.functionalConfiguration.payment}"></td>
                 <td th:text="${lc.functionalConfiguration.printer}"></td>
-                <td><span th:each="selection, stat : ${lc.equipmentSelections}"
-                          th:text="|ID ${selection.equipmentId}: ${selection.quantity} шт.|"></span></td>
+
                 <td th:text="${lc.colorBody}"></td><td th:text="${lc.colorDoor}"></td>
                 <td><a th:href="@{/lcs/{id}(id=${lc.id})}" class="btn btn-primary btn-sm">Изменить</a></td>
             </tr>

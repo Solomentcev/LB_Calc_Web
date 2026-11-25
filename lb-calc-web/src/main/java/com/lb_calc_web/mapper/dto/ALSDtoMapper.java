@@ -185,6 +185,17 @@ public final class ALSDtoMapper {
         );
         domain.setId(dto.getId() == null || dto.getId() <= 0 ? null : dto.getId());
 
+        if (dto.getFunctionalConfiguration() != null) {
+            FunctionalConfigurationDTO functional = dto.getFunctionalConfiguration();
+            FunctionalConfiguration current = domain.getFunctionalConfiguration();
+            domain.setFunctionalConfiguration(new FunctionalConfiguration(
+                    functional.getDisplay() == null ? current.getDisplay() : functional.getDisplay(),
+                    functional.getAccess() == null ? current.getAccess() : functional.getAccess(),
+                    functional.getPayment() == null ? current.getPayment() : functional.getPayment(),
+                    functional.getPrinter() == null ? current.getPrinter() : functional.getPrinter()
+            ));
+        }
+
         if (dto.getModuleOrder() != null
                 && dto.getPositionControlModule() != null
                 && !dto.getPositionControlModule().isBlank()

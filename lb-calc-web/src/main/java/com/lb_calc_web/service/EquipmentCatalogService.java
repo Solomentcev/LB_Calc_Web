@@ -23,6 +23,18 @@ public class EquipmentCatalogService {
     }
 
     @Transactional(readOnly = true)
+    public org.springframework.data.domain.Page<Equipment> findPage(
+            String query, org.springframework.data.domain.Pageable pageable
+    ) {
+        String term = query == null ? "" : query.trim();
+        var entities = term.isEmpty()
+                ? equipmentRepository.findAll(pageable)
+                : equipmentRepository.findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCaseOrPurposeContainingIgnoreCase(
+                        term, term, term, pageable);
+        return entities.map(EquipmentEntityMapper::toDomain);
+    }
+
+    @Transactional(readOnly = true)
     public List<Equipment> findAll() {
         return equipmentRepository.findAll().stream()
                 .map(EquipmentEntityMapper::toDomain)

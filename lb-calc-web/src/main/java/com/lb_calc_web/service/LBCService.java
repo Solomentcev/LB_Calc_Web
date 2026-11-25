@@ -109,6 +109,18 @@ public class LBCService {
     }
 
     @Transactional(readOnly = true)
+    public org.springframework.data.domain.Page<LBC> findPage(
+            String query, org.springframework.data.domain.Pageable pageable
+    ) {
+        String term = query == null ? "" : query.trim();
+        var entities = term.isEmpty()
+                ? lbcRepository.findAll(pageable)
+                : lbcRepository.findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(
+                        term, term, pageable);
+        return entities.map(LBCEntityMapper::toDomain);
+    }
+
+    @Transactional(readOnly = true)
     public List<LBC> findAll() {
         logger.info("Получение списка LBC");
         return lbcRepository.findAll().stream()

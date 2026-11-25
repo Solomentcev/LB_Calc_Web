@@ -97,6 +97,18 @@ public class LCService {
     }
 
     @Transactional(readOnly = true)
+    public org.springframework.data.domain.Page<LC> findPage(
+            String query, org.springframework.data.domain.Pageable pageable
+    ) {
+        String term = query == null ? "" : query.trim();
+        var entities = term.isEmpty()
+                ? lcRepository.findAll(pageable)
+                : lcRepository.findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(
+                        term, term, pageable);
+        return entities.map(LCEntityMapper::toDomain);
+    }
+
+    @Transactional(readOnly = true)
     public List<LC> findAll() {
         logger.info("Получение списка LC");
         return lcRepository.findAll().stream()

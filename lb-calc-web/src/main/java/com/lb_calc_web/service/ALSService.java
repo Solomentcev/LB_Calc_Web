@@ -86,6 +86,18 @@ public class ALSService {
     }
 
     @Transactional(readOnly = true)
+    public org.springframework.data.domain.Page<ALS> findPage(
+            String query, org.springframework.data.domain.Pageable pageable
+    ) {
+        String term = query == null ? "" : query.trim();
+        var entities = term.isEmpty()
+                ? alsRepository.findAll(pageable)
+                : alsRepository.findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(
+                        term, term, pageable);
+        return entities.map(ALSEntityMapper::toDomain);
+    }
+
+    @Transactional(readOnly = true)
     public List<ALS> findAll() {
         logger.info("Получение списка АКХ");
         return alsRepository.findAll().stream()

@@ -12,6 +12,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
+import org.springframework.data.domain.Pageable;
+
+import java.util.Set;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -218,13 +221,22 @@ public class EmployeeController {
     }
 
     @GetMapping("/profiles")
-    public String profiles(Model model) {
-
-        model.addAttribute(
-                "employees",
-                employeeService.getAllProfiles()
-        );
-
+    public String profiles(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "") String q,
+            @RequestParam(defaultValue = "id") String sort,
+            @RequestParam(defaultValue = "asc") String direction,
+            Model model
+    ) {
+        Pageable pageable = CatalogPageSupport.pageable(page, size, sort, direction, "id",
+                Set.of("id", "firstName", "lastName", "email", "registrationDate"));
+        var result = employeeService.findProfilesPage(q, pageable);
+        model.addAttribute("employees", result.getContent());
+        CatalogPageSupport.addModelAttributes(model, result, q, pageable, "/profiles",
+                CatalogPageSupport.sortOptions("id", "ID", "firstName", "Имя",
+                        "lastName", "Фамилия", "email", "Электронная почта",
+                        "registrationDate", "Дата регистрации"));
         return "profiles/profiles";
     }
 
@@ -257,17 +269,24 @@ public class EmployeeController {
 
     @GetMapping("/employees")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    public String employees(Model model) {
-
-        model.addAttribute(
-                "employees",
-                employeeService.getAllProfiles()
-        );
-        model.addAttribute(
-                "employeeStatuses",
-                employeeService.getActiveStatuses()
-        );
-
+    public String employees(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "") String q,
+            @RequestParam(defaultValue = "id") String sort,
+            @RequestParam(defaultValue = "asc") String direction,
+            Model model
+    ) {
+        Pageable pageable = CatalogPageSupport.pageable(page, size, sort, direction, "id",
+                Set.of("id", "firstName", "lastName", "email", "role", "registrationDate"));
+        var result = employeeService.findProfilesPage(q, pageable);
+        model.addAttribute("employees", result.getContent());
+        model.addAttribute("employeeStatuses", employeeService.getActiveStatuses(
+                result.getContent().stream().map(ProfileDTO::getId).toList()));
+        CatalogPageSupport.addModelAttributes(model, result, q, pageable, "/employees",
+                CatalogPageSupport.sortOptions("id", "ID", "firstName", "Имя",
+                        "lastName", "Фамилия", "email", "Электронная почта",
+                        "role", "Роль", "registrationDate", "Дата регистрации"));
         return "employees/employees";
     }
 
