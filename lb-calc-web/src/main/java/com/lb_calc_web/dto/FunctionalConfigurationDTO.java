@@ -1,5 +1,7 @@
 package com.lb_calc_web.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import com.lb_calc_web.domain.equipment.AccessPurpose;
 import com.lb_calc_web.domain.equipment.DisplayPurpose;
 import com.lb_calc_web.domain.equipment.PaymentPurpose;
@@ -24,6 +26,7 @@ public class FunctionalConfigurationDTO {
     public Set<AccessPurpose> getAccess() { return access == null ? null : Set.copyOf(access); }
 
     /** Возвращает все назначения доступа в стабильном текстовом порядке. */
+    @JsonIgnore
     public String getAccessDisplay() {
         return access == null ? "" : access.stream()
                 .map(AccessPurpose::name)
