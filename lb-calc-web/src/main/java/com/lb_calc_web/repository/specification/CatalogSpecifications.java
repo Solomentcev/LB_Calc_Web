@@ -23,7 +23,18 @@ public final class CatalogSpecifications {
     }
 
     public static <T, V> Specification<T> equal(String field, V value) {
-        return value == null ? null : (root, query, builder) ->
+        if (value == null) {
+            return null;
+        }
+        if (value instanceof String string) {
+            String normalized = string.trim();
+            if (normalized.isEmpty()) {
+                return null;
+            }
+            return (root, query, builder) ->
+                    builder.equal(root.get(field), normalized);
+        }
+        return (root, query, builder) ->
                 builder.equal(root.get(field), value);
     }
 
