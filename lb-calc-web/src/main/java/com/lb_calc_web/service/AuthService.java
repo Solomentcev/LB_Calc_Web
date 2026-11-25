@@ -1,9 +1,3 @@
-/**
- * Реализует аутентификацию, регистрацию сотрудников и управление учётными данными.
- *
- * <p>Публикует доменные события в Kafka после успешного завершения транзакций,
- * чтобы уведомления не отражали изменения, которые не были сохранены.</p>
- */
 package com.lb_calc_web.service;
 import com.lb_calc_web.domain.attributes.Role;
 import com.lb_calc_web.domain.model.Employee;
@@ -47,6 +41,13 @@ import java.time.LocalDate;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
+/**
+ * Реализует аутентификацию, регистрацию сотрудников и управление учётными данными.
+ *
+ * <p>Публикует доменные события в Kafka после успешного завершения транзакций,
+ * чтобы уведомления не отражали изменения, которые не были сохранены.</p>
+ */
+
 @Service
 public class AuthService {
     private static final Logger logger =
