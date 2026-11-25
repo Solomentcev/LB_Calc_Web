@@ -41,6 +41,8 @@ class ModuleNamingDescriptionTest {
         assertTrue(lc.getDescription().contains("Функциональные назначения:"));
         assertTrue(lc.getDescription().contains("RFID"));
         assertTrue(lc.getDescription().contains("Установленное оборудование:"));
+        assertTrue(lc.getDescription().contains("\nГабариты модуля (В×Ш×Г):"));
+        assertTrue(!lc.getDescription().contains("\\n"));
     }
 
     @Test
