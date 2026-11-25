@@ -339,6 +339,10 @@ public class ALSController extends BaseCatalogController {
         alsService.findLBCInALS(source, lbcId);
         lbc.setId(lbcId);
         try {
+            // Подбираем модели оборудования до восстановления домена, чтобы описание
+            // отражало фактическую комплектацию уже при обновлении формы.
+            lbc.setEquipmentSelections(equipmentCatalogService.prepareSelections(
+                    lbc.getFunctionalConfiguration(), lbc.getEquipmentSelections()));
             lbc = LBCDtoMapper.toDto(alsService.restoreLBC(lbc, source));
         } catch (ValidationSizeException exception) {
             model.addAttribute("errors", ValidationErrorFormatter.format(exception.getValidationResult()));
