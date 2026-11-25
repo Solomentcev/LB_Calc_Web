@@ -130,6 +130,7 @@ public class ALSService {
     }
 
     @Transactional(readOnly = true)
+    /** Возвращает все сохранённые конфигурации ALS. */
     public List<ALS> findAll() {
         logger.debug("Получение списка АКХ");
         return alsRepository.findAll().stream()
@@ -139,6 +140,7 @@ public class ALSService {
     }
 
     @Transactional(readOnly = true)
+    /** Находит конфигурацию ALS по идентификатору. */
     public ALS findById(Long id) {
         if (id == null || id <= 0) {
             throw new NoSuchElementException("АКХ с id=" + id + " не найдена");
@@ -207,6 +209,7 @@ public class ALSService {
     }
 
     @Transactional
+    /** Удаляет сохранённую конфигурацию ALS. */
     public void deleteALS(Long id) {
         if (id == null || id <= 0) {
             throw new NoSuchElementException("АКХ с id=" + id + " не найдена");
@@ -221,6 +224,7 @@ public class ALSService {
     }
 
     @Transactional(readOnly = true)
+    /** Добавляет в ALS новый модуль хранения LB. */
     public ALS addNewLB(ALS als) {
         Objects.requireNonNull(als, "ALS не должен быть null");
         als.addStorageModule(lbService.createLB(
@@ -230,6 +234,7 @@ public class ALSService {
     }
 
     @Transactional(readOnly = true)
+    /** Удаляет из ALS выбранный экземпляр LB. */
     public ALS deleteLB(ALS als, Long lbId) {
         Objects.requireNonNull(als, "ALS не должен быть null");
         Objects.requireNonNull(lbId, "Идентификатор LB не должен быть null");
@@ -245,12 +250,14 @@ public class ALSService {
     }
 
     @Transactional(readOnly = true)
+    /** Восстанавливает доменную модель LB из DTO. */
     public LB restoreLB(LBDTO dto) {
         Objects.requireNonNull(dto, "LB не должен быть null");
         return LBDtoMapper.toDomain(dto, TypeLbFactory.forLB(environment, dto.getType()));
     }
 
     @Transactional(readOnly = true)
+    /** Заменяет только выбранный экземпляр LB в конфигурации ALS. */
     public ALS replaceLB(ALS als, Long lbId, LB replacement) {
         Objects.requireNonNull(als, "ALS не должен быть null");
         Objects.requireNonNull(lbId, "Идентификатор LB не должен быть null");
@@ -266,6 +273,7 @@ public class ALSService {
         throw new NoSuchElementException("LB с id " + lbId + " не найден в ALS " + als.getId());
     }
 
+    /** Находит выбранный экземпляр LBC внутри ALS. */
     public LBC findLBCInALS(ALS als, Long lbcId) {
         Objects.requireNonNull(als, "ALS не должен быть null");
         LBC lbc = als.getLBC();
@@ -276,6 +284,7 @@ public class ALSService {
     }
 
     @Transactional(readOnly = true)
+    /** Восстанавливает управляющий модуль LC с учётом текущей конфигурации ALS. */
     public LC restoreLC(LCDTO dto, ALS als) {
         Objects.requireNonNull(als, "ALS не должен быть null");
         ControlModule control = als.getControlModule();
@@ -285,6 +294,7 @@ public class ALSService {
     }
 
     @Transactional(readOnly = true)
+    /** Восстанавливает комбинированный модуль LBC с учётом текущей конфигурации ALS. */
     public LBC restoreLBC(LBCDTO dto, ALS als) {
         Objects.requireNonNull(als, "ALS не должен быть null");
         ControlModule control = als.getControlModule();
@@ -294,6 +304,7 @@ public class ALSService {
     }
 
     @Transactional(readOnly = true)
+    /** Заменяет управляющий модуль LC и синхронизирует функциональные назначения ALS. */
     public ALS replaceLC(ALS als, LC replacement) {
         Objects.requireNonNull(als, "ALS не должен быть null");
         Objects.requireNonNull(replacement, "Новый LC не должен быть null");
@@ -308,6 +319,7 @@ public class ALSService {
     }
 
     @Transactional(readOnly = true)
+    /** Заменяет комбинированный модуль LBC и синхронизирует функциональные назначения ALS. */
     public ALS replaceLBC(ALS als, LBC replacement) {
         Objects.requireNonNull(als, "ALS не должен быть null");
         Objects.requireNonNull(replacement, "Новый LBC не должен быть null");
@@ -322,6 +334,7 @@ public class ALSService {
     }
 
     @Transactional(readOnly = true)
+    /** Заменяет управляющий модуль ALS новым модулем LBC. */
     public ALS replaceWithNewLBC(ALS als) {
         Objects.requireNonNull(als, "ALS не должен быть null");
         LBC replacement = lbcService.createLBC(
@@ -337,26 +350,31 @@ public class ALSService {
     }
 
     @Transactional
+    /** Добавляет LB в сохранённую ALS и сохраняет обновлённую конфигурацию. */
     public ALS addNewLBandSaveALS(Long alsId) {
         return saveALS(addNewLB(findById(alsId)));
     }
 
     @Transactional
+    /** Удаляет выбранный LB из сохранённой ALS и сохраняет результат. */
     public ALS deleteLBandSaveALS(Long alsId, Long lbId) {
         return saveALS(deleteLB(findById(alsId), lbId));
     }
 
     @Transactional
+    /** Заменяет LC в ALS и сохраняет обновлённую конфигурацию. */
     public ALS replaceLCandSaveALS(ALS als, LC replacement) {
         return saveALS(replaceLC(als, replacement));
     }
 
     @Transactional
+    /** Заменяет LBC в ALS и сохраняет обновлённую конфигурацию. */
     public ALS replaceLBCandSaveALS(ALS als, LBC replacement) {
         return saveALS(replaceLBC(als, replacement));
     }
 
     @Transactional
+    /** Заменяет управляющий модуль на новый LBC и сохраняет ALS. */
     public ALS replaceWithNewLBCandSaveALS(Long alsId) {
         return saveALS(replaceWithNewLBC(findById(alsId)));
     }

@@ -138,6 +138,7 @@ public class LBCService {
     }
 
     @Transactional(readOnly = true)
+    /** Возвращает все сохранённые комбинированные модули LBC. */
     public List<LBC> findAll() {
         logger.debug("Получение списка LBC");
         return lbcRepository.findAll().stream()
@@ -148,6 +149,7 @@ public class LBCService {
     }
 
     @Transactional(readOnly = true)
+    /** Находит комбинированный модуль LBC по идентификатору. */
     public LBC findById(Long id) {
         if (id == null || id <= 0) {
             throw new NoSuchElementException("LBC с id=" + id + " не найден");
@@ -184,6 +186,7 @@ public class LBCService {
     }
 
     @Transactional
+    /** Проверяет и сохраняет доменную конфигурацию LBC. */
     public LBC saveLBC(LBC domain) {
         Objects.requireNonNull(domain, "LBC не должен быть null");
         logger.info("Сохранение LBC: id={}, type={}", domain.getId(), domain.getTypeLb().getType());

@@ -47,6 +47,7 @@ public class EmployeeService implements UserDetailsService {
      */
     @Override
     @Transactional(readOnly = true)
+    /** Загружает principal сотрудника по адресу электронной почты для Spring Security. */
     public EmployeePrincipal loadUserByUsername(String email) {
 
         logger.debug(
@@ -77,6 +78,7 @@ public class EmployeeService implements UserDetailsService {
      * Возвращает DTO, а не Security Principal.
      */
     @Transactional(readOnly = true)
+    /** Возвращает DTO сотрудника, найденного по адресу электронной почты. */
     public EmployeeDTO loadUserByEmail(String email) {
 
         logger.debug(
@@ -95,6 +97,7 @@ public class EmployeeService implements UserDetailsService {
         return EmployeeEntityMapper.toDto(entity);
     }
 
+    /** Возвращает DTO сотрудника по числовому идентификатору. */
     public EmployeeDTO loadUserById(int id) {
         return loadUserById((long) id);
     }
@@ -119,6 +122,7 @@ public class EmployeeService implements UserDetailsService {
     }
 
     @Transactional(readOnly = true)
+    /** Возвращает профиль сотрудника по идентификатору. */
     public ProfileDTO getProfileById(int id) {
         if (id <= 0) {
             throw new NoSuchElementException("Пользователь с id=" + id + " не найден");
@@ -142,6 +146,7 @@ public class EmployeeService implements UserDetailsService {
      */
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @Transactional
+    /** Сохраняет изменения учётной записи сотрудника. */
     public EmployeeDTO save(EmployeeDTO employeeDTO) {
 
         if (employeeDTO == null || employeeDTO.getId() == null || employeeDTO.getId() <= 0) {
@@ -184,6 +189,7 @@ public class EmployeeService implements UserDetailsService {
      */
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @Transactional
+    /** Деактивирует учётную запись сотрудника. */
     public void deactivateById(Long id) {
         EmployeeEntity entity = getRequiredEntity(id);
 
@@ -202,6 +208,7 @@ public class EmployeeService implements UserDetailsService {
      */
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @Transactional
+    /** Активирует ранее деактивированную учётную запись сотрудника. */
     public void activateById(Long id) {
         EmployeeEntity entity = getRequiredEntity(id);
 
@@ -221,6 +228,7 @@ public class EmployeeService implements UserDetailsService {
      */
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @Transactional(readOnly = true)
+    /** Проверяет, активна ли учётная запись сотрудника. */
     public boolean isActive(Long id) {
         return getRequiredEntity(id).isActive();
     }
@@ -232,6 +240,7 @@ public class EmployeeService implements UserDetailsService {
      */
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @Transactional(readOnly = true)
+    /** Возвращает статусы активности всех сотрудников. */
     public java.util.Map<Long, Boolean> getActiveStatuses() {
         return employeeRepository.findAll().stream()
                 .collect(java.util.stream.Collectors.toMap(
@@ -320,6 +329,7 @@ public class EmployeeService implements UserDetailsService {
 
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @Transactional(readOnly = true)
+    /** Возвращает список сотрудников. */
     public List<EmployeeDTO> findAll() {
 
         List<EmployeeEntity> entities =
@@ -335,6 +345,7 @@ public class EmployeeService implements UserDetailsService {
     }
 
     @Transactional(readOnly = true)
+    /** Возвращает профили всех сотрудников. */
     public List<ProfileDTO> getAllProfiles() {
 
         List<EmployeeEntity> entities =
@@ -350,6 +361,7 @@ public class EmployeeService implements UserDetailsService {
     }
 
     @Transactional(readOnly = true)
+    /** Проверяет наличие учётной записи с указанным email. */
     public boolean existsByEmail(String email) {
 
         return employeeRepository.existsByEmail(email);

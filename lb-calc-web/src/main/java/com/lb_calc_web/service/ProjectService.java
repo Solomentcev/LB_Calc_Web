@@ -78,6 +78,7 @@ public class ProjectService {
      * коллекция ALS не загружается вместе со страницей.
      */
     @Transactional(readOnly = true)
+    /** Возвращает страницу проектов с применёнными фильтрами и сортировкой. */
     public org.springframework.data.domain.Page<Project> findPage(
             ProjectCatalogFilter filter, org.springframework.data.domain.Pageable pageable
     ) {
@@ -159,6 +160,7 @@ public class ProjectService {
     }
 
     @Transactional(readOnly = true)
+    /** Возвращает все сохранённые проекты. */
     public List<Project> findAll() {
         logger.info("Получение списка проектов...");
 return projectRepository.findAllWithUsers()
@@ -171,6 +173,7 @@ return projectRepository.findAllWithUsers()
     }
 
     @Transactional(readOnly = true)
+    /** Находит проект по идентификатору. */
     public Project findById(Long id) {
         logger.info("Поиск проекта(id={})...", id);
         ProjectEntity entity = loadExistingProject(id);
@@ -274,6 +277,7 @@ return projectRepository.findAllWithUsers()
     }
 
     @Transactional
+    /** Удаляет проект по идентификатору. */
     public void deleteById(
             Long id
     ) {
@@ -397,6 +401,7 @@ return projectRepository.findAllWithUsers()
      * Сохранение проекта выполняется одной транзакцией.</p>
      */
     @Transactional
+    /** Заменяет выбранный экземпляр ALS в проекте и сохраняет обновлённый проект. */
     public ALS replaceALSandSaveProject(
             Long projectId,
             Long alsId,

@@ -117,6 +117,7 @@ public class LBService {
     }
 
     @Transactional(readOnly = true)
+    /** Возвращает все сохранённые модули хранения LB. */
     public List<LB> findAll() {
         logger.debug("Получение списка LB");
         return lbRepository.findAll().stream()

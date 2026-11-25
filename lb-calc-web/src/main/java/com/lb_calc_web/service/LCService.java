@@ -160,6 +160,7 @@ public class LCService {
     }
 
     @Transactional(readOnly = true)
+    /** Возвращает все сохранённые управляющие модули LC. */
     public List<LC> findAll() {
         logger.debug("Получение списка LC");
         return lcRepository.findAll().stream()
@@ -170,6 +171,7 @@ public class LCService {
     }
 
     @Transactional(readOnly = true)
+    /** Находит управляющий модуль LC по идентификатору. */
     public LC findById(Long id) {
         if (id == null || id <= 0) {
             throw new NoSuchElementException("LC с id=" + id + " не найден");
@@ -202,6 +204,7 @@ public class LCService {
     }
 
     @Transactional
+    /** Проверяет и сохраняет доменную конфигурацию LC. */
     public LC saveLC(LC domain) {
         Objects.requireNonNull(domain, "LC не должен быть null");
         logger.info("Сохранение LC: id={}, name={}", domain.getId(), domain.getName());

@@ -45,6 +45,7 @@ public class EquipmentCatalogService {
      * @return отфильтрованная страница оборудования
      */
     @Transactional(readOnly = true)
+    /** Возвращает страницу оборудования с применёнными фильтрами и сортировкой. */
     public Page<Equipment> findPage(EquipmentCatalogFilter filter, Pageable pageable) {
         Objects.requireNonNull(filter, "Фильтры каталога оборудования не должны быть null");
         Objects.requireNonNull(pageable, "Параметры страницы не должны быть null");
@@ -109,6 +110,7 @@ public class EquipmentCatalogService {
     }
 
     @Transactional(readOnly = true)
+    /** Возвращает все модели оборудования из каталога. */
     public List<Equipment> findAll() {
         return equipmentRepository.findAll().stream()
                 .map(EquipmentEntityMapper::toDomain)
@@ -228,11 +230,13 @@ public class EquipmentCatalogService {
     }
 
     @Transactional(readOnly = true)
+    /** Находит модель оборудования по идентификатору. */
     public Equipment findById(Long id) {
         return EquipmentEntityMapper.toDomain(findEntity(id));
     }
 
     @Transactional
+    /** Сохраняет модель оборудования после проверки её параметров. */
     public Equipment save(Equipment equipment) {
         Objects.requireNonNull(equipment, "Модель оборудования не должна быть null");
 
@@ -281,6 +285,7 @@ public class EquipmentCatalogService {
     }
 
     @Transactional
+    /** Удаляет модель оборудования по идентификатору. */
     public void delete(Long id) {
         EquipmentEntity entity = findEntity(id);
         if (equipmentRepository.countModuleReferencesByEquipmentId(id) > 0) {
