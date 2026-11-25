@@ -80,6 +80,9 @@ document.addEventListener("DOMContentLoaded", () => {
             if (!selectedOption) {
                 selectedOption = [...select.options].find(option => option.dataset.default === "true");
             }
+            if (!selectedOption && select.options.length === 2) {
+                selectedOption = select.options[1];
+            }
             if (selectedOption) {
                 select.value = selectedOption.value;
             } else {
