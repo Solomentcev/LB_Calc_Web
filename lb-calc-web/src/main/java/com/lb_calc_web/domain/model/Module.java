@@ -74,7 +74,8 @@ public abstract class Module {
         Objects.requireNonNull(source, "Исходный модуль не должен быть null");
         Module restored = source.copy();
         restored.setName(name);
-        restored.setDescription(description);
+        // Нормализуем старые описания, в которых переносы были сохранены как "\\n".
+        restored.setDescription(description == null ? null : description.replace("\\\\n", "\\n"));
         return restored;
     }
 
