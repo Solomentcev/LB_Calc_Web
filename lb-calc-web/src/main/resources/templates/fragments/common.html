@@ -432,5 +432,153 @@
             }
         }
 
+
+        /* Единая компоновка редакторов модулей */
+        .module-editor {
+            max-width: 1180px;
+            padding-top: 1.25rem;
+            padding-bottom: 3rem;
+        }
+        .module-editor__heading {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 1rem;
+            margin: 0 0 1.5rem;
+        }
+        .module-editor__eyebrow {
+            margin-bottom: .35rem;
+            color: #6c757d;
+            font-size: .78rem;
+            font-weight: 700;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+        }
+        .module-editor__title {
+            margin: 0;
+            font-size: 1.65rem;
+            font-weight: 650;
+            line-height: 1.25;
+        }
+        .module-editor__subtitle {
+            margin: .4rem 0 0;
+            color: #6c757d;
+        }
+        .module-editor__id {
+            flex: 0 0 auto;
+            padding: .35rem .7rem;
+            border: 1px solid #dee2e6;
+            border-radius: 2rem;
+            background: #fff;
+            color: #495057;
+            font-size: .85rem;
+        }
+        .module-editor .module-section {
+            margin-bottom: 1.25rem;
+            border: 1px solid #e1e6eb;
+            border-radius: .65rem;
+            background: #fff;
+            box-shadow: 0 2px 8px rgba(33, 37, 41, .035);
+            overflow: hidden;
+        }
+        .module-editor .module-section__header {
+            padding: 1rem 1.25rem .85rem;
+            border-bottom: 1px solid #edf0f2;
+            background: #fbfcfd;
+        }
+        .module-editor .module-section__header h2 {
+            margin: 0;
+            font-size: 1.05rem;
+            font-weight: 650;
+        }
+        .module-editor .module-section__header p {
+            margin: .3rem 0 0;
+            color: #6c757d;
+            font-size: .875rem;
+        }
+        .module-editor .module-section__body {
+            padding: 1.25rem;
+        }
+        .module-editor .module-field {
+            margin-bottom: 1rem;
+        }
+        .module-editor .module-field label {
+            display: block;
+            margin-bottom: .4rem;
+            color: #495057;
+            font-size: .875rem;
+            font-weight: 600;
+        }
+        .module-editor .module-field .form-control {
+            min-height: 2.55rem;
+            border-color: #d7dde3;
+            border-radius: .4rem;
+        }
+        .module-editor .module-field .form-control:focus {
+            border-color: #80bdff;
+            box-shadow: 0 0 0 .15rem rgba(0, 123, 255, .12);
+        }
+        .module-editor .module-field .form-control[readonly] {
+            background: #f5f7f9;
+            color: #59636e;
+        }
+        .module-editor .module-field-hint {
+            display: block;
+            margin-top: .3rem;
+            color: #7a858f;
+            font-size: .78rem;
+        }
+        .module-editor .module-equipment-row {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 120px auto;
+            gap: .75rem;
+            align-items: end;
+            margin: 0 0 .75rem;
+            padding: .85rem;
+            border: 1px solid #e5e9ed;
+            border-radius: .5rem;
+            background: #fbfcfd;
+        }
+        .module-editor .module-equipment-row .module-field { margin: 0; }
+        .module-editor .module-equipment-row .btn { min-height: 2.55rem; }
+        .module-editor .module-visual {
+            display: flex;
+            justify-content: center;
+            padding: 1rem;
+            background: #f8fafb;
+        }
+        .module-editor .module-visual img {
+            max-width: 100%;
+            max-height: 520px;
+            object-fit: contain;
+        }
+        .module-editor .page-actions {
+            top: 3.5rem;
+            margin-bottom: 1.25rem;
+            padding: .75rem 0;
+            border-bottom: 1px solid #e1e6eb;
+            background: #f8f9fa;
+        }
+        .module-editor .page-actions .btn { border-radius: .4rem; }
+        .module-editor .breadcrumb {
+            margin-bottom: 1.25rem;
+            padding: .75rem 1rem;
+            border: 1px solid #e6eaee;
+            border-radius: .45rem;
+            background: #fff;
+        }
+        @media (max-width: 767.98px) {
+            .module-editor__heading { flex-direction: column; }
+            .module-editor__title { font-size: 1.4rem; }
+            .module-editor .module-section__body { padding: 1rem; }
+            .module-editor .module-equipment-row {
+                grid-template-columns: minmax(0, 1fr) 100px;
+            }
+            .module-editor .module-equipment-row .module-equipment-remove {
+                grid-column: 1 / -1;
+                justify-self: start;
+            }
+        }
+
     </style>
 </head>
