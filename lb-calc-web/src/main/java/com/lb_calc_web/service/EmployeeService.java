@@ -1,7 +1,6 @@
 package com.lb_calc_web.service;
 
 import com.lb_calc_web.dto.EmployeeDTO;
-import com.lb_calc_web.domain.attributes.Role;
 import com.lb_calc_web.dto.ProfileDTO;
 import com.lb_calc_web.entity.EmployeeEntity;
 import com.lb_calc_web.mapper.entity.EmployeeEntityMapper;
@@ -23,10 +22,9 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
-import org.springframework.data.jpa.domain.Specification;
-import java.util.List;
 import java.util.NoSuchElementException;
 
+import org.springframework.data.jpa.domain.Specification;
 @Service
 public class EmployeeService implements UserDetailsService {
 
