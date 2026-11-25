@@ -46,6 +46,23 @@ class ModuleNamingDescriptionTest {
     }
 
     @Test
+    void restoreText_shouldNormalizeEscapedLineBreaksInStoredDescription() {
+        LC source = TestDataFactory.validALS(109L).getLC();
+
+        LC restored = (LC) Module.restoreText(
+                source,
+                source.getName(),
+                "Модуль управления\\\\nГабариты модуля (В×Ш×Г): 1940×500×500 мм"
+        );
+
+        assertEquals(
+                "Модуль управления\\nГабариты модуля (В×Ш×Г): 1940×500×500 мм",
+                restored.getDescription()
+        );
+        assertTrue(!restored.getDescription().contains("\\\\n"));
+    }
+
+    @Test
     void lbcNameAndDescription_shouldContainStorageAndControlCharacteristics() {
         ALS als = ALSDtoMapper.toDomain(TestDataFactory.validLBCALSDTO(103L));
         LBC lbc = als.getLBC();
