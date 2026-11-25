@@ -154,8 +154,7 @@ final class ModuleTextFormatter {
                 .append("Габариты (В×Ш×Г): ").append(height).append("×")
                 .append(width).append("×").append(depth).append(" мм\n")
                 .append("Цвет корпуса: ").append(color(body)).append("\n")
-                .append("Цвет дверей: ").append(color(door)).append("\n")
-                .append(functionalDescription((ControlModule) controlModule))
+                .append("Цвет дверей: ").append(color(door))
                 .toString();
     }
 
