@@ -141,24 +141,11 @@ public class LBC extends StorageModule implements ControlModule {
     @Override
     public void recalculate() {
         recalculateCells();
-        setName("Комбинированный модуль на " + getCountCells() + " ячеек");
-        setDescription(String.format(
-                "Комбинированный модуль на %d ячеек тип-%s "
-                        + "(%.1fx%dx%d), ВхШхГ,мм: %dx%dx%d, "
-                        + "%s, %s/%s, толщина дверцы %d мм",
-                getCountCells(),
-                getTypeLb().getType(),
-                (double) getCellHeight(),
-                getCellWidth(),
-                getCellDepth(),
-                getHeight(),
-                getWidth(),
-                getDepth(),
-                getDirectionDoorOpening(),
-                getColorBody(),
-                getColorDoor(),
-                getDoorThickness()
-        ) + ";\n" + getControlDescription());
+        setName(ModuleTextFormatter.storageName(this, "Модуль хранения и управления")
+                + ModuleTextFormatter.controlNameDetails(this));
+        setDescription(ModuleTextFormatter.storageDescription(
+                this, "Модуль хранения и управления")
+                + "\n\n" + ModuleTextFormatter.controlDescription(this, this));
     }
 
     /** @return независимая копия LBC */
