@@ -1,64 +1,114 @@
 document.addEventListener("DOMContentLoaded", () => {
     const list = document.getElementById("equipment-selection-list");
     const template = document.getElementById("equipment-selection-row-template");
-    const addButton = document.getElementById("add-equipment");
+    if (!list || !template) return;
 
-    if (!list || !template || !addButton) {
-        return;
-    }
+    const functional = {
+        display: document.getElementById("module-display"),
+        payment: document.getElementById("module-payment"),
+        printer: document.getElementById("module-printer"),
+        access: [...document.querySelectorAll("[data-access-purpose]")]
+    };
 
-    const reindex = () => {
-        list.querySelectorAll(".equipment-selection-row").forEach((row, index) => {
-            row.querySelectorAll("[name]").forEach((field) => {
-                field.name = field.name.replace(
-                    /equipmentSelections\[\d+]/,
-                    "equipmentSelections[" + index + "]"
-                );
+    const keyOf = (type, purpose) => type + ":" + purpose;
+
+    const readSelections = () => {
+        const selections = new Map();
+        list.querySelectorAll(".equipment-selection-row").forEach(row => {
+            const select = row.querySelector("select");
+            const option = select?.selectedOptions[0];
+            if (!option || !option.value || !option.dataset.functionalType || !option.dataset.purpose) return;
+            const quantity = row.querySelector('input[type="number"]');
+            selections.set(keyOf(option.dataset.functionalType, option.dataset.purpose), {
+                id: option.value,
+                quantity: quantity?.value || "1"
             });
+        });
+        return selections;
+    };
 
+    const activePurposes = () => {
+        const purposes = new Map();
+        const add = (type, purpose) => {
+            if (purpose && purpose !== "NONE" && purpose !== "ABSENT") {
+                purposes.set(keyOf(type, purpose), {type, purpose});
+            }
+        };
+
+        add("DISPLAY", functional.display?.value);
+        functional.access.filter(input => input.checked)
+            .forEach(input => add("ACCESS", input.value));
+
+        const payment = functional.payment?.value;
+        if (payment === "CARDS" || payment === "CARDS_AND_CASH") add("PAYMENT", "CARDS");
+        if (payment === "CASH" || payment === "CARDS_AND_CASH") add("PAYMENT", "CASH");
+
+        add("PRINTER", functional.printer?.value);
+
+        // Системные позиции не управляются функциональными переключателями.
+        // Сохраняем их, если они уже присутствовали в конфигурации.
+        readSelections().forEach((selection, key) => {
+            const [type, purpose] = key.split(":");
+            if (type === "SYSTEM") purposes.set(key, {type, purpose});
+        });
+        return purposes;
+    };
+
+    const render = () => {
+        const previous = readSelections();
+        const purposes = activePurposes();
+        list.replaceChildren();
+
+        purposes.forEach(({type, purpose}, key) => {
+            const fragment = template.content.cloneNode(true);
+            const row = fragment.querySelector(".equipment-selection-row");
             const select = row.querySelector("select");
             const quantity = row.querySelector('input[type="number"]');
-            const label = row.querySelectorAll("label");
+            const label = row.querySelector("label");
 
-            if (select) {
-                select.id = "equipment-" + index;
+            const placeholder = select.options[0];
+            [...select.options].slice(1).forEach(option => {
+                if (option.dataset.functionalType !== type || option.dataset.purpose !== purpose) {
+                    option.remove();
+                }
+            });
+
+            const previousSelection = previous.get(key);
+            let selectedOption = previousSelection
+                ? [...select.options].find(option => option.value === previousSelection.id)
+                : null;
+            if (!selectedOption) {
+                selectedOption = [...select.options].find(option => option.dataset.default === "true");
             }
-            if (quantity) {
-                quantity.id = "quantity-" + index;
+            if (selectedOption) {
+                select.value = selectedOption.value;
+            } else {
+                select.value = "";
             }
-            if (label[0] && select) {
-                label[0].htmlFor = select.id;
+
+            const index = list.children.length;
+            select.name = "equipmentSelections[" + index + "].equipmentId";
+            select.id = "equipment-" + index;
+            quantity.name = "equipmentSelections[" + index + "].quantity";
+            quantity.id = "quantity-" + index;
+            quantity.value = previousSelection?.quantity || "1";
+            label.htmlFor = select.id;
+            label.textContent = type === "ACCESS"
+                ? "Оборудование для доступа: " + purpose
+                : "Оборудование: " + purpose;
+
+            if (select.options.length === 1) {
+                placeholder.textContent = "В каталоге нет моделей для этого назначения";
+                select.disabled = true;
             }
-            if (label[1] && quantity) {
-                label[1].htmlFor = quantity.id;
-            }
+            list.append(fragment);
         });
     };
 
-    addButton.addEventListener("click", () => {
-        const index = list.querySelectorAll(".equipment-selection-row").length;
-        const fragment = template.content.cloneNode(true);
+    [functional.display, functional.payment, functional.printer]
+        .filter(Boolean)
+        .forEach(control => control.addEventListener("change", render));
+    functional.access.forEach(control => control.addEventListener("change", render));
 
-        fragment.querySelectorAll("[name]").forEach((field) => {
-            field.name = field.name.replace(/__INDEX__/g, String(index));
-        });
-
-        list.append(fragment);
-        reindex();
-    });
-
-    list.addEventListener("click", (event) => {
-        const removeButton = event.target.closest(".remove-equipment");
-        if (!removeButton) {
-            return;
-        }
-
-        const row = removeButton.closest(".equipment-selection-row");
-        if (row) {
-            row.remove();
-            reindex();
-        }
-    });
-
-    reindex();
+    render();
 });
