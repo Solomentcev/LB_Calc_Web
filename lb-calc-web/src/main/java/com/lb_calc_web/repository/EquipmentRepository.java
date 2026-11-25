@@ -10,6 +10,9 @@ import org.springframework.data.repository.query.Param;
 public interface EquipmentRepository
         extends JpaRepository<EquipmentEntity, Long>, JpaSpecificationExecutor<EquipmentEntity> {
 
+    /** Возвращает модели, назначенные по умолчанию для своих функциональных назначений. */
+    java.util.List<EquipmentEntity> findAllByDefaultModelTrue();
+
     /**
      * Возвращает число ссылок на модель из комплектаций управляющих модулей.
      * Проверка выполняется до удаления, чтобы сообщить пользователю предметную причину запрета.
