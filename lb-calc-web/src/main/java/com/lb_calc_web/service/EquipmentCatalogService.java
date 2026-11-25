@@ -4,9 +4,13 @@ import com.lb_calc_web.domain.equipment.Equipment;
 import com.lb_calc_web.entity.EquipmentEntity;
 import com.lb_calc_web.mapper.entity.EquipmentEntityMapper;
 import com.lb_calc_web.repository.EquipmentRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -22,16 +26,72 @@ public class EquipmentCatalogService {
         this.equipmentRepository = Objects.requireNonNull(equipmentRepository);
     }
 
+    /**
+     * Возвращает страницу оборудования с независимыми фильтрами по столбцам.
+     * Все условия применяются в БД до сортировки и пагинации.
+     *
+     * @param filter параметры фильтрации
+     * @param pageable сортировка и параметры страницы
+     * @return отфильтрованная страница оборудования
+     */
     @Transactional(readOnly = true)
-    public org.springframework.data.domain.Page<Equipment> findPage(
-            String query, org.springframework.data.domain.Pageable pageable
+    public Page<Equipment> findPage(EquipmentCatalogFilter filter, Pageable pageable) {
+        Objects.requireNonNull(filter, "Фильтры каталога оборудования не должны быть null");
+        Objects.requireNonNull(pageable, "Параметры страницы не должны быть null");
+
+        List<Specification<EquipmentEntity>> specifications = new ArrayList<>();
+        addTextFilter(specifications, "name", filter.name());
+        addTextFilter(specifications, "purpose", filter.purpose());
+        addTextFilter(specifications, "description", filter.description());
+
+        if (filter.functionalType() != null) {
+            specifications.add((root, query, builder) ->
+                    builder.equal(root.get("functionalType"), filter.functionalType()));
+        }
+        if (filter.category() != null) {
+            specifications.add((root, query, builder) ->
+                    builder.equal(root.get("category"), filter.category()));
+        }
+
+        addRangeFilter(specifications, "width", filter.widthMin(), filter.widthMax());
+        addRangeFilter(specifications, "height", filter.heightMin(), filter.heightMax());
+        addRangeFilter(specifications, "depth", filter.depthMin(), filter.depthMax());
+
+        Specification<EquipmentEntity> specification = specifications.stream()
+                .reduce(Specification::and)
+                .orElse((root, query, builder) -> builder.conjunction());
+
+        return equipmentRepository.findAll(specification, pageable)
+                .map(EquipmentEntityMapper::toDomain);
+    }
+
+    private void addTextFilter(
+            List<Specification<EquipmentEntity>> specifications,
+            String attribute,
+            String value
     ) {
-        String term = query == null ? "" : query.trim();
-        var entities = term.isEmpty()
-                ? equipmentRepository.findAll(pageable)
-                : equipmentRepository.findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCaseOrPurposeContainingIgnoreCase(
-                        term, term, term, pageable);
-        return entities.map(EquipmentEntityMapper::toDomain);
+        if (value == null || value.isBlank()) {
+            return;
+        }
+        String pattern = "%" + value.trim().toLowerCase() + "%";
+        specifications.add((root, query, builder) ->
+                builder.like(builder.lower(root.get(attribute)), pattern));
+    }
+
+    private void addRangeFilter(
+            List<Specification<EquipmentEntity>> specifications,
+            String attribute,
+            Integer minimum,
+            Integer maximum
+    ) {
+        if (minimum != null) {
+            specifications.add((root, query, builder) ->
+                    builder.greaterThanOrEqualTo(root.get(attribute), minimum));
+        }
+        if (maximum != null) {
+            specifications.add((root, query, builder) ->
+                    builder.lessThanOrEqualTo(root.get(attribute), maximum));
+        }
     }
 
     @Transactional(readOnly = true)

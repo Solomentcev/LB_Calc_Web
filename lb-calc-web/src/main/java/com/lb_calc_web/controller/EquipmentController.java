@@ -10,13 +10,12 @@ import com.lb_calc_web.domain.equipment.PrinterPurpose;
 import com.lb_calc_web.domain.equipment.SystemPurpose;
 import com.lb_calc_web.dto.EquipmentDTO;
 import com.lb_calc_web.mapper.dto.EquipmentDtoMapper;
+import com.lb_calc_web.service.EquipmentCatalogFilter;
 import com.lb_calc_web.service.EquipmentCatalogService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
-import org.springframework.data.domain.Pageable;
-
-import java.util.Set;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -25,6 +24,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 @Controller
 @RequestMapping("/equipment")
@@ -41,20 +41,38 @@ public class EquipmentController {
     public String list(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
-            @RequestParam(defaultValue = "") String q,
             @RequestParam(defaultValue = "id") String sort,
             @RequestParam(defaultValue = "asc") String direction,
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) EquipmentFunctionalType functionalType,
+            @RequestParam(required = false) EquipmentCategory category,
+            @RequestParam(required = false) String purpose,
+            @RequestParam(required = false) Integer widthMin,
+            @RequestParam(required = false) Integer widthMax,
+            @RequestParam(required = false) Integer heightMin,
+            @RequestParam(required = false) Integer heightMax,
+            @RequestParam(required = false) Integer depthMin,
+            @RequestParam(required = false) Integer depthMax,
+            @RequestParam(required = false) String description,
             Model model
     ) {
         Pageable pageable = CatalogPageSupport.pageable(page, size, sort, direction, "id",
-                Set.of("id", "name", "functionalType", "category", "purpose", "width", "height", "depth"));
-        var result = equipmentCatalogService.findPage(q, pageable).map(EquipmentDtoMapper::toDto);
+                Set.of("id", "name", "functionalType", "category", "purpose",
+                        "width", "height", "depth", "description"));
+        EquipmentCatalogFilter filter = new EquipmentCatalogFilter(
+                name, functionalType, category, purpose,
+                widthMin, widthMax, heightMin, heightMax, depthMin, depthMax, description);
+        var result = equipmentCatalogService.findPage(filter, pageable)
+                .map(EquipmentDtoMapper::toDto);
         model.addAttribute("equipmentList", result.getContent());
-        CatalogPageSupport.addModelAttributes(model, result, q, pageable, "/equipment",
+        CatalogPageSupport.addModelAttributes(model, result, "", pageable, "/equipment",
                 CatalogPageSupport.sortOptions("id", "ID", "name", "Название",
                         "functionalType", "Функциональный тип", "category", "Категория",
                         "purpose", "Назначение", "width", "Ширина", "height", "Высота",
-                        "depth", "Глубина"));
+                        "depth", "Глубина", "description", "Описание"));
+        model.addAttribute("filters", filter);
+        model.addAttribute("functionalTypes", Arrays.asList(EquipmentFunctionalType.values()));
+        model.addAttribute("categories", Arrays.asList(EquipmentCategory.values()));
         return "equipment/equipments";
     }
 
