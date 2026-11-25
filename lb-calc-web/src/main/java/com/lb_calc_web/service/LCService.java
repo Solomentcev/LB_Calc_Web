@@ -22,12 +22,14 @@ import com.lb_calc_web.service.validation.size.SizeValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.env.Environment;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.List;
+import jakarta.persistence.criteria.SetJoin;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
@@ -96,16 +98,65 @@ public class LCService {
         );
     }
 
+    /**
+     * Возвращает страницу LC с фильтрами по информационным столбцам.
+     * Access проверяется через EXISTS, чтобы не размножать строки из-за ElementCollection.
+     */
     @Transactional(readOnly = true)
     public org.springframework.data.domain.Page<LC> findPage(
-            String query, org.springframework.data.domain.Pageable pageable
+            LCCatalogFilter filter, org.springframework.data.domain.Pageable pageable
     ) {
-        String term = query == null ? "" : query.trim();
-        var entities = term.isEmpty()
-                ? lcRepository.findAll(pageable)
-                : lcRepository.findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(
-                        term, term, pageable);
-        return entities.map(LCEntityMapper::toDomain);
+        java.util.List<Specification<LCEntity>> specifications = new java.util.ArrayList<>();
+        if (filter.id() != null) {
+            specifications.add((root, query, builder) -> builder.equal(root.get("id"), filter.id()));
+        }
+        if (filter.name() != null && !filter.name().isBlank()) {
+            String pattern = "%" + filter.name().trim().toLowerCase(java.util.Locale.ROOT) + "%";
+            specifications.add((root, query, builder) -> builder.like(builder.lower(root.get("name")), pattern));
+        }
+        addRange(specifications, "height", filter.heightMin(), filter.heightMax());
+        addRange(specifications, "width", filter.widthMin(), filter.widthMax());
+        addRange(specifications, "depth", filter.depthMin(), filter.depthMax());
+        addEqual(specifications, "displayPurpose", filter.displayPurpose());
+        addEqual(specifications, "paymentPurpose", filter.paymentPurpose());
+        addEqual(specifications, "printerPurpose", filter.printerPurpose());
+        addEqual(specifications, "colorBody", filter.colorBody());
+        addEqual(specifications, "colorDoor", filter.colorDoor());
+        if (filter.accessPurpose() != null) {
+            specifications.add((root, query, builder) -> {
+                var subquery = query.subquery(Integer.class);
+                var correlated = subquery.correlate(root);
+                SetJoin<LCEntity, AccessPurpose> access = correlated.joinSet("accessPurposes");
+                subquery.select(builder.literal(1)).where(builder.equal(access, filter.accessPurpose()));
+                return builder.exists(subquery);
+            });
+        }
+        Specification<LCEntity> specification = specifications.stream()
+                .reduce(Specification::and)
+                .orElse((root, query, builder) -> builder.conjunction());
+        return lcRepository.findAll(specification, pageable).map(LCEntityMapper::toDomain);
+    }
+
+    private void addRange(
+            java.util.List<Specification<LCEntity>> specifications,
+            String field, Integer minimum, Integer maximum
+    ) {
+        if (minimum != null) {
+            specifications.add((root, query, builder) ->
+                    builder.greaterThanOrEqualTo(root.<Integer>get(field), minimum));
+        }
+        if (maximum != null) {
+            specifications.add((root, query, builder) ->
+                    builder.lessThanOrEqualTo(root.<Integer>get(field), maximum));
+        }
+    }
+
+    private <V> void addEqual(
+            java.util.List<Specification<LCEntity>> specifications, String field, V value
+    ) {
+        if (value != null) {
+            specifications.add((root, query, builder) -> builder.equal(root.get(field), value));
+        }
     }
 
     @Transactional(readOnly = true)
