@@ -553,15 +553,15 @@
             object-fit: contain;
         }
         .module-editor .page-actions {
-            position: static;
-            top: auto;
+            position: sticky;
+            top: 6.5rem;
+            z-index: 29;
             margin-bottom: 1.25rem;
             padding: .75rem 0;
             border-bottom: 1px solid #e1e6eb;
             background: #f8f9fa;
         }
         .module-editor .page-actions .btn { border-radius: .4rem; }
-        .module-editor:has(> nav[aria-label="breadcrumb"]) .page-actions { top: auto; }
         .module-editor .breadcrumb {
             margin-bottom: 1.25rem;
             padding: .75rem 1rem;

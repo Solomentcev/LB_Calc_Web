@@ -22,15 +22,19 @@
         </ol>
     </nav>
 
-    <form th:action="${pageContext == 'PROJECT'
+    <form th:action="@{${pageContext == 'PROJECT'
                        ? '/projects/' + projectId + '/alss/' + alsId + '/save'
-                       : '/alss/save'}"
+                       : '/alss/save'}}"
           th:object="${als}" method="post" class="module-editor__form">
 
+        <input type="hidden" th:field="*{id}">
+        <input type="hidden" th:field="*{name}">
+        <input type="hidden" th:field="*{description}">
+
         <button type="submit" hidden formnovalidate data-form-refresh
-                th:formaction="${pageContext == 'PROJECT'
+                th:formaction="@{${pageContext == 'PROJECT'
                                 ? '/projects/' + projectId + '/alss/' + alsId + '/refresh'
-                                : '/alss/refresh'}"></button>
+                                : '/alss/refresh'}}"></button>
 
         <input type="hidden" th:field="*{functionalConfiguration.display}">
         <input type="hidden" th:field="*{functionalConfiguration.payment}">
@@ -51,18 +55,18 @@
 
         <div class="page-actions">
             <button type="submit" class="btn btn-primary btn-sm">Сохранить АКХ</button>
-            <a th:href="${pageContext == 'PROJECT'
+            <a th:href="@{${pageContext == 'PROJECT'
                          ? '/projects/' + projectId + '/alss/' + alsId
-                         : '/alss'}"
+                         : '/alss'}}"
                class="btn btn-secondary btn-sm"
                th:text="${pageContext == 'PROJECT' ? 'Назад к проекту' : 'К списку АКХ'}">
                 Назад
             </a>
             <button th:if="${als.LC != null}" type="submit"
                     class="btn btn-outline-warning btn-sm"
-                    th:formaction="${pageContext == 'PROJECT'
+                    th:formaction="@{${pageContext == 'PROJECT'
                                     ? '/projects/' + projectId + '/alss/' + alsId + '/replaceLBC'
-                                    : '/alss/' + als.id + '/replaceLBC'}">
+                                    : '/alss/' + als.id + '/replaceLBC'}}">
                 Заменить LC на LBC
             </button>
         </div>
@@ -197,9 +201,9 @@
                             <div class="col-md-3"><span class="text-muted small">Печать</span><strong th:text="${als.LC.functionalConfiguration.printer}"></strong></div>
                             <div class="col-md-9"><span class="text-muted small">Физическое оборудование</span><strong th:text="${als.LC.equipmentSelections}"></strong></div>
                         </div>
-                        <a th:href="${pageContext == 'PROJECT'
+                        <a th:href="@{${pageContext == 'PROJECT'
                                      ? '/projects/' + projectId + '/alss/' + alsId + '/lcs/' + als.LC.id
-                                     : '/alss/' + als.id + '/lcs/' + als.LC.id}"
+                                     : '/alss/' + als.id + '/lcs/' + als.LC.id}}"
                            class="btn btn-outline-primary btn-sm mt-3">Редактировать LC</a>
                     </div>
                 </section>
@@ -259,9 +263,9 @@
                             <div class="col-md-3"><span class="text-muted small">Печать</span><strong th:text="${als.LBC.functionalConfiguration.printer}"></strong></div>
                             <div class="col-md-6"><span class="text-muted small">Оборудование</span><strong th:text="${als.LBC.equipmentSelections}"></strong></div>
                         </div>
-                        <a th:href="${pageContext == 'PROJECT'
+                        <a th:href="@{${pageContext == 'PROJECT'
                                      ? '/projects/' + projectId + '/alss/' + alsId + '/lbcs/' + als.LBC.id
-                                     : '/alss/' + als.id + '/lbcs/' + als.LBC.id}"
+                                     : '/alss/' + als.id + '/lbcs/' + als.LBC.id}}"
                            class="btn btn-outline-primary btn-sm mt-3">Редактировать LBC</a>
                     </div>
                 </section>
@@ -311,14 +315,14 @@
                             </div>
 
                             <div class="d-flex flex-wrap align-items-center mt-3">
-                                <a th:href="${pageContext == 'PROJECT'
+                                <a th:href="@{${pageContext == 'PROJECT'
                                              ? '/projects/' + projectId + '/alss/' + alsId + '/lbs/' + lb.id
-                                             : '/alss/' + als.id + '/lbs/' + lb.id}"
+                                             : '/alss/' + als.id + '/lbs/' + lb.id}}"
                                    class="btn btn-outline-primary btn-sm">Редактировать LB</a>
                                 <button type="submit" class="btn btn-outline-danger btn-sm ml-2"
-                                        th:formaction="${pageContext == 'PROJECT'
+                                        th:formaction="@{${pageContext == 'PROJECT'
                                                         ? '/projects/' + projectId + '/alss/' + alsId + '/lbs/' + lb.id + '/delete'
-                                                        : '/alss/' + als.id + '/lbs/' + lb.id + '/delete'}">
+                                                        : '/alss/' + als.id + '/lbs/' + lb.id + '/delete'}}">
                                     Удалить LB
                                 </button>
                             </div>
@@ -329,9 +333,9 @@
                         </div>
 
                         <button type="submit" class="btn btn-primary btn-sm mt-3"
-                                th:formaction="${pageContext == 'PROJECT'
+                                th:formaction="@{${pageContext == 'PROJECT'
                                                 ? '/projects/' + projectId + '/alss/' + alsId + '/addLB'
-                                                : '/alss/' + als.id + '/addLB'}">
+                                                : '/alss/' + als.id + '/addLB'}}">
                             Добавить LB
                         </button>
                     </div>
