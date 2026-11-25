@@ -16,6 +16,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Base64;
 
+/** Генерирует графическое представление модуля хранения LB. */
 public class LBImageService {
 
     private static final Logger logger = LoggerFactory.getLogger(LBImageService.class);
@@ -396,6 +397,7 @@ public class LBImageService {
         return dto;
     }
 
+    /** Создаёт PNG-файл изображения модуля хранения LB. */
     public static File getFileLBImage(
             LBDTO lb
     ) {
@@ -432,6 +434,7 @@ public class LBImageService {
         return file;
     }
 
+    /** Возвращает PNG-изображение LB в виде массива байтов. */
     public static byte[] getBytesArrayLBImage(
             LBDTO lb
     ) {
@@ -462,6 +465,7 @@ public class LBImageService {
         return baos.toByteArray();
     }
 
+    /** Возвращает изображение LB в кодировке Base64. */
     public static String getStringLBImage(
             LBDTO lb
     ) {

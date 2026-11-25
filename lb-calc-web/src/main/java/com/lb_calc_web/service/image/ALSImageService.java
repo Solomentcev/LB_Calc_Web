@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.util.Base64;
 import java.util.List;
 
+/** Генерирует графические представления конфигураций ALS и вложенных модулей. */
 public class ALSImageService {
 
     private static final Logger logger = LoggerFactory.getLogger(ALSImageService.class);
@@ -195,6 +196,7 @@ public class ALSImageService {
         return dto;
     }
 
+    /** Создаёт PNG-файл изображения ALS в файловой системе. */
     public static File getFileLCImage(
             ALSDTO als
     ) {
@@ -231,6 +233,7 @@ public class ALSImageService {
         return file;
     }
 
+    /** Возвращает PNG-изображение ALS в виде массива байтов. */
     public static byte[] getBytesArrayALSImage(
             ALSDTO als
     ) {
@@ -261,6 +264,7 @@ public class ALSImageService {
         return baos.toByteArray();
     }
 
+    /** Возвращает изображение ALS в кодировке Base64. */
     public static String getStringALSImage(
             ALSDTO als
     ) {

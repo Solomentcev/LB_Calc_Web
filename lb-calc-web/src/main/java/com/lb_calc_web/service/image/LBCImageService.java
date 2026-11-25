@@ -16,6 +16,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Base64;
 
+/** Генерирует графическое представление комбинированного модуля LBC. */
 public final class LBCImageService {
 
     private static final Logger logger = LoggerFactory.getLogger(LBCImageService.class);
@@ -366,6 +367,7 @@ public final class LBCImageService {
         return dto;
     }
 
+    /** Создаёт PNG-файл изображения комбинированного модуля LBC. */
     public static File getFileLBCImage(LBCDTO lbc) {
         BufferedImage img =
                 (BufferedImage) createLBCImage(lbc);
@@ -391,6 +393,7 @@ public final class LBCImageService {
         return file;
     }
 
+    /** Возвращает PNG-изображение LBC в виде массива байтов. */
     public static byte[] getBytesArrayLBCImage(LBCDTO lbc) {
         BufferedImage img =
                 (BufferedImage) createLBCImage(lbc);
@@ -411,6 +414,7 @@ public final class LBCImageService {
         return baos.toByteArray();
     }
 
+    /** Возвращает изображение LBC в кодировке Base64. */
     public static String getStringLBCImage(LBCDTO lbc) {
         return Base64.getEncoder().encodeToString(
                 getBytesArrayLBCImage(lbc)

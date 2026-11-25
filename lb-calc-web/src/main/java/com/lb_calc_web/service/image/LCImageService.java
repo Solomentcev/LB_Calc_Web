@@ -15,6 +15,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Base64;
 
+/** Генерирует графическое представление управляющего модуля LC. */
 public class LCImageService {
 
     private static final Logger logger = LoggerFactory.getLogger(LCImageService.class);
@@ -207,6 +208,7 @@ public class LCImageService {
         return dto;
     }
 
+    /** Создаёт PNG-файл изображения управляющего модуля LC. */
     public static File getFileLCImage(
             LCDTO lc
     ) {
@@ -239,6 +241,7 @@ public class LCImageService {
         return file;
     }
 
+    /** Возвращает PNG-изображение LC в виде массива байтов. */
     public static byte[] getBytesArrayLCImage(
             LCDTO lc
     ) {
@@ -269,6 +272,7 @@ public class LCImageService {
         return baos.toByteArray();
     }
 
+    /** Возвращает изображение LC в кодировке Base64. */
     public static String getStringLCImage(
             LCDTO lc
     ) {

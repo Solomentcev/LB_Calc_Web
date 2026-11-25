@@ -27,6 +27,7 @@ public class ModuleSizeValidator {
         this.bounds = bounds;
     }
 
+    /** Возвращает минимальную высоту панели управляющего модуля LC. */
     public int getHeightLcPanelMin() {
         return bounds.getHeightLcPanelMin();
     }
