@@ -15,9 +15,6 @@ import java.util.List;
 
 public interface ALSRepository extends JpaRepository<ALSEntity, Long>, JpaSpecificationExecutor<ALSEntity> {
 
-    Page<ALSEntity> findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(
-            String name, String description, Pageable pageable);
-
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("""
             select entity
