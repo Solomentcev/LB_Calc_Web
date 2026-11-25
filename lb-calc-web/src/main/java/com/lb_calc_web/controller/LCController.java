@@ -132,6 +132,7 @@ public class LCController {
         model.addAttribute("lc", lc);
         model.addAttribute("equipmentList", equipmentCatalogService.findAll().stream()
                 .map(EquipmentDtoMapper::toDto).toList());
+        model.addAttribute("defaultEquipmentIds", equipmentCatalogService.findDefaultModelIds());
         model.addAttribute("displayPurposes", List.of(DisplayPurpose.values()));
         model.addAttribute("accessPurposes", List.of(AccessPurpose.values()));
         model.addAttribute("paymentPurposes", List.of(PaymentPurpose.values()));
