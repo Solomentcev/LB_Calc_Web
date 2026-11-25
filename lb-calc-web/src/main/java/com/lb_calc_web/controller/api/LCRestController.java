@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/** REST-контроллер операций с управляющими модулями LC. */
 @RestController
 @RequestMapping("/api/v1/lcs")
 @PreAuthorize("isAuthenticated()")
@@ -24,7 +25,6 @@ import java.util.List;
         name = "LC",
         description = "REST API модулей управления LC"
 )
-/** REST-контроллер операций с управляющими модулями LC. */
 @SecurityRequirement(name = "bearerAuth")
 public class LCRestController {
 

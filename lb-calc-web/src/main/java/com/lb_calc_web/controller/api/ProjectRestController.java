@@ -41,6 +41,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 
+/** REST-контроллер управления проектами и их конфигурациями ALS. */
 @RestController
 @RequestMapping("/api/v1/projects")
 @PreAuthorize("isAuthenticated()")
@@ -48,7 +49,6 @@ import java.util.Objects;
         name = "Projects",
         description = "API проектов"
 )
-/** REST-контроллер управления проектами и их конфигурациями ALS. */
 @SecurityRequirement(name = "bearerAuth")
 public class ProjectRestController {
 

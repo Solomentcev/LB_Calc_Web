@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/** REST-контроллер управления конфигурациями ALS и вложенными модулями. */
 @RestController
 @RequestMapping("/api/v1/alss")
 @PreAuthorize("isAuthenticated()")
@@ -27,7 +28,6 @@ import java.util.List;
         name = "ALS",
         description = "API автоматизированных систем хранения"
 )
-/** REST-контроллер управления конфигурациями ALS и вложенными модулями. */
 @SecurityRequirement(name = "bearerAuth")
 public class ALSRestController {
 

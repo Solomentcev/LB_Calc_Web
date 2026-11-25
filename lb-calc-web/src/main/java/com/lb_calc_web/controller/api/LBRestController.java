@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/** REST-контроллер операций с модулями хранения LB. */
 @RestController
 @RequestMapping("/api/v1/lbs")
 @PreAuthorize("isAuthenticated()")
@@ -23,7 +24,6 @@ import java.util.List;
         name = "LB",
         description = "REST API модулей хранения LB"
 )
-/** REST-контроллер операций с модулями хранения LB. */
 @SecurityRequirement(name = "bearerAuth")
 public class LBRestController {
 
