@@ -444,22 +444,99 @@ public class Project {
      */
     private void updateDescription() {
         StringBuilder builder = new StringBuilder();
+        int totalQuantity = 0;
+        int totalCells = 0;
+        int index = 1;
 
-        quantityALS.entrySet().stream()
+        var configurations = quantityALS.entrySet().stream()
                 .sorted(java.util.Comparator
                         .comparing((Map.Entry<ALS, Integer> entry) -> entry.getKey().getName())
                         .thenComparing(entry -> entry.getKey().getDescription()))
-                .forEach(entry -> {
-                    if (!builder.isEmpty()) {
-                        builder.append("\n");
-                    }
-                    builder.append(entry.getKey().getName())
-                            .append(" — ")
-                            .append(entry.getValue())
-                            .append(" шт.");
-                });
+                .toList();
+
+        for (Map.Entry<ALS, Integer> entry : configurations) {
+            ALS als = entry.getKey();
+            int quantity = entry.getValue();
+            int cellCount = als.getCountCells();
+
+            if (!builder.isEmpty()) {
+                builder.append("\n\n");
+            }
+
+            builder.append(index++)
+                    .append(". ")
+                    .append(als.getName())
+                    .append(" — ")
+                    .append(quantity)
+                    .append(" шт.\n   ")
+                    .append(formatCellCount(cellCount))
+                    .append(" в каждой АКХ.");
+
+            totalQuantity = Math.addExact(totalQuantity, quantity);
+            totalCells = Math.addExact(
+                    totalCells,
+                    Math.multiplyExact(cellCount, quantity)
+            );
+        }
+
+        if (!builder.isEmpty()) {
+            builder.append("\n\n");
+        }
+
+        builder.append("Всего: ")
+                .append(totalQuantity)
+                .append(' ')
+                .append(formatQuantityWord(totalQuantity, "АКХ", "АКХ", "АКХ"))
+                .append(", ")
+                .append(formatCellCount(totalCells))
+                .append('.');
 
         description = builder.toString();
+    }
+
+    /**
+     * Формирует количество ячеек с правильной формой существительного.
+     *
+     * @param count количество ячеек
+     * @return количество и слово «ячейка» в соответствующей форме
+     */
+    private String formatCellCount(int count) {
+        return count + " " + formatQuantityWord(
+                count,
+                "ячейка",
+                "ячейки",
+                "ячеек"
+        );
+    }
+
+    /**
+     * Выбирает форму существительного для числительного.
+     *
+     * @param count количество
+     * @param singular форма для одного предмета
+     * @param paucal форма для двух, трёх или четырёх предметов
+     * @param plural форма для остальных значений
+     * @return подходящая форма существительного
+     */
+    private String formatQuantityWord(
+            int count,
+            String singular,
+            String paucal,
+            String plural
+    ) {
+        int lastTwoDigits = Math.abs(count % 100);
+        int lastDigit = Math.abs(count % 10);
+
+        if (lastTwoDigits >= 11 && lastTwoDigits <= 14) {
+            return plural;
+        }
+        if (lastDigit == 1) {
+            return singular;
+        }
+        if (lastDigit >= 2 && lastDigit <= 4) {
+            return paucal;
+        }
+        return plural;
     }
 
     /**
