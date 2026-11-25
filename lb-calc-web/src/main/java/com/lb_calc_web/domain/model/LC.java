@@ -127,23 +127,8 @@ public class LC extends Module implements ControlModule {
     }
 
     private void updateNameAndDescription() {
-        Equipment display = getEquipment().keySet().stream()
-                .filter(item -> item.getCategory() == com.lb_calc_web.domain.equipment.EquipmentCategory.DISPLAY)
-                .findFirst()
-                .orElse(null);
-        String displayName = display != null ? display.getName() : "Без дисплея";
-
-        setName("Модуль управления " + displayName);
-        setDescription(
-                "Модуль управления " + displayName + ";\n"
-                        + "Размеры (ВхШхГ, мм): "
-                        + getHeight() + "x" + getWidth() + "x" + getDepth() + ";\n"
-                        + "Рамы (верх/низ, мм): "
-                        + getUpperFrame() + "/" + getBottomFrame() + ";\n"
-                        + getControlDescription() + ";\n"
-                        + "Цвет корпуса: " + getColorBody() + ";\n"
-                        + "Цвет дверей: " + getColorDoor()
-        );
+        setName(ModuleTextFormatter.controlName(this, this));
+        setDescription(ModuleTextFormatter.controlDescription(this, this));
     }
 
     /** @return независимая копия LC */
