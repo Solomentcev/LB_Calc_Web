@@ -6,6 +6,7 @@ import com.lb_calc_web.domain.equipment.EquipmentFunctionalType;
 /**
  * Набор независимых фильтров каталога физических моделей оборудования.
  *
+ * @param id идентификатор модели
  * @param name название модели, поиск по вхождению
  * @param functionalType функциональный тип
  * @param category физическая категория
@@ -19,6 +20,7 @@ import com.lb_calc_web.domain.equipment.EquipmentFunctionalType;
  * @param description описание, поиск по вхождению
  */
 public record EquipmentCatalogFilter(
+        Long id,
         String name,
         EquipmentFunctionalType functionalType,
         EquipmentCategory category,

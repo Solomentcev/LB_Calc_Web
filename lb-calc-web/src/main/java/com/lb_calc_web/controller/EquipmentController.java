@@ -43,6 +43,7 @@ public class EquipmentController {
             @RequestParam(defaultValue = "20") int size,
             @RequestParam(defaultValue = "id") String sort,
             @RequestParam(defaultValue = "asc") String direction,
+            @RequestParam(required = false) Long id,
             @RequestParam(required = false) String name,
             @RequestParam(required = false) EquipmentFunctionalType functionalType,
             @RequestParam(required = false) EquipmentCategory category,
@@ -60,16 +61,17 @@ public class EquipmentController {
                 Set.of("id", "name", "functionalType", "category", "purpose",
                         "width", "height", "depth", "description"));
         EquipmentCatalogFilter filter = new EquipmentCatalogFilter(
-                name, functionalType, category, purpose,
+                id, name, functionalType, category, purpose,
                 widthMin, widthMax, heightMin, heightMax, depthMin, depthMax, description);
         var result = equipmentCatalogService.findPage(filter, pageable)
                 .map(EquipmentDtoMapper::toDto);
         model.addAttribute("equipmentList", result.getContent());
-        CatalogPageSupport.addModelAttributes(model, result, "", pageable, "/equipment",
-                CatalogPageSupport.sortOptions("id", "ID", "name", "Название",
-                        "functionalType", "Функциональный тип", "category", "Категория",
-                        "purpose", "Назначение", "width", "Ширина", "height", "Высота",
-                        "depth", "Глубина", "description", "Описание"));
+        model.addAttribute("page", result);
+        model.addAttribute("sort", pageable.getSort().stream()
+                .findFirst().map(order -> order.getProperty()).orElse("id"));
+        model.addAttribute("direction", pageable.getSort().stream()
+                .findFirst().map(order -> order.getDirection().name().toLowerCase()).orElse("asc"));
+        model.addAttribute("size", pageable.getPageSize());
         model.addAttribute("filters", filter);
         model.addAttribute("functionalTypes", Arrays.asList(EquipmentFunctionalType.values()));
         model.addAttribute("categories", Arrays.asList(EquipmentCategory.values()));

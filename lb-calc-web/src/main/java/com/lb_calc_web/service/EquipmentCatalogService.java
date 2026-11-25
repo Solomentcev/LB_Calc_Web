@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 
@@ -40,6 +41,10 @@ public class EquipmentCatalogService {
         Objects.requireNonNull(pageable, "Параметры страницы не должны быть null");
 
         List<Specification<EquipmentEntity>> specifications = new ArrayList<>();
+        if (filter.id() != null) {
+            specifications.add((root, query, builder) ->
+                    builder.equal(root.get("id"), filter.id()));
+        }
         addTextFilter(specifications, "name", filter.name());
         addTextFilter(specifications, "purpose", filter.purpose());
         addTextFilter(specifications, "description", filter.description());
@@ -73,7 +78,7 @@ public class EquipmentCatalogService {
         if (value == null || value.isBlank()) {
             return;
         }
-        String pattern = "%" + value.trim().toLowerCase() + "%";
+        String pattern = "%" + value.trim().toLowerCase(Locale.ROOT) + "%";
         specifications.add((root, query, builder) ->
                 builder.like(builder.lower(root.get(attribute)), pattern));
     }
@@ -86,11 +91,11 @@ public class EquipmentCatalogService {
     ) {
         if (minimum != null) {
             specifications.add((root, query, builder) ->
-                    builder.greaterThanOrEqualTo(root.get(attribute), minimum));
+                    builder.greaterThanOrEqualTo(root.<Integer>get(attribute), minimum));
         }
         if (maximum != null) {
             specifications.add((root, query, builder) ->
-                    builder.lessThanOrEqualTo(root.get(attribute), maximum));
+                    builder.lessThanOrEqualTo(root.<Integer>get(attribute), maximum));
         }
     }
 
