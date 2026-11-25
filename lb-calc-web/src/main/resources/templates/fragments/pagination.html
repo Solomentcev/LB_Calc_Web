@@ -1,12 +1,9 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
-<div th:fragment="controls(baseUrl, q, sort, direction, size, sortOptions)">
+<div th:fragment="controls(baseUrl, sort, direction, size, sortOptions)">
     <form th:action="${baseUrl}" method="get" class="form-inline mb-3">
         <input type="hidden" name="page" value="0">
-        <label class="mr-2" for="catalog-query">Поиск</label>
-        <input id="catalog-query" class="form-control form-control-sm mr-2"
-               type="search" name="q" th:value="${q}" placeholder="Название или описание">
         <label class="mr-2" for="catalog-sort">Сортировка</label>
         <select id="catalog-sort" class="form-control form-control-sm mr-2" name="sort">
             <option th:each="option : ${sortOptions}" th:value="${option.key}"
@@ -25,21 +22,6 @@
         </select>
         <button class="btn btn-outline-primary btn-sm" type="submit">Применить</button>
     </form>
-
-    <nav th:if="${page.totalPages > 1}" aria-label="Навигация по страницам"
-         class="d-flex align-items-center justify-content-between mb-3">
-        <span class="text-muted small"
-              th:text="${'Записи ' + (page.number * page.size + 1) + '–' + (page.number * page.size + page.numberOfElements) + ' из ' + page.totalElements}">
-            Записи
-        </span>
-        <div>
-            <a th:if="${page.hasPrevious()}" class="btn btn-outline-secondary btn-sm"
-               th:href="@{${baseUrl}(page=${page.number - 1},size=${size},q=${q},sort=${sort},direction=${direction})}">Назад</a>
-            <span class="small mx-2" th:text="${(page.number + 1) + ' / ' + page.totalPages}">1 / 1</span>
-            <a th:if="${page.hasNext()}" class="btn btn-outline-secondary btn-sm"
-               th:href="@{${baseUrl}(page=${page.number + 1},size=${size},q=${q},sort=${sort},direction=${direction})}">Вперёд</a>
-        </div>
-    </nav>
 </div>
 </body>
 </html>
