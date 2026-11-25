@@ -106,6 +106,7 @@ public class LCController {
 
         try {
 
+            equipmentCatalogService.validateSelections(lc.getFunctionalConfiguration(), lc.getEquipmentSelections());
             LC savedLC = lcService.saveLC(lcService.restoreDomain(lc));
 
             return "redirect:/lcs/" + savedLC.getId();

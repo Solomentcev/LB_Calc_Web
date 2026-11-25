@@ -123,6 +123,7 @@ public class LBCController extends BaseCatalogController {
     ) {
         model.addAttribute("pageContext", "CATALOG");
         try {
+            equipmentCatalogService.validateSelections(lbc.getFunctionalConfiguration(), lbc.getEquipmentSelections());
             LBC saved = lbcService.saveLBC(lbcService.restoreDomain(lbc));
 
             return "redirect:/lbcs/" + saved.getId();

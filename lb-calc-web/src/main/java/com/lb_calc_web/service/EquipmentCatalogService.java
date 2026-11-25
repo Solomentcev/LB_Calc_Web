@@ -185,6 +185,44 @@ public class EquipmentCatalogService {
         return item.getFunctionalType().name() + ":" + item.getPurpose().toString();
     }
 
+    /**
+     * Проверяет, что отправленные формы содержат ровно по одной модели для каждого
+     * активного физического назначения и что каждая модель относится к своему назначению.
+     */
+    @Transactional(readOnly = true)
+    public void validateSelections(
+            FunctionalConfigurationDTO configuration, List<EquipmentSelectionDTO> selections) {
+        Objects.requireNonNull(configuration, "Функциональная конфигурация не должна быть null");
+        List<Equipment> catalog = findAll();
+        java.util.Map<Long, Equipment> byId = catalog.stream().filter(e -> e.getId() != null)
+                .collect(java.util.stream.Collectors.toMap(Equipment::getId, e -> e));
+        java.util.LinkedHashSet<String> required = new java.util.LinkedHashSet<>();
+        if (configuration.getDisplay() != null && configuration.getDisplay() != DisplayPurpose.NONE)
+            required.add("DISPLAY:" + configuration.getDisplay().name());
+        if (configuration.getAccess() != null) configuration.getAccess().stream()
+                .filter(p -> p != AccessPurpose.PIN).forEach(p -> required.add("ACCESS:" + p.name()));
+        PaymentPurpose payment = configuration.getPayment();
+        if (payment == PaymentPurpose.CARDS || payment == PaymentPurpose.CARDS_AND_CASH) required.add("PAYMENT:CARDS");
+        if (payment == PaymentPurpose.CASH || payment == PaymentPurpose.CARDS_AND_CASH) required.add("PAYMENT:CASH");
+        if (configuration.getPrinter() != null && configuration.getPrinter() != PrinterPurpose.ABSENT)
+            required.add("PRINTER:" + configuration.getPrinter().name());
+
+        java.util.Set<String> received = new java.util.HashSet<>();
+        if (selections != null) for (EquipmentSelectionDTO selection : selections) {
+            Equipment item = byId.get(selection.getEquipmentId());
+            if (item == null) throw new IllegalArgumentException("Выбрана несуществующая модель оборудования");
+            String key = key(item);
+            if (item.getFunctionalType() != EquipmentFunctionalType.SYSTEM && !required.contains(key))
+                throw new IllegalArgumentException("Модель оборудования не соответствует функциональной конфигурации: " + key);
+            if (!received.add(key))
+                throw new IllegalArgumentException("Для назначения выбрано несколько моделей: " + key);
+        }
+        for (String key : required) {
+            if (!received.contains(key))
+                throw new IllegalArgumentException("Не выбрана модель оборудования для назначения: " + key);
+        }
+    }
+
     @Transactional(readOnly = true)
     public Equipment findById(Long id) {
         return EquipmentEntityMapper.toDomain(findEntity(id));

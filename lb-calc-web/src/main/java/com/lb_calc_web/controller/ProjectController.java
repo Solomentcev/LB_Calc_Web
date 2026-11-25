@@ -396,6 +396,7 @@ public class ProjectController
             lc.setId(lcId);
             projectService.findLCInProject(projectId, alsId, lcId);
             ALS sourceALS = projectService.findALSInProject(projectId, alsId);
+            equipmentCatalogService.validateSelections(lc.getFunctionalConfiguration(), lc.getEquipmentSelections());
             LC replacement = alsService.restoreLC(lc, sourceALS);
             ALS savedALS = projectService.saveLCAtProject(
                     projectId,
@@ -517,6 +518,7 @@ public class ProjectController
             lbc.setId(lbcId);
             projectService.findLBCInProject(projectId, alsId, lbcId);
             ALS sourceALS = projectService.findALSInProject(projectId, alsId);
+            equipmentCatalogService.validateSelections(lbc.getFunctionalConfiguration(), lbc.getEquipmentSelections());
             LBC replacement = alsService.restoreLBC(lbc, sourceALS);
             ALS savedALS = projectService.saveLBCAtProject(
                     projectId,

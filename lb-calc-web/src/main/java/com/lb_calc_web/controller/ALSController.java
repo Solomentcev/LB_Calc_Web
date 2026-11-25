@@ -187,6 +187,7 @@ public class ALSController extends BaseCatalogController {
             }
             lc.setId(lcId);
 
+            equipmentCatalogService.validateSelections(lc.getFunctionalConfiguration(), lc.getEquipmentSelections());
             com.lb_calc_web.domain.model.LC replacement = alsService.restoreLC(lc, als);
             com.lb_calc_web.domain.model.ALS saved =
                     alsService.saveALS(alsService.replaceLC(als, replacement));
@@ -261,6 +262,7 @@ public class ALSController extends BaseCatalogController {
             com.lb_calc_web.domain.model.ALS als = alsService.findById(alsId);
             lbc.setId(lbcId);
 
+            equipmentCatalogService.validateSelections(lbc.getFunctionalConfiguration(), lbc.getEquipmentSelections());
             com.lb_calc_web.domain.model.LBC replacement = alsService.restoreLBC(lbc, als);
             com.lb_calc_web.domain.model.ALS saved =
                     alsService.saveALS(alsService.replaceLBC(als, replacement));
