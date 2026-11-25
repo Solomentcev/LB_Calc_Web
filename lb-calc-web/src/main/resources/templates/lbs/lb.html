@@ -50,7 +50,7 @@
                 <h1 class="module-editor__title" th:text="*{description}">Модуль хранения</h1>
                 <p class="module-editor__subtitle">Параметры ячеек, габариты корпуса и исполнение дверей.</p>
             </div>
-            <span class="module-editor__id" th:if="*{id != null and id > 0}" th:text="|ID: *{id}|">ID</span>
+            <span class="module-editor__id" th:if="*{id != null and id > 0}" th:text="${'ID: ' + lb.id}">ID</span>
         </header>
 
         <section class="module-section">
@@ -194,7 +194,7 @@
                 <p>Текущий чертёж модуля хранения.</p>
             </div>
             <div class="module-visual">
-                <img th:src="|data:image/png;base64,*{stringLBImage}|" alt="Чертёж модуля хранения">
+                <img th:src="'data:image/png;base64,' + ${lb.stringLBImage}" alt="Чертёж модуля хранения">
             </div>
         </section>
     </form>
