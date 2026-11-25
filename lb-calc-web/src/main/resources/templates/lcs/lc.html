@@ -4,42 +4,42 @@
 <body>
 <div th:replace="~{header :: header}"></div>
 <main class="container editor-page module-editor">
-    <nav th:if="\${pageContext != 'CATALOG'}" aria-label="breadcrumb">
+    <nav th:if="${pageContext != 'CATALOG'}" aria-label="breadcrumb">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item" th:if="\${pageContext == 'PROJECT'}">
-                <a th:href="@{/projects/{id}(id=\${projectId})}" th:text="\${project.name}">Проект</a>
+            <li class="breadcrumb-item" th:if="${pageContext == 'PROJECT'}">
+                <a th:href="@{/projects/{id}(id=${projectId})}" th:text="${project.name}">Проект</a>
             </li>
-            <li class="breadcrumb-item" th:if="\${pageContext == 'PROJECT'}">
-                <a th:href="@{/projects/{projectId}/alss/{alsId}(projectId=\${projectId},alsId=\${alsId})}"
-                   th:text="\${als.name}">АКХ</a>
+            <li class="breadcrumb-item" th:if="${pageContext == 'PROJECT'}">
+                <a th:href="@{/projects/{projectId}/alss/{alsId}(projectId=${projectId},alsId=${alsId})}"
+                   th:text="${als.name}">АКХ</a>
             </li>
-            <li class="breadcrumb-item" th:if="\${pageContext == 'ALS_CATALOG'}">
-                <a th:href="@{/alss/{id}(id=\${als.id})}" th:text="\${als.name}">АКХ</a>
+            <li class="breadcrumb-item" th:if="${pageContext == 'ALS_CATALOG'}">
+                <a th:href="@{/alss/{id}(id=${als.id})}" th:text="${als.name}">АКХ</a>
             </li>
             <li class="breadcrumb-item active" aria-current="page">Модуль управления</li>
         </ol>
     </nav>
 
-    <form th:action="\${pageContext == 'CATALOG'} ? @{/lcs/save} :
-                     (\${pageContext == 'ALS_CATALOG'} ?
-                     @{/alss/{alsId}/lcs/{lcId}/save(alsId=\${als.id},lcId=\${lc.id})} :
-                     @{/projects/{projectId}/alss/{alsId}/lcs/{lcId}/save(projectId=\${projectId},alsId=\${alsId},lcId=\${lcId})})"
-          th:object="\${lc}" method="post">
+    <form th:action="${pageContext == 'CATALOG'} ? @{/lcs/save} :
+                     (${pageContext == 'ALS_CATALOG'} ?
+                     @{/alss/{alsId}/lcs/{lcId}/save(alsId=${als.id},lcId=${lc.id})} :
+                     @{/projects/{projectId}/alss/{alsId}/lcs/{lcId}/save(projectId=${projectId},alsId=${alsId},lcId=${lcId})})"
+          th:object="${lc}" method="post">
         <input type="hidden" th:field="*{id}">
         <input type="hidden" th:field="*{name}">
 
         <div class="page-actions">
             <button type="submit" class="btn btn-primary">Сохранить модуль</button>
-            <a th:if="\${pageContext == 'CATALOG'}" th:href="@{/lcs}" class="btn btn-outline-secondary">К списку модулей</a>
-            <a th:if="\${pageContext == 'ALS_CATALOG'}" th:href="@{/alss/{id}(id=\${als.id})}"
+            <a th:if="${pageContext == 'CATALOG'}" th:href="@{/lcs}" class="btn btn-outline-secondary">К списку модулей</a>
+            <a th:if="${pageContext == 'ALS_CATALOG'}" th:href="@{/alss/{id}(id=${als.id})}"
                class="btn btn-outline-secondary">Вернуться к ALS</a>
-            <a th:if="\${pageContext == 'PROJECT'}"
-               th:href="@{/projects/{projectId}/alss/{alsId}(projectId=\${projectId},alsId=\${alsId})}"
+            <a th:if="${pageContext == 'PROJECT'}"
+               th:href="@{/projects/{projectId}/alss/{alsId}(projectId=${projectId},alsId=${alsId})}"
                class="btn btn-outline-secondary">Вернуться к ALS проекта</a>
         </div>
 
-        <div th:if="\${errors != null}" class="alert alert-danger" role="alert">
-            <div th:each="error : \${errors}" th:text="\${error}">Ошибка</div>
+        <div th:if="${errors != null}" class="alert alert-danger" role="alert">
+            <div th:each="error : ${errors}" th:text="${error}">Ошибка</div>
         </div>
 
         <header class="module-editor__heading">
@@ -61,7 +61,7 @@
                     <div class="col-sm-6 col-lg-3 module-field">
                         <label for="lc-height">Высота, мм</label>
                         <input id="lc-height" class="form-control" type="number" min="1"
-                               th:field="*{height}" th:readonly="\${pageContext == 'ALS_CATALOG'}">
+                               th:field="*{height}" th:readonly="${pageContext == 'ALS_CATALOG'}">
                     </div>
                     <div class="col-sm-6 col-lg-3 module-field">
                         <label for="lc-width">Ширина, мм</label>
@@ -70,35 +70,35 @@
                     <div class="col-sm-6 col-lg-3 module-field">
                         <label for="lc-depth">Глубина, мм</label>
                         <input id="lc-depth" class="form-control" type="number" min="1"
-                               th:field="*{depth}" th:readonly="\${pageContext == 'ALS_CATALOG'}">
+                               th:field="*{depth}" th:readonly="${pageContext == 'ALS_CATALOG'}">
                     </div>
                     <div class="col-sm-6 col-lg-3 module-field">
                         <label for="lc-upper-frame">Верхняя рама, мм</label>
                         <input id="lc-upper-frame" class="form-control" type="number" min="0"
-                               th:field="*{upperFrame}" th:readonly="\${pageContext == 'ALS_CATALOG'}">
+                               th:field="*{upperFrame}" th:readonly="${pageContext == 'ALS_CATALOG'}">
                     </div>
                     <div class="col-sm-6 col-lg-3 module-field">
                         <label for="lc-bottom-frame">Нижняя рама, мм</label>
                         <input id="lc-bottom-frame" class="form-control" type="number" min="0"
-                               th:field="*{bottomFrame}" th:readonly="\${pageContext == 'ALS_CATALOG'}">
+                               th:field="*{bottomFrame}" th:readonly="${pageContext == 'ALS_CATALOG'}">
                     </div>
-                    <div class="col-sm-6 col-lg-3 module-field" th:if="\${pageContext != 'ALS_CATALOG'}">
+                    <div class="col-sm-6 col-lg-3 module-field" th:if="${pageContext != 'ALS_CATALOG'}">
                         <label for="lc-body-color">Цвет корпуса</label>
                         <select id="lc-body-color" class="form-control" th:field="*{colorBody}">
-                            <option th:each="color : \${colorsList}" th:value="\${color}" th:text="\${color}"></option>
+                            <option th:each="color : ${colorsList}" th:value="${color}" th:text="${color}"></option>
                         </select>
                     </div>
-                    <div class="col-sm-6 col-lg-3 module-field" th:if="\${pageContext == 'ALS_CATALOG'}">
+                    <div class="col-sm-6 col-lg-3 module-field" th:if="${pageContext == 'ALS_CATALOG'}">
                         <label for="lc-body-color-readonly">Цвет корпуса</label>
                         <input id="lc-body-color-readonly" class="form-control" th:field="*{colorBody}" readonly>
                     </div>
-                    <div class="col-sm-6 col-lg-3 module-field" th:if="\${pageContext != 'ALS_CATALOG'}">
+                    <div class="col-sm-6 col-lg-3 module-field" th:if="${pageContext != 'ALS_CATALOG'}">
                         <label for="lc-door-color">Цвет дверей</label>
                         <select id="lc-door-color" class="form-control" th:field="*{colorDoor}">
-                            <option th:each="color : \${colorsList}" th:value="\${color}" th:text="\${color}"></option>
+                            <option th:each="color : ${colorsList}" th:value="${color}" th:text="${color}"></option>
                         </select>
                     </div>
-                    <div class="col-sm-6 col-lg-3 module-field" th:if="\${pageContext == 'ALS_CATALOG'}">
+                    <div class="col-sm-6 col-lg-3 module-field" th:if="${pageContext == 'ALS_CATALOG'}">
                         <label for="lc-door-color-readonly">Цвет дверей</label>
                         <input id="lc-door-color-readonly" class="form-control" th:field="*{colorDoor}" readonly>
                     </div>
