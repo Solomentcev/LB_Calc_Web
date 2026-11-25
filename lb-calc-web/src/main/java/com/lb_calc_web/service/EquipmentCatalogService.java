@@ -141,9 +141,18 @@ public class EquipmentCatalogService {
                         "Нельзя изменить модель оборудования, пока она установлена в LC/LBC. "
                                 + "Создайте новую модель и замените оборудование в конфигурациях");
             }
+            if (entity.getFunctionalType() != equipment.getFunctionalType()
+                    || !entity.getPurpose().equals(equipment.getPurpose().name())) {
+                entity.setDefaultModel(false);
+            }
         }
 
         EquipmentEntityMapper.updateEntity(equipment, entity);
+        if (!entity.isDefaultModel()
+                && !equipmentRepository.existsByFunctionalTypeAndPurposeAndDefaultModelTrue(
+                        entity.getFunctionalType(), entity.getPurpose())) {
+            entity.setDefaultModel(true);
+        }
         return EquipmentEntityMapper.toDomain(equipmentRepository.saveAndFlush(entity));
     }
 
