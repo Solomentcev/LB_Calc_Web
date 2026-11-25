@@ -1,6 +1,7 @@
 package com.lb_calc_web.service;
 
 import com.lb_calc_web.domain.equipment.Equipment;
+import com.lb_calc_web.domain.equipment.EquipmentFunctionalType;
 import com.lb_calc_web.entity.EquipmentEntity;
 import com.lb_calc_web.mapper.entity.EquipmentEntityMapper;
 import com.lb_calc_web.repository.EquipmentRepository;
@@ -128,6 +129,9 @@ public class EquipmentCatalogService {
         Objects.requireNonNull(equipment, "Модель оборудования не должна быть null");
 
         EquipmentEntity entity;
+        EquipmentFunctionalType previousType = null;
+        String previousPurpose = null;
+        boolean wasDefault = false;
         if (equipment.getId() == null) {
             entity = EquipmentEntity.create();
             entity.setDefaultModel(!equipmentRepository
@@ -141,13 +145,25 @@ public class EquipmentCatalogService {
                         "Нельзя изменить модель оборудования, пока она установлена в LC/LBC. "
                                 + "Создайте новую модель и замените оборудование в конфигурациях");
             }
-            if (entity.getFunctionalType() != equipment.getFunctionalType()
-                    || !entity.getPurpose().equals(equipment.getPurpose().name())) {
+            previousType = entity.getFunctionalType();
+            previousPurpose = entity.getPurpose();
+            wasDefault = entity.isDefaultModel();
+            if (previousType != equipment.getFunctionalType()
+                    || !previousPurpose.equals(equipment.getPurpose().name())) {
                 entity.setDefaultModel(false);
             }
         }
 
         EquipmentEntityMapper.updateEntity(equipment, entity);
+        if (wasDefault && (previousType != entity.getFunctionalType()
+                || !previousPurpose.equals(entity.getPurpose()))) {
+            equipmentRepository.findFirstByFunctionalTypeAndPurposeOrderByIdAsc(
+                    previousType, previousPurpose
+            ).ifPresent(replacement -> {
+                replacement.setDefaultModel(true);
+                equipmentRepository.saveAndFlush(replacement);
+            });
+        }
         if (!entity.isDefaultModel()
                 && !equipmentRepository.existsByFunctionalTypeAndPurposeAndDefaultModelTrue(
                         entity.getFunctionalType(), entity.getPurpose())) {
