@@ -6,6 +6,7 @@ import com.lb_calc_web.dto.EmployeeDTO;
 import com.lb_calc_web.dto.ProfileDTO;
 import com.lb_calc_web.domain.attributes.Role;
 import com.lb_calc_web.service.AuthService;
+import com.lb_calc_web.service.EmployeeCatalogFilter;
 import com.lb_calc_web.service.EmployeeService;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
