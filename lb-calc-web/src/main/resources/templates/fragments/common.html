@@ -435,7 +435,7 @@
 
         /* Единая компоновка редакторов модулей */
         .module-editor {
-            max-width: 1180px;
+            max-width: 1480px;
             padding-top: 1.25rem;
             padding-bottom: 3rem;
         }
@@ -553,14 +553,15 @@
             object-fit: contain;
         }
         .module-editor .page-actions {
-            top: 3.5rem;
+            position: static;
+            top: auto;
             margin-bottom: 1.25rem;
             padding: .75rem 0;
             border-bottom: 1px solid #e1e6eb;
             background: #f8f9fa;
         }
         .module-editor .page-actions .btn { border-radius: .4rem; }
-        .module-editor:has(> nav[aria-label="breadcrumb"]) .page-actions { top: 6.5rem; }
+        .module-editor:has(> nav[aria-label="breadcrumb"]) .page-actions { top: auto; }
         .module-editor .breadcrumb {
             margin-bottom: 1.25rem;
             padding: .75rem 1rem;
@@ -568,6 +569,58 @@
             border-radius: .45rem;
             background: #fff;
         }
+
+        /* Компактная компоновка: параметры слева, чертёж справа. */
+        .module-editor__layout {
+            display: grid;
+            grid-template-columns: minmax(0, 1.15fr) minmax(320px, .85fr);
+            gap: 1.25rem;
+            align-items: start;
+        }
+        .module-editor__parameters,
+        .module-editor__preview { min-width: 0; }
+        .module-editor__preview {
+            position: sticky;
+            top: .75rem;
+        }
+        .module-editor__preview .module-section { margin-bottom: 0; }
+        .module-editor__preview .module-visual {
+            min-height: 260px;
+            padding: .75rem;
+        }
+        .module-editor__preview .module-visual img {
+            max-height: calc(100vh - 260px);
+        }
+        .module-editor .module-section { margin-bottom: .85rem; }
+        .module-editor .module-section__header { padding: .75rem 1rem .65rem; }
+        .module-editor .module-section__body { padding: .85rem 1rem .35rem; }
+        .module-editor .module-field { margin-bottom: .7rem; }
+        .module-editor .module-field .form-control { min-height: 2.25rem; }
+        .module-editor__heading { margin-bottom: 1rem; }
+        .module-editor .page-actions { margin-bottom: .85rem; }
+        .module-editor .module-access-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: .45rem 1rem;
+            padding: .45rem .65rem;
+            border: 1px solid #d7dde3;
+            border-radius: .4rem;
+            background: #fff;
+        }
+        .module-editor .module-access-options label {
+            display: inline-flex;
+            align-items: center;
+            gap: .4rem;
+            margin: 0;
+            font-weight: 400;
+        }
+        .module-editor .module-access-options input { margin: 0; }
+        @media (max-width: 991.98px) {
+            .module-editor__layout { grid-template-columns: minmax(0, 1fr); }
+            .module-editor__preview { position: static; }
+            .module-editor__preview .module-visual img { max-height: 480px; }
+        }
+
         @media (max-width: 767.98px) {
             .module-editor__heading { flex-direction: column; }
             .module-editor__title { font-size: 1.4rem; }
