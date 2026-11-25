@@ -84,7 +84,7 @@ public class AuthService {
             LoginRequest loginRequest
     ) throws AuthException {
 
-EmployeePrincipal principal;
+        EmployeePrincipal principal;
 
         try {
             principal =
