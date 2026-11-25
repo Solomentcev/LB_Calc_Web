@@ -136,7 +136,7 @@ public class EquipmentCatalogService {
             entity = EquipmentEntity.create();
             entity.setDefaultModel(!equipmentRepository
                     .existsByFunctionalTypeAndPurposeAndDefaultModelTrue(
-                            equipment.getFunctionalType(), equipment.getPurpose().name()));
+                            equipment.getFunctionalType(), equipment.getPurpose().toString()));
         } else {
             entity = findEntity(equipment.getId());
             if (equipmentRepository.countModuleReferencesByEquipmentId(equipment.getId()) > 0
@@ -149,7 +149,7 @@ public class EquipmentCatalogService {
             previousPurpose = entity.getPurpose();
             wasDefault = entity.isDefaultModel();
             if (previousType != equipment.getFunctionalType()
-                    || !previousPurpose.equals(equipment.getPurpose().name())) {
+                    || !previousPurpose.equals(equipment.getPurpose().toString())) {
                 entity.setDefaultModel(false);
             }
         }
