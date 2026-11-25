@@ -4,6 +4,7 @@ import notification.event.UserEvent;
 import org.springframework.stereotype.Service;
 
 @Service
+/** Сервис обработки событий пользователей и координации отправки уведомлений. */
 public class NotificationService {
     private final EmailNotificationService emailNotificationService;
 

@@ -14,6 +14,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
+/** Репозиторий модулей хранения LB с запросами поиска кандидатов на совпадение конфигурации. */
 public interface LBRepository extends JpaRepository<LBEntity, Long>, JpaSpecificationExecutor<LBEntity> {
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)

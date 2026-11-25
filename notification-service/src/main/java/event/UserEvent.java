@@ -1,4 +1,5 @@
 package notification.event;
+/** Сообщение о событии пользователя, передаваемое через Kafka. */
 public class UserEvent {
 
     private UserEventType type;

@@ -9,6 +9,7 @@ import org.springframework.kafka.config.TopicBuilder;
 import java.util.Map;
 
 @Configuration
+/** Конфигурация Kafka-топиков, используемых сервисом уведомлений. */
 public class KafkaTopicConfig {
 
     private final String userEventsTopic;

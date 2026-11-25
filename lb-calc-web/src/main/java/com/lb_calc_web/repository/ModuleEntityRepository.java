@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
+/** Базовый репозиторий общих сущностей модулей оборудования. */
 public interface ModuleEntityRepository
         extends JpaRepository<ModuleEntity, Long> {
 

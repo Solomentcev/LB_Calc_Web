@@ -3,6 +3,7 @@ package notification.service;
 import org.springframework.stereotype.Service;
 
 @Service
+/** Сервис отправки электронных уведомлений по событиям пользователей. */
 public class EmailNotificationService {
     public void send(
             String email,

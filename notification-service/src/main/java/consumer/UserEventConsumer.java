@@ -6,6 +6,7 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
 @Component
+/** Kafka-потребитель событий жизненного цикла учётных записей пользователей. */
 public class UserEventConsumer {
 
     private final NotificationService notificationService;

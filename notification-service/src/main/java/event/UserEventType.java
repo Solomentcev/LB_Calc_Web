@@ -1,5 +1,6 @@
 package notification.event;
 
+/** Типы событий пользователя, обрабатываемые сервисом уведомлений. */
 public enum UserEventType {
 
     USER_REGISTERED,

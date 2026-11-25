@@ -14,6 +14,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
+/** Репозиторий комбинированных модулей LBC с запросами поиска кандидатов на совпадение конфигурации. */
 public interface LBCRepository extends JpaRepository<LBCEntity, Long>, JpaSpecificationExecutor<LBCEntity> {
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)

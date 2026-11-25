@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
+/** Репозиторий связей между проектами и конфигурациями ALS. */
 public interface ProjectALSRepository extends JpaRepository<ProjectALSEntity, Long> {
 
     /** Проверяет, используется ли конфигурация ALS хотя бы в одном проекте. */

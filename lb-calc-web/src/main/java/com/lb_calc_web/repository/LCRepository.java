@@ -13,6 +13,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
+/** Репозиторий управляющих модулей LC с запросами поиска кандидатов на совпадение конфигурации. */
 public interface LCRepository extends JpaRepository<LCEntity, Long>, JpaSpecificationExecutor<LCEntity> {
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)

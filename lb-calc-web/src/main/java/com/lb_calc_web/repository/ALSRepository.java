@@ -13,6 +13,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
+/** Репозиторий доступа к сохранённым конфигурациям автоматизированных камер хранения. */
 public interface ALSRepository extends JpaRepository<ALSEntity, Long>, JpaSpecificationExecutor<ALSEntity> {
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
