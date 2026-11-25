@@ -130,6 +130,9 @@ public class EquipmentCatalogService {
         EquipmentEntity entity;
         if (equipment.getId() == null) {
             entity = EquipmentEntity.create();
+            entity.setDefaultModel(!equipmentRepository
+                    .existsByFunctionalTypeAndPurposeAndDefaultModelTrue(
+                            equipment.getFunctionalType(), equipment.getPurpose().name()));
         } else {
             entity = findEntity(equipment.getId());
             if (equipmentRepository.countModuleReferencesByEquipmentId(equipment.getId()) > 0
@@ -151,8 +154,20 @@ public class EquipmentCatalogService {
             throw new IllegalStateException(
                     "Нельзя удалить модель оборудования: она установлена в одном или нескольких модулях");
         }
+        boolean wasDefault = entity.isDefaultModel();
+        var functionalType = entity.getFunctionalType();
+        String purpose = entity.getPurpose();
         equipmentRepository.delete(entity);
         equipmentRepository.flush();
+
+        if (wasDefault) {
+            equipmentRepository.findFirstByFunctionalTypeAndPurposeOrderByIdAsc(
+                    functionalType, purpose
+            ).ifPresent(replacement -> {
+                replacement.setDefaultModel(true);
+                equipmentRepository.saveAndFlush(replacement);
+            });
+        }
     }
 
     private boolean hasChanged(Equipment equipment, EquipmentEntity entity) {
