@@ -70,6 +70,7 @@ public class JwtService {
         );
     }
 
+    /** Проверяет подпись и срок действия refresh token и возвращает его claims. */
     public Claims getRefreshClaims(String token) {
 
         return parseClaimsStrict(
@@ -152,6 +153,7 @@ public class JwtService {
         );
     }
 
+    /** Проверяет, что claims относятся к refresh token. */
     public boolean isRefresh(Claims claims) {
 
         return "refresh".equals(

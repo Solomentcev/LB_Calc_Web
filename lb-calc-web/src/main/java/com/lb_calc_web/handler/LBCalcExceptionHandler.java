@@ -13,6 +13,7 @@ public class LBCalcExceptionHandler {
             LBCalcExceptionHandler.class);
 
     @ExceptionHandler
+    /** Регистрирует непредвиденную ошибку MVC-запроса и отображает страницу ошибки. */
     public String handleException(Throwable e, Model model) {
         LOGGER.error("Непредвиденная ошибка при обработке запроса", e);
         model.addAttribute(

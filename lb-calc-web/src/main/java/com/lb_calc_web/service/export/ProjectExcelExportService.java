@@ -27,6 +27,7 @@ public class ProjectExcelExportService {
     private static final DateTimeFormatter DF =
             DateTimeFormatter.ofPattern("dd.MM.yyyy");
 
+    /** Формирует Excel-файл с проектом, составом ALS и параметрами модулей. */
     public ByteArrayInputStream exportToExcel(
             ProjectDTO project
     ) {

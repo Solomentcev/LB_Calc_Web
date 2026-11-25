@@ -1,9 +1,3 @@
-/**
- * Единая точка доступа к геометрической валидации доменных моделей.
- *
- * <p>Фасад не зависит от DTO и делегирует проверки специализированным
- * валидаторам модулей, ALS и проекта.</p>
- */
 package com.lb_calc_web.service.validation.size;
 import com.lb_calc_web.domain.model.ALS;
 import com.lb_calc_web.domain.model.LB;
@@ -14,6 +8,13 @@ import com.lb_calc_web.domain.model.StorageModule;
 import com.lb_calc_web.service.validation.ValidationResult;
 import org.springframework.stereotype.Component;
 import java.util.List;
+
+/**
+ * Единая точка доступа к геометрической валидации доменных моделей.
+ *
+ * <p>Фасад не зависит от DTO и делегирует проверки специализированным
+ * валидаторам модулей, ALS и проекта.</p>
+ */
 @Component
 public class SizeValidator {
 
@@ -36,6 +37,7 @@ public class SizeValidator {
         return moduleValidator.getHeightLcPanelMin();
     }
 
+    /** Проверяет попадание числового параметра в допустимый диапазон. */
     public void validateRange(
             ValidationResult result,
             String fieldName,
@@ -57,10 +59,12 @@ public class SizeValidator {
         moduleValidator.validateLBCellCount(result, module);
     }
 
+    /** Выполняет геометрическую проверку модуля хранения LB. */
     public ValidationResult validateLB(LB lb) {
         return moduleValidator.validateLB(lb);
     }
 
+    /** Выполняет геометрическую проверку управляющего модуля LC. */
     public ValidationResult validateLC(LC lc) {
         return moduleValidator.validateLC(lc);
     }
@@ -74,6 +78,7 @@ public class SizeValidator {
         return alsValidator.validateALS(als);
     }
 
+    /** Выполняет расширенную проверку ALS и её вложенных модулей. */
     public List<ValidationResult> deepValidateALS(ALS als) {
         return alsValidator.deepValidateALS(als);
     }
