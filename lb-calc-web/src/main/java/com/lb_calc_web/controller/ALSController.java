@@ -257,6 +257,10 @@ public class ALSController extends BaseCatalogController {
             throw new NoSuchElementException("LC с id " + lcId + " не найден в ALS " + alsId);
         lc.setId(lcId);
         try {
+            // Подбираем модели оборудования до восстановления домена, чтобы описание
+            // отражало фактическую комплектацию уже при обновлении формы.
+            lc.setEquipmentSelections(equipmentCatalogService.prepareSelections(
+                    lc.getFunctionalConfiguration(), lc.getEquipmentSelections()));
             lc = LCDtoMapper.toDto(alsService.restoreLC(lc, source));
         } catch (ValidationSizeException exception) {
             model.addAttribute("errors", ValidationErrorFormatter.format(exception.getValidationResult()));
