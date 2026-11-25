@@ -159,6 +159,7 @@ public class ProjectController
                                  Model model) {
         project.setId(id);
         populateServerMetadata(project, id);
+        populateProjectComposition(project, id);
         try {
             com.lb_calc_web.domain.model.Project domain =
                     ProjectDtoMapper.toDomain(project, alsService::restoreDomain);
@@ -186,6 +187,7 @@ public class ProjectController
              */
             project.setId(id);
             populateServerMetadata(project, id);
+            populateProjectComposition(project, id);
 
             com.lb_calc_web.domain.model.Project domain =
                     com.lb_calc_web.mapper.dto.ProjectDtoMapper.toDomain(
@@ -232,6 +234,25 @@ public class ProjectController
         dto.setCreatedAt(metadataDto.getCreatedAt());
         dto.setUpdatedBy(metadataDto.getUpdatedBy());
         dto.setUpdatedAt(metadataDto.getUpdatedAt());
+    }
+
+    /**
+     * Восстанавливает состав проекта, который не редактируется на странице проекта.
+     *
+     * <p>Для существующего проекта состав берётся из сохранённой доменной модели.
+     * Для нового проекта создаётся начальная конфигурация АКХ.</p>
+     *
+     * @param dto DTO проекта из формы
+     * @param projectId идентификатор проекта
+     */
+    private void populateProjectComposition(ProjectDTO dto, Long projectId) {
+        if (projectId != null && projectId > 0) {
+            ProjectDTO persisted = ProjectDtoMapper.toDto(projectService.findById(projectId));
+            dto.setAlsList(persisted.getAlsList());
+        } else if (dto.getAlsList() == null || dto.getAlsList().isEmpty()) {
+            dto.setAlsList(List.of(ALSDtoMapper.toDto(alsService.createALS())));
+        }
+        ProjectDtoMapper.recalculateQuantityALS(dto);
     }
 
     /**
