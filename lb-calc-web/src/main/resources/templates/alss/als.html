@@ -56,7 +56,7 @@
         <div class="page-actions">
             <button type="submit" class="btn btn-primary btn-sm">Сохранить АКХ</button>
             <a th:href="@{${pageContext == 'PROJECT'
-                         ? '/projects/' + projectId + '/alss/' + alsId
+                         ? '/projects/' + projectId
                          : '/alss'}}"
                class="btn btn-secondary btn-sm"
                th:text="${pageContext == 'PROJECT' ? 'Назад к проекту' : 'К списку АКХ'}">
@@ -368,6 +368,17 @@
                     <div class="module-section__header"><h2>Чертёж LBC</h2></div>
                     <div class="module-visual">
                         <img th:src="|data:image/png;base64,${als.LBC.stringLBCImage}|" alt="Чертёж LBC">
+                    </div>
+                </section>
+                <section class="module-section"
+                         th:each="lb : ${als.lbList}"
+                         th:if="${lb.stringLBImage != null}">
+                    <div class="module-section__header">
+                        <h2 th:text="${'Чертёж ' + lb.name}">Чертёж LB</h2>
+                    </div>
+                    <div class="module-visual">
+                        <img th:src="|data:image/png;base64,${lb.stringLBImage}|"
+                             alt="Чертёж модуля хранения">
                     </div>
                 </section>
             </aside>
