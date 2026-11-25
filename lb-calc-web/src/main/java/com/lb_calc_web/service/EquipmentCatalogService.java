@@ -2,6 +2,14 @@ package com.lb_calc_web.service;
 
 import com.lb_calc_web.domain.equipment.Equipment;
 import com.lb_calc_web.domain.equipment.EquipmentFunctionalType;
+import com.lb_calc_web.domain.equipment.AccessPurpose;
+import com.lb_calc_web.domain.equipment.DisplayPurpose;
+import com.lb_calc_web.domain.equipment.PaymentPurpose;
+import com.lb_calc_web.domain.equipment.PrinterPurpose;
+import com.lb_calc_web.dto.EquipmentDTO;
+import com.lb_calc_web.dto.EquipmentSelectionDTO;
+import com.lb_calc_web.dto.FunctionalConfigurationDTO;
+import com.lb_calc_web.mapper.dto.EquipmentDtoMapper;
 import com.lb_calc_web.entity.EquipmentEntity;
 import com.lb_calc_web.mapper.entity.EquipmentEntityMapper;
 import com.lb_calc_web.repository.EquipmentRepository;
@@ -117,6 +125,64 @@ public class EquipmentCatalogService {
         return equipmentRepository.findAllByDefaultModelTrue().stream()
                 .map(EquipmentEntity::getId)
                 .collect(java.util.stream.Collectors.toUnmodifiableSet());
+    }
+
+    /** Формирует строки комплектации для формы без сохранения модуля. */
+    @Transactional(readOnly = true)
+    public List<EquipmentSelectionDTO> prepareSelections(
+            FunctionalConfigurationDTO configuration, List<EquipmentSelectionDTO> currentSelections) {
+        Objects.requireNonNull(configuration, "Функциональная конфигурация не должна быть null");
+        List<Equipment> catalog = findAll();
+        java.util.Map<Long, Equipment> byId = catalog.stream().filter(e -> e.getId() != null)
+                .collect(java.util.stream.Collectors.toMap(Equipment::getId, e -> e));
+        java.util.Map<String, EquipmentSelectionDTO> previous = new java.util.LinkedHashMap<>();
+        if (currentSelections != null) for (EquipmentSelectionDTO selection : currentSelections) {
+            Equipment item = byId.get(selection.getEquipmentId());
+            if (item != null) previous.put(key(item), selection);
+        }
+        if (configuration.getAccess() != null && configuration.getAccess().contains(AccessPurpose.PIN)
+                && configuration.getDisplay() == DisplayPurpose.NONE)
+            configuration.setDisplay(DisplayPurpose.INCH_10);
+
+        java.util.LinkedHashSet<String> required = new java.util.LinkedHashSet<>();
+        if (configuration.getDisplay() != null && configuration.getDisplay() != DisplayPurpose.NONE)
+            required.add("DISPLAY:" + configuration.getDisplay().name());
+        if (configuration.getAccess() != null) configuration.getAccess().stream()
+                .filter(p -> p != AccessPurpose.PIN).sorted()
+                .forEach(p -> required.add("ACCESS:" + p.name()));
+        PaymentPurpose payment = configuration.getPayment();
+        if (payment == PaymentPurpose.CARDS || payment == PaymentPurpose.CARDS_AND_CASH) required.add("PAYMENT:CARDS");
+        if (payment == PaymentPurpose.CASH || payment == PaymentPurpose.CARDS_AND_CASH) required.add("PAYMENT:CASH");
+        if (configuration.getPrinter() != null && configuration.getPrinter() != PrinterPurpose.ABSENT)
+            required.add("PRINTER:" + configuration.getPrinter().name());
+        previous.forEach((key, selection) -> {
+            Equipment item = byId.get(selection.getEquipmentId());
+            if (item != null && item.getFunctionalType() == EquipmentFunctionalType.SYSTEM) required.add(key);
+        });
+
+        java.util.Set<Long> defaults = findDefaultModelIds();
+        List<EquipmentSelectionDTO> result = new ArrayList<>();
+        for (String key : required) {
+            String[] parts = key.split(":", 2);
+            EquipmentFunctionalType type = EquipmentFunctionalType.valueOf(parts[0]);
+            List<EquipmentDTO> models = catalog.stream().filter(e -> e.getFunctionalType() == type)
+                    .filter(e -> e.getPurpose().toString().equals(parts[1]))
+                    .map(EquipmentDtoMapper::toDto).toList();
+            EquipmentSelectionDTO old = previous.get(key);
+            Long id = old != null && models.stream().anyMatch(e -> Objects.equals(e.getId(), old.getEquipmentId()))
+                    ? old.getEquipmentId()
+                    : models.stream().filter(e -> defaults.contains(e.getId()))
+                            .map(EquipmentDTO::getId).findFirst().orElse(null);
+            if (id == null && models.size() == 1) id = models.get(0).getId();
+            EquipmentSelectionDTO row = new EquipmentSelectionDTO(id, old == null ? 1 : old.getQuantity());
+            row.setAvailableModels(models);
+            result.add(row);
+        }
+        return result;
+    }
+
+    private String key(Equipment item) {
+        return item.getFunctionalType().name() + ":" + item.getPurpose().toString();
     }
 
     @Transactional(readOnly = true)

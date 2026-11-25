@@ -200,8 +200,24 @@ public class ALSController extends BaseCatalogController {
         }
     }
 
+    /** Обновляет комплектацию LC внутри ALS без сохранения ALS. */
+    @PostMapping("/{alsId}/lcs/{lcId}/refresh")
+    public String refreshLC(@PathVariable Long alsId, @PathVariable Long lcId,
+                            @ModelAttribute("lc") LCDTO lc, Model model) {
+        model.addAttribute("pageContext", "ALS_CATALOG");
+        com.lb_calc_web.domain.model.ALS source = alsService.findById(alsId);
+        if (source.getLC() == null || !Objects.equals(source.getLC().getId(), lcId))
+            throw new NoSuchElementException("LC с id " + lcId + " не найден в ALS " + alsId);
+        lc.setId(lcId);
+        model.addAttribute("als", ALSImageService.addImages(ALSDtoMapper.toDto(source)));
+        prepareLCForm(model, LCImageService.addImage(lc));
+        return "lcs/lc";
+    }
+
     private void prepareLCForm(Model model, LCDTO lc) {
         model.addAttribute("lc", lc);
+        lc.setEquipmentSelections(equipmentCatalogService.prepareSelections(
+                lc.getFunctionalConfiguration(), lc.getEquipmentSelections()));
         model.addAttribute("equipmentList", equipmentCatalogService.findAll().stream()
                 .map(EquipmentDtoMapper::toDto).toList());
         model.addAttribute("defaultEquipmentIds", equipmentCatalogService.findDefaultModelIds());
@@ -257,8 +273,23 @@ public class ALSController extends BaseCatalogController {
         }
     }
 
+    /** Обновляет комплектацию LBC внутри ALS без сохранения ALS. */
+    @PostMapping("/{alsId}/lbcs/{lbcId}/refresh")
+    public String refreshLBC(@PathVariable Long alsId, @PathVariable Long lbcId,
+                             @ModelAttribute("lbc") LBCDTO lbc, Model model) {
+        model.addAttribute("pageContext", "ALS_CATALOG");
+        com.lb_calc_web.domain.model.ALS source = alsService.findById(alsId);
+        alsService.findLBCInALS(source, lbcId);
+        lbc.setId(lbcId);
+        model.addAttribute("als", ALSImageService.addImages(ALSDtoMapper.toDto(source)));
+        prepareLBCForm(model, LBCImageService.addImage(lbc));
+        return "lbcs/lbc";
+    }
+
     private void prepareLBCForm(Model model, LBCDTO lbc) {
         model.addAttribute("lbc", lbc);
+        lbc.setEquipmentSelections(equipmentCatalogService.prepareSelections(
+                lbc.getFunctionalConfiguration(), lbc.getEquipmentSelections()));
         model.addAttribute("equipmentList", equipmentCatalogService.findAll().stream()
                 .map(EquipmentDtoMapper::toDto).toList());
         model.addAttribute("defaultEquipmentIds", equipmentCatalogService.findDefaultModelIds());

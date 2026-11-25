@@ -57,10 +57,9 @@
                     <select class="form-control" th:id="|equipment-${selectionStat.index}|"
                             th:name="|equipmentSelections[${selectionStat.index}].equipmentId|">
                         <option value="">Выберите модель</option>
-                        <option th:each="item : ${equipmentList}" th:value="${item.id}"
+                        <option th:each="item : ${selection.availableModels}" th:value="${item.id}"
                                 th:selected="${item.id == selection.equipmentId}"
-                                th:text="|${item.name} — ${item.width} × ${item.height} × ${item.depth} мм|"
-                                th:attr="data-functional-type=${item.functionalType},data-purpose=${item.purpose},data-default=${defaultEquipmentIds.contains(item.id)}"></option>
+                                th:text="|${item.name} — ${item.width} × ${item.height} × ${item.depth} мм|"></option>
                     </select>
                 </div>
                 <div class="module-field">
@@ -72,23 +71,6 @@
                 </div>
             </div>
         </div>
-        <template id="equipment-selection-row-template">
-            <div class="module-equipment-row equipment-selection-row">
-                <div class="module-field">
-                    <label>Модель оборудования</label>
-                    <select class="form-control">
-                        <option value="">Модель по умолчанию не задана — выберите модель</option>
-                        <option th:each="item : ${equipmentList}" th:value="${item.id}"
-                                th:text="|${item.name} — ${item.width} × ${item.height} × ${item.depth} мм|"
-                                th:attr="data-functional-type=${item.functionalType},data-purpose=${item.purpose},data-default=${defaultEquipmentIds.contains(item.id)}"></option>
-                    </select>
-                </div>
-                <div class="module-field">
-                    <label>Количество</label>
-                    <input class="form-control" type="number" min="1" value="1">
-                </div>
-            </div>
-        </template>
         <small class="module-field-hint">Состав строк зависит от выбранных функциональных назначений. Для назначения без моделей в каталоге сначала добавьте подходящую модель в каталог оборудования.</small>
     </div>
 </section>

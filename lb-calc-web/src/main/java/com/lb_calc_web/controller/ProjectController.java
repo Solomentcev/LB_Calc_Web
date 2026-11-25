@@ -363,6 +363,22 @@ public class ProjectController
         return "lcs/lc";
     }
 
+    /** Обновляет комплектацию LC проекта без сохранения проекта или ALS. */
+    @PostMapping("/{projectId}/alss/{alsId}/lcs/{lcId}/refresh")
+    public String refreshLC(@PathVariable Long projectId, @PathVariable Long alsId,
+                            @PathVariable Long lcId, @ModelAttribute("lc") LCDTO lc, Model model) {
+        projectService.findLCInProject(projectId, alsId, lcId);
+        lc.setId(lcId);
+        model.addAttribute("project", addALSImages(ProjectDtoMapper.toDto(projectService.findById(projectId))));
+        model.addAttribute("als", ALSImageService.addImages(ALSDtoMapper.toDto(
+                projectService.findALSInProject(projectId, alsId))));
+        prepareLCForm(model, LCImageService.addImage(lc));
+        model.addAttribute("projectId", projectId);
+        model.addAttribute("alsId", alsId);
+        model.addAttribute("lcId", lcId);
+        return "lcs/lc";
+    }
+
     /**
      * Сохранение LC.
      */
@@ -465,6 +481,22 @@ public class ProjectController
         model.addAttribute("alsId", alsId);
         model.addAttribute("lbcId", lbcId);
 
+        return "lbcs/lbc";
+    }
+
+    /** Обновляет комплектацию LBC проекта без сохранения проекта или ALS. */
+    @PostMapping("/{projectId}/alss/{alsId}/lbcs/{lbcId}/refresh")
+    public String refreshLBC(@PathVariable Long projectId, @PathVariable Long alsId,
+                             @PathVariable Long lbcId, @ModelAttribute("lbc") LBCDTO lbc, Model model) {
+        projectService.findLBCInProject(projectId, alsId, lbcId);
+        lbc.setId(lbcId);
+        model.addAttribute("project", addALSImages(ProjectDtoMapper.toDto(projectService.findById(projectId))));
+        model.addAttribute("als", ALSImageService.addImages(ALSDtoMapper.toDto(
+                projectService.findALSInProject(projectId, alsId))));
+        prepareLBCForm(model, LBCImageService.addImage(lbc));
+        model.addAttribute("projectId", projectId);
+        model.addAttribute("alsId", alsId);
+        model.addAttribute("lbcId", lbcId);
         return "lbcs/lbc";
     }
 
@@ -732,6 +764,8 @@ public class ProjectController
 
     private void prepareLCForm(Model model, LCDTO lc) {
         model.addAttribute("lc", lc);
+        lc.setEquipmentSelections(equipmentCatalogService.prepareSelections(
+                lc.getFunctionalConfiguration(), lc.getEquipmentSelections()));
         model.addAttribute("equipmentList", equipmentCatalogService.findAll().stream()
                 .map(EquipmentDtoMapper::toDto).toList());
         model.addAttribute("defaultEquipmentIds", equipmentCatalogService.findDefaultModelIds());
@@ -743,6 +777,8 @@ public class ProjectController
 
     private void prepareLBCForm(Model model, LBCDTO lbc) {
         model.addAttribute("lbc", lbc);
+        lbc.setEquipmentSelections(equipmentCatalogService.prepareSelections(
+                lbc.getFunctionalConfiguration(), lbc.getEquipmentSelections()));
         model.addAttribute("equipmentList", equipmentCatalogService.findAll().stream()
                 .map(EquipmentDtoMapper::toDto).toList());
         model.addAttribute("defaultEquipmentIds", equipmentCatalogService.findDefaultModelIds());

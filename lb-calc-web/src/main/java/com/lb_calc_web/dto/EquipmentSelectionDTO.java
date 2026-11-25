@@ -1,5 +1,7 @@
 package com.lb_calc_web.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.util.List;
 import java.util.Objects;
 
 /** Выбранная физическая модель оборудования и её количество. */
@@ -7,6 +9,8 @@ public class EquipmentSelectionDTO {
 
     private Long equipmentId;
     private int quantity = 1;
+    @JsonIgnore
+    private List<EquipmentDTO> availableModels = List.of();
 
     public EquipmentSelectionDTO() {
     }
@@ -26,6 +30,11 @@ public class EquipmentSelectionDTO {
                     "Идентификатор модели оборудования должен быть положительным");
         }
         this.equipmentId = equipmentId;
+    }
+
+    public List<EquipmentDTO> getAvailableModels() { return availableModels; }
+    public void setAvailableModels(List<EquipmentDTO> models) {
+        availableModels = models == null ? List.of() : List.copyOf(models);
     }
 
     public int getQuantity() {

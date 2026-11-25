@@ -80,6 +80,14 @@ public class LCController {
         return "lcs/lc";
     }
 
+    /** Обновляет комплектацию LC без сохранения модуля. */
+    @PostMapping("/refresh")
+    public String refreshLC(@ModelAttribute("lc") LCDTO lc, Model model) {
+        model.addAttribute("pageContext", "CATALOG");
+        prepareForm(model, LCImageService.addImage(lc));
+        return "lcs/lc";
+    }
+
     /**
      * Сохранение LC.
      */
@@ -130,6 +138,8 @@ public class LCController {
 
     private void prepareForm(Model model, LCDTO lc) {
         model.addAttribute("lc", lc);
+        lc.setEquipmentSelections(equipmentCatalogService.prepareSelections(
+                lc.getFunctionalConfiguration(), lc.getEquipmentSelections()));
         model.addAttribute("equipmentList", equipmentCatalogService.findAll().stream()
                 .map(EquipmentDtoMapper::toDto).toList());
         model.addAttribute("defaultEquipmentIds", equipmentCatalogService.findDefaultModelIds());

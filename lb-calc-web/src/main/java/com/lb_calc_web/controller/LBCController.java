@@ -105,6 +105,14 @@ public class LBCController extends BaseCatalogController {
         return "lbcs/lbc";
     }
 
+    /** Обновляет комплектацию LBC без сохранения модуля. */
+    @PostMapping("/refresh")
+    public String refreshLBC(@ModelAttribute("lbc") LBCDTO lbc, Model model) {
+        model.addAttribute("pageContext", "CATALOG");
+        prepareForm(model, LBCImageService.addImage(lbc));
+        return "lbcs/lbc";
+    }
+
     /**
      * Сохранение LBC.
      */
@@ -132,6 +140,8 @@ public class LBCController extends BaseCatalogController {
 
     private void prepareForm(Model model, LBCDTO lbc) {
         model.addAttribute("lbc", lbc);
+        lbc.setEquipmentSelections(equipmentCatalogService.prepareSelections(
+                lbc.getFunctionalConfiguration(), lbc.getEquipmentSelections()));
         model.addAttribute("equipmentList", equipmentCatalogService.findAll().stream()
                 .map(EquipmentDtoMapper::toDto).toList());
         model.addAttribute("defaultEquipmentIds", equipmentCatalogService.findDefaultModelIds());
