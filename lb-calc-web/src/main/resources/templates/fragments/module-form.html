@@ -21,12 +21,17 @@
                 </select>
             </div>
             <div class="col-md-6 module-field">
-                <label for="module-access">Способы доступа</label>
+                <span class="module-field-label">Способы доступа</span>
                 <input type="hidden" name="_functionalConfiguration.access" value="on">
-                <select id="module-access" multiple size="4" class="form-control"
-                        th:field="*{functionalConfiguration.access}">
-                    <option th:each="purpose : ${accessPurposes}" th:value="${purpose}" th:text="${purpose}"></option>
-                </select>
+                <div class="module-access-options" role="group" aria-label="Способы доступа">
+                    <label th:each="purpose : ${accessPurposes}">
+                        <input type="checkbox" name="functionalConfiguration.access"
+                               th:value="${purpose}"
+                               th:checked="${lc != null and lc.functionalConfiguration != null and lc.functionalConfiguration.access != null and lc.functionalConfiguration.access.contains(purpose)}"
+                               th:attr="data-access-purpose=${purpose}">
+                        <span th:text="${purpose}">Способ доступа</span>
+                    </label>
+                </div>
                 <small class="module-field-hint">Можно выбрать несколько способов доступа.</small>
             </div>
             <div class="col-md-6 module-field">
@@ -41,8 +46,8 @@
 
 <section th:fragment="equipmentSelections" class="module-section">
     <div class="module-section__header">
-        <h2>Физическое оборудование</h2>
-        <p>Выберите фактически устанавливаемые модели и укажите количество каждой модели.</p>
+        <h2>Комплектация оборудования</h2>
+        <p>Модели оборудования и их количество в составе управляющего модуля.</p>
     </div>
     <div class="module-section__body">
         <input type="hidden" name="equipmentSelectionsProvided" value="true">
