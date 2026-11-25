@@ -364,6 +364,133 @@
                 font-size: 1.65rem;
             }
         }
+
+        /*
+         * Единое оформление страниц редактирования АКХ и модулей.
+         * Стили ограничены контейнером editor-page и не влияют на каталоги.
+         */
+        .editor-page {
+            max-width: 1280px;
+            padding-top: 1rem;
+            padding-bottom: 2rem;
+        }
+
+        .editor-page > nav[aria-label="breadcrumb"] {
+            margin-top: 0 !important;
+            margin-bottom: 1rem;
+            border-radius: 0.25rem;
+        }
+
+        .editor-page form {
+            min-width: 0;
+        }
+
+        .editor-page .page-actions {
+            top: 3.5rem;
+            margin-bottom: 1.25rem;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .editor-page:has(> nav[aria-label="breadcrumb"]) .page-actions {
+            top: 6.5rem;
+        }
+
+        .editor-page .card {
+            margin-bottom: 1.25rem;
+            overflow: hidden;
+        }
+
+        .editor-page .card-header {
+            padding: 0.85rem 1.25rem;
+        }
+
+        .editor-page .card-body {
+            padding: 1.25rem;
+        }
+
+        .editor-page .card-header h1,
+        .editor-page .card-header h2,
+        .editor-page .card-header h3,
+        .editor-page .card-header h4,
+        .editor-page .card-header h5 {
+            line-height: 1.35;
+        }
+
+        .editor-page form > h1 {
+            margin: 0 0 1.25rem;
+            font-size: 1.5rem;
+        }
+
+        .editor-page form > h2 {
+            margin-top: 1.5rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #dee2e6;
+            font-size: 1.15rem;
+        }
+
+        .editor-page .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .editor-page .form-group label,
+        .editor-page .card-body > .row label {
+            display: block;
+            margin-bottom: 0.4rem;
+            color: #495057;
+            font-size: 0.9rem;
+        }
+
+        .editor-page .form-control {
+            min-height: calc(1.5em + 0.75rem + 2px);
+        }
+
+        .editor-page input[readonly],
+        .editor-page textarea[readonly],
+        .editor-page select:disabled {
+            background-color: #f1f3f5;
+            color: #495057;
+            opacity: 1;
+        }
+
+        .editor-page .alert {
+            margin-bottom: 1.25rem;
+        }
+
+        .editor-page img.img-thumbnail {
+            display: block;
+            max-width: 100%;
+            max-height: 420px;
+            margin: 0.75rem auto 0;
+            object-fit: contain;
+            background-color: #fff;
+        }
+
+        .editor-page .card-header img.img-thumbnail {
+            margin-left: 0;
+        }
+
+        @media (max-width: 767.98px) {
+            .editor-page {
+                padding-top: 0.75rem;
+                padding-right: 1rem;
+                padding-left: 1rem;
+            }
+
+            .editor-page .card-body {
+                padding: 1rem;
+            }
+
+            .editor-page .page-actions {
+                gap: 0.4rem;
+            }
+
+            .editor-page .page-actions .btn {
+                flex: 0 1 auto;
+            }
+        }
+
     </style>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
