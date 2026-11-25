@@ -17,8 +17,8 @@ import java.io.ByteArrayOutputStream;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
-@Service
 /** Формирует Excel-представление проекта и его конфигурации. */
+@Service
 public class ProjectExcelExportService {
 
     private static final Logger logger =

@@ -49,7 +49,7 @@ public class LCController {
     public String createLC(Model model) {
         model.addAttribute("pageContext", "CATALOG");
 
-        logger.info("Открытие страницы создания LC");
+        logger.debug("Открытие страницы создания LC");
 
         LCDTO lc = LCImageService.addImage(LCDtoMapper.toDto(lcService.createLC()));
         lc.setId(0L);
@@ -69,7 +69,7 @@ public class LCController {
     ) {
         model.addAttribute("pageContext", "CATALOG");
 
-        logger.info(
+        logger.debug(
                 "Открытие страницы редактирования LC id={}",
                 id
         );
@@ -104,7 +104,7 @@ public class LCController {
     ) {
         model.addAttribute("pageContext", "CATALOG");
 
-        logger.info(
+        logger.debug(
                 "Сохранение LC id={}, display={}",
                 lc.getId(),
                 lc.getFunctionalConfiguration()
@@ -119,7 +119,7 @@ public class LCController {
 
         } catch (ValidationSizeException e) {
 
-            logger.warn(
+            logger.debug(
                     "LC не прошёл валидацию: {}",
                     ValidationErrorFormatter.format(e.getValidationResult())
             );

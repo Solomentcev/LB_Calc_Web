@@ -1,7 +1,11 @@
+/**
+ * Централизованная обработка исключений REST API.
+ *
+ * <p>Обработчик ограничен REST-контроллерами и не изменяет обработку ошибок
+ * MVC-интерфейса.</p>
+ */
 package com.lb_calc_web.handler;
-
 import com.lb_calc_web.service.validation.ValidationSizeException;
-
 import com.lb_calc_web.controller.ValidationErrorFormatter;
 import com.lb_calc_web.controller.api.response.ApiResponse;
 import io.jsonwebtoken.JwtException;
@@ -22,16 +26,8 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
-
 import java.util.List;
 import java.util.NoSuchElementException;
-
-/**
- * Централизованная обработка исключений REST API.
- *
- * <p>Обработчик ограничен REST-контроллерами и не изменяет обработку ошибок
- * MVC-интерфейса.</p>
- */
 @RestControllerAdvice(basePackages = "com.lb_calc_web.controller.api")
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class RestExceptionHandler {
@@ -39,6 +35,7 @@ public class RestExceptionHandler {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(RestExceptionHandler.class);
 
+    /** Преобразует ошибку аутентификации в REST-ответ со статусом 401. */
     @ExceptionHandler(AuthException.class)
     public ResponseEntity<ApiResponse<Void>> handleAuthenticationFailure(
             AuthException exception
@@ -53,6 +50,7 @@ public class RestExceptionHandler {
         return response(HttpStatus.UNAUTHORIZED, "Недействительный или просроченный токен");
     }
 
+    /** Возвращает единый ответ для запроса с неизвестной учётной записью. */
     @ExceptionHandler(UsernameNotFoundException.class)
     public ResponseEntity<ApiResponse<Void>> handleUnknownUser(
             UsernameNotFoundException exception
@@ -70,6 +68,7 @@ public class RestExceptionHandler {
                         : exception.getMessage()));
     }
 
+    /** Возвращает ошибки проверки геометрических параметров со статусом 400. */
     @ExceptionHandler(ValidationSizeException.class)
     public ResponseEntity<ApiResponse<Void>> handleValidationSize(
             ValidationSizeException exception
@@ -87,6 +86,7 @@ public class RestExceptionHandler {
             HttpMessageNotReadableException.class,
             MethodArgumentNotValidException.class
     })
+    /** Преобразует ошибки входных данных в REST-ответ со статусом 400. */
     public ResponseEntity<ApiResponse<Void>> handleBadRequest(
             Exception exception
     ) {
@@ -101,6 +101,7 @@ public class RestExceptionHandler {
         return response(HttpStatus.BAD_REQUEST, "Некорректный запрос", errors);
     }
 
+    /** Преобразует отказ в доступе в REST-ответ со статусом 403. */
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ApiResponse<Void>> handleAccessDenied(
             AccessDeniedException exception
@@ -115,6 +116,7 @@ public class RestExceptionHandler {
         return response(HttpStatus.METHOD_NOT_ALLOWED, "HTTP-метод не поддерживается");
     }
 
+    /** Формирует безопасный REST-ответ при непредвиденной ошибке сервера. */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Void>> handleUnexpected(
             Exception exception

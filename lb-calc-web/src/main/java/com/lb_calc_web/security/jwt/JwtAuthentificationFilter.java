@@ -18,8 +18,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
-@Component
 /** Фильтр проверки JWT, восстановления сессии и установки аутентификации в SecurityContext. */
+@Component
 public class JwtAuthentificationFilter
         extends OncePerRequestFilter {
 
@@ -39,6 +39,7 @@ public class JwtAuthentificationFilter
         this.employeeService = employeeService;
     }
 
+    /** Извлекает токен запроса, восстанавливает аутентификацию и продолжает цепочку фильтров. */
     @Override
     protected void doFilterInternal(
             HttpServletRequest request,
@@ -105,6 +106,7 @@ public class JwtAuthentificationFilter
         );
     }
 
+    /** Проверяет access token и при необходимости инициирует обновление по refresh token. */
     private void processAccessOrRefresh(
             String accessToken,
             HttpServletRequest request,
@@ -165,6 +167,7 @@ public class JwtAuthentificationFilter
         }
     }
 
+    /** Проверяет refresh token, выпускает новую пару токенов и обновляет данные ответа. */
     private void tryRefresh(
             HttpServletRequest request,
             HttpServletResponse response
@@ -265,6 +268,7 @@ public class JwtAuthentificationFilter
         authenticate(email);
     }
 
+    /** Загружает активную учётную запись и устанавливает аутентификацию в SecurityContext. */
     private void authenticate(
             String email
     ) {
@@ -292,6 +296,7 @@ public class JwtAuthentificationFilter
                 .setAuthentication(authentication);
     }
 
+    /** Определяет, ожидает ли клиент REST-ответ с токенами в заголовках. */
     private boolean isRestRequest(
             HttpServletRequest request
     ) {
@@ -333,6 +338,7 @@ public class JwtAuthentificationFilter
         ));
     }
 
+    /** Извлекает access token из Authorization или cookie. */
     private String getAccessToken(
             HttpServletRequest request
     ) {
@@ -357,6 +363,7 @@ public class JwtAuthentificationFilter
         );
     }
 
+    /** Извлекает refresh token из заголовка или cookie. */
     private String getRefreshToken(
             HttpServletRequest request
     ) {
@@ -376,6 +383,7 @@ public class JwtAuthentificationFilter
         );
     }
 
+    /** Находит непустое значение cookie с заданным именем. */
     private String getTokenFromCookie(
             HttpServletRequest request,
             String name
@@ -405,6 +413,7 @@ public class JwtAuthentificationFilter
         return null;
     }
 
+    /** Очищает SecurityContext и удаляет токены из cookie. */
     private void clearAuthentication(
             HttpServletResponse response
     ) {

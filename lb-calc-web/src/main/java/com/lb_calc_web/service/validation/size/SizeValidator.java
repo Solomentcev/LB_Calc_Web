@@ -1,5 +1,10 @@
+/**
+ * Единая точка доступа к геометрической валидации доменных моделей.
+ *
+ * <p>Фасад не зависит от DTO и делегирует проверки специализированным
+ * валидаторам модулей, ALS и проекта.</p>
+ */
 package com.lb_calc_web.service.validation.size;
-
 import com.lb_calc_web.domain.model.ALS;
 import com.lb_calc_web.domain.model.LB;
 import com.lb_calc_web.domain.model.LBC;
@@ -8,15 +13,7 @@ import com.lb_calc_web.domain.model.Project;
 import com.lb_calc_web.domain.model.StorageModule;
 import com.lb_calc_web.service.validation.ValidationResult;
 import org.springframework.stereotype.Component;
-
 import java.util.List;
-
-/**
- * Единая точка доступа к геометрической валидации доменных моделей.
- *
- * <p>Фасад не зависит от DTO и делегирует проверки специализированным
- * валидаторам модулей, ALS и проекта.</p>
- */
 @Component
 public class SizeValidator {
 
@@ -34,6 +31,7 @@ public class SizeValidator {
         this.projectValidator = projectValidator;
     }
 
+    /** Возвращает минимальную высоту панели управляющего модуля LC. */
     public int getHeightLcPanelMin() {
         return moduleValidator.getHeightLcPanelMin();
     }
@@ -51,6 +49,7 @@ public class SizeValidator {
         );
     }
 
+    /** Проверяет количество ячеек модуля хранения. */
     public void validateLBCellCount(
             ValidationResult result,
             StorageModule module
@@ -66,6 +65,7 @@ public class SizeValidator {
         return moduleValidator.validateLC(lc);
     }
 
+    /** Выполняет геометрическую проверку комбинированного модуля LBC. */
     public ValidationResult validateLBC(LBC lbc) {
         return moduleValidator.validateLBC(lbc);
     }
@@ -78,6 +78,7 @@ public class SizeValidator {
         return alsValidator.deepValidateALS(als);
     }
 
+    /** Проверяет геометрические ограничения всех конфигураций ALS проекта. */
     public List<ValidationResult> validateProject(Project project) {
         return projectValidator.validateProject(project);
     }

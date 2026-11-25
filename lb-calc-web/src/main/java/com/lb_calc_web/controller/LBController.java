@@ -50,7 +50,7 @@ public class LBController {
     public String createLB(Model model) {
         model.addAttribute("pageContext", "CATALOG");
 
-        logger.info("Открытие страницы создания LB");
+        logger.debug("Открытие страницы создания LB");
 
         LBDTO lb = LBImageService.addImage(LBDtoMapper.toDto(lbService.createLB()));
 
@@ -69,7 +69,7 @@ public class LBController {
     ) {
         model.addAttribute("pageContext", "CATALOG");
 
-        logger.info(
+        logger.debug(
                 "Открытие страницы редактирования LB id={}",
                 id
         );
@@ -107,7 +107,7 @@ public class LBController {
     ) {
         model.addAttribute("pageContext", "CATALOG");
 
-        logger.info(
+        logger.debug(
                 "Сохранение LB id={}, type={}",
                 lb.getId(),
                 lb.getType()
@@ -122,7 +122,7 @@ public class LBController {
 
         } catch (ValidationSizeException e) {
 
-            logger.warn(
+            logger.debug(
                     "LB не прошёл валидацию: {}",
                     ValidationErrorFormatter.format(e.getValidationResult())
             );

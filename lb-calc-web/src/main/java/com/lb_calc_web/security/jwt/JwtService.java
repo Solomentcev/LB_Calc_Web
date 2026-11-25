@@ -23,8 +23,8 @@ import java.util.Date;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-@Service
 /** Сервис создания, проверки и извлечения данных из JWT-токенов. */
+@Service
 public class JwtService {
 
     private static final Logger logger =
@@ -42,6 +42,7 @@ public class JwtService {
     @Value("${jwt.expiration.refresh}")
     private long refreshExpiration;
 
+    /** Извлекает адрес электронной почты из subject токена. */
     public String extractEmail(String token) {
 
         Claims claims =
@@ -59,6 +60,7 @@ public class JwtService {
         return subject;
     }
 
+    /** Проверяет подпись и срок действия access token и возвращает его claims. */
     public Claims getAccessClaims(String token) {
 
         return parseClaimsStrict(
@@ -77,6 +79,7 @@ public class JwtService {
         );
     }
 
+    /** Создаёт access token для аутентифицированного сотрудника. */
     public String generateAccessToken(
             EmployeePrincipal principal
     ) {
@@ -100,6 +103,7 @@ public class JwtService {
                 .compact();
     }
 
+    /** Создаёт refresh token для аутентифицированного сотрудника. */
     public String generateRefreshToken(
             EmployeePrincipal principal
     ) {
@@ -125,6 +129,7 @@ public class JwtService {
                 .compact();
     }
 
+    /** Проверяет, истёк ли срок действия токена. */
     public boolean isExpired(Claims claims) {
 
         Date expiration =
@@ -139,6 +144,7 @@ public class JwtService {
         return expiration.before(new Date());
     }
 
+    /** Проверяет, что claims относятся к access token. */
     public boolean isAccess(Claims claims) {
 
         return "access".equals(
@@ -153,6 +159,7 @@ public class JwtService {
         );
     }
 
+    /** Проверяет корректность access token без распространения JWT-исключений. */
     public boolean isValidatedAccessToken(
             String accessToken
     ) {
@@ -225,6 +232,7 @@ public class JwtService {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
+    /** Создаёт защищённую cookie для access token. */
     public Cookie generateAccessTokenCookie(
             String token
     ) {
@@ -244,6 +252,7 @@ public class JwtService {
         return cookie;
     }
 
+    /** Создаёт защищённую cookie для refresh token. */
     public Cookie generateRefreshTokenCookie(
             String token
     ) {
