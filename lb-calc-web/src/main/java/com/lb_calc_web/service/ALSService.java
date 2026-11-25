@@ -82,6 +82,7 @@ public class ALSService {
         this.sizeValidator = Objects.requireNonNull(sizeValidator);
         this.equipmentRepository = Objects.requireNonNull(equipmentRepository);
     }
+    /** Возвращает страницу конфигураций ALS с применёнными фильтрами и сортировкой. */
     @Transactional(readOnly = true)
     public org.springframework.data.domain.Page<ALS> findPage(
             ModuleCatalogFilter filter, org.springframework.data.domain.Pageable pageable

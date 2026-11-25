@@ -68,6 +68,7 @@ public class ProjectService {
         this.environment = environment;
         this.sizeValidator = sizeValidator;
     }
+    /** Возвращает страницу проектов с применёнными фильтрами и сортировкой. */
     @Transactional(readOnly = true)
     public org.springframework.data.domain.Page<Project> findPage(
             ProjectCatalogFilter filter, org.springframework.data.domain.Pageable pageable
@@ -175,6 +176,7 @@ return projectRepository.findAllWithUsers()
                 (als, alsEntity) -> { }
         );
     }
+    /** Создаёт новый проект с конфигурацией ALS по умолчанию. */
     @Transactional
     public Project createProject() {
         logger.info("Создание проекта...");
@@ -183,6 +185,7 @@ return projectRepository.findAllWithUsers()
         project.addALS(alsService.createALS());
         return project;
     }
+    /** Создаёт доменную модель проекта с заданной компанией и текущим сотрудником. */
     public Project initProject(String company) {
         Employee currentEmployee = employeeService.getCurrentEmployeeDomain();
         LocalDate today = LocalDate.now();
@@ -195,6 +198,7 @@ return projectRepository.findAllWithUsers()
         project.setName(company + "_" + today);
         return project;
     }
+    /** Проверяет и сохраняет проект, включая его конфигурации ALS и сведения об изменении. */
     @Transactional
     public Project saveProject(Project requested) {
         Objects.requireNonNull(requested, "Проект не должен быть null");
@@ -276,12 +280,14 @@ return projectRepository.findAllWithUsers()
         );
         projectRepository.delete(entity);
     }
+    /** Добавляет новую конфигурацию ALS в проект и сохраняет его. */
     @Transactional
     public Project addNewALSandSaveProject(Long projectId) {
         Project domain = findDomainProject(projectId);
         domain.addALS(alsService.createALS());
         return saveDomainProject(domain);
     }
+    /** Удаляет выбранную конфигурацию ALS из проекта и сохраняет результат. */
     @Transactional
     public Project deleteALSandSaveProject(
             Long projectId,
@@ -298,10 +304,12 @@ return projectRepository.findAllWithUsers()
         domain.removeALS(selectedDomain);
         return saveDomainProject(domain);
     }
+    /** Находит выбранную конфигурацию ALS внутри проекта. */
     @Transactional(readOnly = true)
     public ALS findALSInProject(Long projectId, Long alsId) {
         return findDomainALS(findDomainProject(projectId), alsId);
     }
+    /** Находит управляющий модуль LC в выбранной ALS проекта. */
     @Transactional(readOnly = true)
     public LC findLCInProject(Long projectId, Long alsId, Long lcId) {
         ALS als = findALSInProject(projectId, alsId);
@@ -313,6 +321,7 @@ return projectRepository.findAllWithUsers()
         }
         return lc;
     }
+    /** Находит комбинированный модуль LBC в выбранной ALS проекта. */
     @Transactional(readOnly = true)
     public LBC findLBCInProject(Long projectId, Long alsId, Long lbcId) {
         ALS als = findALSInProject(projectId, alsId);
@@ -324,6 +333,7 @@ return projectRepository.findAllWithUsers()
         }
         return lbc;
     }
+    /** Находит выбранный модуль хранения LB в ALS проекта. */
     @Transactional(readOnly = true)
     public LB findLBInProject(Long projectId, Long alsId, Long lbId) {
         ALS als = findALSInProject(projectId, alsId);
@@ -336,6 +346,7 @@ return projectRepository.findAllWithUsers()
                         "LB с id " + lbId + " не найден в ALS " + alsId
                 ));
     }
+    /** Заменяет выбранную конфигурацию ALS в проекте и сохраняет результат. */
     @Transactional
     public ALS replaceALSandSaveProject(
             Long projectId,
@@ -354,6 +365,7 @@ return projectRepository.findAllWithUsers()
         Project savedProject = saveDomainProject(domain);
         return findDomainALS(savedProject, replacement);
     }
+    /** Изменяет управляющий модуль выбранной ALS и сохраняет проект. */
     @Transactional
     public ALS saveLCAtProject(
             Long projectId,
@@ -379,6 +391,7 @@ return projectRepository.findAllWithUsers()
         Project savedProject = saveDomainProject(domain);
         return findDomainALS(savedProject, updated);
     }
+    /** Изменяет комбинированный модуль выбранной ALS и сохраняет проект. */
     @Transactional
     public ALS saveLBCAtProject(
             Long projectId,
@@ -404,6 +417,7 @@ return projectRepository.findAllWithUsers()
         Project savedProject = saveDomainProject(domain);
         return findDomainALS(savedProject, updated);
     }
+    /** Заменяет управляющий модуль выбранной ALS новым LBC и сохраняет проект. */
     @Transactional
     public ALS replaceWithNewLBCAtProject(
             Long projectId,
@@ -416,6 +430,7 @@ return projectRepository.findAllWithUsers()
         Project savedProject = saveDomainProject(domain);
         return findDomainALS(savedProject, updated);
     }
+    /** Добавляет модуль хранения LB в выбранную ALS проекта. */
     @Transactional
     public ALS addLBAtProject(
             Long projectId,
@@ -428,6 +443,7 @@ return projectRepository.findAllWithUsers()
         Project savedProject = saveDomainProject(domain);
         return findDomainALS(savedProject, updated);
     }
+    /** Изменяет выбранный экземпляр LB в ALS и сохраняет проект. */
     @Transactional
     public ALS saveLBAtProject(
             Long projectId,
@@ -472,6 +488,7 @@ return projectRepository.findAllWithUsers()
         }
         return savedALS;
     }
+    /** Удаляет выбранный экземпляр LB из ALS проекта и сохраняет результат. */
     @Transactional
     public ALS deleteLBatProject(
             Long projectId,

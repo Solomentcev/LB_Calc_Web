@@ -141,6 +141,7 @@ public class LBService {
                 new NoSuchElementException("Модуль хранения LB с id=" + id + " не найден"));
         return LBEntityMapper.toDomain(entity);
     }
+    /** Проверяет и сохраняет доменную конфигурацию модуля хранения LB. */
     @Transactional
     public LB saveLB(LB domain) {
         Objects.requireNonNull(domain, "LB не должен быть null");

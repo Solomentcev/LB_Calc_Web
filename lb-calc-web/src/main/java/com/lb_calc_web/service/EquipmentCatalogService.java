@@ -37,6 +37,7 @@ public class EquipmentCatalogService {
     public EquipmentCatalogService(EquipmentRepository equipmentRepository) {
         this.equipmentRepository = Objects.requireNonNull(equipmentRepository);
     }
+    /** Возвращает страницу каталога оборудования с применёнными фильтрами и сортировкой. */
     @Transactional(readOnly = true)
     public Page<Equipment> findPage(EquipmentCatalogFilter filter, Pageable pageable) {
         Objects.requireNonNull(filter, "Фильтры каталога оборудования не должны быть null");
@@ -178,6 +179,7 @@ public class EquipmentCatalogService {
     private String key(Equipment item) {
         return item.getFunctionalType().name() + ":" + item.getPurpose().toString();
     }
+    /** Проверяет, что выбранное оборудование соответствует функциональным назначениям и количеству. */
     @Transactional(readOnly = true)
     public void validateSelections(
             FunctionalConfigurationDTO configuration, List<EquipmentSelectionDTO> selections) {

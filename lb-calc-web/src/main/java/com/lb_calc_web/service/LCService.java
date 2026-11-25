@@ -97,6 +97,7 @@ public class LCService {
                 new ControlConfiguration(functional, Map.of())
         );
     }
+    /** Возвращает страницу управляющих модулей LC с применёнными фильтрами и сортировкой. */
     @Transactional(readOnly = true)
     public org.springframework.data.domain.Page<LC> findPage(
             LCCatalogFilter filter, org.springframework.data.domain.Pageable pageable
