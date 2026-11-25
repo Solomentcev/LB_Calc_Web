@@ -1,6 +1,7 @@
 package com.lb_calc_web.service;
 
 import com.lb_calc_web.dto.EmployeeDTO;
+import com.lb_calc_web.domain.attributes.Role;
 import com.lb_calc_web.dto.ProfileDTO;
 import com.lb_calc_web.entity.EmployeeEntity;
 import com.lb_calc_web.mapper.entity.EmployeeEntityMapper;
@@ -17,7 +18,12 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
+import java.util.Locale;
+import org.springframework.data.jpa.domain.Specification;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -236,17 +242,61 @@ public class EmployeeService implements UserDetailsService {
                 ));
     }
 
-    /** Возвращает страницу профилей с фильтрацией на уровне базы данных. */
+    /**
+     * Возвращает страницу сотрудников или профилей с фильтрами по столбцам.
+     * Фильтрация выполняется в БД до сортировки и пагинации.
+     */
     @Transactional(readOnly = true)
     public org.springframework.data.domain.Page<ProfileDTO> findProfilesPage(
-            String query, org.springframework.data.domain.Pageable pageable
+            EmployeeCatalogFilter filter, org.springframework.data.domain.Pageable pageable
     ) {
-        String term = query == null ? "" : query.trim();
-        var entities = term.isEmpty()
-                ? employeeRepository.findAll(pageable)
-                : employeeRepository.findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCaseOrEmailContainingIgnoreCase(
-                        term, term, term, pageable);
-        return entities.map(EmployeeEntityMapper::toProfileDto);
+        List<Specification<EmployeeEntity>> specifications = new ArrayList<>();
+        if (filter.id() != null) {
+            specifications.add((root, query, builder) ->
+                    builder.equal(root.get("id"), filter.id()));
+        }
+        addTextFilter(specifications, "firstName", filter.firstName());
+        addTextFilter(specifications, "lastName", filter.lastName());
+        addTextFilter(specifications, "email", filter.email());
+
+        if (filter.role() != null) {
+            specifications.add((root, query, builder) ->
+                    builder.equal(root.get("role"), filter.role()));
+        }
+        if (filter.active() != null) {
+            specifications.add((root, query, builder) ->
+                    builder.equal(root.get("active"), filter.active()));
+        }
+        if (filter.registrationDateFrom() != null) {
+            specifications.add((root, query, builder) ->
+                    builder.greaterThanOrEqualTo(
+                            root.<LocalDate>get("registrationDate"), filter.registrationDateFrom()));
+        }
+        if (filter.registrationDateTo() != null) {
+            specifications.add((root, query, builder) ->
+                    builder.lessThanOrEqualTo(
+                            root.<LocalDate>get("registrationDate"), filter.registrationDateTo()));
+        }
+
+        Specification<EmployeeEntity> specification = specifications.stream()
+                .reduce(Specification::and)
+                .orElse((root, query, builder) -> builder.conjunction());
+
+        return employeeRepository.findAll(specification, pageable)
+                .map(EmployeeEntityMapper::toProfileDto);
+    }
+
+    private void addTextFilter(
+            List<Specification<EmployeeEntity>> specifications,
+            String attribute,
+            String value
+    ) {
+        if (value == null || value.isBlank()) {
+            return;
+        }
+        String pattern = "%" + value.trim().toLowerCase(Locale.ROOT) + "%";
+        specifications.add((root, query, builder) ->
+                builder.like(builder.lower(root.get(attribute)), pattern));
     }
 
     /** Возвращает статусы только для сотрудников текущей страницы каталога. */

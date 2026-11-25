@@ -4,13 +4,14 @@ import com.lb_calc_web.entity.EmployeeEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 import java.util.Optional;
 
 /**
  * Репозиторий для работы с сотрудниками.
  */
-public interface EmployeeRepository extends JpaRepository<EmployeeEntity, Long> {
+public interface EmployeeRepository extends JpaRepository<EmployeeEntity, Long>, JpaSpecificationExecutor<EmployeeEntity> {
 
     Page<EmployeeEntity> findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCaseOrEmailContainingIgnoreCase(
             String firstName, String lastName, String email, Pageable pageable);

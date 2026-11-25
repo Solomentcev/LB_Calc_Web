@@ -21,6 +21,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 
@@ -224,16 +225,24 @@ public class EmployeeController {
     public String profiles(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
-            @RequestParam(defaultValue = "") String q,
             @RequestParam(defaultValue = "id") String sort,
             @RequestParam(defaultValue = "asc") String direction,
+            @RequestParam(required = false) Long id,
+            @RequestParam(required = false) String firstName,
+            @RequestParam(required = false) String lastName,
+            @RequestParam(required = false) String email,
+            @RequestParam(required = false) LocalDate registrationDateFrom,
+            @RequestParam(required = false) LocalDate registrationDateTo,
             Model model
     ) {
         Pageable pageable = CatalogPageSupport.pageable(page, size, sort, direction, "id",
                 Set.of("id", "firstName", "lastName", "email", "registrationDate"));
-        var result = employeeService.findProfilesPage(q, pageable);
+        EmployeeCatalogFilter filter = new EmployeeCatalogFilter(
+                id, firstName, lastName, email, null, null, registrationDateFrom, registrationDateTo);
+        var result = employeeService.findProfilesPage(filter, pageable);
         model.addAttribute("employees", result.getContent());
-        CatalogPageSupport.addModelAttributes(model, result, q, pageable, "/profiles",
+        model.addAttribute("filters", filter);
+        CatalogPageSupport.addModelAttributes(model, result, "", pageable, "/profiles",
                 CatalogPageSupport.sortOptions("id", "ID", "firstName", "Имя",
                         "lastName", "Фамилия", "email", "Электронная почта",
                         "registrationDate", "Дата регистрации"));
@@ -272,21 +281,33 @@ public class EmployeeController {
     public String employees(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
-            @RequestParam(defaultValue = "") String q,
             @RequestParam(defaultValue = "id") String sort,
             @RequestParam(defaultValue = "asc") String direction,
+            @RequestParam(required = false) Long id,
+            @RequestParam(required = false) String firstName,
+            @RequestParam(required = false) String lastName,
+            @RequestParam(required = false) String email,
+            @RequestParam(required = false) Role role,
+            @RequestParam(required = false) Boolean active,
+            @RequestParam(required = false) LocalDate registrationDateFrom,
+            @RequestParam(required = false) LocalDate registrationDateTo,
             Model model
     ) {
         Pageable pageable = CatalogPageSupport.pageable(page, size, sort, direction, "id",
-                Set.of("id", "firstName", "lastName", "email", "role", "registrationDate"));
-        var result = employeeService.findProfilesPage(q, pageable);
+                Set.of("id", "firstName", "lastName", "email", "role", "active", "registrationDate"));
+        EmployeeCatalogFilter filter = new EmployeeCatalogFilter(
+                id, firstName, lastName, email, role, active,
+                registrationDateFrom, registrationDateTo);
+        var result = employeeService.findProfilesPage(filter, pageable);
         model.addAttribute("employees", result.getContent());
+        model.addAttribute("filters", filter);
         model.addAttribute("employeeStatuses", employeeService.getActiveStatuses(
                 result.getContent().stream().map(ProfileDTO::getId).toList()));
-        CatalogPageSupport.addModelAttributes(model, result, q, pageable, "/employees",
+        CatalogPageSupport.addModelAttributes(model, result, "", pageable, "/employees",
                 CatalogPageSupport.sortOptions("id", "ID", "firstName", "Имя",
                         "lastName", "Фамилия", "email", "Электронная почта",
-                        "role", "Роль", "registrationDate", "Дата регистрации"));
+                        "role", "Роль", "active", "Статус",
+                        "registrationDate", "Дата регистрации"));
         return "employees/employees";
     }
 
