@@ -102,60 +102,14 @@ docker compose up -d notification-service
 
 Flyway автоматически применяет миграции при запуске основного приложения. Hibernate использует `ddl-auto=validate`.
 
-## Jenkins и версионирование
+## CI/CD и версионирование
 
-На DEV-ноутбуке работают две независимые Pipeline Job. Отдельной Release Job нет.
+GitHub Actions выполняет CI-проверки: проверяет метку версии PR в `master`, собирает проект и запускает тесты. Развёртыванием занимаются две Jenkins Pipeline Job:
 
-| Job | Ветка Jenkinsfile | Jenkinsfile | Назначение |
-|---|---|---|---|
-| LB-CALC-DEV | refactor-main | infrastructure/Jenkinsfile.dev | Выбор ветки разработки и развёртывание на DEV |
-| LB-CALC-TEST | master | infrastructure/Jenkinsfile.test | Автоматическая сборка версии и развёртывание на TEST после merge PR |
+- `LB-CALC-DEV` — сборка выбранной рабочей ветки (`refactor-main`, `feature/*`, `refactor/*`, `bugfix/*`) и развёртывание DEV;
+- `LB-CALC-TEST` — сборка `master` после merge PR, проверка единственной метки `version:patch|minor|major`, расчёт SemVer и развёртывание TEST.
 
-### DEV
-
-В Job LB-CALC-DEV перед запуском указывается SOURCE_BRANCH. Разрешены feature/*, refactor/*, bugfix/*; refactor-main временно оставлена как текущая рабочая ветка.
-
-DEV получает последнюю релизную версию с суффиксом -SNAPSHOT. Пока Git-тегов нет, базовая версия берётся из корневого POM. Docker tag уникален для ветки и номера сборки: <APP_VERSION>-<branch>-build-<BUILD_NUMBER>.
-
-### TEST и SemVer
-
-Каждый PR в master обязан иметь ровно одну GitHub-метку:
-- version:patch — исправление ошибки без изменения публичного контракта;
-- version:minor — новая обратно совместимая функциональность;
-- version:major — несовместимое изменение.
-
-GitHub Actions проверяет наличие ровно одной метки до merge. После merge LB-CALC-TEST находит PR по merge commit, берёт его метку и увеличивает последнюю версию:
-- PATCH: X.Y.Z → X.Y.(Z+1);
-- MINOR: X.Y.Z → X.(Y+1).0;
-- MAJOR: X.Y.Z → (X+1).0.0.
-
-Пока Git-тегов нет, исходная версия берётся из revision корневого POM (0.1.0-SNAPSHOT) без суффикса. Поэтому первый merge с version:patch создаст v0.1.1, с version:minor — v0.2.0, с version:major — v1.0.0.
-
-После успешной Maven-сборки Jenkins создаёт и отправляет в GitHub аннотированный тег vX.Y.Z, затем развёртывает оба приложения на TEST. Если pipeline повторно запускается для того же commit, уже существующий тег этого commit используется повторно. GitHub Releases не создаются.
-
-Оба приложения получают одну Maven-версию через -Drevision=.... Docker tag TEST имеет вид <APP_VERSION>-build-<BUILD_NUMBER>. APP_VERSION и IMAGE_TAG передаются Jenkins в Compose как переменные окружения и не хранятся в .env.
-
-### Настройки GitHub
-
-Создать в репозитории метки version:patch, version:minor, version:major. Для master включить правила:
-- изменения только через Pull Request;
-- обязательная проверка Validate version label; Maven verification сделать обязательной после устранения ошибок интеграционных тестов;
-- запрет прямого push в master.
-
-Сейчас ветка master не защищена; правила необходимо включить в GitHub Settings → Rules → Rulesets (или Branches). На текущем этапе не включать Maven verification в обязательные проверки: существующий запуск завершился 8 ошибками загрузки Spring ApplicationContext (227 тестов запущено, 0 assertion failures).
-
-### Настройки Jenkins
-
-Обе Job настраиваются как Pipeline script from SCM с Git URL git@github.com:Solomentcev/LB_Calc_Web.git и credential github-ssh. Для DEV Pipeline script branch остаётся refactor-main, для TEST — master. Путь к Jenkinsfile указан в таблице. DEV запускается вручную с параметром SOURCE_BRANCH. TEST Pipeline содержит триггер Poll SCM с расписанием H/2 * * * *: Jenkins проверяет master каждые две минуты и запускает Pipeline при обнаружении нового commit.
-
-Credential github-ssh должен иметь право отправлять Git-теги в репозиторий. Для TEST дополнительно нужны:
-- SSH credential test-host-ssh;
-- глобальные переменные TEST_HOST и TEST_PROJECT_DIR;
-- DEV .env доступен Jenkins по /var/jenkins_env/dev/.env;
-- TEST .env хранится на TEST в environments/test/.env;
-- host key TEST-ноутбука находится в /var/jenkins_home/.ssh/known_hosts Jenkins-контейнера.
-
-Обе Pipeline собирают приложения на Jenkins/DEV. DEV развёртывается локально. TEST получает JAR по SCP и собирает контейнеры на Docker Engine TEST. Java и Maven на TEST не требуются.
+DEV использует версию последнего релиза с суффиксом `-SNAPSHOT`. TEST создаёт release tag только после успешной сборки, развёртывания и smoke-проверки. Подробные инструкции по конфигурации Jenkins, Credentials, SSH, запуску и обслуживанию стендов, а также диагностике находятся в [руководстве по инфраструктуре](infrastructure/README.md).
 
 ## Сброс данных
 
@@ -163,7 +117,7 @@ Credential github-ssh должен иметь право отправлять Gi
 
 ## Документация
 
-Актуальная документация находится в `docs/`.
+Документация проекта находится в `docs/` и в отдельном [руководстве по инфраструктуре и эксплуатации](infrastructure/README.md).
 
 | Документ | Назначение |
 |---|---|
@@ -172,3 +126,4 @@ Credential github-ssh должен иметь право отправлять Gi
 | [Доменная модель](docs/03-Доменная_модель.md) | Предметные сущности, связи и инварианты |
 | [Бизнес-логика и состояние реализации](docs/04-Бизнес-логика_и_состояние_реализации.md) | Фактическое поведение и выявленные расхождения |
 | [Архитектура и техническое проектирование](docs/05-Архитектура_и_техническое_проектирование.md) | Архитектура, API, безопасность, хранение данных и инфраструктура |
+| [Инфраструктура и руководство по эксплуатации](infrastructure/README.md) | DEV/TEST, Docker Compose, Jenkins, Credentials, SSH, CI/CD и диагностика |
