@@ -86,17 +86,34 @@ public class LBService {
         );
     }
 
-    /** Возвращает все сохранённые LB, отсортированные по идентификатору. */
+    /** Возвращает страницу LB с фильтрами по столбцам до пагинации. */
     @Transactional(readOnly = true)
     public org.springframework.data.domain.Page<LB> findPage(
-            String query, org.springframework.data.domain.Pageable pageable
+            ModuleCatalogFilter filter, org.springframework.data.domain.Pageable pageable
     ) {
-        String term = query == null ? "" : query.trim();
-        var entities = term.isEmpty()
-                ? lbRepository.findAll(pageable)
-                : lbRepository.findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(
-                        term, term, pageable);
-        return entities.map(LBEntityMapper::toDomain);
+        java.util.List<org.springframework.data.jpa.domain.Specification<LBEntity>> specifications =
+                new java.util.ArrayList<>();
+        specifications.add(com.lb_calc_web.repository.specification.CatalogSpecifications.id(filter.id()));
+        specifications.add(com.lb_calc_web.repository.specification.CatalogSpecifications.containsIgnoreCase("name", filter.name()));
+        specifications.add(com.lb_calc_web.repository.specification.CatalogSpecifications.equal("type", filter.type()));
+        specifications.add(com.lb_calc_web.repository.specification.CatalogSpecifications.integerRange(
+                "height", filter.heightMin(), filter.heightMax()));
+        specifications.add(com.lb_calc_web.repository.specification.CatalogSpecifications.integerRange(
+                "width", filter.widthMin(), filter.widthMax()));
+        specifications.add(com.lb_calc_web.repository.specification.CatalogSpecifications.integerRange(
+                "depth", filter.depthMin(), filter.depthMax()));
+        specifications.add(com.lb_calc_web.repository.specification.CatalogSpecifications.integerRange(
+                "upperFrame", filter.upperFrameMin(), filter.upperFrameMax()));
+        specifications.add(com.lb_calc_web.repository.specification.CatalogSpecifications.integerRange(
+                "bottomFrame", filter.bottomFrameMin(), filter.bottomFrameMax()));
+        specifications.add(com.lb_calc_web.repository.specification.CatalogSpecifications.integerRange(
+                "countCells", filter.countCellsMin(), filter.countCellsMax()));
+        specifications.add(com.lb_calc_web.repository.specification.CatalogSpecifications.equal(
+                "directionDoorOpening", filter.directionDoorOpening()));
+        specifications.add(com.lb_calc_web.repository.specification.CatalogSpecifications.equal("colorBody", filter.colorBody()));
+        specifications.add(com.lb_calc_web.repository.specification.CatalogSpecifications.equal("colorDoor", filter.colorDoor()));
+        var specification = com.lb_calc_web.repository.specification.CatalogSpecifications.all(specifications);
+        return lbRepository.findAll(specification, pageable).map(LBEntityMapper::toDomain);
     }
 
     @Transactional(readOnly = true)
