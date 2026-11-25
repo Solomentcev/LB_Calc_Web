@@ -36,6 +36,10 @@ public final class ALSEntityMapper {
                 modules
         );
 
+        // Функциональная конфигурация ALS хранится отдельно и синхронизируется
+        // с функциональными назначениями единственного управляющего модуля.
+        domain.setFunctionalConfiguration(entity.getFunctionalConfiguration());
+
         /*
          * Наименование, описание и ширина являются производными
          * характеристиками. Доменная модель пересчитывает их из состава
@@ -77,6 +81,7 @@ public final class ALSEntityMapper {
         entity.setBottomFrame(domain.getBottomFrame());
         entity.setColorBody(domain.getColorBody());
         entity.setColorDoor(domain.getColorDoor());
+        entity.setFunctionalConfiguration(domain.getFunctionalConfiguration());
 
         List<ModuleEntity> moduleEntities = domain.getModules().stream()
                 .map(module -> Objects.requireNonNull(

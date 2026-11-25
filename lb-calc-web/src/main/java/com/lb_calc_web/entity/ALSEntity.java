@@ -1,11 +1,19 @@
 package com.lb_calc_web.entity;
 
 import com.lb_calc_web.domain.attributes.Colors;
+import com.lb_calc_web.domain.equipment.AccessPurpose;
+import com.lb_calc_web.domain.equipment.DisplayPurpose;
+import com.lb_calc_web.domain.equipment.PaymentPurpose;
+import com.lb_calc_web.domain.equipment.PrinterPurpose;
+import com.lb_calc_web.domain.model.FunctionalConfiguration;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.EnumSet;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.List;
 import java.util.Objects;
 
@@ -87,6 +95,32 @@ public class ALSEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 50)
     private Colors colorDoor;
+
+    /** Функциональное назначение дисплея ALS. */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "display_purpose", nullable = false, length = 50)
+    private DisplayPurpose displayPurpose = DisplayPurpose.NONE;
+
+    /** Функциональные назначения доступа ALS. */
+    @org.hibernate.annotations.BatchSize(size = 50)
+    @ElementCollection
+    @CollectionTable(
+            name = "als_access_purpose",
+            joinColumns = @JoinColumn(name = "als_id")
+    )
+    @Enumerated(EnumType.STRING)
+    @Column(name = "access_purpose", nullable = false, length = 50)
+    private Set<AccessPurpose> accessPurposes = EnumSet.noneOf(AccessPurpose.class);
+
+    /** Функциональное назначение оплаты ALS. */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "payment_purpose", nullable = false, length = 50)
+    private PaymentPurpose paymentPurpose = PaymentPurpose.NONE;
+
+    /** Функциональное назначение принтера ALS. */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "printer_purpose", nullable = false, length = 50)
+    private PrinterPurpose printerPurpose = PrinterPurpose.ABSENT;
 
     /**
      * Модули, входящие в ALS.
@@ -195,6 +229,26 @@ public class ALSEntity {
                 colorDoor,
                 "Цвет дверей не должен быть null"
         );
+    }
+
+    /** Возвращает независимую функциональную конфигурацию ALS. */
+    public FunctionalConfiguration getFunctionalConfiguration() {
+        return new FunctionalConfiguration(
+                displayPurpose, accessPurposes, paymentPurpose, printerPurpose
+        );
+    }
+
+    /** Обновляет функциональную конфигурацию ALS. */
+    public void setFunctionalConfiguration(FunctionalConfiguration configuration) {
+        Objects.requireNonNull(
+                configuration,
+                "Функциональная конфигурация ALS не должна быть null"
+        );
+        displayPurpose = configuration.getDisplay();
+        accessPurposes.clear();
+        accessPurposes.addAll(configuration.getAccess());
+        paymentPurpose = configuration.getPayment();
+        printerPurpose = configuration.getPrinter();
     }
 
     public List<ALSModuleEntity> getModules() {

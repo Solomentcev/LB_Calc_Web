@@ -45,6 +45,45 @@ class ALSEntityMapperTest {
     }
 
     @Test
+    void roundTrip_shouldPersistAlsFunctionalConfigurationIndependentlyOfModuleConfiguration() {
+        ALS domain = TestDataFactory.validALS(null);
+        var expected = new com.lb_calc_web.domain.model.FunctionalConfiguration(
+                com.lb_calc_web.domain.equipment.DisplayPurpose.INCH_17,
+                java.util.Set.of(
+                        com.lb_calc_web.domain.equipment.AccessPurpose.RFID,
+                        com.lb_calc_web.domain.equipment.AccessPurpose.QR_CODE
+                ),
+                com.lb_calc_web.domain.equipment.PaymentPurpose.CARDS_AND_CASH,
+                com.lb_calc_web.domain.equipment.PrinterPurpose.PRESENT
+        );
+        domain.setFunctionalConfiguration(expected);
+
+        ALSEntity entity = ALSEntityMapper.toEntity(
+                domain,
+                ALSEntityMapperTest::toEntity
+        );
+
+        assertEquals(expected, entity.getFunctionalConfiguration());
+
+        var independentAlsConfiguration =
+                new com.lb_calc_web.domain.model.FunctionalConfiguration(
+                        com.lb_calc_web.domain.equipment.DisplayPurpose.INCH_19,
+                        java.util.Set.of(com.lb_calc_web.domain.equipment.AccessPurpose.PIN),
+                        com.lb_calc_web.domain.equipment.PaymentPurpose.CASH,
+                        com.lb_calc_web.domain.equipment.PrinterPurpose.OTHER
+                );
+        entity.setFunctionalConfiguration(independentAlsConfiguration);
+
+        ALS restored = ALSEntityMapper.toDomain(entity);
+
+        assertEquals(independentAlsConfiguration, restored.getFunctionalConfiguration());
+        assertEquals(
+                independentAlsConfiguration,
+                restored.getControlModule().getControlConfiguration().getFunctionalConfiguration()
+        );
+    }
+
+    @Test
     void updateEntity_shouldReuseUnchangedModuleAssociations() {
         ALS domain = TestDataFactory.validALS(null);
         ALSEntity entity = ALSEntityMapper.toEntity(
