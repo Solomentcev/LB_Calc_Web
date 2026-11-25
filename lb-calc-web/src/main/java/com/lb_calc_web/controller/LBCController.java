@@ -109,6 +109,11 @@ public class LBCController extends BaseCatalogController {
     @PostMapping("/refresh")
     public String refreshLBC(@ModelAttribute("lbc") LBCDTO lbc, Model model) {
         model.addAttribute("pageContext", "CATALOG");
+        try {
+            lbc = LBCDtoMapper.toDto(lbcService.restoreDomain(lbc));
+        } catch (ValidationSizeException exception) {
+            model.addAttribute("errors", ValidationErrorFormatter.format(exception.getValidationResult()));
+        }
         prepareForm(model, LBCImageService.addImage(lbc));
         return "lbcs/lbc";
     }

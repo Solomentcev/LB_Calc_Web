@@ -61,6 +61,27 @@ public class ALSController extends BaseCatalogController {
         return "alss/als";
     }
 
+    /**
+     * Пересчитывает ALS и обновляет форму без сохранения конфигурации.
+     */
+    @PostMapping("/refresh")
+    public String refreshALS(@ModelAttribute("als") ALSDTO als, Model model) {
+        model.addAttribute("pageContext", "CATALOG");
+        try {
+            if (als.getId() != null && als.getId() > 0) {
+                ALSDTO persisted = ALSDtoMapper.toDto(alsService.findById(als.getId()));
+                als.setLC(persisted.getLC());
+                als.setLBC(persisted.getLBC());
+            }
+            als = ALSDtoMapper.toDto(alsService.restoreDomain(als));
+        } catch (ValidationSizeException exception) {
+            model.addAttribute("ALSErrors",
+                    ValidationErrorFormatter.format(exception.getValidationResult()));
+        }
+        model.addAttribute("als", ALSImageService.addImages(als));
+        return "alss/als";
+    }
+
     @PostMapping("/save")
     public String saveALS(@ModelAttribute("als") ALSDTO als, Model model) {
         model.addAttribute("pageContext", "CATALOG");
@@ -105,6 +126,26 @@ public class ALSController extends BaseCatalogController {
 
         model.addAttribute("als", ALSImageService.addImages(ALSDtoMapper.toDto(als)));
         model.addAttribute("lb", LBImageService.addImage(LBDtoMapper.toDto(lb)));
+        return "lbs/lb";
+    }
+
+    /**
+     * Пересчитывает LB внутри ALS и обновляет форму без сохранения ALS.
+     */
+    @PostMapping("/{alsId}/lbs/{lbId}/refresh")
+    public String refreshLB(@PathVariable Long alsId, @PathVariable Long lbId,
+                            @ModelAttribute("lb") LBDTO lb, Model model) {
+        model.addAttribute("pageContext", "ALS_CATALOG");
+        ALS als = alsService.findById(alsId);
+        findLBInALS(als, lbId);
+        lb.setId(lbId);
+        try {
+            lb = LBDtoMapper.toDto(alsService.restoreLB(lb));
+        } catch (IllegalArgumentException | NullPointerException exception) {
+            // При незаполненных промежуточных значениях сохраняем введённые данные формы.
+        }
+        model.addAttribute("als", ALSImageService.addImages(ALSDtoMapper.toDto(als)));
+        model.addAttribute("lb", LBImageService.addImage(lb));
         return "lbs/lb";
     }
 
@@ -210,6 +251,11 @@ public class ALSController extends BaseCatalogController {
         if (source.getLC() == null || !Objects.equals(source.getLC().getId(), lcId))
             throw new NoSuchElementException("LC с id " + lcId + " не найден в ALS " + alsId);
         lc.setId(lcId);
+        try {
+            lc = LCDtoMapper.toDto(alsService.restoreLC(lc, source));
+        } catch (ValidationSizeException exception) {
+            model.addAttribute("errors", ValidationErrorFormatter.format(exception.getValidationResult()));
+        }
         model.addAttribute("als", ALSImageService.addImages(ALSDtoMapper.toDto(source)));
         prepareLCForm(model, LCImageService.addImage(lc));
         return "lcs/lc";
@@ -283,6 +329,11 @@ public class ALSController extends BaseCatalogController {
         com.lb_calc_web.domain.model.ALS source = alsService.findById(alsId);
         alsService.findLBCInALS(source, lbcId);
         lbc.setId(lbcId);
+        try {
+            lbc = LBCDtoMapper.toDto(alsService.restoreLBC(lbc, source));
+        } catch (ValidationSizeException exception) {
+            model.addAttribute("errors", ValidationErrorFormatter.format(exception.getValidationResult()));
+        }
         model.addAttribute("als", ALSImageService.addImages(ALSDtoMapper.toDto(source)));
         prepareLBCForm(model, LBCImageService.addImage(lbc));
         return "lbcs/lbc";

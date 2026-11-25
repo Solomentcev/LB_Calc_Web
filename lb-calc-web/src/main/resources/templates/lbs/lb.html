@@ -30,6 +30,13 @@
         <input type="hidden" th:field="*{deltaWidth}">
         <input type="hidden" th:field="*{serviceZoneWidth}">
 
+        <button type="submit" hidden formnovalidate data-form-refresh
+                th:formaction="${pageContext == 'CATALOG'} ? @{/lbs/refresh} :
+                    (${pageContext == 'ALS_CATALOG'} ?
+                    @{/alss/{alsId}/lbs/{lbId}/refresh(alsId=${als.id},lbId=${lb.id})} :
+                    @{/projects/{projectId}/alss/{alsId}/lbs/{lbId}/refresh(projectId=${projectId},alsId=${alsId},lbId=${lbId})})">
+        </button>
+
         <div class="page-actions">
             <button type="submit" class="btn btn-primary">Сохранить модуль</button>
             <a th:if="${pageContext == 'CATALOG'}" th:href="@{/lbs}" class="btn btn-outline-secondary">К списку модулей</a>

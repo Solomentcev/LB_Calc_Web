@@ -14,6 +14,8 @@
     <form th:action="@{/projects/{id}/save(id=${project.id})}"
           th:object="${project}"
           method="post">
+        <button type="submit" hidden formnovalidate data-form-refresh
+                th:formaction="@{/projects/{id}/refresh(id=${project.id})}"></button>
 
         <div class="mb-3">
 

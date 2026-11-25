@@ -84,6 +84,11 @@ public class LCController {
     @PostMapping("/refresh")
     public String refreshLC(@ModelAttribute("lc") LCDTO lc, Model model) {
         model.addAttribute("pageContext", "CATALOG");
+        try {
+            lc = LCDtoMapper.toDto(lcService.restoreDomain(lc));
+        } catch (ValidationSizeException exception) {
+            model.addAttribute("errors", ValidationErrorFormatter.format(exception.getValidationResult()));
+        }
         prepareForm(model, LCImageService.addImage(lc));
         return "lcs/lc";
     }

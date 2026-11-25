@@ -149,6 +149,30 @@ public class ProjectController
     }
 
     /**
+     * Пересчитывает вложенные ALS и обновляет форму проекта без сохранения.
+     */
+    @PostMapping("/{id}/refresh")
+    public String refreshProject(@PathVariable Long id,
+                                 @ModelAttribute("project") ProjectDTO project,
+                                 Model model) {
+        project.setId(id);
+        populateServerMetadata(project, id);
+        try {
+            if (project.getAlsList() != null) {
+                project.setAlsList(project.getAlsList().stream()
+                        .map(als -> ALSImageService.addImages(
+                                ALSDtoMapper.toDto(alsService.restoreDomain(als))))
+                        .toList());
+            }
+        } catch (ValidationSizeException exception) {
+            model.addAttribute("projectErrors",
+                    ValidationErrorFormatter.format(exception.getValidationResult()));
+        }
+        model.addAttribute("project", addALSImages(project));
+        return "projects/project";
+    }
+
+    /**
      * Сохранение проекта.
      */
     @PostMapping("/{id}/save")
@@ -281,7 +305,31 @@ public class ProjectController
                 "als",
                 ALSImageService.addImages(als)
         );
+        model.addAttribute("projectId", projectId);
+        model.addAttribute("alsId", alsId);
 
+        return "alss/als";
+    }
+
+    /**
+     * Пересчитывает ALS проекта и обновляет форму без сохранения проекта.
+     */
+    @PostMapping("/{projectId}/alss/{alsId}/refresh")
+    public String refreshALS(@PathVariable Long projectId, @PathVariable Long alsId,
+                             @ModelAttribute("als") ALSDTO als, Model model) {
+        projectService.findALSInProject(projectId, alsId);
+        als.setId(alsId);
+        try {
+            als = ALSDtoMapper.toDto(alsService.restoreDomain(als));
+        } catch (ValidationSizeException exception) {
+            model.addAttribute("ALSErrors",
+                    ValidationErrorFormatter.format(exception.getValidationResult()));
+        }
+        model.addAttribute("project", addALSImages(
+                ProjectDtoMapper.toDto(projectService.findById(projectId))));
+        model.addAttribute("als", ALSImageService.addImages(als));
+        model.addAttribute("projectId", projectId);
+        model.addAttribute("alsId", alsId);
         return "alss/als";
     }
 
@@ -323,6 +371,8 @@ public class ProjectController
                     "project",
                     addALSImages(ProjectDtoMapper.toDto(projectService.findById(projectId)))
             );
+            model.addAttribute("projectId", projectId);
+            model.addAttribute("alsId", alsId);
 
             return "alss/als";
         }
@@ -367,8 +417,14 @@ public class ProjectController
     @PostMapping("/{projectId}/alss/{alsId}/lcs/{lcId}/refresh")
     public String refreshLC(@PathVariable Long projectId, @PathVariable Long alsId,
                             @PathVariable Long lcId, @ModelAttribute("lc") LCDTO lc, Model model) {
+        ALS sourceALS = projectService.findALSInProject(projectId, alsId);
         projectService.findLCInProject(projectId, alsId, lcId);
         lc.setId(lcId);
+        try {
+            lc = LCDtoMapper.toDto(alsService.restoreLC(lc, sourceALS));
+        } catch (ValidationSizeException exception) {
+            model.addAttribute("errors", ValidationErrorFormatter.format(exception.getValidationResult()));
+        }
         model.addAttribute("project", addALSImages(ProjectDtoMapper.toDto(projectService.findById(projectId))));
         model.addAttribute("als", ALSImageService.addImages(ALSDtoMapper.toDto(
                 projectService.findALSInProject(projectId, alsId))));
@@ -489,8 +545,14 @@ public class ProjectController
     @PostMapping("/{projectId}/alss/{alsId}/lbcs/{lbcId}/refresh")
     public String refreshLBC(@PathVariable Long projectId, @PathVariable Long alsId,
                              @PathVariable Long lbcId, @ModelAttribute("lbc") LBCDTO lbc, Model model) {
+        ALS sourceALS = projectService.findALSInProject(projectId, alsId);
         projectService.findLBCInProject(projectId, alsId, lbcId);
         lbc.setId(lbcId);
+        try {
+            lbc = LBCDtoMapper.toDto(alsService.restoreLBC(lbc, sourceALS));
+        } catch (ValidationSizeException exception) {
+            model.addAttribute("errors", ValidationErrorFormatter.format(exception.getValidationResult()));
+        }
         model.addAttribute("project", addALSImages(ProjectDtoMapper.toDto(projectService.findById(projectId))));
         model.addAttribute("als", ALSImageService.addImages(ALSDtoMapper.toDto(
                 projectService.findALSInProject(projectId, alsId))));
@@ -586,6 +648,31 @@ public class ProjectController
         model.addAttribute("alsId", alsId);
         model.addAttribute("lbId", lbId);
 
+        return "lbs/lb";
+    }
+
+    /**
+     * Пересчитывает LB проекта и обновляет форму без сохранения ALS.
+     */
+    @PostMapping("/{projectId}/alss/{alsId}/lbs/{lbId}/refresh")
+    public String refreshLB(@PathVariable Long projectId, @PathVariable Long alsId,
+                            @PathVariable Long lbId, @ModelAttribute("lb") LBDTO lb,
+                            Model model) {
+        projectService.findLBInProject(projectId, alsId, lbId);
+        lb.setId(lbId);
+        try {
+            lb = LBDtoMapper.toDto(alsService.restoreLB(lb));
+        } catch (IllegalArgumentException | NullPointerException exception) {
+            // При незаполненных промежуточных значениях сохраняем введённые данные формы.
+        }
+        model.addAttribute("project", addALSImages(
+                ProjectDtoMapper.toDto(projectService.findById(projectId))));
+        model.addAttribute("als", ALSImageService.addImages(ALSDtoMapper.toDto(
+                projectService.findALSInProject(projectId, alsId))));
+        model.addAttribute("lb", LBImageService.addImage(lb));
+        model.addAttribute("projectId", projectId);
+        model.addAttribute("alsId", alsId);
+        model.addAttribute("lbId", lbId);
         return "lbs/lb";
     }
 

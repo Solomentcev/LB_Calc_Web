@@ -7,6 +7,8 @@
         
         <div class="container editor-page">
         <form th:action="@{/alss/save}" th:object="${als}" method="post">
+            <button type="submit" hidden formnovalidate data-form-refresh
+                    th:formaction="@{/alss/refresh}"></button>
             <input type="hidden" th:field="*{functionalConfiguration.display}">
             <input type="hidden" th:field="*{functionalConfiguration.payment}">
             <input type="hidden" th:field="*{functionalConfiguration.printer}">
@@ -302,6 +304,8 @@
                         alsId=${alsId})}"
                   th:object="${als}"
                   method="post">
+            <button type="submit" hidden formnovalidate data-form-refresh
+                    th:formaction="@{/projects/{projectId}/alss/{alsId}/refresh(projectId=${projectId},alsId=${alsId})}"></button>
             <input type="hidden" th:field="*{functionalConfiguration.display}">
             <input type="hidden" th:field="*{functionalConfiguration.payment}">
             <input type="hidden" th:field="*{functionalConfiguration.printer}">

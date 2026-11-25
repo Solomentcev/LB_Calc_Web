@@ -28,7 +28,7 @@
         <input type="hidden" th:field="*{id}">
         <input type="hidden" th:field="*{name}">
 
-        <button type="submit" hidden formnovalidate th:formaction="${pageContext == 'CATALOG'} ? @{/lbcs/refresh} : (${pageContext == 'ALS_CATALOG'} ? @{/alss/{alsId}/lbcs/{lbcId}/refresh(alsId=${als.id},lbcId=${lbc.id})} : @{/projects/{projectId}/alss/{alsId}/lbcs/{lbcId}/refresh(projectId=${projectId},alsId=${alsId},lbcId=${lbcId})})"></button>
+        <button type="submit" hidden formnovalidate data-form-refresh th:formaction="${pageContext == 'CATALOG'} ? @{/lbcs/refresh} : (${pageContext == 'ALS_CATALOG'} ? @{/alss/{alsId}/lbcs/{lbcId}/refresh(alsId=${als.id},lbcId=${lbc.id})} : @{/projects/{projectId}/alss/{alsId}/lbcs/{lbcId}/refresh(projectId=${projectId},alsId=${alsId},lbcId=${lbcId})})"></button>
         <div class="page-actions">
             <button type="submit" class="btn btn-primary">Сохранить модуль</button>
             <a th:if="${pageContext == 'CATALOG'}" th:href="@{/lbcs}" class="btn btn-outline-secondary">К списку модулей</a>
@@ -169,6 +169,5 @@
     </form>
 </main>
 <div th:replace="~{footer :: footer}"></div>
-<script th:src="@{/js/module-equipment.js}" defer></script>
 </body>
 </html>

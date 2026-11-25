@@ -4,6 +4,7 @@ import com.lb_calc_web.domain.attributes.Colors;
 import com.lb_calc_web.domain.attributes.DirectionDoorOpening;
 import com.lb_calc_web.dto.LBDTO;
 import com.lb_calc_web.mapper.dto.LBDtoMapper;
+import com.lb_calc_web.service.factory.TypeLbFactory;
 import com.lb_calc_web.service.validation.ValidationSizeException;
 import com.lb_calc_web.service.LBService;
 import com.lb_calc_web.service.image.LBImageService;
@@ -76,6 +77,22 @@ public class LBController {
 
         model.addAttribute("lb", lb);
 
+        return "lbs/lb";
+    }
+
+    /**
+     * Пересчитывает LB и обновляет форму без сохранения модуля.
+     */
+    @PostMapping("/refresh")
+    public String refreshLB(@ModelAttribute("lb") LBDTO lb, Model model) {
+        model.addAttribute("pageContext", "CATALOG");
+        try {
+            lb = LBDtoMapper.toDto(LBDtoMapper.toDomain(
+                    lb, TypeLbFactory.forLB(environment, lb.getType())));
+        } catch (IllegalArgumentException | NullPointerException exception) {
+            // При незаполненных промежуточных значениях сохраняем введённые данные формы.
+        }
+        model.addAttribute("lb", LBImageService.addImage(lb));
         return "lbs/lb";
     }
 
