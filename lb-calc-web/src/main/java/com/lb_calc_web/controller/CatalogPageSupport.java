@@ -37,7 +37,13 @@ public final class CatalogPageSupport {
         String safeSort = allowedSorts.contains(sort) ? sort : defaultSort;
         Sort.Direction safeDirection = Sort.Direction.fromOptionalString(direction)
                 .orElse(Sort.Direction.ASC);
-        Sort ordering = Sort.by(safeDirection, safeSort);
+        Sort ordering;
+        if ("createdBy".equals(safeSort) || "updatedBy".equals(safeSort)) {
+            ordering = Sort.by(safeDirection, safeSort + ".lastName")
+                    .and(Sort.by(safeDirection, safeSort + ".firstName"));
+        } else {
+            ordering = Sort.by(safeDirection, safeSort);
+        }
         if (!"id".equals(safeSort)) {
             ordering = ordering.and(Sort.by(Sort.Direction.ASC, "id"));
         }

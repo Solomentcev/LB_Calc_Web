@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.env.Environment;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,6 +31,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
@@ -70,17 +72,90 @@ public class ProjectService {
         this.sizeValidator = sizeValidator;
     }
 
+    /**
+     * Возвращает страницу проектов с независимыми фильтрами по столбцам.
+     * Связи с создателем и редактором используются только в условиях запроса;
+     * коллекция ALS не загружается вместе со страницей.
+     */
     @Transactional(readOnly = true)
     public org.springframework.data.domain.Page<Project> findPage(
-            String query, org.springframework.data.domain.Pageable pageable
+            ProjectCatalogFilter filter, org.springframework.data.domain.Pageable pageable
     ) {
-        String term = query == null ? "" : query.trim();
-        var entities = term.isEmpty()
-                ? projectRepository.findAllWithUsers(pageable)
-                : projectRepository.findByNameContainingIgnoreCaseOrCompanyContainingIgnoreCaseOrDescriptionContainingIgnoreCase(
-                        term, term, term, pageable);
-        return entities.map(entity -> ProjectEntityMapper.toDomain(
-                entity, (als, alsEntity) -> { }));
+        List<Specification<ProjectEntity>> specifications = new ArrayList<>();
+        if (filter.id() != null) {
+            specifications.add((root, query, builder) ->
+                    builder.equal(root.get("id"), filter.id()));
+        }
+        addTextFilter(specifications, "name", filter.name());
+        addTextFilter(specifications, "company", filter.company());
+        addTextFilter(specifications, "description", filter.description());
+
+        if (hasText(filter.createdByFirstName())) {
+            specifications.add((root, query, builder) -> builder.like(
+                    builder.lower(root.join("createdBy").get("firstName")),
+                    pattern(filter.createdByFirstName())));
+        }
+        if (hasText(filter.createdByLastName())) {
+            specifications.add((root, query, builder) -> builder.like(
+                    builder.lower(root.join("createdBy").get("lastName")),
+                    pattern(filter.createdByLastName())));
+        }
+        if (hasText(filter.updatedByFirstName())) {
+            specifications.add((root, query, builder) -> builder.like(
+                    builder.lower(root.join("updatedBy").get("firstName")),
+                    pattern(filter.updatedByFirstName())));
+        }
+        if (hasText(filter.updatedByLastName())) {
+            specifications.add((root, query, builder) -> builder.like(
+                    builder.lower(root.join("updatedBy").get("lastName")),
+                    pattern(filter.updatedByLastName())));
+        }
+        addDateRangeFilter(specifications, "createdAt",
+                filter.createdAtFrom(), filter.createdAtTo());
+        addDateRangeFilter(specifications, "updatedAt",
+                filter.updatedAtFrom(), filter.updatedAtTo());
+
+        Specification<ProjectEntity> specification = specifications.stream()
+                .reduce(Specification::and)
+                .orElse((root, query, builder) -> builder.conjunction());
+
+        return projectRepository.findAll(specification, pageable)
+                .map(entity -> ProjectEntityMapper.toDomain(entity, (als, alsEntity) -> { }));
+    }
+
+    private void addTextFilter(
+            List<Specification<ProjectEntity>> specifications,
+            String attribute,
+            String value
+    ) {
+        if (hasText(value)) {
+            specifications.add((root, query, builder) ->
+                    builder.like(builder.lower(root.get(attribute)), pattern(value)));
+        }
+    }
+
+    private void addDateRangeFilter(
+            List<Specification<ProjectEntity>> specifications,
+            String attribute,
+            LocalDate from,
+            LocalDate to
+    ) {
+        if (from != null) {
+            specifications.add((root, query, builder) ->
+                    builder.greaterThanOrEqualTo(root.<LocalDate>get(attribute), from));
+        }
+        if (to != null) {
+            specifications.add((root, query, builder) ->
+                    builder.lessThanOrEqualTo(root.<LocalDate>get(attribute), to));
+        }
+    }
+
+    private boolean hasText(String value) {
+        return value != null && !value.isBlank();
+    }
+
+    private String pattern(String value) {
+        return "%" + value.trim().toLowerCase(Locale.ROOT) + "%";
     }
 
     @Transactional(readOnly = true)

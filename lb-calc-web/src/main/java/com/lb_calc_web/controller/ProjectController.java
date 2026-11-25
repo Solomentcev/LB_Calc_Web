@@ -22,6 +22,7 @@ import com.lb_calc_web.dto.LCDTO;
 import com.lb_calc_web.dto.ProjectDTO;
 import com.lb_calc_web.service.validation.ValidationSizeException;
 import com.lb_calc_web.service.ProjectService;
+import com.lb_calc_web.service.ProjectCatalogFilter;
 import com.lb_calc_web.service.ALSService;
 import com.lb_calc_web.service.export.ProjectExcelExportService;
 import com.lb_calc_web.service.image.ALSImageService;
@@ -40,6 +41,7 @@ import java.util.Set;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Controller
@@ -76,19 +78,38 @@ public class ProjectController
     public String projects(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
-            @RequestParam(defaultValue = "") String q,
             @RequestParam(defaultValue = "id") String sort,
             @RequestParam(defaultValue = "asc") String direction,
+            @RequestParam(required = false) Long id,
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String company,
+            @RequestParam(required = false) String description,
+            @RequestParam(required = false) String createdByFirstName,
+            @RequestParam(required = false) String createdByLastName,
+            @RequestParam(required = false) LocalDate createdAtFrom,
+            @RequestParam(required = false) LocalDate createdAtTo,
+            @RequestParam(required = false) String updatedByFirstName,
+            @RequestParam(required = false) String updatedByLastName,
+            @RequestParam(required = false) LocalDate updatedAtFrom,
+            @RequestParam(required = false) LocalDate updatedAtTo,
             Model model
     ) {
         Pageable pageable = CatalogPageSupport.pageable(page, size, sort, direction, "id",
-                Set.of("id", "name", "company", "createdAt", "updatedAt"));
-        var result = projectService.findPage(q, pageable).map(ProjectDtoMapper::toDto);
+                Set.of("id", "name", "company", "description",
+                        "createdBy", "createdAt", "updatedBy", "updatedAt"));
+        ProjectCatalogFilter filter = new ProjectCatalogFilter(
+                id, name, company, description,
+                createdByFirstName, createdByLastName, createdAtFrom, createdAtTo,
+                updatedByFirstName, updatedByLastName, updatedAtFrom, updatedAtTo);
+        var result = projectService.findPage(filter, pageable).map(ProjectDtoMapper::toDto);
         model.addAttribute("projects", result.getContent());
-        CatalogPageSupport.addModelAttributes(model, result, q, pageable, "/projects",
-                CatalogPageSupport.sortOptions("id", "ID", "name", "Название",
-                        "company", "Компания", "createdAt", "Дата создания",
-                        "updatedAt", "Дата изменения"));
+        model.addAttribute("filters", filter);
+        model.addAttribute("page", result);
+        model.addAttribute("sort", pageable.getSort().stream()
+                .findFirst().map(order -> order.getProperty()).orElse("id"));
+        model.addAttribute("direction", pageable.getSort().stream()
+                .findFirst().map(order -> order.getDirection().name().toLowerCase()).orElse("asc"));
+        model.addAttribute("size", pageable.getPageSize());
         return "projects/projects";
     }
 
