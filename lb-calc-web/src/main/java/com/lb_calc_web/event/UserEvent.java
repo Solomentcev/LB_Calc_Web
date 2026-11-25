@@ -1,4 +1,5 @@
 package com.lb_calc_web.event;
+/** Событие изменения состояния учётной записи для передачи в сервис уведомлений. */
 public class UserEvent {
 
     private UserEventType type;

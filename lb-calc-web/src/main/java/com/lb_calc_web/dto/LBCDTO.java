@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+/** DTO комбинированного модуля LBC, включая функциональные назначения и выбранное оборудование. */
 public class LBCDTO {
 
     private Long id;

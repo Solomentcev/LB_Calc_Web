@@ -1,5 +1,6 @@
 package com.lb_calc_web.event;
 
+/** Типы событий жизненного цикла учётной записи пользователя. */
 public enum UserEventType {
 
     USER_REGISTERED,

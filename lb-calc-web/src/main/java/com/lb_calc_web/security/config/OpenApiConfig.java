@@ -20,5 +20,6 @@ import org.springframework.context.annotation.Configuration;
         scheme = "bearer",
         bearerFormat = "JWT"
 )
+/** Конфигурация OpenAPI и Swagger UI для REST API приложения. */
 public class OpenApiConfig {
 }

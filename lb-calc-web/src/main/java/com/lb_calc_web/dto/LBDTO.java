@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.util.Objects;
 
+/** DTO модуля хранения LB для передачи параметров между веб-слоем и сервисами. */
 public class LBDTO {
 
     private Long id;

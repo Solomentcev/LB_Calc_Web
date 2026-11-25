@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 @ControllerAdvice
+/** Глобальный обработчик непредвиденных исключений MVC-интерфейса. */
 public class LBCalcExceptionHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(
             LBCalcExceptionHandler.class);

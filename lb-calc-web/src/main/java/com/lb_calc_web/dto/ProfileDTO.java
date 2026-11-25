@@ -8,6 +8,7 @@ import jakarta.validation.constraints.Size;
 
 import java.time.LocalDate;
 
+/** Представление профиля текущего пользователя. */
 public class ProfileDTO {
     private Long id;
     @NotBlank

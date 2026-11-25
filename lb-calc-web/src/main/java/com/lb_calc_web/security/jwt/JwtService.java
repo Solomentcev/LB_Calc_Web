@@ -24,6 +24,7 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 @Service
+/** Сервис создания, проверки и извлечения данных из JWT-токенов. */
 public class JwtService {
 
     private static final Logger logger =

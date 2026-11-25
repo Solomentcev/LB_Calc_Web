@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
  * Неизменяемая конфигурация ограничений геометрических параметров.
  */
 @Component
+/** Набор граничных значений и ограничений геометрических параметров модулей. */
 public class SizeBounds {
 
     private final int upperFrameMin;

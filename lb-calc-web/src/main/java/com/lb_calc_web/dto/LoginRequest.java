@@ -3,6 +3,7 @@ package com.lb_calc_web.dto;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
+/** Данные запроса аутентификации пользователя. */
 public class LoginRequest {
     @NotBlank
     @Email

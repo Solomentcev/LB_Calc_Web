@@ -24,6 +24,7 @@ import java.io.IOException;
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
+/** Конфигурация Spring Security, правил доступа и фильтров аутентификации. */
 public class SecurityConfiguration {
 
     private final JwtAuthentificationFilter jwtAuthentificationFilter;

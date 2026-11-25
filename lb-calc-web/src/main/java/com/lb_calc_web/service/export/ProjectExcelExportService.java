@@ -18,6 +18,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
 @Service
+/** Формирует Excel-представление проекта и его конфигурации. */
 public class ProjectExcelExportService {
 
     private static final Logger logger =

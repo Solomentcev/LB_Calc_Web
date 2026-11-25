@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+/** DTO управляющего модуля LC для передачи параметров между веб-слоем и сервисами. */
 public class LCDTO {
 
     private Long id;
