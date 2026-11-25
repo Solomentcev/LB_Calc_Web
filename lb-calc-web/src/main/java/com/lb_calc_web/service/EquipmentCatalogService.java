@@ -31,13 +31,21 @@ import java.util.Objects;
 /** Управляет каталогом физических моделей оборудования. */
 @Service
 public class EquipmentCatalogService {
-    private static final Logger logger = LoggerFactory.getLogger(EquipmentCatalogService.class);
 
     private final EquipmentRepository equipmentRepository;
+
     public EquipmentCatalogService(EquipmentRepository equipmentRepository) {
         this.equipmentRepository = Objects.requireNonNull(equipmentRepository);
     }
-    /** Возвращает страницу каталога оборудования с применёнными фильтрами и сортировкой. */
+
+    /**
+     * Возвращает страницу оборудования с независимыми фильтрами по столбцам.
+     * Все условия применяются в БД до сортировки и пагинации.
+     *
+     * @param filter параметры фильтрации
+     * @param pageable сортировка и параметры страницы
+     * @return отфильтрованная страница оборудования
+     */
     @Transactional(readOnly = true)
     public Page<Equipment> findPage(EquipmentCatalogFilter filter, Pageable pageable) {
         Objects.requireNonNull(filter, "Фильтры каталога оборудования не должны быть null");
@@ -140,6 +148,7 @@ public class EquipmentCatalogService {
         if (configuration.getAccess() != null && configuration.getAccess().contains(AccessPurpose.PIN)
                 && configuration.getDisplay() == DisplayPurpose.NONE)
             configuration.setDisplay(DisplayPurpose.INCH_10);
+
         java.util.LinkedHashSet<String> required = new java.util.LinkedHashSet<>();
         if (configuration.getDisplay() != null && configuration.getDisplay() != DisplayPurpose.NONE)
             required.add("DISPLAY:" + configuration.getDisplay().name());
@@ -155,6 +164,7 @@ public class EquipmentCatalogService {
             Equipment item = byId.get(selection.getEquipmentId());
             if (item != null && item.getFunctionalType() == EquipmentFunctionalType.SYSTEM) required.add(key);
         });
+
         java.util.Set<Long> defaults = findDefaultModelIds();
         List<EquipmentSelectionDTO> result = new ArrayList<>();
         for (String key : required) {
@@ -175,11 +185,16 @@ public class EquipmentCatalogService {
         }
         return result;
     }
+
     /** Формирует ключ функционального назначения модели оборудования. */
     private String key(Equipment item) {
         return item.getFunctionalType().name() + ":" + item.getPurpose().toString();
     }
-    /** Проверяет, что выбранное оборудование соответствует функциональным назначениям и количеству. */
+
+    /**
+     * Проверяет, что отправленные формы содержат ровно по одной модели для каждого
+     * активного физического назначения и что каждая модель относится к своему назначению.
+     */
     @Transactional(readOnly = true)
     public void validateSelections(
             FunctionalConfigurationDTO configuration, List<EquipmentSelectionDTO> selections) {

@@ -41,9 +41,12 @@ import java.util.function.Function;
 /** Сервис координации жизненного цикла проектов и изменения их конфигураций ALS. */
 @Service
 public class ProjectService {
+
     private static final Logger logger =
             LoggerFactory.getLogger(ProjectService.class);
+
     private static final String DEFAULT_COMPANY = "Заказчик";
+
     private final ProjectRepository projectRepository;
     private final ALSRepository alsRepository;
     private final EmployeeRepository employeeRepository;
@@ -51,6 +54,7 @@ public class ProjectService {
     private final EmployeeService employeeService;
     private final Environment environment;
     private final SizeValidator sizeValidator;
+
     public ProjectService(
             ProjectRepository projectRepository,
             ALSRepository alsRepository,
@@ -68,7 +72,12 @@ public class ProjectService {
         this.environment = environment;
         this.sizeValidator = sizeValidator;
     }
-    /** Возвращает страницу проектов с применёнными фильтрами и сортировкой. */
+
+    /**
+     * Возвращает страницу проектов с независимыми фильтрами по столбцам.
+     * Связи с создателем и редактором используются только в условиях запроса;
+     * коллекция ALS не загружается вместе со страницей.
+     */
     @Transactional(readOnly = true)
     public org.springframework.data.domain.Page<Project> findPage(
             ProjectCatalogFilter filter, org.springframework.data.domain.Pageable pageable
@@ -171,24 +180,34 @@ return projectRepository.findAllWithUsers()
         if (entity == null) {
             throw new NoSuchElementException("Проект с id " + id + " не найден");
         }
+
         return ProjectEntityMapper.toDomain(
                 entity,
                 (als, alsEntity) -> { }
         );
     }
-    /** Создаёт новый проект с конфигурацией ALS по умолчанию. */
+
+    /**
+     * Создаёт доменный проект с начальной конфигурацией ALS.
+     * Сохранение выполняется только после отправки формы.
+     */
     @Transactional
     public Project createProject() {
         logger.info("Создание проекта...");
+
         String company = getDefaultCompany();
         Project project = initProject(company);
         project.addALS(alsService.createALS());
         return project;
     }
-    /** Создаёт доменную модель проекта с заданной компанией и текущим сотрудником. */
+
+    /**
+     * Инициализирует новый доменный проект.
+     */
     public Project initProject(String company) {
         Employee currentEmployee = employeeService.getCurrentEmployeeDomain();
         LocalDate today = LocalDate.now();
+
         Project project = new Project(
                 company,
                 company,
@@ -198,7 +217,11 @@ return projectRepository.findAllWithUsers()
         project.setName(company + "_" + today);
         return project;
     }
-    /** Проверяет и сохраняет проект, включая его конфигурации ALS и сведения об изменении. */
+
+    /**
+     * Сохраняет доменный проект. Серверные metadata формируются
+     * на основании сохранённой записи и текущего сотрудника.
+     */
     @Transactional
     public Project saveProject(Project requested) {
         Objects.requireNonNull(requested, "Проект не должен быть null");
@@ -265,6 +288,7 @@ return projectRepository.findAllWithUsers()
         if (id == null || id <= 0) {
             throw new NoSuchElementException("Проект с id " + id + " не найден");
         }
+
         ProjectEntity entity =
                 projectRepository.findById(id)
                         .orElseThrow(
@@ -274,20 +298,28 @@ return projectRepository.findAllWithUsers()
                                                 + " не найден"
                                 )
                         );
+
         assertCanModifyProject(
                 entity,
                 employeeService.getCurrentEmployeeDomain()
         );
+
         projectRepository.delete(entity);
     }
-    /** Добавляет новую конфигурацию ALS в проект и сохраняет его. */
+
+    /**
+     * Добавляет одну единицу новой конфигурации ALS в проект.
+     */
     @Transactional
     public Project addNewALSandSaveProject(Long projectId) {
         Project domain = findDomainProject(projectId);
         domain.addALS(alsService.createALS());
         return saveDomainProject(domain);
     }
-    /** Удаляет выбранную конфигурацию ALS из проекта и сохраняет результат. */
+
+    /**
+     * Удаляет одну единицу выбранной конфигурации ALS из проекта.
+     */
     @Transactional
     public Project deleteALSandSaveProject(
             Long projectId,
@@ -295,21 +327,30 @@ return projectRepository.findAllWithUsers()
     ) {
         Project domain = findDomainProject(projectId);
         ALS selectedDomain = findDomainALS(domain, alsId);
+
         if (domain.getQuantity(selectedDomain) == 0) {
             throw new NoSuchElementException(
                     "ALS с id " + alsId
                             + " не найден в проекте " + projectId
             );
         }
+
         domain.removeALS(selectedDomain);
+
         return saveDomainProject(domain);
     }
-    /** Находит выбранную конфигурацию ALS внутри проекта. */
+
+    /**
+     * Находит ALS внутри конкретного проекта.
+     */
     @Transactional(readOnly = true)
     public ALS findALSInProject(Long projectId, Long alsId) {
         return findDomainALS(findDomainProject(projectId), alsId);
     }
-    /** Находит управляющий модуль LC в выбранной ALS проекта. */
+
+    /**
+     * Находит LC внутри конкретного ALS конкретного проекта.
+     */
     @Transactional(readOnly = true)
     public LC findLCInProject(Long projectId, Long alsId, Long lcId) {
         ALS als = findALSInProject(projectId, alsId);
@@ -321,7 +362,10 @@ return projectRepository.findAllWithUsers()
         }
         return lc;
     }
-    /** Находит комбинированный модуль LBC в выбранной ALS проекта. */
+
+    /**
+     * Находит LBC внутри конкретного ALS конкретного проекта.
+     */
     @Transactional(readOnly = true)
     public LBC findLBCInProject(Long projectId, Long alsId, Long lbcId) {
         ALS als = findALSInProject(projectId, alsId);
@@ -333,7 +377,10 @@ return projectRepository.findAllWithUsers()
         }
         return lbc;
     }
-    /** Находит выбранный модуль хранения LB в ALS проекта. */
+
+    /**
+     * Находит LB внутри конкретного ALS конкретного проекта.
+     */
     @Transactional(readOnly = true)
     public LB findLBInProject(Long projectId, Long alsId, Long lbId) {
         ALS als = findALSInProject(projectId, alsId);
@@ -346,7 +393,13 @@ return projectRepository.findAllWithUsers()
                         "LB с id " + lbId + " не найден в ALS " + alsId
                 ));
     }
-    /** Заменяет выбранную конфигурацию ALS в проекте и сохраняет результат. */
+
+    /**
+     * Заменяет одну единицу ALS в доменном составе проекта.
+     *
+     * <p>Состав изменяется через доменную модель Project.
+     * Сохранение проекта выполняется одной транзакцией.</p>
+     */
     @Transactional
     public ALS replaceALSandSaveProject(
             Long projectId,
@@ -354,18 +407,24 @@ return projectRepository.findAllWithUsers()
             ALS replacement
     ) {
         Objects.requireNonNull(replacement, "ALS не должен быть null");
+
         Project domain = findDomainProject(projectId);
         ALS oldConfiguration = findDomainALS(domain, alsId);
+
         /*
          * ID определяется URL, а не телом запроса.
          * Это исключает подмену идентификатора ALS клиентом.
          */
         replacement.setId(alsId);
         domain.replaceALS(oldConfiguration, replacement);
+
         Project savedProject = saveDomainProject(domain);
         return findDomainALS(savedProject, replacement);
     }
-    /** Изменяет управляющий модуль выбранной ALS и сохраняет проект. */
+
+    /**
+     * Сохраняет LC конкретного ALS конкретного проекта.
+     */
     @Transactional
     public ALS saveLCAtProject(
             Long projectId,
@@ -377,6 +436,7 @@ return projectRepository.findAllWithUsers()
                 replacement,
                 "LC не должен быть null"
         );
+
         Project domain = findDomainProject(projectId);
         ALS original = findDomainALS(domain, alsId);
         LC current = original.getLC();
@@ -385,13 +445,18 @@ return projectRepository.findAllWithUsers()
                     "LC с id " + lcId + " не найден в ALS " + alsId
             );
         }
+
         replacement.setId(lcId);
         ALS updated = alsService.replaceLC(original.copy(), replacement);
         domain.replaceALS(original, updated);
+
         Project savedProject = saveDomainProject(domain);
         return findDomainALS(savedProject, updated);
     }
-    /** Изменяет комбинированный модуль выбранной ALS и сохраняет проект. */
+
+    /**
+     * Сохраняет LBC конкретного ALS конкретного проекта.
+     */
     @Transactional
     public ALS saveLBCAtProject(
             Long projectId,
@@ -403,6 +468,7 @@ return projectRepository.findAllWithUsers()
                 replacement,
                 "LBC не должен быть null"
         );
+
         Project domain = findDomainProject(projectId);
         ALS original = findDomainALS(domain, alsId);
         LBC current = original.getLBC();
@@ -411,13 +477,18 @@ return projectRepository.findAllWithUsers()
                     "LBC с id " + lbcId + " не найден в ALS " + alsId
             );
         }
+
         replacement.setId(lbcId);
         ALS updated = alsService.replaceLBC(original.copy(), replacement);
         domain.replaceALS(original, updated);
+
         Project savedProject = saveDomainProject(domain);
         return findDomainALS(savedProject, updated);
     }
-    /** Заменяет управляющий модуль выбранной ALS новым LBC и сохраняет проект. */
+
+    /**
+     * Заменяет текущий control-модуль проекта на новый LBC.
+     */
     @Transactional
     public ALS replaceWithNewLBCAtProject(
             Long projectId,
@@ -427,10 +498,14 @@ return projectRepository.findAllWithUsers()
         ALS original = findDomainALS(domain, alsId);
         ALS updated = alsService.replaceWithNewLBC(original.copy());
         domain.replaceALS(original, updated);
+
         Project savedProject = saveDomainProject(domain);
         return findDomainALS(savedProject, updated);
     }
-    /** Добавляет модуль хранения LB в выбранную ALS проекта. */
+
+    /**
+     * Добавляет LB в конкретный ALS конкретного проекта.
+     */
     @Transactional
     public ALS addLBAtProject(
             Long projectId,
@@ -440,10 +515,14 @@ return projectRepository.findAllWithUsers()
         ALS original = findDomainALS(domain, alsId);
         ALS updated = alsService.addNewLB(original.copy());
         domain.replaceALS(original, updated);
+
         Project savedProject = saveDomainProject(domain);
         return findDomainALS(savedProject, updated);
     }
-    /** Изменяет выбранный экземпляр LB в ALS и сохраняет проект. */
+
+    /**
+     * Сохраняет LB конкретного ALS конкретного проекта.
+     */
     @Transactional
     public ALS saveLBAtProject(
             Long projectId,
@@ -455,6 +534,7 @@ return projectRepository.findAllWithUsers()
                 replacement,
                 "LB не должен быть null"
         );
+
         Project domain = findDomainProject(projectId);
         ALS original = findDomainALS(domain, alsId);
         if (original.getStorageModules().stream()
@@ -465,14 +545,18 @@ return projectRepository.findAllWithUsers()
                     "LB с id " + lbId + " не найден в ALS " + alsId
             );
         }
+
         int originalLbCount = (int) original.getStorageModules().stream()
                 .filter(LB.class::isInstance)
                 .count();
+
         replacement.setId(lbId);
         ALS updated = alsService.replaceLB(original.copy(), lbId, replacement);
         domain.replaceALS(original, updated);
+
         Project savedProject = saveDomainProject(domain);
         ALS savedALS = findDomainALS(savedProject, updated);
+
         /*
          * После изменения конфигурации LB получает новый persistence ID.
          * Проверять прежний ID нельзя: он идентифицировал исходную запись,
@@ -486,9 +570,13 @@ return projectRepository.findAllWithUsers()
                     "После сохранения изменился состав LB в ALS"
             );
         }
+
         return savedALS;
     }
-    /** Удаляет выбранный экземпляр LB из ALS проекта и сохраняет результат. */
+
+    /**
+     * Удаляет LB из конкретного ALS конкретного проекта.
+     */
     @Transactional
     public ALS deleteLBatProject(
             Long projectId,
@@ -499,19 +587,33 @@ return projectRepository.findAllWithUsers()
         ALS original = findDomainALS(domain, alsId);
         ALS updated = alsService.deleteLB(original.copy(), lbId);
         domain.replaceALS(original, updated);
+
         Project savedProject = saveDomainProject(domain);
         return findDomainALS(savedProject, updated);
     }
+
+
+    /**
+     * Загружает проект непосредственно в доменную модель.
+     *
+     * <p>Для восстановления конфигураций используется полный каталог,
+     * включая деактивированные позиции, необходимые историческим проектам.</p>
+     */
     private Project findDomainProject(Long projectId) {
         if (projectId == null || projectId <= 0) {
             throw new NoSuchElementException("Проект с id " + projectId + " не найден");
         }
+
         ProjectEntity entity = loadExistingProject(projectId);
         return ProjectEntityMapper.toDomain(
                 entity,
                 (als, alsEntity) -> { }
         );
     }
+
+    /**
+     * Находит конкретную конфигурацию ALS по persistence ID в агрегате проекта.
+     */
     private ALS findDomainALS(Project project, Long alsId) {
         return project.getQuantityALS().keySet().stream()
                 .filter(als -> Objects.equals(als.getId(), alsId))
@@ -520,6 +622,13 @@ return projectRepository.findAllWithUsers()
                         "ALS с id " + alsId + " не найден в проекте " + project.getId()
                 ));
     }
+
+    /**
+     * Находит сохранённую конфигурацию ALS по её доменному содержимому.
+     *
+     * <p>Project возвращает независимые копии ключей Map, поэтому ID,
+     * назначенный при сохранении копии, нельзя читать из исходного объекта.</p>
+     */
     private ALS findDomainALS(Project project, ALS configuration) {
         return project.getQuantityALS().keySet().stream()
                 .filter(als -> als.equals(configuration))
@@ -528,18 +637,28 @@ return projectRepository.findAllWithUsers()
                         "После сохранения изменённая ALS отсутствует в проекте"
                 ));
     }
+
+    /**
+     * Сохраняет уже изменённый доменный проект.
+     */
     private Project saveDomainProject(Project domain) {
         ProjectEntity existing = loadExistingProject(domain.getId());
         Employee currentEmployee = employeeService.getCurrentEmployeeDomain();
         assertCanModifyProject(existing, currentEmployee);
+
         domain.setUpdatedBy(currentEmployee);
         validateProject(domain);
+
         ProjectEntity saved = persistProjectEntity(domain, existing);
         return ProjectEntityMapper.toDomain(
                 saved,
                 (als, alsEntity) -> { }
         );
     }
+
+    /**
+     * Сохраняет доменный проект и все уникальные конфигурации ALS.
+     */
     private ProjectEntity persistProjectEntity(Project domain, ProjectEntity existing) {
         /*
          * Project агрегирует одинаковые ALS, поэтому каждая уникальная
@@ -547,8 +666,10 @@ return projectRepository.findAllWithUsers()
          */
         List<ALS> savedALS = new ArrayList<>(domain.getQuantityALS().keySet());
         savedALS.forEach(alsService::saveALS);
+
         Function<ALS, ALSEntity> alsResolver = resolveALSEntities(savedALS);
         ProjectEntity entity;
+
         if (existing == null) {
             entity = ProjectEntityMapper.toEntity(
                     domain,
@@ -564,16 +685,20 @@ return projectRepository.findAllWithUsers()
                     alsResolver
             );
         }
+
         ProjectEntity saved = projectRepository.save(entity);
         logger.info("Проект сохранён: id={}", saved.getId());
         return saved;
     }
+
+
     private ProjectEntity loadExistingProject(
             Long id
     ) {
         if (id == null || id <= 0) {
             return null;
         }
+
         return projectRepository.findById(id)
                 .orElseThrow(
                         () -> new NoSuchElementException(
@@ -583,6 +708,17 @@ return projectRepository.findAllWithUsers()
                         )
                 );
     }
+
+    /**
+     * Проверяет право текущего сотрудника изменять проект.
+     *
+     * <p>Администратор может изменять любой проект.
+     * Менеджер может изменять только проекты, которые он создал.</p>
+     *
+     * @param project существующий проект или {@code null} при создании
+     * @param currentEmployee текущий сотрудник
+     * @throws AccessDeniedException если изменение запрещено
+     */
     private void assertCanModifyProject(
             ProjectEntity project,
             Employee currentEmployee
@@ -590,27 +726,38 @@ return projectRepository.findAllWithUsers()
         if (project == null) {
             return;
         }
+
         if (currentEmployee == null
                 || currentEmployee.getRole() == null) {
             throw new AccessDeniedException(
                     "Недостаточно прав для изменения проекта"
             );
         }
+
         if (currentEmployee.getRole() == Role.ROLE_ADMIN) {
             return;
         }
+
         boolean isOwner =
                 currentEmployee.getRole() == Role.ROLE_MANAGER
                         && Objects.equals(
                                 currentEmployee.getId(),
                                 project.getCreatedBy().getId()
                         );
+
         if (!isOwner) {
             throw new AccessDeniedException(
                     "Менеджер может изменять только собственные проекты"
             );
         }
     }
+
+    /**
+     * Создаёт функцию разрешения доменной ALS в сохранённую ALSEntity.
+     *
+     * <p>Каждая уникальная конфигурация уже сохранена через Domain API.
+     * Для связывания с проектом загружаются только сущности по полученным ID.</p>
+     */
     private Function<ALS, ALSEntity> resolveALSEntities(
             List<ALS> savedALS
     ) {
@@ -621,13 +768,16 @@ return projectRepository.findAllWithUsers()
                 );
             };
         }
+
         Set<Long> ids = new LinkedHashSet<>();
+
         for (ALS als : savedALS) {
             if (als == null) {
                 throw new IllegalArgumentException(
                         "ALS проекта не должен быть null"
                 );
             }
+
             Long id = als.getId();
             if (id == null || id <= 0) {
                 throw new IllegalStateException(
@@ -636,10 +786,12 @@ return projectRepository.findAllWithUsers()
             }
             ids.add(id);
         }
+
         Map<Long, ALSEntity> entitiesById = new HashMap<>();
         for (ALSEntity entity : alsRepository.findAllById(ids)) {
             entitiesById.put(entity.getId(), entity);
         }
+
         for (Long id : ids) {
             if (!entitiesById.containsKey(id)) {
                 throw new NoSuchElementException(
@@ -647,6 +799,7 @@ return projectRepository.findAllWithUsers()
                 );
             }
         }
+
         List<Map.Entry<ALS, ALSEntity>> resolved = new ArrayList<>();
         for (ALS als : savedALS) {
             ALSEntity entity = entitiesById.get(als.getId());
@@ -654,6 +807,7 @@ return projectRepository.findAllWithUsers()
                 resolved.add(Map.entry(als, entity));
             }
         }
+
         return requested -> resolved.stream()
                 .filter(entry -> entry.getKey().equals(requested))
                 .map(Map.Entry::getValue)
@@ -661,9 +815,11 @@ return projectRepository.findAllWithUsers()
                 .orElseThrow(() -> new NoSuchElementException(
                         "Для конфигурации ALS не найдена сохранённая сущность"));
     }
+
     private void validateProject(Project domain) {
         List<ValidationResult> results =
                 sizeValidator.validateProject(domain);
+
         List<ValidationError> errors =
                 results.stream()
                         .filter(
@@ -676,21 +832,29 @@ return projectRepository.findAllWithUsers()
                                                 .stream()
                         )
                         .toList();
+
         if (errors.isEmpty()) {
             return;
         }
+
         ValidationResult combined =
                 new ValidationResult(
                         "Project",
                         null
                 );
+
         errors.forEach(
                 combined::addError
         );
+
         throw new ValidationSizeException(
                 combined
         );
     }
+
+    /**
+     * DTO/domain Employee -> JPA EmployeeEntity.
+     */
     private EmployeeEntity resolveEmployee(
             Employee domain
     ) {
@@ -699,11 +863,13 @@ return projectRepository.findAllWithUsers()
                     "Employee не должен быть null"
             );
         }
+
         if (domain.getId() == null) {
             throw new IllegalArgumentException(
                     "У сотрудника отсутствует ID"
             );
         }
+
         return employeeRepository
                 .findById(domain.getId())
                 .orElseThrow(
@@ -714,6 +880,17 @@ return projectRepository.findAllWithUsers()
                         )
                 );
     }
+
+
+    /**
+     * Возвращает значение компании по умолчанию.
+     *
+     * <p>Если внешняя настройка содержит строку с типичными признаками
+     * неверно декодированной кириллицы, используется безопасное значение
+     * по умолчанию. Это предотвращает сохранение новых проектов с кракозябрами.</p>
+     *
+     * @return название компании по умолчанию
+     */
     private String getDefaultCompany() {
         String configured = environment.getProperty(
                 "project.company.default",

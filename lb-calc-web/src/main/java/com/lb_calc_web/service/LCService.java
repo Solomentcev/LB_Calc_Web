@@ -86,6 +86,7 @@ public class LCService {
                 enumProperty("lc.payment-purpose.default", PaymentPurpose.class, PaymentPurpose.NONE),
                 enumProperty("lc.printer-purpose.default", PrinterPurpose.class, PrinterPurpose.ABSENT)
         );
+
         return new LC(
                 height,
                 requiredInt("size.width.default"),
@@ -97,7 +98,11 @@ public class LCService {
                 new ControlConfiguration(functional, Map.of())
         );
     }
-    /** Возвращает страницу управляющих модулей LC с применёнными фильтрами и сортировкой. */
+
+    /**
+     * Возвращает страницу LC с фильтрами по информационным столбцам.
+     * Access проверяется через EXISTS, чтобы не размножать строки из-за ElementCollection.
+     */
     @Transactional(readOnly = true)
     public org.springframework.data.domain.Page<LC> findPage(
             LCCatalogFilter filter, org.springframework.data.domain.Pageable pageable

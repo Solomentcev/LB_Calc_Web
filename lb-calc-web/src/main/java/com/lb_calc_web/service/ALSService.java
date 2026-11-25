@@ -48,7 +48,9 @@ import java.util.Optional;
 /** Сервис координации доменных операций с конфигурациями ALS и вложенными модулями. */
 @Service
 public class ALSService {
+
     private static final Logger logger = LoggerFactory.getLogger(ALSService.class);
+
     private final FindOrCreateLockService findOrCreateLockService;
     private final ALSRepository alsRepository;
     private final ProjectALSRepository projectALSRepository;
@@ -59,6 +61,7 @@ public class ALSService {
     private final Environment environment;
     private final SizeValidator sizeValidator;
     private final EquipmentRepository equipmentRepository;
+
     public ALSService(
             ALSRepository alsRepository,
             ProjectALSRepository projectALSRepository,
@@ -82,7 +85,11 @@ public class ALSService {
         this.sizeValidator = Objects.requireNonNull(sizeValidator);
         this.equipmentRepository = Objects.requireNonNull(equipmentRepository);
     }
-    /** Возвращает страницу конфигураций ALS с применёнными фильтрами и сортировкой. */
+
+    /**
+     * Возвращает страницу ALS с фильтрами по информационным столбцам.
+     * Access проверяется через EXISTS, чтобы не размножать строки из ElementCollection.
+     */
     @Transactional(readOnly = true)
     public org.springframework.data.domain.Page<ALS> findPage(
             ModuleCatalogFilter filter, org.springframework.data.domain.Pageable pageable

@@ -1,4 +1,5 @@
 package com.lb_calc_web.service;
+
 import com.lb_calc_web.domain.attributes.Role;
 import com.lb_calc_web.domain.model.Employee;
 import com.lb_calc_web.dto.CreateEmployeeDTO;
@@ -37,27 +38,26 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+
 import java.time.LocalDate;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
-/**
- * Реализует аутентификацию, регистрацию сотрудников и управление учётными данными.
- *
- * <p>Публикует доменные события в Kafka после успешного завершения транзакций,
- * чтобы уведомления не отражали изменения, которые не были сохранены.</p>
- */
 
+/** Реализует аутентификацию, регистрацию сотрудников и управление учётными данными. Публикует события после успешного завершения транзакций. */
 @Service
 public class AuthService {
+
     private static final Logger logger =
             LoggerFactory.getLogger(AuthService.class);
+
     private final EmployeeService employeeService;
     private final EmployeeRepository employeeRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final KafkaTemplate<String, UserEvent> kafkaTemplate;
     private final String userEventsTopic;
+
     public AuthService(
             EmployeeService employeeService,
             EmployeeRepository employeeRepository,
@@ -74,12 +74,17 @@ public class AuthService {
         this.kafkaTemplate = kafkaTemplate;
         this.userEventsTopic = userEventsTopic;
     }
-    /** Проверяет учётные данные сотрудника и выпускает access- и refresh-токены. */
+
+    /**
+     * Авторизация пользователя.
+     *
+     * Главный объект здесь — EmployeePrincipal.
+     */
     public JwtResponse login(
             LoginRequest loginRequest
     ) throws AuthException {
 
-        EmployeePrincipal principal;
+EmployeePrincipal principal;
 
         try {
             principal =
@@ -200,21 +205,28 @@ public class AuthService {
     ) {
         return employeeService.existsByEmail(email);
     }
-    /** Регистрирует нового сотрудника с ролью по умолчанию и публикует событие регистрации. */
+
+    /**
+     * Обычная регистрация пользователя.
+     * Зарегистрированный пользователь получает ROLE_MANAGER.
+     */
     @Transactional
     public EmployeeDTO registration(
             RegistrationDTO registrationDTO
     ) {
         Objects.requireNonNull(registrationDTO, "Данные регистрации не должны быть null");
+
         validatePasswords(
                 registrationDTO.getPassword(),
                 registrationDTO.getConfirmPassword()
         );
+
         if (existsByEmail(registrationDTO.getEmail())) {
             throw new IllegalArgumentException(
                     "Email уже используется"
             );
         }
+
         Employee domain = new Employee(
                 registrationDTO.getFirstName(),
                 registrationDTO.getLastName(),
@@ -222,45 +234,57 @@ public class AuthService {
                 LocalDate.now(),
                 Role.ROLE_MANAGER
         );
+
         EmployeeEntity entity =
                 EmployeeEntityMapper.toEntity(domain);
+
         entity.setEncryptedPassword(
                 passwordEncoder.encode(
                         registrationDTO.getPassword()
                 )
         );
+
         EmployeeEntity saved;
         try {
             saved = employeeRepository.save(entity);
         } catch (DataIntegrityViolationException exception) {
             throw toEmailConflict(exception);
         }
+
         EmployeeDTO result =
                 employeeService.loadUserById(
                         saved.getId()
                 );
+
         publishEvent(
                 UserEventType.USER_REGISTERED,
                 saved.getId(),
                 saved.getEmail()
         );
+
         return result;
     }
-    /** Создаёт учётную запись сотрудника с заданной ролью. */
+
+    /**
+     * Создание сотрудника администратором.
+     */
     @Transactional
     public EmployeeDTO createEmployee(
             CreateEmployeeDTO createEmployeeDTO
     ) {
         Objects.requireNonNull(createEmployeeDTO, "Данные сотрудника не должны быть null");
+
         validatePasswords(
                 createEmployeeDTO.getPassword(),
                 createEmployeeDTO.getConfirmPassword()
         );
+
         if (existsByEmail(createEmployeeDTO.getEmail())) {
             throw new IllegalArgumentException(
                     "Пользователь с таким email уже существует"
             );
         }
+
         Employee domain = new Employee(
                 createEmployeeDTO.getFirstName(),
                 createEmployeeDTO.getLastName(),
@@ -268,31 +292,42 @@ public class AuthService {
                 LocalDate.now(),
                 createEmployeeDTO.getRole()
         );
+
         EmployeeEntity entity =
                 EmployeeEntityMapper.toEntity(domain);
+
         entity.setEncryptedPassword(
                 passwordEncoder.encode(
                         createEmployeeDTO.getPassword()
                 )
         );
+
         EmployeeEntity saved;
         try {
             saved = employeeRepository.save(entity);
         } catch (DataIntegrityViolationException exception) {
             throw toEmailConflict(exception);
         }
+
         EmployeeDTO result =
                 employeeService.loadUserById(
                         saved.getId()
                 );
+
         publishEvent(
                 UserEventType.EMPLOYEE_CREATED,
                 saved.getId(),
                 saved.getEmail()
         );
+
         return result;
     }
-    /** Проверяет текущий пароль и сохраняет новый пароль сотрудника. */
+
+    /**
+     * Смена пароля.
+     *
+     * Пароль не проходит через EmployeeDTO.
+     */
     @Transactional
     public void changePassword(
             Long employeeId,
@@ -328,7 +363,6 @@ public class AuthService {
         );
     }
 
-    /** Преобразует нарушение уникальности email в прикладную ошибку конфликта. */
     private IllegalArgumentException toEmailConflict(DataIntegrityViolationException exception) {
         Throwable cause = exception;
         while (cause != null) {
@@ -341,7 +375,6 @@ public class AuthService {
         throw exception;
     }
 
-    /** Проверяет наличие пароля и совпадение его подтверждения. */
     private void validatePasswords(
             String password,
             String confirmPassword
@@ -358,7 +391,6 @@ public class AuthService {
         }
     }
 
-    /** Планирует публикацию события после commit либо отправляет его сразу вне транзакции. */
     void publishEvent(
             UserEventType type,
             Long userId,
@@ -395,7 +427,6 @@ public class AuthService {
         sendEvent.run();
     }
 
-    /** Отправляет событие в Kafka и регистрирует результат асинхронной отправки. */
     private void sendEvent(UserEvent event, UserEventType type, Long userId) {
         try {
             CompletableFuture<SendResult<String, UserEvent>> future =
