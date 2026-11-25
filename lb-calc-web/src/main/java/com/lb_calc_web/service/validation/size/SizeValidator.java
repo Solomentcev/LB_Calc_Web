@@ -74,6 +74,7 @@ public class SizeValidator {
         return moduleValidator.validateLBC(lbc);
     }
 
+    /** Выполняет геометрическую проверку конфигурации ALS. */
     public ValidationResult validateALS(ALS als) {
         return alsValidator.validateALS(als);
     }

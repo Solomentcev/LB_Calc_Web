@@ -12,8 +12,8 @@ public class LBCalcExceptionHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(
             LBCalcExceptionHandler.class);
 
-    @ExceptionHandler
     /** Регистрирует непредвиденную ошибку MVC-запроса и отображает страницу ошибки. */
+    @ExceptionHandler
     public String handleException(Throwable e, Model model) {
         LOGGER.error("Непредвиденная ошибка при обработке запроса", e);
         model.addAttribute(

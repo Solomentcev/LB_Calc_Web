@@ -173,6 +173,7 @@ public class JwtService {
         );
     }
 
+    /** Проверяет корректность refresh token без распространения JWT-исключений. */
     public boolean isValidatedRefreshToken(
             String refreshToken
     ) {
