@@ -26,11 +26,11 @@ final class ModuleTextFormatter {
     }
 
     static String storageName(StorageModule module, String prefix) {
-        return prefix + " на " + module.getCountCells() + " ячеек"
-                + ", тип " + module.getTypeLb().getType()
-                + ", открывание дверей: " + direction(module.getDirectionDoorOpening())
-                + ", габариты: " + dimensions(module)
-                + ", " + colors(module);
+        return prefix + ": " + module.getCountCells() + " яч."
+                + ", " + module.getTypeLb().getType()
+                + ", " + direction(module.getDirectionDoorOpening())
+                + ", " + dimensions(module)
+                + ", " + colorPair(module.getColorBody(), module.getColorDoor());
     }
 
     static String storageDescription(StorageModule module, String title) {
@@ -51,18 +51,18 @@ final class ModuleTextFormatter {
 
     static String combinedName(StorageModule storageModule, ControlModule controlModule) {
         String details = controlNameDetails(controlModule);
-        return "Модуль хранения и управления на " + storageModule.getCountCells()
-                + " ячеек" + details
-                + ", тип " + storageModule.getTypeLb().getType()
-                + ", открывание дверей: " + direction(storageModule.getDirectionDoorOpening())
-                + ", габариты: " + dimensions(storageModule)
-                + ", " + colors(storageModule);
+        return "Модуль хранения и управления: " + storageModule.getCountCells()
+                + " яч." + details
+                + ", " + storageModule.getTypeLb().getType()
+                + ", " + direction(storageModule.getDirectionDoorOpening())
+                + ", " + dimensions(storageModule)
+                + ", " + colorPair(storageModule.getColorBody(), storageModule.getColorDoor());
     }
 
     static String controlName(ControlModule controlModule, Module module) {
-        return "Модуль управления" + controlNameDetails(controlModule)
-                + ", габариты: " + dimensions(module)
-                + ", " + colors(module);
+        return "Модуль управления:" + controlNameDetails(controlModule)
+                + ", " + dimensions(module)
+                + ", " + colorPair(module.getColorBody(), module.getColorDoor());
     }
 
     static String controlDescription(ControlModule controlModule, Module module) {
@@ -93,13 +93,13 @@ final class ModuleTextFormatter {
                 .map(ModuleTextFormatter::access)
                 .collect(Collectors.joining(", "));
         if (!access.isBlank()) {
-            append(result, "доступ: " + access);
+            append(result, access);
         }
         if (configuration.getPayment() != PaymentPurpose.NONE) {
-            append(result, "оплата: " + payment(configuration.getPayment()));
+            append(result, payment(configuration.getPayment()));
         }
         if (configuration.getPrinter() != PrinterPurpose.ABSENT) {
-            append(result, "печать: " + printer(configuration.getPrinter()));
+            append(result, printer(configuration.getPrinter()));
         }
         return result.toString();
     }
@@ -134,11 +134,10 @@ final class ModuleTextFormatter {
                           int height, int width, int depth, Colors body, Colors door) {
         ControlModule controlModule = (ControlModule) control;
         String details = controlNameDetails(controlModule);
-        return "АКХ на " + countCells + " ячеек, модулей хранения: "
-                + storageModuleCount
+        return "АКХ: " + countCells + " яч., " + storageModuleCount + " мод."
                 + (details.isBlank() ? "" : details)
-                + ", габариты: " + height + "×" + width + "×" + depth + " мм"
-                + ", корпус: " + color(body) + ", двери: " + color(door);
+                + ", " + height + "×" + width + "×" + depth + " мм"
+                + ", " + colorPair(body, door);
     }
 
     static String alsDescription(int countCells, int storageModuleCount,
@@ -167,8 +166,12 @@ final class ModuleTextFormatter {
     }
 
     static String colors(Module module) {
-        return "цвет корпуса: " + color(module.getColorBody())
+        return "Цвет корпуса: " + color(module.getColorBody())
                 + ", цвет дверей: " + color(module.getColorDoor());
+    }
+
+    private static String colorPair(Colors body, Colors door) {
+        return color(body) + "/" + color(door);
     }
 
     static String direction(DirectionDoorOpening direction) {
