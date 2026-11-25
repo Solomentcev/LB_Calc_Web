@@ -1,5 +1,10 @@
+/**
+ * Реализует аутентификацию, регистрацию сотрудников и управление учётными данными.
+ *
+ * <p>Публикует доменные события в Kafka после успешного завершения транзакций,
+ * чтобы уведомления не отражали изменения, которые не были сохранены.</p>
+ */
 package com.lb_calc_web.service;
-
 import com.lb_calc_web.domain.attributes.Role;
 import com.lb_calc_web.domain.model.Employee;
 import com.lb_calc_web.dto.CreateEmployeeDTO;
@@ -38,31 +43,20 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
-
 import java.time.LocalDate;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
-
-/**
- * Реализует аутентификацию, регистрацию сотрудников и управление учётными данными.
- *
- * <p>Публикует доменные события в Kafka после успешного завершения транзакций,
- * чтобы уведомления не отражали изменения, которые не были сохранены.</p>
- */
 @Service
 public class AuthService {
-
     private static final Logger logger =
             LoggerFactory.getLogger(AuthService.class);
-
     private final EmployeeService employeeService;
     private final EmployeeRepository employeeRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final KafkaTemplate<String, UserEvent> kafkaTemplate;
     private final String userEventsTopic;
-
     public AuthService(
             EmployeeService employeeService,
             EmployeeRepository employeeRepository,
@@ -79,12 +73,6 @@ public class AuthService {
         this.kafkaTemplate = kafkaTemplate;
         this.userEventsTopic = userEventsTopic;
     }
-
-    /**
-     * Авторизация пользователя.
-     *
-     * Главный объект здесь — EmployeePrincipal.
-     */
     public JwtResponse login(
             LoginRequest loginRequest
     ) throws AuthException {
@@ -210,28 +198,20 @@ public class AuthService {
     ) {
         return employeeService.existsByEmail(email);
     }
-
-    /**
-     * Обычная регистрация пользователя.
-     * Зарегистрированный пользователь получает ROLE_MANAGER.
-     */
     @Transactional
     public EmployeeDTO registration(
             RegistrationDTO registrationDTO
     ) {
         Objects.requireNonNull(registrationDTO, "Данные регистрации не должны быть null");
-
         validatePasswords(
                 registrationDTO.getPassword(),
                 registrationDTO.getConfirmPassword()
         );
-
         if (existsByEmail(registrationDTO.getEmail())) {
             throw new IllegalArgumentException(
                     "Email уже используется"
             );
         }
-
         Employee domain = new Employee(
                 registrationDTO.getFirstName(),
                 registrationDTO.getLastName(),
@@ -239,57 +219,44 @@ public class AuthService {
                 LocalDate.now(),
                 Role.ROLE_MANAGER
         );
-
         EmployeeEntity entity =
                 EmployeeEntityMapper.toEntity(domain);
-
         entity.setEncryptedPassword(
                 passwordEncoder.encode(
                         registrationDTO.getPassword()
                 )
         );
-
         EmployeeEntity saved;
         try {
             saved = employeeRepository.save(entity);
         } catch (DataIntegrityViolationException exception) {
             throw toEmailConflict(exception);
         }
-
         EmployeeDTO result =
                 employeeService.loadUserById(
                         saved.getId()
                 );
-
         publishEvent(
                 UserEventType.USER_REGISTERED,
                 saved.getId(),
                 saved.getEmail()
         );
-
         return result;
     }
-
-    /**
-     * Создание сотрудника администратором.
-     */
     @Transactional
     public EmployeeDTO createEmployee(
             CreateEmployeeDTO createEmployeeDTO
     ) {
         Objects.requireNonNull(createEmployeeDTO, "Данные сотрудника не должны быть null");
-
         validatePasswords(
                 createEmployeeDTO.getPassword(),
                 createEmployeeDTO.getConfirmPassword()
         );
-
         if (existsByEmail(createEmployeeDTO.getEmail())) {
             throw new IllegalArgumentException(
                     "Пользователь с таким email уже существует"
             );
         }
-
         Employee domain = new Employee(
                 createEmployeeDTO.getFirstName(),
                 createEmployeeDTO.getLastName(),
@@ -297,42 +264,30 @@ public class AuthService {
                 LocalDate.now(),
                 createEmployeeDTO.getRole()
         );
-
         EmployeeEntity entity =
                 EmployeeEntityMapper.toEntity(domain);
-
         entity.setEncryptedPassword(
                 passwordEncoder.encode(
                         createEmployeeDTO.getPassword()
                 )
         );
-
         EmployeeEntity saved;
         try {
             saved = employeeRepository.save(entity);
         } catch (DataIntegrityViolationException exception) {
             throw toEmailConflict(exception);
         }
-
         EmployeeDTO result =
                 employeeService.loadUserById(
                         saved.getId()
                 );
-
         publishEvent(
                 UserEventType.EMPLOYEE_CREATED,
                 saved.getId(),
                 saved.getEmail()
         );
-
         return result;
     }
-
-    /**
-     * Смена пароля.
-     *
-     * Пароль не проходит через EmployeeDTO.
-     */
     @Transactional
     public void changePassword(
             Long employeeId,

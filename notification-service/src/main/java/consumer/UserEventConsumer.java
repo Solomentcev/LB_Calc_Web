@@ -19,8 +19,8 @@ public class UserEventConsumer {
         this.notificationService = notificationService;
     }
 
-    @KafkaListener(topics = "${app.kafka.topic.user-events}")
     /** Передаёт полученное событие в сервис обработки уведомлений. */
+    @KafkaListener(topics = "${app.kafka.topic.user-events}")
     public void consume(UserEvent event) {
         logger.info("Получено событие пользователя: type={}, userId={}",
                 event.getType(), event.getUserId());

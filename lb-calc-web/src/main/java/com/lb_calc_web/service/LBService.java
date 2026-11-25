@@ -117,8 +117,8 @@ public class LBService {
         return lbRepository.findAll(specification, pageable).map(LBEntityMapper::toDomain);
     }
 
-    @Transactional(readOnly = true)
     /** Возвращает все сохранённые модули хранения LB. */
+    @Transactional(readOnly = true)
     public List<LB> findAll() {
         logger.debug("Получение списка LB");
         return lbRepository.findAll().stream()
@@ -141,11 +141,6 @@ public class LBService {
                 new NoSuchElementException("Модуль хранения LB с id=" + id + " не найден"));
         return LBEntityMapper.toDomain(entity);
     }
-
-    /**
-     * Валидирует и сохраняет доменную модель LB.
-     * При наличии идентичной конфигурации возвращает уже сохранённый объект.
-     */
     @Transactional
     public LB saveLB(LB domain) {
         Objects.requireNonNull(domain, "LB не должен быть null");

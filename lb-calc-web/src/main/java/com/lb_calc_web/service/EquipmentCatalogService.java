@@ -29,23 +29,11 @@ import java.util.Objects;
 /** Управляет каталогом физических моделей оборудования. */
 @Service
 public class EquipmentCatalogService {
-
     private final EquipmentRepository equipmentRepository;
-
     public EquipmentCatalogService(EquipmentRepository equipmentRepository) {
         this.equipmentRepository = Objects.requireNonNull(equipmentRepository);
     }
-
-    /**
-     * Возвращает страницу оборудования с независимыми фильтрами по столбцам.
-     * Все условия применяются в БД до сортировки и пагинации.
-     *
-     * @param filter параметры фильтрации
-     * @param pageable сортировка и параметры страницы
-     * @return отфильтрованная страница оборудования
-     */
     @Transactional(readOnly = true)
-    /** Возвращает страницу оборудования с применёнными фильтрами и сортировкой. */
     public Page<Equipment> findPage(EquipmentCatalogFilter filter, Pageable pageable) {
         Objects.requireNonNull(filter, "Фильтры каталога оборудования не должны быть null");
         Objects.requireNonNull(pageable, "Параметры страницы не должны быть null");
@@ -109,8 +97,8 @@ public class EquipmentCatalogService {
         }
     }
 
-    @Transactional(readOnly = true)
     /** Возвращает все модели оборудования из каталога. */
+    @Transactional(readOnly = true)
     public List<Equipment> findAll() {
         return equipmentRepository.findAll().stream()
                 .map(EquipmentEntityMapper::toDomain)
@@ -145,7 +133,6 @@ public class EquipmentCatalogService {
         if (configuration.getAccess() != null && configuration.getAccess().contains(AccessPurpose.PIN)
                 && configuration.getDisplay() == DisplayPurpose.NONE)
             configuration.setDisplay(DisplayPurpose.INCH_10);
-
         java.util.LinkedHashSet<String> required = new java.util.LinkedHashSet<>();
         if (configuration.getDisplay() != null && configuration.getDisplay() != DisplayPurpose.NONE)
             required.add("DISPLAY:" + configuration.getDisplay().name());
@@ -161,7 +148,6 @@ public class EquipmentCatalogService {
             Equipment item = byId.get(selection.getEquipmentId());
             if (item != null && item.getFunctionalType() == EquipmentFunctionalType.SYSTEM) required.add(key);
         });
-
         java.util.Set<Long> defaults = findDefaultModelIds();
         List<EquipmentSelectionDTO> result = new ArrayList<>();
         for (String key : required) {
@@ -182,15 +168,9 @@ public class EquipmentCatalogService {
         }
         return result;
     }
-
     private String key(Equipment item) {
         return item.getFunctionalType().name() + ":" + item.getPurpose().toString();
     }
-
-    /**
-     * Проверяет, что отправленные формы содержат ровно по одной модели для каждого
-     * активного физического назначения и что каждая модель относится к своему назначению.
-     */
     @Transactional(readOnly = true)
     public void validateSelections(
             FunctionalConfigurationDTO configuration, List<EquipmentSelectionDTO> selections) {
@@ -229,14 +209,14 @@ public class EquipmentCatalogService {
         }
     }
 
-    @Transactional(readOnly = true)
     /** Находит модель оборудования по идентификатору. */
+    @Transactional(readOnly = true)
     public Equipment findById(Long id) {
         return EquipmentEntityMapper.toDomain(findEntity(id));
     }
 
-    @Transactional
     /** Сохраняет модель оборудования после проверки её параметров. */
+    @Transactional
     public Equipment save(Equipment equipment) {
         Objects.requireNonNull(equipment, "Модель оборудования не должна быть null");
 
@@ -284,8 +264,8 @@ public class EquipmentCatalogService {
         return EquipmentEntityMapper.toDomain(equipmentRepository.saveAndFlush(entity));
     }
 
-    @Transactional
     /** Удаляет модель оборудования по идентификатору. */
+    @Transactional
     public void delete(Long id) {
         EquipmentEntity entity = findEntity(id);
         if (equipmentRepository.countModuleReferencesByEquipmentId(id) > 0) {

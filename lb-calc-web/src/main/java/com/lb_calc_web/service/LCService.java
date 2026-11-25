@@ -86,7 +86,6 @@ public class LCService {
                 enumProperty("lc.payment-purpose.default", PaymentPurpose.class, PaymentPurpose.NONE),
                 enumProperty("lc.printer-purpose.default", PrinterPurpose.class, PrinterPurpose.ABSENT)
         );
-
         return new LC(
                 height,
                 requiredInt("size.width.default"),
@@ -98,11 +97,6 @@ public class LCService {
                 new ControlConfiguration(functional, Map.of())
         );
     }
-
-    /**
-     * Возвращает страницу LC с фильтрами по информационным столбцам.
-     * Access проверяется через EXISTS, чтобы не размножать строки из-за ElementCollection.
-     */
     @Transactional(readOnly = true)
     public org.springframework.data.domain.Page<LC> findPage(
             LCCatalogFilter filter, org.springframework.data.domain.Pageable pageable
@@ -160,8 +154,8 @@ public class LCService {
         }
     }
 
-    @Transactional(readOnly = true)
     /** Возвращает все сохранённые управляющие модули LC. */
+    @Transactional(readOnly = true)
     public List<LC> findAll() {
         logger.debug("Получение списка LC");
         return lcRepository.findAll().stream()
@@ -171,8 +165,8 @@ public class LCService {
                 .toList();
     }
 
-    @Transactional(readOnly = true)
     /** Находит управляющий модуль LC по идентификатору. */
+    @Transactional(readOnly = true)
     public LC findById(Long id) {
         if (id == null || id <= 0) {
             throw new NoSuchElementException("LC с id=" + id + " не найден");
@@ -204,8 +198,8 @@ public class LCService {
         }
     }
 
-    @Transactional
     /** Проверяет и сохраняет доменную конфигурацию LC. */
+    @Transactional
     public LC saveLC(LC domain) {
         Objects.requireNonNull(domain, "LC не должен быть null");
         logger.info("Сохранение LC: id={}, name={}", domain.getId(), domain.getName());
