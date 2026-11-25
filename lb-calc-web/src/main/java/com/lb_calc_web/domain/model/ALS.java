@@ -860,25 +860,16 @@ public class ALS {
     private void updateNameAndDescription() {
         int countCells = getCountCells();
         int storageModuleCount = getStorageModuleCount();
-
-        name = "АКХ на " + countCells + " ячеек";
-
         Module controlModule = getControlModuleAsModule();
 
-        description =
-                "АКХ на "
-                        + countCells
-                        + " ячеек, ВхШхГ, мм: "
-                        + height + "x"
-                        + width + "x"
-                        + depth
-                        + "; Цвет: "
-                        + colorBody + "/"
-                        + colorDoor
-                        + "; Модулей хранения: "
-                        + storageModuleCount
-                        + " шт.;\n"
-                        + controlModule.getDescription();
+        name = ModuleTextFormatter.alsName(
+                countCells, storageModuleCount, controlModule,
+                height, width, depth, colorBody, colorDoor
+        );
+        description = ModuleTextFormatter.alsDescription(
+                countCells, storageModuleCount,
+                height, width, depth, colorBody, colorDoor, modules
+        );
     }
     /**
      * Возвращает количество storage-модулей без создания их копий.
