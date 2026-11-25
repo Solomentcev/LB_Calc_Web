@@ -112,7 +112,7 @@
         
                         <div class="mt-3" th:if="*{stringLBImage != null}">
                             <h2 class="h5">Визуализация</h2>
-                            <img class="img-fluid img-thumbnail" style="max-height: 420px"
+                            <img class="img-fluid img-thumbnail"
                                  th:src="|data:image/png;base64,*{stringLBImage}|" alt="Чертёж модуля хранения">
                         </div>
                     </div>
@@ -240,7 +240,7 @@
         
                         <div class="mt-3" th:if="*{stringLBImage != null}">
                             <h2 class="h5">Визуализация</h2>
-                            <img class="img-fluid img-thumbnail" style="max-height: 420px"
+                            <img class="img-fluid img-thumbnail"
                                  th:src="|data:image/png;base64,${lb.stringLBImage}|" alt="Чертёж модуля хранения">
                         </div>
                     </div>
