@@ -228,9 +228,12 @@ return projectRepository.findAllWithUsers()
         assertCanModifyProject(existing, currentEmployee);
         LocalDate today = LocalDate.now();
 
-        String company = existing == null
-                ? requested.getCompany()
-                : existing.getCompany();
+        String company = requested.getCompany();
+        if (company == null || company.isBlank()) {
+            company = existing == null
+                    ? getDefaultCompany()
+                    : existing.getCompany();
+        }
         if (company == null || company.isBlank()) {
             company = getDefaultCompany();
         }
