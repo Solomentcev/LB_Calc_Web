@@ -45,6 +45,7 @@ import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 
+/** Сервис координации доменных операций с конфигурациями ALS и вложенными модулями. */
 @Service
 public class ALSService {
 

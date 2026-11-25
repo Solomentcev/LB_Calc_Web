@@ -38,6 +38,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 
+/** Сервис координации жизненного цикла проектов и изменения их конфигураций ALS. */
 @Service
 public class ProjectService {
 

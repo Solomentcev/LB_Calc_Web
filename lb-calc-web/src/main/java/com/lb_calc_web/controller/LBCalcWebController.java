@@ -29,9 +29,9 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import java.util.Set;
 import java.util.List;
 
+/** MVC-контроллер главной страницы и каталогов модулей и автоматизированных камер хранения. */
 @Controller
 @RequestMapping("/")
-/** MVC-контроллер главной страницы и каталогов модулей и автоматизированных камер хранения. */
 public class LBCalcWebController {
 
     private final ALSService alsService;
@@ -48,11 +48,13 @@ public class LBCalcWebController {
         this.lbService = lbService;
     }
 
+    /** Отображает главную страницу приложения. */
     @GetMapping
     public String init() {
         return "index";
     }
 
+    /** Отображает каталог конфигураций ALS с фильтрацией и сортировкой. */
     @GetMapping("/alss")
     public String alss(
             @RequestParam(defaultValue = "0") int page,
@@ -83,6 +85,7 @@ public class LBCalcWebController {
         return "alss/alss";
     }
 
+    /** Отображает каталог управляющих модулей LC с фильтрацией и сортировкой. */
     @GetMapping("/lcs")
     public String lcs(
             @RequestParam(defaultValue = "0") int page,
@@ -130,6 +133,7 @@ public class LBCalcWebController {
         return "lcs/lcs";
     }
 
+    /** Отображает каталог модулей хранения LB с фильтрацией и сортировкой. */
     @GetMapping("/lbs")
     public String lbs(
             @RequestParam(defaultValue = "0") int page,

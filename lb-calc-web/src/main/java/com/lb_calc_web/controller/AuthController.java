@@ -23,6 +23,7 @@ public class AuthController {
         this.authService = authService;
 
     }
+    /** Отображает форму регистрации пользователя. */
     @GetMapping("/registration")
     public String registration(Model model) {
         model.addAttribute("employee", new RegistrationDTO());
@@ -53,6 +54,7 @@ public class AuthController {
         model.addAttribute("loginRequest", new LoginRequest() );
         return "login";
     }
+    /** Проверяет учётные данные и создаёт cookie с JWT-токенами при успешном входе. */
     @PostMapping("/login")
     public String logIn( @ModelAttribute @Valid LoginRequest loginRequest,
                          HttpServletResponse response,

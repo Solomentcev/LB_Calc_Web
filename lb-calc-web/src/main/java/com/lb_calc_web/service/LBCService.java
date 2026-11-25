@@ -36,6 +36,7 @@ import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 
+/** Сервис создания, восстановления, поиска, проверки и сохранения доменных конфигураций LBC. */
 @Service
 public class LBCService {
 

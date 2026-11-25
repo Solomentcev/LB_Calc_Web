@@ -23,6 +23,7 @@ import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 
+/** Сервис создания, восстановления, поиска, проверки и сохранения доменных конфигураций LB. */
 @Service
 public class LBService {
 
