@@ -54,7 +54,8 @@ public class LCController {
 
         prepareForm(model, lc);
 
-        return "lcs/lc";
+        model.addAttribute("pageContext", "catalog");
+            return "lcs/lc";
     }
 
     /**
@@ -75,7 +76,8 @@ public class LCController {
 
         prepareForm(model, lc);
 
-        return "lcs/lc";
+        model.addAttribute("pageContext", "catalog");
+            return "lcs/lc";
     }
 
     /**
@@ -113,6 +115,7 @@ public class LCController {
 
             prepareForm(model, LCImageService.addImage(lc));
 
+            model.addAttribute("pageContext", "catalog");
             return "lcs/lc";
         }
     }

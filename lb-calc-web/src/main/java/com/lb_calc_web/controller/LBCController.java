@@ -59,7 +59,8 @@ public class LBCController extends BaseCatalogController {
 
         prepareForm(model, LBCImageService.addImage(LBCDtoMapper.toDto(lbcService.createLBC())));
 
-        return "lbcs/lbc";
+        model.addAttribute("pageContext", "catalog");
+            return "lbcs/lbc";
     }
 
     /**
@@ -77,7 +78,8 @@ public class LBCController extends BaseCatalogController {
 
         prepareForm(model, LBCImageService.addImage(LBCDtoMapper.toDto(lbcService.findById(id))));
 
-        return "lbcs/lbc";
+        model.addAttribute("pageContext", "catalog");
+            return "lbcs/lbc";
     }
 
     /**
@@ -100,6 +102,7 @@ public class LBCController extends BaseCatalogController {
             );
             prepareForm(model, LBCImageService.addImage(lbc));
 
+            model.addAttribute("pageContext", "catalog");
             return "lbcs/lbc";
         }
     }

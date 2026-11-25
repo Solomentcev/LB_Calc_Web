@@ -240,7 +240,8 @@ public class ProjectController
                 ALSImageService.addImages(als)
         );
 
-        return "projects/project_als";
+        model.addAttribute("pageContext", "project");
+            return "alss/als";
     }
 
     /**
@@ -282,7 +283,8 @@ public class ProjectController
                     addALSImages(ProjectDtoMapper.toDto(projectService.findById(projectId)))
             );
 
-            return "projects/project_als";
+            model.addAttribute("pageContext", "project");
+            return "alss/als";
         }
     }
 
@@ -318,7 +320,8 @@ public class ProjectController
         model.addAttribute("alsId", alsId);
         model.addAttribute("lcId", lcId);
 
-        return "projects/project_lc";
+        model.addAttribute("pageContext", "project");
+            return "lcs/lc";
     }
 
     /**
@@ -387,7 +390,8 @@ public class ProjectController
                     lcId
             );
 
-            return "projects/project_lc";
+            model.addAttribute("pageContext", "project");
+            return "lcs/lc";
         }
     }
 
@@ -423,7 +427,8 @@ public class ProjectController
         model.addAttribute("alsId", alsId);
         model.addAttribute("lbcId", lbcId);
 
-        return "projects/project_lbc";
+        model.addAttribute("pageContext", "project");
+            return "lbcs/lbc";
     }
 
     /**
@@ -474,7 +479,8 @@ public class ProjectController
             model.addAttribute("alsId", alsId);
             model.addAttribute("lbcId", lbcId);
 
-            return "projects/project_lbc";
+            model.addAttribute("pageContext", "project");
+            return "lbcs/lbc";
         }
     }
 
@@ -510,7 +516,8 @@ public class ProjectController
         model.addAttribute("alsId", alsId);
         model.addAttribute("lbId", lbId);
 
-        return "projects/project_lb";
+        model.addAttribute("pageContext", "project");
+            return "lbs/lb";
     }
 
     /**
@@ -573,7 +580,8 @@ public class ProjectController
                     lbId
             );
 
-            return "projects/project_lb";
+            model.addAttribute("pageContext", "project");
+            return "lbs/lb";
         }
     }
 

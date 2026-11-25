@@ -49,14 +49,16 @@ public class ALSController extends BaseCatalogController {
     public String createALS(Model model) {
         ALSDTO als = ALSImageService.addImages(ALSDtoMapper.toDto(alsService.createALS()));
         model.addAttribute("als", als);
-        return "alss/als";
+        model.addAttribute("pageContext", "catalog");
+            return "alss/als";
     }
 
     @GetMapping("/{id}")
     public String editALS(@PathVariable Long id, Model model) {
         ALSDTO als = ALSImageService.addImages(ALSDtoMapper.toDto(alsService.findById(id)));
         model.addAttribute("als", als);
-        return "alss/als";
+        model.addAttribute("pageContext", "catalog");
+            return "alss/als";
     }
 
     @PostMapping("/save")
@@ -77,6 +79,7 @@ public class ALSController extends BaseCatalogController {
         } catch (ValidationSizeException e) {
             model.addAttribute("ALSErrors", ValidationErrorFormatter.format(e.getValidationResult()));
             model.addAttribute("als", ALSImageService.addImages(als));
+            model.addAttribute("pageContext", "catalog");
             return "alss/als";
         }
     }
@@ -101,7 +104,8 @@ public class ALSController extends BaseCatalogController {
 
         model.addAttribute("als", ALSImageService.addImages(ALSDtoMapper.toDto(als)));
         model.addAttribute("lb", LBImageService.addImage(LBDtoMapper.toDto(lb)));
-        return "alss/alss_lb";
+        model.addAttribute("pageContext", "als");
+            return "lbs/lb";
     }
 
     /**
@@ -127,7 +131,8 @@ public class ALSController extends BaseCatalogController {
             ALS als = alsService.findById(alsId);
             model.addAttribute("als", ALSImageService.addImages(ALSDtoMapper.toDto(als)));
             model.addAttribute("lb", LBImageService.addImage(lb));
-            return "alss/alss_lb";
+            model.addAttribute("pageContext", "als");
+            return "lbs/lb";
         }
     }
 
@@ -159,7 +164,8 @@ public class ALSController extends BaseCatalogController {
 
         model.addAttribute("als", ALSImageService.addImages(ALSDtoMapper.toDto(domain)));
         prepareLCForm(model, LCImageService.addImage(LCDtoMapper.toDto(lc)));
-        return "alss/alss_lc";
+        model.addAttribute("pageContext", "als");
+            return "lcs/lc";
     }
 
     /**
@@ -189,7 +195,8 @@ public class ALSController extends BaseCatalogController {
             com.lb_calc_web.domain.model.ALS als = alsService.findById(alsId);
             model.addAttribute("als", ALSImageService.addImages(ALSDtoMapper.toDto(als)));
             prepareLCForm(model, LCImageService.addImage(lc));
-            return "alss/alss_lc";
+            model.addAttribute("pageContext", "als");
+            return "lcs/lc";
         }
     }
 
@@ -218,7 +225,8 @@ public class ALSController extends BaseCatalogController {
         model.addAttribute("als", als);
         prepareLBCForm(model,
                 LBCImageService.addImage(LBCDtoMapper.toDto(alsService.findLBCInALS(domain, lbcId))));
-        return "alss/alss_lbc";
+        model.addAttribute("pageContext", "als");
+            return "lbcs/lbc";
     }
 
     /**
@@ -243,7 +251,8 @@ public class ALSController extends BaseCatalogController {
             model.addAttribute("errors", ValidationErrorFormatter.format(e.getValidationResult()));
             model.addAttribute("als", ALSImageService.addImages(ALSDtoMapper.toDto(alsService.findById(alsId))));
             prepareLBCForm(model, LBCImageService.addImage(lbc));
-            return "alss/alss_lbc";
+            model.addAttribute("pageContext", "als");
+            return "lbcs/lbc";
         }
     }
 

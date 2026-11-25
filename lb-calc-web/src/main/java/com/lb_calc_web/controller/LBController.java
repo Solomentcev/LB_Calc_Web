@@ -53,7 +53,8 @@ public class LBController {
 
         model.addAttribute("lb", lb);
 
-        return "lbs/lb";
+        model.addAttribute("pageContext", "catalog");
+            return "lbs/lb";
     }
 
     /**
@@ -74,7 +75,8 @@ public class LBController {
 
         model.addAttribute("lb", lb);
 
-        return "lbs/lb";
+        model.addAttribute("pageContext", "catalog");
+            return "lbs/lb";
     }
 
     /**
@@ -116,6 +118,7 @@ public class LBController {
                     LBImageService.addImage(lb)
             );
 
+            model.addAttribute("pageContext", "catalog");
             return "lbs/lb";
         }
     }
