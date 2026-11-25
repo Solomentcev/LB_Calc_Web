@@ -5,8 +5,8 @@
 <h1 class="page-title">Модули хранения</h1><div class="page-actions"><a th:href="@{/lbs/create}" class="btn btn-primary btn-sm">Создать модуль хранения</a><a th:href="@{/}" class="btn btn-secondary btn-sm">Назад</a></div>
 <div th:replace="~{fragments/pagination :: controls('/lbs', ${q}, ${sort}, ${direction}, ${size}, ${sortOptions})}"></div>
 <div class="table-responsive"><table class="table table-striped table-hover catalog-table">
-<colgroup><col style="width:4%"><col style="width:9%"><col style="width:11%"><col style="width:5%"><col style="width:5%"><col style="width:6%"><col style="width:6%"><col style="width:6%"><col style="width:7%"><col style="width:7%"><col style="width:8%"><col style="width:8%"><col style="width:9%"><col style="width:9%"></colgroup>
-<thead><tr><th>ID</th><th>Название</th><th>Тип</th><th>Ячейки</th><th>Высота</th><th>Ширина</th><th>Глубина</th><th>Верхняя рама</th><th>Нижняя рама</th><th>Открывание</th><th>Цвет корпуса</th><th>Цвет дверей</th><th>Действие</th></tr></thead>
+
+<thead><tr><th>ID</th><th>Название</th><th>Тип</th><th>Ячейки</th><th>Высота</th><th>Ширина</th><th>Глубина</th><th>Верхняя рама</th><th>Нижняя рама</th><th>Открывание</th><th>Цвет корпуса</th><th>Цвет дверей</th><th>Действия</th></tr></thead>
 <tbody><tr th:each="lb : ${lbs}">
 <td th:text="${lb.id}"></td><td th:text="${lb.name}"></td><td th:text="${lb.type}"></td><td th:text="${lb.countCells}"></td>
 <td th:text="${lb.height}"></td><td th:text="${lb.width}"></td><td th:text="${lb.depth}"></td><td th:text="${lb.upperFrame}"></td><td th:text="${lb.bottomFrame}"></td>

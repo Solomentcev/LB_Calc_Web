@@ -37,7 +37,11 @@ public final class CatalogPageSupport {
         String safeSort = allowedSorts.contains(sort) ? sort : defaultSort;
         Sort.Direction safeDirection = Sort.Direction.fromOptionalString(direction)
                 .orElse(Sort.Direction.ASC);
-        return PageRequest.of(safePage, safeSize, Sort.by(safeDirection, safeSort));
+        Sort ordering = Sort.by(safeDirection, safeSort);
+        if (!"id".equals(safeSort)) {
+            ordering = ordering.and(Sort.by(Sort.Direction.ASC, "id"));
+        }
+        return PageRequest.of(safePage, safeSize, ordering);
     }
 
     /** Добавляет в модель параметры страницы, необходимые шаблону списка. */
