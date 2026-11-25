@@ -621,6 +621,49 @@
             .module-editor__preview .module-visual img { max-height: 480px; }
         }
 
+        .project-editor {
+            max-width: 1280px;
+            padding-top: 1rem;
+            padding-bottom: 2rem;
+        }
+        .project-editor .project-als-card__preview img {
+            display: block;
+            max-height: 320px;
+            margin: 0 auto;
+            object-fit: contain;
+        }
+        .project-editor__metadata {
+            padding-top: .75rem;
+            border-top: 1px solid #edf0f2;
+        }
+        .project-als-card__metrics > div {
+            display: flex;
+            flex-direction: column;
+            gap: .2rem;
+            margin-bottom: .75rem;
+        }
+        .project-als-card__modules {
+            border-top: 1px solid #edf0f2;
+        }
+        .project-module-summary {
+            padding: .75rem 0;
+            border-bottom: 1px solid #edf0f2;
+        }
+        .project-module-summary:last-child { border-bottom: 0; }
+        .module-summary > div {
+            display: flex;
+            flex-direction: column;
+            gap: .2rem;
+            margin-bottom: .65rem;
+        }
+        .module-storage-card {
+            margin-bottom: .85rem;
+            padding: .9rem;
+            border: 1px solid #e5e9ed;
+            border-radius: .5rem;
+            background: #fbfcfd;
+        }
+
         @media (max-width: 767.98px) {
             .module-editor__heading { flex-direction: column; }
             .module-editor__title { font-size: 1.4rem; }
