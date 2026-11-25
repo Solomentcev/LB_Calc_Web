@@ -47,6 +47,7 @@ public class ALSRestController {
     @Operation(
             summary = "Получить список ALS"
     )
+    /** Возвращает список конфигураций ALS. */
     public ResponseEntity<?> getAllALS() {
 
         List<ALSDTO> alsList =
@@ -64,6 +65,7 @@ public class ALSRestController {
     @Operation(
             summary = "Получить ALS по ID"
     )
+    /** Возвращает конфигурацию ALS по идентификатору. */
     public ResponseEntity<?> getALSById(
             @PathVariable Long id
     ) {
@@ -80,6 +82,7 @@ public class ALSRestController {
     @Operation(
             summary = "Получить шаблон ALS"
     )
+    /** Создаёт конфигурацию ALS из переданных данных. */
     public ResponseEntity<?> createALS() {
 
         return ResponseEntity.ok(
@@ -93,6 +96,7 @@ toDto(alsService.createALS())
     @Operation(
             summary = "Создать ALS"
     )
+    /** Создаёт конфигурацию ALS из переданных данных. */
     public ResponseEntity<?> createALS(
             @RequestBody ALSDTO dto
     ) {
@@ -117,6 +121,7 @@ toDto(alsService.createALS())
     @Operation(
             summary = "Обновить ALS"
     )
+    /** Обновляет сохранённую конфигурацию ALS. */
     public ResponseEntity<?> updateALS(
             @PathVariable Long id,
             @RequestBody ALSDTO dto
@@ -137,6 +142,7 @@ toDto(alsService.createALS())
     @Operation(
             summary = "Удалить ALS"
     )
+    /** Удаляет конфигурацию ALS по идентификатору. */
     public ResponseEntity<?> deleteALS(
             @PathVariable Long id
     ) {

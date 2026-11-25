@@ -33,6 +33,7 @@ public class AuthController {
         return "registration";
     }
     @PostMapping("/registration")
+    /** Отображает форму регистрации пользователя. */
     public String registration(@Valid RegistrationDTO registrationDTO,
                                 BindingResult bindingResult,
                                 Model model, RedirectAttributes redirectAttributes) {
@@ -50,6 +51,7 @@ public class AuthController {
         }
     }
     @GetMapping("/login")
+    /** Отображает страницу входа в систему. */
     public String loginPage(Model model) {
         model.addAttribute("loginRequest", new LoginRequest() );
         return "login";

@@ -47,6 +47,7 @@ public class EmployeeController {
     }
 
     @ModelAttribute
+    /** Подготавливает список ролей для форм управления сотрудниками. */
     public void addRoles(Model model) {
         model.addAttribute("roles", roles);
     }
@@ -66,6 +67,7 @@ public class EmployeeController {
     }
 
     @GetMapping("/myprofile/changepassword")
+    /** Отображает форму смены пароля текущего сотрудника. */
     public String changePasswordForm(
             Model model
     ) {
@@ -84,6 +86,7 @@ public class EmployeeController {
     }
 
     @PostMapping("/myprofile/changepassword")
+    /** Проверяет данные и изменяет пароль текущего сотрудника. */
     public String changePassword(
             @ModelAttribute("changePassword")
             @Valid
@@ -143,6 +146,7 @@ public class EmployeeController {
 
     @GetMapping("/employees/{id}/changepassword")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    /** Отображает форму изменения пароля выбранного сотрудника. */
     public String changeEmployeePasswordForm(
             @PathVariable int id,
             Model model
@@ -169,6 +173,7 @@ public class EmployeeController {
 
     @PostMapping("/employees/{id}/changepassword")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    /** Изменяет пароль выбранного сотрудника. */
     public String changeEmployeePassword(
             @PathVariable int id,
             @ModelAttribute("changePassword")
@@ -224,6 +229,7 @@ public class EmployeeController {
     }
 
     @GetMapping("/profiles")
+    /** Отображает страницу профилей сотрудников с фильтрацией и пагинацией. */
     public String profiles(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
@@ -252,6 +258,7 @@ public class EmployeeController {
     }
 
     @GetMapping("/profiles/{id}")
+    /** Отображает профиль выбранного сотрудника. */
     public String getProfile(
             @PathVariable int id,
             Model model
@@ -280,6 +287,7 @@ public class EmployeeController {
 
     @GetMapping("/employees")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    /** Отображает список сотрудников с фильтрацией и пагинацией. */
     public String employees(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
@@ -315,6 +323,7 @@ public class EmployeeController {
 
     @GetMapping("/employees/create")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    /** Открывает форму создания учётной записи сотрудника. */
     public String registration(Model model) {
 
         model.addAttribute(
@@ -332,6 +341,7 @@ public class EmployeeController {
 
     @PostMapping("/employees/save")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    /** Сохраняет новую или изменённую учётную запись сотрудника. */
     public String save(
             @ModelAttribute("employee")
             @Valid
@@ -402,6 +412,7 @@ public class EmployeeController {
 
     @PostMapping("/employees/{id}/deactivate")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    /** Деактивирует учётную запись выбранного сотрудника. */
     public String deactivateEmployee(
             @PathVariable Long id,
             RedirectAttributes redirectAttributes
@@ -416,6 +427,7 @@ public class EmployeeController {
 
     @PostMapping("/employees/{id}/activate")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    /** Активирует учётную запись выбранного сотрудника. */
     public String activateEmployee(
             @PathVariable Long id,
             RedirectAttributes redirectAttributes
@@ -430,6 +442,7 @@ public class EmployeeController {
 
     @GetMapping("/employees/{id}")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    /** Открывает форму редактирования учётной записи сотрудника. */
     public String editEmployee(
             @PathVariable int id,
             Model model
@@ -462,6 +475,7 @@ public class EmployeeController {
 
     @PostMapping("/employees/{id}/update")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    /** Сохраняет изменения учётной записи сотрудника. */
     public String update(
             @PathVariable int id,
             @ModelAttribute("employee")

@@ -80,6 +80,7 @@ public class EquipmentController {
     }
 
     @GetMapping("/create")
+    /** Открывает форму создания модели оборудования. */
     public String createForm(Model model) {
         prepareForm(model, new EquipmentDTO());
         return "equipment/equipment";
@@ -92,6 +93,7 @@ public class EquipmentController {
     }
 
     @PostMapping("/save")
+    /** Проверяет и сохраняет модель оборудования. */
     public String save(
             @Valid @ModelAttribute("equipment") EquipmentDTO dto,
             BindingResult bindingResult,
@@ -116,6 +118,7 @@ public class EquipmentController {
     }
 
     @PostMapping("/{id}/delete")
+    /** Удаляет модель оборудования из каталога. */
     public String delete(
             @PathVariable Long id,
             RedirectAttributes redirectAttributes

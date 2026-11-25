@@ -46,6 +46,7 @@ public class ALSController extends BaseCatalogController {
     }
 
     @GetMapping("/create")
+    /** Открывает форму создания новой конфигурации ALS. */
     public String createALS(Model model) {
         model.addAttribute("pageContext", "CATALOG");
         ALSDTO als = ALSImageService.addImages(ALSDtoMapper.toDto(alsService.createALS()));
@@ -83,6 +84,7 @@ public class ALSController extends BaseCatalogController {
     }
 
     @PostMapping("/save")
+    /** Проверяет и сохраняет конфигурацию ALS. */
     public String saveALS(@ModelAttribute("als") ALSDTO als, Model model) {
         model.addAttribute("pageContext", "CATALOG");
         try {
@@ -106,6 +108,7 @@ public class ALSController extends BaseCatalogController {
     }
 
     @PostMapping("/{alsId}/addLB")
+    /** Добавляет новый модуль хранения LB в редактируемую ALS. */
     public String addLB(@PathVariable Long alsId) {
         ALSDTO als = ALSDtoMapper.toDto(alsService.addNewLBandSaveALS(alsId));
         return "redirect:/alss/" + als.getId();

@@ -50,6 +50,7 @@ public class ProjectController
         extends BaseCatalogController {
 
     @ModelAttribute("pageContext")
+    /** Определяет контекст отображения страницы проекта. */
     public String pageContext() {
         return "PROJECT";
     }

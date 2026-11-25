@@ -32,6 +32,7 @@ public class EmployeeRestController {
     }
 
     @GetMapping
+    /** Возвращает список учётных записей сотрудников. */
     public ResponseEntity<?> getAllEmployees() {
 
             List<EmployeeDTO> employees =
@@ -54,6 +55,7 @@ public class EmployeeRestController {
     }
 
     @GetMapping("/{id}")
+    /** Возвращает сотрудника по идентификатору. */
     public ResponseEntity<?> getEmployeeById(
             @PathVariable Long id
     ) {
@@ -68,6 +70,7 @@ public class EmployeeRestController {
     }
 
     @PostMapping
+    /** Создаёт учётную запись сотрудника. */
     public ResponseEntity<?> createEmployee(
             @RequestBody
             @Valid
@@ -90,6 +93,7 @@ public class EmployeeRestController {
     }
 
     @PutMapping("/{id}")
+    /** Обновляет данные учётной записи сотрудника. */
     public ResponseEntity<?> updateEmployee(
             @PathVariable int id,
             @RequestBody @Valid ProfileDTO employeeUpd
@@ -136,6 +140,7 @@ public class EmployeeRestController {
     }
 
     @PostMapping("/{id}/activate")
+    /** Активирует учётную запись сотрудника. */
     public ResponseEntity<?> activateEmployee(
             @PathVariable Long id
     ) {
@@ -148,6 +153,7 @@ public class EmployeeRestController {
     }
 
     @DeleteMapping("/{id}")
+    /** Деактивирует или удаляет учётную запись сотрудника согласно правилам сервиса. */
     public ResponseEntity<?> deleteEmployee(
             @PathVariable Long id
     ) {
