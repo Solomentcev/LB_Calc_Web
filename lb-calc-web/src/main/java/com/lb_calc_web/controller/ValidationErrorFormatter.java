@@ -13,6 +13,7 @@ public final class ValidationErrorFormatter {
     private ValidationErrorFormatter() {
     }
 
+    /** Преобразует результат геометрической проверки в список сообщений для представления. */
     public static List<String> format(ValidationResult result) {
         if (result == null) {
             return List.of();

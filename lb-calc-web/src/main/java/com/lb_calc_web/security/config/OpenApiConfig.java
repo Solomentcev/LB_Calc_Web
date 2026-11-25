@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import org.springframework.context.annotation.Configuration;
 
+/** Конфигурация OpenAPI и Swagger UI для REST API приложения. */
 @Configuration
 @OpenAPIDefinition(
         info = @Info(
@@ -20,6 +21,5 @@ import org.springframework.context.annotation.Configuration;
         scheme = "bearer",
         bearerFormat = "JWT"
 )
-/** Конфигурация OpenAPI и Swagger UI для REST API приложения. */
 public class OpenApiConfig {
 }

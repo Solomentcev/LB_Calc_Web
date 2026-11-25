@@ -23,26 +23,31 @@ public abstract class BaseCatalogController {
             Arrays.asList(DirectionDoorOpening.values());
 
     @ModelAttribute("colorsList")
+    /** Возвращает справочник цветов для выбора в формах каталога. */
     public List<Colors> colorsList() {
         return colorsList;
     }
 
     @ModelAttribute("positionControlModuleList")
+    /** Возвращает допустимые положения управляющего модуля. */
     public List<PositionControlModule> positionControlModuleList() {
         return positionControlModuleList;
     }
 
     @ModelAttribute("typeList")
+    /** Возвращает настроенный список конструктивных типов модулей хранения. */
     public List<String> typeList() {
         return getTypeLbList();
     }
 
     @ModelAttribute("typeLbList")
+    /** Возвращает типы LB, разрешённые конфигурацией приложения. */
     public List<String> typeLbList() {
         return getTypeLbList();
     }
 
     @ModelAttribute("directionDoorOpeningList")
+    /** Возвращает допустимые направления открывания дверей. */
     public List<DirectionDoorOpening> directionDoorOpeningList() {
         return directionDoorOpeningList;
     }

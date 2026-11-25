@@ -21,10 +21,10 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import java.io.IOException;
 
+/** Конфигурация Spring Security, правил доступа и фильтров аутентификации. */
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
-/** Конфигурация Spring Security, правил доступа и фильтров аутентификации. */
 public class SecurityConfiguration {
 
     private final JwtAuthentificationFilter jwtAuthentificationFilter;
@@ -38,6 +38,7 @@ public class SecurityConfiguration {
         this.objectMapper = objectMapper;
     }
 
+    /** Настраивает правила HTTP-доступа, аутентификацию и цепочку security-фильтров. */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -89,6 +90,7 @@ public class SecurityConfiguration {
         objectMapper.writeValue(response.getOutputStream(), ApiResponse.error(message));
     }
 
+    /** Предоставляет BCrypt-кодировщик паролей для сервисов аутентификации. */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
