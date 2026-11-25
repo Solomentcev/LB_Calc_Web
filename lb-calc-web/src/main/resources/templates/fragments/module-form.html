@@ -54,7 +54,7 @@
                  th:each="selection, selectionStat : *{equipmentSelections}">
                 <div class="module-field">
                     <label th:for="|equipment-${selectionStat.index}|">Модель оборудования</label>
-                    <select class="form-control" th:id="|equipment-${selectionStat.index}|"
+                    <select class="form-control" required th:id="|equipment-${selectionStat.index}|"
                             th:name="|equipmentSelections[${selectionStat.index}].equipmentId|">
                         <option value="">Выберите модель</option>
                         <option th:each="item : ${selection.availableModels}" th:value="${item.id}"
