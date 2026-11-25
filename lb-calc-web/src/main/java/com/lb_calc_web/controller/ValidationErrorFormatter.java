@@ -24,6 +24,7 @@ public final class ValidationErrorFormatter {
                 .toList();
     }
 
+    /** Форматирует отдельную ошибку с полем и фактическим значением. */
     private static String format(ValidationError error) {
         return "[" + error.getObjectType() + "-id" + error.getObjectId() + "]"
                 + error.getField() + ": " + error.getMessage()

@@ -52,6 +52,7 @@ public abstract class BaseCatalogController {
         return directionDoorOpeningList;
     }
 
+    /** Разбирает настройку lb.types и возвращает список непустых типов. */
     private List<String> getTypeLbList() {
         if (lbTypes == null || lbTypes.isBlank()) {
             return List.of();

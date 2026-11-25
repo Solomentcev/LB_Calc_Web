@@ -13,6 +13,8 @@ import com.lb_calc_web.mapper.dto.EquipmentDtoMapper;
 import com.lb_calc_web.entity.EquipmentEntity;
 import com.lb_calc_web.mapper.entity.EquipmentEntityMapper;
 import com.lb_calc_web.repository.EquipmentRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -29,6 +31,8 @@ import java.util.Objects;
 /** Управляет каталогом физических моделей оборудования. */
 @Service
 public class EquipmentCatalogService {
+    private static final Logger logger = LoggerFactory.getLogger(EquipmentCatalogService.class);
+
     private final EquipmentRepository equipmentRepository;
     public EquipmentCatalogService(EquipmentRepository equipmentRepository) {
         this.equipmentRepository = Objects.requireNonNull(equipmentRepository);
@@ -68,6 +72,7 @@ public class EquipmentCatalogService {
                 .map(EquipmentEntityMapper::toDomain);
     }
 
+    /** Добавляет спецификацию текстового поиска без учёта регистра. */
     private void addTextFilter(
             List<Specification<EquipmentEntity>> specifications,
             String attribute,
@@ -81,6 +86,7 @@ public class EquipmentCatalogService {
                 builder.like(builder.lower(root.get(attribute)), pattern));
     }
 
+    /** Добавляет нижнюю и верхнюю границы фильтрации числового поля. */
     private void addRangeFilter(
             List<Specification<EquipmentEntity>> specifications,
             String attribute,
@@ -168,6 +174,7 @@ public class EquipmentCatalogService {
         }
         return result;
     }
+    /** Формирует ключ функционального назначения модели оборудования. */
     private String key(Equipment item) {
         return item.getFunctionalType().name() + ":" + item.getPurpose().toString();
     }
@@ -261,7 +268,10 @@ public class EquipmentCatalogService {
                         entity.getFunctionalType(), entity.getPurpose())) {
             entity.setDefaultModel(true);
         }
-        return EquipmentEntityMapper.toDomain(equipmentRepository.saveAndFlush(entity));
+        EquipmentEntity saved = equipmentRepository.saveAndFlush(entity);
+        logger.info("Модель оборудования сохранена: id={}, functionalType={}, purpose={}",
+                saved.getId(), saved.getFunctionalType(), saved.getPurpose());
+        return EquipmentEntityMapper.toDomain(saved);
     }
 
     /** Удаляет модель оборудования по идентификатору. */
@@ -286,8 +296,11 @@ public class EquipmentCatalogService {
                 equipmentRepository.saveAndFlush(replacement);
             });
         }
+        logger.info("Модель оборудования удалена: id={}, functionalType={}, purpose={}",
+                id, functionalType, purpose);
     }
 
+    /** Проверяет, изменились ли характеристики модели, используемой в модулях. */
     private boolean hasChanged(Equipment equipment, EquipmentEntity entity) {
         return equipment.getFunctionalType() != entity.getFunctionalType()
                 || !equipment.getPurpose().toString().equals(entity.getPurpose())
@@ -299,6 +312,7 @@ public class EquipmentCatalogService {
                 || equipment.getDepth() != entity.getDepth();
     }
 
+    /** Находит сущность оборудования и проверяет корректность идентификатора. */
     private EquipmentEntity findEntity(Long id) {
         if (id == null || id <= 0) {
             throw new NoSuchElementException("Модель оборудования с id=" + id + " не найдена");
