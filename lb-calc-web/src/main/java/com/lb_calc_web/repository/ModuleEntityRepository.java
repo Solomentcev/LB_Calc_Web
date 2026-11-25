@@ -26,6 +26,7 @@ public interface ModuleEntityRepository
               and entity.colorBody = :colorBody
               and entity.colorDoor = :colorDoor
             """)
+    /** Находит общие сущности модулей с совпадающими базовыми габаритами и цветами. */
     List<ModuleEntity> findCandidates(
             @Param("height") int height,
             @Param("width") int width,

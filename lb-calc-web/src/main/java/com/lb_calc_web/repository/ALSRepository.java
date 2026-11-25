@@ -27,6 +27,7 @@ public interface ALSRepository extends JpaRepository<ALSEntity, Long>, JpaSpecif
               and entity.colorBody = :colorBody
               and entity.colorDoor = :colorDoor
             """)
+    /** Находит ALS-кандидаты с совпадающими базовыми габаритами и цветами под блокирующей блокировкой. */
     List<ALSEntity> findCandidates(
             @Param("height") int height,
             @Param("depth") int depth,

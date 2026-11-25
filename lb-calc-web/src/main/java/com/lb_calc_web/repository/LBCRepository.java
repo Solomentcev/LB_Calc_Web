@@ -36,6 +36,7 @@ public interface LBCRepository extends JpaRepository<LBCEntity, Long>, JpaSpecif
               and entity.directionDoorOpening = :directionDoorOpening
               and entity.countCells = :countCells
             """)
+    /** Находит LBC-кандидаты с совпадающими конструктивными параметрами под блокирующей блокировкой. */
     List<LBCEntity> findCandidates(
             @Param("height") int height,
             @Param("width") int width,

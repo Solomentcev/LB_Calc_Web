@@ -15,9 +15,11 @@ public interface EquipmentRepository
     /** Возвращает модели, назначенные по умолчанию для своих функциональных назначений. */
     java.util.List<EquipmentEntity> findAllByDefaultModelTrue();
 
+    /** Проверяет наличие модели по умолчанию для функционального типа и назначения. */
     boolean existsByFunctionalTypeAndPurposeAndDefaultModelTrue(
             EquipmentFunctionalType functionalType, String purpose);
 
+    /** Находит модель с минимальным идентификатором для заданного функционального назначения. */
     Optional<EquipmentEntity> findFirstByFunctionalTypeAndPurposeOrderByIdAsc(
             EquipmentFunctionalType functionalType, String purpose);
 

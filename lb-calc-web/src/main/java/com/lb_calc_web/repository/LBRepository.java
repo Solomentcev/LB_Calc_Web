@@ -36,6 +36,7 @@ public interface LBRepository extends JpaRepository<LBEntity, Long>, JpaSpecific
               and entity.colorBody = :colorBody
               and entity.colorDoor = :colorDoor
             """)
+    /** Находит LB-кандидаты с совпадающими конструктивными параметрами под блокирующей блокировкой. */
     List<LBEntity> findCandidates(
             @Param("height") int height,
             @Param("width") int width,

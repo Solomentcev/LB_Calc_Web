@@ -28,6 +28,7 @@ public interface LCRepository extends JpaRepository<LCEntity, Long>, JpaSpecific
               and entity.colorBody = :colorBody
               and entity.colorDoor = :colorDoor
             """)
+    /** Находит LC-кандидаты с совпадающими базовыми габаритами и цветами под блокирующей блокировкой. */
     List<LCEntity> findCandidates(
             @Param("height") int height,
             @Param("width") int width,
