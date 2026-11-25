@@ -15,7 +15,7 @@ class ModuleNamingDescriptionTest {
     @Test
     void lbNameAndDescription_shouldContainStorageCharacteristics() {
         ALS als = TestDataFactory.validALS(101L);
-        StorageModule left = als.getStorageModules().getFirst();
+        StorageModule left = als.getStorageModules().get(0);
 
         assertTrue(left.getName().startsWith("Модуль хранения на 3 ячеек"));
         assertTrue(left.getName().contains("тип TYPE1"));
