@@ -51,6 +51,9 @@
             <span class="module-editor__id" th:if="*{id != null and id > 0}" th:text="${'ID: ' + lc.id}">ID</span>
         </header>
 
+        <div class="module-editor__layout">
+            <div class="module-editor__parameters">
+
         <section class="module-section">
             <div class="module-section__header">
                 <h2>Габариты и исполнение</h2>
@@ -109,7 +112,8 @@
         <div th:replace="~{fragments/module-form :: functionalConfiguration}"></div>
         <div th:replace="~{fragments/module-form :: equipmentSelections}"></div>
 
-        <section class="module-section" th:if="*{stringLCImage != null}">
+</div>
+            <aside class="module-editor__preview">        <section class="module-section" th:if="*{stringLCImage != null}">
             <div class="module-section__header">
                 <h2>Визуализация</h2>
                 <p>Текущий чертёж управляющего модуля.</p>
@@ -118,6 +122,8 @@
                 <img th:src="'data:image/png;base64,' + ${lc.stringLCImage}" alt="Чертёж модуля управления">
             </div>
         </section>
+            </aside>
+        </div>
     </form>
 </main>
 <div th:replace="~{footer :: footer}"></div>
