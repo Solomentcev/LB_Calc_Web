@@ -54,13 +54,11 @@ public final class CatalogPageSupport {
     public static void addModelAttributes(
             Model model,
             Page<?> page,
-            String query,
             Pageable pageable,
             String baseUrl,
             Map<String, String> sortOptions
     ) {
         model.addAttribute("page", page);
-        model.addAttribute("q", query == null ? "" : query);
         model.addAttribute("sort", pageable.getSort().stream()
                 .findFirst().map(Sort.Order::getProperty).orElse("id"));
         model.addAttribute("direction", pageable.getSort().stream()
