@@ -13,6 +13,7 @@ import com.lb_calc_web.mapper.dto.LBCDtoMapper;
 import com.lb_calc_web.service.image.LBCImageService;
 import com.lb_calc_web.service.validation.ValidationSizeException;
 import com.lb_calc_web.service.LBCService;
+import com.lb_calc_web.service.ModuleCatalogFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -47,20 +48,28 @@ public class LBCController extends BaseCatalogController {
     public String lbcs(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
-            @RequestParam(defaultValue = "") String q,
             @RequestParam(defaultValue = "id") String sort,
             @RequestParam(defaultValue = "asc") String direction,
+            @ModelAttribute ModuleCatalogFilter filter,
             Model model
     ) {
-        Pageable pageable = CatalogPageSupport.pageable(page, size, sort, direction, "id",
-                Set.of("id", "name", "type", "countCells", "height", "width", "depth"));
-        var result = lbcService.findPage(q, pageable).map(
+        Set<String> allowedSorts = Set.of("id", "name", "type", "countCells", "height", "width",
+                "depth", "displayPurpose", "accessSort", "paymentPurpose", "printerPurpose",
+                "colorBody", "colorDoor");
+        Pageable pageable = CatalogPageSupport.pageable(page, size, sort, direction, "id", allowedSorts);
+        var result = lbcService.findPage(filter, pageable).map(
                 LBCDtoMapper::toDto).map(LBCImageService::addImage);
         model.addAttribute("lbcs", result.getContent());
-        CatalogPageSupport.addModelAttributes(model, result, q, pageable, "/lbcs",
-                CatalogPageSupport.sortOptions("id", "ID", "name", "Название", "type", "Тип",
-                        "countCells", "Ячейки", "height", "Высота", "width", "Ширина",
-                        "depth", "Глубина"));
+        model.addAttribute("page", result);
+        model.addAttribute("filters", filter);
+        model.addAttribute("sort", allowedSorts.contains(sort) ? sort : "id");
+        model.addAttribute("direction", pageable.getSort().stream().findFirst()
+                .map(order -> order.getDirection().name().toLowerCase()).orElse("asc"));
+        model.addAttribute("size", pageable.getPageSize());
+        model.addAttribute("displayPurposes", List.of(DisplayPurpose.values()));
+        model.addAttribute("accessPurposes", List.of(AccessPurpose.values()));
+        model.addAttribute("paymentPurposes", List.of(PaymentPurpose.values()));
+        model.addAttribute("printerPurposes", List.of(PrinterPurpose.values()));
         return "lbcs/lbcs";
     }
 
