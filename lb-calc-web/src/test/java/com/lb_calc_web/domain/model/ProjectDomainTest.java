@@ -16,6 +16,37 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class ProjectDomainTest {
 
     @Test
+    void replaceALS_shouldChangeOnlyOneInstanceAndRecalculateDescription() {
+        Employee employee = new Employee(
+                "Тест",
+                "Тестов",
+                "project-replacement@example.test",
+                LocalDate.of(2026, 1, 10),
+                Role.ROLE_MANAGER
+        );
+        ALS original = TestDataFactory.validALS(1L);
+        ALS replacement = ALSDtoMapper.toDomain(
+                TestDataFactory.validLBCALSDTO(2L)
+        );
+        Project project = new Project(
+                "Проект",
+                "Компания",
+                LocalDate.of(2026, 1, 10),
+                employee
+        );
+        project.addALS(original);
+        project.addALS(original);
+        String previousDescription = project.getDescription();
+
+        project.replaceALS(original, replacement);
+
+        assertEquals(1, project.getQuantity(original));
+        assertEquals(1, project.getQuantity(replacement));
+        assertTrue(!project.getDescription().equals(previousDescription));
+        assertTrue(project.getDescription().contains(replacement.getName()));
+    }
+
+    @Test
     void description_shouldNotDependOnAlsInsertionOrder() {
         Employee employee = new Employee(
                 "Тест",

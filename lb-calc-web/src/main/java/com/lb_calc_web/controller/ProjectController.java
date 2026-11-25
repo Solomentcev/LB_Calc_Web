@@ -428,8 +428,9 @@ public class ProjectController
             lc.setEquipmentSelections(equipmentCatalogService.prepareSelections(
                     lc.getFunctionalConfiguration(), lc.getEquipmentSelections()));
             com.lb_calc_web.domain.model.LC replacement = alsService.restoreLC(lc, sourceALS);
-            updatedALS = alsService.replaceLC(sourceALS.copy(), replacement);
-            preview = projectService.previewALSReplacement(projectId, alsId, updatedALS);
+            ALS candidateALS = alsService.replaceLC(sourceALS.copy(), replacement);
+            preview = projectService.previewALSReplacement(projectId, alsId, candidateALS);
+            updatedALS = candidateALS;
             lc = LCDtoMapper.toDto(replacement);
         } catch (ValidationSizeException exception) {
             model.addAttribute("errors", ValidationErrorFormatter.format(exception.getValidationResult()));
@@ -562,8 +563,9 @@ public class ProjectController
             lbc.setEquipmentSelections(equipmentCatalogService.prepareSelections(
                     lbc.getFunctionalConfiguration(), lbc.getEquipmentSelections()));
             com.lb_calc_web.domain.model.LBC replacement = alsService.restoreLBC(lbc, sourceALS);
-            updatedALS = alsService.replaceLBC(sourceALS.copy(), replacement);
-            preview = projectService.previewALSReplacement(projectId, alsId, updatedALS);
+            ALS candidateALS = alsService.replaceLBC(sourceALS.copy(), replacement);
+            preview = projectService.previewALSReplacement(projectId, alsId, candidateALS);
+            updatedALS = candidateALS;
             lbc = LBCDtoMapper.toDto(replacement);
         } catch (ValidationSizeException exception) {
             model.addAttribute("errors", ValidationErrorFormatter.format(exception.getValidationResult()));
@@ -679,10 +681,11 @@ public class ProjectController
         ALS updatedALS = sourceALS;
         try {
             LB replacement = alsService.restoreLB(lb);
-            updatedALS = alsService.replaceLB(sourceALS.copy(), lbId, replacement);
-            preview = projectService.previewALSReplacement(projectId, alsId, updatedALS);
+            ALS candidateALS = alsService.replaceLB(sourceALS.copy(), lbId, replacement);
+            preview = projectService.previewALSReplacement(projectId, alsId, candidateALS);
+            updatedALS = candidateALS;
             lb = LBDtoMapper.toDto(replacement);
-        } catch (IllegalArgumentException | NullPointerException exception) {
+        } catch (IllegalArgumentException | NullPointerException | IllegalStateException exception) {
             // При незаполненных промежуточных значениях сохраняем введённые данные формы.
         } catch (ValidationSizeException exception) {
             model.addAttribute("errors", ValidationErrorFormatter.format(exception.getValidationResult()));

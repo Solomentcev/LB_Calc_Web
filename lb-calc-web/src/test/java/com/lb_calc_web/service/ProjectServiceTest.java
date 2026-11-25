@@ -199,6 +199,33 @@ environment = new MockEnvironment()
     }
 
     @Test
+    void previewProject_shouldValidateWithoutPersisting() {
+        Employee employee = new Employee(
+                1L,
+                "Иван",
+                "Иванов",
+                "preview@example.test",
+                java.time.LocalDate.of(2026, 9, 18),
+                Role.ROLE_MANAGER
+        );
+        com.lb_calc_web.domain.model.Project requested =
+                new com.lb_calc_web.domain.model.Project(
+                        "Проект",
+                        "TEST_COMPANY",
+                        java.time.LocalDate.of(2026, 9, 18),
+                        employee
+                );
+        requested.addALS(TestDataFactory.validALS(10L));
+
+        com.lb_calc_web.domain.model.Project result =
+                projectService.previewProject(requested);
+
+        assertSame(requested, result);
+        verify(projectRepository, never()).save(any(ProjectEntity.class));
+        verify(alsService, never()).saveALS(any(com.lb_calc_web.domain.model.ALS.class));
+    }
+
+    @Test
     void findAll_shouldReturnDomainProjects() {
         when(projectRepository.findAllWithUsers()).thenReturn(java.util.List.of());
         assertTrue(projectService.findAll().isEmpty());
