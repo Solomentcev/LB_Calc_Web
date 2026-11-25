@@ -44,6 +44,12 @@ import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
+/**
+ * Реализует аутентификацию, регистрацию сотрудников и управление учётными данными.
+ *
+ * <p>Публикует доменные события в Kafka после успешного завершения транзакций,
+ * чтобы уведомления не отражали изменения, которые не были сохранены.</p>
+ */
 @Service
 public class AuthService {
 
@@ -82,11 +88,6 @@ public class AuthService {
     public JwtResponse login(
             LoginRequest loginRequest
     ) throws AuthException {
-
-        logger.info(
-                "Попытка входа email={}",
-                loginRequest.getEmail()
-        );
 
         EmployeePrincipal principal;
 
@@ -129,10 +130,7 @@ public class AuthService {
                 .getContext()
                 .setAuthentication(authentication);
 
-        logger.info(
-                "Аутентификация успешна email={}",
-                principal.getUsername()
-        );
+        logger.info("Пользователь успешно аутентифицирован: employeeId={}", principal.getId());
 
         String accessToken =
                 jwtService.generateAccessToken(principal);
@@ -152,6 +150,7 @@ public class AuthService {
         );
     }
 
+    /** Проверяет refresh token и выпускает новую пару токенов для активной учётной записи. */
     public JwtResponse refresh(
             @NonNull String refreshToken
     ) {
@@ -188,18 +187,21 @@ public class AuthService {
         );
     }
 
+    /** Создаёт cookie для access token с настройками безопасности из JWT-сервиса. */
     public Cookie generateAccessTokenCookie(
             String token
     ) {
         return jwtService.generateAccessTokenCookie(token);
     }
 
+    /** Создаёт cookie для refresh token с настройками безопасности из JWT-сервиса. */
     public Cookie generateRefreshTokenCookie(
             String token
     ) {
         return jwtService.generateRefreshTokenCookie(token);
     }
 
+    /** Проверяет, зарегистрирован ли сотрудник с указанным адресом электронной почты. */
     public boolean existsByEmail(
             @NotBlank
             @Size(max = 50)
@@ -366,6 +368,7 @@ public class AuthService {
         );
     }
 
+    /** Преобразует нарушение уникальности email в прикладную ошибку конфликта. */
     private IllegalArgumentException toEmailConflict(DataIntegrityViolationException exception) {
         Throwable cause = exception;
         while (cause != null) {
@@ -378,6 +381,7 @@ public class AuthService {
         throw exception;
     }
 
+    /** Проверяет наличие пароля и совпадение его подтверждения. */
     private void validatePasswords(
             String password,
             String confirmPassword
@@ -394,6 +398,7 @@ public class AuthService {
         }
     }
 
+    /** Планирует публикацию события после commit либо отправляет его сразу вне транзакции. */
     void publishEvent(
             UserEventType type,
             Long userId,
@@ -430,6 +435,7 @@ public class AuthService {
         sendEvent.run();
     }
 
+    /** Отправляет событие в Kafka и регистрирует результат асинхронной отправки. */
     private void sendEvent(UserEvent event, UserEventType type, Long userId) {
         try {
             CompletableFuture<SendResult<String, UserEvent>> future =

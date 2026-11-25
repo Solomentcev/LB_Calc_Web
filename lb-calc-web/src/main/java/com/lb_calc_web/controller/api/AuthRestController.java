@@ -9,8 +9,6 @@ import com.lb_calc_web.service.AuthService;
 import jakarta.security.auth.message.AuthException;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,65 +17,45 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1")
 public class AuthRestController {
     private final AuthService authService;
-    private static final Logger logger = LoggerFactory.getLogger(AuthRestController.class);
 
     public AuthRestController(AuthService authService) {
         this.authService = authService;
     }
 
-    /**
-     * POST /api/v1/login
-     * Вход в систему с email и паролем
-     */
+    /** Выполняет вход по учётным данным и возвращает пару JWT-токенов. */
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody @Valid LoginRequest loginRequest) throws AuthException {
-        logger.info("Login attempt for email: {}", loginRequest.getEmail());
-
-            JwtResponse tokens = authService.login(loginRequest);
-            logger.info("User {} successfully logged in", loginRequest.getEmail());
-            return ResponseEntity.ok(ApiResponse.success("Login successful", tokens));
+        JwtResponse tokens = authService.login(loginRequest);
+        return ResponseEntity.ok(ApiResponse.success("Login successful", tokens));
 
     }
 
-    /**
-     * POST /api/v1/registration
-     * Регистрация нового пользователя
-     */
+    /** Регистрирует пользователя с ролью по умолчанию. */
 
     @PostMapping("/registration")
     public ResponseEntity<?> registration(@RequestBody @Valid RegistrationDTO registrationDTO) {
-        logger.info("Registration attempt for email: {}", registrationDTO.getEmail());
-
-            EmployeeDTO employee = authService.registration(registrationDTO);
-            logger.info("User {} successfully registered", registrationDTO.getEmail());
-            ApiResponse<EmployeeDTO> response = ApiResponse.success("Registration successful", employee);
-            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        EmployeeDTO employee = authService.registration(registrationDTO);
+        ApiResponse<EmployeeDTO> response = ApiResponse.success("Registration successful", employee);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
 
     }
 
-    /**
-     * POST /api/v1/refresh
-     * Обновление access token используя refresh token
-     */
+    /** Обновляет пару JWT-токенов по refresh token из заголовка запроса. */
     @PostMapping("/refresh")
     public ResponseEntity<?> refresh(@RequestHeader(value = "Refresh-Token", required = false) String refreshToken) {
-        logger.debug("Token refresh attempt");
-
         if (refreshToken == null || refreshToken.isBlank()) {
             throw new IllegalArgumentException("Refresh token is missing");
         }
 
-            JwtResponse tokens = authService.refresh(refreshToken);
-
-            logger.debug("Token successfully refreshed");
-            ApiResponse<JwtResponse> response = ApiResponse.success("Token refreshed", tokens);
-            return ResponseEntity.ok(response);
+        JwtResponse tokens = authService.refresh(refreshToken);
+        ApiResponse<JwtResponse> response = ApiResponse.success("Token refreshed", tokens);
+        return ResponseEntity.ok(response);
 
     }
 
+    /** Завершает клиентскую сессию, удаляя access- и refresh-cookie. */
     @PostMapping("/logout")
     public ResponseEntity<?> logout(HttpServletResponse response) {
-        logger.info("User logout");
         response.addHeader("Set-Cookie", "jwtAccess=; Max-Age=0; Path=/; HttpOnly");
         response.addHeader("Set-Cookie", "jwtRefresh=; Max-Age=0; Path=/; HttpOnly");
         ApiResponse<Void> responseBody = ApiResponse.success("Logout successful");
