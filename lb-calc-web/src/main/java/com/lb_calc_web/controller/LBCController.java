@@ -55,6 +55,7 @@ public class LBCController extends BaseCatalogController {
      */
     @GetMapping("/create")
     public String createLBC(Model model) {
+        model.addAttribute("pageContext", "CATALOG");
         logger.info("Открытие страницы создания LBC");
 
         prepareForm(model, LBCImageService.addImage(LBCDtoMapper.toDto(lbcService.createLBC())));
@@ -70,6 +71,7 @@ public class LBCController extends BaseCatalogController {
             @PathVariable Long id,
             Model model
     ) {
+        model.addAttribute("pageContext", "CATALOG");
         logger.info(
                 "Открытие страницы редактирования LBC id={}",
                 id
@@ -88,6 +90,7 @@ public class LBCController extends BaseCatalogController {
             @ModelAttribute("lbc") LBCDTO lbc,
             Model model
     ) {
+        model.addAttribute("pageContext", "CATALOG");
         try {
             LBC saved = lbcService.saveLBC(lbcService.restoreDomain(lbc));
 

@@ -46,6 +46,7 @@ public class LCController {
      */
     @GetMapping("/create")
     public String createLC(Model model) {
+        model.addAttribute("pageContext", "CATALOG");
 
         logger.info("Открытие страницы создания LC");
 
@@ -65,6 +66,7 @@ public class LCController {
             @PathVariable Long id,
             Model model
     ) {
+        model.addAttribute("pageContext", "CATALOG");
 
         logger.info(
                 "Открытие страницы редактирования LC id={}",
@@ -86,6 +88,7 @@ public class LCController {
             @ModelAttribute("lc") LCDTO lc,
             Model model
     ) {
+        model.addAttribute("pageContext", "CATALOG");
 
         logger.info(
                 "Сохранение LC id={}, display={}",

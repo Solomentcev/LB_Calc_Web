@@ -44,6 +44,11 @@ import java.util.List;
 public class ProjectController
         extends BaseCatalogController {
 
+    @ModelAttribute("pageContext")
+    public String pageContext() {
+        return "PROJECT";
+    }
+
     private final ProjectService projectService;
     private final ALSService alsService;
     private final ProjectExcelExportService projectExcelExportService;
@@ -240,7 +245,7 @@ public class ProjectController
                 ALSImageService.addImages(als)
         );
 
-        return "projects/project_als";
+        return "alss/als";
     }
 
     /**
@@ -282,7 +287,7 @@ public class ProjectController
                     addALSImages(ProjectDtoMapper.toDto(projectService.findById(projectId)))
             );
 
-            return "projects/project_als";
+            return "alss/als";
         }
     }
 
@@ -318,7 +323,7 @@ public class ProjectController
         model.addAttribute("alsId", alsId);
         model.addAttribute("lcId", lcId);
 
-        return "projects/project_lc";
+        return "lcs/lc";
     }
 
     /**
@@ -387,7 +392,7 @@ public class ProjectController
                     lcId
             );
 
-            return "projects/project_lc";
+            return "lcs/lc";
         }
     }
 
@@ -423,7 +428,7 @@ public class ProjectController
         model.addAttribute("alsId", alsId);
         model.addAttribute("lbcId", lbcId);
 
-        return "projects/project_lbc";
+        return "lbcs/lbc";
     }
 
     /**
@@ -474,7 +479,7 @@ public class ProjectController
             model.addAttribute("alsId", alsId);
             model.addAttribute("lbcId", lbcId);
 
-            return "projects/project_lbc";
+            return "lbcs/lbc";
         }
     }
 
@@ -510,7 +515,7 @@ public class ProjectController
         model.addAttribute("alsId", alsId);
         model.addAttribute("lbId", lbId);
 
-        return "projects/project_lb";
+        return "lbs/lb";
     }
 
     /**
@@ -573,7 +578,7 @@ public class ProjectController
                     lbId
             );
 
-            return "projects/project_lb";
+            return "lbs/lb";
         }
     }
 

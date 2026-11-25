@@ -46,6 +46,7 @@ public class LBController {
      */
     @GetMapping("/create")
     public String createLB(Model model) {
+        model.addAttribute("pageContext", "CATALOG");
 
         logger.info("Открытие страницы создания LB");
 
@@ -64,6 +65,7 @@ public class LBController {
             @PathVariable Long id,
             Model model
     ) {
+        model.addAttribute("pageContext", "CATALOG");
 
         logger.info(
                 "Открытие страницы редактирования LB id={}",
@@ -85,6 +87,7 @@ public class LBController {
             @ModelAttribute("lb") LBDTO lb,
             Model model
     ) {
+        model.addAttribute("pageContext", "CATALOG");
 
         logger.info(
                 "Сохранение LB id={}, type={}",
