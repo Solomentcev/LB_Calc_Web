@@ -91,6 +91,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const index = list.children.length;
             select.name = "equipmentSelections[" + index + "].equipmentId";
+            select.required = true;
             select.id = "equipment-" + index;
             quantity.name = "equipmentSelections[" + index + "].quantity";
             quantity.id = "quantity-" + index;
