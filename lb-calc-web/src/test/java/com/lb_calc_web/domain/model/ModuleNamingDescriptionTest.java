@@ -138,7 +138,12 @@ class ModuleNamingDescriptionTest {
         project.addALS(als);
         project.addALS(als);
 
-        assertEquals(als.getName() + " — 2 шт.", project.getDescription());
+        assertEquals(
+                "1. " + als.getName() + " — 2 шт.\\n"
+                        + "   6 ячеек в каждой АКХ.\\n\\n"
+                        + "Всего: 2 АКХ, 12 ячеек.",
+                project.getDescription()
+        );
         assertTrue(!project.getDescription().contains(als.getDescription()));
     }
 
