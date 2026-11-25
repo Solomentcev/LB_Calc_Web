@@ -13,9 +13,6 @@ import java.util.Optional;
  */
 public interface EmployeeRepository extends JpaRepository<EmployeeEntity, Long>, JpaSpecificationExecutor<EmployeeEntity> {
 
-    Page<EmployeeEntity> findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCaseOrEmailContainingIgnoreCase(
-            String firstName, String lastName, String email, Pageable pageable);
-
     /**
      * Находит сотрудника по email.
      *
