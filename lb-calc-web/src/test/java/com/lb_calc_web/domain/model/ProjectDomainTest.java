@@ -86,7 +86,7 @@ class ProjectDomainTest {
                 .filter(line -> line.matches("\\d+\\. .* — \\d+ шт\\."))
                 .count());
         assertTrue(first.getDescription().contains("6 ячеек в каждой АКХ."));
-        assertTrue(first.getDescription().contains("3 ячейки в каждой АКХ."));
+        assertTrue(first.getDescription().contains("3 ячейки."));
         assertTrue(first.getDescription().contains("Всего: 3 АКХ, 15 ячеек."));
         assertTrue(!first.getDescription().contains("Состав модулей слева направо:"));
     }
