@@ -119,6 +119,16 @@ public class ALSEntity {
     )
     private String accessSort;
 
+    /** Общее количество ячеек во всех модулях хранения ALS. */
+    @org.hibernate.annotations.Formula(
+            "(select coalesce(sum(storage_module.count_cells), 0) "
+                    + "from als_module am "
+                    + "join (select id, count_cells from lb union all select id, count_cells from lbc) storage_module "
+                    + "on storage_module.id = am.module_id "
+                    + "where am.als_id = {alias}.id)"
+    )
+    private int countCells;
+
     /** Положение управляющего модуля, вычисляемое по физическому порядку модулей ALS. */
     @org.hibernate.annotations.Formula(
             "(case "
@@ -262,6 +272,10 @@ public class ALSEntity {
 
     public String getPositionControlModule() {
         return positionControlModule;
+    }
+
+    public int getCountCells() {
+        return countCells;
     }
 
     public FunctionalConfiguration getFunctionalConfiguration() {
