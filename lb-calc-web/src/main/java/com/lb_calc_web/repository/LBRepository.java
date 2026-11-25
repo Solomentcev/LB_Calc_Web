@@ -16,9 +16,6 @@ import java.util.List;
 
 public interface LBRepository extends JpaRepository<LBEntity, Long>, JpaSpecificationExecutor<LBEntity> {
 
-    Page<LBEntity> findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(
-            String name, String description, Pageable pageable);
-
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("""
             select entity
