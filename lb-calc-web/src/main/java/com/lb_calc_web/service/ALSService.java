@@ -85,16 +85,48 @@ public class ALSService {
         this.equipmentRepository = Objects.requireNonNull(equipmentRepository);
     }
 
+    /**
+     * Возвращает страницу ALS с фильтрами по информационным столбцам.
+     * Access проверяется через EXISTS, чтобы не размножать строки из ElementCollection.
+     */
     @Transactional(readOnly = true)
     public org.springframework.data.domain.Page<ALS> findPage(
-            String query, org.springframework.data.domain.Pageable pageable
+            ModuleCatalogFilter filter, org.springframework.data.domain.Pageable pageable
     ) {
-        String term = query == null ? "" : query.trim();
-        var entities = term.isEmpty()
-                ? alsRepository.findAll(pageable)
-                : alsRepository.findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(
-                        term, term, pageable);
-        return entities.map(ALSEntityMapper::toDomain);
+        java.util.List<org.springframework.data.jpa.domain.Specification<ALSEntity>> specifications =
+                new java.util.ArrayList<>();
+        specifications.add(com.lb_calc_web.repository.specification.CatalogSpecifications.id(filter.id()));
+        specifications.add(com.lb_calc_web.repository.specification.CatalogSpecifications.containsIgnoreCase(
+                "name", filter.name()));
+        specifications.add(com.lb_calc_web.repository.specification.CatalogSpecifications.integerRange(
+                "height", filter.heightMin(), filter.heightMax()));
+        specifications.add(com.lb_calc_web.repository.specification.CatalogSpecifications.integerRange(
+                "width", filter.widthMin(), filter.widthMax()));
+        specifications.add(com.lb_calc_web.repository.specification.CatalogSpecifications.integerRange(
+                "depth", filter.depthMin(), filter.depthMax()));
+        specifications.add(com.lb_calc_web.repository.specification.CatalogSpecifications.integerRange(
+                "upperFrame", filter.upperFrameMin(), filter.upperFrameMax()));
+        specifications.add(com.lb_calc_web.repository.specification.CatalogSpecifications.integerRange(
+                "bottomFrame", filter.bottomFrameMin(), filter.bottomFrameMax()));
+        specifications.add(com.lb_calc_web.repository.specification.CatalogSpecifications.integerRange(
+                "countCells", filter.countCellsMin(), filter.countCellsMax()));
+        specifications.add(com.lb_calc_web.repository.specification.CatalogSpecifications.equal(
+                "positionControlModule", filter.positionControlModule() == null
+                        ? null : filter.positionControlModule().name()));
+        specifications.add(com.lb_calc_web.repository.specification.CatalogSpecifications.equal(
+                "displayPurpose", filter.displayPurpose()));
+        specifications.add(com.lb_calc_web.repository.specification.CatalogSpecifications.collectionContains(
+                "accessPurposes", filter.accessPurpose()));
+        specifications.add(com.lb_calc_web.repository.specification.CatalogSpecifications.equal(
+                "paymentPurpose", filter.paymentPurpose()));
+        specifications.add(com.lb_calc_web.repository.specification.CatalogSpecifications.equal(
+                "printerPurpose", filter.printerPurpose()));
+        specifications.add(com.lb_calc_web.repository.specification.CatalogSpecifications.equal(
+                "colorBody", filter.colorBody()));
+        specifications.add(com.lb_calc_web.repository.specification.CatalogSpecifications.equal(
+                "colorDoor", filter.colorDoor()));
+        var specification = com.lb_calc_web.repository.specification.CatalogSpecifications.all(specifications);
+        return alsRepository.findAll(specification, pageable).map(ALSEntityMapper::toDomain);
     }
 
     @Transactional(readOnly = true)
