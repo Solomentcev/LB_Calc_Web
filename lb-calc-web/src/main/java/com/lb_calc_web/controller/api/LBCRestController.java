@@ -24,6 +24,7 @@ import java.util.List;
         description = "REST API комбинированных модулей LBC"
 )
 @SecurityRequirement(name = "bearerAuth")
+/** REST-контроллер операций с комбинированными модулями LBC. */
 public class LBCRestController {
 
     private final LBCService lbcService;

@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
+/** MVC-контроллер регистрации и входа пользователей через веб-интерфейс. */
 public class AuthController {
     private final Logger logger = LoggerFactory.getLogger(AuthController.class);
     private final AuthService authService;

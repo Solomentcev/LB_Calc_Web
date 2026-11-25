@@ -27,6 +27,7 @@ import java.util.Arrays;
 import java.util.List;
 
 @Controller
+/** MVC-контроллер управления учётными записями сотрудников. */
 public class EmployeeController {
 
     private static final Logger logger =

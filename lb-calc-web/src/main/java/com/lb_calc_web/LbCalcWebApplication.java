@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 
 @SpringBootApplication
+/** Точка входа Spring Boot-приложения расчёта и проектирования автоматизированных камер хранения. */
 public class LbCalcWebApplication {
 
     public static void main(String[] args) {

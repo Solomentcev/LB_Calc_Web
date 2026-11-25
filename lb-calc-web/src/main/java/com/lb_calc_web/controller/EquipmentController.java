@@ -29,6 +29,7 @@ import java.util.Set;
 @Controller
 @RequestMapping("/equipment")
 @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+/** MVC-контроллер каталога физических моделей оборудования. */
 public class EquipmentController {
 
     private final EquipmentCatalogService equipmentCatalogService;

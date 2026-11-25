@@ -3,6 +3,7 @@ package com.lb_calc_web.dto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
+/** Данные запроса на изменение пароля учётной записи. */
 public class ChangePasswordDTO {
     @NotBlank
     @Size(max = 120)

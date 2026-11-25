@@ -21,6 +21,7 @@ import java.util.List;
 @PreAuthorize("hasAuthority('ROLE_ADMIN')")
 @Tag(name = "Equipment", description = "Управление каталогом физических моделей оборудования")
 @SecurityRequirement(name = "bearerAuth")
+/** REST-контроллер операций чтения и управления каталогом моделей оборудования. */
 public class EquipmentRestController {
 
     private final EquipmentCatalogService equipmentCatalogService;

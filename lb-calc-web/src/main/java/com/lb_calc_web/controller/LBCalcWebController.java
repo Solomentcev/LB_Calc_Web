@@ -31,6 +31,7 @@ import java.util.List;
 
 @Controller
 @RequestMapping("/")
+/** MVC-контроллер главной страницы и каталогов модулей и автоматизированных камер хранения. */
 public class LBCalcWebController {
 
     private final ALSService alsService;

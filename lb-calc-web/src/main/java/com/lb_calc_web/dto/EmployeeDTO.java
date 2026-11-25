@@ -8,6 +8,7 @@ import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
 import java.util.Objects;
 
+/** Представление учётной записи сотрудника для передачи между слоями приложения и клиентом. */
 public class EmployeeDTO {
 
     private Long id;
