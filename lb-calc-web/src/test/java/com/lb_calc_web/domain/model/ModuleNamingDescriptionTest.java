@@ -66,10 +66,12 @@ class ModuleNamingDescriptionTest {
         assertTrue(als.getName().contains("RFID"));
         assertTrue(als.getDescription().contains("Количество модулей хранения: 2"));
         assertTrue(als.getDescription().contains("Модуль управления: LC"));
-        assertTrue(als.getDescription().contains("Функциональные назначения:"));
-        assertTrue(!als.getDescription().contains("Состав модулей слева направо:"));
-        assertTrue(!als.getDescription().contains("Размеры ячейки (В×Ш×Г)"));
+        assertTrue(!als.getDescription().contains("Функциональные назначения:"));
         assertTrue(!als.getDescription().contains("Установленное оборудование:"));
+        assertTrue(!als.getDescription().contains("Верхняя рама:"));
+        assertTrue(!als.getDescription().contains("Нижняя рама:"));
+        assertTrue(!als.getDescription().contains("Размеры ячейки (В×Ш×Г)"));
+        assertTrue(!als.getDescription().contains("Состав модулей слева направо:"));
     }
 
     @Test
