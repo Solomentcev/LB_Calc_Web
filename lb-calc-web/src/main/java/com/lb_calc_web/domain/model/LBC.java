@@ -141,8 +141,7 @@ public class LBC extends StorageModule implements ControlModule {
     @Override
     public void recalculate() {
         recalculateCells();
-        setName(ModuleTextFormatter.storageName(this, "Модуль хранения и управления")
-                + ModuleTextFormatter.controlNameDetails(this));
+        setName(ModuleTextFormatter.combinedName(this, this));
         setDescription(ModuleTextFormatter.storageDescription(
                 this, "Модуль хранения и управления")
                 + "\n\n" + ModuleTextFormatter.controlDescription(this, this));
