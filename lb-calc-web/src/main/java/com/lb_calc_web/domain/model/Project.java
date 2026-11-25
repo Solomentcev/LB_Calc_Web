@@ -469,8 +469,12 @@ public class Project {
                     .append(" — ")
                     .append(quantity)
                     .append(" шт.\n   ")
-                    .append(formatCellCount(cellCount))
-                    .append(" в каждой АКХ.");
+                    .append(formatCellCount(cellCount));
+
+            if (quantity > 1) {
+                builder.append(" в каждой АКХ");
+            }
+            builder.append('.');
 
             totalQuantity = Math.addExact(totalQuantity, quantity);
             totalCells = Math.addExact(
@@ -485,9 +489,7 @@ public class Project {
 
         builder.append("Всего: ")
                 .append(totalQuantity)
-                .append(' ')
-                .append(formatQuantityWord(totalQuantity, "АКХ", "АКХ", "АКХ"))
-                .append(", ")
+                .append(" АКХ, ")
                 .append(formatCellCount(totalCells))
                 .append('.');
 
