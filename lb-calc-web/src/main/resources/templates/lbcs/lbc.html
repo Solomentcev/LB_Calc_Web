@@ -48,7 +48,7 @@
                 <h1 class="module-editor__title" th:text="*{description}">Модуль хранения и управления</h1>
                 <p class="module-editor__subtitle">Модуль объединяет ячейки хранения и управляющее оборудование.</p>
             </div>
-            <span class="module-editor__id" th:if="*{id != null and id > 0}" th:text="|ID: *{id}|">ID</span>
+            <span class="module-editor__id" th:if="*{id != null and id > 0}" th:text="${'ID: ' + lbc.id}">ID</span>
         </header>
 
         <section class="module-section">
@@ -156,7 +156,7 @@
                 <p>Текущий чертёж совмещённого модуля.</p>
             </div>
             <div class="module-visual">
-                <img th:src="|data:image/png;base64,*{stringLBCImage}|" alt="Чертёж модуля хранения и управления">
+                <img th:src="'data:image/png;base64,' + ${lbc.stringLBCImage}" alt="Чертёж модуля хранения и управления">
             </div>
         </section>
     </form>
