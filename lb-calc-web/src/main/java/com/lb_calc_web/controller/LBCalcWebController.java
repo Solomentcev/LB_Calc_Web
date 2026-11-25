@@ -3,6 +3,14 @@ package com.lb_calc_web.controller;
 import com.lb_calc_web.service.ALSService;
 import com.lb_calc_web.mapper.dto.ALSDtoMapper;
 import com.lb_calc_web.service.LBService;
+import com.lb_calc_web.service.ModuleCatalogFilter;
+import com.lb_calc_web.domain.attributes.Colors;
+import com.lb_calc_web.domain.attributes.PositionControlModule;
+import com.lb_calc_web.domain.attributes.DirectionDoorOpening;
+import com.lb_calc_web.domain.equipment.AccessPurpose;
+import com.lb_calc_web.domain.equipment.DisplayPurpose;
+import com.lb_calc_web.domain.equipment.PaymentPurpose;
+import com.lb_calc_web.domain.equipment.PrinterPurpose;
 import com.lb_calc_web.service.LCService;
 import com.lb_calc_web.service.LCCatalogFilter;
 import com.lb_calc_web.domain.attributes.Colors;
@@ -16,6 +24,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ModelAttribute;
 
 import java.util.Set;
 import java.util.List;
@@ -47,18 +56,29 @@ public class LBCalcWebController {
     public String alss(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
-            @RequestParam(defaultValue = "") String q,
             @RequestParam(defaultValue = "id") String sort,
             @RequestParam(defaultValue = "asc") String direction,
+            @ModelAttribute ModuleCatalogFilter filter,
             Model model
     ) {
-        Pageable pageable = CatalogPageSupport.pageable(page, size, sort, direction, "id",
-                Set.of("id", "name", "height", "width", "depth"));
-        var result = alsService.findPage(q, pageable).map(ALSDtoMapper::toDto);
+        Set<String> allowedSorts = Set.of("id", "name", "countCells", "height", "width", "depth",
+                "upperFrame", "bottomFrame", "positionControlModule", "displayPurpose",
+                "accessSort", "paymentPurpose", "printerPurpose", "colorBody", "colorDoor");
+        Pageable pageable = CatalogPageSupport.pageable(page, size, sort, direction, "id", allowedSorts);
+        var result = alsService.findPage(filter, pageable).map(ALSDtoMapper::toDto);
         model.addAttribute("alss", result.getContent());
-        CatalogPageSupport.addModelAttributes(model, result, q, pageable, "/alss",
-                CatalogPageSupport.sortOptions("id", "ID", "name", "Название",
-                        "height", "Высота", "width", "Ширина", "depth", "Глубина"));
+        model.addAttribute("page", result);
+        model.addAttribute("filters", filter);
+        model.addAttribute("sort", allowedSorts.contains(sort) ? sort : "id");
+        model.addAttribute("direction", pageable.getSort().stream().findFirst()
+                .map(order -> order.getDirection().name().toLowerCase()).orElse("asc"));
+        model.addAttribute("size", pageable.getPageSize());
+        model.addAttribute("colorsList", List.of(Colors.values()));
+        model.addAttribute("positionControlModuleList", List.of(PositionControlModule.values()));
+        model.addAttribute("displayPurposes", List.of(DisplayPurpose.values()));
+        model.addAttribute("accessPurposes", List.of(AccessPurpose.values()));
+        model.addAttribute("paymentPurposes", List.of(PaymentPurpose.values()));
+        model.addAttribute("printerPurposes", List.of(PrinterPurpose.values()));
         return "alss/alss";
     }
 
@@ -113,20 +133,24 @@ public class LBCalcWebController {
     public String lbs(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
-            @RequestParam(defaultValue = "") String q,
             @RequestParam(defaultValue = "id") String sort,
             @RequestParam(defaultValue = "asc") String direction,
+            @ModelAttribute ModuleCatalogFilter filter,
             Model model
     ) {
-        Pageable pageable = CatalogPageSupport.pageable(page, size, sort, direction, "id",
-                Set.of("id", "name", "type", "countCells", "height", "width", "depth"));
-        var result = lbService.findPage(q, pageable).map(
+        Set<String> allowedSorts = Set.of("id", "name", "type", "countCells", "height", "width",
+                "depth", "upperFrame", "bottomFrame", "directionDoorOpening", "colorBody", "colorDoor");
+        Pageable pageable = CatalogPageSupport.pageable(page, size, sort, direction, "id", allowedSorts);
+        var result = lbService.findPage(filter, pageable).map(
                 com.lb_calc_web.mapper.dto.LBDtoMapper::toDto);
         model.addAttribute("lbs", result.getContent());
-        CatalogPageSupport.addModelAttributes(model, result, q, pageable, "/lbs",
-                CatalogPageSupport.sortOptions("id", "ID", "name", "Название", "type", "Тип",
-                        "countCells", "Ячейки", "height", "Высота", "width", "Ширина",
-                        "depth", "Глубина"));
+        model.addAttribute("page", result);
+        model.addAttribute("filters", filter);
+        model.addAttribute("sort", allowedSorts.contains(sort) ? sort : "id");
+        model.addAttribute("direction", pageable.getSort().stream().findFirst()
+                .map(order -> order.getDirection().name().toLowerCase()).orElse("asc"));
+        model.addAttribute("size", pageable.getPageSize());
+        model.addAttribute("directionDoorOpeningList", List.of(DirectionDoorOpening.values()));
         return "lbs/lbs";
     }
 }
