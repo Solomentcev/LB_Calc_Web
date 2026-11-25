@@ -49,6 +49,16 @@ final class ModuleTextFormatter {
                 + colors(module);
     }
 
+    static String combinedName(StorageModule storageModule, ControlModule controlModule) {
+        String details = controlNameDetails(controlModule);
+        return "Модуль хранения и управления на " + storageModule.getCountCells()
+                + " ячеек" + details
+                + ", тип " + storageModule.getTypeLb().getType()
+                + ", открывание дверей: " + direction(storageModule.getDirectionDoorOpening())
+                + ", габариты: " + dimensions(storageModule)
+                + ", " + colors(storageModule);
+    }
+
     static String controlName(ControlModule controlModule, Module module) {
         return "Модуль управления" + controlNameDetails(controlModule)
                 + ", габариты: " + dimensions(module)
