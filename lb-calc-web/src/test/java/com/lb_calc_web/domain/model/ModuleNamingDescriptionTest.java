@@ -52,14 +52,14 @@ class ModuleNamingDescriptionTest {
         LC restored = (LC) Module.restoreText(
                 source,
                 source.getName(),
-                "Модуль управления\\\\nГабариты модуля (В×Ш×Г): 1940×500×500 мм"
+                "Модуль управления\nГабариты модуля (В×Ш×Г): 1940×500×500 мм"
         );
 
         assertEquals(
                 "Модуль управления\\nГабариты модуля (В×Ш×Г): 1940×500×500 мм",
                 restored.getDescription()
         );
-        assertTrue(!restored.getDescription().contains("\\\\n"));
+        assertTrue(!restored.getDescription().contains("\\n"));
     }
 
     @Test
