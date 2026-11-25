@@ -145,7 +145,9 @@ public class ALSController extends BaseCatalogController {
         findLBInALS(als, lbId);
         lb.setId(lbId);
         try {
-            lb = LBDtoMapper.toDto(alsService.restoreLB(lb));
+            LB replacement = alsService.restoreLB(lb);
+            als = alsService.replaceLB(als.copy(), lbId, replacement);
+            lb = LBDtoMapper.toDto(replacement);
         } catch (IllegalArgumentException | NullPointerException exception) {
             // При незаполненных промежуточных значениях сохраняем введённые данные формы.
         }
@@ -257,11 +259,11 @@ public class ALSController extends BaseCatalogController {
             throw new NoSuchElementException("LC с id " + lcId + " не найден в ALS " + alsId);
         lc.setId(lcId);
         try {
-            // Подбираем модели оборудования до восстановления домена, чтобы описание
-            // отражало фактическую комплектацию уже при обновлении формы.
             lc.setEquipmentSelections(equipmentCatalogService.prepareSelections(
                     lc.getFunctionalConfiguration(), lc.getEquipmentSelections()));
-            lc = LCDtoMapper.toDto(alsService.restoreLC(lc, source));
+            com.lb_calc_web.domain.model.LC replacement = alsService.restoreLC(lc, source);
+            source = alsService.replaceLC(source.copy(), replacement);
+            lc = LCDtoMapper.toDto(replacement);
         } catch (ValidationSizeException exception) {
             model.addAttribute("errors", ValidationErrorFormatter.format(exception.getValidationResult()));
         }
@@ -339,11 +341,11 @@ public class ALSController extends BaseCatalogController {
         alsService.findLBCInALS(source, lbcId);
         lbc.setId(lbcId);
         try {
-            // Подбираем модели оборудования до восстановления домена, чтобы описание
-            // отражало фактическую комплектацию уже при обновлении формы.
             lbc.setEquipmentSelections(equipmentCatalogService.prepareSelections(
                     lbc.getFunctionalConfiguration(), lbc.getEquipmentSelections()));
-            lbc = LBCDtoMapper.toDto(alsService.restoreLBC(lbc, source));
+            com.lb_calc_web.domain.model.LBC replacement = alsService.restoreLBC(lbc, source);
+            source = alsService.replaceLBC(source.copy(), replacement);
+            lbc = LBCDtoMapper.toDto(replacement);
         } catch (ValidationSizeException exception) {
             model.addAttribute("errors", ValidationErrorFormatter.format(exception.getValidationResult()));
         }

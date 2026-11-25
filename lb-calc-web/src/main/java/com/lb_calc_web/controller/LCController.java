@@ -86,6 +86,8 @@ public class LCController {
     public String refreshLC(@ModelAttribute("lc") LCDTO lc, Model model) {
         model.addAttribute("pageContext", "CATALOG");
         try {
+            lc.setEquipmentSelections(equipmentCatalogService.prepareSelections(
+                    lc.getFunctionalConfiguration(), lc.getEquipmentSelections()));
             lc = LCDtoMapper.toDto(lcService.restoreDomain(lc));
         } catch (ValidationSizeException exception) {
             model.addAttribute("errors", ValidationErrorFormatter.format(exception.getValidationResult()));

@@ -594,6 +594,40 @@ return projectRepository.findAllWithUsers()
 
 
     /**
+     * Проверяет доменный проект после полного восстановления его конфигураций,
+     * не сохраняя изменения в базе данных.
+     *
+     * @param requested восстановленный проект
+     * @return проверенный доменный проект
+     */
+    @Transactional(readOnly = true)
+    public Project previewProject(Project requested) {
+        Objects.requireNonNull(requested, "Проект не должен быть null");
+        validateProject(requested);
+        return requested;
+    }
+
+    /**
+     * Заменяет одну выбранную конфигурацию ALS в копии состава проекта
+     * и проверяет результат без сохранения в базе данных.
+     *
+     * @param projectId идентификатор проекта
+     * @param alsId идентификатор выбранной конфигурации ALS
+     * @param replacement полностью восстановленная конфигурация ALS
+     * @return пересчитанный доменный проект
+     */
+    @Transactional(readOnly = true)
+    public Project previewALSReplacement(Long projectId, Long alsId, ALS replacement) {
+        Objects.requireNonNull(replacement, "Новая ALS не должна быть null");
+        Project project = findDomainProject(projectId);
+        ALS current = findDomainALS(project, alsId);
+        replacement.setId(alsId);
+        project.replaceALS(current, replacement);
+        validateProject(project);
+        return project;
+    }
+
+    /**
      * Загружает проект непосредственно в доменную модель.
      *
      * <p>Для восстановления конфигураций используется полный каталог,

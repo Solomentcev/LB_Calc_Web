@@ -160,12 +160,9 @@ public class ProjectController
         project.setId(id);
         populateServerMetadata(project, id);
         try {
-            if (project.getAlsList() != null) {
-                project.setAlsList(project.getAlsList().stream()
-                        .map(als -> ALSImageService.addImages(
-                                ALSDtoMapper.toDto(alsService.restoreDomain(als))))
-                        .toList());
-            }
+            com.lb_calc_web.domain.model.Project domain =
+                    ProjectDtoMapper.toDomain(project, alsService::restoreDomain);
+            project = ProjectDtoMapper.toDto(projectService.previewProject(domain));
         } catch (ValidationSizeException exception) {
             model.addAttribute("projectErrors",
                     ValidationErrorFormatter.format(exception.getValidationResult()));
@@ -321,14 +318,17 @@ public class ProjectController
                              @ModelAttribute("als") ALSDTO als, Model model) {
         projectService.findALSInProject(projectId, alsId);
         als.setId(alsId);
+        com.lb_calc_web.domain.model.Project preview =
+                projectService.findById(projectId);
         try {
-            als = ALSDtoMapper.toDto(alsService.restoreDomain(als));
+            ALS replacement = alsService.restoreDomain(als);
+            preview = projectService.previewALSReplacement(projectId, alsId, replacement);
+            als = ALSDtoMapper.toDto(replacement);
         } catch (ValidationSizeException exception) {
             model.addAttribute("ALSErrors",
                     ValidationErrorFormatter.format(exception.getValidationResult()));
         }
-        model.addAttribute("project", addALSImages(
-                ProjectDtoMapper.toDto(projectService.findById(projectId))));
+        model.addAttribute("project", addALSImages(ProjectDtoMapper.toDto(preview)));
         model.addAttribute("als", ALSImageService.addImages(als));
         model.addAttribute("projectId", projectId);
         model.addAttribute("alsId", alsId);
@@ -422,14 +422,20 @@ public class ProjectController
         ALS sourceALS = projectService.findALSInProject(projectId, alsId);
         projectService.findLCInProject(projectId, alsId, lcId);
         lc.setId(lcId);
+        com.lb_calc_web.domain.model.Project preview = projectService.findById(projectId);
+        ALS updatedALS = sourceALS;
         try {
-            lc = LCDtoMapper.toDto(alsService.restoreLC(lc, sourceALS));
+            lc.setEquipmentSelections(equipmentCatalogService.prepareSelections(
+                    lc.getFunctionalConfiguration(), lc.getEquipmentSelections()));
+            com.lb_calc_web.domain.model.LC replacement = alsService.restoreLC(lc, sourceALS);
+            updatedALS = alsService.replaceLC(sourceALS.copy(), replacement);
+            preview = projectService.previewALSReplacement(projectId, alsId, updatedALS);
+            lc = LCDtoMapper.toDto(replacement);
         } catch (ValidationSizeException exception) {
             model.addAttribute("errors", ValidationErrorFormatter.format(exception.getValidationResult()));
         }
-        model.addAttribute("project", addALSImages(ProjectDtoMapper.toDto(projectService.findById(projectId))));
-        model.addAttribute("als", ALSImageService.addImages(ALSDtoMapper.toDto(
-                projectService.findALSInProject(projectId, alsId))));
+        model.addAttribute("project", addALSImages(ProjectDtoMapper.toDto(preview)));
+        model.addAttribute("als", ALSImageService.addImages(ALSDtoMapper.toDto(updatedALS)));
         prepareLCForm(model, LCImageService.addImage(lc));
         model.addAttribute("projectId", projectId);
         model.addAttribute("alsId", alsId);
@@ -550,14 +556,20 @@ public class ProjectController
         ALS sourceALS = projectService.findALSInProject(projectId, alsId);
         projectService.findLBCInProject(projectId, alsId, lbcId);
         lbc.setId(lbcId);
+        com.lb_calc_web.domain.model.Project preview = projectService.findById(projectId);
+        ALS updatedALS = sourceALS;
         try {
-            lbc = LBCDtoMapper.toDto(alsService.restoreLBC(lbc, sourceALS));
+            lbc.setEquipmentSelections(equipmentCatalogService.prepareSelections(
+                    lbc.getFunctionalConfiguration(), lbc.getEquipmentSelections()));
+            com.lb_calc_web.domain.model.LBC replacement = alsService.restoreLBC(lbc, sourceALS);
+            updatedALS = alsService.replaceLBC(sourceALS.copy(), replacement);
+            preview = projectService.previewALSReplacement(projectId, alsId, updatedALS);
+            lbc = LBCDtoMapper.toDto(replacement);
         } catch (ValidationSizeException exception) {
             model.addAttribute("errors", ValidationErrorFormatter.format(exception.getValidationResult()));
         }
-        model.addAttribute("project", addALSImages(ProjectDtoMapper.toDto(projectService.findById(projectId))));
-        model.addAttribute("als", ALSImageService.addImages(ALSDtoMapper.toDto(
-                projectService.findALSInProject(projectId, alsId))));
+        model.addAttribute("project", addALSImages(ProjectDtoMapper.toDto(preview)));
+        model.addAttribute("als", ALSImageService.addImages(ALSDtoMapper.toDto(updatedALS)));
         prepareLBCForm(model, LBCImageService.addImage(lbc));
         model.addAttribute("projectId", projectId);
         model.addAttribute("alsId", alsId);
@@ -662,15 +674,21 @@ public class ProjectController
                             Model model) {
         projectService.findLBInProject(projectId, alsId, lbId);
         lb.setId(lbId);
+        com.lb_calc_web.domain.model.Project preview = projectService.findById(projectId);
+        ALS sourceALS = projectService.findALSInProject(projectId, alsId);
+        ALS updatedALS = sourceALS;
         try {
-            lb = LBDtoMapper.toDto(alsService.restoreLB(lb));
+            LB replacement = alsService.restoreLB(lb);
+            updatedALS = alsService.replaceLB(sourceALS.copy(), lbId, replacement);
+            preview = projectService.previewALSReplacement(projectId, alsId, updatedALS);
+            lb = LBDtoMapper.toDto(replacement);
         } catch (IllegalArgumentException | NullPointerException exception) {
             // При незаполненных промежуточных значениях сохраняем введённые данные формы.
+        } catch (ValidationSizeException exception) {
+            model.addAttribute("errors", ValidationErrorFormatter.format(exception.getValidationResult()));
         }
-        model.addAttribute("project", addALSImages(
-                ProjectDtoMapper.toDto(projectService.findById(projectId))));
-        model.addAttribute("als", ALSImageService.addImages(ALSDtoMapper.toDto(
-                projectService.findALSInProject(projectId, alsId))));
+        model.addAttribute("project", addALSImages(ProjectDtoMapper.toDto(preview)));
+        model.addAttribute("als", ALSImageService.addImages(ALSDtoMapper.toDto(updatedALS)));
         model.addAttribute("lb", LBImageService.addImage(lb));
         model.addAttribute("projectId", projectId);
         model.addAttribute("alsId", alsId);
