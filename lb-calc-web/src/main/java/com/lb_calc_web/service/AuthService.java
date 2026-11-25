@@ -73,6 +73,7 @@ public class AuthService {
         this.kafkaTemplate = kafkaTemplate;
         this.userEventsTopic = userEventsTopic;
     }
+    /** Проверяет учётные данные сотрудника и выпускает access- и refresh-токены. */
     public JwtResponse login(
             LoginRequest loginRequest
     ) throws AuthException {
@@ -198,6 +199,7 @@ public class AuthService {
     ) {
         return employeeService.existsByEmail(email);
     }
+    /** Регистрирует нового сотрудника с ролью по умолчанию и публикует событие регистрации. */
     @Transactional
     public EmployeeDTO registration(
             RegistrationDTO registrationDTO
@@ -243,6 +245,7 @@ public class AuthService {
         );
         return result;
     }
+    /** Создаёт учётную запись сотрудника с заданной ролью. */
     @Transactional
     public EmployeeDTO createEmployee(
             CreateEmployeeDTO createEmployeeDTO
@@ -288,6 +291,7 @@ public class AuthService {
         );
         return result;
     }
+    /** Проверяет текущий пароль и сохраняет новый пароль сотрудника. */
     @Transactional
     public void changePassword(
             Long employeeId,
