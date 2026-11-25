@@ -14,8 +14,8 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-@Controller
 /** MVC-контроллер регистрации и входа пользователей через веб-интерфейс. */
+@Controller
 public class AuthController {
     private final AuthService authService;
 
@@ -29,8 +29,8 @@ public class AuthController {
 
         return "registration";
     }
-    @PostMapping("/registration")
     /** Отображает форму регистрации пользователя. */
+    @PostMapping("/registration")
     public String registration(@Valid RegistrationDTO registrationDTO,
                                 BindingResult bindingResult,
                                 Model model, RedirectAttributes redirectAttributes) {
@@ -47,8 +47,8 @@ public class AuthController {
             return "registration";
         }
     }
-    @GetMapping("/login")
     /** Отображает страницу входа в систему. */
+    @GetMapping("/login")
     public String loginPage(Model model) {
         model.addAttribute("loginRequest", new LoginRequest() );
         return "login";

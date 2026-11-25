@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+/** REST-контроллер аутентификации, регистрации, обновления токенов и выхода пользователя. */
 @RestController
 @RequestMapping("/api/v1")
 public class AuthRestController {

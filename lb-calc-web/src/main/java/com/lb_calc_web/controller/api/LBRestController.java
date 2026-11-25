@@ -23,6 +23,7 @@ import java.util.List;
         name = "LB",
         description = "REST API модулей хранения LB"
 )
+/** REST-контроллер операций с модулями хранения LB. */
 @SecurityRequirement(name = "bearerAuth")
 public class LBRestController {
 

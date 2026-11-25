@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 
+/** MVC-контроллер каталога и редактирования комбинированных модулей LBC. */
 @Controller
 @RequestMapping("/lbcs")
 public class LBCController extends BaseCatalogController {

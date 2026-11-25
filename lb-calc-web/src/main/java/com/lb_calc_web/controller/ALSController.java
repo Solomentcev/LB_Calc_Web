@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 
+/** MVC-контроллер создания и редактирования конфигураций ALS и вложенных модулей. */
 @Controller
 @RequestMapping("/alss")
 public class ALSController extends BaseCatalogController {
@@ -45,8 +46,8 @@ public class ALSController extends BaseCatalogController {
         this.equipmentCatalogService = equipmentCatalogService;
     }
 
-    @GetMapping("/create")
     /** Открывает форму создания новой конфигурации ALS. */
+    @GetMapping("/create")
     public String createALS(Model model) {
         model.addAttribute("pageContext", "CATALOG");
         ALSDTO als = ALSImageService.addImages(ALSDtoMapper.toDto(alsService.createALS()));
@@ -83,8 +84,8 @@ public class ALSController extends BaseCatalogController {
         return "alss/als";
     }
 
-    @PostMapping("/save")
     /** Проверяет и сохраняет конфигурацию ALS. */
+    @PostMapping("/save")
     public String saveALS(@ModelAttribute("als") ALSDTO als, Model model) {
         model.addAttribute("pageContext", "CATALOG");
         try {
@@ -107,8 +108,8 @@ public class ALSController extends BaseCatalogController {
         }
     }
 
-    @PostMapping("/{alsId}/addLB")
     /** Добавляет новый модуль хранения LB в редактируемую ALS. */
+    @PostMapping("/{alsId}/addLB")
     public String addLB(@PathVariable Long alsId) {
         ALSDTO als = ALSDtoMapper.toDto(alsService.addNewLBandSaveALS(alsId));
         return "redirect:/alss/" + als.getId();

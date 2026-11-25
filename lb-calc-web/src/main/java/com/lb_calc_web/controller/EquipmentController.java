@@ -26,10 +26,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
+/** MVC-контроллер каталога физических моделей оборудования. */
 @Controller
 @RequestMapping("/equipment")
 @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-/** MVC-контроллер каталога физических моделей оборудования. */
 public class EquipmentController {
 
     private final EquipmentCatalogService equipmentCatalogService;
@@ -79,8 +79,8 @@ public class EquipmentController {
         return "equipment/equipments";
     }
 
-    @GetMapping("/create")
     /** Открывает форму создания модели оборудования. */
+    @GetMapping("/create")
     public String createForm(Model model) {
         prepareForm(model, new EquipmentDTO());
         return "equipment/equipment";
@@ -92,8 +92,8 @@ public class EquipmentController {
         return "equipment/equipment";
     }
 
-    @PostMapping("/save")
     /** Проверяет и сохраняет модель оборудования. */
+    @PostMapping("/save")
     public String save(
             @Valid @ModelAttribute("equipment") EquipmentDTO dto,
             BindingResult bindingResult,
@@ -117,8 +117,8 @@ public class EquipmentController {
         }
     }
 
-    @PostMapping("/{id}/delete")
     /** Удаляет модель оборудования из каталога. */
+    @PostMapping("/{id}/delete")
     public String delete(
             @PathVariable Long id,
             RedirectAttributes redirectAttributes

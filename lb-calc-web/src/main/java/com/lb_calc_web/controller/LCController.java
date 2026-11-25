@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Arrays;
 import java.util.List;
 
+/** MVC-контроллер каталога и редактирования управляющих модулей LC. */
 @Controller
 @RequestMapping("/lcs")
 public class LCController {

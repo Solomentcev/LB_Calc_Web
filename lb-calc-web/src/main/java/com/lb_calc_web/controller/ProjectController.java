@@ -44,13 +44,14 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.util.List;
 
+/** MVC-контроллер создания, редактирования, сохранения и экспорта проектов. */
 @Controller
 @RequestMapping("/projects")
 public class ProjectController
         extends BaseCatalogController {
 
-    @ModelAttribute("pageContext")
     /** Определяет контекст отображения страницы проекта. */
+    @ModelAttribute("pageContext")
     public String pageContext() {
         return "PROJECT";
     }

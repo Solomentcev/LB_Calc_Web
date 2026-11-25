@@ -24,6 +24,7 @@ import java.util.List;
         name = "LC",
         description = "REST API модулей управления LC"
 )
+/** REST-контроллер операций с управляющими модулями LC. */
 @SecurityRequirement(name = "bearerAuth")
 public class LCRestController {
 

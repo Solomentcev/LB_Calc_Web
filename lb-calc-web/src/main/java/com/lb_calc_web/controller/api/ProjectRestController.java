@@ -48,6 +48,7 @@ import java.util.Objects;
         name = "Projects",
         description = "API проектов"
 )
+/** REST-контроллер управления проектами и их конфигурациями ALS. */
 @SecurityRequirement(name = "bearerAuth")
 public class ProjectRestController {
 

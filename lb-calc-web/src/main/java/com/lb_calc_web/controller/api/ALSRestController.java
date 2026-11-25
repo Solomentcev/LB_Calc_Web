@@ -27,6 +27,7 @@ import java.util.List;
         name = "ALS",
         description = "API автоматизированных систем хранения"
 )
+/** REST-контроллер управления конфигурациями ALS и вложенными модулями. */
 @SecurityRequirement(name = "bearerAuth")
 public class ALSRestController {
 

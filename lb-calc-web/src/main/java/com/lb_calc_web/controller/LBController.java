@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Arrays;
 import java.util.List;
 
+/** MVC-контроллер каталога и редактирования модулей хранения LB. */
 @Controller
 @RequestMapping("/lbs")
 public class LBController {

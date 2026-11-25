@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/** REST-контроллер управления сотрудниками и их профилями. */
 @RestController
 @RequestMapping("/api/v1/employees")
 @PreAuthorize("hasAuthority('ROLE_ADMIN')")
@@ -31,8 +32,8 @@ public class EmployeeRestController {
         this.authService = authService;
     }
 
-    @GetMapping
     /** Возвращает список учётных записей сотрудников. */
+    @GetMapping
     public ResponseEntity<?> getAllEmployees() {
 
             List<EmployeeDTO> employees =
@@ -54,8 +55,8 @@ public class EmployeeRestController {
         );
     }
 
-    @GetMapping("/{id}")
     /** Возвращает сотрудника по идентификатору. */
+    @GetMapping("/{id}")
     public ResponseEntity<?> getEmployeeById(
             @PathVariable Long id
     ) {
@@ -69,8 +70,8 @@ public class EmployeeRestController {
 
     }
 
-    @PostMapping
     /** Создаёт учётную запись сотрудника. */
+    @PostMapping
     public ResponseEntity<?> createEmployee(
             @RequestBody
             @Valid
@@ -92,8 +93,8 @@ public class EmployeeRestController {
 
     }
 
-    @PutMapping("/{id}")
     /** Обновляет данные учётной записи сотрудника. */
+    @PutMapping("/{id}")
     public ResponseEntity<?> updateEmployee(
             @PathVariable int id,
             @RequestBody @Valid ProfileDTO employeeUpd
@@ -139,8 +140,8 @@ public class EmployeeRestController {
 
     }
 
-    @PostMapping("/{id}/activate")
     /** Активирует учётную запись сотрудника. */
+    @PostMapping("/{id}/activate")
     public ResponseEntity<?> activateEmployee(
             @PathVariable Long id
     ) {
@@ -152,8 +153,8 @@ public class EmployeeRestController {
 
     }
 
-    @DeleteMapping("/{id}")
     /** Деактивирует или удаляет учётную запись сотрудника согласно правилам сервиса. */
+    @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteEmployee(
             @PathVariable Long id
     ) {
