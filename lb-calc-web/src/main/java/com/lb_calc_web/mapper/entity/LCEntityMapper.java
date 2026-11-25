@@ -22,6 +22,7 @@ public final class LCEntityMapper {
     private LCEntityMapper() {
     }
 
+    /** Восстанавливает доменную конфигурацию LC из JPA-сущности. */
     public static LC toDomain(LCEntity entity) {
         if (entity == null) {
             return null;
@@ -60,6 +61,7 @@ public final class LCEntityMapper {
         return domain;
     }
 
+    /** Создаёт JPA-сущность LC из доменной конфигурации. */
     public static LCEntity toEntity(
             LC domain,
             Function<Equipment, EquipmentEntity> equipmentLookup
@@ -72,6 +74,7 @@ public final class LCEntityMapper {
         return entity;
     }
 
+    /** Обновляет существующую JPA-сущность LC доменными данными. */
     public static void updateEntity(
             LC domain,
             LCEntity entity,

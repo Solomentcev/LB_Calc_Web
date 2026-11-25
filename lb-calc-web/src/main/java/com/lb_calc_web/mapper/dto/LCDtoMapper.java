@@ -22,6 +22,7 @@ public final class LCDtoMapper {
     private LCDtoMapper() {
     }
 
+    /** Преобразует доменную конфигурацию LC в DTO. */
     public static LCDTO toDto(LC domain) {
         if (domain == null) {
             return null;
@@ -62,6 +63,7 @@ public final class LCDtoMapper {
         return dto;
     }
 
+    /** Восстанавливает доменную конфигурацию LC из DTO. */
     public static LC toDomain(LCDTO dto) {
         return toDomain(dto, id -> {
             throw new IllegalStateException(
@@ -69,10 +71,12 @@ public final class LCDtoMapper {
         }, null);
     }
 
+    /** Восстанавливает доменную конфигурацию LC из DTO. */
     public static LC toDomain(LCDTO dto, Function<Long, Equipment> equipmentLookup) {
         return toDomain(dto, equipmentLookup, null);
     }
 
+    /** Восстанавливает доменную конфигурацию LC из DTO. */
     public static LC toDomain(
             LCDTO dto,
             Function<Long, Equipment> equipmentLookup,
@@ -153,6 +157,7 @@ public final class LCDtoMapper {
         );
     }
 
+    /** Преобразует список доменных конфигураций LC в список DTO. */
     public static List<LCDTO> toDtoList(List<LC> domains) {
         return domains == null ? List.of() : domains.stream().map(LCDtoMapper::toDto).toList();
     }

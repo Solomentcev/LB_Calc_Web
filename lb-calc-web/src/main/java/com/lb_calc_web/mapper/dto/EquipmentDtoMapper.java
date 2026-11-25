@@ -12,6 +12,7 @@ public final class EquipmentDtoMapper {
     private EquipmentDtoMapper() {
     }
 
+    /** Преобразует DTO оборудования в доменную модель. */
     public static Equipment toDomain(EquipmentDTO dto, Long id) {
         Objects.requireNonNull(dto, "DTO оборудования не должен быть null");
         EquipmentFunctionalType type = Objects.requireNonNull(
@@ -31,6 +32,7 @@ public final class EquipmentDtoMapper {
         );
     }
 
+    /** Преобразует доменную модель оборудования в DTO. */
     public static EquipmentDTO toDto(Equipment equipment) {
         if (equipment == null) {
             return null;

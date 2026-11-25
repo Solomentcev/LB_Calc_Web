@@ -23,6 +23,7 @@ public final class LBCEntityMapper {
     private LBCEntityMapper() {
     }
 
+    /** Восстанавливает доменную конфигурацию LBC из JPA-сущности. */
     public static LBC toDomain(LBCEntity entity) {
         if (entity == null) {
             return null;
@@ -72,6 +73,7 @@ public final class LBCEntityMapper {
         return domain;
     }
 
+    /** Создаёт JPA-сущность LBC из доменной конфигурации. */
     public static LBCEntity toEntity(
             LBC domain,
             Function<Equipment, EquipmentEntity> equipmentLookup
@@ -84,6 +86,7 @@ public final class LBCEntityMapper {
         return entity;
     }
 
+    /** Обновляет существующую JPA-сущность LBC доменными данными. */
     public static void updateEntity(
             LBC domain,
             LBCEntity entity,

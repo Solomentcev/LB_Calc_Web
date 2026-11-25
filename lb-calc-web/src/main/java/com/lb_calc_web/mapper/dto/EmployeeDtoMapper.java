@@ -16,6 +16,7 @@ public final class EmployeeDtoMapper {
     private EmployeeDtoMapper() {
     }
 
+    /** Преобразует DTO сотрудника в доменную модель. */
     public static Employee toDomain(EmployeeDTO dto) {
         if (dto == null) {
             return null;
@@ -31,6 +32,7 @@ public final class EmployeeDtoMapper {
         );
     }
 
+    /** Преобразует доменную модель сотрудника в DTO. */
     public static EmployeeDTO toDto(Employee domain) {
         if (domain == null) {
             return null;
@@ -48,6 +50,7 @@ public final class EmployeeDtoMapper {
         return dto;
     }
 
+    /** Преобразует список доменных сотрудников в список DTO. */
     public static List<EmployeeDTO> toDtoList(
             List<Employee> employees
     ) {
@@ -64,6 +67,7 @@ public final class EmployeeDtoMapper {
         return result;
     }
 
+    /** Преобразует данные сотрудника в DTO профиля. */
     public static ProfileDTO toProfileDto(Employee domain) {
         Objects.requireNonNull(
                 domain,
@@ -82,6 +86,7 @@ public final class EmployeeDtoMapper {
         return dto;
     }
 
+    /** Преобразует список сотрудников в список DTO профилей. */
     public static List<ProfileDTO> toProfileDtoList(
             List<Employee> employees
     ) {

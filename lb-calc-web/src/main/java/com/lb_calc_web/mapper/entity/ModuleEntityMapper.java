@@ -21,6 +21,7 @@ public final class ModuleEntityMapper {
     private ModuleEntityMapper() {
     }
 
+    /** Восстанавливает общую доменную модель модуля из JPA-сущности. */
     public static Module toDomain(ModuleEntity entity) {
         if (entity == null) {
             return null;
@@ -42,6 +43,7 @@ public final class ModuleEntityMapper {
         );
     }
 
+    /** Создаёт общую JPA-сущность модуля из доменной модели. */
     public static ModuleEntity toEntity(
             Module domain,
             Function<Equipment, EquipmentEntity> equipmentLookup

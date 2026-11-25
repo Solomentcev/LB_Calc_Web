@@ -17,6 +17,7 @@ public final class ALSEntityMapper {
     private ALSEntityMapper() {
     }
 
+    /** Восстанавливает доменную конфигурацию ALS из JPA-сущности. */
     public static ALS toDomain(ALSEntity entity) {
         Objects.requireNonNull(entity, "ALSEntity не должен быть null");
 
@@ -51,6 +52,7 @@ public final class ALSEntityMapper {
         return domain;
     }
 
+    /** Создаёт JPA-сущность ALS из доменной конфигурации. */
     public static ALSEntity toEntity(
             ALS domain,
             Function<Module, ModuleEntity> moduleResolver
@@ -63,6 +65,7 @@ public final class ALSEntityMapper {
         return entity;
     }
 
+    /** Обновляет существующую JPA-сущность данными доменной ALS. */
     public static void updateEntity(
             ALS domain,
             ALSEntity entity,

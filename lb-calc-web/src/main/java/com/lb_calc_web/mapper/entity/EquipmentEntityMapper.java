@@ -11,6 +11,7 @@ public final class EquipmentEntityMapper {
     private EquipmentEntityMapper() {
     }
 
+    /** Восстанавливает доменную модель оборудования из JPA-сущности. */
     public static Equipment toDomain(EquipmentEntity entity) {
         if (entity == null) return null;
 
@@ -31,6 +32,7 @@ public final class EquipmentEntityMapper {
         return domain;
     }
 
+    /** Создаёт JPA-сущность оборудования из доменной модели. */
     public static EquipmentEntity toEntity(Equipment domain) {
         if (domain == null) return null;
 
@@ -39,6 +41,7 @@ public final class EquipmentEntityMapper {
         return entity;
     }
 
+    /** Обновляет существующую JPA-сущность оборудования доменными данными. */
     public static void updateEntity(Equipment domain, EquipmentEntity entity) {
         Objects.requireNonNull(domain, "Оборудование не должно быть null");
         Objects.requireNonNull(entity, "EquipmentEntity не должен быть null");

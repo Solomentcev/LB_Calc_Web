@@ -24,6 +24,7 @@ public final class LBCDtoMapper {
     private LBCDtoMapper() {
     }
 
+    /** Преобразует доменную конфигурацию LBC в DTO. */
     public static LBCDTO toDto(LBC domain) {
         if (domain == null) {
             return null;
@@ -74,6 +75,7 @@ public final class LBCDtoMapper {
         return dto;
     }
 
+    /** Восстанавливает доменную конфигурацию LBC из DTO. */
     public static LBC toDomain(LBCDTO dto) {
         if (dto == null) {
             return null;
@@ -86,6 +88,7 @@ public final class LBCDtoMapper {
         }, null);
     }
 
+    /** Восстанавливает доменную конфигурацию LBC из DTO. */
     public static LBC toDomain(
             LBCDTO dto,
             TypeLb typeLb,
@@ -94,6 +97,7 @@ public final class LBCDtoMapper {
         return toDomain(dto, typeLb, equipmentLookup, null);
     }
 
+    /** Восстанавливает доменную конфигурацию LBC из DTO. */
     public static LBC toDomain(
             LBCDTO dto,
             TypeLb typeLb,
@@ -184,6 +188,7 @@ public final class LBCDtoMapper {
         );
     }
 
+    /** Преобразует список доменных конфигураций LBC в список DTO. */
     public static List<LBCDTO> toDtoList(List<LBC> domains) {
         return domains == null ? List.of() : domains.stream().map(LBCDtoMapper::toDto).toList();
     }

@@ -28,6 +28,7 @@ public final class ALSDtoMapper {
     private ALSDtoMapper() {
     }
 
+    /** Преобразует доменную конфигурацию ALS в DTO для представления. */
     public static ALSDTO toDto(ALS domain) {
         if (domain == null) {
             return null;
@@ -81,6 +82,7 @@ public final class ALSDtoMapper {
         return dto;
     }
 
+    /** Обновляет в DTO вычисляемые геометрические характеристики ALS. */
     public static void updateCalculatedFields(ALSDTO target, ALS domain) {
         Objects.requireNonNull(target, "Целевой ALSDTO не должен быть null");
         Objects.requireNonNull(domain, "ALS не должна быть null");
@@ -95,6 +97,7 @@ public final class ALSDtoMapper {
         target.setModuleOrder(calculated.getModuleOrder());
     }
 
+    /** Находит позицию физического экземпляра LB в порядке модулей ALS. */
     public static int findPhysicalLbIndex(ALS domain, int lbIndex) {
         Objects.requireNonNull(domain, "ALS не должна быть null");
         int current = 0;
@@ -111,6 +114,7 @@ public final class ALSDtoMapper {
                 "Не удалось сопоставить LB DTO с модулем доменной ALS");
     }
 
+    /** Восстанавливает доменную конфигурацию ALS из DTO. */
     public static ALS toDomain(ALSDTO dto) {
         return toDomain(
                 dto,
@@ -140,6 +144,7 @@ public final class ALSDtoMapper {
         });
     }
 
+    /** Восстанавливает доменную конфигурацию ALS из DTO. */
     public static ALS toDomain(
             ALSDTO dto,
             Function<LBDTO, TypeLb> lbTypeResolver,
@@ -149,6 +154,7 @@ public final class ALSDtoMapper {
         return toDomain(dto, lbTypeResolver, lbcTypeResolver, equipmentLookup, null);
     }
 
+    /** Восстанавливает доменную конфигурацию ALS из DTO. */
     public static ALS toDomain(
             ALSDTO dto,
             Function<LBDTO, TypeLb> lbTypeResolver,
