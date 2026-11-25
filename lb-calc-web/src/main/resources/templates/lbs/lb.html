@@ -5,7 +5,7 @@
     <th:block th:if="${pageContext == 'CATALOG'}">
         <div th:replace="~{header :: header}"></div>
         
-        <main class="container">
+        <main class="container editor-page">
             <form th:action="@{/lbs/save}" th:object="${lb}" method="post">
                 <div class="page-actions">
                     <button type="submit" class="btn btn-primary btn-sm">Сохранить LB</button>
@@ -126,7 +126,7 @@
     <th:block th:if="${pageContext == 'ALS_CATALOG'}">
         <div th:replace="~{header :: header}"></div>
         
-        <main class="container">
+        <main class="container editor-page">
             <nav aria-label="breadcrumb" class="mt-3">
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item">
@@ -254,7 +254,7 @@
     <th:block th:if="${pageContext == 'PROJECT'}">
         <div th:replace="~{header :: header}"></div>
         
-        <div class="container">
+        <div class="container editor-page">
         <nav aria-label="breadcrumb" class="mt-3"><ol class="breadcrumb"><li class="breadcrumb-item"><a th:href="@{/projects/{id}(id=${projectId})}" th:text="|${project.name} (ID: ${projectId})|">Проект</a></li><li class="breadcrumb-item"><a th:href="@{/projects/{projectId}/alss/{alsId}(projectId=${projectId},alsId=${alsId})}" th:text="|${als.name} (ID: ${alsId})|">АКХ</a></li><li class="breadcrumb-item active" aria-current="page" th:text="|${lb.description} (ID: ${lb.id})|">Модуль хранения</li></ol></nav>
         
         
@@ -265,7 +265,7 @@
                   th:object="${lb}"
                   method="post">
         
-                <div class="mb-3">
+                <div class="page-actions">
         
                     <button type="submit"
                             class="btn btn-primary btn-sm">
