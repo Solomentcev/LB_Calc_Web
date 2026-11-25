@@ -443,29 +443,27 @@ public class Project {
      * Оно полностью строится из {@link #quantityALS}.</p>
      */
     private void updateDescription() {
-        StringBuilder builder =
-                new StringBuilder();
+        StringBuilder builder = new StringBuilder();
 
         quantityALS.entrySet().stream()
-                .sorted(
-                        java.util.Comparator
-                                .comparing((Map.Entry<ALS, Integer> entry) ->
-                                        entry.getKey().getName())
-                                .thenComparing(entry ->
-                                        entry.getKey().getDescription())
-                                .thenComparingInt(Map.Entry::getValue)
-                )
-                .forEach(entry ->
-                        builder.append(entry.getKey().getName())
-                                .append(" - ")
-                                .append(entry.getValue())
-                                .append(" шт.\n")
-                );
+                .sorted(java.util.Comparator
+                        .comparing((Map.Entry<ALS, Integer> entry) -> entry.getKey().getName())
+                        .thenComparing(entry -> entry.getKey().getDescription()))
+                .forEach(entry -> {
+                    if (!builder.isEmpty()) {
+                        builder.append("\n\n");
+                    }
+                    builder.append(entry.getKey().getName())
+                            .append(" — ")
+                            .append(entry.getValue())
+                            .append(" шт.\n")
+                            .append(entry.getKey().getDescription().lines()
+                                    .map(line -> "  " + line)
+                                    .collect(java.util.stream.Collectors.joining("\n")));
+                });
 
-        description =
-                builder.toString();
+        description = builder.toString();
     }
-
     /**
      * Восстанавливает проект из сохранённого состояния.
      *
