@@ -10,6 +10,6 @@
 <tbody><tr th:each="als : ${alss}">
 <td th:text="${als.id}"></td><td th:text="${als.name}"></td><td th:text="${als.countCells}"></td>
 <td th:text="${als.height}"></td><td th:text="${als.width}"></td><td th:text="${als.depth}"></td><td th:text="${als.upperFrame}"></td><td th:text="${als.bottomFrame}"></td>
-<td th:text="${als.positionControlModule}"></td><td th:text="${als.functionalConfiguration.display}"></td><td th:text="${als.functionalConfiguration.access}"></td><td th:text="${als.functionalConfiguration.payment}"></td><td th:text="${als.functionalConfiguration.printer}"></td><td th:text="${als.colorBody}"></td><td th:text="${als.colorDoor}"></td>
+<td th:text="${als.positionControlModule}"></td><td th:text="${als.functionalConfiguration.display}"></td><td th:text="${als.functionalConfiguration.accessDisplay}"></td><td th:text="${als.functionalConfiguration.payment}"></td><td th:text="${als.functionalConfiguration.printer}"></td><td th:text="${als.colorBody}"></td><td th:text="${als.colorDoor}"></td>
 <td><a th:href="@{/alss/{id}(id=${als.id})}" class="btn btn-primary btn-sm">Изменить</a></td></tr></tbody></table></div>
 </div><div th:replace="~{footer :: footer}"></div></body></html>

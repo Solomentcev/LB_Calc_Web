@@ -8,6 +8,7 @@ import com.lb_calc_web.domain.equipment.PrinterPurpose;
 import java.util.EnumSet;
 import java.util.Set;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /** Транспортное представление функциональных назначений ALS и управляющего модуля. */
 public class FunctionalConfigurationDTO {
@@ -21,6 +22,14 @@ public class FunctionalConfigurationDTO {
     public void setDisplay(DisplayPurpose display) { this.display = display; }
 
     public Set<AccessPurpose> getAccess() { return access == null ? null : Set.copyOf(access); }
+
+    /** Возвращает все назначения доступа в стабильном текстовом порядке. */
+    public String getAccessDisplay() {
+        return access == null ? "" : access.stream()
+                .map(AccessPurpose::name)
+                .sorted()
+                .collect(Collectors.joining(", "));
+    }
     public void setAccess(Set<AccessPurpose> access) {
         this.access = access == null ? null
                 : access.isEmpty() ? EnumSet.noneOf(AccessPurpose.class) : EnumSet.copyOf(access);

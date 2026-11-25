@@ -1,6 +1,7 @@
 package com.lb_calc_web.controller;
 
 import com.lb_calc_web.service.ALSService;
+import com.lb_calc_web.mapper.dto.ALSDtoMapper;
 import com.lb_calc_web.service.LBService;
 import com.lb_calc_web.service.LCService;
 import org.springframework.stereotype.Controller;
@@ -46,7 +47,7 @@ public class LBCalcWebController {
     ) {
         Pageable pageable = CatalogPageSupport.pageable(page, size, sort, direction, "id",
                 Set.of("id", "name", "height", "width", "depth"));
-        var result = alsService.findPage(q, pageable);
+        var result = alsService.findPage(q, pageable).map(ALSDtoMapper::toDto);
         model.addAttribute("alss", result.getContent());
         CatalogPageSupport.addModelAttributes(model, result, q, pageable, "/alss",
                 CatalogPageSupport.sortOptions("id", "ID", "name", "Название",
