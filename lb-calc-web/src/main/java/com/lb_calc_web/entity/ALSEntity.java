@@ -112,6 +112,30 @@ public class ALSEntity {
     @Column(name = "access_purpose", nullable = false, length = 50)
     private Set<AccessPurpose> accessPurposes = EnumSet.noneOf(AccessPurpose.class);
 
+    /** Стабильное строковое представление набора Access для сортировки каталога. */
+    @org.hibernate.annotations.Formula(
+            "(select group_concat(ap.access_purpose order by ap.access_purpose separator ', ') "
+                    + "from als_access_purpose ap where ap.als_id = {alias}.id)"
+    )
+    private String accessSort;
+
+    /** Положение управляющего модуля, вычисляемое по физическому порядку модулей ALS. */
+    @org.hibernate.annotations.Formula(
+            "(case "
+                    + "when (select count(*) from als_module am where am.als_id = {alias}.id) = 1 "
+                    + "then 'CENTER' "
+                    + "when (select min(am.module_order) from als_module am "
+                    + "where am.als_id = {alias}.id "
+                    + "and am.module_id in (select id from lc union select id from lbc)) = 0 "
+                    + "then 'LEFT' "
+                    + "when (select min(am.module_order) from als_module am "
+                    + "where am.als_id = {alias}.id "
+                    + "and am.module_id in (select id from lc union select id from lbc)) = "
+                    + "(select count(*) - 1 from als_module am where am.als_id = {alias}.id) "
+                    + "then 'RIGHT' else 'CENTER' end)"
+    )
+    private String positionControlModule;
+
     /** Функциональное назначение оплаты ALS. */
     @Enumerated(EnumType.STRING)
     @Column(name = "payment_purpose", nullable = false, length = 50)
@@ -232,6 +256,14 @@ public class ALSEntity {
     }
 
     /** Возвращает независимую функциональную конфигурацию ALS. */
+    public String getAccessSort() {
+        return accessSort;
+    }
+
+    public String getPositionControlModule() {
+        return positionControlModule;
+    }
+
     public FunctionalConfiguration getFunctionalConfiguration() {
         return new FunctionalConfiguration(
                 displayPurpose, accessPurposes, paymentPurpose, printerPurpose

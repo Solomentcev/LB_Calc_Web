@@ -44,6 +44,13 @@ public class LBCEntity extends StorageModuleEntity {
     @Column(name = "access_purpose", nullable = false, length = 50)
     private Set<AccessPurpose> accessPurposes = EnumSet.noneOf(AccessPurpose.class);
 
+    /** Стабильное строковое представление набора Access для сортировки каталога. */
+    @org.hibernate.annotations.Formula(
+            "(select group_concat(ap.access_purpose order by ap.access_purpose separator ', ') "
+                    + "from lbc_access_purpose ap where ap.lbc_id = {alias}.id)"
+    )
+    private String accessSort;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "payment_purpose", nullable = false, length = 50)
     private PaymentPurpose paymentPurpose = PaymentPurpose.NONE;
@@ -79,6 +86,10 @@ public class LBCEntity extends StorageModuleEntity {
         }
         this.equipment.clear();
         this.equipment.addAll(equipment);
+    }
+
+    public String getAccessSort() {
+        return accessSort;
     }
 
     public FunctionalConfiguration getFunctionalConfiguration() {
