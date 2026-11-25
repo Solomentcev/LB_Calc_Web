@@ -83,29 +83,8 @@ public class LB extends StorageModule {
     public void recalculate() {
         recalculateCells();
 
-        setName(
-                "Модуль хранения на "
-                        + getCountCells()
-                        + " ячеек"
-        );
-
-        setDescription(String.format(
-                "Модуль хранения на %d ячеек тип-%s "
-                        + "(%.1fx%dx%d), ВхШхГ,мм: %dx%dx%d, "
-                        + "%s, %s/%s, толщина дверцы %d мм",
-                getCountCells(),
-                getTypeLb().getType(),
-                (double) getCellHeight(),
-                getCellWidth(),
-                getCellDepth(),
-                getHeight(),
-                getWidth(),
-                getDepth(),
-                getDirectionDoorOpening(),
-                getColorBody(),
-                getColorDoor(),
-                getDoorThickness()
-        ));
+        setName(ModuleTextFormatter.storageName(this, "Модуль хранения"));
+        setDescription(ModuleTextFormatter.storageDescription(this, "Модуль хранения"));
     }
 
     /**
