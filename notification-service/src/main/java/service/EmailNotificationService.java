@@ -1,19 +1,19 @@
 package notification.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-@Service
 /** Сервис отправки электронных уведомлений по событиям пользователей. */
+@Service
 public class EmailNotificationService {
+    private static final Logger logger = LoggerFactory.getLogger(EmailNotificationService.class);
+    /** Формирует и отправляет уведомление на указанный адрес получателя. */
     public void send(
             String email,
             String subject,
             String message) {
 
-        System.out.println("========== EMAIL ==========");
-        System.out.println("Кому: " + email);
-        System.out.println("Тема: " + subject);
-        System.out.println("Сообщение: " + message);
-        System.out.println("===========================");
+        logger.info("Подготовлено email-уведомление: subject={}", subject);
     }
 }

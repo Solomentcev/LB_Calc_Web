@@ -8,8 +8,8 @@ import org.springframework.kafka.config.TopicBuilder;
 
 import java.util.Map;
 
-@Configuration
 /** Конфигурация Kafka-топиков, используемых сервисом уведомлений. */
+@Configuration
 public class KafkaTopicConfig {
 
     private final String userEventsTopic;
@@ -23,6 +23,7 @@ public class KafkaTopicConfig {
         this.userEventsTopicPartitions = userEventsTopicPartitions;
     }
 
+    /** Создаёт топик для событий пользователей с настроенным числом разделов. */
     @Bean
     public NewTopic userEventsTopic() {
         return TopicBuilder.name(userEventsTopic)

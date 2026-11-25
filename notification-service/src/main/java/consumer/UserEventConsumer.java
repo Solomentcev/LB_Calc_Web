@@ -2,12 +2,16 @@ package notification.consumer;
 
 import notification.event.UserEvent;
 import notification.service.NotificationService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
-@Component
 /** Kafka-потребитель событий жизненного цикла учётных записей пользователей. */
+@Component
 public class UserEventConsumer {
+
+    private static final Logger logger = LoggerFactory.getLogger(UserEventConsumer.class);
 
     private final NotificationService notificationService;
 
@@ -16,11 +20,10 @@ public class UserEventConsumer {
     }
 
     @KafkaListener(topics = "${app.kafka.topic.user-events}")
+    /** Передаёт полученное событие в сервис обработки уведомлений. */
     public void consume(UserEvent event) {
-        System.out.println("Получено событие: " + event.getType());
-        System.out.println("User ID: " + event.getUserId());
-        System.out.println("Email: " + event.getEmail());
-
+        logger.info("Получено событие пользователя: type={}, userId={}",
+                event.getType(), event.getUserId());
         notificationService.process(event);
     }
 }

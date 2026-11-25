@@ -25,6 +25,7 @@ import java.util.Locale;
 import java.util.NoSuchElementException;
 
 import org.springframework.data.jpa.domain.Specification;
+/** Сервис загрузки, изменения и поиска учётных записей и профилей сотрудников. */
 @Service
 public class EmployeeService implements UserDetailsService {
 
@@ -45,9 +46,9 @@ public class EmployeeService implements UserDetailsService {
      * Здесь возвращается именно EmployeePrincipal,
      * а не EmployeeDTO.
      */
+    /** Загружает principal сотрудника по адресу электронной почты для Spring Security. */
     @Override
     @Transactional(readOnly = true)
-    /** Загружает principal сотрудника по адресу электронной почты для Spring Security. */
     public EmployeePrincipal loadUserByUsername(String email) {
 
 EmployeeEntity entity = employeeRepository
@@ -72,8 +73,8 @@ EmployeeEntity entity = employeeRepository
      *
      * Возвращает DTO, а не Security Principal.
      */
-    @Transactional(readOnly = true)
     /** Возвращает DTO сотрудника, найденного по адресу электронной почты. */
+    @Transactional(readOnly = true)
     public EmployeeDTO loadUserByEmail(String email) {
 
 EmployeeEntity entity = employeeRepository
@@ -111,8 +112,8 @@ EmployeeEntity entity = employeeRepository
         return EmployeeEntityMapper.toDto(entity);
     }
 
-    @Transactional(readOnly = true)
     /** Возвращает профиль сотрудника по идентификатору. */
+    @Transactional(readOnly = true)
     public ProfileDTO getProfileById(int id) {
         if (id <= 0) {
             throw new NoSuchElementException("Пользователь с id=" + id + " не найден");
@@ -134,9 +135,9 @@ EmployeeEntity entity = employeeRepository
      *
      * Пароль здесь не изменяется.
      */
+    /** Сохраняет изменения учётной записи сотрудника. */
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @Transactional
-    /** Сохраняет изменения учётной записи сотрудника. */
     public EmployeeDTO save(EmployeeDTO employeeDTO) {
 
         if (employeeDTO == null || employeeDTO.getId() == null || employeeDTO.getId() <= 0) {
@@ -173,9 +174,9 @@ EmployeeEntity entity = employeeRepository
      *
      * @param id идентификатор сотрудника
      */
+    /** Деактивирует учётную запись сотрудника. */
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @Transactional
-    /** Деактивирует учётную запись сотрудника. */
     public void deactivateById(Long id) {
         EmployeeEntity entity = getRequiredEntity(id);
 
@@ -192,9 +193,9 @@ EmployeeEntity entity = employeeRepository
      *
      * @param id идентификатор сотрудника
      */
+    /** Активирует ранее деактивированную учётную запись сотрудника. */
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @Transactional
-    /** Активирует ранее деактивированную учётную запись сотрудника. */
     public void activateById(Long id) {
         EmployeeEntity entity = getRequiredEntity(id);
 
@@ -212,9 +213,9 @@ EmployeeEntity entity = employeeRepository
      * @param id идентификатор сотрудника
      * @return {@code true}, если учётная запись активна
      */
+    /** Проверяет, активна ли учётная запись сотрудника. */
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @Transactional(readOnly = true)
-    /** Проверяет, активна ли учётная запись сотрудника. */
     public boolean isActive(Long id) {
         return getRequiredEntity(id).isActive();
     }
@@ -224,9 +225,9 @@ EmployeeEntity entity = employeeRepository
      *
      * @return соответствие ID сотрудника признаку активности
      */
+    /** Возвращает статусы активности всех сотрудников. */
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @Transactional(readOnly = true)
-    /** Возвращает статусы активности всех сотрудников. */
     public java.util.Map<Long, Boolean> getActiveStatuses() {
         return employeeRepository.findAll().stream()
                 .collect(java.util.stream.Collectors.toMap(
@@ -313,9 +314,9 @@ EmployeeEntity entity = employeeRepository
                 );
     }
 
+    /** Возвращает список сотрудников. */
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @Transactional(readOnly = true)
-    /** Возвращает список сотрудников. */
     public List<EmployeeDTO> findAll() {
 
         List<EmployeeEntity> entities =
@@ -330,8 +331,8 @@ EmployeeEntity entity = employeeRepository
                 .toList();
     }
 
-    @Transactional(readOnly = true)
     /** Возвращает профили всех сотрудников. */
+    @Transactional(readOnly = true)
     public List<ProfileDTO> getAllProfiles() {
 
         List<EmployeeEntity> entities =
@@ -346,8 +347,8 @@ EmployeeEntity entity = employeeRepository
                 .toList();
     }
 
-    @Transactional(readOnly = true)
     /** Проверяет наличие учётной записи с указанным email. */
+    @Transactional(readOnly = true)
     public boolean existsByEmail(String email) {
 
         return employeeRepository.existsByEmail(email);

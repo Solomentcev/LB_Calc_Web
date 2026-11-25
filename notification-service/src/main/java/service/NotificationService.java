@@ -1,11 +1,14 @@
 package notification.service;
 
 import notification.event.UserEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-@Service
 /** Сервис обработки событий пользователей и координации отправки уведомлений. */
+@Service
 public class NotificationService {
+    private static final Logger logger = LoggerFactory.getLogger(NotificationService.class);
     private final EmailNotificationService emailNotificationService;
 
     public NotificationService(
@@ -13,7 +16,9 @@ public class NotificationService {
 
         this.emailNotificationService = emailNotificationService;
     }
+    /** Выбирает содержание уведомления в соответствии с типом события пользователя. */
     public void process(UserEvent event) {
+        logger.debug("Обработка уведомления: type={}, userId={}", event.getType(), event.getUserId());
 
         switch (event.getType()) {
 
