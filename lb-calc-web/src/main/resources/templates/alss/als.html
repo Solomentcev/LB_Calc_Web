@@ -1,504 +1,165 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="ru" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/common :: head('Автоматическая камера хранения')}"></head>
 <body>
-    <th:block th:if="${pageContext == 'CATALOG'}">
-        <div th:replace="~{header :: header}"></div>
-        
-        <div class="container editor-page">
-        <form th:action="@{/alss/save}" th:object="${als}" method="post">
-            <button type="submit" hidden formnovalidate data-form-refresh
-                    th:formaction="@{/alss/refresh}"></button>
-            <input type="hidden" th:field="*{functionalConfiguration.display}">
-            <input type="hidden" th:field="*{functionalConfiguration.payment}">
-            <input type="hidden" th:field="*{functionalConfiguration.printer}">
-            <input type="hidden" name="_functionalConfiguration.access" value="on">
-            <input type="hidden"
-                   th:each="purpose : *{functionalConfiguration.access}"
-                   name="functionalConfiguration.access" th:value="${purpose}">
+<div th:replace="~{header :: header}"></div>
 
-            <div class="page-actions">
-                <button type="submit" class="btn btn-primary btn-sm">Сохранить АКХ</button>
-                <a th:href="@{/alss}" class="btn btn-secondary btn-sm">К списку АКХ</a>
-                <button type="submit" class="btn btn-warning btn-sm"
-                        th:formaction="@{/alss/{alsId}/replaceLBC(alsId=${als.id})}">
-                    Заменить модуль управления на модуль хранения и управления
-                </button>
-                <button type="submit" class="btn btn-primary btn-sm"
-                        th:formaction="@{/alss/{alsId}/addLB(alsId=${als.id})}">
-                    Добавить LB
-                </button>
-            </div>
-        
-            <div th:if="${ALSErrors != null}" class="alert alert-danger">
-                <div th:each="error : ${ALSErrors}" th:text="${error}">Error</div>
-            </div>
-        
-            <div class="card mb-4">
-                <div class="card-header"><h1 class="h4 mb-0" th:text="*{name}">Автоматическая камера хранения</h1></div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-2"><label>ID</label>
-                            <input class="form-control" type="number" th:field="*{id}" readonly></div>
-                        <div class="col-md-4"><label>Название</label>
-                            <input class="form-control" type="text" th:field="*{name}" readonly></div>
-                        <div class="col-md-6"><label>Описание</label>
-                            <textarea class="form-control" th:field="*{description}" readonly></textarea></div>
-                    </div>
-                    <div class="row mt-3">
-                        <div class="col-md-2"><label>Положение модуля управления</label>
-                            <select id="positionControlModule" class="form-control" th:field="*{positionControlModule}">
-                                <option th:each="position : ${positionControlModuleList}"
-                                        th:value="${position}" th:text="${position}"></option>
-                            </select>
-                        </div>
-                        <div class="col-md-2"><label>Ячеек</label>
-                            <input class="form-control" type="number" th:field="*{countCells}" readonly></div>
-                        <div class="col-md-2"><label>Высота</label>
-                            <input class="form-control" type="number" th:field="*{height}"></div>
-                        <div class="col-md-2"><label>Ширина</label>
-                            <input class="form-control" type="number" th:field="*{width}" readonly></div>
-                        <div class="col-md-2"><label>Глубина</label>
-                            <input class="form-control" type="number" th:field="*{depth}"></div>
-                        <div class="col-md-2"><label>Глубина ячейки</label>
-                            <input class="form-control" type="number" th:field="*{depthCell}" readonly></div>
-                    </div>
-                    <div class="row mt-3">
-                        <div class="col-md-3"><label>Верхняя рама</label>
-                            <input class="form-control" type="number" th:field="*{upperFrame}"></div>
-                        <div class="col-md-3"><label>Нижняя рама</label>
-                            <input class="form-control" type="number" th:field="*{bottomFrame}"></div>
-                        <div class="col-md-3"><label>Цвет корпуса</label>
-                            <select class="form-control" th:field="*{colorBody}">
-                                <option th:each="color : ${colorsList}" th:value="${color}" th:text="${color}"></option>
-                            </select></div>
-                        <div class="col-md-3"><label>Цвет дверей</label>
-                            <select class="form-control" th:field="*{colorDoor}">
-                                <option th:each="color : ${colorsList}" th:value="${color}" th:text="${color}"></option>
-                            </select></div>
-                    </div>
-                </div>
-            </div>
-        
-            <div id="module-order-fields"
-                 th:attr="data-control-type=${als.LBC != null ? 'LBC' : 'LC'}">
-                <input type="hidden" class="module-order-field"
-                       th:each="item, itemStat : ${als.moduleOrder}"
-                       th:name="|moduleOrder[${itemStat.index}].type|" th:value="${item.type}">
-                <input type="hidden" class="module-order-field"
-                       th:each="item, itemStat : ${als.moduleOrder}"
-                       th:name="|moduleOrder[${itemStat.index}].index|" th:value="${item.index}">
-            </div>
-        
-            <div th:if="${als.LBC != null}" class="card mb-4">
-                <div class="card-header">
-                    <h5 th:text="${'Модуль хранения и управления — ' + als.LBC.name}">Модуль хранения и управления</h5>
-                </div>
-                <div class="card-body">
-                    <input type="hidden" th:field="*{LBC.id}">
-                    <input type="hidden" th:field="*{LBC.name}">
-                    <input type="hidden" th:field="*{LBC.description}">
-                    <input type="hidden" th:field="*{LBC.type}">
-                    <input type="hidden" th:field="*{LBC.height}">
-                    <input type="hidden" th:field="*{LBC.width}">
-                    <input type="hidden" th:field="*{LBC.depth}">
-                    <input type="hidden" th:field="*{LBC.upperFrame}">
-                    <input type="hidden" th:field="*{LBC.bottomFrame}">
-                    <input type="hidden" th:field="*{LBC.shelfThick}">
-                    <input type="hidden" th:field="*{LBC.deltaWidth}">
-                    <input type="hidden" th:field="*{LBC.serviceZoneWidth}">
-                    <input type="hidden" th:field="*{LBC.doorThickness}">
-                    <input type="hidden" th:field="*{LBC.countCells}">
-                    <input type="hidden" th:field="*{LBC.heightCell}">
-                    <input type="hidden" th:field="*{LBC.widthCell}">
-                    <input type="hidden" th:field="*{LBC.depthCell}">
-                    <input type="hidden" th:field="*{LBC.directionDoorOpening}">
-                    <input type="hidden" th:field="*{LBC.colorDoor}">
-                    <input type="hidden" th:field="*{LBC.colorBody}">
-                    <input type="hidden" th:field="*{LBC.functionalConfiguration.display}">
-                    <input type="hidden" th:field="*{LBC.functionalConfiguration.payment}">
-                    <input type="hidden" th:field="*{LBC.functionalConfiguration.printer}">
-                    <input type="hidden" name="_LBC.functionalConfiguration.access" value="on">
-                    <input type="hidden"
-                           th:each="purpose, purposeStat : ${als.LBC.functionalConfiguration.access}"
-                           th:name="LBC.functionalConfiguration.access"
-                           th:value="${purpose}">
-                    <input type="hidden"
-                           th:each="selection, selectionStat : ${als.LBC.equipmentSelections}"
-                           th:name="|LBC.equipmentSelections[${selectionStat.index}].equipmentId|"
-                           th:value="${selection.equipmentId}">
-                    <input type="hidden"
-                           th:each="selection, selectionStat : ${als.LBC.equipmentSelections}"
-                           th:name="|LBC.equipmentSelections[${selectionStat.index}].quantity|"
-                           th:value="${selection.quantity}">
-        
-                    <div class="row">
-                        <div class="col-md-2"><strong>ID:</strong> <span th:text="${als.LBC.id}"></span></div>
-                        <div class="col-md-2"><strong>Тип:</strong> <span th:text="${als.LBC.type}"></span></div>
-                        <div class="col-md-2"><strong>Ячеек:</strong> <span th:text="${als.LBC.countCells}"></span></div>
-                        <div class="col-md-3"><strong>Дисплей:</strong> <span th:text="${als.LBC.functionalConfiguration.display}"></span></div>
-                        <div class="col-md-3"><strong>Оплата:</strong> <span th:text="${als.LBC.functionalConfiguration.payment}"></span></div>
-                         <div class="col-md-3"><strong>Доступ:</strong> <span th:text="${als.LBC.functionalConfiguration.access}"></span></div>
-                         <div class="col-md-3"><strong>Печать:</strong> <span th:text="${als.LBC.functionalConfiguration.printer}"></span></div>
-                         <div class="col-md-3"><strong>Оборудование:</strong> <span th:text="${als.LBC.equipmentSelections}"></span></div>
-                    </div>
-                    <div class="mt-3">
-                        <a th:href="@{/alss/{alsId}/lbcs/{lbcId}(alsId=${als.id},lbcId=${als.LBC.id})}"
-                           class="btn btn-primary btn-sm">
-                            Редактировать модуль хранения и управления
-                        </a>
-                    </div>
-                </div>
-            </div>
-        
-            <div th:if="${als.LC != null}" class="card mb-4">
-                <div class="card-header"><h5 th:text="${als.LC.description}">Модуль управления LC</h5></div>
-                <div class="card-body">
-                    <input type="hidden" th:field="*{LC.id}">
-                    <input type="hidden" th:field="*{LC.name}">
-                    <input type="hidden" th:field="*{LC.description}">
-                    <input type="hidden" th:field="*{LC.height}">
-                    <input type="hidden" th:field="*{LC.width}">
-                    <input type="hidden" th:field="*{LC.depth}">
-                    <input type="hidden" th:field="*{LC.upperFrame}">
-                    <input type="hidden" th:field="*{LC.bottomFrame}">
-                    <input type="hidden" th:field="*{LC.colorBody}">
-                    <input type="hidden" th:field="*{LC.colorDoor}">
-                    <input type="hidden" th:field="*{LC.functionalConfiguration.display}">
-                    <input type="hidden" th:field="*{LC.functionalConfiguration.payment}">
-                    <input type="hidden" th:field="*{LC.functionalConfiguration.printer}">
-                    <input type="hidden" name="_LC.functionalConfiguration.access" value="on">
-                    <input type="hidden"
-                           th:each="purpose, purposeStat : ${als.LC.functionalConfiguration.access}"
-                           th:name="LC.functionalConfiguration.access"
-                           th:value="${purpose}">
-                    <input type="hidden"
-                           th:each="selection, selectionStat : ${als.LC.equipmentSelections}"
-                           th:name="|LC.equipmentSelections[${selectionStat.index}].equipmentId|"
-                           th:value="${selection.equipmentId}">
-                    <input type="hidden"
-                           th:each="selection, selectionStat : ${als.LC.equipmentSelections}"
-                           th:name="|LC.equipmentSelections[${selectionStat.index}].quantity|"
-                           th:value="${selection.quantity}">
-                    <div class="row">
-                        <div class="col-md-2"><strong>ID:</strong> <span th:text="${als.LC.id}"></span></div>
-                        <div class="col-md-3"><strong>Дисплей:</strong> <span th:text="${als.LC.functionalConfiguration.display}"></span></div>
-                        <div class="col-md-3"><strong>Оплата:</strong> <span th:text="${als.LC.functionalConfiguration.payment}"></span></div>
-                        <div class="col-md-4"><strong>Способы доступа:</strong> <span th:text="${als.LC.functionalConfiguration.access}"></span></div>
-                    </div>
-                    <div class="mt-3">
-                        <a th:href="@{/alss/{alsId}/lcs/{lcId}(alsId=${als.id},lcId=${als.LC.id})}" class="btn btn-primary btn-sm">Редактировать LC</a>
-                    </div>
-                </div>
-            </div>
-        
-            <div class="card mb-4">
-                <div class="card-header"><h5>Модули хранения LB</h5></div>
-                <div class="card-body">
-                    <div th:each="lb, lbStat : ${als.lbList}" class="border rounded p-3 mb-3">
-                        <input type="hidden" th:field="*{lbList[__${lbStat.index}__].id}">
-                        <input type="hidden" th:field="*{lbList[__${lbStat.index}__].name}">
-                        <input type="hidden" th:field="*{lbList[__${lbStat.index}__].description}">
-                        <input type="hidden" th:field="*{lbList[__${lbStat.index}__].height}">
-                        <input type="hidden" th:field="*{lbList[__${lbStat.index}__].depth}">
-                        <input type="hidden" th:field="*{lbList[__${lbStat.index}__].upperFrame}">
-                        <input type="hidden" th:field="*{lbList[__${lbStat.index}__].bottomFrame}">
-                        <input type="hidden" th:field="*{lbList[__${lbStat.index}__].heightCell}">
-                        <input type="hidden" th:field="*{lbList[__${lbStat.index}__].widthCell}">
-                        <input type="hidden" th:field="*{lbList[__${lbStat.index}__].depthCell}">
-                        <input type="hidden" th:field="*{lbList[__${lbStat.index}__].directionDoorOpening}">
-                        <input type="hidden" th:field="*{lbList[__${lbStat.index}__].colorBody}">
-                        <input type="hidden" th:field="*{lbList[__${lbStat.index}__].colorDoor}">
-                        <input type="hidden" th:field="*{lbList[__${lbStat.index}__].shelfThick}">
-                        <input type="hidden" th:field="*{lbList[__${lbStat.index}__].deltaWidth}">
-                        <input type="hidden" th:field="*{lbList[__${lbStat.index}__].serviceZoneWidth}">
-                        <input type="hidden" th:field="*{lbList[__${lbStat.index}__].doorThickness}">
-        
-                        <div class="row">
-                            <div class="col-md-2"><strong>ID:</strong> <span th:text="${lb.id}"></span></div>
-                            <div class="col-md-3"><strong>Тип:</strong> <span th:text="${lb.type}"></span></div>
-                            <div class="col-md-3"><strong>Ячеек:</strong> <span th:text="${lb.countCells}"></span></div>
-                            <div class="col-md-4">
-                                <label>Количество ячеек</label>
-                                <input class="form-control" type="number"
-                                       th:field="*{lbList[__${lbStat.index}__].countCells}">
-                            </div>
-                        </div>
-                        <div class="mt-2">
-                            <a th:href="@{/alss/{alsId}/lbs/{lbId}(alsId=${als.id},lbId=${lb.id})}" class="btn btn-primary btn-sm">Редактировать LB</a>
-                            <button type="submit" class="btn btn-danger btn-sm"
-                                    th:formaction="@{/alss/{alsId}/lbs/{lbId}/delete(alsId=${als.id},lbId=${lb.id})}">
-                                Удалить
-                            </button>
-                        </div>
-                    </div>
-        
-                    <div th:if="${als.lbList == null or als.lbList.isEmpty()}" class="text-muted">
-                        Обычных модулей хранения нет. Модуль хранения и управления, если присутствует, уже считается модулем хранения.
-                    </div>
-                </div>
-            </div>
-        </form>
+<main class="container module-editor">
+    <nav aria-label="breadcrumb" class="breadcrumb">
+        <ol class="breadcrumb mb-0" th:if="${pageContext == 'PROJECT'}">
+            <li class="breadcrumb-item">
+                <a th:href="@{/projects/{id}(id=${projectId})}"
+                   th:text="|${project.name} (ID: ${projectId})|">Проект</a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page"
+                th:text="|${als.name} (ID: ${als.id})|">АКХ</li>
+        </ol>
+        <ol class="breadcrumb mb-0" th:if="${pageContext != 'PROJECT'}">
+            <li class="breadcrumb-item"><a th:href="@{/alss}">Каталог АКХ</a></li>
+            <li class="breadcrumb-item active" aria-current="page"
+                th:text="|${als.name} (ID: ${als.id})|">АКХ</li>
+        </ol>
+    </nav>
+
+    <form th:action="${pageContext == 'PROJECT'
+                       ? '/projects/' + projectId + '/alss/' + alsId + '/save'
+                       : '/alss/save'}"
+          th:object="${als}" method="post" class="module-editor__form">
+
+        <button type="submit" hidden formnovalidate data-form-refresh
+                th:formaction="${pageContext == 'PROJECT'
+                                ? '/projects/' + projectId + '/alss/' + alsId + '/refresh'
+                                : '/alss/refresh'}"></button>
+
+        <input type="hidden" th:field="*{functionalConfiguration.display}">
+        <input type="hidden" th:field="*{functionalConfiguration.payment}">
+        <input type="hidden" th:field="*{functionalConfiguration.printer}">
+        <input type="hidden" name="_functionalConfiguration.access" value="on">
+        <input type="hidden" th:each="purpose : *{functionalConfiguration.access}"
+               name="functionalConfiguration.access" th:value="${purpose}">
+
+        <div id="module-order-fields"
+             th:attr="data-control-type=${als.LBC != null ? 'LBC' : 'LC'}">
+            <input type="hidden" class="module-order-field"
+                   th:each="item, itemStat : ${als.moduleOrder}"
+                   th:name="|moduleOrder[${itemStat.index}].type|" th:value="${item.type}">
+            <input type="hidden" class="module-order-field"
+                   th:each="item, itemStat : ${als.moduleOrder}"
+                   th:name="|moduleOrder[${itemStat.index}].index|" th:value="${item.index}">
         </div>
-        
-        
-        <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const positionSelect = document.getElementById("positionControlModule");
-            const orderFields = document.getElementById("module-order-fields");
-            if (!positionSelect || !orderFields) return;
-        
-            positionSelect.addEventListener("change", function () {
-                const lbCount = document.querySelectorAll(
-                    'input[name^="lbList["][name$="].id"]'
-                ).length;
-                const controlType = orderFields.dataset.controlType;
-                let position = positionSelect.value;
-        
-                if (position === "CENTER" && lbCount === 1) {
-                    position = "LEFT";
-                    positionSelect.value = position;
-                }
-        
-                const leftCount = position === "LEFT" ? 0
-                        : position === "RIGHT" ? lbCount
-                        : Math.floor(lbCount / 2);
-                const order = [];
-                for (let index = 0; index < leftCount; index++) {
-                    order.push({type: "LB", index: index});
-                }
-                order.push({type: controlType, index: 0});
-                for (let index = leftCount; index < lbCount; index++) {
-                    order.push({type: "LB", index: index});
-                }
-        
-                orderFields.replaceChildren();
-                order.forEach(function (item, index) {
-                    const typeInput = document.createElement("input");
-                    typeInput.type = "hidden";
-                    typeInput.name = "moduleOrder[" + index + "].type";
-                    typeInput.value = item.type;
-                    const indexInput = document.createElement("input");
-                    indexInput.type = "hidden";
-                    indexInput.name = "moduleOrder[" + index + "].index";
-                    indexInput.value = item.index;
-                    orderFields.append(typeInput, indexInput);
-                });
-            });
-        });
-        </script>
-        
-        <div th:replace="~{footer :: footer}"></div>
-    </th:block>
 
-    <th:block th:if="${pageContext == 'PROJECT'}">
-        <div th:replace="~{header :: header}"></div>
-        
-        <div class="container editor-page">
-        
-            <nav aria-label="breadcrumb" class="mt-3"><ol class="breadcrumb"><li class="breadcrumb-item"><a th:href="@{/projects/{id}(id=${projectId})}" th:text="|${project.name} (ID: ${projectId})|">Проект</a></li><li class="breadcrumb-item active" aria-current="page" th:text="|${als.name} (ID: ${als.id})|">АКХ</li></ol></nav>
-        
-        
-            <form th:action="@{/projects/{projectId}/alss/{alsId}/save(
-                        projectId=${projectId},
-                        alsId=${alsId})}"
-                  th:object="${als}"
-                  method="post">
-            <button type="submit" hidden formnovalidate data-form-refresh
-                    th:formaction="@{/projects/{projectId}/alss/{alsId}/refresh(projectId=${projectId},alsId=${alsId})}"></button>
-            <input type="hidden" th:field="*{functionalConfiguration.display}">
-            <input type="hidden" th:field="*{functionalConfiguration.payment}">
-            <input type="hidden" th:field="*{functionalConfiguration.printer}">
-            <input type="hidden" name="_functionalConfiguration.access" value="on">
-            <input type="hidden"
-                   th:each="purpose : *{functionalConfiguration.access}"
-                   name="functionalConfiguration.access" th:value="${purpose}">
+        <div class="page-actions">
+            <button type="submit" class="btn btn-primary btn-sm">Сохранить АКХ</button>
+            <a th:href="${pageContext == 'PROJECT'
+                         ? '/projects/' + projectId + '/alss/' + alsId
+                         : '/alss'}"
+               class="btn btn-secondary btn-sm"
+               th:text="${pageContext == 'PROJECT' ? 'Назад к проекту' : 'К списку АКХ'}">
+                Назад
+            </a>
+            <button th:if="${als.LC != null}" type="submit"
+                    class="btn btn-outline-warning btn-sm"
+                    th:formaction="${pageContext == 'PROJECT'
+                                    ? '/projects/' + projectId + '/alss/' + alsId + '/replaceLBC'
+                                    : '/alss/' + als.id + '/replaceLBC'}">
+                Заменить LC на LBC
+            </button>
+        </div>
 
-        
-                <div class="page-actions">
-        
-                    <button type="submit"
-                            class="btn btn-primary btn-sm">
-                        Сохранить ALS
-                    </button>
-        
-                    <a th:href="@{/projects/{id}(id=${projectId})}"
-                       class="btn btn-secondary btn-sm">
-                        Назад к проекту
-                    </a>
-        
-                </div>
-        
-                <div th:if="${ALSErrors != null}"
-                     class="alert alert-danger">
-        
-                    <div th:each="error : ${ALSErrors}"
-                         th:text="${error}">
+        <div th:if="${ALSErrors != null}" class="alert alert-danger" role="alert">
+            <div th:each="error : ${ALSErrors}" th:text="${error}">Ошибка</div>
+        </div>
+        <div th:if="${LBErrors != null}" class="alert alert-danger" role="alert">
+            <div th:each="error : ${LBErrors}" th:text="${error}">Ошибка</div>
+        </div>
+
+        <header class="module-editor__heading">
+            <div>
+                <div class="module-editor__eyebrow">Конфигурация автоматической камеры хранения</div>
+                <h1 class="module-editor__title" th:text="${als.name}">АКХ</h1>
+                <p class="module-editor__subtitle" th:text="${als.description}">Описание АКХ</p>
+            </div>
+            <div class="module-editor__id" th:text="|ID: ${als.id}|">ID</div>
+        </header>
+
+        <div class="module-editor__layout">
+            <div class="module-editor__parameters">
+
+                <section class="module-section">
+                    <div class="module-section__header">
+                        <h2>Основные параметры АКХ</h2>
+                        <p>Геометрия, положение модуля управления и оформление корпуса.</p>
                     </div>
-        
-                </div>
-        
-                <div class="card mb-4">
-        
-                    <div class="card-header">
-                        <h1 class="h4 mb-0" th:text="${als.name}">
-                            ALS
-                        </h1>
-                        <img class="img-fluid mt-3"
-                             th:if="${als.stringALSImage != null}"
-                             th:src="|data:image/png;base64,${als.stringALSImage}|"
-                             alt="Изображение АКХ">
-                    </div>
-        
-                    <div class="card-body">
-        
-                        <div class="row">
-        
-                            <div class="col-md-2">
-                                <label>ID</label>
-                                <input type="number"
-                                       class="form-control"
-                                       th:field="*{id}"
-                                       readonly aria-label="id">
+                    <div class="module-section__body">
+                        <div class="form-row">
+                            <div class="col-md-3 module-field">
+                                <label for="als-height">Высота, мм</label>
+                                <input id="als-height" class="form-control" type="number"
+                                       min="1" th:field="*{height}">
                             </div>
-        
-                            <div class="col-md-5">
-                                <label>Название</label>
-                                <input type="text"
-                                       class="form-control"
-                                       th:field="*{name}"
-                                       readonly aria-label="name">
+                            <div class="col-md-3 module-field">
+                                <label for="als-width">Ширина, мм</label>
+                                <input id="als-width" class="form-control" type="number"
+                                       th:field="*{width}" readonly>
                             </div>
-        
-                            <div class="col-md-5">
-                                <label>Описание</label>
-                                <input type="text"
-                                       class="form-control"
-                                       th:field="*{description}"
-                                       readonly aria-label="description">
+                            <div class="col-md-3 module-field">
+                                <label for="als-depth">Глубина, мм</label>
+                                <input id="als-depth" class="form-control" type="number"
+                                       min="1" th:field="*{depth}">
                             </div>
-        
-                        </div>
-        
-                        <div class="row mt-3">
-        
-                            <div class="col-md-2">
-                                <label>Положение модуля управления</label>
-        
-                                <select class="form-control"
-                                        th:field="*{positionControlModule}" aria-label="positionControlModule">
-        
+                            <div class="col-md-3 module-field">
+                                <label for="als-cells">Количество ячеек</label>
+                                <input id="als-cells" class="form-control" type="number"
+                                       th:field="*{countCells}" readonly>
+                            </div>
+                            <div class="col-md-4 module-field">
+                                <label for="positionControlModule">Положение модуля управления</label>
+                                <select id="positionControlModule" class="form-control"
+                                        th:field="*{positionControlModule}">
                                     <option th:each="position : ${positionControlModuleList}"
-                                            th:value="${position}"
-                                            th:text="${position}">
-                                    </option>
-        
+                                            th:value="${position}" th:text="${position}"></option>
                                 </select>
                             </div>
-        
-                            <div class="col-md-2">
-                                <label>Количество ячеек</label>
-                                <input type="number"
-                                       class="form-control"
-                                       th:field="*{countCells}"
-                                       readonly aria-label="countCells">
+                            <div class="col-md-4 module-field">
+                                <label for="als-depth-cell">Глубина ячейки, мм</label>
+                                <input id="als-depth-cell" class="form-control" type="number"
+                                       th:field="*{depthCell}" readonly>
                             </div>
-        
-                            <div class="col-md-2">
-                                <label>Высота</label>
-                                <input type="number"
-                                       class="form-control"
-                                       th:field="*{height}" aria-label="height">
+                            <div class="col-md-2 module-field">
+                                <label for="als-upper-frame">Верхняя рама, мм</label>
+                                <input id="als-upper-frame" class="form-control" type="number"
+                                       min="0" th:field="*{upperFrame}">
                             </div>
-        
-                            <div class="col-md-2">
-                                <label>Ширина</label>
-                                <input type="number"
-                                       class="form-control"
-                                       th:field="*{width}"
-                                       readonly aria-label="width">
+                            <div class="col-md-2 module-field">
+                                <label for="als-bottom-frame">Нижняя рама, мм</label>
+                                <input id="als-bottom-frame" class="form-control" type="number"
+                                       min="0" th:field="*{bottomFrame}">
                             </div>
-        
-                            <div class="col-md-2">
-                                <label>Глубина</label>
-                                <input type="number"
-                                       class="form-control"
-                                       th:field="*{depth}" aria-label="depth">
-                            </div>
-        
-                            <div class="col-md-2">
-                                <label>Глубина ячейки</label>
-                                <input type="number"
-                                       class="form-control"
-                                       th:field="*{depthCell}"
-                                       readonly aria-label="depthCell">
-                            </div>
-        
-                        </div>
-        
-                        <div class="row mt-3">
-        
-                            <div class="col-md-3">
-                                <label>Верхняя рама</label>
-                                <input type="number"
-                                       class="form-control"
-                                       th:field="*{upperFrame}" aria-label="upperFrame">
-                            </div>
-        
-                            <div class="col-md-3">
-                                <label>Нижняя рама</label>
-                                <input type="number"
-                                       class="form-control"
-                                       th:field="*{bottomFrame}" aria-label="bottomFrame">
-                            </div>
-        
-                            <div class="col-md-3">
-                                <label>Цвет корпуса</label>
-        
-                                <select class="form-control"
-                                        th:field="*{colorBody}" aria-label="colorBody">
-        
+                            <div class="col-md-6 module-field">
+                                <label for="als-body-color">Цвет корпуса</label>
+                                <select id="als-body-color" class="form-control" th:field="*{colorBody}">
                                     <option th:each="color : ${colorsList}"
-                                            th:value="${color}"
-                                            th:text="${color}">
-                                    </option>
-        
+                                            th:value="${color}" th:text="${color}"></option>
                                 </select>
                             </div>
-        
-                            <div class="col-md-3">
-                                <label>Цвет дверей</label>
-        
-                                <select class="form-control"
-                                        th:field="*{colorDoor}" aria-label="colorDoor">
-        
+                            <div class="col-md-6 module-field">
+                                <label for="als-door-color">Цвет дверей</label>
+                                <select id="als-door-color" class="form-control" th:field="*{colorDoor}">
                                     <option th:each="color : ${colorsList}"
-                                            th:value="${color}"
-                                            th:text="${color}">
-                                    </option>
-        
+                                            th:value="${color}" th:text="${color}"></option>
                                 </select>
                             </div>
-        
                         </div>
-        
                     </div>
-        
-                </div>
-        
-                <!-- LC -->
-        
-                <div class="card mb-4"
-                     th:if="${als.LC != null}">
-        
-                    <div class="card-header">
-                        <h4 th:text="${als.LC.description}">Модуль управления</h4>
-                        <img class="img-thumbnail mt-2" th:if="${als.LC.stringLCImage != null}" th:src="|data:image/png;base64,${als.LC.stringLCImage}|" alt="Чертёж LC">
+                </section>
+
+                <section th:if="${als.LC != null}" class="module-section">
+                    <div class="module-section__header">
+                        <h2>Модуль управления LC</h2>
+                        <p th:text="${als.LC.description}">Описание LC</p>
                     </div>
-        
-                    <div class="card-body">
-        
-                        <!-- Сохраняем неизменяемую конфигурацию LC при отправке формы ALS. -->
+                    <div class="module-section__body">
                         <input type="hidden" th:field="*{LC.id}">
                         <input type="hidden" th:field="*{LC.name}">
                         <input type="hidden" th:field="*{LC.description}">
@@ -507,17 +168,18 @@
                         <input type="hidden" th:field="*{LC.depth}">
                         <input type="hidden" th:field="*{LC.upperFrame}">
                         <input type="hidden" th:field="*{LC.bottomFrame}">
+                        <input type="hidden" th:field="*{LC.colorBody}">
+                        <input type="hidden" th:field="*{LC.colorDoor}">
+                        <input type="hidden" th:field="*{LC.displayWidth}">
+                        <input type="hidden" th:field="*{LC.displayHeight}">
                         <input type="hidden" name="LC.equipmentSelectionsProvided" value="true">
                         <input type="hidden" th:field="*{LC.functionalConfiguration.display}">
                         <input type="hidden" th:field="*{LC.functionalConfiguration.payment}">
                         <input type="hidden" th:field="*{LC.functionalConfiguration.printer}">
-                        <input type="hidden" th:field="*{LC.colorBody}">
-                        <input type="hidden" th:field="*{LC.colorDoor}">
                         <input type="hidden" name="_LC.functionalConfiguration.access" value="on">
                         <input type="hidden"
-                               th:each="purpose, purposeStat : ${als.LC.functionalConfiguration.access}"
-                               th:name="LC.functionalConfiguration.access"
-                               th:value="${purpose}">
+                               th:each="purpose : ${als.LC.functionalConfiguration.access}"
+                               name="LC.functionalConfiguration.access" th:value="${purpose}">
                         <input type="hidden"
                                th:each="selection, selectionStat : ${als.LC.equipmentSelections}"
                                th:name="|LC.equipmentSelections[${selectionStat.index}].equipmentId|"
@@ -526,89 +188,28 @@
                                th:each="selection, selectionStat : ${als.LC.equipmentSelections}"
                                th:name="|LC.equipmentSelections[${selectionStat.index}].quantity|"
                                th:value="${selection.quantity}">
-        
-        
-                        <div class="row">
-        
-                            <div class="col-md-2">
-                                <label>ID</label>
-                                <input type="number"
-                                       class="form-control"
-                                       th:value="${als.LC.id}"
-                                       readonly aria-label="Поле формы">
-                            </div>
-        
-                            <div class="col-md-2">
-                                <label>Дисплей</label>
-        
-                                <input type="text"
-                                       class="form-control"
-                                       th:value="${als.LC.functionalConfiguration.display}"
-                                       readonly aria-label="Поле формы">
-                            </div>
-        
-                            <div class="col-md-2">
-                                <label>Оплата</label>
-        
-                                <input type="text"
-                                       class="form-control"
-                                       th:value="${als.LC.functionalConfiguration.payment}"
-                                       readonly aria-label="Поле формы">
-                            </div>
-        
-                            <div class="col-md-2">
-                                <label>Принтер</label>
-        
-                                <input type="text"
-                                       class="form-control"
-                                       th:value="${als.LC.functionalConfiguration.printer}"
-                                       readonly aria-label="Поле формы">
-                            </div>
-        
-                            <div class="col-md-3">
-                                <label>Способы доступа</label>
-                                <input type="text" class="form-control"
-                                       th:value="${als.LC.functionalConfiguration.access}"
-                                       readonly aria-label="Способы доступа">
-                            </div>
-        
-                            <div class="col-md-3">
-                                <label>Физическое оборудование</label>
-                                <input type="text" class="form-control"
-                                       th:value="${als.LC.equipmentSelections}"
-                                       readonly aria-label="Физическое оборудование">
-                            </div>
-        
+
+                        <div class="row module-summary">
+                            <div class="col-md-3"><span class="text-muted small">ID</span><strong th:text="${als.LC.id}"></strong></div>
+                            <div class="col-md-3"><span class="text-muted small">Дисплей</span><strong th:text="${als.LC.functionalConfiguration.display}"></strong></div>
+                            <div class="col-md-3"><span class="text-muted small">Доступ</span><strong th:text="${als.LC.functionalConfiguration.access}"></strong></div>
+                            <div class="col-md-3"><span class="text-muted small">Оплата</span><strong th:text="${als.LC.functionalConfiguration.payment}"></strong></div>
+                            <div class="col-md-3"><span class="text-muted small">Печать</span><strong th:text="${als.LC.functionalConfiguration.printer}"></strong></div>
+                            <div class="col-md-9"><span class="text-muted small">Физическое оборудование</span><strong th:text="${als.LC.equipmentSelections}"></strong></div>
                         </div>
-        
-                        <div class="mt-3">
-        
-                            <a th:href="@{/projects/{projectId}/alss/{alsId}/lcs/{lcId}(
-                                        projectId=${projectId},
-                                        alsId=${alsId},
-                                        lcId=${als.LC.id})}"
-                               class="btn btn-primary btn-sm">
-                                Редактировать LC
-                            </a>
-        
-                        </div>
-        
+                        <a th:href="${pageContext == 'PROJECT'
+                                     ? '/projects/' + projectId + '/alss/' + alsId + '/lcs/' + als.LC.id
+                                     : '/alss/' + als.id + '/lcs/' + als.LC.id}"
+                           class="btn btn-outline-primary btn-sm mt-3">Редактировать LC</a>
                     </div>
-        
-                </div>
-        
-        
-                <!-- LBC -->
-        
-                <div th:if="${als.LBC != null}"
-                     class="card mb-4">
-        
-                    <div class="card-header">
-                        <h4 th:text="${'Модуль хранения и управления — ' + als.LBC.name}">Модуль хранения и управления</h4>
-                        <img class="img-thumbnail mt-2" th:if="${als.LBC.stringLBCImage != null}" th:src="|data:image/png;base64,${als.LBC.stringLBCImage}|" alt="Модуль хранения и управления">
+                </section>
+
+                <section th:if="${als.LBC != null}" class="module-section">
+                    <div class="module-section__header">
+                        <h2>Модуль хранения и управления LBC</h2>
+                        <p th:text="${als.LBC.description}">Описание LBC</p>
                     </div>
-        
-                    <div class="card-body">
+                    <div class="module-section__body">
                         <input type="hidden" th:field="*{LBC.id}">
                         <input type="hidden" th:field="*{LBC.name}">
                         <input type="hidden" th:field="*{LBC.description}">
@@ -629,15 +230,16 @@
                         <input type="hidden" th:field="*{LBC.directionDoorOpening}">
                         <input type="hidden" th:field="*{LBC.colorBody}">
                         <input type="hidden" th:field="*{LBC.colorDoor}">
+                        <input type="hidden" th:field="*{LBC.displayWidth}">
+                        <input type="hidden" th:field="*{LBC.displayHeight}">
                         <input type="hidden" name="LBC.equipmentSelectionsProvided" value="true">
                         <input type="hidden" th:field="*{LBC.functionalConfiguration.display}">
                         <input type="hidden" th:field="*{LBC.functionalConfiguration.payment}">
                         <input type="hidden" th:field="*{LBC.functionalConfiguration.printer}">
                         <input type="hidden" name="_LBC.functionalConfiguration.access" value="on">
                         <input type="hidden"
-                               th:each="purpose, purposeStat : ${als.LBC.functionalConfiguration.access}"
-                               th:name="LBC.functionalConfiguration.access"
-                               th:value="${purpose}">
+                               th:each="purpose : ${als.LBC.functionalConfiguration.access}"
+                               name="LBC.functionalConfiguration.access" th:value="${purpose}">
                         <input type="hidden"
                                th:each="selection, selectionStat : ${als.LBC.equipmentSelections}"
                                th:name="|LBC.equipmentSelections[${selectionStat.index}].equipmentId|"
@@ -646,147 +248,180 @@
                                th:each="selection, selectionStat : ${als.LBC.equipmentSelections}"
                                th:name="|LBC.equipmentSelections[${selectionStat.index}].quantity|"
                                th:value="${selection.quantity}">
-        
-                        <div class="row">
-                            <div class="col-md-2">
-                                <strong>ID:</strong>
-                                <span th:text="${als.LBC.id}"></span>
-                            </div>
-                            <div class="col-md-2">
-                                <strong>Тип:</strong>
-                                <span th:text="${als.LBC.type}"></span>
-                            </div>
-                            <div class="col-md-2">
-                                <strong>Ячеек:</strong>
-                                <span th:text="${als.LBC.countCells}"></span>
-                            </div>
-                            <div class="col-md-3">
-                                <strong>Display:</strong>
-                                <span th:text="${als.LBC.functionalConfiguration.display}"></span>
-                            </div>
-                            <div class="col-md-2">
-                                <strong>Оплата:</strong>
-                                <span th:text="${als.LBC.functionalConfiguration.payment}"></span>
-                            </div>
-                            <div class="col-md-3">
-                                <strong>Доступ:</strong>
-                                <span th:text="${als.LBC.functionalConfiguration.access}"></span>
-                            </div>
-                            <div class="col-md-3">
-                                <strong>Оборудование:</strong>
-                                <span th:text="${als.LBC.equipmentSelections}"></span>
-                            </div>
+
+                        <div class="row module-summary">
+                            <div class="col-md-3"><span class="text-muted small">ID</span><strong th:text="${als.LBC.id}"></strong></div>
+                            <div class="col-md-3"><span class="text-muted small">Тип</span><strong th:text="${als.LBC.type}"></strong></div>
+                            <div class="col-md-3"><span class="text-muted small">Ячеек</span><strong th:text="${als.LBC.countCells}"></strong></div>
+                            <div class="col-md-3"><span class="text-muted small">Дисплей</span><strong th:text="${als.LBC.functionalConfiguration.display}"></strong></div>
+                            <div class="col-md-3"><span class="text-muted small">Доступ</span><strong th:text="${als.LBC.functionalConfiguration.access}"></strong></div>
+                            <div class="col-md-3"><span class="text-muted small">Оплата</span><strong th:text="${als.LBC.functionalConfiguration.payment}"></strong></div>
+                            <div class="col-md-3"><span class="text-muted small">Печать</span><strong th:text="${als.LBC.functionalConfiguration.printer}"></strong></div>
+                            <div class="col-md-6"><span class="text-muted small">Оборудование</span><strong th:text="${als.LBC.equipmentSelections}"></strong></div>
                         </div>
-        
-                        <a th:href="@{/projects/{projectId}/alss/{alsId}/lbcs/{lbcId}(
-                                    projectId=${projectId},
-                                    alsId=${alsId},
-                                    lbcId=${als.LBC.id})}"
-                           class="btn btn-primary btn-sm">
-                            Редактировать модуль хранения и управления
-                        </a>
+                        <a th:href="${pageContext == 'PROJECT'
+                                     ? '/projects/' + projectId + '/alss/' + alsId + '/lbcs/' + als.LBC.id
+                                     : '/alss/' + als.id + '/lbcs/' + als.LBC.id}"
+                           class="btn btn-outline-primary btn-sm mt-3">Редактировать LBC</a>
                     </div>
-                </div>
-        
-                <!-- LB -->
-        
-                <div class="card mb-4">
-        
-                    <div class="card-header">
-                        <h4>Модули хранения</h4>
+                </section>
+
+                <section class="module-section">
+                    <div class="module-section__header">
+                        <h2>Модули хранения LB</h2>
+                        <p>Состав и параметры модулей хранения в текущей конфигурации АКХ.</p>
                     </div>
-        
-                    <div class="card-body">
-        
-                        <div th:if="${LBErrors != null}"
-                             class="alert alert-danger">
-        
-                            <div th:each="error : ${LBErrors}">
-                                <span th:text="${error}"></span>
+                    <div class="module-section__body">
+                        <div th:each="lb, lbStat : ${als.lbList}"
+                             class="module-storage-card">
+                            <input type="hidden" th:field="*{lbList[__${lbStat.index}__].id}">
+                            <input type="hidden" th:field="*{lbList[__${lbStat.index}__].name}">
+                            <input type="hidden" th:field="*{lbList[__${lbStat.index}__].description}">
+                            <input type="hidden" th:field="*{lbList[__${lbStat.index}__].type}">
+                            <input type="hidden" th:field="*{lbList[__${lbStat.index}__].height}">
+                            <input type="hidden" th:field="*{lbList[__${lbStat.index}__].width}">
+                            <input type="hidden" th:field="*{lbList[__${lbStat.index}__].depth}">
+                            <input type="hidden" th:field="*{lbList[__${lbStat.index}__].upperFrame}">
+                            <input type="hidden" th:field="*{lbList[__${lbStat.index}__].bottomFrame}">
+                            <input type="hidden" th:field="*{lbList[__${lbStat.index}__].shelfThick}">
+                            <input type="hidden" th:field="*{lbList[__${lbStat.index}__].deltaWidth}">
+                            <input type="hidden" th:field="*{lbList[__${lbStat.index}__].serviceZoneWidth}">
+                            <input type="hidden" th:field="*{lbList[__${lbStat.index}__].doorThickness}">
+                            <input type="hidden" th:field="*{lbList[__${lbStat.index}__].countCells}">
+                            <input type="hidden" th:field="*{lbList[__${lbStat.index}__].heightCell}">
+                            <input type="hidden" th:field="*{lbList[__${lbStat.index}__].widthCell}">
+                            <input type="hidden" th:field="*{lbList[__${lbStat.index}__].depthCell}">
+                            <input type="hidden" th:field="*{lbList[__${lbStat.index}__].directionDoorOpening}">
+                            <input type="hidden" th:field="*{lbList[__${lbStat.index}__].colorBody}">
+                            <input type="hidden" th:field="*{lbList[__${lbStat.index}__].colorDoor}">
+
+                            <div class="d-flex flex-wrap align-items-start justify-content-between">
+                                <div>
+                                    <h3 class="h6 mb-1" th:text="|${lb.name} (ID: ${lb.id})|">LB</h3>
+                                    <p class="text-muted small mb-2" th:text="${lb.description}">Описание LB</p>
+                                </div>
+                                <span class="badge badge-light border" th:text="${lb.type}">Тип</span>
                             </div>
-        
-                        </div>
-        
-                        <div th:each="lb, item : ${als.lbList}"
-                             class="border rounded p-3 mb-3">
-                            <img class="img-thumbnail mb-3" th:if="${lb.stringLBImage != null}" th:src="|data:image/png;base64,${lb.stringLBImage}|" alt="Чертёж LB">
-        
-                            <div class="row">
-        
-                                <div class="col-md-2">
-                                    <label>ID</label>
-                                    <input type="number"
-                                           class="form-control"
-                                           th:value="${lb.id}"
-                                           readonly aria-label="Поле формы">
-                                </div>
-        
-                                <div class="col-md-4">
-                                    <label>Название</label>
-                                    <input type="text"
-                                           class="form-control"
-                                           th:value="${lb.name}"
-                                           readonly aria-label="Поле формы">
-                                </div>
-        
-                                <div class="col-md-3">
-                                    <label>Тип</label>
-                                    <input type="text"
-                                           class="form-control"
-                                           th:value="${lb.type}"
-                                           readonly aria-label="Поле формы">
-                                </div>
-        
-                                <div class="col-md-3">
-                                    <label>Ячеек</label>
-                                    <input type="number"
-                                           class="form-control"
-                                           th:value="${lb.countCells}"
-                                           readonly aria-label="Поле формы">
-                                </div>
-        
+
+                            <div class="row module-summary">
+                                <div class="col-sm-3"><span class="text-muted small">Высота</span><strong th:text="|${lb.height} мм|"></strong></div>
+                                <div class="col-sm-3"><span class="text-muted small">Ширина</span><strong th:text="|${lb.width} мм|"></strong></div>
+                                <div class="col-sm-3"><span class="text-muted small">Глубина</span><strong th:text="|${lb.depth} мм|"></strong></div>
+                                <div class="col-sm-3"><span class="text-muted small">Ячеек</span><strong th:text="${lb.countCells}"></strong></div>
                             </div>
-        
-                            <div class="mt-3">
-        
-                                <a th:href="@{/projects/{projectId}/alss/{alsId}/lbs/{lbId}(
-                                            projectId=${projectId},
-                                            alsId=${alsId},
-                                            lbId=${lb.id})}"
-                                   class="btn btn-primary btn-sm">
-                                    Редактировать
-                                </a>
-        
-                                <button type="submit"
-                                        class="btn btn-danger btn-sm"
-                                        th:formaction="@{/projects/{projectId}/alss/{alsId}/lbs/{lbId}/delete(
-                                            projectId=${projectId},
-                                            alsId=${alsId},
-                                            lbId=${lb.id})}">
-                                    Удалить
+
+                            <div class="d-flex flex-wrap align-items-center mt-3">
+                                <a th:href="${pageContext == 'PROJECT'
+                                             ? '/projects/' + projectId + '/alss/' + alsId + '/lbs/' + lb.id
+                                             : '/alss/' + als.id + '/lbs/' + lb.id}"
+                                   class="btn btn-outline-primary btn-sm">Редактировать LB</a>
+                                <button type="submit" class="btn btn-outline-danger btn-sm ml-2"
+                                        th:formaction="${pageContext == 'PROJECT'
+                                                        ? '/projects/' + projectId + '/alss/' + alsId + '/lbs/' + lb.id + '/delete'
+                                                        : '/alss/' + als.id + '/lbs/' + lb.id + '/delete'}">
+                                    Удалить LB
                                 </button>
-        
                             </div>
-        
                         </div>
-        
-                        <button type="submit"
-                                class="btn btn-primary btn-sm"
-                                th:formaction="@{/projects/{projectId}/alss/{alsId}/addLB(
-                                            projectId=${projectId},
-                                            alsId=${alsId})}">
+
+                        <div th:if="${#lists.isEmpty(als.lbList)}" class="text-muted py-2">
+                            Модули хранения LB отсутствуют.
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-sm mt-3"
+                                th:formaction="${pageContext == 'PROJECT'
+                                                ? '/projects/' + projectId + '/alss/' + alsId + '/addLB'
+                                                : '/alss/' + als.id + '/addLB'}">
                             Добавить LB
                         </button>
-        
                     </div>
-        
-                </div>
-        
-            </form>
-        
+                </section>
+            </div>
+
+            <aside class="module-editor__preview">
+                <section class="module-section">
+                    <div class="module-section__header">
+                        <h2>Визуализация АКХ</h2>
+                        <p>Чертёж текущей конфигурации.</p>
+                    </div>
+                    <div class="module-visual" th:if="${als.stringALSImage != null}">
+                        <img th:src="|data:image/png;base64,${als.stringALSImage}|"
+                             alt="Чертёж автоматической камеры хранения">
+                    </div>
+                    <div class="module-section__body text-muted"
+                         th:if="${als.stringALSImage == null}">
+                        Чертёж пока недоступен.
+                    </div>
+                </section>
+
+                <section class="module-section" th:if="${als.LC != null and als.LC.stringLCImage != null}">
+                    <div class="module-section__header"><h2>Чертёж LC</h2></div>
+                    <div class="module-visual">
+                        <img th:src="|data:image/png;base64,${als.LC.stringLCImage}|" alt="Чертёж LC">
+                    </div>
+                </section>
+                <section class="module-section" th:if="${als.LBC != null and als.LBC.stringLBCImage != null}">
+                    <div class="module-section__header"><h2>Чертёж LBC</h2></div>
+                    <div class="module-visual">
+                        <img th:src="|data:image/png;base64,${als.LBC.stringLBCImage}|" alt="Чертёж LBC">
+                    </div>
+                </section>
+            </aside>
         </div>
-        
-        <div th:replace="~{footer :: footer}"></div>
-    </th:block>
+    </form>
+</main>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const positionSelect = document.getElementById("positionControlModule");
+    const orderFields = document.getElementById("module-order-fields");
+    if (!positionSelect || !orderFields) {
+        return;
+    }
+
+    positionSelect.addEventListener("change", function () {
+        const lbCount = document.querySelectorAll(
+            'input[name^="lbList["][name$="].id"]'
+        ).length;
+        const controlType = orderFields.dataset.controlType;
+        let position = positionSelect.value;
+
+        if (position === "CENTER" && lbCount === 1) {
+            position = "LEFT";
+            positionSelect.value = position;
+        }
+
+        const leftCount = position === "LEFT" ? 0
+                : position === "RIGHT" ? lbCount
+                : Math.floor(lbCount / 2);
+        const order = [];
+
+        for (let index = 0; index < leftCount; index++) {
+            order.push({type: "LB", index: index});
+        }
+        order.push({type: controlType, index: 0});
+        for (let index = leftCount; index < lbCount; index++) {
+            order.push({type: "LB", index: index});
+        }
+
+        orderFields.replaceChildren();
+        order.forEach(function (item, index) {
+            const typeInput = document.createElement("input");
+            typeInput.type = "hidden";
+            typeInput.name = "moduleOrder[" + index + "].type";
+            typeInput.value = item.type;
+
+            const indexInput = document.createElement("input");
+            indexInput.type = "hidden";
+            indexInput.name = "moduleOrder[" + index + "].index";
+            indexInput.value = item.index;
+
+            orderFields.append(typeInput, indexInput);
+        });
+    });
+});
+</script>
+
+<div th:replace="~{footer :: footer}"></div>
 </body>
 </html>
