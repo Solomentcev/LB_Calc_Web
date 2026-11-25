@@ -45,7 +45,7 @@ public class ProjectSizeValidator {
 
         Map<ALS, Integer> configurations = project.getQuantityALS();
 
-        logger.info(
+        logger.debug(
                 "Валидация доменного проекта. Уникальных конфигураций ALS: {}",
                 configurations.size()
         );
@@ -64,7 +64,7 @@ public class ProjectSizeValidator {
             results.addAll(alsValidator.deepValidateALS(als));
         }
 
-        logger.info(
+        logger.debug(
                 "Валидация доменного проекта завершена. Всего результатов: {}. Ошибок: {}",
                 results.size(),
                 results.stream().filter(result -> !result.isValid()).count()

@@ -131,7 +131,7 @@ public class ALSService {
 
     @Transactional(readOnly = true)
     public List<ALS> findAll() {
-        logger.info("Получение списка АКХ");
+        logger.debug("Получение списка АКХ");
         return alsRepository.findAll().stream()
                 .sorted(Comparator.comparing(ALSEntity::getId))
                 .map(ALSEntityMapper::toDomain)

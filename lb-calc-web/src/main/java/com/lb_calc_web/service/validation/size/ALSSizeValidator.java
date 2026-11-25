@@ -134,7 +134,7 @@ public class ALSSizeValidator {
             return results;
         }
 
-        logger.info("Глубокая валидация доменной ALS");
+        logger.debug("Глубокая валидация доменной ALS");
         results.add(validateALS(als));
 
         int height = als.getHeight();
@@ -158,7 +158,7 @@ public class ALSSizeValidator {
             }
         }
 
-        logger.info(
+        logger.debug(
                 "Глубокая валидация ALS завершена. Всего результатов: {}. Ошибок: {}",
                 results.size(),
                 results.stream().filter(result -> !result.isValid()).count()

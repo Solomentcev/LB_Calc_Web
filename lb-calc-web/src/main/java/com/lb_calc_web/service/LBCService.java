@@ -139,7 +139,7 @@ public class LBCService {
 
     @Transactional(readOnly = true)
     public List<LBC> findAll() {
-        logger.info("Получение списка LBC");
+        logger.debug("Получение списка LBC");
         return lbcRepository.findAll().stream()
                 .sorted(Comparator.comparing(LBCEntity::getId,
                         Comparator.nullsLast(Comparator.naturalOrder())))

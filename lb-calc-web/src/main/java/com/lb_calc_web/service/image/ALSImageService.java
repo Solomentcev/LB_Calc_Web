@@ -181,7 +181,7 @@ public class ALSImageService {
         try {
             dto.setStringALSImage(getStringALSImage(dto));
         } catch (RuntimeException exception) {
-            logger.warn("Не удалось сформировать изображение ALS id={}: {}", dto.getId(), exception.getMessage());
+            logger.warn("Не удалось сформировать изображение ALS id={}", dto.getId(), exception);
         }
         if (dto.getLC() != null) {
             LCImageService.addImage(dto.getLC());

@@ -202,7 +202,7 @@ public class LCImageService {
         try {
             dto.setStringLCImage(getStringLCImage(dto));
         } catch (RuntimeException exception) {
-            logger.warn("Не удалось сформировать изображение LC id={}: {}", dto.getId(), exception.getMessage());
+            logger.warn("Не удалось сформировать изображение LC id={}", dto.getId(), exception);
         }
         return dto;
     }

@@ -391,7 +391,7 @@ public class LBImageService {
         try {
             dto.setStringLBImage(getStringLBImage(dto));
         } catch (RuntimeException exception) {
-            logger.warn("Не удалось сформировать изображение LB id={}: {}", dto.getId(), exception.getMessage());
+            logger.warn("Не удалось сформировать изображение LB id={}", dto.getId(), exception);
         }
         return dto;
     }

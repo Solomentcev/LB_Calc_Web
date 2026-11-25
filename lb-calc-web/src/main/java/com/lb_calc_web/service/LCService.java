@@ -161,7 +161,7 @@ public class LCService {
 
     @Transactional(readOnly = true)
     public List<LC> findAll() {
-        logger.info("Получение списка LC");
+        logger.debug("Получение списка LC");
         return lcRepository.findAll().stream()
                 .sorted(Comparator.comparing(LCEntity::getId,
                         Comparator.nullsLast(Comparator.naturalOrder())))

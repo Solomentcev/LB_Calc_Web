@@ -361,7 +361,7 @@ public final class LBCImageService {
         try {
             dto.setStringLBCImage(getStringLBCImage(dto));
         } catch (RuntimeException exception) {
-            logger.warn("Не удалось сформировать изображение LBC id={}: {}", dto.getId(), exception.getMessage());
+            logger.warn("Не удалось сформировать изображение LBC id={}", dto.getId(), exception);
         }
         return dto;
     }

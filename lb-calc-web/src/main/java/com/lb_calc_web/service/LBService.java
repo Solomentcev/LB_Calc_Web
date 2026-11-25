@@ -118,7 +118,7 @@ public class LBService {
 
     @Transactional(readOnly = true)
     public List<LB> findAll() {
-        logger.info("Получение списка LB");
+        logger.debug("Получение списка LB");
         return lbRepository.findAll().stream()
                 .sorted(Comparator.comparing(
                         LBEntity::getId,
@@ -131,7 +131,7 @@ public class LBService {
     /** Возвращает LB по идентификатору. */
     @Transactional(readOnly = true)
     public LB findById(Long id) {
-        logger.info("Поиск LB по id={}", id);
+        logger.debug("Поиск LB по id={}", id);
         if (id == null || id <= 0) {
             throw new NoSuchElementException("LB с id=" + id + " не найден");
         }
