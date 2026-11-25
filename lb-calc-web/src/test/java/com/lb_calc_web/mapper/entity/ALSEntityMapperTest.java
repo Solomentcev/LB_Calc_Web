@@ -110,7 +110,7 @@ class ALSEntityMapperTest {
     }
 
     @Test
-    void toDomain_shouldRecalculateDerivedFieldsWhenStoredValuesAreStale() {
+    void toDomain_shouldPreserveStoredTextAndRecalculateDerivedWidth() {
         ALS expected = TestDataFactory.validALS(null);
         ALSEntity entity = ALSEntityMapper.toEntity(
                 expected,
@@ -118,13 +118,20 @@ class ALSEntityMapperTest {
         );
         entity.setName("Устаревшее название");
         entity.setDescription("Устаревшее описание");
+        entity.getModules().forEach(module -> {
+            module.getModule().setName("Сохранённое название модуля");
+            module.getModule().setDescription("Сохранённое описание модуля");
+        });
         entity.setWidth(entity.getWidth() + 1);
 
         ALS restored = ALSEntityMapper.toDomain(entity);
 
-        assertEquals(expected.getName(), restored.getName());
-        assertEquals(expected.getDescription(), restored.getDescription());
+        assertEquals("Устаревшее название", restored.getName());
+        assertEquals("Устаревшее описание", restored.getDescription());
         assertEquals(expected.getWidth(), restored.getWidth());
+        assertTrue(restored.getModules().stream().allMatch(module ->
+                "Сохранённое название модуля".equals(module.getName())
+                        && "Сохранённое описание модуля".equals(module.getDescription())));
         assertEquals(expected, restored);
     }
 

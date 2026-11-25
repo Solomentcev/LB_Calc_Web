@@ -4,6 +4,7 @@ import com.lb_calc_web.domain.attributes.TypeLb;
 import com.lb_calc_web.domain.equipment.Equipment;
 import com.lb_calc_web.domain.model.ControlConfiguration;
 import com.lb_calc_web.domain.model.LBC;
+import com.lb_calc_web.domain.model.Module;
 import com.lb_calc_web.dto.LBCDTO;
 import com.lb_calc_web.entity.EquipmentEntity;
 import com.lb_calc_web.entity.EquipmentQuantityEmbeddable;
@@ -68,7 +69,7 @@ public final class LBCEntityMapper {
                 configuration
         );
 
-        // Размеры ячеек, наименование и описание пересчитываются доменной моделью.
+        domain = (LBC) Module.restoreText(domain, entity.getName(), entity.getDescription());
         domain.setId(entity.getId());
         return domain;
     }

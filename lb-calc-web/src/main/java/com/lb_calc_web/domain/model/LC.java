@@ -138,7 +138,7 @@ public class LC extends Module implements ControlModule {
                 getHeight(), getWidth(), getDepth(),
                 getUpperFrame(), getBottomFrame(),
                 getColorBody(), getColorDoor(), controlConfiguration);
-        return copyIdentityTo(copy);
+        return copyTextTo(copyIdentityTo(copy));
     }
 
     @Override

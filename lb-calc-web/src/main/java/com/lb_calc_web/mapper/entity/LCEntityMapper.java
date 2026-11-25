@@ -3,6 +3,7 @@ package com.lb_calc_web.mapper.entity;
 import com.lb_calc_web.domain.equipment.Equipment;
 import com.lb_calc_web.domain.model.ControlConfiguration;
 import com.lb_calc_web.domain.model.LC;
+import com.lb_calc_web.domain.model.Module;
 import com.lb_calc_web.entity.EquipmentQuantityEmbeddable;
 import com.lb_calc_web.entity.EquipmentEntity;
 import com.lb_calc_web.entity.LCEntity;
@@ -56,7 +57,7 @@ public final class LCEntityMapper {
                 configuration
         );
 
-        // Наименование и описание пересчитываются доменной моделью из исходных параметров.
+        domain = (LC) Module.restoreText(domain, entity.getName(), entity.getDescription());
         domain.setId(entity.getId());
         return domain;
     }

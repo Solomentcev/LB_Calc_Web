@@ -41,15 +41,13 @@ public final class ALSEntityMapper {
         // с функциональными назначениями единственного управляющего модуля.
         domain.setFunctionalConfiguration(entity.getFunctionalConfiguration());
 
-        /*
-         * Наименование, описание и ширина являются производными
-         * характеристиками. Доменная модель пересчитывает их из состава
-         * модулей, поэтому сохранённые в БД значения не используются
-         * при восстановлении агрегата.
-         */
-
         domain.setId(entity.getId());
-        return domain;
+        return ALS.restoreText(
+                domain,
+                entity.getName(),
+                entity.getDescription(),
+                modules
+        );
     }
 
     /** Создаёт JPA-сущность ALS из доменной конфигурации. */

@@ -5,6 +5,7 @@ import com.lb_calc_web.mapper.dto.ALSDtoMapper;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -57,20 +58,68 @@ class ModuleNamingDescriptionTest {
     }
 
     @Test
-    void alsNameAndDescription_shouldContainModuleCountAndPhysicalComposition() {
+    void alsNameAndDescription_shouldDescribeWholeSystemWithoutModuleDescriptions() {
         ALS als = TestDataFactory.validALS(104L);
 
         assertTrue(als.getName().startsWith("АКХ: 6 яч., 2 мод."));
         assertTrue(als.getName().contains("дисплей 10″"));
         assertTrue(als.getName().contains("RFID"));
         assertTrue(als.getDescription().contains("Количество модулей хранения: 2"));
-        assertTrue(als.getDescription().contains("Состав модулей слева направо:"));
-        assertTrue(als.getDescription().contains("Направление открытия дверей: влево"));
-        assertTrue(als.getDescription().contains("Направление открытия дверей: вправо"));
+        assertTrue(als.getDescription().contains("Модуль управления: LC"));
+        assertTrue(als.getDescription().contains("Функциональные назначения:"));
+        assertTrue(!als.getDescription().contains("Состав модулей слева направо:"));
+        assertTrue(!als.getDescription().contains("Размеры ячейки (В×Ш×Г)"));
+        assertTrue(!als.getDescription().contains("Установленное оборудование:"));
     }
 
     @Test
-    void projectDescription_shouldContainDetailedAlsCompositionAndQuantity() {
+    void copy_shouldPreservePreviouslyStoredAlsAndModuleTexts() {
+        ALS source = TestDataFactory.validALS(107L);
+        List<Module> storedModules = source.getModules();
+        for (int index = 0; index < storedModules.size(); index++) {
+            storedModules.get(index).setName("Сохранённое название " + index);
+            storedModules.get(index).setDescription("Сохранённое описание " + index);
+        }
+
+        ALS restored = ALS.restoreText(
+                source,
+                "Сохранённое название АКХ",
+                "Сохранённое описание АКХ",
+                storedModules
+        );
+        ALS copy = restored.copy();
+
+        assertEquals("Сохранённое название АКХ", copy.getName());
+        assertEquals("Сохранённое описание АКХ", copy.getDescription());
+        for (int index = 0; index < storedModules.size(); index++) {
+            assertEquals("Сохранённое название " + index, copy.getModules().get(index).getName());
+            assertEquals("Сохранённое описание " + index, copy.getModules().get(index).getDescription());
+        }
+    }
+
+    @Test
+    void changingControlFunctions_shouldNotRegenerateUnchangedStorageModuleTexts() {
+        ALS als = TestDataFactory.validALS(108L);
+        StorageModule storageModule = als.getStorageModules().get(0);
+        String storedName = storageModule.getName();
+        String storedDescription = storageModule.getDescription();
+
+        FunctionalConfiguration current = als.getFunctionalConfiguration();
+        als.setFunctionalConfiguration(new FunctionalConfiguration(
+                com.lb_calc_web.domain.equipment.DisplayPurpose.INCH_19,
+                current.getAccess(),
+                current.getPayment(),
+                current.getPrinter()
+        ));
+
+        StorageModule updatedStorageModule = als.getStorageModules().get(0);
+        assertEquals(storedName, updatedStorageModule.getName());
+        assertEquals(storedDescription, updatedStorageModule.getDescription());
+        assertTrue(als.getLC().getName().contains("дисплей 19″"));
+    }
+
+    @Test
+    void projectDescription_shouldContainAlsSummaryAndQuantity() {
         Employee employee = new Employee(
                 "Тест",
                 "Тестов",
@@ -89,10 +138,10 @@ class ModuleNamingDescriptionTest {
         project.addALS(als);
         project.addALS(als);
 
-        assertTrue(project.getDescription().contains("АКХ на 6 ячеек"));
+        assertTrue(project.getDescription().contains("АКХ: 6 яч."));
         assertTrue(project.getDescription().contains("2 шт."));
-        assertTrue(project.getDescription().contains("Состав модулей слева направо:"));
-        assertTrue(project.getDescription().contains("Размеры ячейки (В×Ш×Г)"));
+        assertTrue(!project.getDescription().contains("Состав модулей слева направо:"));
+        assertTrue(!project.getDescription().contains("Размеры ячейки (В×Ш×Г)"));
     }
 
     @Test

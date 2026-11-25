@@ -191,8 +191,45 @@ public class ALS {
                 modules
         );
         copy.functionalConfiguration = functionalConfiguration.copy();
+        copy.name = name;
+        copy.description = description;
         copy.setId(id);
         return copy;
+    }
+
+    /**
+     * Восстанавливает сохранённые пользовательские тексты ALS и её модулей.
+     *
+     * @param source доменная конфигурация, собранная из исходных параметров
+     * @param name сохранённое наименование ALS
+     * @param description сохранённое описание ALS
+     * @param storedModules модули, восстановленные с сохранёнными текстами
+     * @return независимая копия ALS с восстановленными текстами
+     */
+    public static ALS restoreText(
+            ALS source,
+            String name,
+            String description,
+            List<Module> storedModules
+    ) {
+        Objects.requireNonNull(source, "Исходная ALS не должна быть null");
+        Objects.requireNonNull(storedModules, "Список модулей не должен быть null");
+
+        ALS restored = source.copy();
+        if (restored.modules.size() != storedModules.size()) {
+            throw new IllegalArgumentException(
+                    "Количество восстановленных модулей не соответствует составу ALS");
+        }
+        for (int index = 0; index < restored.modules.size(); index++) {
+            Module storedModule = Objects.requireNonNull(
+                    storedModules.get(index), "Восстановленный модуль не должен быть null");
+            Module targetModule = restored.modules.get(index);
+            targetModule.setName(storedModule.getName());
+            targetModule.setDescription(storedModule.getDescription());
+        }
+        restored.name = name;
+        restored.description = description;
+        return restored;
     }
 
     /** @return независимая копия функциональной конфигурации ALS */
@@ -701,11 +738,21 @@ public class ALS {
         validateStructure();
         validateFunctionalConfigurationConsistency();
 
+        List<Module> previousModules = modules.stream()
+                .map(Module::copy)
+                .toList();
+
         synchronizeModules();
         recalculateDoorDirections();
 
-        for (Module module : modules) {
+        for (int index = 0; index < modules.size(); index++) {
+            Module module = modules.get(index);
+            Module previousModule = previousModules.get(index);
             module.recalculate();
+            if (module.equals(previousModule)) {
+                module.setName(previousModule.getName());
+                module.setDescription(previousModule.getDescription());
+            }
         }
 
         renumberCells();
@@ -868,7 +915,7 @@ public class ALS {
         );
         description = ModuleTextFormatter.alsDescription(
                 countCells, storageModuleCount,
-                height, width, depth, colorBody, colorDoor, modules
+                height, width, depth, colorBody, colorDoor, controlModule
         );
     }
     /**

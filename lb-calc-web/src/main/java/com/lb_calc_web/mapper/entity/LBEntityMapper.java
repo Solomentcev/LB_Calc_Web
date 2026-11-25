@@ -4,6 +4,7 @@ import com.lb_calc_web.domain.attributes.Colors;
 import com.lb_calc_web.domain.attributes.DirectionDoorOpening;
 import com.lb_calc_web.domain.attributes.TypeLb;
 import com.lb_calc_web.domain.model.LB;
+import com.lb_calc_web.domain.model.Module;
 import com.lb_calc_web.entity.LBEntity;
 
 import java.util.Objects;
@@ -20,10 +21,10 @@ public final class LBEntityMapper {
     }
 
     /**
-     * Entity -> Domain.
+     * Восстанавливает LB из сохранённых исходных параметров и пользовательских текстов.
      *
-     * <p>Производные значения Domain не берутся из БД,
-     * а пересчитываются конструктором LB.</p>
+     * <p>Геометрия ячеек пересчитывается доменной моделью, а наименование и описание
+     * переносятся из persistence-сущности.</p>
      */
     public static LB toDomain(LBEntity entity) {
         if (entity == null) {
@@ -60,7 +61,7 @@ public final class LBEntityMapper {
                 entity.getDoorThickness()
         );
 
-        // Производные характеристики пересчитываются доменной моделью из исходных параметров.
+        domain = (LB) Module.restoreText(domain, entity.getName(), entity.getDescription());
 
         domain.setId(entity.getId());
         return domain;

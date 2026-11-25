@@ -157,7 +157,7 @@ public class LBC extends StorageModule implements ControlModule {
                 getCountCells(), getDirectionDoorOpening(),
                 getDoorThickness(), controlConfiguration);
         copy.copyCellNumbersFrom(this);
-        return copyIdentityTo(copy);
+        return copyTextTo(copyIdentityTo(copy));
     }
 
     @Override

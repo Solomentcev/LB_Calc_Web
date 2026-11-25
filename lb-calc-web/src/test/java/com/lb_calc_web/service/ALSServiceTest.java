@@ -137,6 +137,63 @@ class ALSServiceTest {
     }
 
     @Test
+    void restoreDomain_shouldPreserveStoredTextsWhenConfigurationIsUnchanged() {
+        ALS source = TestDataFactory.validALS(15L);
+        ALSEntity entity = spy(ALSEntityMapper.toEntity(
+                source,
+                module -> ModuleEntityMapper.toEntity(module, equipment -> null)
+        ));
+        doReturn(15L).when(entity).getId();
+        entity.setName("Сохранённое название АКХ");
+        entity.setDescription("Сохранённое описание АКХ");
+        entity.getModules().forEach(module -> {
+            module.getModule().setName("Сохранённое название модуля");
+            module.getModule().setDescription("Сохранённое описание модуля");
+        });
+        when(alsRepository.findById(15L)).thenReturn(Optional.of(entity));
+
+        ALS existing = service.findById(15L);
+        var dto = com.lb_calc_web.mapper.dto.ALSDtoMapper.toDto(existing);
+        ALS restored = service.restoreDomain(dto);
+
+        assertEquals("Сохранённое название АКХ", restored.getName());
+        assertEquals("Сохранённое описание АКХ", restored.getDescription());
+        assertTrue(restored.getModules().stream().allMatch(module ->
+                "Сохранённое название модуля".equals(module.getName())
+                        && "Сохранённое описание модуля".equals(module.getDescription())));
+    }
+
+    @Test
+    void restoreDomain_shouldUpdateOnlyTextsOfChangedModules() {
+        ALS source = TestDataFactory.validALS(16L);
+        ALSEntity entity = spy(ALSEntityMapper.toEntity(
+                source,
+                module -> ModuleEntityMapper.toEntity(module, equipment -> null)
+        ));
+        doReturn(16L).when(entity).getId();
+        entity.setName("Сохранённое название АКХ");
+        entity.setDescription("Сохранённое описание АКХ");
+        entity.getModules().forEach(module -> {
+            module.getModule().setName("Сохранённое название модуля");
+            module.getModule().setDescription("Сохранённое описание модуля");
+        });
+        when(alsRepository.findById(16L)).thenReturn(Optional.of(entity));
+
+        ALS existing = service.findById(16L);
+        var dto = com.lb_calc_web.mapper.dto.ALSDtoMapper.toDto(existing);
+        dto.getFunctionalConfiguration().setDisplay(
+                com.lb_calc_web.domain.equipment.DisplayPurpose.INCH_19
+        );
+
+        ALS restored = service.restoreDomain(dto);
+
+        assertEquals("Сохранённое название модуля", restored.getStorageModules().get(0).getName());
+        assertEquals("Сохранённое описание модуля", restored.getStorageModules().get(0).getDescription());
+        assertTrue(restored.getLC().getName().contains("дисплей 19″"));
+        assertNotEquals("Сохранённое название АКХ", restored.getName());
+    }
+
+    @Test
     void restoreDomain_shouldConvertDtoWithoutLegacyCatalogDependencies() {
         var dto = TestDataFactory.validALSDTO(3L);
         dto.setId(null);

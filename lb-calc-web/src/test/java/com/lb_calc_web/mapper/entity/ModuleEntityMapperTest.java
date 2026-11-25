@@ -46,7 +46,7 @@ class ModuleEntityMapperTest {
     }
 
     @Test
-    void toDomain_shouldRecalculateStaleLcDerivedCharacteristics() {
+    void toDomain_shouldPreserveStoredLcText() {
         var expected = TestDataFactory.validLC(null);
         LCEntity entity = (LCEntity) toEntity(expected);
         entity.setName("Устаревшее наименование");
@@ -54,12 +54,12 @@ class ModuleEntityMapperTest {
 
         var restored = ModuleEntityMapper.toDomain(entity);
 
-        assertEquals(expected.getName(), restored.getName());
-        assertEquals(expected.getDescription(), restored.getDescription());
+        assertEquals("Устаревшее наименование", restored.getName());
+        assertEquals("Устаревшее описание", restored.getDescription());
     }
 
     @Test
-    void toDomain_shouldRecalculateStaleLbcDerivedCharacteristics() {
+    void toDomain_shouldPreserveStoredLbcTextAndRecalculateCellDimensions() {
         var expected = TestDataFactory.validLBC(null);
         LBCEntity entity = (LBCEntity) toEntity(expected);
         entity.setName("Устаревшее наименование");
@@ -70,15 +70,15 @@ class ModuleEntityMapperTest {
 
         var restored = ModuleEntityMapper.toDomain(entity);
 
-        assertEquals(expected.getName(), restored.getName());
-        assertEquals(expected.getDescription(), restored.getDescription());
+        assertEquals("Устаревшее наименование", restored.getName());
+        assertEquals("Устаревшее описание", restored.getDescription());
         assertEquals(expected.getCellHeight(), ((com.lb_calc_web.domain.model.LBC) restored).getCellHeight());
         assertEquals(expected.getCellWidth(), ((com.lb_calc_web.domain.model.LBC) restored).getCellWidth());
         assertEquals(expected.getCellDepth(), ((com.lb_calc_web.domain.model.LBC) restored).getCellDepth());
     }
 
     @Test
-    void toDomain_shouldRecalculateStaleLbDerivedCharacteristics() {
+    void toDomain_shouldPreserveStoredLbTextAndRecalculateCellDimensions() {
         var expected = TestDataFactory.validLB(null);
         LBEntity entity = (LBEntity) toEntity(expected);
         entity.setName("Устаревшее наименование");
@@ -89,8 +89,8 @@ class ModuleEntityMapperTest {
 
         var restored = ModuleEntityMapper.toDomain(entity);
 
-        assertEquals(expected.getName(), restored.getName());
-        assertEquals(expected.getDescription(), restored.getDescription());
+        assertEquals("Устаревшее наименование", restored.getName());
+        assertEquals("Устаревшее описание", restored.getDescription());
         assertEquals(expected.getCellHeight(), ((com.lb_calc_web.domain.model.LB) restored).getCellHeight());
         assertEquals(expected.getCellWidth(), ((com.lb_calc_web.domain.model.LB) restored).getCellWidth());
         assertEquals(expected.getCellDepth(), ((com.lb_calc_web.domain.model.LB) restored).getCellDepth());

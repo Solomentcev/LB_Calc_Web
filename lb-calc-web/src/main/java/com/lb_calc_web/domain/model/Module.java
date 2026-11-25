@@ -60,6 +60,31 @@ public abstract class Module {
         this.description = description;
     }
 
+    /**
+     * Создаёт независимую копию модуля с сохранёнными пользовательскими текстами.
+     *
+     * <p>Используется при восстановлении ранее сохранённого состояния.</p>
+     *
+     * @param source исходный модуль
+     * @param name сохранённое наименование
+     * @param description сохранённое описание
+     * @return независимая копия модуля с указанными текстами
+     */
+    public static Module restoreText(Module source, String name, String description) {
+        Objects.requireNonNull(source, "Исходный модуль не должен быть null");
+        Module restored = source.copy();
+        restored.setName(name);
+        restored.setDescription(description);
+        return restored;
+    }
+
+    /** Копирует пользовательские тексты в независимую копию модуля. */
+    protected final <T extends Module> T copyTextTo(T copy) {
+        copy.setName(name);
+        copy.setDescription(description);
+        return copy;
+    }
+
     public int getHeight() {
         return height;
     }

@@ -385,9 +385,11 @@ public class ALSService {
     public ALS restoreDomain(ALSDTO dto) {
         Objects.requireNonNull(dto, "ALS не должен быть null");
         try {
+            ALS existingALS = dto.getId() != null && dto.getId() > 0
+                    ? findById(dto.getId())
+                    : null;
             ControlConfiguration fallback = null;
-            if (dto.getId() != null && dto.getId() > 0) {
-                ALS existingALS = findById(dto.getId());
+            if (existingALS != null) {
                 ControlModule existingControl = existingALS.getControlModule();
                 if ((dto.getLC() != null && existingControl instanceof LC)
                         || (dto.getLBC() != null && existingControl instanceof LBC)) {
@@ -395,12 +397,60 @@ public class ALSService {
                     fallback.setFunctionalConfiguration(existingALS.getFunctionalConfiguration());
                 }
             }
-            return ALSDtoMapper.toDomain(
+
+            ALS restored = ALSDtoMapper.toDomain(
                     dto,
                     candidate -> TypeLbFactory.forLB(environment, candidate.getType()),
                     candidate -> TypeLbFactory.forLBC(environment, candidate.getType()),
                     this::findEquipment,
                     fallback
+            );
+            if (existingALS == null) {
+                return restored;
+            }
+
+            List<Module> previousModules = existingALS.getModules();
+            List<Module> restoredModules = restored.getModules();
+            List<Module> mergedModules = new ArrayList<>(restoredModules.size());
+            boolean[] matchedPreviousModules = new boolean[previousModules.size()];
+            for (Module currentModule : restoredModules) {
+                int previousIndex = -1;
+                if (currentModule.getId() != null) {
+                    for (int index = 0; index < previousModules.size(); index++) {
+                        if (!matchedPreviousModules[index]
+                                && Objects.equals(previousModules.get(index).getId(), currentModule.getId())) {
+                            previousIndex = index;
+                            break;
+                        }
+                    }
+                }
+                if (previousIndex < 0) {
+                    for (int index = 0; index < previousModules.size(); index++) {
+                        if (!matchedPreviousModules[index]
+                                && previousModules.get(index).equals(currentModule)) {
+                            previousIndex = index;
+                            break;
+                        }
+                    }
+                }
+
+                if (previousIndex >= 0) {
+                    matchedPreviousModules[previousIndex] = true;
+                    Module previousModule = previousModules.get(previousIndex);
+                    mergedModules.add(previousModule.equals(currentModule)
+                            ? previousModule
+                            : currentModule);
+                } else {
+                    mergedModules.add(currentModule);
+                }
+            }
+
+            boolean unchangedConfiguration = existingALS.equals(restored);
+            return ALS.restoreText(
+                    restored,
+                    unchangedConfiguration ? existingALS.getName() : restored.getName(),
+                    unchangedConfiguration ? existingALS.getDescription() : restored.getDescription(),
+                    mergedModules
             );
         } catch (IllegalStateException exception) {
             throw createValidationException(dto, "structure", exception);

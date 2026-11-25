@@ -60,7 +60,9 @@ final class ModuleTextFormatter {
     }
 
     static String controlName(ControlModule controlModule, Module module) {
-        return "Модуль управления:" + controlNameDetails(controlModule)
+        String details = functionalSummary(
+                controlModule.getControlConfiguration().getFunctionalConfiguration());
+        return "Модуль управления:" + (details.isBlank() ? "" : " " + details)
                 + ", " + dimensions(module)
                 + ", " + colorPair(module.getColorBody(), module.getColorDoor());
     }
@@ -142,22 +144,19 @@ final class ModuleTextFormatter {
 
     static String alsDescription(int countCells, int storageModuleCount,
                                  int height, int width, int depth,
-                                 Colors body, Colors door, List<Module> modules) {
-        StringBuilder result = new StringBuilder()
+                                 Colors body, Colors door, Module controlModule) {
+        String controlType = controlModule instanceof LBC ? "LBC" : "LC";
+        return new StringBuilder()
                 .append("Автоматизированная камера хранения\n")
                 .append("Количество ячеек: ").append(countCells).append("\n")
                 .append("Количество модулей хранения: ").append(storageModuleCount).append("\n")
+                .append("Модуль управления: ").append(controlType).append("\n")
                 .append("Габариты (В×Ш×Г): ").append(height).append("×")
                 .append(width).append("×").append(depth).append(" мм\n")
                 .append("Цвет корпуса: ").append(color(body)).append("\n")
                 .append("Цвет дверей: ").append(color(door)).append("\n")
-                .append("Состав модулей слева направо:");
-        for (int i = 0; i < modules.size(); i++) {
-            Module module = modules.get(i);
-            result.append("\n\n").append(i + 1).append(". ").append(module.getName())
-                    .append("\n").append(indent(module.getDescription()));
-        }
-        return result.toString();
+                .append(functionalDescription((ControlModule) controlModule))
+                .toString();
     }
 
     static String dimensions(Module module) {
@@ -252,8 +251,4 @@ final class ModuleTextFormatter {
         builder.append(value);
     }
 
-    private static String indent(String value) {
-        return value.lines().map(line -> "   " + line)
-                .collect(Collectors.joining("\n"));
-    }
 }
