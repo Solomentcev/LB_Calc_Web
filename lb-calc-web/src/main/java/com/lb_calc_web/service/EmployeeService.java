@@ -75,7 +75,7 @@ public class EmployeeService implements UserDetailsService {
     @Transactional(readOnly = true)
     public EmployeeDTO loadUserByEmail(String email) {
 
-EmployeeEntity entity = employeeRepository
+        EmployeeEntity entity = employeeRepository
                 .findByEmail(email)
                 .orElseThrow(() ->
                         new UsernameNotFoundException(
