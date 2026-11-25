@@ -83,8 +83,8 @@ public class JwtAuthentificationFilter
         } catch (JwtException e) {
 
             logger.debug(
-                    "[JWT-FILTER] JWT error: {}",
-                    e.getMessage()
+                    "JWT отклонён: тип ошибки={}",
+                    e.getClass().getSimpleName()
             );
 
             clearAuthentication(response);
@@ -154,8 +154,8 @@ public class JwtAuthentificationFilter
         } catch (JwtException e) {
 
             logger.debug(
-                    "[JWT-FILTER] Access rejected: {}",
-                    e.getMessage()
+                    "Access token отклонён: тип ошибки={}",
+                    e.getClass().getSimpleName()
             );
 
             tryRefresh(

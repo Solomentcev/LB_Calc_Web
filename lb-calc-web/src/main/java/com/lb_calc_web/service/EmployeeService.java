@@ -50,12 +50,7 @@ public class EmployeeService implements UserDetailsService {
     /** Загружает principal сотрудника по адресу электронной почты для Spring Security. */
     public EmployeePrincipal loadUserByUsername(String email) {
 
-        logger.debug(
-                "Загрузка principal по email={}",
-                email
-        );
-
-        EmployeeEntity entity = employeeRepository
+EmployeeEntity entity = employeeRepository
                 .findByEmail(email)
                 .orElseThrow(() ->
                         new UsernameNotFoundException(
@@ -81,12 +76,7 @@ public class EmployeeService implements UserDetailsService {
     /** Возвращает DTO сотрудника, найденного по адресу электронной почты. */
     public EmployeeDTO loadUserByEmail(String email) {
 
-        logger.debug(
-                "Загрузка сотрудника по email={}",
-                email
-        );
-
-        EmployeeEntity entity = employeeRepository
+EmployeeEntity entity = employeeRepository
                 .findByEmail(email)
                 .orElseThrow(() ->
                         new UsernameNotFoundException(
@@ -155,11 +145,7 @@ public class EmployeeService implements UserDetailsService {
             );
         }
 
-        logger.info(
-                "Обновление сотрудника id={}, email={}",
-                employeeDTO.getId(),
-                employeeDTO.getEmail()
-        );
+        logger.info("Обновление учётной записи сотрудника: id={}", employeeDTO.getId());
 
         EmployeeEntity entity = employeeRepository
                 .findById(employeeDTO.getId())

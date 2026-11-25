@@ -162,7 +162,7 @@ public class ProjectService {
     @Transactional(readOnly = true)
     /** Возвращает все сохранённые проекты. */
     public List<Project> findAll() {
-        logger.info("Получение списка проектов...");
+        logger.debug("Получение списка проектов");
 return projectRepository.findAllWithUsers()
                 .stream()
                 .map(entity -> ProjectEntityMapper.toDomain(
@@ -175,7 +175,7 @@ return projectRepository.findAllWithUsers()
     @Transactional(readOnly = true)
     /** Находит проект по идентификатору. */
     public Project findById(Long id) {
-        logger.info("Поиск проекта(id={})...", id);
+        logger.debug("Поиск проекта: id={}", id);
         ProjectEntity entity = loadExistingProject(id);
         if (entity == null) {
             throw new NoSuchElementException("Проект с id " + id + " не найден");

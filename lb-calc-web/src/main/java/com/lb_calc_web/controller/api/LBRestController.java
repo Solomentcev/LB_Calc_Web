@@ -45,7 +45,7 @@ public class LBRestController {
     )
     public ResponseEntity<?> getAllLB() {
 
-        logger.info("GET /api/v1/lbs");
+        logger.debug("GET /api/v1/lbs");
 
             List<LBDTO> lbList = lbService.findAll().stream().map(LBDtoMapper::toDto).toList();
 
@@ -71,7 +71,7 @@ public class LBRestController {
             @PathVariable Long id
     ) {
 
-        logger.info("GET /api/v1/lbs/{}", id);
+        logger.debug("GET /api/v1/lbs/{}", id);
 
             LBDTO lb = LBDtoMapper.toDto(lbService.findById(id));
 
@@ -92,7 +92,7 @@ public class LBRestController {
     )
     public ResponseEntity<?> createLB() {
 
-        logger.info("GET /api/v1/lbs/create");
+        logger.debug("GET /api/v1/lbs/create");
 
             LBDTO lb = LBDtoMapper.toDto(lbService.createLB());
 
@@ -114,7 +114,7 @@ public class LBRestController {
             @RequestBody LBDTO dto
     ) {
 
-        logger.info(
+        logger.debug(
                 "POST /api/v1/lbs: type={}",
                 dto != null ? dto.getType() : null
         );
