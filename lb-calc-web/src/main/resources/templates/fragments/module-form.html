@@ -25,10 +25,8 @@
                 <input type="hidden" name="_functionalConfiguration.access" value="on">
                 <div class="module-access-options" role="group" aria-label="Способы доступа">
                     <label th:each="purpose : ${accessPurposes}">
-                        <input type="checkbox" name="functionalConfiguration.access"
-                               th:value="${purpose}"
-                               th:checked="${lc != null and lc.functionalConfiguration != null and lc.functionalConfiguration.access != null and lc.functionalConfiguration.access.contains(purpose)}"
-                               th:attr="data-access-purpose=${purpose}">
+                        <input type="checkbox" th:field="*{functionalConfiguration.access}"
+                               th:value="${purpose}" th:attr="data-access-purpose=${purpose}">
                         <span th:text="${purpose}">Способ доступа</span>
                     </label>
                 </div>
