@@ -105,11 +105,16 @@ public class ProjectController
         model.addAttribute("projects", result.getContent());
         model.addAttribute("filters", filter);
         model.addAttribute("page", result);
-        model.addAttribute("sort", pageable.getSort().stream()
-                .findFirst().map(order -> order.getProperty()).orElse("id"));
+        model.addAttribute("sort", Set.of("id", "name", "company", "description",
+                "createdBy", "createdAt", "updatedBy", "updatedAt").contains(sort) ? sort : "id");
         model.addAttribute("direction", pageable.getSort().stream()
                 .findFirst().map(order -> order.getDirection().name().toLowerCase()).orElse("asc"));
         model.addAttribute("size", pageable.getPageSize());
+        model.addAttribute("sortOptions", CatalogPageSupport.sortOptions(
+                "id", "ID", "name", "Название", "company", "Компания",
+                "description", "Описание", "createdBy", "Создатель",
+                "createdAt", "Дата создания", "updatedBy", "Последний редактор",
+                "updatedAt", "Дата изменения"));
         return "projects/projects";
     }
 
