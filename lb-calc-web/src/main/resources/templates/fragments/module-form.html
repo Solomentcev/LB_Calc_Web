@@ -4,23 +4,23 @@
 <section th:fragment="functionalConfiguration" class="module-section">
     <div class="module-section__header">
         <h2>Функциональные назначения</h2>
-        <p>Логические возможности модуля. Они не определяют автоматически перечень установленного оборудования.</p>
+        <p>Выберите возможности управляющего модуля. Комплектация оборудования будет сформирована автоматически.</p>
     </div>
     <div class="module-section__body">
         <div class="form-row">
-            <div class="col-md-6 module-field">
+            <div class="col-sm-6 module-field">
                 <label for="module-display">Дисплей</label>
                 <select id="module-display" class="form-control" th:field="*{functionalConfiguration.display}">
                     <option th:each="purpose : ${displayPurposes}" th:value="${purpose}" th:text="${purpose}"></option>
                 </select>
             </div>
-            <div class="col-md-6 module-field">
+            <div class="col-sm-6 module-field">
                 <label for="module-payment">Оплата</label>
                 <select id="module-payment" class="form-control" th:field="*{functionalConfiguration.payment}">
                     <option th:each="purpose : ${paymentPurposes}" th:value="${purpose}" th:text="${purpose}"></option>
                 </select>
             </div>
-            <div class="col-md-6 module-field">
+            <div class="col-sm-6 module-field">
                 <span class="module-field-label">Способы доступа</span>
                 <input type="hidden" name="_functionalConfiguration.access" value="on">
                 <div class="module-access-options" role="group" aria-label="Способы доступа">
@@ -32,7 +32,7 @@
                 </div>
                 <small class="module-field-hint">Можно выбрать несколько способов доступа.</small>
             </div>
-            <div class="col-md-6 module-field">
+            <div class="col-sm-6 module-field">
                 <label for="module-printer">Печать</label>
                 <select id="module-printer" class="form-control" th:field="*{functionalConfiguration.printer}">
                     <option th:each="purpose : ${printerPurposes}" th:value="${purpose}" th:text="${purpose}"></option>
@@ -45,7 +45,7 @@
 <section th:fragment="equipmentSelections" class="module-section">
     <div class="module-section__header">
         <h2>Комплектация оборудования</h2>
-        <p>Модели оборудования и их количество в составе управляющего модуля.</p>
+        <p>Для каждого выбранного назначения установлена модель по умолчанию. При необходимости замените её на другую модель с тем же назначением.</p>
     </div>
     <div class="module-section__body">
         <input type="hidden" name="equipmentSelectionsProvided" value="true">
@@ -59,7 +59,8 @@
                         <option value="">Выберите модель</option>
                         <option th:each="item : ${equipmentList}" th:value="${item.id}"
                                 th:selected="${item.id == selection.equipmentId}"
-                                th:text="|[${item.functionalType}] ${item.name} — ${item.purpose} (${item.width} × ${item.height} × ${item.depth} мм)|"></option>
+                                th:text="|${item.name} — ${item.width} × ${item.height} × ${item.depth} мм|"
+                                th:attr="data-functional-type=${item.functionalType},data-purpose=${item.purpose},data-default=${defaultEquipmentIds.contains(item.id)}"></option>
                     </select>
                 </div>
                 <div class="module-field">
@@ -69,34 +70,26 @@
                            th:name="|equipmentSelections[${selectionStat.index}].quantity|"
                            th:value="${selection.quantity}">
                 </div>
-                <button type="button" class="btn btn-outline-danger module-equipment-remove remove-equipment">
-                    Удалить
-                </button>
             </div>
         </div>
-        <button type="button" id="add-equipment" class="btn btn-outline-primary">
-            Добавить оборудование
-        </button>
         <template id="equipment-selection-row-template">
             <div class="module-equipment-row equipment-selection-row">
                 <div class="module-field">
                     <label>Модель оборудования</label>
-                    <select class="form-control" name="equipmentSelections[__INDEX__].equipmentId">
-                        <option value="">Выберите модель</option>
+                    <select class="form-control">
+                        <option value="">Модель по умолчанию не задана — выберите модель</option>
                         <option th:each="item : ${equipmentList}" th:value="${item.id}"
-                                th:text="|[${item.functionalType}] ${item.name} — ${item.purpose} (${item.width} × ${item.height} × ${item.depth} мм)|"></option>
+                                th:text="|${item.name} — ${item.width} × ${item.height} × ${item.depth} мм|"
+                                th:attr="data-functional-type=${item.functionalType},data-purpose=${item.purpose},data-default=${defaultEquipmentIds.contains(item.id)}"></option>
                     </select>
                 </div>
                 <div class="module-field">
                     <label>Количество</label>
-                    <input class="form-control" type="number" min="1" value="1"
-                           name="equipmentSelections[__INDEX__].quantity">
+                    <input class="form-control" type="number" min="1" value="1">
                 </div>
-                <button type="button" class="btn btn-outline-danger module-equipment-remove remove-equipment">
-                    Удалить
-                </button>
             </div>
         </template>
+        <small class="module-field-hint">Состав строк зависит от выбранных функциональных назначений. Для назначения без моделей в каталоге сначала добавьте подходящую модель в каталог оборудования.</small>
     </div>
 </section>
 </body>
