@@ -29,6 +29,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const activePurposes = () => {
         const purposes = new Map();
+        const pinEnabled = functional.access.some(input => input.checked && input.value === "PIN");
+
+        // PIN не требует отдельного считывателя: для ввода PIN используется дисплей.
+        // Если дисплей не выбран, устанавливаем минимальную модель.
+        if (pinEnabled && functional.display?.value === "NONE") {
+            const minimumDisplay = [...functional.display.options]
+                .find(option => option.value === "INCH_10");
+            if (minimumDisplay) functional.display.value = minimumDisplay.value;
+        }
         const add = (type, purpose) => {
             if (purpose && purpose !== "NONE" && purpose !== "ABSENT") {
                 purposes.set(keyOf(type, purpose), {type, purpose});
@@ -36,7 +45,7 @@ document.addEventListener("DOMContentLoaded", () => {
         };
 
         add("DISPLAY", functional.display?.value);
-        functional.access.filter(input => input.checked)
+        functional.access.filter(input => input.checked && input.value !== "PIN")
             .forEach(input => add("ACCESS", input.value));
 
         const payment = functional.payment?.value;
