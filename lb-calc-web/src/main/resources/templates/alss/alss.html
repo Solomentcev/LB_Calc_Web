@@ -2,14 +2,73 @@
 <html lang="ru" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/common :: head('Автоматические камеры хранения')}"></head>
 <body><div th:replace="~{header :: header}"></div><div class="container">
-<h1 class="page-title">Автоматические камеры хранения</h1><div class="page-actions"><a th:href="@{/alss/create}" class="btn btn-primary btn-sm">Создать АКХ</a><a th:href="@{/}" class="btn btn-secondary btn-sm">Назад</a></div>
-<div th:replace="~{fragments/pagination :: controls('/alss', ${q}, ${sort}, ${direction}, ${size}, ${sortOptions})}"></div>
+<h1 class="page-title">Автоматические камеры хранения</h1>
+<div class="page-actions"><a th:href="@{/alss/create}" class="btn btn-primary btn-sm">Создать АКХ</a><a th:href="@{/}" class="btn btn-secondary btn-sm">Назад</a></div>
+<form id="als-filter-form" th:action="@{/alss}" method="get" class="mb-2">
+<input type="hidden" name="page" value="0"><input type="hidden" name="sort" th:value="${sort}"><input type="hidden" name="direction" th:value="${direction}"><input type="hidden" name="size" th:value="${size}">
+<button type="submit" class="btn btn-outline-primary btn-sm">Применить фильтры</button><a th:href="@{/alss}" class="btn btn-outline-secondary btn-sm">Сбросить</a>
+</form>
+<form id="als-sort-form" th:action="@{/alss}" method="get" class="form-inline mb-3">
+<input type="hidden" name="page" value="0">
+<input type="hidden" name="id" th:value="${filters.id}"><input type="hidden" name="name" th:value="${filters.name}">
+<input type="hidden" name="countCellsMin" th:value="${filters.countCellsMin}"><input type="hidden" name="countCellsMax" th:value="${filters.countCellsMax}">
+<input type="hidden" name="heightMin" th:value="${filters.heightMin}"><input type="hidden" name="heightMax" th:value="${filters.heightMax}">
+<input type="hidden" name="widthMin" th:value="${filters.widthMin}"><input type="hidden" name="widthMax" th:value="${filters.widthMax}">
+<input type="hidden" name="depthMin" th:value="${filters.depthMin}"><input type="hidden" name="depthMax" th:value="${filters.depthMax}">
+<input type="hidden" name="upperFrameMin" th:value="${filters.upperFrameMin}"><input type="hidden" name="upperFrameMax" th:value="${filters.upperFrameMax}">
+<input type="hidden" name="bottomFrameMin" th:value="${filters.bottomFrameMin}"><input type="hidden" name="bottomFrameMax" th:value="${filters.bottomFrameMax}">
+<input type="hidden" name="positionControlModule" th:value="${filters.positionControlModule}">
+<input type="hidden" name="displayPurpose" th:value="${filters.displayPurpose}"><input type="hidden" name="accessPurpose" th:value="${filters.accessPurpose}">
+<input type="hidden" name="paymentPurpose" th:value="${filters.paymentPurpose}"><input type="hidden" name="printerPurpose" th:value="${filters.printerPurpose}">
+<input type="hidden" name="colorBody" th:value="${filters.colorBody}"><input type="hidden" name="colorDoor" th:value="${filters.colorDoor}">
+<label class="mr-2" for="als-sort">Сортировка</label>
+<select id="als-sort" class="form-control form-control-sm mr-2" name="sort">
+<option value="id" th:selected="${sort == 'id'}">ID</option><option value="name" th:selected="${sort == 'name'}">Название</option>
+<option value="countCells" th:selected="${sort == 'countCells'}">Ячейки</option><option value="height" th:selected="${sort == 'height'}">Высота</option>
+<option value="width" th:selected="${sort == 'width'}">Ширина</option><option value="depth" th:selected="${sort == 'depth'}">Глубина</option>
+<option value="upperFrame" th:selected="${sort == 'upperFrame'}">Верхняя рама</option><option value="bottomFrame" th:selected="${sort == 'bottomFrame'}">Нижняя рама</option>
+<option value="positionControlModule" th:selected="${sort == 'positionControlModule'}">Положение модуля управления</option>
+<option value="displayPurpose" th:selected="${sort == 'displayPurpose'}">Display</option><option value="accessSort" th:selected="${sort == 'accessSort'}">Access</option>
+<option value="paymentPurpose" th:selected="${sort == 'paymentPurpose'}">Payment</option><option value="printerPurpose" th:selected="${sort == 'printerPurpose'}">Printer</option>
+<option value="colorBody" th:selected="${sort == 'colorBody'}">Цвет корпуса</option><option value="colorDoor" th:selected="${sort == 'colorDoor'}">Цвет дверей</option>
+</select>
+<select class="form-control form-control-sm mr-2" name="direction"><option value="asc" th:selected="${direction == 'asc'}">По возрастанию</option><option value="desc" th:selected="${direction == 'desc'}">По убыванию</option></select>
+<select class="form-control form-control-sm mr-2" name="size"><option value="10" th:selected="${size == 10}">10</option><option value="20" th:selected="${size == 20}">20</option><option value="50" th:selected="${size == 50}">50</option><option value="100" th:selected="${size == 100}">100</option></select>
+<button type="submit" class="btn btn-outline-primary btn-sm">Применить</button>
+</form>
 <div class="table-responsive"><table class="table table-striped table-hover catalog-table">
-
-<thead><tr><th>ID</th><th>Название</th><th>Ячейки</th><th>Высота</th><th>Ширина</th><th>Глубина</th><th>Верхняя рама</th><th>Нижняя рама</th><th>Положение модуля управления</th><th>Display</th><th>Access</th><th>Payment</th><th>Printer</th><th>Цвет корпуса</th><th>Цвет дверей</th><th>Действия</th></tr></thead>
+<thead>
+<tr><th>ID</th><th>Название</th><th>Ячейки</th><th>Высота</th><th>Ширина</th><th>Глубина</th><th>Верхняя рама</th><th>Нижняя рама</th><th>Положение модуля управления</th><th>Display</th><th>Access</th><th>Payment</th><th>Printer</th><th>Цвет корпуса</th><th>Цвет дверей</th><th>Действия</th></tr>
+<tr>
+<th><input form="als-filter-form" class="form-control form-control-sm" type="number" min="1" name="id" th:value="${filters.id}" placeholder="ID"></th>
+<th><input form="als-filter-form" class="form-control form-control-sm" type="text" name="name" th:value="${filters.name}" placeholder="Содержит"></th>
+<th><input form="als-filter-form" class="form-control form-control-sm" type="number" min="0" name="countCellsMin" th:value="${filters.countCellsMin}" placeholder="От"><input form="als-filter-form" class="form-control form-control-sm mt-1" type="number" min="0" name="countCellsMax" th:value="${filters.countCellsMax}" placeholder="До"></th>
+<th><input form="als-filter-form" class="form-control form-control-sm" type="number" min="0" name="heightMin" th:value="${filters.heightMin}" placeholder="От"><input form="als-filter-form" class="form-control form-control-sm mt-1" type="number" min="0" name="heightMax" th:value="${filters.heightMax}" placeholder="До"></th>
+<th><input form="als-filter-form" class="form-control form-control-sm" type="number" min="0" name="widthMin" th:value="${filters.widthMin}" placeholder="От"><input form="als-filter-form" class="form-control form-control-sm mt-1" type="number" min="0" name="widthMax" th:value="${filters.widthMax}" placeholder="До"></th>
+<th><input form="als-filter-form" class="form-control form-control-sm" type="number" min="0" name="depthMin" th:value="${filters.depthMin}" placeholder="От"><input form="als-filter-form" class="form-control form-control-sm mt-1" type="number" min="0" name="depthMax" th:value="${filters.depthMax}" placeholder="До"></th>
+<th><input form="als-filter-form" class="form-control form-control-sm" type="number" min="0" name="upperFrameMin" th:value="${filters.upperFrameMin}" placeholder="От"><input form="als-filter-form" class="form-control form-control-sm mt-1" type="number" min="0" name="upperFrameMax" th:value="${filters.upperFrameMax}" placeholder="До"></th>
+<th><input form="als-filter-form" class="form-control form-control-sm" type="number" min="0" name="bottomFrameMin" th:value="${filters.bottomFrameMin}" placeholder="От"><input form="als-filter-form" class="form-control form-control-sm mt-1" type="number" min="0" name="bottomFrameMax" th:value="${filters.bottomFrameMax}" placeholder="До"></th>
+<th><select form="als-filter-form" class="form-control form-control-sm" name="positionControlModule"><option value="">Все</option><option th:each="v : ${positionControlModuleList}" th:value="${v}" th:text="${v}" th:selected="${v == filters.positionControlModule}"></option></select></th>
+<th><select form="als-filter-form" class="form-control form-control-sm" name="displayPurpose"><option value="">Все</option><option th:each="v : ${displayPurposes}" th:value="${v}" th:text="${v}" th:selected="${v == filters.displayPurpose}"></option></select></th>
+<th><select form="als-filter-form" class="form-control form-control-sm" name="accessPurpose"><option value="">Все</option><option th:each="v : ${accessPurposes}" th:value="${v}" th:text="${v}" th:selected="${v == filters.accessPurpose}"></option></select></th>
+<th><select form="als-filter-form" class="form-control form-control-sm" name="paymentPurpose"><option value="">Все</option><option th:each="v : ${paymentPurposes}" th:value="${v}" th:text="${v}" th:selected="${v == filters.paymentPurpose}"></option></select></th>
+<th><select form="als-filter-form" class="form-control form-control-sm" name="printerPurpose"><option value="">Все</option><option th:each="v : ${printerPurposes}" th:value="${v}" th:text="${v}" th:selected="${v == filters.printerPurpose}"></option></select></th>
+<th><select form="als-filter-form" class="form-control form-control-sm" name="colorBody"><option value="">Все</option><option th:each="v : ${colorsList}" th:value="${v}" th:text="${v}" th:selected="${v == filters.colorBody}"></option></select></th>
+<th><select form="als-filter-form" class="form-control form-control-sm" name="colorDoor"><option value="">Все</option><option th:each="v : ${colorsList}" th:value="${v}" th:text="${v}" th:selected="${v == filters.colorDoor}"></option></select></th><th></th>
+</tr>
+</thead>
 <tbody><tr th:each="als : ${alss}">
-<td th:text="${als.id}"></td><td th:text="${als.name}"></td><td th:text="${als.countCells}"></td>
-<td th:text="${als.height}"></td><td th:text="${als.width}"></td><td th:text="${als.depth}"></td><td th:text="${als.upperFrame}"></td><td th:text="${als.bottomFrame}"></td>
-<td th:text="${als.positionControlModule}"></td><td th:text="${als.functionalConfiguration.display}"></td><td th:text="${als.functionalConfiguration.accessDisplay}"></td><td th:text="${als.functionalConfiguration.payment}"></td><td th:text="${als.functionalConfiguration.printer}"></td><td th:text="${als.colorBody}"></td><td th:text="${als.colorDoor}"></td>
-<td><a th:href="@{/alss/{id}(id=${als.id})}" class="btn btn-primary btn-sm">Изменить</a></td></tr></tbody></table></div>
+<td th:text="${als.id}"></td><td th:text="${als.name}"></td><td th:text="${als.countCells}"></td><td th:text="${als.height}"></td><td th:text="${als.width}"></td><td th:text="${als.depth}"></td>
+<td th:text="${als.upperFrame}"></td><td th:text="${als.bottomFrame}"></td><td th:text="${als.positionControlModule}"></td>
+<td th:text="${als.functionalConfiguration.display}"></td><td th:text="${als.functionalConfiguration.accessDisplay}"></td><td th:text="${als.functionalConfiguration.payment}"></td><td th:text="${als.functionalConfiguration.printer}"></td>
+<td th:text="${als.colorBody}"></td><td th:text="${als.colorDoor}"></td><td><a th:href="@{/alss/{id}(id=${als.id})}" class="btn btn-primary btn-sm">Изменить</a></td>
+</tr><tr th:if="${#lists.isEmpty(alss)}"><td colspan="16" class="text-center">Нет конфигураций, соответствующих фильтрам</td></tr></tbody>
+</table></div>
+<nav th:if="${page.totalPages > 1}" aria-label="Навигация по страницам" class="d-flex align-items-center justify-content-between mb-3">
+<span class="text-muted small" th:text="${'Записи ' + (page.number * page.size + 1) + '–' + (page.number * page.size + page.numberOfElements) + ' из ' + page.totalElements}">Записи</span>
+<div>
+<a th:if="${page.hasPrevious()}" class="btn btn-outline-secondary btn-sm" th:href="@{/alss(page=${page.number - 1},size=${size},sort=${sort},direction=${direction},id=${filters.id},name=${filters.name},countCellsMin=${filters.countCellsMin},countCellsMax=${filters.countCellsMax},heightMin=${filters.heightMin},heightMax=${filters.heightMax},widthMin=${filters.widthMin},widthMax=${filters.widthMax},depthMin=${filters.depthMin},depthMax=${filters.depthMax},upperFrameMin=${filters.upperFrameMin},upperFrameMax=${filters.upperFrameMax},bottomFrameMin=${filters.bottomFrameMin},bottomFrameMax=${filters.bottomFrameMax},positionControlModule=${filters.positionControlModule},displayPurpose=${filters.displayPurpose},accessPurpose=${filters.accessPurpose},paymentPurpose=${filters.paymentPurpose},printerPurpose=${filters.printerPurpose},colorBody=${filters.colorBody},colorDoor=${filters.colorDoor})}">Назад</a>
+<span class="small mx-2" th:text="${(page.number + 1) + ' / ' + page.totalPages}">1 / 1</span>
+<a th:if="${page.hasNext()}" class="btn btn-outline-secondary btn-sm" th:href="@{/alss(page=${page.number + 1},size=${size},sort=${sort},direction=${direction},id=${filters.id},name=${filters.name},countCellsMin=${filters.countCellsMin},countCellsMax=${filters.countCellsMax},heightMin=${filters.heightMin},heightMax=${filters.heightMax},widthMin=${filters.widthMin},widthMax=${filters.widthMax},depthMin=${filters.depthMin},depthMax=${filters.depthMax},upperFrameMin=${filters.upperFrameMin},upperFrameMax=${filters.upperFrameMax},bottomFrameMin=${filters.bottomFrameMin},bottomFrameMax=${filters.bottomFrameMax},positionControlModule=${filters.positionControlModule},displayPurpose=${filters.displayPurpose},accessPurpose=${filters.accessPurpose},paymentPurpose=${filters.paymentPurpose},printerPurpose=${filters.printerPurpose},colorBody=${filters.colorBody},colorDoor=${filters.colorDoor})}">Вперёд</a>
+</div></nav>
 </div><div th:replace="~{footer :: footer}"></div></body></html>
