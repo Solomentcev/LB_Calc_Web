@@ -4,27 +4,27 @@
 <body>
 <div th:replace="~{header :: header}"></div>
 <main class="container editor-page module-editor">
-    <nav th:if="\${pageContext != 'CATALOG'}" aria-label="breadcrumb">
+    <nav th:if="${pageContext != 'CATALOG'}" aria-label="breadcrumb">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item" th:if="\${pageContext == 'PROJECT'}">
-                <a th:href="@{/projects/{id}(id=\${projectId})}" th:text="\${project.name}">Проект</a>
+            <li class="breadcrumb-item" th:if="${pageContext == 'PROJECT'}">
+                <a th:href="@{/projects/{id}(id=${projectId})}" th:text="${project.name}">Проект</a>
             </li>
-            <li class="breadcrumb-item" th:if="\${pageContext == 'PROJECT'}">
-                <a th:href="@{/projects/{projectId}/alss/{alsId}(projectId=\${projectId},alsId=\${alsId})}"
-                   th:text="\${als.name}">АКХ</a>
+            <li class="breadcrumb-item" th:if="${pageContext == 'PROJECT'}">
+                <a th:href="@{/projects/{projectId}/alss/{alsId}(projectId=${projectId},alsId=${alsId})}"
+                   th:text="${als.name}">АКХ</a>
             </li>
-            <li class="breadcrumb-item" th:if="\${pageContext == 'ALS_CATALOG'}">
-                <a th:href="@{/alss/{id}(id=\${als.id})}" th:text="\${als.name}">АКХ</a>
+            <li class="breadcrumb-item" th:if="${pageContext == 'ALS_CATALOG'}">
+                <a th:href="@{/alss/{id}(id=${als.id})}" th:text="${als.name}">АКХ</a>
             </li>
             <li class="breadcrumb-item active" aria-current="page">Модуль хранения</li>
         </ol>
     </nav>
 
-    <form th:action="\${pageContext == 'CATALOG'} ? @{/lbs/save} :
-                     (\${pageContext == 'ALS_CATALOG'} ?
-                     @{/alss/{alsId}/lbs/{lbId}/save(alsId=\${als.id},lbId=\${lb.id})} :
-                     @{/projects/{projectId}/alss/{alsId}/lbs/{lbId}/save(projectId=\${projectId},alsId=\${alsId},lbId=\${lbId})})"
-          th:object="\${lb}" method="post">
+    <form th:action="${pageContext == 'CATALOG'} ? @{/lbs/save} :
+                     (${pageContext == 'ALS_CATALOG'} ?
+                     @{/alss/{alsId}/lbs/{lbId}/save(alsId=${als.id},lbId=${lb.id})} :
+                     @{/projects/{projectId}/alss/{alsId}/lbs/{lbId}/save(projectId=${projectId},alsId=${alsId},lbId=${lbId})})"
+          th:object="${lb}" method="post">
         <input type="hidden" th:field="*{name}">
         <input type="hidden" th:field="*{description}">
         <input type="hidden" th:field="*{deltaWidth}">
@@ -32,16 +32,16 @@
 
         <div class="page-actions">
             <button type="submit" class="btn btn-primary">Сохранить модуль</button>
-            <a th:if="\${pageContext == 'CATALOG'}" th:href="@{/lbs}" class="btn btn-outline-secondary">К списку модулей</a>
-            <a th:if="\${pageContext == 'ALS_CATALOG'}" th:href="@{/alss/{id}(id=\${als.id})}"
+            <a th:if="${pageContext == 'CATALOG'}" th:href="@{/lbs}" class="btn btn-outline-secondary">К списку модулей</a>
+            <a th:if="${pageContext == 'ALS_CATALOG'}" th:href="@{/alss/{id}(id=${als.id})}"
                class="btn btn-outline-secondary">Вернуться к ALS</a>
-            <a th:if="\${pageContext == 'PROJECT'}"
-               th:href="@{/projects/{projectId}/alss/{alsId}(projectId=\${projectId},alsId=\${alsId})}"
+            <a th:if="${pageContext == 'PROJECT'}"
+               th:href="@{/projects/{projectId}/alss/{alsId}(projectId=${projectId},alsId=${alsId})}"
                class="btn btn-outline-secondary">Вернуться к ALS проекта</a>
         </div>
 
-        <div th:if="\${errors != null}" class="alert alert-danger" role="alert">
-            <div th:each="error : \${errors}" th:text="\${error}">Ошибка</div>
+        <div th:if="${errors != null}" class="alert alert-danger" role="alert">
+            <div th:each="error : ${errors}" th:text="${error}">Ошибка</div>
         </div>
 
         <header class="module-editor__heading">
@@ -67,7 +67,7 @@
                     <div class="col-sm-6 col-lg-3 module-field">
                         <label for="lb-type">Тип модуля</label>
                         <select id="lb-type" class="form-control" th:field="*{type}" required>
-                            <option th:each="type : \${typeLbList}" th:value="\${type}" th:text="\${type}"></option>
+                            <option th:each="type : ${typeLbList}" th:value="${type}" th:text="${type}"></option>
                         </select>
                     </div>
                     <div class="col-sm-6 col-lg-3 module-field">
@@ -94,7 +94,7 @@
                     <div class="col-sm-6 col-lg-3 module-field">
                         <label for="lb-height">Высота корпуса, мм</label>
                         <input id="lb-height" class="form-control" type="number" th:field="*{height}"
-                               th:readonly="\${pageContext != 'CATALOG'}">
+                               th:readonly="${pageContext != 'CATALOG'}">
                     </div>
                     <div class="col-sm-6 col-lg-3 module-field">
                         <label for="lb-width">Ширина корпуса, мм</label>
@@ -103,7 +103,7 @@
                     <div class="col-sm-6 col-lg-3 module-field">
                         <label for="lb-depth">Глубина корпуса, мм</label>
                         <input id="lb-depth" class="form-control" type="number" th:field="*{depth}"
-                               th:readonly="\${pageContext != 'CATALOG'}">
+                               th:readonly="${pageContext != 'CATALOG'}">
                     </div>
                     <div class="col-sm-6 col-lg-3 module-field">
                         <label for="lb-shelf-thick">Толщина полки, мм</label>
@@ -112,12 +112,12 @@
                     <div class="col-sm-6 col-lg-3 module-field">
                         <label for="lb-upper-frame">Верхняя рама, мм</label>
                         <input id="lb-upper-frame" class="form-control" type="number" th:field="*{upperFrame}"
-                               th:readonly="\${pageContext != 'CATALOG'}">
+                               th:readonly="${pageContext != 'CATALOG'}">
                     </div>
                     <div class="col-sm-6 col-lg-3 module-field">
                         <label for="lb-bottom-frame">Нижняя рама, мм</label>
                         <input id="lb-bottom-frame" class="form-control" type="number" th:field="*{bottomFrame}"
-                               th:readonly="\${pageContext != 'CATALOG'}">
+                               th:readonly="${pageContext != 'CATALOG'}">
                     </div>
                 </div>
             </div>
@@ -153,34 +153,34 @@
             </div>
             <div class="module-section__body">
                 <div class="form-row">
-                    <div class="col-sm-6 col-lg-4 module-field" th:if="\${pageContext == 'CATALOG'}">
+                    <div class="col-sm-6 col-lg-4 module-field" th:if="${pageContext == 'CATALOG'}">
                         <label for="lb-door-direction">Направление открывания дверей</label>
                         <select id="lb-door-direction" class="form-control" th:field="*{directionDoorOpening}">
-                            <option th:each="direction : \${directionDoorOpeningList}"
-                                    th:value="\${direction}" th:text="\${direction}"></option>
+                            <option th:each="direction : ${directionDoorOpeningList}"
+                                    th:value="${direction}" th:text="${direction}"></option>
                         </select>
                     </div>
-                    <div class="col-sm-6 col-lg-4 module-field" th:if="\${pageContext != 'CATALOG'}">
+                    <div class="col-sm-6 col-lg-4 module-field" th:if="${pageContext != 'CATALOG'}">
                         <label for="lb-door-direction-readonly">Направление открывания дверей</label>
                         <input id="lb-door-direction-readonly" class="form-control" th:field="*{directionDoorOpening}" readonly>
                     </div>
-                    <div class="col-sm-6 col-lg-4 module-field" th:if="\${pageContext == 'CATALOG'}">
+                    <div class="col-sm-6 col-lg-4 module-field" th:if="${pageContext == 'CATALOG'}">
                         <label for="lb-body-color">Цвет корпуса</label>
                         <select id="lb-body-color" class="form-control" th:field="*{colorBody}">
-                            <option th:each="color : \${colorsList}" th:value="\${color}" th:text="\${color}"></option>
+                            <option th:each="color : ${colorsList}" th:value="${color}" th:text="${color}"></option>
                         </select>
                     </div>
-                    <div class="col-sm-6 col-lg-4 module-field" th:if="\${pageContext != 'CATALOG'}">
+                    <div class="col-sm-6 col-lg-4 module-field" th:if="${pageContext != 'CATALOG'}">
                         <label for="lb-body-color-readonly">Цвет корпуса</label>
                         <input id="lb-body-color-readonly" class="form-control" th:field="*{colorBody}" readonly>
                     </div>
-                    <div class="col-sm-6 col-lg-4 module-field" th:if="\${pageContext == 'CATALOG'}">
+                    <div class="col-sm-6 col-lg-4 module-field" th:if="${pageContext == 'CATALOG'}">
                         <label for="lb-door-color">Цвет дверей</label>
                         <select id="lb-door-color" class="form-control" th:field="*{colorDoor}">
-                            <option th:each="color : \${colorsList}" th:value="\${color}" th:text="\${color}"></option>
+                            <option th:each="color : ${colorsList}" th:value="${color}" th:text="${color}"></option>
                         </select>
                     </div>
-                    <div class="col-sm-6 col-lg-4 module-field" th:if="\${pageContext != 'CATALOG'}">
+                    <div class="col-sm-6 col-lg-4 module-field" th:if="${pageContext != 'CATALOG'}">
                         <label for="lb-door-color-readonly">Цвет дверей</label>
                         <input id="lb-door-color-readonly" class="form-control" th:field="*{colorDoor}" readonly>
                     </div>
