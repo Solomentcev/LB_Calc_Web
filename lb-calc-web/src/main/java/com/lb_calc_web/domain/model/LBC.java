@@ -144,7 +144,7 @@ public class LBC extends StorageModule implements ControlModule {
         setName(ModuleTextFormatter.combinedName(this, this));
         setDescription(ModuleTextFormatter.storageDescription(
                 this, "Модуль хранения и управления")
-                + "\n\n" + ModuleTextFormatter.controlDescription(this, this));
+                + "\n\n" + ModuleTextFormatter.controlDetailsDescription(this));
     }
 
     /** @return независимая копия LBC */
