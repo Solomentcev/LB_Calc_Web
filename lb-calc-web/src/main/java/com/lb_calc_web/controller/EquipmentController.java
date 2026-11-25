@@ -38,6 +38,7 @@ public class EquipmentController {
         this.equipmentCatalogService = equipmentCatalogService;
     }
 
+    /** Отображает каталог моделей оборудования с фильтрацией, сортировкой и пагинацией. */
     @GetMapping
     public String list(
             @RequestParam(defaultValue = "0") int page,
@@ -86,6 +87,7 @@ public class EquipmentController {
         return "equipment/equipment";
     }
 
+    /** Открывает форму редактирования выбранной модели оборудования. */
     @GetMapping("/{id}")
     public String editForm(@PathVariable Long id, Model model) {
         prepareForm(model, EquipmentDtoMapper.toDto(equipmentCatalogService.findById(id)));

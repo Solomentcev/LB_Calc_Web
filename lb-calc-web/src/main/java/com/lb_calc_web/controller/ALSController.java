@@ -55,6 +55,7 @@ public class ALSController extends BaseCatalogController {
         return "alss/als";
     }
 
+    /** Открывает форму редактирования сохранённой конфигурации ALS. */
     @GetMapping("/{id}")
     public String editALS(@PathVariable Long id, Model model) {
         model.addAttribute("pageContext", "CATALOG");
@@ -365,6 +366,7 @@ public class ALSController extends BaseCatalogController {
         return "redirect:/alss/" + saved.getId();
     }
 
+    /** Удаляет выбранный экземпляр LB из редактируемой конфигурации ALS. */
     @PostMapping("/{alsId}/lbs/{lbId}/delete")
     public String deleteLB(
             @PathVariable Long alsId,

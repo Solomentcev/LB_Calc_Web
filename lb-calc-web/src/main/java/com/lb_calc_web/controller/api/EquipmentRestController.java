@@ -30,6 +30,7 @@ public class EquipmentRestController {
         this.equipmentCatalogService = equipmentCatalogService;
     }
 
+    /** Возвращает список моделей оборудования. */
     @GetMapping
     @Operation(summary = "Получить каталог оборудования")
     public ResponseEntity<ApiResponse<List<EquipmentDTO>>> findAll() {
@@ -38,6 +39,7 @@ public class EquipmentRestController {
         return ResponseEntity.ok(ApiResponse.success(result));
     }
 
+    /** Возвращает модель оборудования по идентификатору. */
     @GetMapping("/{id}")
     @Operation(summary = "Получить модель оборудования по ID")
     public ResponseEntity<ApiResponse<EquipmentDTO>> findById(@PathVariable Long id) {
@@ -45,6 +47,7 @@ public class EquipmentRestController {
                 EquipmentDtoMapper.toDto(equipmentCatalogService.findById(id))));
     }
 
+    /** Создаёт модель оборудования. */
     @PostMapping
     @Operation(summary = "Добавить модель оборудования")
     public ResponseEntity<ApiResponse<EquipmentDTO>> create(@Valid @RequestBody EquipmentDTO dto) {
@@ -53,6 +56,7 @@ public class EquipmentRestController {
                 "Модель оборудования создана", EquipmentDtoMapper.toDto(saved)));
     }
 
+    /** Обновляет существующую модель оборудования. */
     @PutMapping("/{id}")
     @Operation(summary = "Изменить модель оборудования")
     public ResponseEntity<ApiResponse<EquipmentDTO>> update(
@@ -64,6 +68,7 @@ public class EquipmentRestController {
                 "Модель оборудования обновлена", EquipmentDtoMapper.toDto(saved)));
     }
 
+    /** Удаляет модель оборудования по идентификатору. */
     @DeleteMapping("/{id}")
     @Operation(summary = "Удалить модель оборудования")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {

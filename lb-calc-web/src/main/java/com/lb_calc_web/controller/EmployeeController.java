@@ -52,6 +52,7 @@ public class EmployeeController {
         model.addAttribute("roles", roles);
     }
 
+    /** Отображает профиль текущего аутентифицированного сотрудника. */
     @GetMapping("/myprofile")
     public String myProfile(Model model) {
 
