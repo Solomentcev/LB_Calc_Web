@@ -32,6 +32,8 @@ import java.util.Objects;
 @Service
 public class EquipmentCatalogService {
 
+    private static final Logger logger = LoggerFactory.getLogger(EquipmentCatalogService.class);
+
     private final EquipmentRepository equipmentRepository;
 
     public EquipmentCatalogService(EquipmentRepository equipmentRepository) {
