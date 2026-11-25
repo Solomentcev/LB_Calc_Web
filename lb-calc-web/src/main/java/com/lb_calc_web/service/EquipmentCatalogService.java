@@ -193,6 +193,10 @@ public class EquipmentCatalogService {
     public void validateSelections(
             FunctionalConfigurationDTO configuration, List<EquipmentSelectionDTO> selections) {
         Objects.requireNonNull(configuration, "Функциональная конфигурация не должна быть null");
+        if (configuration.getAccess() != null
+                && configuration.getAccess().contains(AccessPurpose.PIN)
+                && configuration.getDisplay() == DisplayPurpose.NONE)
+            configuration.setDisplay(DisplayPurpose.INCH_10);
         List<Equipment> catalog = findAll();
         java.util.Map<Long, Equipment> byId = catalog.stream().filter(e -> e.getId() != null)
                 .collect(java.util.stream.Collectors.toMap(Equipment::getId, e -> e));
