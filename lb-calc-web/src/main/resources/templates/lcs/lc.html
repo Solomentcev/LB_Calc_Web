@@ -92,37 +92,7 @@
                 <div class="col-md-2"><button type="button" class="btn btn-outline-danger remove-equipment">Удалить</button></div>
             </div>
         </template>
-        <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const list = document.getElementById("equipment-selection-list");
-            const template = document.getElementById("equipment-selection-row-template");
-            const addButton = document.getElementById("add-equipment");
-            if (!list || !template || !addButton) return;
-            function reindex() {
-                list.querySelectorAll(".equipment-selection-row").forEach((row, index) => {
-                    row.querySelectorAll("[name]").forEach(input => {
-                        input.name = input.name.replace(/equipmentSelections\[\d+\]/,
-                                "equipmentSelections[" + index + "]");
-                    });
-                });
-            }
-            addButton.addEventListener("click", function () {
-                const index = list.querySelectorAll(".equipment-selection-row").length;
-                const fragment = template.content.cloneNode(true);
-                fragment.querySelectorAll("[name]").forEach(input => {
-                    input.name = input.name.replaceAll("__INDEX__", String(index));
-                });
-                list.append(fragment);
-            });
-            list.addEventListener("click", function (event) {
-                if (event.target.classList.contains("remove-equipment")) {
-                    event.target.closest(".equipment-selection-row").remove();
-                    reindex();
-                }
-            });
-        });
-        </script>
-                <div class="row mt-4"><div class="col-lg-6"><img class="img-thumbnail" th:src="'data:image/png;base64,' + ${lc.stringLCImage}" alt="Модуль управления"></div></div>
+<div class="row mt-4"><div class="col-lg-6"><img class="img-thumbnail" th:src="'data:image/png;base64,' + ${lc.stringLCImage}" alt="Модуль управления"></div></div>
             </form>
         </main>
         <div th:replace="~{footer :: footer}"></div>
@@ -225,7 +195,7 @@
                 <div class="col-md-2"><button type="button" class="btn btn-outline-danger remove-equipment">Удалить</button></div>
             </div>
         </template>
-        
+
                 <div class="row mt-4"><div class="col-lg-6"><img class="img-thumbnail" th:src="'data:image/png;base64,' + ${lc.stringLCImage}" alt="Модуль управления"></div></div>
             </form>
         </main>
@@ -240,7 +210,7 @@
         <li class="breadcrumb-item"><a th:href="@{/projects/{projectId}/alss/{alsId}(projectId=${projectId},alsId=${alsId})}" th:text="${als.name}">ALS</a></li>
         <li class="breadcrumb-item active" aria-current="page">Модуль управления</li>
         </ol></nav>
-        
+
             <form th:action="@{/projects/{projectId}/alss/{alsId}/lcs/{lcId}/save(projectId=${projectId},alsId=${alsId},lcId=${lcId})}" th:object="${lc}" method="post">
                 <input type="hidden" name="equipmentSelectionsProvided" value="true">
                 <div class="page-actions">
@@ -328,11 +298,41 @@
                 <div class="col-md-2"><button type="button" class="btn btn-outline-danger remove-equipment">Удалить</button></div>
             </div>
         </template>
-        
+
                 <div class="row mt-4"><div class="col-lg-6"><img class="img-thumbnail" th:src="'data:image/png;base64,' + ${lc.stringLCImage}" alt="Модуль управления"></div></div>
             </form>
         </main>
         <div th:replace="~{footer :: footer}"></div>
     </th:block>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const list = document.getElementById("equipment-selection-list");
+            const template = document.getElementById("equipment-selection-row-template");
+            const addButton = document.getElementById("add-equipment");
+            if (!list || !template || !addButton) return;
+            function reindex() {
+                list.querySelectorAll(".equipment-selection-row").forEach((row, index) => {
+                    row.querySelectorAll("[name]").forEach(input => {
+                        input.name = input.name.replace(/equipmentSelections\[\d+\]/,
+                                "equipmentSelections[" + index + "]");
+                    });
+                });
+            }
+            addButton.addEventListener("click", function () {
+                const index = list.querySelectorAll(".equipment-selection-row").length;
+                const fragment = template.content.cloneNode(true);
+                fragment.querySelectorAll("[name]").forEach(input => {
+                    input.name = input.name.replaceAll("__INDEX__", String(index));
+                });
+                list.append(fragment);
+            });
+            list.addEventListener("click", function (event) {
+                if (event.target.classList.contains("remove-equipment")) {
+                    event.target.closest(".equipment-selection-row").remove();
+                    reindex();
+                }
+            });
+        });
+        </script>
 </body>
 </html>
