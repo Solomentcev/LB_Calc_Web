@@ -4,42 +4,42 @@
 <body>
 <div th:replace="~{header :: header}"></div>
 <main class="container editor-page module-editor">
-    <nav th:if="\${pageContext != 'CATALOG'}" aria-label="breadcrumb">
+    <nav th:if="${pageContext != 'CATALOG'}" aria-label="breadcrumb">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item" th:if="\${pageContext == 'PROJECT'}">
-                <a th:href="@{/projects/{id}(id=\${projectId})}" th:text="\${project.name}">Проект</a>
+            <li class="breadcrumb-item" th:if="${pageContext == 'PROJECT'}">
+                <a th:href="@{/projects/{id}(id=${projectId})}" th:text="${project.name}">Проект</a>
             </li>
-            <li class="breadcrumb-item" th:if="\${pageContext == 'PROJECT'}">
-                <a th:href="@{/projects/{projectId}/alss/{alsId}(projectId=\${projectId},alsId=\${alsId})}"
-                   th:text="\${als.name}">АКХ</a>
+            <li class="breadcrumb-item" th:if="${pageContext == 'PROJECT'}">
+                <a th:href="@{/projects/{projectId}/alss/{alsId}(projectId=${projectId},alsId=${alsId})}"
+                   th:text="${als.name}">АКХ</a>
             </li>
-            <li class="breadcrumb-item" th:if="\${pageContext == 'ALS_CATALOG'}">
-                <a th:href="@{/alss/{id}(id=\${als.id})}" th:text="\${als.name}">АКХ</a>
+            <li class="breadcrumb-item" th:if="${pageContext == 'ALS_CATALOG'}">
+                <a th:href="@{/alss/{id}(id=${als.id})}" th:text="${als.name}">АКХ</a>
             </li>
             <li class="breadcrumb-item active" aria-current="page">Модуль хранения и управления</li>
         </ol>
     </nav>
 
-    <form th:action="\${pageContext == 'CATALOG'} ? @{/lbcs/save} :
-                     (\${pageContext == 'ALS_CATALOG'} ?
-                     @{/alss/{alsId}/lbcs/{lbcId}/save(alsId=\${als.id},lbcId=\${lbc.id})} :
-                     @{/projects/{projectId}/alss/{alsId}/lbcs/{lbcId}/save(projectId=\${projectId},alsId=\${alsId},lbcId=\${lbcId})})"
-          th:object="\${lbc}" method="post">
+    <form th:action="${pageContext == 'CATALOG'} ? @{/lbcs/save} :
+                     (${pageContext == 'ALS_CATALOG'} ?
+                     @{/alss/{alsId}/lbcs/{lbcId}/save(alsId=${als.id},lbcId=${lbc.id})} :
+                     @{/projects/{projectId}/alss/{alsId}/lbcs/{lbcId}/save(projectId=${projectId},alsId=${alsId},lbcId=${lbcId})})"
+          th:object="${lbc}" method="post">
         <input type="hidden" th:field="*{id}">
         <input type="hidden" th:field="*{name}">
 
         <div class="page-actions">
             <button type="submit" class="btn btn-primary">Сохранить модуль</button>
-            <a th:if="\${pageContext == 'CATALOG'}" th:href="@{/lbcs}" class="btn btn-outline-secondary">К списку модулей</a>
-            <a th:if="\${pageContext == 'ALS_CATALOG'}" th:href="@{/alss/{id}(id=\${als.id})}"
+            <a th:if="${pageContext == 'CATALOG'}" th:href="@{/lbcs}" class="btn btn-outline-secondary">К списку модулей</a>
+            <a th:if="${pageContext == 'ALS_CATALOG'}" th:href="@{/alss/{id}(id=${als.id})}"
                class="btn btn-outline-secondary">Вернуться к ALS</a>
-            <a th:if="\${pageContext == 'PROJECT'}"
-               th:href="@{/projects/{projectId}/alss/{alsId}(projectId=\${projectId},alsId=\${alsId})}"
+            <a th:if="${pageContext == 'PROJECT'}"
+               th:href="@{/projects/{projectId}/alss/{alsId}(projectId=${projectId},alsId=${alsId})}"
                class="btn btn-outline-secondary">Вернуться к ALS проекта</a>
         </div>
 
-        <div th:if="\${errors != null}" class="alert alert-danger" role="alert">
-            <div th:each="error : \${errors}" th:text="\${error}">Ошибка</div>
+        <div th:if="${errors != null}" class="alert alert-danger" role="alert">
+            <div th:each="error : ${errors}" th:text="${error}">Ошибка</div>
         </div>
 
         <header class="module-editor__heading">
@@ -100,20 +100,20 @@
                     <div class="col-sm-6 col-lg-4 module-field">
                         <label for="lbc-door-direction">Направление открывания дверей</label>
                         <select id="lbc-door-direction" class="form-control" th:field="*{directionDoorOpening}">
-                            <option th:each="direction : \${directionDoorOpeningList}"
-                                    th:value="\${direction}" th:text="\${direction}"></option>
+                            <option th:each="direction : ${directionDoorOpeningList}"
+                                    th:value="${direction}" th:text="${direction}"></option>
                         </select>
                     </div>
                     <div class="col-sm-6 col-lg-4 module-field">
                         <label for="lbc-body-color">Цвет корпуса</label>
                         <select id="lbc-body-color" class="form-control" th:field="*{colorBody}">
-                            <option th:each="color : \${colorsList}" th:value="\${color}" th:text="\${color}"></option>
+                            <option th:each="color : ${colorsList}" th:value="${color}" th:text="${color}"></option>
                         </select>
                     </div>
                     <div class="col-sm-6 col-lg-4 module-field">
                         <label for="lbc-door-color">Цвет дверей</label>
                         <select id="lbc-door-color" class="form-control" th:field="*{colorDoor}">
-                            <option th:each="color : \${colorsList}" th:value="\${color}" th:text="\${color}"></option>
+                            <option th:each="color : ${colorsList}" th:value="${color}" th:text="${color}"></option>
                         </select>
                     </div>
                 </div>
