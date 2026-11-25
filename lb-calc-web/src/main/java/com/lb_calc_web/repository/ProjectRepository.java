@@ -24,13 +24,6 @@ public interface ProjectRepository
     @EntityGraph(attributePaths = {"createdBy", "updatedBy"})
     Page<ProjectEntity> findAll(Specification<ProjectEntity> specification, Pageable pageable);
 
-    @Query(value = """
-            SELECT p FROM ProjectEntity p
-            LEFT JOIN FETCH p.createdBy
-            LEFT JOIN FETCH p.updatedBy
-            """, countQuery = "SELECT COUNT(p) FROM ProjectEntity p")
-    Page<ProjectEntity> findAllWithUsers(Pageable pageable);
-
     /**
      * Возвращает проекты вместе с сотрудниками,
      * создавшими и изменившими проект.
