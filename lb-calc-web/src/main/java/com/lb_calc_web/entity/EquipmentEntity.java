@@ -37,6 +37,9 @@ public class EquipmentEntity {
     @Column(nullable = false, length = 50)
     private EquipmentCategory category;
 
+    @Column(name = "is_default", nullable = false)
+    private boolean defaultModel;
+
     @Column(nullable = false)
     private int width;
 
@@ -60,6 +63,7 @@ public class EquipmentEntity {
     public EquipmentFunctionalType getFunctionalType() { return functionalType; }
     public String getPurpose() { return purpose; }
     public EquipmentCategory getCategory() { return category; }
+    public boolean isDefaultModel() { return defaultModel; }
     public int getWidth() { return width; }
     public int getHeight() { return height; }
     public int getDepth() { return depth; }
@@ -91,6 +95,8 @@ public class EquipmentEntity {
         this.category = Objects.requireNonNull(category,
                 "Категория оборудования не должна быть null");
     }
+
+    public void setDefaultModel(boolean defaultModel) { this.defaultModel = defaultModel; }
 
     public void setWidth(int width) {
         this.width = requireNonNegative(width, "Ширина");
