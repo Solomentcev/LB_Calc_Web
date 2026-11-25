@@ -138,10 +138,8 @@ class ModuleNamingDescriptionTest {
         project.addALS(als);
         project.addALS(als);
 
-        assertTrue(project.getDescription().contains("АКХ: 6 яч."));
-        assertTrue(project.getDescription().contains("2 шт."));
-        assertTrue(!project.getDescription().contains("Состав модулей слева направо:"));
-        assertTrue(!project.getDescription().contains("Размеры ячейки (В×Ш×Г)"));
+        assertEquals(als.getName() + " — 2 шт.", project.getDescription());
+        assertTrue(!project.getDescription().contains(als.getDescription()));
     }
 
     @Test

@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Проверяет правила состава и производного описания проекта.
@@ -48,5 +49,8 @@ class ProjectDomainTest {
         second.addALS(lcConfiguration);
 
         assertEquals(first.getDescription(), second.getDescription());
+        assertTrue(first.getDescription().lines().allMatch(line ->
+                line.matches(".* — \\d+ шт\\.")));
+        assertTrue(!first.getDescription().contains("Состав модулей слева направо:"));
     }
 }

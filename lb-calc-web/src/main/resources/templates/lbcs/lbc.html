@@ -46,7 +46,7 @@
         <header class="module-editor__heading">
             <div>
                 <div class="module-editor__eyebrow">LBC · Совмещённый модуль</div>
-                <h1 class="module-editor__title" th:text="*{description}">Модуль хранения и управления</h1>
+                <h1 class="module-editor__title" th:text="*{name}">Модуль хранения и управления</h1>
                 <p class="module-editor__subtitle">Модуль объединяет ячейки хранения и управляющее оборудование.</p>
             </div>
             <span class="module-editor__id" th:if="*{id != null and id > 0}" th:text="${'ID: ' + lbc.id}">ID</span>
@@ -164,6 +164,12 @@
                 <img th:src="'data:image/png;base64,' + ${lbc.stringLBCImage}" alt="Чертёж модуля хранения и управления">
             </div>
         </section>
+            <section class="module-section module-description">
+                <div class="module-section__body">
+                    <p style="white-space: pre-line; margin-bottom: 0;"
+                       th:text="*{description}">Описание модуля</p>
+                </div>
+            </section>
             </aside>
         </div>
     </form>

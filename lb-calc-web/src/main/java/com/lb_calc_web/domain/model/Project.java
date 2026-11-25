@@ -451,19 +451,17 @@ public class Project {
                         .thenComparing(entry -> entry.getKey().getDescription()))
                 .forEach(entry -> {
                     if (!builder.isEmpty()) {
-                        builder.append("\n\n");
+                        builder.append("\n");
                     }
                     builder.append(entry.getKey().getName())
                             .append(" — ")
                             .append(entry.getValue())
-                            .append(" шт.\n")
-                            .append(entry.getKey().getDescription().lines()
-                                    .map(line -> "  " + line)
-                                    .collect(java.util.stream.Collectors.joining("\n")));
+                            .append(" шт.");
                 });
 
         description = builder.toString();
     }
+
     /**
      * Восстанавливает проект из сохранённого состояния.
      *
