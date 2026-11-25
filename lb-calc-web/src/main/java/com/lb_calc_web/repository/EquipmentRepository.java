@@ -1,6 +1,8 @@
 package com.lb_calc_web.repository;
 
 import com.lb_calc_web.entity.EquipmentEntity;
+import com.lb_calc_web.domain.equipment.EquipmentFunctionalType;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -12,6 +14,12 @@ public interface EquipmentRepository
 
     /** Возвращает модели, назначенные по умолчанию для своих функциональных назначений. */
     java.util.List<EquipmentEntity> findAllByDefaultModelTrue();
+
+    boolean existsByFunctionalTypeAndPurposeAndDefaultModelTrue(
+            EquipmentFunctionalType functionalType, String purpose);
+
+    Optional<EquipmentEntity> findFirstByFunctionalTypeAndPurposeOrderByIdAsc(
+            EquipmentFunctionalType functionalType, String purpose);
 
     /**
      * Возвращает число ссылок на модель из комплектаций управляющих модулей.
