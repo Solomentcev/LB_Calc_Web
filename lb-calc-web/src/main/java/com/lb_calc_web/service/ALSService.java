@@ -334,6 +334,47 @@ public class ALSService {
         return als;
     }
 
+    /**
+     * Преобразует LBC в LC и самостоятельный LB без потери конфигурации.
+     */
+    @Transactional(readOnly = true)
+    public ALS replaceWithNewLC(ALS als) {
+        Objects.requireNonNull(als, "ALS не должен быть null");
+        LBC current = als.getLBC();
+        if (current == null) {
+            throw new NoSuchElementException(
+                    "В ALS " + als.getId() + " отсутствует модуль LBC");
+        }
+
+        ControlConfiguration configuration = current.getControlConfiguration();
+        LC replacementLC = new LC(
+                current.getHeight(),
+                current.getWidth(),
+                current.getDepth(),
+                current.getUpperFrame(),
+                current.getBottomFrame(),
+                current.getColorBody(),
+                current.getColorDoor(),
+                configuration
+        );
+        LB replacementLB = new LB(
+                current.getHeight(),
+                current.getWidth(),
+                current.getDepth(),
+                current.getUpperFrame(),
+                current.getBottomFrame(),
+                current.getColorBody(),
+                current.getColorDoor(),
+                current.getTypeLb(),
+                current.getCountCells(),
+                current.getDirectionDoorOpening(),
+                current.getDoorThickness()
+        );
+
+        als.replaceLBCWithLC(replacementLC, replacementLB);
+        return als;
+    }
+
     /** Заменяет управляющий модуль ALS новым модулем LBC. */
     @Transactional(readOnly = true)
     public ALS replaceWithNewLBC(ALS als) {
@@ -348,6 +389,12 @@ public class ALSService {
         // Новый LBC получает новую идентичность, поэтому не проходит проверку замены по старому ID.
         als.replaceControlModule(replacement);
         return als;
+    }
+
+    /** Преобразует LBC в LC и LB и сохраняет обновлённую ALS. */
+    @Transactional
+    public ALS replaceWithNewLCandSaveALS(Long alsId) {
+        return saveALS(replaceWithNewLC(findById(alsId)));
     }
 
     /** Добавляет LB в сохранённую ALS и сохраняет обновлённую конфигурацию. */
