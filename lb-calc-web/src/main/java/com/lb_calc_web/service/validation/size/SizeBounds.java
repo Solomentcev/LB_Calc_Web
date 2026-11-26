@@ -33,6 +33,18 @@ public class SizeBounds {
     private final int typeShelfThickMax;
     private final int typeServiceZoneWidthMin;
     private final int typeServiceZoneWidthMax;
+    private final int heightDefault;
+    private final int widthDefault;
+    private final int depthDefault;
+    private final int upperFrameDefault;
+    private final int bottomFrameDefault;
+    private final int countCellsDefault;
+    private final int doorThicknessDefault;
+    private final int lcMinimumWidth;
+    private final int lcDisplaySideClearance;
+    private final int lcWidthRoundingStep;
+    private final int lcDisplayCenterHeight;
+    private final int lcDisplayTopClearance;
 
     public SizeBounds(
             @Value("${size.frame.upper.min}") int upperFrameMin,
@@ -60,7 +72,19 @@ public class SizeBounds {
             @Value("${size.type.shelf-thick.min}") int typeShelfThickMin,
             @Value("${size.type.shelf-thick.max}") int typeShelfThickMax,
             @Value("${size.type.service-zone-width.min}") int typeServiceZoneWidthMin,
-            @Value("${size.type.service-zone-width.max}") int typeServiceZoneWidthMax
+            @Value("${size.type.service-zone-width.max}") int typeServiceZoneWidthMax,
+            @Value("${size.height.default}") int heightDefault,
+            @Value("${size.width.default}") int widthDefault,
+            @Value("${size.depth.default}") int depthDefault,
+            @Value("${size.frame.upper.default}") int upperFrameDefault,
+            @Value("${size.frame.bottom.default}") int bottomFrameDefault,
+            @Value("${size.count.cells.default}") int countCellsDefault,
+            @Value("${size.door.thickness.default}") int doorThicknessDefault,
+            @Value("${lc.geometry.width.min}") int lcMinimumWidth,
+            @Value("${lc.geometry.display.side-clearance}") int lcDisplaySideClearance,
+            @Value("${lc.geometry.width.rounding-step}") int lcWidthRoundingStep,
+            @Value("${lc.geometry.display.center-height}") int lcDisplayCenterHeight,
+            @Value("${lc.geometry.display.top-clearance}") int lcDisplayTopClearance
     ) {
         this.upperFrameMin = upperFrameMin;
         this.upperFrameMax = upperFrameMax;
@@ -88,6 +112,18 @@ public class SizeBounds {
         this.typeShelfThickMax = typeShelfThickMax;
         this.typeServiceZoneWidthMin = typeServiceZoneWidthMin;
         this.typeServiceZoneWidthMax = typeServiceZoneWidthMax;
+        this.heightDefault = heightDefault;
+        this.widthDefault = widthDefault;
+        this.depthDefault = depthDefault;
+        this.upperFrameDefault = upperFrameDefault;
+        this.bottomFrameDefault = bottomFrameDefault;
+        this.countCellsDefault = countCellsDefault;
+        this.doorThicknessDefault = doorThicknessDefault;
+        this.lcMinimumWidth = lcMinimumWidth;
+        this.lcDisplaySideClearance = lcDisplaySideClearance;
+        this.lcWidthRoundingStep = lcWidthRoundingStep;
+        this.lcDisplayCenterHeight = lcDisplayCenterHeight;
+        this.lcDisplayTopClearance = lcDisplayTopClearance;
     }
 
     public int getUpperFrameMin() {
@@ -192,6 +228,25 @@ public class SizeBounds {
 
     public int getTypeServiceZoneWidthMax() {
         return typeServiceZoneWidthMax;
+    }
+
+    public int getHeightDefault() { return heightDefault; }
+    public int getWidthDefault() { return widthDefault; }
+    public int getDepthDefault() { return depthDefault; }
+    public int getUpperFrameDefault() { return upperFrameDefault; }
+    public int getBottomFrameDefault() { return bottomFrameDefault; }
+    public int getCountCellsDefault() { return countCellsDefault; }
+    public int getDoorThicknessDefault() { return doorThicknessDefault; }
+
+    /** Создаёт настройки геометрии LC из значений properties. */
+    public com.lb_calc_web.domain.model.LCGeometrySettings getLCGeometrySettings() {
+        return new com.lb_calc_web.domain.model.LCGeometrySettings(
+                lcMinimumWidth,
+                lcDisplaySideClearance,
+                lcWidthRoundingStep,
+                lcDisplayCenterHeight,
+                lcDisplayTopClearance
+        );
     }
 
 }

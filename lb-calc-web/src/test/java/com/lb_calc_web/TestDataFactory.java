@@ -47,35 +47,52 @@ public final class TestDataFactory {
         );
     }
 
-    public static SizeValidator createSizeValidator() {
-        SizeBounds bounds = new SizeBounds(
-                20,
-                300,
-                20,
-                300,
-                85,
-                2300,
-                125,
-                600,
-                300,
-                1,
-                20,
-                100,
-                100,
-                1200,
-                100,
-                880,
-                170,
-                900,
-                5,
-                50,
-                0,
-                500,
-                0,
-                100,
-                0,
-                300
+    public static SizeBounds createSizeBounds() {
+        Properties properties = loadSizeProperties();
+        return new SizeBounds(
+                intProperty(properties, "size.frame.upper.min"),
+                intProperty(properties, "size.frame.upper.max"),
+                intProperty(properties, "size.frame.bottom.min"),
+                intProperty(properties, "size.frame.bottom.max"),
+                intProperty(properties, "size.height.cell.min"),
+                intProperty(properties, "size.height.max"),
+                intProperty(properties, "size.height.min"),
+                intProperty(properties, "size.height.lc.min"),
+                intProperty(properties, "size.height.lc.panel.min"),
+                intProperty(properties, "size.count.cells.min"),
+                intProperty(properties, "size.count.cells.max"),
+                intProperty(properties, "size.width.cell.min"),
+                intProperty(properties, "size.width.min"),
+                intProperty(properties, "size.width.max"),
+                intProperty(properties, "size.depth.cell.min"),
+                intProperty(properties, "size.depth.cell.max"),
+                intProperty(properties, "size.depth.min"),
+                intProperty(properties, "size.depth.max"),
+                intProperty(properties, "size.door.thickness.min"),
+                intProperty(properties, "size.door.thickness.max"),
+                intProperty(properties, "size.type.delta-width.min"),
+                intProperty(properties, "size.type.delta-width.max"),
+                intProperty(properties, "size.type.shelf-thick.min"),
+                intProperty(properties, "size.type.shelf-thick.max"),
+                intProperty(properties, "size.type.service-zone-width.min"),
+                intProperty(properties, "size.type.service-zone-width.max"),
+                intProperty(properties, "size.height.default"),
+                intProperty(properties, "size.width.default"),
+                intProperty(properties, "size.depth.default"),
+                intProperty(properties, "size.frame.upper.default"),
+                intProperty(properties, "size.frame.bottom.default"),
+                intProperty(properties, "size.count.cells.default"),
+                intProperty(properties, "size.door.thickness.default"),
+                intProperty(properties, "lc.geometry.width.min"),
+                intProperty(properties, "lc.geometry.display.side-clearance"),
+                intProperty(properties, "lc.geometry.width.rounding-step"),
+                intProperty(properties, "lc.geometry.display.center-height"),
+                intProperty(properties, "lc.geometry.display.top-clearance")
         );
+    }
+
+    public static SizeValidator createSizeValidator() {
+        SizeBounds bounds = createSizeBounds();
         ModuleSizeValidator moduleValidator =
                 new ModuleSizeValidator(bounds);
         ALSSizeValidator alsValidator =
@@ -326,14 +343,7 @@ return als;
     }
     /** Загружает тестовые геометрические настройки из того же файла, что и приложение. */
     public static LCGeometrySettings lcGeometrySettings() {
-        Properties properties = loadSizeProperties();
-        return new LCGeometrySettings(
-                Integer.parseInt(properties.getProperty("lc.geometry.width.min")),
-                Integer.parseInt(properties.getProperty("lc.geometry.display.side-clearance")),
-                Integer.parseInt(properties.getProperty("lc.geometry.width.rounding-step")),
-                Integer.parseInt(properties.getProperty("lc.geometry.display.center-height")),
-                Integer.parseInt(properties.getProperty("lc.geometry.display.top-clearance"))
-        );
+        return createSizeBounds().getLCGeometrySettings();
     }
 
     /** Добавляет геометрические свойства LC в тестовое окружение. */
@@ -342,6 +352,14 @@ return als;
         properties.stringPropertyNames().stream()
                 .filter(key -> key.startsWith("lc.geometry."))
                 .forEach(key -> environment.setProperty(key, properties.getProperty(key)));
+    }
+
+    private static int intProperty(Properties properties, String key) {
+        String value = properties.getProperty(key);
+        if (value == null) {
+            throw new IllegalStateException("Не задано свойство " + key);
+        }
+        return Integer.parseInt(value);
     }
 
     private static Properties loadSizeProperties() {
