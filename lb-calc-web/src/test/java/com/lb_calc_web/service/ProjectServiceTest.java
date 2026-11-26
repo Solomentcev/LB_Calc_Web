@@ -46,13 +46,7 @@ class ProjectServiceTest {
         alsService = mock(ALSService.class);
         when(alsService.restoreDomain(any(ALSDTO.class))).thenAnswer(invocation -> {
             ALSDTO dto = invocation.getArgument(0);
-            return ALSDtoMapper.toDomain(
-                    dto,
-                    value -> new TypeLb(value.getType(), value.getDeltaWidth(),
-                            value.getShelfThick(), value.getServiceZoneWidth()),
-                    value -> new TypeLb(value.getType(), value.getDeltaWidth(),
-                            value.getShelfThick(), value.getServiceZoneWidth())
-            );
+            return TestDataFactory.restoreALS(dto);
         });
         employeeService = mock(EmployeeService.class);
 environment = new MockEnvironment()
@@ -99,13 +93,7 @@ environment = new MockEnvironment()
                 .thenReturn(employee);
 
         ALSDTO alsDto = TestDataFactory.validALSDTO(10L);
-        com.lb_calc_web.domain.model.ALS als = ALSDtoMapper.toDomain(
-                alsDto,
-                value -> new TypeLb(value.getType(), value.getDeltaWidth(),
-                        value.getShelfThick(), value.getServiceZoneWidth()),
-                value -> new TypeLb(value.getType(), value.getDeltaWidth(),
-                        value.getShelfThick(), value.getServiceZoneWidth())
-        );
+        com.lb_calc_web.domain.model.ALS als = TestDataFactory.restoreALS(alsDto);
 
         when(alsService.createALS()).thenReturn(als);
 
@@ -181,13 +169,7 @@ environment = new MockEnvironment()
         when(projectRepository.findById(1L)).thenReturn(Optional.empty());
 
         ALSDTO replacementDto = TestDataFactory.validALSDTO(10L);
-        com.lb_calc_web.domain.model.ALS replacement = ALSDtoMapper.toDomain(
-                replacementDto,
-                value -> new TypeLb(value.getType(), value.getDeltaWidth(),
-                        value.getShelfThick(), value.getServiceZoneWidth()),
-                value -> new TypeLb(value.getType(), value.getDeltaWidth(),
-                        value.getShelfThick(), value.getServiceZoneWidth())
-        );
+        com.lb_calc_web.domain.model.ALS replacement = TestDataFactory.restoreALS(replacementDto);
 
         assertThrows(
                 NoSuchElementException.class,
