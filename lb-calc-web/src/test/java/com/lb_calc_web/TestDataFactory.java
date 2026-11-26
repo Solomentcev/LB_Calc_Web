@@ -19,7 +19,6 @@ import com.lb_calc_web.dto.FunctionalConfigurationDTO;
 import com.lb_calc_web.dto.ProjectDTO;
 import com.lb_calc_web.mapper.dto.ALSDtoMapper;
 import com.lb_calc_web.mapper.dto.LBCDtoMapper;
-import com.lb_calc_web.service.image.ALSImageService;
 import com.lb_calc_web.service.validation.size.ALSSizeValidator;
 import com.lb_calc_web.service.validation.size.ModuleSizeValidator;
 import com.lb_calc_web.service.validation.size.ProjectSizeValidator;
@@ -234,11 +233,7 @@ public final class TestDataFactory {
                         + " ячеек"
         );
 
-        als.setStringALSImage(
-                ALSImageService.getStringALSImage(als)
-        );
-
-        return als;
+return als;
     }
 
     public static ALSDTO validLBCALSDTO(Long id) {
@@ -273,11 +268,7 @@ public final class TestDataFactory {
                         + als.getCountCells()
                         + " ячеек"
         );
-        als.setStringALSImage(
-                ALSImageService.getStringALSImage(als)
-        );
-
-        return als;
+return als;
     }
 
     public static ALS validALS(Long id) {
