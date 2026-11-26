@@ -274,7 +274,7 @@ class PersistenceIntegrationTest {
         ProjectEntity restoredEntity =
                 projectRepository.findById(projectId).orElseThrow();
         Project restoredProject =
-                ProjectEntityMapper.toDomain(restoredEntity);
+                restoreProjectEntity(restoredEntity);
 
         assertEquals(2, restoredProject.getQuantity(domainALS));
         assertEquals(domainProject.getDescription(), restoredProject.getDescription());
@@ -296,7 +296,7 @@ class PersistenceIntegrationTest {
             );
         }
 
-        ALS restoredALS = ALSEntityMapper.toDomain(restoredALSEntity);
+        ALS restoredALS = restoreAlsEntity(restoredALSEntity);
         assertEquals(domainALS, restoredALS);
         assertEquals("CENTER", restoredALS.getPositionControlModule().name());
 
@@ -384,13 +384,11 @@ class PersistenceIntegrationTest {
         employeeEntity = employeeRepository.saveAndFlush(employeeEntity);
 
         ALS originalALS = TestDataFactory.validALS(null);
-        ALS otherALS = ALSDtoMapper.toDomain(
-                TestDataFactory.validLBCALSDTO(null)
-        );
+        ALS otherALS = TestDataFactory.restoreALS(TestDataFactory.validLBCALSDTO(null));
 
         ALSDTO changedDTO = TestDataFactory.validALSDTO(null);
         changedDTO.getLbList().get(1).setCountCells(4);
-        ALS changedALS = ALSDtoMapper.toDomain(changedDTO);
+        ALS changedALS = TestDataFactory.restoreALS(changedDTO);
 
         Map<Module, ModuleEntity> resolvedModules = new HashMap<>();
         java.util.function.Function<Module, ModuleEntity> moduleResolver =
@@ -437,9 +435,7 @@ class PersistenceIntegrationTest {
 
         ProjectEntity managedProjectEntity =
                 projectRepository.findById(projectId).orElseThrow();
-        Project restoredProject = ProjectEntityMapper.toDomain(
-                managedProjectEntity
-        );
+        Project restoredProject = restoreProjectEntity(managedProjectEntity);
         restoredProject.replaceALS(originalALS, changedALS);
 
         Map<Long, ALSEntity> persistedConfigurations = Map.of(
@@ -471,7 +467,7 @@ class PersistenceIntegrationTest {
 
         ProjectEntity restoredEntity =
                 projectRepository.findById(projectId).orElseThrow();
-        Project finalProject = ProjectEntityMapper.toDomain(restoredEntity);
+        Project finalProject = restoreProjectEntity(restoredEntity);
 
         assertEquals(1, finalProject.getQuantity(originalALS));
         assertEquals(1, finalProject.getQuantity(changedALS));
@@ -504,7 +500,7 @@ class PersistenceIntegrationTest {
         );
 
         ALS restoredChangedALS =
-                ALSEntityMapper.toDomain(restoredChangedEntity);
+                restoreAlsEntity(restoredChangedEntity);
         assertEquals(
                 List.of("LEFT", "RIGHT"),
                 restoredChangedALS.getStorageModules().stream()
@@ -707,7 +703,7 @@ class PersistenceIntegrationTest {
             ALSEntity restoredChangedLCEntity =
                     alsRepository.findById(changedWithLC.getId()).orElseThrow();
             ALS restoredChangedLC =
-                    ALSEntityMapper.toDomain(restoredChangedLCEntity);
+                    restoreAlsEntity(restoredChangedLCEntity);
             assertEquals(2, restoredChangedLC.getStorageModules().size());
             assertEquals(
                     List.of(1, 2, 3, 4, 5, 6, 7),
@@ -757,6 +753,18 @@ class PersistenceIntegrationTest {
         return EquipmentEntityMapper.toDomain(saved);
     }
 
+    private ALS restoreAlsEntity(ALSEntity entity) {
+        return ALSEntityMapper.toDomain(entity, TestDataFactory.lcGeometrySettings());
+    }
+
+    private Project restoreProjectEntity(ProjectEntity entity) {
+        return ProjectEntityMapper.toDomain(
+                entity,
+                this::restoreAlsEntity,
+                (als, alsEntity) -> { }
+        );
+    }
+
     private ALS restoreAlsDto(ALSDTO dto) {
         return ALSDtoMapper.toDomain(
                 dto,
@@ -764,7 +772,9 @@ class PersistenceIntegrationTest {
                         value.getShelfThick(), value.getServiceZoneWidth()),
                 value -> new TypeLb(value.getType(), value.getDeltaWidth(),
                         value.getShelfThick(), value.getServiceZoneWidth()),
-                equipmentCatalogService::findById
+                equipmentCatalogService::findById,
+                null,
+                TestDataFactory.lcGeometrySettings()
         );
     }
 
