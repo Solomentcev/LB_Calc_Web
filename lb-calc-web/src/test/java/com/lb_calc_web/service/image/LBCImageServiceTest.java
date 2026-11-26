@@ -77,9 +77,10 @@ class LBCImageServiceTest {
         BufferedImage leftImage = LBCImageService.createLBCImage(leftOpening);
         BufferedImage rightImage = LBCImageService.createLBCImage(rightOpening);
 
-        int y = 100 * 3 + 1;
-        int leftSideX = 1 * 3 + 1;
-        int rightSideX = 49 * 3 + 1;
+        // Берём точки внутри зон, вдали от скруглённых границ и сглаживания.
+        int y = 15 * 3 + 1;
+        int leftSideX = 5 * 3 + 1;
+        int rightSideX = 45 * 3 + 1;
 
         assertEquals(Colors.White.getColor().getRGB(), leftImage.getRGB(leftSideX, y));
         assertEquals(Colors.Blue.getColor().getRGB(), leftImage.getRGB(rightSideX, y));
