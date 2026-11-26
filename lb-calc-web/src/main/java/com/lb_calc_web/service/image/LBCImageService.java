@@ -105,7 +105,7 @@ public final class LBCImageService {
         // Полки складских ячеек выше технической ячейки.
         for (int i = 0; i < lbc.getStorageCellsAbove(); i++) {
             int shelfY = technicalTop - (i + 1) * shelf - i * cellHeight;
-            drawShelf(graphics, storageAreaX, shelfY, storageAreaWidth, shelf);
+            drawShelf(graphics, lbc.getColorBody().getColor(), storageAreaX, shelfY, storageAreaWidth, shelf);
         }
 
         // Техническая ячейка и дисплей отображаются по физическим размерам.
