@@ -76,6 +76,7 @@ public class ALSController extends BaseCatalogController {
                 als.setLC(persisted.getLC());
                 als.setLBC(persisted.getLBC());
             }
+            ALSFormSupport.synchronizeFunctionalConfiguration(als, equipmentCatalogService);
             als = ALSDtoMapper.toDto(alsService.restoreDomain(als));
         } catch (ValidationSizeException exception) {
             model.addAttribute("ALSErrors",
@@ -99,6 +100,7 @@ public class ALSController extends BaseCatalogController {
                 als.setLBC(persisted.getLBC());
             }
 
+            ALSFormSupport.synchronizeFunctionalConfiguration(als, equipmentCatalogService);
             com.lb_calc_web.domain.model.ALS domain = alsService.restoreDomain(als);
             com.lb_calc_web.domain.model.ALS saved = alsService.saveALS(domain);
             return "redirect:/alss/" + saved.getId();
