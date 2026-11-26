@@ -230,13 +230,27 @@ public class SizeBounds {
         return typeServiceZoneWidthMax;
     }
 
-    public int getHeightDefault() { return heightDefault; }
-    public int getWidthDefault() { return widthDefault; }
-    public int getDepthDefault() { return depthDefault; }
-    public int getUpperFrameDefault() { return upperFrameDefault; }
-    public int getBottomFrameDefault() { return bottomFrameDefault; }
-    public int getCountCellsDefault() { return countCellsDefault; }
-    public int getDoorThicknessDefault() { return doorThicknessDefault; }
+    public int getHeightDefault() {
+        return heightDefault;
+    }
+    public int getWidthDefault() {
+        return widthDefault;
+    }
+    public int getDepthDefault() {
+        return depthDefault;
+    }
+    public int getUpperFrameDefault() {
+        return upperFrameDefault;
+    }
+    public int getBottomFrameDefault() {
+        return bottomFrameDefault;
+    }
+    public int getCountCellsDefault() {
+        return countCellsDefault;
+    }
+    public int getDoorThicknessDefault() {
+        return doorThicknessDefault;
+    }
 
     /** Создаёт настройки геометрии LC из значений properties. */
     public com.lb_calc_web.domain.model.LCGeometrySettings getLCGeometrySettings() {

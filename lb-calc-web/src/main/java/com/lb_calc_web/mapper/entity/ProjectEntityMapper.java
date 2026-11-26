@@ -32,6 +32,7 @@ public final class ProjectEntityMapper {
      * соответствие каждой доменной ALS её persistence-сущности.
      *
      * @param entity persistence-модель проекта
+     * @param alsMapper восстановление доменной ALS из JPA-сущности
      * @param alsObserver обработчик соответствия ALS и ALSEntity
      * @return доменный проект
      */

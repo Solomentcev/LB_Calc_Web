@@ -31,7 +31,6 @@ import java.util.List;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
-import org.springframework.mock.env.MockEnvironment;
 
 public final class TestDataFactory {
 
@@ -344,14 +343,6 @@ return als;
     /** Загружает тестовые геометрические настройки из того же файла, что и приложение. */
     public static LCGeometrySettings lcGeometrySettings() {
         return createSizeBounds().getLCGeometrySettings();
-    }
-
-    /** Добавляет геометрические свойства LC в тестовое окружение. */
-    public static void configureLcGeometryProperties(MockEnvironment environment) {
-        Properties properties = loadSizeProperties();
-        properties.stringPropertyNames().stream()
-                .filter(key -> key.startsWith("lc.geometry."))
-                .forEach(key -> environment.setProperty(key, properties.getProperty(key)));
     }
 
     private static int intProperty(Properties properties, String key) {
