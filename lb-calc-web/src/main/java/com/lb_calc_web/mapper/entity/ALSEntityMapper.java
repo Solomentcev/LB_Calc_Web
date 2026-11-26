@@ -18,13 +18,15 @@ public final class ALSEntityMapper {
     }
 
     /** Восстанавливает ALS с настройками геометрии приложения. */
-    public static ALS toDomain(ALSEntity entity, com.lb_calc_web.domain.model.LCGeometrySettings geometrySettings) {
+    public static ALS toDomain(ALSEntity entity, int minimumWidth, int displaySideClearance, int widthRoundingStep,
+            int displayCenterHeight, int displayTopClearance) {
         Objects.requireNonNull(entity, "ALSEntity не должен быть null");
 
         List<Module> modules = entity.getModules().stream()
                 .sorted(Comparator.comparingInt(ALSModuleEntity::getModuleOrder))
                 .map(ALSModuleEntity::getModule)
-                .map(module -> ModuleEntityMapper.toDomain(module, geometrySettings))
+                .map(module -> ModuleEntityMapper.toDomain(module, minimumWidth, displaySideClearance,
+                        widthRoundingStep, displayCenterHeight, displayTopClearance))
                 .toList();
 
         ALS domain = new ALS(
