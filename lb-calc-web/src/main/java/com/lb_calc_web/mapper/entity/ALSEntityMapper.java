@@ -19,12 +19,17 @@ public final class ALSEntityMapper {
 
     /** Восстанавливает доменную конфигурацию ALS из JPA-сущности. */
     public static ALS toDomain(ALSEntity entity) {
+        return toDomain(entity, new com.lb_calc_web.domain.model.LCGeometrySettings(200, 20, 50, 1300, 20));
+    }
+
+    /** Восстанавливает ALS с настройками геометрии приложения. */
+    public static ALS toDomain(ALSEntity entity, com.lb_calc_web.domain.model.LCGeometrySettings geometrySettings) {
         Objects.requireNonNull(entity, "ALSEntity не должен быть null");
 
         List<Module> modules = entity.getModules().stream()
                 .sorted(Comparator.comparingInt(ALSModuleEntity::getModuleOrder))
                 .map(ALSModuleEntity::getModule)
-                .map(ModuleEntityMapper::toDomain)
+                .map(module -> ModuleEntityMapper.toDomain(module, geometrySettings))
                 .toList();
 
         ALS domain = new ALS(

@@ -25,6 +25,11 @@ public final class LCEntityMapper {
 
     /** Восстанавливает доменную конфигурацию LC из JPA-сущности. */
     public static LC toDomain(LCEntity entity) {
+        return toDomain(entity, new com.lb_calc_web.domain.model.LCGeometrySettings(200, 20, 50, 1300, 20));
+    }
+
+    /** Восстанавливает LC с настройками геометрии приложения. */
+    public static LC toDomain(LCEntity entity, com.lb_calc_web.domain.model.LCGeometrySettings geometrySettings) {
         if (entity == null) {
             return null;
         }
@@ -54,7 +59,8 @@ public final class LCEntityMapper {
                         "Цвет корпуса LC не должен быть null"),
                 Objects.requireNonNull(entity.getColorDoor(),
                         "Цвет дверей LC не должен быть null"),
-                configuration
+                configuration,
+                geometrySettings
         );
 
         domain = (LC) Module.restoreText(domain, entity.getName(), entity.getDescription());

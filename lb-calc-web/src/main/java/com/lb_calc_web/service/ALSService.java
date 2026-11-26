@@ -127,7 +127,7 @@ public class ALSService {
         specifications.add(com.lb_calc_web.repository.specification.CatalogSpecifications.equal(
                 "colorDoor", filter.colorDoor()));
         var specification = com.lb_calc_web.repository.specification.CatalogSpecifications.all(specifications);
-        return alsRepository.findAll(specification, pageable).map(ALSEntityMapper::toDomain);
+        return alsRepository.findAll(specification, pageable).map(entity -> ALSEntityMapper.toDomain(entity, lcService.getGeometrySettings()));
     }
 
     /** Возвращает все сохранённые конфигурации ALS. */
@@ -148,7 +148,7 @@ public class ALSService {
         }
         ALSEntity entity = alsRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("АКХ с id=" + id + " не найдена"));
-        return ALSEntityMapper.toDomain(entity);
+        return ALSEntityMapper.toDomain(entity, lcService.getGeometrySettings());
     }
 
     /** Создаёт доменную конфигурацию ALS с параметрами по умолчанию. */
@@ -354,7 +354,8 @@ public class ALSService {
                 current.getBottomFrame(),
                 current.getColorBody(),
                 current.getColorDoor(),
-                current.getControlConfiguration()
+                current.getControlConfiguration(),
+                lcService.getGeometrySettings()
         );
 
         als.replaceLBCWithLC(replacement);
@@ -512,7 +513,7 @@ public class ALSService {
     private ModuleEntity resolveModule(Module domain, List<ModuleEntity> cache) {
         for (ModuleEntity entity : cache) {
             if (isSameModuleType(domain, entity)
-                    && domain.equals(ModuleEntityMapper.toDomain(entity))) {
+                    && domain.equals(ModuleEntityMapper.toDomain(entity, lcService.getGeometrySettings()))) {
                 return entity;
             }
         }

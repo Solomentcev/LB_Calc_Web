@@ -75,6 +75,17 @@ ControlConfiguration configuration = domain.getControlConfiguration();
             Function<Long, Equipment> equipmentLookup,
             ControlConfiguration fallbackConfiguration
     ) {
+        return toDomain(dto, equipmentLookup, fallbackConfiguration,
+                new com.lb_calc_web.domain.model.LCGeometrySettings(200, 20, 50, 1300, 20));
+    }
+
+    /** Восстанавливает LC с настройками геометрии приложения. */
+    public static LC toDomain(
+            LCDTO dto,
+            Function<Long, Equipment> equipmentLookup,
+            ControlConfiguration fallbackConfiguration,
+            com.lb_calc_web.domain.model.LCGeometrySettings geometrySettings
+    ) {
         if (dto == null) {
             return null;
         }
@@ -122,7 +133,8 @@ ControlConfiguration configuration = domain.getControlConfiguration();
                 dto.getBottomFrame(),
                 Colors.valueOf(dto.getColorBody()),
                 Colors.valueOf(dto.getColorDoor()),
-                configuration
+                configuration,
+                geometrySettings
         );
         domain.setId(dto.getId() == null || dto.getId() <= 0 ? null : dto.getId());
         return domain;

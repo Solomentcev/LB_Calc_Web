@@ -144,7 +144,7 @@ public class LCService {
         Specification<LCEntity> specification = specifications.stream()
                 .reduce(Specification::and)
                 .orElse((root, query, builder) -> builder.conjunction());
-        return lcRepository.findAll(specification, pageable).map(LCEntityMapper::toDomain);
+        return lcRepository.findAll(specification, pageable).map(entity -> LCEntityMapper.toDomain(entity, geometrySettings));
     }
 
     private void addRange(
@@ -189,7 +189,7 @@ public class LCService {
         LCEntity entity = lcRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException(
                         "Модуль управления LC с id=" + id + " не найден"));
-        return LCEntityMapper.toDomain(entity);
+        return LCEntityMapper.toDomain(entity, geometrySettings);
     }
 
     /** Восстанавливает LC из DTO, разрешая выбранное оборудование по Long ID. */
@@ -207,7 +207,7 @@ public class LCService {
         Objects.requireNonNull(dto, "LC не должен быть null");
         try {
             return LCDtoMapper.toDomain(
-                    dto, this::findEquipment, fallbackConfiguration);
+                    dto, this::findEquipment, fallbackConfiguration, geometrySettings);
         } catch (RuntimeException exception) {
             throw createMappingValidationException("LC", dto.getId(), exception);
         }
@@ -235,11 +235,11 @@ public class LCService {
                         domain.getUpperFrame(), domain.getBottomFrame(),
                         domain.getColorBody(), domain.getColorDoor())
                 .stream()
-                .filter(entity -> LCEntityMapper.toDomain(entity).equals(domain))
+                .filter(entity -> LCEntityMapper.toDomain(entity, geometrySettings).equals(domain))
                 .findFirst();
 
         if (duplicate.isPresent()) {
-            return LCEntityMapper.toDomain(duplicate.get());
+            return LCEntityMapper.toDomain(duplicate.get(), geometrySettings);
         }
 
         LCEntity saved = lcRepository.save(
@@ -247,6 +247,10 @@ public class LCService {
         domain.setId(saved.getId());
         logger.info("LC сохранён, id={}", saved.getId());
         return domain;
+    }
+
+    public com.lb_calc_web.domain.model.LCGeometrySettings getGeometrySettings() {
+        return geometrySettings;
     }
 
     private int requiredInt(String key) {
