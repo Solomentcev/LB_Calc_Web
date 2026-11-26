@@ -342,6 +342,7 @@ public class ProjectController
         com.lb_calc_web.domain.model.Project preview =
                 projectService.findById(projectId);
         try {
+            ALSFormSupport.synchronizeFunctionalConfiguration(als, equipmentCatalogService);
             ALS replacement = alsService.restoreDomain(als);
             preview = projectService.previewALSReplacement(projectId, alsId, replacement);
             als = ALSDtoMapper.toDto(replacement);
@@ -369,6 +370,7 @@ public class ProjectController
         try {
             projectService.findALSInProject(projectId, alsId);
             als.setId(alsId);
+            ALSFormSupport.synchronizeFunctionalConfiguration(als, equipmentCatalogService);
             ALS replacement = alsService.restoreDomain(als);
             ALS savedALS = projectService.replaceALSandSaveProject(
                     projectId,
