@@ -29,7 +29,7 @@ class ALSDomainTest {
 
 
     @Test
-    void replaceLBCWithLC_shouldPreserveStorageConfigurationAndPhysicalSide() {
+    void replaceLBCWithLC_shouldRemoveEmbeddedStorageAndPreserveControlConfiguration() {
         LB left = TestDataFactory.validLB(101L);
         LBC lbc = TestDataFactory.validLBC(102L);
         LB right = TestDataFactory.validLB(103L);
@@ -45,32 +45,20 @@ class ALSDomainTest {
                 lbc.getColorBody(), lbc.getColorDoor(),
                 lbc.getControlConfiguration()
         );
-        LB replacementLB = new LB(
-                lbc.getHeight(), lbc.getWidth(), lbc.getDepth(),
-                lbc.getUpperFrame(), lbc.getBottomFrame(),
-                lbc.getColorBody(), lbc.getColorDoor(),
-                lbc.getTypeLb(), lbc.getCountCells(),
-                lbc.getDirectionDoorOpening(), lbc.getDoorThickness()
-        );
 
-        als.replaceLBCWithLC(replacementLC, replacementLB);
+        als.replaceLBCWithLC(replacementLC);
 
-        List<Module> modules = als.getModules();
         assertEquals(
-                List.of("LB", "LC", "LB", "LB"),
-                modules.stream().map(module -> module.getClass().getSimpleName()).toList()
+                List.of("LB", "LC", "LB"),
+                als.getModules().stream()
+                        .map(module -> module.getClass().getSimpleName())
+                        .toList()
         );
         assertEquals("CENTER", als.getPositionControlModule().name());
-        assertEquals(9, als.getCountCells());
-        assertEquals(lbc.getControlConfiguration(),
-                als.getLC().getControlConfiguration());
-        LB convertedStorage = (LB) modules.get(2);
-        assertEquals(lbc.getTypeLb(), convertedStorage.getTypeLb());
-        assertEquals(lbc.getCountCells(), convertedStorage.getCountCells());
-        assertEquals(lbc.getDoorThickness(), convertedStorage.getDoorThickness());
+        assertEquals(6, als.getCountCells());
         assertEquals(
-                com.lb_calc_web.domain.attributes.DirectionDoorOpening.RIGHT,
-                convertedStorage.getDirectionDoorOpening()
+                lbc.getControlConfiguration(),
+                als.getLC().getControlConfiguration()
         );
     }
 
