@@ -58,7 +58,7 @@ class LBCServiceTest {
                 .withProperty("lb.type.TYPE1.service-zone-width", "40");
         service = new LBCService(
                 repository, lockService, environment,
-                TestDataFactory.createSizeValidator(), equipmentRepository);
+                TestDataFactory.createSizeValidator(), equipmentRepository, TestDataFactory.createSizeBounds());
     }
 
     @Test

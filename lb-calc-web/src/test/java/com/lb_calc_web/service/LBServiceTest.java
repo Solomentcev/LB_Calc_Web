@@ -48,7 +48,8 @@ class LBServiceTest {
                 lbRepository,
                 findOrCreateLockService,
                 environment,
-                TestDataFactory.createSizeValidator()
+                TestDataFactory.createSizeValidator(),
+                TestDataFactory.createSizeBounds()
         );
     }
 

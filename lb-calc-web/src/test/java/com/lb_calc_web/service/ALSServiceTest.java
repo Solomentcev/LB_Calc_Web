@@ -60,7 +60,8 @@ class ALSServiceTest {
         service = new ALSService(
                 alsRepository, projectALSRepository, moduleRepository,
                 lbService, lcService, lbcService, lockService,
-                environment, TestDataFactory.createSizeValidator(), equipmentRepository);
+                environment, TestDataFactory.createSizeValidator(), equipmentRepository,
+                TestDataFactory.createSizeBounds());
     }
 
     @Test

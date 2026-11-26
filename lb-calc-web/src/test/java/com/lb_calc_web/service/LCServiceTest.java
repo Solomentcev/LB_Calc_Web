@@ -57,7 +57,7 @@ class LCServiceTest {
         TestDataFactory.configureLcGeometryProperties(environment);
         service = new LCService(
                 repository, lockService, environment,
-                TestDataFactory.createSizeValidator(), equipmentRepository);
+                TestDataFactory.createSizeValidator(), equipmentRepository, TestDataFactory.createSizeBounds());
     }
 
     @Test
