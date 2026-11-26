@@ -74,7 +74,7 @@
                     <div class="col-sm-6 col-lg-3 module-field">
                         <label for="lbc-height">Высота, мм</label>
                         <input id="lbc-height" class="form-control" type="number" min="1"
-                               th:field="*{height}" required>
+                               th:field="*{height}" required th:readonly="${pageContext != 'CATALOG'}">
                     </div>
                     <div class="col-sm-6 col-lg-3 module-field">
                         <label for="lbc-width">Ширина, мм</label>
@@ -84,17 +84,17 @@
                     <div class="col-sm-6 col-lg-3 module-field">
                         <label for="lbc-depth">Глубина, мм</label>
                         <input id="lbc-depth" class="form-control" type="number" min="1"
-                               th:field="*{depth}" required>
+                               th:field="*{depth}" required th:readonly="${pageContext != 'CATALOG'}">
                     </div>
                     <div class="col-sm-6 col-lg-3 module-field">
                         <label for="lbc-upper-frame">Верхняя рама, мм</label>
                         <input id="lbc-upper-frame" class="form-control" type="number" min="0"
-                               th:field="*{upperFrame}">
+                               th:field="*{upperFrame}" th:readonly="${pageContext != 'CATALOG'}">
                     </div>
                     <div class="col-sm-6 col-lg-3 module-field">
                         <label for="lbc-bottom-frame">Нижняя рама, мм</label>
                         <input id="lbc-bottom-frame" class="form-control" type="number" min="0"
-                               th:field="*{bottomFrame}">
+                               th:field="*{bottomFrame}" th:readonly="${pageContext != 'CATALOG'}">
                     </div>
                     <div class="col-sm-6 col-lg-3 module-field">
                         <label for="lbc-door-thickness">Толщина дверцы, мм</label>
@@ -108,17 +108,25 @@
                                     th:value="${direction}" th:text="${direction}"></option>
                         </select>
                     </div>
-                    <div class="col-sm-6 col-lg-4 module-field">
+                    <div class="col-sm-6 col-lg-4 module-field" th:if="${pageContext == 'CATALOG'}">
                         <label for="lbc-body-color">Цвет корпуса</label>
                         <select id="lbc-body-color" class="form-control" th:field="*{colorBody}">
                             <option th:each="color : ${colorsList}" th:value="${color}" th:text="${color}"></option>
                         </select>
                     </div>
-                    <div class="col-sm-6 col-lg-4 module-field">
+                    <div class="col-sm-6 col-lg-4 module-field" th:if="${pageContext != 'CATALOG'}">
+                        <label for="lbc-body-color-readonly">Цвет корпуса</label>
+                        <input id="lbc-body-color-readonly" class="form-control" th:field="*{colorBody}" readonly>
+                    </div>
+                    <div class="col-sm-6 col-lg-4 module-field" th:if="${pageContext == 'CATALOG'}">
                         <label for="lbc-door-color">Цвет дверей</label>
                         <select id="lbc-door-color" class="form-control" th:field="*{colorDoor}">
                             <option th:each="color : ${colorsList}" th:value="${color}" th:text="${color}"></option>
                         </select>
+                    </div>
+                    <div class="col-sm-6 col-lg-4 module-field" th:if="${pageContext != 'CATALOG'}">
+                        <label for="lbc-door-color-readonly">Цвет дверей</label>
+                        <input id="lbc-door-color-readonly" class="form-control" th:field="*{colorDoor}" readonly>
                     </div>
                 </div>
             </div>
@@ -151,7 +159,16 @@
             </div>
         </section>
 
-        <div th:replace="~{fragments/module-form :: functionalConfiguration}"></div>
+        <div th:if="${pageContext == 'CATALOG'}"
+             th:replace="~{fragments/module-form :: functionalConfiguration}"></div>
+        <div th:if="${pageContext != 'CATALOG'}">
+            <input type="hidden" th:field="*{functionalConfiguration.display}">
+            <input type="hidden" th:field="*{functionalConfiguration.payment}">
+            <input type="hidden" th:field="*{functionalConfiguration.printer}">
+            <input type="hidden" name="_functionalConfiguration.access" value="on">
+            <input type="hidden" th:each="purpose : *{functionalConfiguration.access}"
+                   name="functionalConfiguration.access" th:value="${purpose}">
+        </div>
         <div th:replace="~{fragments/module-form :: equipmentSelections}"></div>
 
 </div>
