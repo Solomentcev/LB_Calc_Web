@@ -22,7 +22,8 @@ public final class ModuleEntityMapper {
     }
 
     /** Восстанавливает модуль с настройками геометрии приложения. */
-    public static Module toDomain(ModuleEntity entity, com.lb_calc_web.domain.model.LCGeometrySettings geometrySettings) {
+    public static Module toDomain(ModuleEntity entity, int minimumWidth, int displaySideClearance, int widthRoundingStep,
+            int displayCenterHeight, int displayTopClearance) {
         if (entity == null) {
             return null;
         }
@@ -35,7 +36,8 @@ public final class ModuleEntityMapper {
             return LBEntityMapper.toDomain(lbEntity);
         }
         if (concreteEntity instanceof LCEntity lcEntity) {
-            return LCEntityMapper.toDomain(lcEntity, geometrySettings);
+            return LCEntityMapper.toDomain(lcEntity, minimumWidth, displaySideClearance,
+                    widthRoundingStep, displayCenterHeight, displayTopClearance);
         }
 
         throw new IllegalArgumentException(
