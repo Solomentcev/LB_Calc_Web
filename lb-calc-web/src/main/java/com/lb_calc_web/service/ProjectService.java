@@ -504,6 +504,20 @@ return projectRepository.findAllWithUsers()
     }
 
     /**
+     * Преобразует LBC в LC и LB только в выбранном экземпляре ALS проекта.
+     */
+    @Transactional
+    public ALS replaceWithNewLCAtProject(Long projectId, Long alsId) {
+        Project domain = findDomainProject(projectId);
+        ALS original = findDomainALS(domain, alsId);
+        ALS updated = alsService.replaceWithNewLC(original.copy());
+        domain.replaceALS(original, updated);
+
+        Project savedProject = saveDomainProject(domain);
+        return findDomainALS(savedProject, updated);
+    }
+
+    /**
      * Добавляет LB в конкретный ALS конкретного проекта.
      */
     @Transactional
