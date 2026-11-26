@@ -122,7 +122,26 @@ public final class ALSDtoMapper {
             Function<Long, com.lb_calc_web.domain.equipment.Equipment> equipmentLookup,
             com.lb_calc_web.domain.model.ControlConfiguration fallbackConfiguration,
             int minimumWidth, int displaySideClearance, int widthRoundingStep,
-            int displayCenterHeight, int displayTopClearance
+            int displayCenterHeight, int displayTopClearance,
+            int lbcTechnicalCellMinWidth, int lbcTechnicalCellMinHeight,
+            int lbcEquipmentClearance, int lbcDisplayCenterHeight, int storageCellMinHeight
+    ) {
+        return toDomain(dto, lbTypeResolver, lbcTypeResolver, equipmentLookup,
+                fallbackConfiguration, minimumWidth, displaySideClearance, widthRoundingStep,
+                displayCenterHeight, displayTopClearance, 200, 200, 20, 1300, 85);
+    }
+
+    /** Восстанавливает ALS с настройками физической геометрии LC и LBC. */
+    public static ALS toDomain(
+            ALSDTO dto,
+            Function<LBDTO, TypeLb> lbTypeResolver,
+            Function<LBCDTO, TypeLb> lbcTypeResolver,
+            Function<Long, com.lb_calc_web.domain.equipment.Equipment> equipmentLookup,
+            com.lb_calc_web.domain.model.ControlConfiguration fallbackConfiguration,
+            int minimumWidth, int displaySideClearance, int widthRoundingStep,
+            int displayCenterHeight, int displayTopClearance,
+            int lbcTechnicalCellMinWidth, int lbcTechnicalCellMinHeight,
+            int lbcEquipmentClearance, int lbcDisplayCenterHeight, int storageCellMinHeight
     ) {
         if (dto == null) {
             return null;
@@ -142,11 +161,15 @@ public final class ALSDtoMapper {
                 ? restoreLegacyOrder(
                         dto, lbTypeResolver, lbcTypeResolver, equipmentLookup, fallbackConfiguration,
                         minimumWidth, displaySideClearance, widthRoundingStep,
-                        displayCenterHeight, displayTopClearance)
+                        displayCenterHeight, displayTopClearance,
+                        lbcTechnicalCellMinWidth, lbcTechnicalCellMinHeight,
+                        lbcEquipmentClearance, lbcDisplayCenterHeight, storageCellMinHeight)
                 : restoreExplicitOrder(
                         dto, lbTypeResolver, lbcTypeResolver, equipmentLookup, fallbackConfiguration,
                         minimumWidth, displaySideClearance, widthRoundingStep,
-                        displayCenterHeight, displayTopClearance);
+                        displayCenterHeight, displayTopClearance,
+                        lbcTechnicalCellMinWidth, lbcTechnicalCellMinHeight,
+                        lbcEquipmentClearance, lbcDisplayCenterHeight, storageCellMinHeight);
 
         ALS domain = new ALS(
                 dto.getHeight(),
@@ -199,7 +222,9 @@ public final class ALSDtoMapper {
         }
 
         Module control = dto.getLBC() != null
-                ? LBCDtoMapper.toDomain(dto.getLBC(), lbcTypeResolver.apply(dto.getLBC()), equipmentLookup, fallbackConfiguration)
+                ? LBCDtoMapper.toDomain(dto.getLBC(), lbcTypeResolver.apply(dto.getLBC()), equipmentLookup,
+                        fallbackConfiguration, lbcTechnicalCellMinWidth, lbcTechnicalCellMinHeight,
+                        lbcEquipmentClearance, lbcDisplayCenterHeight, storageCellMinHeight)
                 : LCDtoMapper.toDomain(
                         dto.getLC(), equipmentLookup, fallbackConfiguration,
                         minimumWidth, displaySideClearance, widthRoundingStep,
@@ -255,7 +280,9 @@ public final class ALSDtoMapper {
                     }
                     controlModuleUsed = true;
                     modules.add(LBCDtoMapper.toDomain(
-                            dto.getLBC(), lbcTypeResolver.apply(dto.getLBC()), equipmentLookup, fallbackConfiguration));
+                            dto.getLBC(), lbcTypeResolver.apply(dto.getLBC()), equipmentLookup, fallbackConfiguration,
+                            lbcTechnicalCellMinWidth, lbcTechnicalCellMinHeight,
+                            lbcEquipmentClearance, lbcDisplayCenterHeight, storageCellMinHeight));
                 }
                 default -> throw new IllegalStateException(
                         "Неизвестный тип модуля в moduleOrder: " + item.getType());
