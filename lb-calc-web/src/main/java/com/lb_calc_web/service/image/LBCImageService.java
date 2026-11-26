@@ -99,7 +99,7 @@ public final class LBCImageService {
 
         for (int i = 0; i < lbc.getStorageCellsBelow(); i++) {
             int shelfY = bottomBoundary + i * (cellHeight + shelf);
-            drawShelf(graphics, storageAreaX, shelfY, storageAreaWidth, shelf);
+            drawShelf(graphics, lbc.getColorBody().getColor(), storageAreaX, shelfY, storageAreaWidth, shelf);
         }
 
         // Полки складских ячеек выше технической ячейки.
@@ -147,11 +147,11 @@ public final class LBCImageService {
     }
 
     /** Рисует полку с заливкой и чёрным контуром в пределах области хранения. */
-    private static void drawShelf(Graphics2D graphics, int x, int y, int width, int shelf) {
+    private static void drawShelf(Graphics2D graphics, Color shelfColor, int x, int y, int width, int shelf) {
         if (width <= 0 || shelf <= 0) {
             return;
         }
-        graphics.setColor(graphics.getColor());
+        graphics.setColor(shelfColor);
         graphics.fillRoundRect(x, y, width, shelf, 1, 1);
         graphics.setColor(Color.BLACK);
         graphics.drawRoundRect(x, y, width, shelf, 1, 1);
