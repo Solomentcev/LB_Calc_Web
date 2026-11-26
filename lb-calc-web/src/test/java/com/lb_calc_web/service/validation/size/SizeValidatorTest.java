@@ -352,7 +352,8 @@ class SizeValidatorTest {
                 lc.getBottomFrame(),
                 lc.getColorBody(),
                 lc.getColorDoor(),
-                lc.getControlConfiguration().copy()
+                lc.getControlConfiguration().copy(),
+                TestDataFactory.lcGeometrySettings()
         );
     }
 
@@ -391,9 +392,7 @@ class SizeValidatorTest {
     }
 
     private ALS validLBCALS(Long id) {
-        return ALSDtoMapper.toDomain(
-                TestDataFactory.validLBCALSDTO(id)
-        );
+        return TestDataFactory.restoreALS(TestDataFactory.validLBCALSDTO(id));
     }
 
     private Project createProject(Long id, ALS configuration) {
@@ -438,7 +437,7 @@ class SizeValidatorTest {
                 ControlConfiguration configuration
         ) {
             super(height, width, depth, upperFrame, bottomFrame,
-                    colorBody, colorDoor, configuration);
+                    colorBody, colorDoor, configuration, TestDataFactory.lcGeometrySettings());
         }
 
         private void setWidthForTest(int width) {

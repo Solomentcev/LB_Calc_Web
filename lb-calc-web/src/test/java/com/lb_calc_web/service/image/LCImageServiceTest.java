@@ -1,5 +1,7 @@
 package com.lb_calc_web.service.image;
 
+import com.lb_calc_web.TestDataFactory;
+
 import com.lb_calc_web.domain.attributes.Colors;
 import com.lb_calc_web.domain.equipment.DisplayPurpose;
 import com.lb_calc_web.domain.equipment.Equipment;
@@ -54,7 +56,8 @@ class LCImageServiceTest {
                 50,
                 Colors.Black,
                 Colors.White,
-                new ControlConfiguration(functional, equipment)
+                new ControlConfiguration(functional, equipment),
+                TestDataFactory.lcGeometrySettings()
         );
     }
 
