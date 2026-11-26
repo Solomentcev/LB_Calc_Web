@@ -44,7 +44,8 @@ class LCDtoMapperTest {
                 new ControlConfiguration(
                         source.getControlConfiguration().getFunctionalConfiguration(),
                         Map.of(scanner, 2)
-                )
+                ),
+                TestDataFactory.lcGeometrySettings()
         );
 
         LCDTO dto = LCDtoMapper.toDto(domain);
@@ -68,7 +69,7 @@ class LCDtoMapperTest {
 
         LC restored = LCDtoMapper.toDomain(dto, id -> {
             throw new AssertionError("Загрузчик не должен вызываться");
-        }, fallback);
+        }, fallback, TestDataFactory.lcGeometrySettings());
 
         assertEquals(Map.of(scanner, 1), restored.getEquipment());
     }

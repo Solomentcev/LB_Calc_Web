@@ -38,7 +38,7 @@ class ALSEntityMapperTest {
             assertEquals(i, entity.getModules().get(i).getModuleOrder());
         }
 
-        ALS restored = ALSEntityMapper.toDomain(entity);
+        ALS restored = ALSEntityMapper.toDomain(entity, TestDataFactory.lcGeometrySettings());
 
         assertEquals(domain, restored);
         assertEquals(domain.getModules(), restored.getModules());
@@ -98,7 +98,7 @@ class ALSEntityMapperTest {
                 entity,
                 module -> originalAssociations.stream()
                         .map(com.lb_calc_web.entity.ALSModuleEntity::getModule)
-                        .filter(existing -> ModuleEntityMapper.toDomain(existing).equals(module))
+                        .filter(existing -> ModuleEntityMapper.toDomain(existing, TestDataFactory.lcGeometrySettings()).equals(module))
                         .findFirst()
                         .orElseThrow()
         );

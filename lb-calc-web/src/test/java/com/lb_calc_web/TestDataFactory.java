@@ -112,8 +112,14 @@ public final class TestDataFactory {
     }
 
     public static LC validLC(Long id) {
-        return com.lb_calc_web.mapper.dto.LCDtoMapper
-                .toDomain(validLCDTO(id));
+        return com.lb_calc_web.mapper.dto.LCDtoMapper.toDomain(
+                validLCDTO(id),
+                equipmentId -> {
+                    throw new IllegalStateException("Оборудование в тестовой конфигурации не загружается");
+                },
+                null,
+                lcGeometrySettings()
+        );
     }
 
     public static LBDTO validLBDTO(Long id) {
@@ -277,8 +283,22 @@ return als;
     }
 
     public static ALS validALS(Long id) {
+        return restoreALS(validALSDTO(id));
+    }
+
+    /** Восстанавливает тестовую ALS с геометрическими настройками из properties. */
+    public static ALS restoreALS(ALSDTO dto) {
         return ALSDtoMapper.toDomain(
-                validALSDTO(id)
+                dto,
+                value -> new TypeLb(value.getType(), value.getDeltaWidth(),
+                        value.getShelfThick(), value.getServiceZoneWidth()),
+                value -> new TypeLb(value.getType(), value.getDeltaWidth(),
+                        value.getShelfThick(), value.getServiceZoneWidth()),
+                equipmentId -> {
+                    throw new IllegalStateException("Оборудование в тестовой конфигурации не загружается");
+                },
+                null,
+                lcGeometrySettings()
         );
     }
 

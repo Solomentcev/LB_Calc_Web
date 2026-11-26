@@ -1,5 +1,6 @@
 package com.lb_calc_web.domain.model;
 
+import com.lb_calc_web.TestDataFactory;
 import com.lb_calc_web.domain.attributes.Colors;
 import com.lb_calc_web.domain.equipment.DisplayPurpose;
 import com.lb_calc_web.domain.equipment.Equipment;
@@ -82,7 +83,7 @@ class LCTest {
         ControlConfiguration configuration = new ControlConfiguration(
                 functionalConfiguration, equipment);
         return new LC(height, width, 600, 50, 50,
-                Colors.Black, Colors.Black, configuration);
+                Colors.Black, Colors.Black, configuration, TestDataFactory.lcGeometrySettings());
     }
 
     private Equipment display(int width, int height) {

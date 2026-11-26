@@ -26,7 +26,7 @@ class ALSDtoMapperTest {
         functional.setPrinter(com.lb_calc_web.domain.equipment.PrinterPurpose.PRESENT);
         dto.setFunctionalConfiguration(functional);
 
-        ALS restored = ALSDtoMapper.toDomain(dto);
+        ALS restored = TestDataFactory.restoreALS(dto);
 
         assertEquals(
                 new com.lb_calc_web.domain.model.FunctionalConfiguration(

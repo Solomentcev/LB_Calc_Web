@@ -26,7 +26,7 @@ class ModuleEntityMapperTest {
         var domain = TestDataFactory.validLB(null);
         ModuleEntity entity = toEntity(domain);
         assertInstanceOf(LBEntity.class, entity);
-        assertEquals(domain, ModuleEntityMapper.toDomain(entity));
+        assertEquals(domain, ModuleEntityMapper.toDomain(entity, TestDataFactory.lcGeometrySettings()));
     }
 
     @Test
@@ -115,7 +115,7 @@ class ModuleEntityMapperTest {
 
     @Test
     void toDomain_shouldReturnNullForNullEntity() {
-        assertNull(ModuleEntityMapper.toDomain(null));
+        assertNull(ModuleEntityMapper.toDomain(null, TestDataFactory.lcGeometrySettings()));
     }
 
     @Test
