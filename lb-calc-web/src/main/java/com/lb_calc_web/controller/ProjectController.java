@@ -1,10 +1,6 @@
 package com.lb_calc_web.controller;
 
 import com.lb_calc_web.dto.ALSDTO;
-import com.lb_calc_web.domain.equipment.AccessPurpose;
-import com.lb_calc_web.domain.equipment.DisplayPurpose;
-import com.lb_calc_web.domain.equipment.PaymentPurpose;
-import com.lb_calc_web.domain.equipment.PrinterPurpose;
 import com.lb_calc_web.mapper.dto.EquipmentDtoMapper;
 import com.lb_calc_web.service.EquipmentCatalogService;
 import com.lb_calc_web.domain.model.ALS;
@@ -904,10 +900,6 @@ public class ProjectController
         model.addAttribute("equipmentList", equipmentCatalogService.findAll().stream()
                 .map(EquipmentDtoMapper::toDto).toList());
         model.addAttribute("defaultEquipmentIds", equipmentCatalogService.findDefaultModelIds());
-        model.addAttribute("displayPurposes", List.of(DisplayPurpose.values()));
-        model.addAttribute("accessPurposes", List.of(AccessPurpose.values()));
-        model.addAttribute("paymentPurposes", List.of(PaymentPurpose.values()));
-        model.addAttribute("printerPurposes", List.of(PrinterPurpose.values()));
     }
 
     private void prepareLBCForm(Model model, LBCDTO lbc) {
@@ -917,10 +909,6 @@ public class ProjectController
         model.addAttribute("equipmentList", equipmentCatalogService.findAll().stream()
                 .map(EquipmentDtoMapper::toDto).toList());
         model.addAttribute("defaultEquipmentIds", equipmentCatalogService.findDefaultModelIds());
-        model.addAttribute("displayPurposes", List.of(DisplayPurpose.values()));
-        model.addAttribute("accessPurposes", List.of(AccessPurpose.values()));
-        model.addAttribute("paymentPurposes", List.of(PaymentPurpose.values()));
-        model.addAttribute("printerPurposes", List.of(PrinterPurpose.values()));
     }
 
 
