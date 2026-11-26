@@ -162,6 +162,19 @@ public final class ALSDtoMapper {
             Function<Long, com.lb_calc_web.domain.equipment.Equipment> equipmentLookup,
             com.lb_calc_web.domain.model.ControlConfiguration fallbackConfiguration
     ) {
+        return toDomain(dto, lbTypeResolver, lbcTypeResolver, equipmentLookup,
+                fallbackConfiguration, new com.lb_calc_web.domain.model.LCGeometrySettings(200, 20, 50, 1300, 20));
+    }
+
+    /** Восстанавливает ALS с настройками геометрии LC приложения. */
+    public static ALS toDomain(
+            ALSDTO dto,
+            Function<LBDTO, TypeLb> lbTypeResolver,
+            Function<LBCDTO, TypeLb> lbcTypeResolver,
+            Function<Long, com.lb_calc_web.domain.equipment.Equipment> equipmentLookup,
+            com.lb_calc_web.domain.model.ControlConfiguration fallbackConfiguration,
+            com.lb_calc_web.domain.model.LCGeometrySettings geometrySettings
+    ) {
         if (dto == null) {
             return null;
         }
@@ -177,8 +190,8 @@ public final class ALSDtoMapper {
         }
 
         List<Module> modules = dto.getModuleOrder() == null
-                ? restoreLegacyOrder(dto, lbTypeResolver, lbcTypeResolver, equipmentLookup, fallbackConfiguration)
-                : restoreExplicitOrder(dto, lbTypeResolver, lbcTypeResolver, equipmentLookup, fallbackConfiguration);
+                ? restoreLegacyOrder(dto, lbTypeResolver, lbcTypeResolver, equipmentLookup, fallbackConfiguration, geometrySettings)
+                : restoreExplicitOrder(dto, lbTypeResolver, lbcTypeResolver, equipmentLookup, fallbackConfiguration, geometrySettings);
 
         ALS domain = new ALS(
                 dto.getHeight(),
@@ -217,7 +230,8 @@ public final class ALSDtoMapper {
             Function<LBDTO, TypeLb> lbTypeResolver,
             Function<LBCDTO, TypeLb> lbcTypeResolver,
             Function<Long, com.lb_calc_web.domain.equipment.Equipment> equipmentLookup,
-            com.lb_calc_web.domain.model.ControlConfiguration fallbackConfiguration
+            com.lb_calc_web.domain.model.ControlConfiguration fallbackConfiguration,
+            com.lb_calc_web.domain.model.LCGeometrySettings geometrySettings
     ) {
         List<LBDTO> lbDtos = dto.getLbList() == null ? List.of() : dto.getLbList();
         List<Module> modules = new ArrayList<>();
@@ -230,7 +244,7 @@ public final class ALSDtoMapper {
 
         Module control = dto.getLBC() != null
                 ? LBCDtoMapper.toDomain(dto.getLBC(), lbcTypeResolver.apply(dto.getLBC()), equipmentLookup, fallbackConfiguration)
-                : LCDtoMapper.toDomain(dto.getLC(), equipmentLookup, fallbackConfiguration);
+                : LCDtoMapper.toDomain(dto.getLC(), equipmentLookup, fallbackConfiguration, geometrySettings);
         return insertControlModule(modules, control, dto.getPositionControlModule());
     }
 
@@ -269,7 +283,7 @@ public final class ALSDtoMapper {
                         throw new IllegalStateException("moduleOrder содержит недопустимую ссылку на LC");
                     }
                     controlModuleUsed = true;
-                    modules.add(LCDtoMapper.toDomain(dto.getLC(), equipmentLookup, fallbackConfiguration));
+                    modules.add(LCDtoMapper.toDomain(dto.getLC(), equipmentLookup, fallbackConfiguration, geometrySettings));
                 }
                 case "LBC" -> {
                     if (item.getIndex() != 0 || dto.getLBC() == null || controlModuleUsed) {

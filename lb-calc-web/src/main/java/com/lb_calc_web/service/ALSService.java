@@ -437,7 +437,8 @@ public class ALSService {
                     candidate -> TypeLbFactory.forLB(environment, candidate.getType()),
                     candidate -> TypeLbFactory.forLBC(environment, candidate.getType()),
                     this::findEquipment,
-                    fallback
+                    fallback,
+                    lcService.getGeometrySettings()
             );
             if (existingALS == null) {
                 return restored;
