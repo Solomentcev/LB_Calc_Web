@@ -139,10 +139,14 @@ public final class ALSDtoMapper {
         }
 
         List<Module> modules = dto.getModuleOrder() == null
-                ? restoreLegacyOrder(dto, lbTypeResolver, lbcTypeResolver, equipmentLookup, fallbackConfiguration, minimumWidth, displaySideClearance,
-                        widthRoundingStep, displayCenterHeight, displayTopClearance)
-                : restoreExplicitOrder(dto, lbTypeResolver, lbcTypeResolver, equipmentLookup, fallbackConfiguration, minimumWidth, displaySideClearance,
-                        widthRoundingStep, displayCenterHeight, displayTopClearance);
+                ? restoreLegacyOrder(
+                        dto, lbTypeResolver, lbcTypeResolver, equipmentLookup, fallbackConfiguration,
+                        minimumWidth, displaySideClearance, widthRoundingStep,
+                        displayCenterHeight, displayTopClearance)
+                : restoreExplicitOrder(
+                        dto, lbTypeResolver, lbcTypeResolver, equipmentLookup, fallbackConfiguration,
+                        minimumWidth, displaySideClearance, widthRoundingStep,
+                        displayCenterHeight, displayTopClearance);
 
         ALS domain = new ALS(
                 dto.getHeight(),
@@ -196,8 +200,10 @@ public final class ALSDtoMapper {
 
         Module control = dto.getLBC() != null
                 ? LBCDtoMapper.toDomain(dto.getLBC(), lbcTypeResolver.apply(dto.getLBC()), equipmentLookup, fallbackConfiguration)
-                : LCDtoMapper.toDomain(dto.getLC(), equipmentLookup, fallbackConfiguration, minimumWidth, displaySideClearance,
-                        widthRoundingStep, displayCenterHeight, displayTopClearance);
+                : LCDtoMapper.toDomain(
+                        dto.getLC(), equipmentLookup, fallbackConfiguration,
+                        minimumWidth, displaySideClearance, widthRoundingStep,
+                        displayCenterHeight, displayTopClearance);
         return insertControlModule(modules, control, dto.getPositionControlModule());
     }
 
@@ -238,8 +244,10 @@ public final class ALSDtoMapper {
                         throw new IllegalStateException("moduleOrder содержит недопустимую ссылку на LC");
                     }
                     controlModuleUsed = true;
-                    modules.add(LCDtoMapper.toDomain(dto.getLC(), equipmentLookup, fallbackConfiguration, minimumWidth, displaySideClearance,
-                        widthRoundingStep, displayCenterHeight, displayTopClearance));
+                    modules.add(LCDtoMapper.toDomain(
+                            dto.getLC(), equipmentLookup, fallbackConfiguration,
+                            minimumWidth, displaySideClearance, widthRoundingStep,
+                            displayCenterHeight, displayTopClearance));
                 }
                 case "LBC" -> {
                     if (item.getIndex() != 0 || dto.getLBC() == null || controlModuleUsed) {
