@@ -172,13 +172,6 @@
                         <input type="hidden" th:field="*{LC.displayWidth}">
                         <input type="hidden" th:field="*{LC.displayHeight}">
                         <input type="hidden" name="LC.equipmentSelectionsProvided" value="true">
-                        <input type="hidden" th:field="*{LC.functionalConfiguration.display}">
-                        <input type="hidden" th:field="*{LC.functionalConfiguration.payment}">
-                        <input type="hidden" th:field="*{LC.functionalConfiguration.printer}">
-                        <input type="hidden" name="_LC.functionalConfiguration.access" value="on">
-                        <input type="hidden"
-                               th:each="purpose : ${als.LC.functionalConfiguration.access}"
-                               name="LC.functionalConfiguration.access" th:value="${purpose}">
                         <input type="hidden"
                                th:each="selection, selectionStat : ${als.LC.equipmentSelections}"
                                th:name="|LC.equipmentSelections[${selectionStat.index}].equipmentId|"
@@ -232,13 +225,6 @@
                         <input type="hidden" th:field="*{LBC.displayWidth}">
                         <input type="hidden" th:field="*{LBC.displayHeight}">
                         <input type="hidden" name="LBC.equipmentSelectionsProvided" value="true">
-                        <input type="hidden" th:field="*{LBC.functionalConfiguration.display}">
-                        <input type="hidden" th:field="*{LBC.functionalConfiguration.payment}">
-                        <input type="hidden" th:field="*{LBC.functionalConfiguration.printer}">
-                        <input type="hidden" name="_LBC.functionalConfiguration.access" value="on">
-                        <input type="hidden"
-                               th:each="purpose : ${als.LBC.functionalConfiguration.access}"
-                               name="LBC.functionalConfiguration.access" th:value="${purpose}">
                         <input type="hidden"
                                th:each="selection, selectionStat : ${als.LBC.equipmentSelections}"
                                th:name="|LBC.equipmentSelections[${selectionStat.index}].equipmentId|"
