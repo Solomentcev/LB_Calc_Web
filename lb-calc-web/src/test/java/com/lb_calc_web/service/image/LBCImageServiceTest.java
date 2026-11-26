@@ -138,8 +138,8 @@ class LBCImageServiceTest {
 
         // Берём точки внутри зон, вдали от скруглённых границ и сглаживания.
         int y = 15 * 3 + 1;
-        int leftSideX = 1 * 3 + 1;
-        int rightSideX = 49 * 3 + 1;
+        int leftSideX = 5 * 3 + 1;
+        int rightSideX = 45 * 3 + 1;
 
         assertEquals(Colors.White.getColor().getRGB(), leftImage.getRGB(leftSideX, y));
         assertEquals(Colors.Blue.getColor().getRGB(), leftImage.getRGB(rightSideX, y));
@@ -161,7 +161,7 @@ class LBCImageServiceTest {
         return new LBC(
                 1940, 500, 600, 100, 100,
                 Colors.Blue, Colors.White,
-                new TypeLb("TYPE1", 100, 5, 20),
+                new TypeLb("TYPE1", 100, 5, 100),
                 10, direction, 20, control,
                 200, 200, 20, 1300, 200, 85
         );
