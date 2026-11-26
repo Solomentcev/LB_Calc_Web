@@ -335,7 +335,7 @@ public class ALSService {
     }
 
     /**
-     * Преобразует LBC в LC и самостоятельный LB без потери конфигурации.
+     * Заменяет LBC модулем LC. Встроенная часть хранения LBC удаляется.
      */
     @Transactional(readOnly = true)
     public ALS replaceWithNewLC(ALS als) {
@@ -346,8 +346,7 @@ public class ALSService {
                     "В ALS " + als.getId() + " отсутствует модуль LBC");
         }
 
-        ControlConfiguration configuration = current.getControlConfiguration();
-        LC replacementLC = new LC(
+        LC replacement = new LC(
                 current.getHeight(),
                 current.getWidth(),
                 current.getDepth(),
@@ -355,24 +354,17 @@ public class ALSService {
                 current.getBottomFrame(),
                 current.getColorBody(),
                 current.getColorDoor(),
-                configuration
-        );
-        LB replacementLB = new LB(
-                current.getHeight(),
-                current.getWidth(),
-                current.getDepth(),
-                current.getUpperFrame(),
-                current.getBottomFrame(),
-                current.getColorBody(),
-                current.getColorDoor(),
-                current.getTypeLb(),
-                current.getCountCells(),
-                current.getDirectionDoorOpening(),
-                current.getDoorThickness()
+                current.getControlConfiguration()
         );
 
-        als.replaceLBCWithLC(replacementLC, replacementLB);
+        als.replaceLBCWithLC(replacement);
         return als;
+    }
+
+    /** Заменяет LBC на LC и сохраняет обновлённую ALS. */
+    @Transactional
+    public ALS replaceWithNewLCandSaveALS(Long alsId) {
+        return saveALS(replaceWithNewLC(findById(alsId)));
     }
 
     /** Заменяет управляющий модуль ALS новым модулем LBC. */
