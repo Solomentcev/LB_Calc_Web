@@ -83,7 +83,9 @@ class LCTest {
         ControlConfiguration configuration = new ControlConfiguration(
                 functionalConfiguration, equipment);
         return new LC(height, width, 600, 50, 50,
-                Colors.Black, Colors.Black, configuration, TestDataFactory.lcGeometrySettings());
+                Colors.Black, Colors.Black, configuration, TestDataFactory.lcMinimumWidth(), TestDataFactory.lcDisplaySideClearance(),
+                TestDataFactory.lcWidthRoundingStep(), TestDataFactory.lcDisplayCenterHeight(),
+                TestDataFactory.lcDisplayTopClearance());
     }
 
     private Equipment display(int width, int height) {
