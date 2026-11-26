@@ -250,7 +250,7 @@ toDto(alsService.createALS())
     ) {
 
             ALSDTO saved = toDto(alsService.deleteLBandSaveALS(alsId, lbId));
-            return ResponseEntity.ok(ApiResponse.success(addALSImage(saved)));
+            return ResponseEntity.ok(ApiResponse.success(toDto(alsService.findById(alsId))));
 
     }
 
@@ -258,14 +258,8 @@ toDto(alsService.createALS())
      * Преобразует доменную ALS в DTO и формирует изображение для ответа API.
      */
     private ALSDTO toDto(com.lb_calc_web.domain.model.ALS domain) {
-        return addALSImage(ALSDtoMapper.toDto(domain));
-    }
-
-    /**
-     * Добавляет изображение на границе HTTP-представления.
-     */
-    private ALSDTO addALSImage(ALSDTO dto) {
-        dto.setStringALSImage(ALSImageService.getStringALSImage(dto));
+        ALSDTO dto = ALSDtoMapper.toDto(domain);
+        dto.setStringALSImage(ALSImageService.getStringALSImage(domain));
         return dto;
     }
 

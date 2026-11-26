@@ -319,7 +319,7 @@ public class ProjectController
 
         model.addAttribute(
                 "als",
-                ALSImageService.addImages(als)
+                addALSImage(als)
         );
         model.addAttribute("projectId", projectId);
         model.addAttribute("alsId", alsId);
@@ -349,7 +349,7 @@ public class ProjectController
             model.addAttribute("ALSErrors", List.of(exception.getMessage()));
         }
         model.addAttribute("project", addALSImages(ProjectDtoMapper.toDto(preview)));
-        model.addAttribute("als", ALSImageService.addImages(als));
+        model.addAttribute("als", addALSImage(als));
         model.addAttribute("projectId", projectId);
         model.addAttribute("alsId", alsId);
         return "alss/als";
@@ -388,7 +388,7 @@ public class ProjectController
                     ValidationErrorFormatter.format(e.getValidationResult())
             );
 
-            model.addAttribute("als", ALSImageService.addImages(als));
+            model.addAttribute("als", addALSImage(als));
 
             model.addAttribute(
                     "project",
@@ -400,7 +400,7 @@ public class ProjectController
             return "alss/als";
         } catch (IllegalArgumentException e) {
             model.addAttribute("ALSErrors", List.of(e.getMessage()));
-            model.addAttribute("als", ALSImageService.addImages(als));
+            model.addAttribute("als", addALSImage(als));
             model.addAttribute("project", addALSImages(ProjectDtoMapper.toDto(projectService.findById(projectId))));
             model.addAttribute("projectId", projectId);
             model.addAttribute("alsId", alsId);
@@ -434,8 +434,8 @@ public class ProjectController
                 );
 
         model.addAttribute("project", addALSImages(project));
-        model.addAttribute("als", ALSImageService.addImages(als));
-        prepareLCForm(model, LCImageService.addImage(lc));
+        model.addAttribute("als", addALSImage(als));
+        prepareLCForm(model, addLCImage(lc, projectId, alsId));
         model.addAttribute("projectId", projectId);
         model.addAttribute("alsId", alsId);
         model.addAttribute("lcId", lcId);
@@ -464,8 +464,8 @@ public class ProjectController
             model.addAttribute("errors", ValidationErrorFormatter.format(exception.getValidationResult()));
         }
         model.addAttribute("project", addALSImages(ProjectDtoMapper.toDto(preview)));
-        model.addAttribute("als", ALSImageService.addImages(ALSDtoMapper.toDto(updatedALS)));
-        prepareLCForm(model, LCImageService.addImage(lc));
+        model.addAttribute("als", toDtoWithImages(updatedALS));
+        prepareLCForm(model, addLCImage(lc, projectId, alsId));
         model.addAttribute("projectId", projectId);
         model.addAttribute("alsId", alsId);
         model.addAttribute("lcId", lcId);
@@ -517,12 +517,10 @@ public class ProjectController
 
             model.addAttribute(
                     "als",
-                    ALSImageService.addImages(ALSDtoMapper.toDto(
-                            projectService.findALSInProject(projectId, alsId)
-                    ))
+                    toDtoWithImages(projectService.findALSInProject(projectId, alsId))
             );
 
-            prepareLCForm(model, LCImageService.addImage(lc));
+            prepareLCForm(model, addLCImage(lc, projectId, alsId));
 
             model.addAttribute(
                     "projectId",
@@ -569,8 +567,8 @@ public class ProjectController
                 );
 
         model.addAttribute("project", addALSImages(project));
-        model.addAttribute("als", ALSImageService.addImages(als));
-        prepareLBCForm(model, LBCImageService.addImage(lbc));
+        model.addAttribute("als", addALSImage(als));
+        prepareLBCForm(model, addLBCImage(lbc, projectId, alsId));
         model.addAttribute("projectId", projectId);
         model.addAttribute("alsId", alsId);
         model.addAttribute("lbcId", lbcId);
@@ -599,8 +597,8 @@ public class ProjectController
             model.addAttribute("errors", ValidationErrorFormatter.format(exception.getValidationResult()));
         }
         model.addAttribute("project", addALSImages(ProjectDtoMapper.toDto(preview)));
-        model.addAttribute("als", ALSImageService.addImages(ALSDtoMapper.toDto(updatedALS)));
-        prepareLBCForm(model, LBCImageService.addImage(lbc));
+        model.addAttribute("als", toDtoWithImages(updatedALS));
+        prepareLBCForm(model, addLBCImage(lbc, projectId, alsId));
         model.addAttribute("projectId", projectId);
         model.addAttribute("alsId", alsId);
         model.addAttribute("lbcId", lbcId);
@@ -646,11 +644,9 @@ public class ProjectController
 
             model.addAttribute("project", addALSImages(ProjectDtoMapper.toDto(projectService.findById(projectId))));
 
-            model.addAttribute("als", ALSImageService.addImages(ALSDtoMapper.toDto(
-                    projectService.findALSInProject(projectId, alsId)
-            )));
+            model.addAttribute("als", toDtoWithImages(projectService.findALSInProject(projectId, alsId)));
 
-            prepareLBCForm(model, LBCImageService.addImage(lbc));
+            prepareLBCForm(model, addLBCImage(lbc, projectId, alsId));
 
             model.addAttribute("projectId", projectId);
             model.addAttribute("alsId", alsId);
@@ -686,8 +682,8 @@ public class ProjectController
                 );
 
         model.addAttribute("project", addALSImages(project));
-        model.addAttribute("als", ALSImageService.addImages(als));
-        model.addAttribute("lb", LBImageService.addImage(lb));
+        model.addAttribute("als", addALSImage(als));
+        model.addAttribute("lb", addLBImage(lb));
         model.addAttribute("projectId", projectId);
         model.addAttribute("alsId", alsId);
         model.addAttribute("lbId", lbId);
@@ -719,8 +715,8 @@ public class ProjectController
             model.addAttribute("errors", ValidationErrorFormatter.format(exception.getValidationResult()));
         }
         model.addAttribute("project", addALSImages(ProjectDtoMapper.toDto(preview)));
-        model.addAttribute("als", ALSImageService.addImages(ALSDtoMapper.toDto(updatedALS)));
-        model.addAttribute("lb", LBImageService.addImage(lb));
+        model.addAttribute("als", toDtoWithImages(updatedALS));
+        model.addAttribute("lb", addLBImage(lb));
         model.addAttribute("projectId", projectId);
         model.addAttribute("alsId", alsId);
         model.addAttribute("lbId", lbId);
@@ -765,11 +761,11 @@ public class ProjectController
 
             model.addAttribute("project", addALSImages(ProjectDtoMapper.toDto(projectService.findById(projectId))));
 
-            model.addAttribute("als", ALSImageService.addImages(ALSDtoMapper.toDto(projectService.findALSInProject(projectId, alsId))));
+            model.addAttribute("als", toDtoWithImages(projectService.findALSInProject(projectId, alsId)));
 
             model.addAttribute(
                     "lb",
-                    LBImageService.addImage(lb)
+                    addLBImage(lb)
             );
 
             model.addAttribute(
@@ -887,7 +883,7 @@ public class ProjectController
 
         InputStreamResource file =
                 new InputStreamResource(
-                        projectExcelExportService.exportToExcel(project)
+                        projectExcelExportService.exportToExcel(projectService.findById(id))
                 );
 
         return ResponseEntity.ok()
@@ -907,10 +903,85 @@ public class ProjectController
      */
     private ProjectDTO addALSImages(ProjectDTO project) {
         if (project != null && project.getAlsList() != null) {
+            for (int index = 0; index < project.getAlsList().size(); index++) {
+                ALSDTO als = project.getAlsList().get(index);
+                try {
+                    project.getAlsList().set(index, toDtoWithImages(alsService.restoreDomain(als)));
+                } catch (RuntimeException exception) {
+                    // Для некорректной промежуточной формы изображение не формируется.
+                }
+            }
             ProjectDtoMapper.recalculateQuantityALS(project);
-            project.getAlsList().forEach(ALSImageService::addImages);
         }
         return project;
+    }
+
+    private ALSDTO addALSImage(ALSDTO dto) {
+        try {
+            return toDtoWithImages(alsService.restoreDomain(dto));
+        } catch (RuntimeException exception) {
+            return dto;
+        }
+    }
+
+    private ALSDTO toDtoWithImages(ALS domain) {
+        ALSDTO dto = ALSDtoMapper.toDto(domain);
+        dto.setStringALSImage(ALSImageService.getStringALSImage(domain));
+        int lbIndex = 0;
+        for (com.lb_calc_web.domain.model.Module module : domain.getModules()) {
+            if (module instanceof LB lb) {
+                dto.getLbList().get(lbIndex++).setStringLBImage(LBImageService.getStringLBImage(lb));
+            } else if (module instanceof LC lc) {
+                dto.getLC().setStringLCImage(LCImageService.getStringLCImage(lc));
+            } else if (module instanceof LBC lbc) {
+                dto.getLBC().setStringLBCImage(LBCImageService.getStringLBCImage(lbc));
+            }
+        }
+        return dto;
+    }
+
+    private LCDTO addLCImage(LCDTO dto, Long projectId, Long alsId) {
+        try {
+            ALS als = projectService.findALSInProject(projectId, alsId);
+            return toDtoWithImage(alsService.restoreLC(dto, als));
+        } catch (RuntimeException exception) {
+            return dto;
+        }
+    }
+
+    private LBCDTO addLBCImage(LBCDTO dto, Long projectId, Long alsId) {
+        try {
+            ALS als = projectService.findALSInProject(projectId, alsId);
+            return toDtoWithImage(alsService.restoreLBC(dto, als));
+        } catch (RuntimeException exception) {
+            return dto;
+        }
+    }
+
+    private LBDTO addLBImage(LBDTO dto) {
+        try {
+            return toDtoWithImage(alsService.restoreLB(dto));
+        } catch (RuntimeException exception) {
+            return dto;
+        }
+    }
+
+    private LCDTO toDtoWithImage(LC domain) {
+        LCDTO dto = LCDtoMapper.toDto(domain);
+        dto.setStringLCImage(LCImageService.getStringLCImage(domain));
+        return dto;
+    }
+
+    private LBCDTO toDtoWithImage(LBC domain) {
+        LBCDTO dto = LBCDtoMapper.toDto(domain);
+        dto.setStringLBCImage(LBCImageService.getStringLBCImage(domain));
+        return dto;
+    }
+
+    private LBDTO toDtoWithImage(LB domain) {
+        LBDTO dto = LBDtoMapper.toDto(domain);
+        dto.setStringLBImage(LBImageService.getStringLBImage(domain));
+        return dto;
     }
 
 

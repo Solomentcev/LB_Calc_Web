@@ -1,6 +1,9 @@
 package com.lb_calc_web.service.export;
 
 import com.lb_calc_web.dto.ALSDTO;
+import com.lb_calc_web.domain.model.ALS;
+import com.lb_calc_web.domain.model.Project;
+import com.lb_calc_web.mapper.dto.ProjectDtoMapper;
 import com.lb_calc_web.dto.LBCDTO;
 import com.lb_calc_web.dto.LBDTO;
 import com.lb_calc_web.dto.ProjectDTO;
@@ -28,9 +31,8 @@ public class ProjectExcelExportService {
             DateTimeFormatter.ofPattern("dd.MM.yyyy");
 
     /** Формирует Excel-файл с проектом, составом ALS и параметрами модулей. */
-    public ByteArrayInputStream exportToExcel(
-            ProjectDTO project
-    ) {
+    public ByteArrayInputStream exportToExcel(Project domainProject) {
+        ProjectDTO project = ProjectDtoMapper.toDto(domainProject);
 
         try (XSSFWorkbook wb = new XSSFWorkbook();
              ByteArrayOutputStream out = new ByteArrayOutputStream()) {
@@ -129,16 +131,15 @@ public class ProjectExcelExportService {
 
             int index = 1;
 
-            for (
-                    Map.Entry<ALSDTO, Integer> entry
-                    : project.getQuantityALS().entrySet()
-            ) {
-
+            var domainEntries = domainProject.getQuantityALS().entrySet().iterator();
+            for (Map.Entry<ALSDTO, Integer> entry : project.getQuantityALS().entrySet()) {
+                Map.Entry<ALS, Integer> domainEntry = domainEntries.next();
                 r = alsBlock(
                         sheet,
                         wb,
                         drawing,
                         entry.getKey(),
+                        domainEntry.getKey(),
                         entry.getValue(),
                         index++,
                         s,
@@ -175,6 +176,7 @@ public class ProjectExcelExportService {
             Workbook wb,
             XSSFDrawing drawing,
             ALSDTO als,
+            ALS domainAls,
             Integer qty,
             int index,
             Styles s,
@@ -209,7 +211,7 @@ public class ProjectExcelExportService {
                 sheet,
                 wb,
                 drawing,
-                als,
+                domainAls,
                 r++,
                 1,
                 8
@@ -472,16 +474,14 @@ public class ProjectExcelExportService {
             Sheet sheet,
             Workbook wb,
             XSSFDrawing drawing,
-            ALSDTO als,
+            ALS als,
             int row,
             int col1,
             int col2
     ) {
 
         byte[] img =
-                ALSImageService.getBytesArrayALSImage(
-                        als
-                );
+                ALSImageService.getBytesArrayALSImage(als);
 
         int id =
                 wb.addPicture(
