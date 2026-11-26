@@ -36,13 +36,6 @@
                                 ? '/projects/' + projectId + '/alss/' + alsId + '/refresh'
                                 : '/alss/refresh'}}"></button>
 
-        <input type="hidden" th:field="*{functionalConfiguration.display}">
-        <input type="hidden" th:field="*{functionalConfiguration.payment}">
-        <input type="hidden" th:field="*{functionalConfiguration.printer}">
-        <input type="hidden" name="_functionalConfiguration.access" value="on">
-        <input type="hidden" th:each="purpose : *{functionalConfiguration.access}"
-               name="functionalConfiguration.access" th:value="${purpose}">
-
         <div id="module-order-fields"
              th:attr="data-control-type=${als.LBC != null ? 'LBC' : 'LC'}">
             <input type="hidden" class="module-order-field"
@@ -157,6 +150,8 @@
                         </div>
                     </div>
                 </section>
+
+                <div th:replace="~{fragments/module-form :: functionalConfiguration}"></div>
 
                 <section th:if="${als.LC != null}" class="module-section">
                     <div class="module-section__header">
