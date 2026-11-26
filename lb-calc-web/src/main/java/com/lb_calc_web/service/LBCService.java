@@ -109,7 +109,12 @@ public class LBCService {
                 DirectionDoorOpening.valueOf(environment.getProperty(
                         "lbc.direction.default", DirectionDoorOpening.LEFT.name())),
                 sizeBounds.getDoorThicknessDefault(),
-                new ControlConfiguration(functional, Map.of())
+                new ControlConfiguration(functional, Map.of()),
+                sizeBounds.getLbcTechnicalCellMinWidth(),
+                sizeBounds.getLbcTechnicalCellMinHeight(),
+                sizeBounds.getLbcEquipmentClearance(),
+                sizeBounds.getLbcDisplayCenterHeight(),
+                sizeBounds.getHeightCellMin()
         );
     }
 
@@ -139,7 +144,7 @@ public class LBCService {
         specifications.add(com.lb_calc_web.repository.specification.CatalogSpecifications.equal("colorBody", filter.colorBody()));
         specifications.add(com.lb_calc_web.repository.specification.CatalogSpecifications.equal("colorDoor", filter.colorDoor()));
         var specification = com.lb_calc_web.repository.specification.CatalogSpecifications.all(specifications);
-        return lbcRepository.findAll(specification, pageable).map(LBCEntityMapper::toDomain);
+        return lbcRepository.findAll(specification, pageable).map(this::toDomain);
     }
 
     /** Возвращает все сохранённые комбинированные модули LBC. */
@@ -162,7 +167,7 @@ public class LBCService {
         LBCEntity entity = lbcRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException(
                         "Комбинированный модуль LBC с id=" + id + " не найден"));
-        return LBCEntityMapper.toDomain(entity);
+        return toDomain(entity);
     }
 
     /** Восстанавливает LBC из DTO, разрешая выбранное оборудование по Long ID. */
@@ -183,7 +188,12 @@ public class LBCService {
                     dto,
                     TypeLbFactory.forLBC(environment, dto.getType()),
                     this::findEquipment,
-                    fallbackConfiguration
+                    fallbackConfiguration,
+                    sizeBounds.getLbcTechnicalCellMinWidth(),
+                    sizeBounds.getLbcTechnicalCellMinHeight(),
+                    sizeBounds.getLbcEquipmentClearance(),
+                    sizeBounds.getLbcDisplayCenterHeight(),
+                    sizeBounds.getHeightCellMin()
             );
         } catch (RuntimeException exception) {
             throw createMappingValidationException("LBC", dto.getId(), exception);
@@ -216,11 +226,11 @@ public class LBCService {
                         typeLb.getServiceZoneWidth(), domain.getDoorThickness(),
                         domain.getDirectionDoorOpening(), domain.getCountCells())
                 .stream()
-                .filter(entity -> LBCEntityMapper.toDomain(entity).equals(domain))
+                .filter(entity -> toDomain(entity).equals(domain))
                 .findFirst();
 
         if (duplicate.isPresent()) {
-            return LBCEntityMapper.toDomain(duplicate.get());
+            return toDomain(duplicate.get());
         }
 
         LBCEntity saved = lbcRepository.save(
@@ -228,6 +238,15 @@ public class LBCService {
         domain.setId(saved.getId());
         logger.info("LBC сохранён, id={}", saved.getId());
         return domain;
+    }
+
+    private LBC toDomain(LBCEntity entity) {
+        return LBCEntityMapper.toDomain(entity,
+                sizeBounds.getLbcTechnicalCellMinWidth(),
+                sizeBounds.getLbcTechnicalCellMinHeight(),
+                sizeBounds.getLbcEquipmentClearance(),
+                sizeBounds.getLbcDisplayCenterHeight(),
+                sizeBounds.getHeightCellMin());
     }
 
     private Colors requiredColor(String key) {
