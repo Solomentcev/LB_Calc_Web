@@ -147,12 +147,7 @@ public class LCImageService {
                                 / 2
                 ) / 10;
 
-        int displayY =
-                (
-                        lc.getHeight()
-                                - 1300
-                                - lc.getDisplayHeight()
-                ) / 10;
+        int displayY = lc.getDisplayTop() / 10;
 
         int displayWidth =
                 lc.getDisplayWidth() / 10;

@@ -27,6 +27,8 @@ public class LCDTO {
     private int displayWidth;
     @JsonIgnore
     private int displayHeight;
+    @JsonIgnore
+    private int displayTop;
 
     private FunctionalConfigurationDTO functionalConfiguration;
     private List<EquipmentSelectionDTO> equipmentSelections;
@@ -111,6 +113,8 @@ public class LCDTO {
     public void setDisplayWidth(int displayWidth) { this.displayWidth = displayWidth; }
     public int getDisplayHeight() { return displayHeight; }
     public void setDisplayHeight(int displayHeight) { this.displayHeight = displayHeight; }
+    public int getDisplayTop() { return displayTop; }
+    public void setDisplayTop(int displayTop) { this.displayTop = displayTop; }
 
     public FunctionalConfigurationDTO getFunctionalConfiguration() {
         return functionalConfiguration;

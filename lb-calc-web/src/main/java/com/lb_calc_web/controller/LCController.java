@@ -51,8 +51,12 @@ public class LCController {
 
         logger.debug("Открытие страницы создания LC");
 
-        LCDTO lc = LCImageService.addImage(LCDtoMapper.toDto(lcService.createLC()));
+        LCDTO lc = LCDtoMapper.toDto(lcService.createLC());
+        lc.setEquipmentSelections(equipmentCatalogService.prepareSelections(
+                lc.getFunctionalConfiguration(), null));
+        lc = LCDtoMapper.toDto(lcService.restoreDomain(lc));
         lc.setId(0L);
+        lc = LCImageService.addImage(lc);
 
         prepareForm(model, lc);
 
@@ -115,7 +119,9 @@ public class LCController {
         try {
 
             equipmentCatalogService.validateSelections(lc.getFunctionalConfiguration(), lc.getEquipmentSelections());
-            LC savedLC = lcService.saveLC(lcService.restoreDomain(lc));
+            LC domain = lcService.restoreDomain(lc);
+            lc = LCDtoMapper.toDto(domain);
+            LC savedLC = lcService.saveLC(domain);
 
             return "redirect:/lcs/" + savedLC.getId();
 

@@ -5,6 +5,7 @@ import com.lb_calc_web.domain.equipment.Equipment;
 import com.lb_calc_web.domain.model.ControlConfiguration;
 import com.lb_calc_web.domain.model.FunctionalConfiguration;
 import com.lb_calc_web.domain.model.LC;
+import com.lb_calc_web.domain.model.LCGeometryCalculator;
 import com.lb_calc_web.dto.EquipmentSelectionDTO;
 import com.lb_calc_web.dto.FunctionalConfigurationDTO;
 import com.lb_calc_web.dto.LCDTO;
@@ -44,6 +45,8 @@ public final class LCDtoMapper {
                 .findFirst().ifPresent(display -> {
                     dto.setDisplayWidth(display.getWidth());
                     dto.setDisplayHeight(display.getHeight());
+                    dto.setDisplayTop(LCGeometryCalculator.calculateDisplayTop(
+                            domain.getHeight(), domain.getUpperFrame(), display.getHeight()));
                 });
 
         ControlConfiguration configuration = domain.getControlConfiguration();
