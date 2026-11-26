@@ -6,10 +6,6 @@ import com.lb_calc_web.dto.LCDTO;
 import com.lb_calc_web.dto.LBDTO;
 import com.lb_calc_web.domain.model.ALS;
 import com.lb_calc_web.domain.model.LB;
-import com.lb_calc_web.domain.equipment.AccessPurpose;
-import com.lb_calc_web.domain.equipment.DisplayPurpose;
-import com.lb_calc_web.domain.equipment.PaymentPurpose;
-import com.lb_calc_web.domain.equipment.PrinterPurpose;
 import com.lb_calc_web.mapper.dto.EquipmentDtoMapper;
 import com.lb_calc_web.service.EquipmentCatalogService;
 import com.lb_calc_web.mapper.dto.ALSDtoMapper;
@@ -281,10 +277,6 @@ public class ALSController extends BaseCatalogController {
         model.addAttribute("equipmentList", equipmentCatalogService.findAll().stream()
                 .map(EquipmentDtoMapper::toDto).toList());
         model.addAttribute("defaultEquipmentIds", equipmentCatalogService.findDefaultModelIds());
-        model.addAttribute("displayPurposes", List.of(DisplayPurpose.values()));
-        model.addAttribute("accessPurposes", List.of(AccessPurpose.values()));
-        model.addAttribute("paymentPurposes", List.of(PaymentPurpose.values()));
-        model.addAttribute("printerPurposes", List.of(PrinterPurpose.values()));
     }
 
     /**
@@ -363,10 +355,6 @@ public class ALSController extends BaseCatalogController {
         model.addAttribute("equipmentList", equipmentCatalogService.findAll().stream()
                 .map(EquipmentDtoMapper::toDto).toList());
         model.addAttribute("defaultEquipmentIds", equipmentCatalogService.findDefaultModelIds());
-        model.addAttribute("displayPurposes", List.of(DisplayPurpose.values()));
-        model.addAttribute("accessPurposes", List.of(AccessPurpose.values()));
-        model.addAttribute("paymentPurposes", List.of(PaymentPurpose.values()));
-        model.addAttribute("printerPurposes", List.of(PrinterPurpose.values()));
     }
 
     /**
