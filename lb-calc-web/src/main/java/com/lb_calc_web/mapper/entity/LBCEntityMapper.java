@@ -26,6 +26,18 @@ public final class LBCEntityMapper {
 
     /** Восстанавливает доменную конфигурацию LBC из JPA-сущности. */
     public static LBC toDomain(LBCEntity entity) {
+        return toDomain(entity, 200, 200, 20, 1300, 85);
+    }
+
+    /** Восстанавливает LBC с актуальными настройками физической геометрии. */
+    public static LBC toDomain(
+            LBCEntity entity,
+            int technicalCellMinWidth,
+            int technicalCellMinHeight,
+            int equipmentClearance,
+            int displayCenterHeight,
+            int storageCellMinHeight
+    ) {
         if (entity == null) {
             return null;
         }
@@ -66,7 +78,12 @@ public final class LBCEntityMapper {
                 Objects.requireNonNull(entity.getDirectionDoorOpening(),
                         "Направление открытия дверей LBC не должно быть null"),
                 entity.getDoorThickness(),
-                configuration
+                configuration,
+                technicalCellMinWidth,
+                technicalCellMinHeight,
+                equipmentClearance,
+                displayCenterHeight,
+                storageCellMinHeight
         );
 
         domain = (LBC) Module.restoreText(domain, entity.getName(), entity.getDescription());
