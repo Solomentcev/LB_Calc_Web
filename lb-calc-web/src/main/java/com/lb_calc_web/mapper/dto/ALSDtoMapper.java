@@ -253,7 +253,8 @@ public final class ALSDtoMapper {
             Function<LBDTO, TypeLb> lbTypeResolver,
             Function<LBCDTO, TypeLb> lbcTypeResolver,
             Function<Long, com.lb_calc_web.domain.equipment.Equipment> equipmentLookup,
-            com.lb_calc_web.domain.model.ControlConfiguration fallbackConfiguration
+            com.lb_calc_web.domain.model.ControlConfiguration fallbackConfiguration,
+            com.lb_calc_web.domain.model.LCGeometrySettings geometrySettings
     ) {
         List<LBDTO> lbDtos = dto.getLbList() == null ? List.of() : dto.getLbList();
         boolean[] usedLbIndexes = new boolean[lbDtos.size()];
