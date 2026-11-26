@@ -121,7 +121,8 @@ public final class ALSDtoMapper {
             Function<LBCDTO, TypeLb> lbcTypeResolver,
             Function<Long, com.lb_calc_web.domain.equipment.Equipment> equipmentLookup,
             com.lb_calc_web.domain.model.ControlConfiguration fallbackConfiguration,
-            com.lb_calc_web.domain.model.LCGeometrySettings geometrySettings
+            int minimumWidth, int displaySideClearance, int widthRoundingStep,
+            int displayCenterHeight, int displayTopClearance
     ) {
         if (dto == null) {
             return null;
@@ -138,8 +139,10 @@ public final class ALSDtoMapper {
         }
 
         List<Module> modules = dto.getModuleOrder() == null
-                ? restoreLegacyOrder(dto, lbTypeResolver, lbcTypeResolver, equipmentLookup, fallbackConfiguration, geometrySettings)
-                : restoreExplicitOrder(dto, lbTypeResolver, lbcTypeResolver, equipmentLookup, fallbackConfiguration, geometrySettings);
+                ? restoreLegacyOrder(dto, lbTypeResolver, lbcTypeResolver, equipmentLookup, fallbackConfiguration, minimumWidth, displaySideClearance,
+                        widthRoundingStep, displayCenterHeight, displayTopClearance)
+                : restoreExplicitOrder(dto, lbTypeResolver, lbcTypeResolver, equipmentLookup, fallbackConfiguration, minimumWidth, displaySideClearance,
+                        widthRoundingStep, displayCenterHeight, displayTopClearance);
 
         ALS domain = new ALS(
                 dto.getHeight(),
@@ -179,7 +182,8 @@ public final class ALSDtoMapper {
             Function<LBCDTO, TypeLb> lbcTypeResolver,
             Function<Long, com.lb_calc_web.domain.equipment.Equipment> equipmentLookup,
             com.lb_calc_web.domain.model.ControlConfiguration fallbackConfiguration,
-            com.lb_calc_web.domain.model.LCGeometrySettings geometrySettings
+            int minimumWidth, int displaySideClearance, int widthRoundingStep,
+            int displayCenterHeight, int displayTopClearance
     ) {
         List<LBDTO> lbDtos = dto.getLbList() == null ? List.of() : dto.getLbList();
         List<Module> modules = new ArrayList<>();
@@ -192,7 +196,8 @@ public final class ALSDtoMapper {
 
         Module control = dto.getLBC() != null
                 ? LBCDtoMapper.toDomain(dto.getLBC(), lbcTypeResolver.apply(dto.getLBC()), equipmentLookup, fallbackConfiguration)
-                : LCDtoMapper.toDomain(dto.getLC(), equipmentLookup, fallbackConfiguration, geometrySettings);
+                : LCDtoMapper.toDomain(dto.getLC(), equipmentLookup, fallbackConfiguration, minimumWidth, displaySideClearance,
+                        widthRoundingStep, displayCenterHeight, displayTopClearance);
         return insertControlModule(modules, control, dto.getPositionControlModule());
     }
 
@@ -202,7 +207,8 @@ public final class ALSDtoMapper {
             Function<LBCDTO, TypeLb> lbcTypeResolver,
             Function<Long, com.lb_calc_web.domain.equipment.Equipment> equipmentLookup,
             com.lb_calc_web.domain.model.ControlConfiguration fallbackConfiguration,
-            com.lb_calc_web.domain.model.LCGeometrySettings geometrySettings
+            int minimumWidth, int displaySideClearance, int widthRoundingStep,
+            int displayCenterHeight, int displayTopClearance
     ) {
         List<LBDTO> lbDtos = dto.getLbList() == null ? List.of() : dto.getLbList();
         boolean[] usedLbIndexes = new boolean[lbDtos.size()];
@@ -232,7 +238,8 @@ public final class ALSDtoMapper {
                         throw new IllegalStateException("moduleOrder содержит недопустимую ссылку на LC");
                     }
                     controlModuleUsed = true;
-                    modules.add(LCDtoMapper.toDomain(dto.getLC(), equipmentLookup, fallbackConfiguration, geometrySettings));
+                    modules.add(LCDtoMapper.toDomain(dto.getLC(), equipmentLookup, fallbackConfiguration, minimumWidth, displaySideClearance,
+                        widthRoundingStep, displayCenterHeight, displayTopClearance));
                 }
                 case "LBC" -> {
                     if (item.getIndex() != 0 || dto.getLBC() == null || controlModuleUsed) {
