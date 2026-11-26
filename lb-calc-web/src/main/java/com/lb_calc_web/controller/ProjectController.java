@@ -345,6 +345,8 @@ public class ProjectController
         } catch (ValidationSizeException exception) {
             model.addAttribute("ALSErrors",
                     ValidationErrorFormatter.format(exception.getValidationResult()));
+        } catch (IllegalArgumentException exception) {
+            model.addAttribute("ALSErrors", List.of(exception.getMessage()));
         }
         model.addAttribute("project", addALSImages(ProjectDtoMapper.toDto(preview)));
         model.addAttribute("als", ALSImageService.addImages(als));
@@ -395,6 +397,13 @@ public class ProjectController
             model.addAttribute("projectId", projectId);
             model.addAttribute("alsId", alsId);
 
+            return "alss/als";
+        } catch (IllegalArgumentException e) {
+            model.addAttribute("ALSErrors", List.of(e.getMessage()));
+            model.addAttribute("als", ALSImageService.addImages(als));
+            model.addAttribute("project", addALSImages(ProjectDtoMapper.toDto(projectService.findById(projectId))));
+            model.addAttribute("projectId", projectId);
+            model.addAttribute("alsId", alsId);
             return "alss/als";
         }
     }
