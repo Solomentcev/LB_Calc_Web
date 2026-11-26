@@ -26,7 +26,9 @@ class ModuleEntityMapperTest {
         var domain = TestDataFactory.validLB(null);
         ModuleEntity entity = toEntity(domain);
         assertInstanceOf(LBEntity.class, entity);
-        assertEquals(domain, ModuleEntityMapper.toDomain(entity, TestDataFactory.lcGeometrySettings()));
+        assertEquals(domain, ModuleEntityMapper.toDomain(entity, TestDataFactory.lcMinimumWidth(), TestDataFactory.lcDisplaySideClearance(),
+                TestDataFactory.lcWidthRoundingStep(), TestDataFactory.lcDisplayCenterHeight(),
+                TestDataFactory.lcDisplayTopClearance()));
     }
 
     @Test
@@ -34,7 +36,9 @@ class ModuleEntityMapperTest {
         var domain = TestDataFactory.validLC(null);
         ModuleEntity entity = toEntity(domain);
         assertInstanceOf(LCEntity.class, entity);
-        assertEquals(domain, ModuleEntityMapper.toDomain(entity, TestDataFactory.lcGeometrySettings()));
+        assertEquals(domain, ModuleEntityMapper.toDomain(entity, TestDataFactory.lcMinimumWidth(), TestDataFactory.lcDisplaySideClearance(),
+                TestDataFactory.lcWidthRoundingStep(), TestDataFactory.lcDisplayCenterHeight(),
+                TestDataFactory.lcDisplayTopClearance()));
     }
 
     @Test
@@ -42,7 +46,9 @@ class ModuleEntityMapperTest {
         var domain = TestDataFactory.validLBC(null);
         ModuleEntity entity = toEntity(domain);
         assertInstanceOf(LBCEntity.class, entity);
-        assertEquals(domain, ModuleEntityMapper.toDomain(entity, TestDataFactory.lcGeometrySettings()));
+        assertEquals(domain, ModuleEntityMapper.toDomain(entity, TestDataFactory.lcMinimumWidth(), TestDataFactory.lcDisplaySideClearance(),
+                TestDataFactory.lcWidthRoundingStep(), TestDataFactory.lcDisplayCenterHeight(),
+                TestDataFactory.lcDisplayTopClearance()));
     }
 
     @Test
@@ -52,7 +58,9 @@ class ModuleEntityMapperTest {
         entity.setName("Устаревшее наименование");
         entity.setDescription("Устаревшее описание");
 
-        var restored = ModuleEntityMapper.toDomain(entity, TestDataFactory.lcGeometrySettings());
+        var restored = ModuleEntityMapper.toDomain(entity, TestDataFactory.lcMinimumWidth(), TestDataFactory.lcDisplaySideClearance(),
+                TestDataFactory.lcWidthRoundingStep(), TestDataFactory.lcDisplayCenterHeight(),
+                TestDataFactory.lcDisplayTopClearance());
 
         assertEquals("Устаревшее наименование", restored.getName());
         assertEquals("Устаревшее описание", restored.getDescription());
@@ -68,7 +76,9 @@ class ModuleEntityMapperTest {
         entity.setWidthCell(entity.getWidthCell() + 1);
         entity.setDepthCell(entity.getDepthCell() + 1);
 
-        var restored = ModuleEntityMapper.toDomain(entity, TestDataFactory.lcGeometrySettings());
+        var restored = ModuleEntityMapper.toDomain(entity, TestDataFactory.lcMinimumWidth(), TestDataFactory.lcDisplaySideClearance(),
+                TestDataFactory.lcWidthRoundingStep(), TestDataFactory.lcDisplayCenterHeight(),
+                TestDataFactory.lcDisplayTopClearance());
 
         assertEquals("Устаревшее наименование", restored.getName());
         assertEquals("Устаревшее описание", restored.getDescription());
@@ -87,7 +97,9 @@ class ModuleEntityMapperTest {
         entity.setWidthCell(entity.getWidthCell() + 1);
         entity.setDepthCell(entity.getDepthCell() + 1);
 
-        var restored = ModuleEntityMapper.toDomain(entity, TestDataFactory.lcGeometrySettings());
+        var restored = ModuleEntityMapper.toDomain(entity, TestDataFactory.lcMinimumWidth(), TestDataFactory.lcDisplaySideClearance(),
+                TestDataFactory.lcWidthRoundingStep(), TestDataFactory.lcDisplayCenterHeight(),
+                TestDataFactory.lcDisplayTopClearance());
 
         assertEquals("Устаревшее наименование", restored.getName());
         assertEquals("Устаревшее описание", restored.getDescription());
@@ -115,7 +127,9 @@ class ModuleEntityMapperTest {
 
     @Test
     void toDomain_shouldReturnNullForNullEntity() {
-        assertNull(ModuleEntityMapper.toDomain(null, TestDataFactory.lcGeometrySettings()));
+        assertNull(ModuleEntityMapper.toDomain(null, TestDataFactory.lcMinimumWidth(), TestDataFactory.lcDisplaySideClearance(),
+                TestDataFactory.lcWidthRoundingStep(), TestDataFactory.lcDisplayCenterHeight(),
+                TestDataFactory.lcDisplayTopClearance()));
     }
 
     @Test
@@ -133,7 +147,9 @@ class ModuleEntityMapperTest {
         };
         for (var module : modules) {
             ModuleEntity entity = toEntity(module);
-            var restored = ModuleEntityMapper.toDomain(entity, TestDataFactory.lcGeometrySettings());
+            var restored = ModuleEntityMapper.toDomain(entity, TestDataFactory.lcMinimumWidth(), TestDataFactory.lcDisplaySideClearance(),
+                TestDataFactory.lcWidthRoundingStep(), TestDataFactory.lcDisplayCenterHeight(),
+                TestDataFactory.lcDisplayTopClearance());
             assertEquals(module.getClass(), restored.getClass());
             assertEquals(module, restored);
         }
