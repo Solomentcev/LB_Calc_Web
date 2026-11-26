@@ -57,7 +57,9 @@ class LCImageServiceTest {
                 Colors.Black,
                 Colors.White,
                 new ControlConfiguration(functional, equipment),
-                TestDataFactory.lcGeometrySettings()
+                TestDataFactory.lcMinimumWidth(), TestDataFactory.lcDisplaySideClearance(),
+                TestDataFactory.lcWidthRoundingStep(), TestDataFactory.lcDisplayCenterHeight(),
+                TestDataFactory.lcDisplayTopClearance()
         );
     }
 
