@@ -64,12 +64,16 @@ class ControlModuleEquipmentEntityMapperTest {
         LC source = new LC(1940, 500, 500, 50, 50,
                 com.lb_calc_web.domain.attributes.Colors.Blue,
                 com.lb_calc_web.domain.attributes.Colors.White,
-                new ControlConfiguration(FUNCTIONAL, positions), TestDataFactory.lcGeometrySettings());
+                new ControlConfiguration(FUNCTIONAL, positions), TestDataFactory.lcMinimumWidth(), TestDataFactory.lcDisplaySideClearance(),
+                TestDataFactory.lcWidthRoundingStep(), TestDataFactory.lcDisplayCenterHeight(),
+                TestDataFactory.lcDisplayTopClearance());
         Map<Long, EquipmentEntity> entities = Map.of(
                 1L, persisted(display), 2L, persisted(rfid), 3L, persisted(barcode));
 
         LCEntity entity = LCEntityMapper.toEntity(source, item -> entities.get(item.getId()));
-        LC restored = LCEntityMapper.toDomain(entity, TestDataFactory.lcGeometrySettings());
+        LC restored = LCEntityMapper.toDomain(entity, TestDataFactory.lcMinimumWidth(), TestDataFactory.lcDisplaySideClearance(),
+                TestDataFactory.lcWidthRoundingStep(), TestDataFactory.lcDisplayCenterHeight(),
+                TestDataFactory.lcDisplayTopClearance());
 
         assertEquals(source, restored);
         assertEquals(FUNCTIONAL, entity.getFunctionalConfiguration());
