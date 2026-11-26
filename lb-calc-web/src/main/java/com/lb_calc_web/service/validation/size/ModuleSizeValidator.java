@@ -242,16 +242,7 @@ public class ModuleSizeValidator {
                     bounds.getDepthMin(), bounds.getDepthMax(),
                     "Глубина модуля");
 
-            if (controlModule) {
-                long usableHeight = (long) height
-                        - upperFrame - bottomFrame;
-                if (usableHeight < bounds.getHeightLcPanelMin()) {
-                    addError(result, "heightConsistency",
-                            "Полезная высота слишком мала для панели управления LBC",
-                            usableHeight, bounds.getHeightLcPanelMin(),
-                            bounds.getHeightMax());
-                }
-            }
+            // Для LBC размеры технической и складских ячеек проверяются отдельно.
         }
 
         if (typeLb == null) {
@@ -364,11 +355,12 @@ public class ModuleSizeValidator {
                 bounds.getDepthCellMin(), bounds.getDepthCellMax(),
                 "Глубина ячейки");
 
-        long serviceZoneWidth = result.getObjectType().equals("LBC")
-                ? 0 : typeLb.getServiceZoneWidth();
-        long widthCell = (long) width - typeLb.getDeltaWidth() - serviceZoneWidth;
+        long widthCell = (long) width
+                - typeLb.getDeltaWidth()
+                - typeLb.getServiceZoneWidth();
         long widthCellMax = (long) bounds.getWidthMax()
-                - typeLb.getDeltaWidth() - serviceZoneWidth;
+                - typeLb.getDeltaWidth()
+                - typeLb.getServiceZoneWidth();
 
         validateRange(result, "widthCell", widthCell,
                 bounds.getWidthCellMin(), widthCellMax,
