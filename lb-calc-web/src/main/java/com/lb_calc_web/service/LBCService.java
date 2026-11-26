@@ -154,7 +154,7 @@ public class LBCService {
         return lbcRepository.findAll().stream()
                 .sorted(Comparator.comparing(LBCEntity::getId,
                         Comparator.nullsLast(Comparator.naturalOrder())))
-                .map(LBCEntityMapper::toDomain)
+                .map(this::toDomain)
                 .toList();
     }
 
