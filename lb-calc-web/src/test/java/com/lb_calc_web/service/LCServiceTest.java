@@ -209,7 +209,9 @@ class LCServiceTest {
         LC domain = new LC(
                 10, source.getWidth(), source.getDepth(), source.getUpperFrame(),
                 source.getBottomFrame(), source.getColorBody(), source.getColorDoor(),
-                source.getControlConfiguration(), TestDataFactory.lcGeometrySettings());
+                source.getControlConfiguration(), TestDataFactory.lcMinimumWidth(), TestDataFactory.lcDisplaySideClearance(),
+                TestDataFactory.lcWidthRoundingStep(), TestDataFactory.lcDisplayCenterHeight(),
+                TestDataFactory.lcDisplayTopClearance());
 
         assertThrows(ValidationSizeException.class, () -> service.saveLC(domain));
         verify(repository, never()).save(any());
