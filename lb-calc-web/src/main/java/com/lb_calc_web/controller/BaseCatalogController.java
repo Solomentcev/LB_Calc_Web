@@ -3,6 +3,10 @@ package com.lb_calc_web.controller;
 import com.lb_calc_web.domain.attributes.Colors;
 import com.lb_calc_web.domain.attributes.DirectionDoorOpening;
 import com.lb_calc_web.domain.attributes.PositionControlModule;
+import com.lb_calc_web.domain.equipment.AccessPurpose;
+import com.lb_calc_web.domain.equipment.DisplayPurpose;
+import com.lb_calc_web.domain.equipment.PaymentPurpose;
+import com.lb_calc_web.domain.equipment.PrinterPurpose;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.ModelAttribute;
 
@@ -21,6 +25,30 @@ public abstract class BaseCatalogController {
 
     protected final List<DirectionDoorOpening> directionDoorOpeningList =
             Arrays.asList(DirectionDoorOpening.values());
+
+    /** Возвращает допустимые функциональные назначения дисплея. */
+    @ModelAttribute("displayPurposes")
+    public List<DisplayPurpose> displayPurposes() {
+        return Arrays.asList(DisplayPurpose.values());
+    }
+
+    /** Возвращает допустимые способы доступа. */
+    @ModelAttribute("accessPurposes")
+    public List<AccessPurpose> accessPurposes() {
+        return Arrays.asList(AccessPurpose.values());
+    }
+
+    /** Возвращает допустимые назначения оплаты. */
+    @ModelAttribute("paymentPurposes")
+    public List<PaymentPurpose> paymentPurposes() {
+        return Arrays.asList(PaymentPurpose.values());
+    }
+
+    /** Возвращает допустимые назначения печати. */
+    @ModelAttribute("printerPurposes")
+    public List<PrinterPurpose> printerPurposes() {
+        return Arrays.asList(PrinterPurpose.values());
+    }
 
     /** Возвращает справочник цветов для выбора в формах каталога. */
     @ModelAttribute("colorsList")
