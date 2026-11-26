@@ -61,7 +61,8 @@ ControlConfiguration configuration = domain.getControlConfiguration();
             LCDTO dto,
             Function<Long, Equipment> equipmentLookup,
             ControlConfiguration fallbackConfiguration,
-            com.lb_calc_web.domain.model.LCGeometrySettings geometrySettings
+            int minimumWidth, int displaySideClearance, int widthRoundingStep,
+            int displayCenterHeight, int displayTopClearance
     ) {
         if (dto == null) {
             return null;
@@ -111,7 +112,8 @@ ControlConfiguration configuration = domain.getControlConfiguration();
                 Colors.valueOf(dto.getColorBody()),
                 Colors.valueOf(dto.getColorDoor()),
                 configuration,
-                geometrySettings
+                minimumWidth, displaySideClearance, widthRoundingStep,
+                displayCenterHeight, displayTopClearance
         );
         domain.setId(dto.getId() == null || dto.getId() <= 0 ? null : dto.getId());
         return domain;
