@@ -268,6 +268,13 @@ public class LBC extends StorageModule implements ControlModule {
         technicalCellTop = saturatedInt((long) getHeight() - technicalBottom
                 - technicalCellHeight);
 
+        // При установленном дисплее ширина складской ячейки должна
+        // вмещать дисплей с боковыми зазорами по 20 мм.
+        if (display != null) {
+            long requiredModuleWidth = (long) technicalCellWidth + getTypeLb().getDeltaWidth();
+            setWidth(saturatedInt(Math.max(getWidth(), requiredModuleWidth)));
+        }
+
         int cellWidth = saturatedInt((long) getWidth() - getTypeLb().getDeltaWidth());
         int cellDepth = saturatedInt((long) getDepth() - getDoorThickness());
         setCellDimensions(selectedHeight, cellWidth, cellDepth);
