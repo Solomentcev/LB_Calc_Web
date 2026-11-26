@@ -20,13 +20,24 @@ public final class ALSEntityMapper {
     /** Восстанавливает ALS с настройками геометрии приложения. */
     public static ALS toDomain(ALSEntity entity, int minimumWidth, int displaySideClearance, int widthRoundingStep,
             int displayCenterHeight, int displayTopClearance) {
+        return toDomain(entity, minimumWidth, displaySideClearance, widthRoundingStep,
+                displayCenterHeight, displayTopClearance, 200, 200, 20, 1300, 85);
+    }
+
+    /** Восстанавливает ALS с настройками геометрии LC и LBC. */
+    public static ALS toDomain(ALSEntity entity, int minimumWidth, int displaySideClearance,
+            int widthRoundingStep, int displayCenterHeight, int displayTopClearance,
+            int lbcTechnicalCellMinWidth, int lbcTechnicalCellMinHeight,
+            int lbcEquipmentClearance, int lbcDisplayCenterHeight, int storageCellMinHeight) {
         Objects.requireNonNull(entity, "ALSEntity не должен быть null");
 
         List<Module> modules = entity.getModules().stream()
                 .sorted(Comparator.comparingInt(ALSModuleEntity::getModuleOrder))
                 .map(ALSModuleEntity::getModule)
                 .map(module -> ModuleEntityMapper.toDomain(module, minimumWidth, displaySideClearance,
-                        widthRoundingStep, displayCenterHeight, displayTopClearance))
+                        widthRoundingStep, displayCenterHeight, displayTopClearance,
+                        lbcTechnicalCellMinWidth, lbcTechnicalCellMinHeight,
+                        lbcEquipmentClearance, lbcDisplayCenterHeight, storageCellMinHeight))
                 .toList();
 
         ALS domain = new ALS(
