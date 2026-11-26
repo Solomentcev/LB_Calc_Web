@@ -23,7 +23,7 @@ public final class LBCImageService {
     private LBCImageService() {
     }
 
-    static Image createLBCImage(LBC lbc) {
+    static BufferedImage createLBCImage(LBC lbc) {
         BufferedImage image = new BufferedImage(
                 Math.max(1, lbc.getWidth() / MILLIMETERS_PER_PIXEL + 1),
                 Math.max(1, lbc.getHeight() / MILLIMETERS_PER_PIXEL + 1),
@@ -45,7 +45,7 @@ public final class LBCImageService {
     }
 
     /** Рисует корпус, техническую ячейку и складские ячейки по координатам доменной модели. */
-    static void drawLBC(java.awt.Image image, LBC lbc, int x) {
+    static void drawLBC(BufferedImage image, LBC lbc, int x) {
         Graphics2D graphics = (Graphics2D) image.getGraphics();
         graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
                 RenderingHints.VALUE_ANTIALIAS_ON);
