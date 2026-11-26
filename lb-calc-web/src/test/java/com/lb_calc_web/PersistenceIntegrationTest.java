@@ -754,7 +754,9 @@ class PersistenceIntegrationTest {
     }
 
     private ALS restoreAlsEntity(ALSEntity entity) {
-        return ALSEntityMapper.toDomain(entity, TestDataFactory.lcGeometrySettings());
+        return ALSEntityMapper.toDomain(entity, TestDataFactory.lcMinimumWidth(), TestDataFactory.lcDisplaySideClearance(),
+                TestDataFactory.lcWidthRoundingStep(), TestDataFactory.lcDisplayCenterHeight(),
+                TestDataFactory.lcDisplayTopClearance());
     }
 
     private Project restoreProjectEntity(ProjectEntity entity) {
@@ -774,7 +776,9 @@ class PersistenceIntegrationTest {
                         value.getShelfThick(), value.getServiceZoneWidth()),
                 equipmentCatalogService::findById,
                 null,
-                TestDataFactory.lcGeometrySettings()
+                TestDataFactory.lcMinimumWidth(), TestDataFactory.lcDisplaySideClearance(),
+                TestDataFactory.lcWidthRoundingStep(), TestDataFactory.lcDisplayCenterHeight(),
+                TestDataFactory.lcDisplayTopClearance()
         );
     }
 
