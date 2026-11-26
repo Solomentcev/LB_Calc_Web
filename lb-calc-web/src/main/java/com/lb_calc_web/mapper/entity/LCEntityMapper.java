@@ -24,7 +24,8 @@ public final class LCEntityMapper {
     }
 
     /** Восстанавливает LC с настройками геометрии приложения. */
-    public static LC toDomain(LCEntity entity, com.lb_calc_web.domain.model.LCGeometrySettings geometrySettings) {
+    public static LC toDomain(LCEntity entity, int minimumWidth, int displaySideClearance, int widthRoundingStep,
+            int displayCenterHeight, int displayTopClearance) {
         if (entity == null) {
             return null;
         }
@@ -55,7 +56,8 @@ public final class LCEntityMapper {
                 Objects.requireNonNull(entity.getColorDoor(),
                         "Цвет дверей LC не должен быть null"),
                 configuration,
-                geometrySettings
+                minimumWidth, displaySideClearance, widthRoundingStep,
+                displayCenterHeight, displayTopClearance
         );
 
         domain = (LC) Module.restoreText(domain, entity.getName(), entity.getDescription());
@@ -113,11 +115,13 @@ public final class LCEntityMapper {
     }
 
     /** Преобразует LCEntity в DTO, сохраняя persistence ID. */
-    public static LCDTO toDto(LCEntity entity, com.lb_calc_web.domain.model.LCGeometrySettings geometrySettings) {
+    public static LCDTO toDto(LCEntity entity, int minimumWidth, int displaySideClearance, int widthRoundingStep,
+            int displayCenterHeight, int displayTopClearance) {
         if (entity == null) {
             return null;
         }
-        LCDTO dto = LCDtoMapper.toDto(toDomain(entity, geometrySettings));
+        LCDTO dto = LCDtoMapper.toDto(toDomain(entity, minimumWidth, displaySideClearance, widthRoundingStep,
+                displayCenterHeight, displayTopClearance));
         dto.setId(entity.getId());
         return dto;
     }
