@@ -85,7 +85,11 @@ public final class TestDataFactory {
                 intProperty(properties, "lc.geometry.display.side-clearance"),
                 intProperty(properties, "lc.geometry.width.rounding-step"),
                 intProperty(properties, "lc.geometry.display.center-height"),
-                intProperty(properties, "lc.geometry.display.top-clearance")
+                intProperty(properties, "lc.geometry.display.top-clearance"),
+                intProperty(properties, "lbc.geometry.technical-cell.width.min"),
+                intProperty(properties, "lbc.geometry.technical-cell.height.min"),
+                intProperty(properties, "lbc.geometry.equipment.clearance"),
+                intProperty(properties, "lbc.geometry.display.center-height")
         );
     }
 
