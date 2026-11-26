@@ -45,6 +45,7 @@ public class LCService {
     private final LCRepository lcRepository;
     private final Environment environment;
     private final SizeValidator sizeValidator;
+    private final com.lb_calc_web.domain.model.LCGeometrySettings geometrySettings;
     private final EquipmentRepository equipmentRepository;
 
     public LCService(
@@ -57,6 +58,13 @@ public class LCService {
         this.lcRepository = Objects.requireNonNull(lcRepository);
         this.findOrCreateLockService = Objects.requireNonNull(findOrCreateLockService);
         this.environment = Objects.requireNonNull(environment);
+        this.geometrySettings = new com.lb_calc_web.domain.model.LCGeometrySettings(
+                requiredInt(environment, "lc.geometry.width.min"),
+                requiredInt(environment, "lc.geometry.display.side-clearance"),
+                requiredInt(environment, "lc.geometry.width.rounding-step"),
+                requiredInt(environment, "lc.geometry.display.center-height"),
+                requiredInt(environment, "lc.geometry.display.top-clearance")
+        );
         this.sizeValidator = Objects.requireNonNull(sizeValidator);
         this.equipmentRepository = Objects.requireNonNull(equipmentRepository);
     }
@@ -95,7 +103,8 @@ public class LCService {
                 bottomFrame,
                 Objects.requireNonNull(colorBody, "Цвет корпуса не должен быть null"),
                 requiredColor("lc.color.door.default"),
-                new ControlConfiguration(functional, Map.of())
+                new ControlConfiguration(functional, Map.of()),
+                geometrySettings
         );
     }
 
@@ -241,6 +250,10 @@ public class LCService {
     }
 
     private int requiredInt(String key) {
+        return requiredInt(environment, key);
+    }
+
+    private static int requiredInt(Environment environment, String key) {
         return environment.getRequiredProperty(key, Integer.class);
     }
 

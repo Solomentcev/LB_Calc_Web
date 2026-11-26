@@ -23,11 +23,10 @@ import java.util.Objects;
  */
 public class LC extends Module implements ControlModule {
 
-    private static final int MIN_WIDTH = 200;
-    private static final int DISPLAY_SIDE_CLEARANCE = 20;
-    private static final int WIDTH_ROUNDING_STEP = 50;
-    private static final int DISPLAY_CENTER_HEIGHT = 1300;
-    private static final int DISPLAY_TOP_CLEARANCE = 20;
+    private static final LCGeometrySettings DEFAULT_GEOMETRY =
+            new LCGeometrySettings(200, 20, 50, 1300, 20);
+
+    private final LCGeometrySettings geometrySettings;
 
     /** Конфигурация функций управления LC. */
     private ControlConfiguration controlConfiguration;
@@ -47,6 +46,17 @@ public class LC extends Module implements ControlModule {
     public LC(int height, int width, int depth, int upperFrame, int bottomFrame,
               Colors colorBody, Colors colorDoor,
               ControlConfiguration controlConfiguration) {
+        this(height, width, depth, upperFrame, bottomFrame, colorBody, colorDoor,
+                controlConfiguration, DEFAULT_GEOMETRY);
+    }
+
+    /** Создаёт LC с явно заданными настройками физических расчётов. */
+    public LC(int height, int width, int depth, int upperFrame, int bottomFrame,
+              Colors colorBody, Colors colorDoor,
+              ControlConfiguration controlConfiguration,
+              LCGeometrySettings geometrySettings) {
+        this.geometrySettings = Objects.requireNonNull(
+                geometrySettings, "Настройки геометрии LC не должны быть null");
         setHeight(height);
         setWidth(width);
         setDepth(depth);
@@ -147,9 +157,9 @@ public class LC extends Module implements ControlModule {
         // Координата задаётся в миллиметрах от верхнего края корпуса.
         // Округляем вниз, чтобы при нечётной высоте дисплея не сместить его центр ниже заданной отметки.
         int centeredTop = (int) Math.floor(
-                getHeight() - DISPLAY_CENTER_HEIGHT - displayHeight / 2.0
+                getHeight() - geometrySettings.displayCenterHeight() - displayHeight / 2.0
         );
-        return Math.max(centeredTop, getUpperFrame() + DISPLAY_TOP_CLEARANCE);
+        return Math.max(centeredTop, getUpperFrame() + geometrySettings.displayTopClearance());
     }
 
     /** Пересчитывает производные характеристики LC. */
@@ -168,15 +178,15 @@ public class LC extends Module implements ControlModule {
     public int getRequiredWidth() {
         Equipment display = findDisplay();
         if (display == null) {
-            return MIN_WIDTH;
+            return geometrySettings.minimumWidth();
         }
 
         long requiredWidth = Math.max(
-                MIN_WIDTH,
-                (long) display.getWidth() + 2L * DISPLAY_SIDE_CLEARANCE
+                geometrySettings.minimumWidth(),
+                (long) display.getWidth() + 2L * geometrySettings.displaySideClearance()
         );
-        long roundedWidth = ((requiredWidth + WIDTH_ROUNDING_STEP - 1)
-                / WIDTH_ROUNDING_STEP) * WIDTH_ROUNDING_STEP;
+        long roundedWidth = ((requiredWidth + geometrySettings.widthRoundingStep() - 1)
+                / geometrySettings.widthRoundingStep()) * geometrySettings.widthRoundingStep();
         return Math.toIntExact(roundedWidth);
     }
 
@@ -189,7 +199,7 @@ public class LC extends Module implements ControlModule {
      */
     private int calculateWidth() {
         if (findDisplay() == null) {
-            return Math.max(MIN_WIDTH, getWidth());
+            return Math.max(geometrySettings.minimumWidth(), getWidth());
         }
         return getRequiredWidth();
     }
@@ -212,7 +222,7 @@ public class LC extends Module implements ControlModule {
         LC copy = new LC(
                 getHeight(), getWidth(), getDepth(),
                 getUpperFrame(), getBottomFrame(),
-                getColorBody(), getColorDoor(), controlConfiguration);
+                getColorBody(), getColorDoor(), controlConfiguration, geometrySettings);
         return copyTextTo(copyIdentityTo(copy));
     }
 
