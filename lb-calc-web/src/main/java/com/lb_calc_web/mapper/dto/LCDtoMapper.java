@@ -56,29 +56,6 @@ ControlConfiguration configuration = domain.getControlConfiguration();
         return dto;
     }
 
-    /** Восстанавливает доменную конфигурацию LC из DTO. */
-    public static LC toDomain(LCDTO dto) {
-        return toDomain(dto, id -> {
-            throw new IllegalStateException(
-                    "Для восстановления оборудования требуется загрузчик оборудования");
-        }, null);
-    }
-
-    /** Восстанавливает доменную конфигурацию LC из DTO. */
-    public static LC toDomain(LCDTO dto, Function<Long, Equipment> equipmentLookup) {
-        return toDomain(dto, equipmentLookup, null);
-    }
-
-    /** Восстанавливает доменную конфигурацию LC из DTO. */
-    public static LC toDomain(
-            LCDTO dto,
-            Function<Long, Equipment> equipmentLookup,
-            ControlConfiguration fallbackConfiguration
-    ) {
-        return toDomain(dto, equipmentLookup, fallbackConfiguration,
-                new com.lb_calc_web.domain.model.LCGeometrySettings(200, 20, 50, 1300, 20));
-    }
-
     /** Восстанавливает LC с настройками геометрии приложения. */
     public static LC toDomain(
             LCDTO dto,

@@ -21,11 +21,6 @@ public final class ModuleEntityMapper {
     private ModuleEntityMapper() {
     }
 
-    /** Восстанавливает общую доменную модель модуля из JPA-сущности. */
-    public static Module toDomain(ModuleEntity entity) {
-        return toDomain(entity, new com.lb_calc_web.domain.model.LCGeometrySettings(200, 20, 50, 1300, 20));
-    }
-
     /** Восстанавливает модуль с настройками геометрии приложения. */
     public static Module toDomain(ModuleEntity entity, com.lb_calc_web.domain.model.LCGeometrySettings geometrySettings) {
         if (entity == null) {

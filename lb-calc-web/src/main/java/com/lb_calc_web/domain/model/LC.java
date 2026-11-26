@@ -23,32 +23,10 @@ import java.util.Objects;
  */
 public class LC extends Module implements ControlModule {
 
-    private static final LCGeometrySettings DEFAULT_GEOMETRY =
-            new LCGeometrySettings(200, 20, 50, 1300, 20);
-
     private final LCGeometrySettings geometrySettings;
 
     /** Конфигурация функций управления LC. */
     private ControlConfiguration controlConfiguration;
-
-    /**
-     * Создаёт модуль управления LC с заданной конфигурацией.
-     *
-     * @param height высота модуля, мм
-     * @param width ширина модуля, мм
-     * @param depth глубина модуля, мм
-     * @param upperFrame размер верхней рамы, мм
-     * @param bottomFrame размер нижней рамы, мм
-     * @param colorBody цвет корпуса
-     * @param colorDoor цвет дверей
-     * @param controlConfiguration конфигурация управления
-     */
-    public LC(int height, int width, int depth, int upperFrame, int bottomFrame,
-              Colors colorBody, Colors colorDoor,
-              ControlConfiguration controlConfiguration) {
-        this(height, width, depth, upperFrame, bottomFrame, colorBody, colorDoor,
-                controlConfiguration, DEFAULT_GEOMETRY);
-    }
 
     /** Создаёт LC с явно заданными настройками физических расчётов. */
     public LC(int height, int width, int depth, int upperFrame, int bottomFrame,
@@ -140,9 +118,8 @@ public class LC extends Module implements ControlModule {
     /**
      * Рассчитывает положение верхнего края дисплея относительно верхнего края LC.
      *
-     * <p>Центр дисплея располагается на высоте 1300 мм от нижнего края корпуса.
-     * Если расстояние до верхней рамы меньше 20 мм, дисплей смещается вниз
-     * до обеспечения минимального зазора.</p>
+     * <p>Положение дисплея рассчитывается по геометрическим параметрам,
+     * загруженным из конфигурации приложения.</p>
      *
      * @return координата верхнего края дисплея от верхнего края LC, мм;
      *         {@code 0}, если дисплей не установлен
@@ -172,8 +149,8 @@ public class LC extends Module implements ControlModule {
     /**
      * Возвращает минимальную ширину корпуса с учётом установленного дисплея.
      *
-     * @return минимальная ширина 200 мм без физического дисплея либо ширина
-     *         дисплея с боковыми зазорами по 20 мм, округлённая вверх до 50 мм
+     * @return минимальная ширина без физического дисплея либо ширина,
+     *         рассчитанная по габаритам дисплея и параметрам конфигурации
      */
     public int getRequiredWidth() {
         Equipment display = findDisplay();

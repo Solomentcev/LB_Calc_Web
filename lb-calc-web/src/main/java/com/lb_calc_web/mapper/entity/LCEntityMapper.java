@@ -23,11 +23,6 @@ public final class LCEntityMapper {
     private LCEntityMapper() {
     }
 
-    /** Восстанавливает доменную конфигурацию LC из JPA-сущности. */
-    public static LC toDomain(LCEntity entity) {
-        return toDomain(entity, new com.lb_calc_web.domain.model.LCGeometrySettings(200, 20, 50, 1300, 20));
-    }
-
     /** Восстанавливает LC с настройками геометрии приложения. */
     public static LC toDomain(LCEntity entity, com.lb_calc_web.domain.model.LCGeometrySettings geometrySettings) {
         if (entity == null) {
@@ -118,11 +113,11 @@ public final class LCEntityMapper {
     }
 
     /** Преобразует LCEntity в DTO, сохраняя persistence ID. */
-    public static LCDTO toDto(LCEntity entity) {
+    public static LCDTO toDto(LCEntity entity, com.lb_calc_web.domain.model.LCGeometrySettings geometrySettings) {
         if (entity == null) {
             return null;
         }
-        LCDTO dto = LCDtoMapper.toDto(toDomain(entity));
+        LCDTO dto = LCDtoMapper.toDto(toDomain(entity, geometrySettings));
         dto.setId(entity.getId());
         return dto;
     }

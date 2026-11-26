@@ -114,58 +114,6 @@ public final class ALSDtoMapper {
                 "Не удалось сопоставить LB DTO с модулем доменной ALS");
     }
 
-    /** Восстанавливает доменную конфигурацию ALS из DTO. */
-    public static ALS toDomain(ALSDTO dto) {
-        return toDomain(
-                dto,
-                value -> new TypeLb(value.getType(), value.getDeltaWidth(),
-                        value.getShelfThick(), value.getServiceZoneWidth()),
-                value -> new TypeLb(value.getType(), value.getDeltaWidth(),
-                        value.getShelfThick(), value.getServiceZoneWidth()),
-                id -> {
-                    throw new IllegalStateException(
-                            "Для восстановления оборудования требуется загрузчик каталога");
-                }
-        );
-    }
-
-    /**
-     * Восстанавливает ALS без физических позиций оборудования.
-     * Для DTO с выбранными позициями следует передать явный equipmentLookup.
-     */
-    public static ALS toDomain(
-            ALSDTO dto,
-            Function<LBDTO, TypeLb> lbTypeResolver,
-            Function<LBCDTO, TypeLb> lbcTypeResolver
-    ) {
-        return toDomain(dto, lbTypeResolver, lbcTypeResolver, id -> {
-            throw new IllegalStateException(
-                    "Для восстановления оборудования требуется Equipment resolver");
-        });
-    }
-
-    /** Восстанавливает доменную конфигурацию ALS из DTO. */
-    public static ALS toDomain(
-            ALSDTO dto,
-            Function<LBDTO, TypeLb> lbTypeResolver,
-            Function<LBCDTO, TypeLb> lbcTypeResolver,
-            Function<Long, com.lb_calc_web.domain.equipment.Equipment> equipmentLookup
-    ) {
-        return toDomain(dto, lbTypeResolver, lbcTypeResolver, equipmentLookup, null);
-    }
-
-    /** Восстанавливает доменную конфигурацию ALS из DTO. */
-    public static ALS toDomain(
-            ALSDTO dto,
-            Function<LBDTO, TypeLb> lbTypeResolver,
-            Function<LBCDTO, TypeLb> lbcTypeResolver,
-            Function<Long, com.lb_calc_web.domain.equipment.Equipment> equipmentLookup,
-            com.lb_calc_web.domain.model.ControlConfiguration fallbackConfiguration
-    ) {
-        return toDomain(dto, lbTypeResolver, lbcTypeResolver, equipmentLookup,
-                fallbackConfiguration, new com.lb_calc_web.domain.model.LCGeometrySettings(200, 20, 50, 1300, 20));
-    }
-
     /** Восстанавливает ALS с настройками геометрии LC приложения. */
     public static ALS toDomain(
             ALSDTO dto,
