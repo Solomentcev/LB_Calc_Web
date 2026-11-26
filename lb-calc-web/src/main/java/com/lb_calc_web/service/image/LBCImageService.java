@@ -1,411 +1,143 @@
 package com.lb_calc_web.service.image;
 
 import com.lb_calc_web.domain.attributes.Colors;
-import com.lb_calc_web.domain.attributes.DirectionDoorOpening;
-import com.lb_calc_web.domain.model.LBC;
 import com.lb_calc_web.domain.equipment.Equipment;
-import com.lb_calc_web.domain.equipment.EquipmentFunctionalType;
+import com.lb_calc_web.domain.model.LBC;
 
 import javax.imageio.ImageIO;
-import java.awt.*;
-import java.awt.geom.AffineTransform;
-import java.awt.image.AffineTransformOp;
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.Base64;
 
-/** Генерирует графическое представление комбинированного модуля LBC. */
+/** Формирует визуальное представление физической геометрии LBC. */
 public final class LBCImageService {
 
-private LBCImageService() {
+    private static final int MILLIMETERS_PER_PIXEL = 10;
+    private static final int SCALE = 3;
+
+    private LBCImageService() {
     }
 
     static Image createLBCImage(LBC lbc) {
-        BufferedImage img =
-                new BufferedImage(
-                        lbc.getWidth() / 10 + 1,
-                        lbc.getHeight() / 10 + 1,
-                        BufferedImage.TYPE_INT_ARGB
-                );
+        BufferedImage image = new BufferedImage(
+                Math.max(1, lbc.getWidth() / MILLIMETERS_PER_PIXEL + 1),
+                Math.max(1, lbc.getHeight() / MILLIMETERS_PER_PIXEL + 1),
+                BufferedImage.TYPE_INT_ARGB
+        );
+        drawLBC(image, lbc, 0);
 
-        AffineTransform scalingTransform = new AffineTransform();
-        scalingTransform.scale(3, 3);
-
-        AffineTransformOp scaleOp =
-                new AffineTransformOp(
-                        scalingTransform,
-                        AffineTransformOp.TYPE_BILINEAR
-                );
-
-        drawLBC(img, lbc, 0);
-
-        BufferedImage scaledImg =
-                new BufferedImage(
-                        img.getWidth() * 3,
-                        img.getHeight() * 3,
-                        BufferedImage.TYPE_INT_ARGB
-                );
-
-        return scaleOp.filter(img, scaledImg);
+        BufferedImage scaled = new BufferedImage(
+                image.getWidth() * SCALE,
+                image.getHeight() * SCALE,
+                BufferedImage.TYPE_INT_ARGB
+        );
+        Graphics2D graphics = scaled.createGraphics();
+        graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
+                RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        graphics.drawImage(image, 0, 0, scaled.getWidth(), scaled.getHeight(), null);
+        graphics.dispose();
+        return scaled;
     }
 
-    /**
-     * Рисует LBC как один физический модуль:
-     * единый корпус, storage-ячейки и встроенная панель управления.
-     */
-    static void drawLBC(
-            Image img,
-            LBC lbc,
-            int x
-    ) {
-        Graphics2D g2d =
-                (Graphics2D) img.getGraphics();
+    /** Рисует корпус, техническую ячейку и складские ячейки по координатам доменной модели. */
+    static void drawLBC(java.awt.Image image, LBC lbc, int x) {
+        Graphics2D graphics = (Graphics2D) image.getGraphics();
+        graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                RenderingHints.VALUE_ANTIALIAS_ON);
+        graphics.setRenderingHint(RenderingHints.KEY_RENDERING,
+                RenderingHints.VALUE_RENDER_QUALITY);
 
-        g2d.setRenderingHint(
-                RenderingHints.KEY_ANTIALIASING,
-                RenderingHints.VALUE_ANTIALIAS_ON
-        );
+        int width = mm(lbc.getWidth());
+        int height = mm(lbc.getHeight());
+        int upperFrame = mm(lbc.getUpperFrame());
+        int bottomFrame = mm(lbc.getBottomFrame());
+        int shelf = Math.max(1, mm(lbc.getTypeLb().getShelfThick()));
+        int technicalTop = mm(lbc.getTechnicalCellTop());
+        int technicalHeight = Math.max(1, mm(lbc.getTechnicalCellHeight()));
+        int technicalWidth = Math.max(1, mm(lbc.getTechnicalCellWidth()));
+        int technicalX = x + (width - technicalWidth) / 2;
 
-        g2d.setRenderingHint(
-                RenderingHints.KEY_RENDERING,
-                RenderingHints.VALUE_RENDER_QUALITY
-        );
+        graphics.setColor(lbc.getColorBody().getColor());
+        graphics.fillRect(x, 0, width, height);
+        graphics.setColor(lbc.getColorDoor().getColor());
+        graphics.fillRect(x + 1, 1, Math.max(1, width - 2), Math.max(1, height - 2));
 
-        int width = lbc.getWidth() / 10;
-        int height = lbc.getHeight() / 10;
-        int upperFrame = lbc.getUpperFrame() / 10;
-        int bottomFrame = lbc.getBottomFrame() / 10;
-        int serviceZoneWidth = lbc.getTypeLb().getServiceZoneWidth() / 10;
-        int shelfThickness = Math.max(1, lbc.getTypeLb().getShelfThick() / 10);
+        graphics.setColor(lbc.getColorBody().getColor());
+        graphics.fillRect(x, 0, width, upperFrame);
+        graphics.fillRect(x, height - bottomFrame, width, bottomFrame);
 
-        Colors bodyColor =
-                lbc.getColorBody();
-
-        Colors doorColor =
-                lbc.getColorDoor();
-
-        // Единый корпус
-        g2d.setColor(bodyColor.getColor());
-        g2d.fillRoundRect(
-                x, 0, width, height, 1, 1
-        );
-
-        // Дверная поверхность
-        g2d.setColor(doorColor.getColor());
-        g2d.fillRoundRect(
-                x, 0, width, height, 1, 1
-        );
-
-        // Верхняя и нижняя рамы
-        g2d.setColor(bodyColor.getColor());
-
-        g2d.fillRoundRect(
-                x, 0, width, upperFrame, 1, 1
-        );
-
-        g2d.fillRoundRect(
-                x,
-                height - bottomFrame,
-                width,
-                bottomFrame,
-                1,
-                1
-        );
-
-        // Storage-зона и встроенная control-зона.
-        boolean directionLeft =
-                DirectionDoorOpening.LEFT == lbc.getDirectionDoorOpening();
-
-        int storageWidth =
-                Math.max(
-                        1,
-                        width - serviceZoneWidth
-                );
-
-        int storageX =
-                directionLeft
-                        ? x
-                        : x + serviceZoneWidth;
-
-        g2d.setColor(bodyColor.getColor());
-
-        for (int i = 2; i <= lbc.getCountCells(); i++) {
-            int y = (int) (
-                    (
-                            lbc.getHeight()
-                                    - lbc.getBottomFrame()
-                                    - (
-                                    lbc.getCellHeight()
-                                            + lbc.getTypeLb().getShelfThick()
-                            ) * (i - 1)
-                    ) / 10.0
-            );
-
-            g2d.fillRoundRect(
-                    storageX,
-                    y,
-                    storageWidth,
-                    shelfThickness,
-                    1,
-                    1
-            );
+        // Перегородки складских ячеек под технической ячейкой.
+        int bottomBoundary = technicalTop + technicalHeight;
+        for (int i = 0; i < lbc.getStorageCellsBelow(); i++) {
+            int y = bottomBoundary + i * (mm(lbc.getCellHeight()) + shelf);
+            graphics.fillRect(x, y, width, shelf);
         }
 
-        /*
-         * Control-зона LBC занимает сервисную зону того же физического
-         * корпуса, поэтому LBC не раскладывается на отдельные LC и LB.
-         */
-        int usableHeight =
-                Math.max(
-                        1,
-                        height - upperFrame - bottomFrame
-                );
+        // Перегородки складских ячеек над технической ячейкой.
+        for (int i = 0; i < lbc.getStorageCellsAbove(); i++) {
+            int y = technicalTop - (i + 1) * shelf
+                    - i * mm(lbc.getCellHeight());
+            graphics.fillRect(x, y, width, shelf);
+        }
 
-        int controlWidth =
-                serviceZoneWidth > 0
-                        ? Math.max(
-                        1,
-                        serviceZoneWidth
-                        )
-                        : Math.max(
-                        1,
-                        width
-                );
+        graphics.setColor(Color.DARK_GRAY);
+        graphics.fillRect(technicalX, technicalTop, technicalWidth, technicalHeight);
+        graphics.setColor(Color.BLACK);
+        graphics.drawRect(technicalX, technicalTop, technicalWidth, technicalHeight);
 
-        int panelX =
-                directionLeft
-                        ? x + storageWidth
-                        : x;
-
-        int panelY =
-                upperFrame + 5;
-
-        int panelHeight =
-                Math.max(
-                        1,
-                        usableHeight - 10
-                );
-
-        int panelMargin =
-                Math.min(
-                        5,
-                        Math.max(0, controlWidth / 10)
-                );
-
-        int panelWidth =
-                Math.max(
-                        1,
-                        controlWidth - panelMargin * 2
-                );
-
-        g2d.setColor(Color.DARK_GRAY);
-        g2d.fillRoundRect(
-                panelX + panelMargin,
-                panelY,
-                panelWidth,
-                panelHeight,
-                4,
-                4
-        );
-
-        g2d.setColor(Color.BLACK);
-        g2d.drawRoundRect(
-                panelX + panelMargin,
-                panelY,
-                panelWidth,
-                panelHeight,
-                4,
-                4
-        );
-
-        Equipment display = findDisplay(lbc);
+        Equipment display = lbc.getDisplay();
         if (display != null && display.getWidth() > 0 && display.getHeight() > 0) {
-            int displayWidth =
-                    Math.min(
-                            Math.max(
-                                    10,
-                                    display.getWidth() / 10
-                            ),
-                            Math.max(
-                                    1,
-                                    panelWidth - 4
-                            )
-                    );
-
-            int displayHeight =
-                    Math.min(
-                            Math.max(
-                                    10,
-                                    display.getHeight() / 10
-                            ),
-                            Math.max(
-                                    1,
-                                    panelHeight - 4
-                            )
-                    );
-
-            int displayX =
-                    panelX
-                            + panelMargin
-                            + (panelWidth - displayWidth) / 2;
-
-            int displayY =
-                    panelY
-                            + (panelHeight - displayHeight) / 2;
-
-            g2d.setColor(Color.GRAY);
-            g2d.fillRoundRect(
-                    displayX,
-                    displayY,
-                    displayWidth,
-                    displayHeight,
-                    3,
-                    3
-            );
-
-            g2d.setColor(Color.BLACK);
-            g2d.drawRoundRect(
-                    displayX,
-                    displayY,
-                    displayWidth,
-                    displayHeight,
-                    3,
-                    3
-            );
+            int displayWidth = mm(display.getWidth());
+            int displayHeight = mm(display.getHeight());
+            int displayX = x + (width - displayWidth) / 2;
+            int displayY = mm(lbc.getDisplayTop());
+            graphics.setColor(Color.GRAY);
+            graphics.fillRect(displayX, displayY, displayWidth, displayHeight);
+            graphics.setColor(Color.BLACK);
+            graphics.drawRect(displayX, displayY, displayWidth, displayHeight);
         }
 
-        g2d.setColor(Color.BLACK);
-        com.lb_calc_web.domain.model.FunctionalConfiguration functional =
-                lbc.getControlConfiguration().getFunctionalConfiguration();
-
-        if (functional.getAccess() != null
-                && (functional.getAccess().contains(
-                        com.lb_calc_web.domain.equipment.AccessPurpose.BAR_CODE)
-                || functional.getAccess().contains(
-                        com.lb_calc_web.domain.equipment.AccessPurpose.QR_CODE))) {
-            g2d.fillRect(
-                    panelX + panelMargin + 2,
-                    panelY + 2,
-                    6,
-                    6
-            );
-        }
-
-        if (functional.getPrinter()
-                != com.lb_calc_web.domain.equipment.PrinterPurpose.ABSENT) {
-            g2d.fillRect(
-                    panelX + panelMargin + 2,
-                    panelY + panelHeight - 8,
-                    6,
-                    6
-            );
-        }
-
-        if (functional.getAccess() != null
-                && functional.getAccess().contains(
-                        com.lb_calc_web.domain.equipment.AccessPurpose.RFID)) {
-            g2d.fillRect(
-                    panelX + controlWidth - panelMargin - 8,
-                    panelY + panelHeight - 8,
-                    6,
-                    6
-            );
-        }
-
-        // Внешняя граница единого модуля и сервисной зоны.
-        g2d.setColor(Color.BLACK);
-
-        g2d.drawRoundRect(
-                x,
-                0,
-                width,
-                height,
-                1,
-                1
-        );
-
-        if (serviceZoneWidth > 0) {
-            int zoneX =
-                    directionLeft
-                            ? x + width - serviceZoneWidth
-                            : x;
-
-            g2d.drawRoundRect(
-                    zoneX,
-                    upperFrame,
-                    serviceZoneWidth,
-                    usableHeight,
-                    1,
-                    1
-            );
-        }
-
-        g2d.dispose();
+        graphics.setColor(Color.BLACK);
+        graphics.drawRect(x, 0, width, height);
+        graphics.dispose();
     }
 
-    /**
-     * Формирует изображение LBC для представления.
-     */
-    private static Equipment findDisplay(LBC lbc) {
-        return lbc.getEquipment().keySet().stream()
-                .filter(item -> item.getFunctionalType() == EquipmentFunctionalType.DISPLAY)
-                .findFirst()
-                .orElse(null);
+    private static int mm(int value) {
+        return value / MILLIMETERS_PER_PIXEL;
     }
 
-    /** Создаёт PNG-файл изображения комбинированного модуля LBC. */
+    /** Создаёт PNG-файл изображения LBC. */
     public static File getFileLBCImage(LBC lbc) {
-        BufferedImage img =
-                (BufferedImage) createLBCImage(lbc);
-
-        File file =
-                new File(
-                        "src/main/resources/static/lbcs/lbc"
-                                + lbc.getId()
-                                + ".png"
-                );
-
+        BufferedImage image = (BufferedImage) createLBCImage(lbc);
+        File file = new File("src/main/resources/static/lbcs/lbc" + lbc.getId() + ".png");
         try {
             file.createNewFile();
-            ImageIO.write(img, "png", file);
-        } catch (IOException e) {
-            throw new RuntimeException(
-                    "Error creating LBC image: "
-                            + e.getMessage(),
-                    e
-            );
+            ImageIO.write(image, "png", file);
+        } catch (IOException exception) {
+            throw new IllegalStateException("Не удалось создать изображение LBC", exception);
         }
-
         return file;
     }
 
     /** Возвращает PNG-изображение LBC в виде массива байтов. */
     public static byte[] getBytesArrayLBCImage(LBC lbc) {
-        BufferedImage img =
-                (BufferedImage) createLBCImage(lbc);
-
-        ByteArrayOutputStream baos =
-                new ByteArrayOutputStream();
-
+        BufferedImage image = (BufferedImage) createLBCImage(lbc);
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
         try {
-            ImageIO.write(img, "png", baos);
-        } catch (IOException e) {
-            throw new RuntimeException(
-                    "Error creating LBC image: "
-                            + e.getMessage(),
-                    e
-            );
+            ImageIO.write(image, "png", output);
+        } catch (IOException exception) {
+            throw new IllegalStateException("Не удалось сформировать изображение LBC", exception);
         }
-
-        return baos.toByteArray();
+        return output.toByteArray();
     }
 
     /** Возвращает изображение LBC в кодировке Base64. */
     public static String getStringLBCImage(LBC lbc) {
-        return Base64.getEncoder().encodeToString(
-                getBytesArrayLBCImage(lbc)
-        );
+        return Base64.getEncoder().encodeToString(getBytesArrayLBCImage(lbc));
     }
 }
