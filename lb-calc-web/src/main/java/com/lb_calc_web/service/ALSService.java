@@ -131,14 +131,18 @@ public class ALSService {
         specifications.add(com.lb_calc_web.repository.specification.CatalogSpecifications.equal(
                 "colorDoor", filter.colorDoor()));
         var specification = com.lb_calc_web.repository.specification.CatalogSpecifications.all(specifications);
-        return alsRepository.findAll(specification, pageable).map(entity -> ALSEntityMapper.toDomain(entity, lcService.getGeometrySettings()));
+        return alsRepository.findAll(specification, pageable).map(entity -> ALSEntityMapper.toDomain(entity, sizeBounds.getLcMinimumWidth(), sizeBounds.getLcDisplaySideClearance(),
+                sizeBounds.getLcWidthRoundingStep(), sizeBounds.getLcDisplayCenterHeight(),
+                sizeBounds.getLcDisplayTopClearance()));
     }
 
     /** Восстанавливает доменную ALS из загруженной JPA-сущности. */
     @Transactional(readOnly = true)
     public ALS restoreDomain(ALSEntity entity) {
         Objects.requireNonNull(entity, "ALSEntity не должна быть null");
-        return ALSEntityMapper.toDomain(entity, lcService.getGeometrySettings());
+        return ALSEntityMapper.toDomain(entity, sizeBounds.getLcMinimumWidth(), sizeBounds.getLcDisplaySideClearance(),
+                sizeBounds.getLcWidthRoundingStep(), sizeBounds.getLcDisplayCenterHeight(),
+                sizeBounds.getLcDisplayTopClearance());
     }
 
     /** Возвращает все сохранённые конфигурации ALS. */
@@ -147,7 +151,9 @@ public class ALSService {
         logger.debug("Получение списка АКХ");
         return alsRepository.findAll().stream()
                 .sorted(Comparator.comparing(ALSEntity::getId))
-                .map(entity -> ALSEntityMapper.toDomain(entity, lcService.getGeometrySettings()))
+                .map(entity -> ALSEntityMapper.toDomain(entity, sizeBounds.getLcMinimumWidth(), sizeBounds.getLcDisplaySideClearance(),
+                sizeBounds.getLcWidthRoundingStep(), sizeBounds.getLcDisplayCenterHeight(),
+                sizeBounds.getLcDisplayTopClearance()))
                 .toList();
     }
 
@@ -159,7 +165,9 @@ public class ALSService {
         }
         ALSEntity entity = alsRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("АКХ с id=" + id + " не найдена"));
-        return ALSEntityMapper.toDomain(entity, lcService.getGeometrySettings());
+        return ALSEntityMapper.toDomain(entity, sizeBounds.getLcMinimumWidth(), sizeBounds.getLcDisplaySideClearance(),
+                sizeBounds.getLcWidthRoundingStep(), sizeBounds.getLcDisplayCenterHeight(),
+                sizeBounds.getLcDisplayTopClearance());
     }
 
     /** Создаёт доменную конфигурацию ALS с параметрами по умолчанию. */
@@ -366,7 +374,9 @@ public class ALSService {
                 current.getColorBody(),
                 current.getColorDoor(),
                 current.getControlConfiguration(),
-                lcService.getGeometrySettings()
+                sizeBounds.getLcMinimumWidth(), sizeBounds.getLcDisplaySideClearance(),
+                sizeBounds.getLcWidthRoundingStep(), sizeBounds.getLcDisplayCenterHeight(),
+                sizeBounds.getLcDisplayTopClearance()
         );
 
         als.replaceLBCWithLC(replacement);
@@ -449,7 +459,9 @@ public class ALSService {
                     candidate -> TypeLbFactory.forLBC(environment, candidate.getType()),
                     this::findEquipment,
                     fallback,
-                    lcService.getGeometrySettings()
+                    sizeBounds.getLcMinimumWidth(), sizeBounds.getLcDisplaySideClearance(),
+                sizeBounds.getLcWidthRoundingStep(), sizeBounds.getLcDisplayCenterHeight(),
+                sizeBounds.getLcDisplayTopClearance()
             );
             if (existingALS == null) {
                 return restored;
@@ -510,7 +522,9 @@ public class ALSService {
                         domain.getHeight(), domain.getDepth(), domain.getUpperFrame(),
                         domain.getBottomFrame(), domain.getColorBody(), domain.getColorDoor())
                 .stream()
-                .filter(entity -> domain.equals(ALSEntityMapper.toDomain(entity, lcService.getGeometrySettings())))
+                .filter(entity -> domain.equals(ALSEntityMapper.toDomain(entity, sizeBounds.getLcMinimumWidth(), sizeBounds.getLcDisplaySideClearance(),
+                sizeBounds.getLcWidthRoundingStep(), sizeBounds.getLcDisplayCenterHeight(),
+                sizeBounds.getLcDisplayTopClearance())))
                 .findFirst();
     }
 
@@ -525,7 +539,9 @@ public class ALSService {
     private ModuleEntity resolveModule(Module domain, List<ModuleEntity> cache) {
         for (ModuleEntity entity : cache) {
             if (isSameModuleType(domain, entity)
-                    && domain.equals(ModuleEntityMapper.toDomain(entity, lcService.getGeometrySettings()))) {
+                    && domain.equals(ModuleEntityMapper.toDomain(entity, sizeBounds.getLcMinimumWidth(), sizeBounds.getLcDisplaySideClearance(),
+                sizeBounds.getLcWidthRoundingStep(), sizeBounds.getLcDisplayCenterHeight(),
+                sizeBounds.getLcDisplayTopClearance()))) {
                 return entity;
             }
         }
@@ -538,7 +554,9 @@ public class ALSService {
 
         for (ModuleEntity entity : candidates) {
             if (isSameModuleType(domain, entity)
-                    && domain.equals(ModuleEntityMapper.toDomain(entity, lcService.getGeometrySettings()))) {
+                    && domain.equals(ModuleEntityMapper.toDomain(entity, sizeBounds.getLcMinimumWidth(), sizeBounds.getLcDisplaySideClearance(),
+                sizeBounds.getLcWidthRoundingStep(), sizeBounds.getLcDisplayCenterHeight(),
+                sizeBounds.getLcDisplayTopClearance()))) {
                 return entity;
             }
         }
