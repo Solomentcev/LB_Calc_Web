@@ -143,7 +143,11 @@ public class LC extends Module implements ControlModule {
             return 0;
         }
 
-        int centeredTop = getHeight() - DISPLAY_CENTER_HEIGHT - displayHeight / 2;
+        // Координата задаётся в миллиметрах от верхнего края корпуса.
+        // Округляем вниз, чтобы при нечётной высоте дисплея не сместить его центр ниже заданной отметки.
+        int centeredTop = (int) Math.floor(
+                getHeight() - DISPLAY_CENTER_HEIGHT - displayHeight / 2.0
+        );
         return Math.max(centeredTop, getUpperFrame() + DISPLAY_TOP_CLEARANCE);
     }
 

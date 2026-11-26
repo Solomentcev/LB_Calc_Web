@@ -1,9 +1,8 @@
 package com.lb_calc_web.service.image;
 
-import com.lb_calc_web.domain.attributes.Colors;
-import com.lb_calc_web.domain.model.LC;
 import com.lb_calc_web.domain.equipment.Equipment;
 import com.lb_calc_web.domain.equipment.EquipmentFunctionalType;
+import com.lb_calc_web.domain.model.LC;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -16,173 +15,126 @@ import java.io.IOException;
 import java.util.Base64;
 
 /** Генерирует графическое представление управляющего модуля LC. */
-public class LCImageService {
+public final class LCImageService {
 
-static Image createLCImage(
-            LC lc
-    ) {
+    private static final int MILLIMETERS_PER_PIXEL = 10;
+    private static final int IMAGE_SCALE = 3;
 
-        BufferedImage img =
-                new BufferedImage(
-                        lc.getWidth() / 10 + 1,
-                        lc.getHeight() / 10 + 1,
-                        BufferedImage.TYPE_INT_ARGB
-                );
-
-        AffineTransform scalingTransform =
-                new AffineTransform();
-
-        scalingTransform.scale(3, 3);
-
-        AffineTransformOp scaleOp =
-                new AffineTransformOp(
-                        scalingTransform,
-                        AffineTransformOp.TYPE_BILINEAR
-                );
-
-        drawLC(
-                img,
-                lc,
-                0
-        );
-
-        BufferedImage scaledImg =
-                new BufferedImage(
-                        img.getWidth() * 3,
-                        img.getHeight() * 3,
-                        BufferedImage.TYPE_INT_ARGB
-                );
-
-        scaledImg =
-                scaleOp.filter(
-                        img,
-                        scaledImg
-                );
-
-        return scaledImg;
+    private LCImageService() {
     }
 
-    static void drawLC(
-            Image img,
-            LC lc,
-            int x
-    ) {
-
-        Graphics2D g2d =
-                (Graphics2D) img.getGraphics();
-
-        g2d.setRenderingHint(
-                RenderingHints.KEY_ANTIALIASING,
-                RenderingHints.VALUE_ANTIALIAS_ON
+    /** Создаёт масштабированное изображение LC. */
+    static Image createLCImage(LC lc) {
+        BufferedImage image = new BufferedImage(
+                toPixels(lc.getWidth()) + 1,
+                toPixels(lc.getHeight()) + 1,
+                BufferedImage.TYPE_INT_ARGB
         );
 
-        g2d.setRenderingHint(
-                RenderingHints.KEY_RENDERING,
-                RenderingHints.VALUE_RENDER_QUALITY
+        drawLC(image, lc, 0);
+
+        AffineTransform transform = new AffineTransform();
+        transform.scale(IMAGE_SCALE, IMAGE_SCALE);
+        AffineTransformOp scaleOperation = new AffineTransformOp(
+                transform,
+                AffineTransformOp.TYPE_BILINEAR
         );
 
-        Colors colorBody =
-                lc.getColorBody();
-
-
-        g2d.setColor(
-                colorBody.getColor()
+        BufferedImage scaledImage = new BufferedImage(
+                image.getWidth() * IMAGE_SCALE,
+                image.getHeight() * IMAGE_SCALE,
+                BufferedImage.TYPE_INT_ARGB
         );
-
-        // Габариты модуля
-        g2d.fillRoundRect(
-                x,
-                0,
-                lc.getWidth() / 10,
-                lc.getHeight() / 10,
-                1,
-                1
-        );
-
-        g2d.setColor(Color.BLACK);
-
-        // Габариты модуля
-        g2d.drawRoundRect(
-                x,
-                0,
-                lc.getWidth() / 10,
-                lc.getHeight() / 10,
-                1,
-                1
-        );
-
-        // Верхняя рама
-        g2d.drawRoundRect(
-                x,
-                0,
-                lc.getWidth() / 10,
-                lc.getUpperFrame() / 10,
-                1,
-                1
-        );
-
-        // Нижняя рама
-        g2d.drawRoundRect(
-                x,
-                (lc.getHeight() - lc.getBottomFrame()) / 10,
-                lc.getWidth() / 10,
-                lc.getBottomFrame() / 10,
-                1,
-                1
-        );
-
-        // Дисплей
-        g2d.setColor(Color.GRAY);
-
-        Equipment display = findDisplay(lc);
-        int displayWidthMm = display == null ? 0 : display.getWidth();
-        int displayHeightMm = display == null ? 0 : display.getHeight();
-
-        int displayX =
-                x + ((lc.getWidth() - displayWidthMm) / 2) / 10;
-
-        int displayY = lc.getDisplayTop() / 10;
-
-        int displayWidth = displayWidthMm / 10;
-
-        int displayHeight = displayHeightMm / 10;
-
-        g2d.fillRoundRect(
-                displayX,
-                displayY,
-                displayWidth,
-                displayHeight,
-                1,
-                1
-        );
-
-        g2d.setColor(Color.BLACK);
-
-        g2d.drawRoundRect(
-                displayX,
-                displayY,
-                displayWidth,
-                displayHeight,
-                1,
-                1
-        );
-
-        // Панель
-        g2d.drawRoundRect(
-                x,
-                lc.getUpperFrame() / 10,
-                lc.getWidth() / 10,
-                (lc.getHeight() - 1100) / 10,
-                1,
-                1
-        );
-
-        g2d.dispose();
+        return scaleOperation.filter(image, scaledImage);
     }
 
     /**
-     * Формирует изображение LC для представления.
+     * Рисует LC в переданном изображении.
+     *
+     * <p>Все геометрические размеры и координаты до преобразования
+     * выражены в миллиметрах. Сервис отвечает только за перевод
+     * физических размеров в пиксели и графическое представление.</p>
      */
+    static void drawLC(Image image, LC lc, int x) {
+        Graphics2D graphics = (Graphics2D) image.getGraphics();
+        try {
+            graphics.setRenderingHint(
+                    RenderingHints.KEY_ANTIALIASING,
+                    RenderingHints.VALUE_ANTIALIAS_ON
+            );
+            graphics.setRenderingHint(
+                    RenderingHints.KEY_RENDERING,
+                    RenderingHints.VALUE_RENDER_QUALITY
+            );
+
+            int width = toPixels(lc.getWidth());
+            int height = toPixels(lc.getHeight());
+            int upperFrame = toPixels(lc.getUpperFrame());
+            int bottomFrame = toPixels(lc.getBottomFrame());
+
+            // Лицевая поверхность дверцы.
+            graphics.setColor(lc.getColorDoor().getColor());
+            graphics.fillRoundRect(x, 0, width, height, 1, 1);
+
+            // Верхняя и нижняя рамы корпуса.
+            graphics.setColor(lc.getColorBody().getColor());
+            graphics.fillRoundRect(x, 0, width, upperFrame, 1, 1);
+            graphics.fillRoundRect(
+                    x,
+                    height - bottomFrame,
+                    width,
+                    bottomFrame,
+                    1,
+                    1
+            );
+
+            // Контур рабочей панели ограничен рамами, а не фиксированной высотой.
+            graphics.setColor(Color.BLACK);
+            graphics.drawRoundRect(
+                    x,
+                    upperFrame,
+                    width,
+                    Math.max(0, height - upperFrame - bottomFrame),
+                    1,
+                    1
+            );
+
+            drawDisplay(graphics, lc, x);
+
+            // Внешний контур корпуса.
+            graphics.drawRoundRect(x, 0, width, height, 1, 1);
+        } finally {
+            graphics.dispose();
+        }
+    }
+
+    /** Размещает дисплей по рассчитанной доменом физической координате. */
+    private static void drawDisplay(Graphics2D graphics, LC lc, int x) {
+        Equipment display = findDisplay(lc);
+        if (display == null || display.getWidth() <= 0 || display.getHeight() <= 0) {
+            return;
+        }
+
+        int displayWidth = toPixels(display.getWidth());
+        int displayHeight = toPixels(display.getHeight());
+        if (displayWidth <= 0 || displayHeight <= 0) {
+            return;
+        }
+
+        int displayX = x + toPixels((lc.getWidth() - display.getWidth()) / 2);
+        int displayY = toPixels(lc.getDisplayTop());
+
+        graphics.setColor(Color.GRAY);
+        graphics.fillRoundRect(
+                displayX, displayY, displayWidth, displayHeight, 1, 1
+        );
+
+        graphics.setColor(Color.BLACK);
+        graphics.drawRoundRect(
+                displayX, displayY, displayWidth, displayHeight, 1, 1
+        );
+    }
+
     private static Equipment findDisplay(LC lc) {
         return lc.getEquipment().keySet().stream()
                 .filter(item -> item.getFunctionalType() == EquipmentFunctionalType.DISPLAY)
@@ -190,77 +142,47 @@ static Image createLCImage(
                 .orElse(null);
     }
 
+    private static int toPixels(int millimeters) {
+        return (int) Math.round((double) millimeters / MILLIMETERS_PER_PIXEL);
+    }
+
     /** Создаёт PNG-файл изображения управляющего модуля LC. */
-    public static File getFileLCImage(
-            LC lc
-    ) {
-
-        BufferedImage img =
-                (BufferedImage) createLCImage(lc);
-
-        File file =
-                new File(
-                        "src/main/resources/static/lcs/lc"
-                                + lc.getId()
-                                + ".png"
-                );
+    public static File getFileLCImage(LC lc) {
+        BufferedImage image = (BufferedImage) createLCImage(lc);
+        File file = new File(
+                "src/main/resources/static/lcs/lc" + lc.getId() + ".png"
+        );
 
         try {
-
             file.createNewFile();
-
-            ImageIO.write(
-                    img,
-                    "png",
-                    file
+            ImageIO.write(image, "png", file);
+        } catch (IOException exception) {
+            throw new RuntimeException(
+                    "Не удалось создать файл изображения LC",
+                    exception
             );
-
-        } catch (IOException e) {
-
-            throw new RuntimeException(e);
         }
-
         return file;
     }
 
     /** Возвращает PNG-изображение LC в виде массива байтов. */
-    public static byte[] getBytesArrayLCImage(
-            LC lc
-    ) {
-
-        BufferedImage img =
-                (BufferedImage) createLCImage(lc);
-
-        ByteArrayOutputStream baos =
-                new ByteArrayOutputStream();
+    public static byte[] getBytesArrayLCImage(LC lc) {
+        BufferedImage image = (BufferedImage) createLCImage(lc);
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
 
         try {
-
-            ImageIO.write(
-                    img,
-                    "png",
-                    baos
-            );
-
-        } catch (IOException e) {
-
+            ImageIO.write(image, "png", output);
+        } catch (IOException exception) {
             throw new RuntimeException(
-                    "Error creating image: "
-                            + e.getMessage(),
-                    e
+                    "Не удалось сформировать изображение LC",
+                    exception
             );
         }
-
-        return baos.toByteArray();
+        return output.toByteArray();
     }
 
     /** Возвращает изображение LC в кодировке Base64. */
-    public static String getStringLCImage(
-            LC lc
-    ) {
-
-        return Base64.getEncoder().encodeToString(
-                getBytesArrayLCImage(lc)
-        );
+    public static String getStringLCImage(LC lc) {
+        return Base64.getEncoder().encodeToString(getBytesArrayLCImage(lc));
     }
 }
