@@ -143,13 +143,7 @@ public final class TestDataFactory {
                 lcDisplaySideClearance(),
                 lcWidthRoundingStep(),
                 lcDisplayCenterHeight(),
-                lcDisplayTopClearance(),
-                lbcTechnicalCellMinWidth(),
-                lbcTechnicalCellMinHeight(),
-                lbcEquipmentClearance(),
-                lbcDisplayCenterHeight(),
-                lbcStorageCellMinWidth(),
-                storageCellMinHeight()
+                lcDisplayTopClearance()
         );
     }
 
