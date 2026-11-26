@@ -176,7 +176,7 @@ public class LCService {
         return lcRepository.findAll().stream()
                 .sorted(Comparator.comparing(LCEntity::getId,
                         Comparator.nullsLast(Comparator.naturalOrder())))
-                .map(LCEntityMapper::toDomain)
+                .map(entity -> LCEntityMapper.toDomain(entity, geometrySettings))
                 .toList();
     }
 

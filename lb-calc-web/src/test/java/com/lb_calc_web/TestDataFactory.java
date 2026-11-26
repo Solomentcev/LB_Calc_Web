@@ -11,6 +11,7 @@ import com.lb_calc_web.domain.model.ALS;
 import com.lb_calc_web.domain.model.LBC;
 import com.lb_calc_web.domain.model.LB;
 import com.lb_calc_web.domain.model.LC;
+import com.lb_calc_web.domain.model.LCGeometrySettings;
 import com.lb_calc_web.dto.ALSDTO;
 import com.lb_calc_web.dto.LBCDTO;
 import com.lb_calc_web.dto.LBDTO;
@@ -27,6 +28,10 @@ import com.lb_calc_web.service.validation.size.SizeValidator;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
+import org.springframework.mock.env.MockEnvironment;
 
 public final class TestDataFactory {
 
@@ -298,4 +303,38 @@ return als;
 
         return project;
     }
+    /** Загружает тестовые геометрические настройки из того же файла, что и приложение. */
+    public static LCGeometrySettings lcGeometrySettings() {
+        Properties properties = loadSizeProperties();
+        return new LCGeometrySettings(
+                Integer.parseInt(properties.getProperty("lc.geometry.width.min")),
+                Integer.parseInt(properties.getProperty("lc.geometry.display.side-clearance")),
+                Integer.parseInt(properties.getProperty("lc.geometry.width.rounding-step")),
+                Integer.parseInt(properties.getProperty("lc.geometry.display.center-height")),
+                Integer.parseInt(properties.getProperty("lc.geometry.display.top-clearance"))
+        );
+    }
+
+    /** Добавляет геометрические свойства LC в тестовое окружение. */
+    public static void configureLcGeometryProperties(MockEnvironment environment) {
+        Properties properties = loadSizeProperties();
+        properties.stringPropertyNames().stream()
+                .filter(key -> key.startsWith("lc.geometry."))
+                .forEach(key -> environment.setProperty(key, properties.getProperty(key)));
+    }
+
+    private static Properties loadSizeProperties() {
+        Properties properties = new Properties();
+        try (InputStream input = TestDataFactory.class.getClassLoader()
+                .getResourceAsStream("size-bounds.properties")) {
+            if (input == null) {
+                throw new IllegalStateException("Не найден size-bounds.properties");
+            }
+            properties.load(input);
+            return properties;
+        } catch (IOException exception) {
+            throw new IllegalStateException("Не удалось загрузить size-bounds.properties", exception);
+        }
+    }
+
 }

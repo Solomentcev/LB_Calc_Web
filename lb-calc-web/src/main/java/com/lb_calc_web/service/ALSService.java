@@ -136,7 +136,7 @@ public class ALSService {
         logger.debug("Получение списка АКХ");
         return alsRepository.findAll().stream()
                 .sorted(Comparator.comparing(ALSEntity::getId))
-                .map(ALSEntityMapper::toDomain)
+                .map(entity -> ALSEntityMapper.toDomain(entity, lcService.getGeometrySettings()))
                 .toList();
     }
 
@@ -499,7 +499,7 @@ public class ALSService {
                         domain.getHeight(), domain.getDepth(), domain.getUpperFrame(),
                         domain.getBottomFrame(), domain.getColorBody(), domain.getColorDoor())
                 .stream()
-                .filter(entity -> domain.equals(ALSEntityMapper.toDomain(entity)))
+                .filter(entity -> domain.equals(ALSEntityMapper.toDomain(entity, lcService.getGeometrySettings())))
                 .findFirst();
     }
 
@@ -527,7 +527,7 @@ public class ALSService {
 
         for (ModuleEntity entity : candidates) {
             if (isSameModuleType(domain, entity)
-                    && domain.equals(ModuleEntityMapper.toDomain(entity))) {
+                    && domain.equals(ModuleEntityMapper.toDomain(entity, lcService.getGeometrySettings()))) {
                 return entity;
             }
         }

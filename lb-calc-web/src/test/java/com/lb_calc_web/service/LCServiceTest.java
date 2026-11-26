@@ -54,6 +54,7 @@ class LCServiceTest {
                 .withProperty("lc.access-purposes.default", "RFID")
                 .withProperty("lc.color.body.default", "Blue")
                 .withProperty("lc.color.door.default", "White");
+        TestDataFactory.configureLcGeometryProperties(environment);
         service = new LCService(
                 repository, lockService, environment,
                 TestDataFactory.createSizeValidator(), equipmentRepository);

@@ -55,6 +55,8 @@ class ALSServiceTest {
                 .withProperty("lb.type.TYPE1.shelf-thick", "5")
                 .withProperty("lb.type.TYPE1.service-zone-width", "40");
 
+        when(lcService.getGeometrySettings()).thenReturn(TestDataFactory.lcGeometrySettings());
+
         service = new ALSService(
                 alsRepository, projectALSRepository, moduleRepository,
                 lbService, lcService, lbcService, lockService,
