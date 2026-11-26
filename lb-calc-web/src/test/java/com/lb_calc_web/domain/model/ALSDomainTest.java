@@ -29,6 +29,49 @@ class ALSDomainTest {
 
 
     @Test
+    void replaceLBCWithLC_shouldPreserveStorageConfigurationAndPhysicalSide() {
+        LB left = TestDataFactory.validLB(101L);
+        LBC lbc = TestDataFactory.validLBC(102L);
+        LB right = TestDataFactory.validLB(103L);
+        ALS als = new ALS(
+                1940, 500, 50, 50,
+                lbc.getColorBody(), lbc.getColorDoor(),
+                List.of(left, lbc, right)
+        );
+
+        LC replacementLC = new LC(
+                lbc.getHeight(), lbc.getWidth(), lbc.getDepth(),
+                lbc.getUpperFrame(), lbc.getBottomFrame(),
+                lbc.getColorBody(), lbc.getColorDoor(),
+                lbc.getControlConfiguration()
+        );
+        LB replacementLB = new LB(
+                lbc.getHeight(), lbc.getWidth(), lbc.getDepth(),
+                lbc.getUpperFrame(), lbc.getBottomFrame(),
+                lbc.getColorBody(), lbc.getColorDoor(),
+                lbc.getTypeLb(), lbc.getCountCells(),
+                lbc.getDirectionDoorOpening(), lbc.getDoorThickness()
+        );
+
+        als.replaceLBCWithLC(replacementLC, replacementLB);
+
+        List<Module> modules = als.getModules();
+        assertEquals(
+                List.of("LB", "LC", "LB", "LB"),
+                modules.stream().map(module -> module.getClass().getSimpleName()).toList()
+        );
+        assertEquals("CENTER", als.getPositionControlModule().name());
+        assertEquals(9, als.getCountCells());
+        assertEquals(lbc.getControlConfiguration(),
+                als.getLC().getControlConfiguration());
+        LB convertedStorage = (LB) modules.get(2);
+        assertEquals(lbc.getTypeLb(), convertedStorage.getTypeLb());
+        assertEquals(lbc.getCountCells(), convertedStorage.getCountCells());
+        assertEquals(lbc.getDoorThickness(), convertedStorage.getDoorThickness());
+        assertEquals(lbc.getDirectionDoorOpening(), convertedStorage.getDirectionDoorOpening());
+    }
+
+    @Test
     void copy_shouldPreserveEqualityAndHashCodeContract() {
         ALS original = TestDataFactory.validALS(1L);
         ALS copy = original.copy();
