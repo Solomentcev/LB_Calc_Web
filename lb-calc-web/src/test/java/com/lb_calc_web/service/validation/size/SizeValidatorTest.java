@@ -93,13 +93,14 @@ class SizeValidatorTest {
     }
 
     @Test
-    void validateLBC_widthShouldNotIncludeServiceZoneWidth() {
-        LBC invalidLBC = createLBC(1940, 200, 3, 20);
+    void validateLBC_shouldRequireTwoHundredMillimeterStorageCell() {
+        LBC configuredLBC = createLBC(1940, 200, 3, 20);
 
-        ValidationResult result = sizeValidator.validateLBC(invalidLBC);
+        ValidationResult result = sizeValidator.validateLBC(configuredLBC);
 
         assertFalse(hasError(result, "width"));
         assertFalse(hasError(result, "widthCell"));
+        assertEquals(200, configuredLBC.getCellWidth());
     }
 
     @Test
@@ -292,7 +293,7 @@ class SizeValidatorTest {
         ValidationResult result = sizeValidator.validateLBC(zeroCellLBC);
 
         assertHasError(result, "countCells");
-        assertHasError(result, "widthCell");
+        assertFalse(hasError(result, "widthCell"));
     }
 
     @Test

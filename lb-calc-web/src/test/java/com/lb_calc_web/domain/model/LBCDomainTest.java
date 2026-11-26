@@ -70,6 +70,28 @@ class LBCDomainTest {
     }
 
     @Test
+    void storageCellWidthForLbcIsAtLeastTwoHundredForEveryType() {
+        FunctionalConfiguration functional = new FunctionalConfiguration(
+                DisplayPurpose.NONE, Set.of(), PaymentPurpose.NONE, PrinterPurpose.ABSENT);
+        Map<String, Integer> typeDeltas = Map.of(
+                "TYPE1", 100,
+                "TYPE2", 100,
+                "TYPE3", 160,
+                "TYPE4", 60
+        );
+
+        typeDeltas.forEach((type, deltaWidth) -> {
+            LBC module = new LBC(1940, 200, 600, 100, 100,
+                    Colors.Blue, Colors.White, new TypeLb(type, deltaWidth, 5, 40),
+                    10, DirectionDoorOpening.LEFT, 20,
+                    new ControlConfiguration(functional, Map.of()));
+
+            assertEquals(200, module.getCellWidth(), type);
+            assertEquals(200 + deltaWidth, module.getWidth(), type);
+        });
+    }
+
+    @Test
     void lbcActsAsControlAndStorageModule() {
         FunctionalConfiguration functional = new FunctionalConfiguration(
                 DisplayPurpose.NONE,

@@ -271,7 +271,12 @@ public class ModuleSizeValidator {
         if (module instanceof LBC lbc) {
             requiredWidth = Math.max(
                     requiredWidth,
-                    requiredLBCControlWidth(lbc)
+                    (long) bounds.getLbcTechnicalCellMinWidth()
+                            + typeLb.getDeltaWidth()
+            );
+            requiredWidth = Math.max(
+                    requiredWidth,
+                    requiredLBCControlWidth(lbc) + typeLb.getDeltaWidth()
             );
         }
 
@@ -429,7 +434,7 @@ public class ModuleSizeValidator {
 
         long cellWidth = (long) lbc.getWidth() - lbc.getTypeLb().getDeltaWidth();
         validateRange(result, "widthCell", cellWidth,
-                bounds.getWidthCellMin(),
+                bounds.getLbcTechnicalCellMinWidth(),
                 (long) bounds.getWidthMax() - lbc.getTypeLb().getDeltaWidth(),
                 "Ширина складской ячейки");
 
