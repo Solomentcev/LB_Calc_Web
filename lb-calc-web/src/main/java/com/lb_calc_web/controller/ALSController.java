@@ -77,6 +77,8 @@ public class ALSController extends BaseCatalogController {
         } catch (ValidationSizeException exception) {
             model.addAttribute("ALSErrors",
                     ValidationErrorFormatter.format(exception.getValidationResult()));
+        } catch (IllegalArgumentException exception) {
+            model.addAttribute("ALSErrors", List.of(exception.getMessage()));
         }
         model.addAttribute("als", ALSImageService.addImages(als));
         return "alss/als";
@@ -102,6 +104,10 @@ public class ALSController extends BaseCatalogController {
             return "redirect:/alss/" + saved.getId();
         } catch (ValidationSizeException e) {
             model.addAttribute("ALSErrors", ValidationErrorFormatter.format(e.getValidationResult()));
+            model.addAttribute("als", ALSImageService.addImages(als));
+            return "alss/als";
+        } catch (IllegalArgumentException e) {
+            model.addAttribute("ALSErrors", List.of(e.getMessage()));
             model.addAttribute("als", ALSImageService.addImages(als));
             return "alss/als";
         }
