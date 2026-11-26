@@ -64,7 +64,7 @@ class ModuleNamingDescriptionTest {
 
     @Test
     void lbcNameAndDescription_shouldContainStorageAndControlCharacteristics() {
-        ALS als = ALSDtoMapper.toDomain(TestDataFactory.validLBCALSDTO(103L));
+        ALS als = TestDataFactory.restoreALS(TestDataFactory.validLBCALSDTO(103L));
         LBC lbc = als.getLBC();
 
         assertTrue(lbc.getName().startsWith(
@@ -170,7 +170,7 @@ class ModuleNamingDescriptionTest {
 
     @Test
     void absentOptionalControlFunctions_shouldNotAppearInNames() {
-        ALS als = ALSDtoMapper.toDomain(TestDataFactory.validLBCALSDTO(106L));
+        ALS als = TestDataFactory.restoreALS(TestDataFactory.validLBCALSDTO(106L));
         FunctionalConfiguration configuration = new FunctionalConfiguration(
                 com.lb_calc_web.domain.equipment.DisplayPurpose.NONE,
                 java.util.Set.of(),

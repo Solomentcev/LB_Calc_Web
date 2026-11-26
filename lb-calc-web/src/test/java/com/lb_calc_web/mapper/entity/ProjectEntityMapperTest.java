@@ -71,7 +71,7 @@ class ProjectEntityMapperTest {
 
         Project restored = ProjectEntityMapper.toDomain(
                 entity,
-                alsEntity -> ALSEntityMapper.toDomain(alsEntity, TestDataFactory.lcGeometrySettings()),
+                entityForAls -> ALSEntityMapper.toDomain(entityForAls, TestDataFactory.lcGeometrySettings()),
                 (mappedDomain, mappedEntity) -> {
                     mappedAls.set(mappedDomain);
                     mappedAlsEntity.set(mappedEntity);

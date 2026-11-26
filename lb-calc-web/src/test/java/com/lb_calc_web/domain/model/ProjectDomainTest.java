@@ -25,9 +25,7 @@ class ProjectDomainTest {
                 Role.ROLE_MANAGER
         );
         ALS original = TestDataFactory.validALS(1L);
-        ALS replacement = ALSDtoMapper.toDomain(
-                TestDataFactory.validLBCALSDTO(2L)
-        );
+        ALS replacement = TestDataFactory.restoreALS(TestDataFactory.validLBCALSDTO(2L));
         Project project = new Project(
                 "Проект",
                 "Компания",
@@ -57,9 +55,7 @@ class ProjectDomainTest {
         );
 
         ALS lcConfiguration = TestDataFactory.validALS(1L);
-        ALS lbcConfiguration = ALSDtoMapper.toDomain(
-                TestDataFactory.validLBCALSDTO(2L)
-        );
+        ALS lbcConfiguration = TestDataFactory.restoreALS(TestDataFactory.validLBCALSDTO(2L));
 
         Project first = new Project(
                 "Проект",
