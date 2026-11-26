@@ -383,12 +383,6 @@ public class ALSService {
         return als;
     }
 
-    /** Преобразует LBC в LC и LB и сохраняет обновлённую ALS. */
-    @Transactional
-    public ALS replaceWithNewLCandSaveALS(Long alsId) {
-        return saveALS(replaceWithNewLC(findById(alsId)));
-    }
-
     /** Добавляет LB в сохранённую ALS и сохраняет обновлённую конфигурацию. */
     @Transactional
     public ALS addNewLBandSaveALS(Long alsId) {
