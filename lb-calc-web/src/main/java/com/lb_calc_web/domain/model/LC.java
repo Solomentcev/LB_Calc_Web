@@ -23,7 +23,11 @@ import java.util.Objects;
  */
 public class LC extends Module implements ControlModule {
 
-    private final LCGeometrySettings geometrySettings;
+    private final int minimumWidth;
+    private final int displaySideClearance;
+    private final int widthRoundingStep;
+    private final int displayCenterHeight;
+    private final int displayTopClearance;
 
     /** Конфигурация функций управления LC. */
     private ControlConfiguration controlConfiguration;
@@ -32,9 +36,17 @@ public class LC extends Module implements ControlModule {
     public LC(int height, int width, int depth, int upperFrame, int bottomFrame,
               Colors colorBody, Colors colorDoor,
               ControlConfiguration controlConfiguration,
-              LCGeometrySettings geometrySettings) {
-        this.geometrySettings = Objects.requireNonNull(
-                geometrySettings, "Настройки геометрии LC не должны быть null");
+              int minimumWidth, int displaySideClearance, int widthRoundingStep,
+              int displayCenterHeight, int displayTopClearance) {
+        if (minimumWidth <= 0 || displaySideClearance < 0 || widthRoundingStep <= 0
+                || displayCenterHeight < 0 || displayTopClearance < 0) {
+            throw new IllegalArgumentException("Параметры геометрии LC содержат недопустимые значения");
+        }
+        this.minimumWidth = minimumWidth;
+        this.displaySideClearance = displaySideClearance;
+        this.widthRoundingStep = widthRoundingStep;
+        this.displayCenterHeight = displayCenterHeight;
+        this.displayTopClearance = displayTopClearance;
         setHeight(height);
         setWidth(width);
         setDepth(depth);
@@ -134,9 +146,9 @@ public class LC extends Module implements ControlModule {
         // Координата задаётся в миллиметрах от верхнего края корпуса.
         // Округляем вниз, чтобы при нечётной высоте дисплея не сместить его центр ниже заданной отметки.
         int centeredTop = (int) Math.floor(
-                getHeight() - geometrySettings.displayCenterHeight() - displayHeight / 2.0
+                getHeight() - displayCenterHeight - displayHeight / 2.0
         );
-        return Math.max(centeredTop, getUpperFrame() + geometrySettings.displayTopClearance());
+        return Math.max(centeredTop, getUpperFrame() + displayTopClearance);
     }
 
     /** Пересчитывает производные характеристики LC. */
@@ -155,15 +167,15 @@ public class LC extends Module implements ControlModule {
     public int getRequiredWidth() {
         Equipment display = findDisplay();
         if (display == null) {
-            return geometrySettings.minimumWidth();
+            return minimumWidth;
         }
 
         long requiredWidth = Math.max(
-                geometrySettings.minimumWidth(),
-                (long) display.getWidth() + 2L * geometrySettings.displaySideClearance()
+                minimumWidth,
+                (long) display.getWidth() + 2L * displaySideClearance
         );
-        long roundedWidth = ((requiredWidth + geometrySettings.widthRoundingStep() - 1)
-                / geometrySettings.widthRoundingStep()) * geometrySettings.widthRoundingStep();
+        long roundedWidth = ((requiredWidth + widthRoundingStep - 1)
+                / widthRoundingStep) * widthRoundingStep;
         return Math.toIntExact(roundedWidth);
     }
 
@@ -176,7 +188,7 @@ public class LC extends Module implements ControlModule {
      */
     private int calculateWidth() {
         if (findDisplay() == null) {
-            return Math.max(geometrySettings.minimumWidth(), getWidth());
+            return Math.max(minimumWidth, getWidth());
         }
         return getRequiredWidth();
     }
@@ -199,7 +211,9 @@ public class LC extends Module implements ControlModule {
         LC copy = new LC(
                 getHeight(), getWidth(), getDepth(),
                 getUpperFrame(), getBottomFrame(),
-                getColorBody(), getColorDoor(), controlConfiguration, geometrySettings);
+                getColorBody(), getColorDoor(), controlConfiguration,
+                minimumWidth, displaySideClearance, widthRoundingStep,
+                displayCenterHeight, displayTopClearance);
         return copyTextTo(copyIdentityTo(copy));
     }
 
