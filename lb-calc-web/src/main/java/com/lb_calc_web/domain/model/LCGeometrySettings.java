@@ -1,7 +1,5 @@
 package com.lb_calc_web.domain.model;
 
-import java.util.Objects;
-
 /** Настройки физических ограничений геометрии управляющего модуля LC. */
 public record LCGeometrySettings(
         int minimumWidth,

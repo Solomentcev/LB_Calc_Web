@@ -146,7 +146,8 @@ public class ModuleSizeValidator {
         logger.debug("Валидация размеров доменной модели LC");
 
         validateRange(result, "width", lc.getWidth(),
-                lc.getRequiredWidth(), bounds.getWidthMax(), "Ширина модуля");
+                Math.max((long) bounds.getWidthMin(), lc.getRequiredWidth()),
+                bounds.getWidthMax(), "Ширина модуля");
 
         if (validateCommonDimensions) {
             validateFrames(result, upperFrame, bottomFrame);
@@ -257,7 +258,7 @@ public class ModuleSizeValidator {
             addError(result, "type",
                     "Тип модуля хранения не задан", null, null, null);
             validateRange(result, "width", module.getWidth(),
-                    (long) bounds.getWidthCellMin(),
+                    Math.max((long) bounds.getWidthMin(), bounds.getWidthCellMin()),
                     bounds.getWidthMax(), "Ширина модуля");
             validateRange(result, "doorThickness",
                     module.getDoorThickness(),
@@ -273,7 +274,7 @@ public class ModuleSizeValidator {
         long storageWidthMin = (long) bounds.getWidthCellMin()
                 + typeLb.getDeltaWidth()
                 + typeLb.getServiceZoneWidth();
-        long requiredWidth = storageWidthMin;
+        long requiredWidth = Math.max((long) bounds.getWidthMin(), storageWidthMin);
 
         if (module instanceof LBC lbc) {
             requiredWidth = Math.max(

@@ -19,6 +19,7 @@ public class SizeBounds {
     private final int countCellsMin;
     private final int countCellsMax;
     private final int widthCellMin;
+    private final int widthMin;
     private final int widthMax;
     private final int depthCellMin;
     private final int depthCellMax;
@@ -46,6 +47,7 @@ public class SizeBounds {
             @Value("${size.count.cells.min}") int countCellsMin,
             @Value("${size.count.cells.max}") int countCellsMax,
             @Value("${size.width.cell.min}") int widthCellMin,
+            @Value("${size.width.min}") int widthMin,
             @Value("${size.width.max}") int widthMax,
             @Value("${size.depth.cell.min}") int depthCellMin,
             @Value("${size.depth.cell.max}") int depthCellMax,
@@ -72,6 +74,7 @@ public class SizeBounds {
         this.countCellsMin = countCellsMin;
         this.countCellsMax = countCellsMax;
         this.widthCellMin = widthCellMin;
+        this.widthMin = widthMin;
         this.widthMax = widthMax;
         this.depthCellMin = depthCellMin;
         this.depthCellMax = depthCellMax;
@@ -133,6 +136,10 @@ public class SizeBounds {
 
     public int getWidthCellMin() {
         return widthCellMin;
+    }
+
+    public int getWidthMin() {
+        return widthMin;
     }
 
     public int getWidthMax() {
