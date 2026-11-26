@@ -26,7 +26,7 @@ public final class LBCEntityMapper {
 
     /** Восстанавливает доменную конфигурацию LBC из JPA-сущности. */
     public static LBC toDomain(LBCEntity entity) {
-        return toDomain(entity, 200, 200, 20, 1300, 85);
+        return toDomain(entity, 200, 200, 20, 1300, 200, 85);
     }
 
     /** Восстанавливает LBC с актуальными настройками физической геометрии. */
@@ -36,6 +36,7 @@ public final class LBCEntityMapper {
             int technicalCellMinHeight,
             int equipmentClearance,
             int displayCenterHeight,
+            int storageCellMinWidth,
             int storageCellMinHeight
     ) {
         if (entity == null) {
@@ -83,6 +84,7 @@ public final class LBCEntityMapper {
                 technicalCellMinHeight,
                 equipmentClearance,
                 displayCenterHeight,
+                storageCellMinWidth,
                 storageCellMinHeight
         );
 

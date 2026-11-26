@@ -98,7 +98,7 @@ ControlConfiguration configuration = domain.getControlConfiguration();
             ControlConfiguration fallbackConfiguration
     ) {
         return toDomain(dto, typeLb, equipmentLookup, fallbackConfiguration,
-                200, 200, 20, 1300, 85);
+                200, 200, 20, 1300, 200, 85);
     }
 
     /** Восстанавливает LBC с заданными ограничениями физической геометрии. */
@@ -111,6 +111,7 @@ ControlConfiguration configuration = domain.getControlConfiguration();
             int technicalCellMinHeight,
             int equipmentClearance,
             int displayCenterHeight,
+            int storageCellMinWidth,
             int storageCellMinHeight
     ) {
         if (dto == null) {
@@ -174,6 +175,7 @@ ControlConfiguration configuration = domain.getControlConfiguration();
                 technicalCellMinHeight,
                 equipmentClearance,
                 displayCenterHeight,
+                storageCellMinWidth,
                 storageCellMinHeight
         );
         domain.setId(dto.getId() == null || dto.getId() <= 0 ? null : dto.getId());

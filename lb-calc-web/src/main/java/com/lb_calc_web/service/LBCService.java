@@ -114,6 +114,7 @@ public class LBCService {
                 sizeBounds.getLbcTechnicalCellMinHeight(),
                 sizeBounds.getLbcEquipmentClearance(),
                 sizeBounds.getLbcDisplayCenterHeight(),
+                sizeBounds.getLbcStorageCellMinWidth(),
                 sizeBounds.getHeightCellMin()
         );
     }
@@ -193,6 +194,7 @@ public class LBCService {
                     sizeBounds.getLbcTechnicalCellMinHeight(),
                     sizeBounds.getLbcEquipmentClearance(),
                     sizeBounds.getLbcDisplayCenterHeight(),
+                    sizeBounds.getLbcStorageCellMinWidth(),
                     sizeBounds.getHeightCellMin()
             );
         } catch (RuntimeException exception) {
@@ -246,6 +248,7 @@ public class LBCService {
                 sizeBounds.getLbcTechnicalCellMinHeight(),
                 sizeBounds.getLbcEquipmentClearance(),
                 sizeBounds.getLbcDisplayCenterHeight(),
+                sizeBounds.getLbcStorageCellMinWidth(),
                 sizeBounds.getHeightCellMin());
     }
 

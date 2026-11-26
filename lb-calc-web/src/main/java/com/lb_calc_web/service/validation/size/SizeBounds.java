@@ -45,6 +45,7 @@ public class SizeBounds {
     private final int lcWidthRoundingStep;
     private final int lcDisplayCenterHeight;
     private final int lcDisplayTopClearance;
+    private final int lbcStorageCellMinWidth;
     private final int lbcTechnicalCellMinWidth;
     private final int lbcTechnicalCellMinHeight;
     private final int lbcEquipmentClearance;
@@ -89,6 +90,7 @@ public class SizeBounds {
             @Value("${lc.geometry.width.rounding-step}") int lcWidthRoundingStep,
             @Value("${lc.geometry.display.center-height}") int lcDisplayCenterHeight,
             @Value("${lc.geometry.display.top-clearance}") int lcDisplayTopClearance,
+            @Value("${lbc.geometry.storage-cell.width.min}") int lbcStorageCellMinWidth,
             @Value("${lbc.geometry.technical-cell.width.min}") int lbcTechnicalCellMinWidth,
             @Value("${lbc.geometry.technical-cell.height.min}") int lbcTechnicalCellMinHeight,
             @Value("${lbc.geometry.equipment.clearance}") int lbcEquipmentClearance,
@@ -132,6 +134,7 @@ public class SizeBounds {
         this.lcWidthRoundingStep = lcWidthRoundingStep;
         this.lcDisplayCenterHeight = lcDisplayCenterHeight;
         this.lcDisplayTopClearance = lcDisplayTopClearance;
+        this.lbcStorageCellMinWidth = lbcStorageCellMinWidth;
         this.lbcTechnicalCellMinWidth = lbcTechnicalCellMinWidth;
         this.lbcTechnicalCellMinHeight = lbcTechnicalCellMinHeight;
         this.lbcEquipmentClearance = lbcEquipmentClearance;
@@ -157,6 +160,8 @@ public class SizeBounds {
     public int getLcDisplayTopClearance() {
         return lcDisplayTopClearance;
     }
+
+    public int getLbcStorageCellMinWidth() { return lbcStorageCellMinWidth; }
 
     public int getLbcTechnicalCellMinWidth() { return lbcTechnicalCellMinWidth; }
 

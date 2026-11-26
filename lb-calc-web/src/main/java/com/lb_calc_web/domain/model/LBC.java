@@ -23,6 +23,7 @@ public class LBC extends StorageModule implements ControlModule {
     private static final int DEFAULT_EQUIPMENT_CLEARANCE = 20;
     private static final int DEFAULT_DISPLAY_CENTER_HEIGHT = 1300;
 
+    private final int storageCellMinWidth;
     private final int technicalCellMinWidth;
     private final int technicalCellMinHeight;
     private final int equipmentClearance;
@@ -58,7 +59,7 @@ public class LBC extends StorageModule implements ControlModule {
         this(height, width, depth, upperFrame, bottomFrame, colorBody, colorDoor,
                 typeLb, countCells, directionDoorOpening, doorThickness, controlConfiguration,
                 technicalCellMinWidth, technicalCellMinHeight, equipmentClearance,
-                targetDisplayCenterHeight, 85);
+                targetDisplayCenterHeight, 200, 85);
     }
 
     public LBC(int height, int width, int depth, int upperFrame, int bottomFrame,
@@ -66,13 +67,15 @@ public class LBC extends StorageModule implements ControlModule {
                DirectionDoorOpening directionDoorOpening, int doorThickness,
                ControlConfiguration controlConfiguration, int technicalCellMinWidth,
                int technicalCellMinHeight, int equipmentClearance,
-               int targetDisplayCenterHeight, int storageCellMinHeight) {
+               int targetDisplayCenterHeight, int storageCellMinWidth,
+               int storageCellMinHeight) {
         super(doorThickness);
         if (technicalCellMinWidth <= 0 || technicalCellMinHeight <= 0
                 || equipmentClearance < 0 || targetDisplayCenterHeight < 0
-                || storageCellMinHeight <= 0) {
+                || storageCellMinWidth <= 0 || storageCellMinHeight <= 0) {
             throw new IllegalArgumentException("Параметры геометрии LBC заданы некорректно");
         }
+        this.storageCellMinWidth = storageCellMinWidth;
         this.technicalCellMinWidth = technicalCellMinWidth;
         this.technicalCellMinHeight = technicalCellMinHeight;
         this.equipmentClearance = equipmentClearance;
@@ -133,6 +136,11 @@ public class LBC extends StorageModule implements ControlModule {
     @Override
     public int getEquipmentHeight() {
         return getEquipment().keySet().stream().mapToInt(Equipment::getHeight).max().orElse(0);
+    }
+
+    /** Минимальная ширина складской ячейки, мм. */
+    public int getStorageCellMinWidth() {
+        return storageCellMinWidth;
     }
 
     /** Минимальная ширина технической ячейки с учётом дисплея и оборудования. */
@@ -270,7 +278,8 @@ public class LBC extends StorageModule implements ControlModule {
 
         // Ширина LBC должна обеспечивать минимальную ширину технической
         // и складской ячеек независимо от наличия физического дисплея.
-        long requiredModuleWidth = (long) technicalCellWidth + getTypeLb().getDeltaWidth();
+        long requiredCellWidth = Math.max(technicalCellWidth, storageCellMinWidth);
+        long requiredModuleWidth = requiredCellWidth + getTypeLb().getDeltaWidth();
         setWidth(saturatedInt(Math.max(getWidth(), requiredModuleWidth)));
 
         int cellWidth = saturatedInt((long) getWidth() - getTypeLb().getDeltaWidth());
@@ -306,7 +315,7 @@ public class LBC extends StorageModule implements ControlModule {
                 getColorBody(), getColorDoor(), getTypeLb(), getCountCells(),
                 getDirectionDoorOpening(), getDoorThickness(), controlConfiguration,
                 technicalCellMinWidth, technicalCellMinHeight, equipmentClearance,
-                targetDisplayCenterHeight, storageCellMinHeight);
+                targetDisplayCenterHeight, storageCellMinWidth, storageCellMinHeight);
         copy.copyCellNumbersFrom(this);
         return copyTextTo(copyIdentityTo(copy));
     }
