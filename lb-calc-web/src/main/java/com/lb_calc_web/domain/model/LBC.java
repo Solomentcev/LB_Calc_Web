@@ -202,7 +202,7 @@ public class LBC extends StorageModule implements ControlModule {
         long selectedCenterDistance = Long.MAX_VALUE;
 
         if (count >= 2 && compartmentHeight >= minimumTechnicalHeight
-                + (long) count * getTypeLb().getHeightCellMin()) {
+                + (long) count * boundsMinCellHeight()) {
             int bestImbalance = Integer.MAX_VALUE;
             for (int below = 1; below < count; below++) {
                 int above = count - below;
