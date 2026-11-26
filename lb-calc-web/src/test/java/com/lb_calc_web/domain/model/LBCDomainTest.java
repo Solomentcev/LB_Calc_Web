@@ -53,6 +53,23 @@ class LBCDomainTest {
     }
 
     @Test
+    void displaySetsMinimumStorageCellWidthForTypeThree() {
+        Equipment display = new Equipment(2L, EquipmentFunctionalType.DISPLAY,
+                DisplayPurpose.INCH_10, EquipmentCategory.DISPLAY,
+                "Дисплей", "", 300, 180, 30);
+        FunctionalConfiguration functional = new FunctionalConfiguration(
+                DisplayPurpose.INCH_10, Set.of(), PaymentPurpose.NONE, PrinterPurpose.ABSENT);
+        LBC module = new LBC(1940, 200, 600, 100, 100,
+                Colors.Blue, Colors.White, new TypeLb("TYPE3", 160, 5, 40),
+                10, DirectionDoorOpening.LEFT, 20,
+                new ControlConfiguration(functional, Map.of(display, 1)));
+
+        assertEquals(340, module.getTechnicalCellWidth());
+        assertEquals(500, module.getWidth());
+        assertEquals(340, module.getCellWidth());
+    }
+
+    @Test
     void lbcActsAsControlAndStorageModule() {
         FunctionalConfiguration functional = new FunctionalConfiguration(
                 DisplayPurpose.NONE,
