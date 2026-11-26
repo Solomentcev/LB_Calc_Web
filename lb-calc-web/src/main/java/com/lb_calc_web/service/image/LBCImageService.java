@@ -2,9 +2,9 @@ package com.lb_calc_web.service.image;
 
 import com.lb_calc_web.domain.attributes.Colors;
 import com.lb_calc_web.domain.attributes.DirectionDoorOpening;
-import com.lb_calc_web.dto.LBCDTO;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.lb_calc_web.domain.model.LBC;
+import com.lb_calc_web.domain.equipment.Equipment;
+import com.lb_calc_web.domain.equipment.EquipmentFunctionalType;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -19,13 +19,10 @@ import java.util.Base64;
 /** Генерирует графическое представление комбинированного модуля LBC. */
 public final class LBCImageService {
 
-    private static final Logger logger = LoggerFactory.getLogger(LBCImageService.class);
-
-
-    private LBCImageService() {
+private LBCImageService() {
     }
 
-    static Image createLBCImage(LBCDTO lbc) {
+    static Image createLBCImage(LBC lbc) {
         BufferedImage img =
                 new BufferedImage(
                         lbc.getWidth() / 10 + 1,
@@ -60,7 +57,7 @@ public final class LBCImageService {
      */
     static void drawLBC(
             Image img,
-            LBCDTO lbc,
+            LBC lbc,
             int x
     ) {
         Graphics2D g2d =
@@ -80,14 +77,14 @@ public final class LBCImageService {
         int height = lbc.getHeight() / 10;
         int upperFrame = lbc.getUpperFrame() / 10;
         int bottomFrame = lbc.getBottomFrame() / 10;
-        int serviceZoneWidth = lbc.getServiceZoneWidth() / 10;
-        int shelfThickness = Math.max(1, lbc.getShelfThick() / 10);
+        int serviceZoneWidth = lbc.getTypeLb().getServiceZoneWidth() / 10;
+        int shelfThickness = Math.max(1, lbc.getTypeLb().getShelfThick() / 10);
 
         Colors bodyColor =
-                Colors.valueOf(lbc.getColorBody());
+                lbc.getColorBody();
 
         Colors doorColor =
-                Colors.valueOf(lbc.getColorDoor());
+                lbc.getColorDoor();
 
         // Единый корпус
         g2d.setColor(bodyColor.getColor());
@@ -119,10 +116,7 @@ public final class LBCImageService {
 
         // Storage-зона и встроенная control-зона.
         boolean directionLeft =
-                DirectionDoorOpening.LEFT.name()
-                        .equals(
-                                lbc.getDirectionDoorOpening()
-                        );
+                DirectionDoorOpening.LEFT == lbc.getDirectionDoorOpening();
 
         int storageWidth =
                 Math.max(
@@ -143,8 +137,8 @@ public final class LBCImageService {
                             lbc.getHeight()
                                     - lbc.getBottomFrame()
                                     - (
-                                    lbc.getHeightCell()
-                                            + lbc.getShelfThick()
+                                    lbc.getCellHeight()
+                                            + lbc.getTypeLb().getShelfThick()
                             ) * (i - 1)
                     ) / 10.0
             );
@@ -226,12 +220,12 @@ public final class LBCImageService {
                 4
         );
 
-        if (lbc.getDisplayWidth() > 0 && lbc.getDisplayHeight() > 0) {
+        if ((findDisplay(lbc) == null ? 0 : findDisplay(lbc).getWidth()) > 0 && (findDisplay(lbc) == null ? 0 : findDisplay(lbc).getHeight()) > 0) {
             int displayWidth =
                     Math.min(
                             Math.max(
                                     10,
-                                    lbc.getDisplayWidth() / 10
+                                    (findDisplay(lbc) == null ? 0 : findDisplay(lbc).getWidth()) / 10
                             ),
                             Math.max(
                                     1,
@@ -243,7 +237,7 @@ public final class LBCImageService {
                     Math.min(
                             Math.max(
                                     10,
-                                    lbc.getDisplayHeight() / 10
+                                    (findDisplay(lbc) == null ? 0 : findDisplay(lbc).getHeight()) / 10
                             ),
                             Math.max(
                                     1,
@@ -283,11 +277,11 @@ public final class LBCImageService {
 
         g2d.setColor(Color.BLACK);
 
-        if (lbc.getFunctionalConfiguration() != null
-                && lbc.getFunctionalConfiguration().getAccess() != null
-                && (lbc.getFunctionalConfiguration().getAccess().contains(
+        if (lbc.getControlConfiguration().getFunctionalConfiguration() != null
+                && lbc.getControlConfiguration().getFunctionalConfiguration().getAccess() != null
+                && (lbc.getControlConfiguration().getFunctionalConfiguration().getAccess().contains(
                         com.lb_calc_web.domain.equipment.AccessPurpose.BAR_CODE)
-                || lbc.getFunctionalConfiguration().getAccess().contains(
+                || lbc.getControlConfiguration().getFunctionalConfiguration().getAccess().contains(
                         com.lb_calc_web.domain.equipment.AccessPurpose.QR_CODE))) {
             g2d.fillRect(
                     panelX + panelMargin + 2,
@@ -297,9 +291,9 @@ public final class LBCImageService {
             );
         }
 
-        if (lbc.getFunctionalConfiguration() != null
-                && lbc.getFunctionalConfiguration().getPrinter() != null
-                && lbc.getFunctionalConfiguration().getPrinter()
+        if (lbc.getControlConfiguration().getFunctionalConfiguration() != null
+                && lbc.getControlConfiguration().getFunctionalConfiguration().getPrinter() != null
+                && lbc.getControlConfiguration().getFunctionalConfiguration().getPrinter()
                 != com.lb_calc_web.domain.equipment.PrinterPurpose.ABSENT) {
             g2d.fillRect(
                     panelX + panelMargin + 2,
@@ -309,9 +303,9 @@ public final class LBCImageService {
             );
         }
 
-        if (lbc.getFunctionalConfiguration() != null
-                && lbc.getFunctionalConfiguration().getAccess() != null
-                && lbc.getFunctionalConfiguration().getAccess().contains(
+        if (lbc.getControlConfiguration().getFunctionalConfiguration() != null
+                && lbc.getControlConfiguration().getFunctionalConfiguration().getAccess() != null
+                && lbc.getControlConfiguration().getFunctionalConfiguration().getAccess().contains(
                         com.lb_calc_web.domain.equipment.AccessPurpose.RFID)) {
             g2d.fillRect(
                     panelX + controlWidth - panelMargin - 8,
@@ -355,20 +349,15 @@ public final class LBCImageService {
     /**
      * Формирует изображение LBC для представления.
      */
-    public static LBCDTO addImage(LBCDTO dto) {
-        if (dto == null) {
-            return null;
-        }
-        try {
-            dto.setStringLBCImage(getStringLBCImage(dto));
-        } catch (RuntimeException exception) {
-            logger.warn("Не удалось сформировать изображение LBC id={}", dto.getId(), exception);
-        }
-        return dto;
+    private static Equipment findDisplay(LBC lbc) {
+        return lbc.getEquipment().keySet().stream()
+                .filter(item -> item.getFunctionalType() == EquipmentFunctionalType.DISPLAY)
+                .findFirst()
+                .orElse(null);
     }
 
     /** Создаёт PNG-файл изображения комбинированного модуля LBC. */
-    public static File getFileLBCImage(LBCDTO lbc) {
+    public static File getFileLBCImage(LBC lbc) {
         BufferedImage img =
                 (BufferedImage) createLBCImage(lbc);
 
@@ -394,7 +383,7 @@ public final class LBCImageService {
     }
 
     /** Возвращает PNG-изображение LBC в виде массива байтов. */
-    public static byte[] getBytesArrayLBCImage(LBCDTO lbc) {
+    public static byte[] getBytesArrayLBCImage(LBC lbc) {
         BufferedImage img =
                 (BufferedImage) createLBCImage(lbc);
 
@@ -415,7 +404,7 @@ public final class LBCImageService {
     }
 
     /** Возвращает изображение LBC в кодировке Base64. */
-    public static String getStringLBCImage(LBCDTO lbc) {
+    public static String getStringLBCImage(LBC lbc) {
         return Base64.getEncoder().encodeToString(
                 getBytesArrayLBCImage(lbc)
         );

@@ -1,9 +1,9 @@
 package com.lb_calc_web.service.image;
 
 import com.lb_calc_web.domain.attributes.Colors;
-import com.lb_calc_web.dto.LCDTO;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.lb_calc_web.domain.model.LC;
+import com.lb_calc_web.domain.equipment.Equipment;
+import com.lb_calc_web.domain.equipment.EquipmentFunctionalType;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -18,11 +18,8 @@ import java.util.Base64;
 /** Генерирует графическое представление управляющего модуля LC. */
 public class LCImageService {
 
-    private static final Logger logger = LoggerFactory.getLogger(LCImageService.class);
-
-
-    static Image createLCImage(
-            LCDTO lc
+static Image createLCImage(
+            LC lc
     ) {
 
         BufferedImage img =
@@ -67,7 +64,7 @@ public class LCImageService {
 
     static void drawLC(
             Image img,
-            LCDTO lc,
+            LC lc,
             int x
     ) {
 
@@ -85,9 +82,7 @@ public class LCImageService {
         );
 
         Colors colorBody =
-                Colors.valueOf(
-                        lc.getColorBody()
-                );
+                lc.getColorBody();
 
 
         g2d.setColor(
@@ -143,17 +138,17 @@ public class LCImageService {
                 x
                         + (
                         (lc.getWidth()
-                                - lc.getDisplayWidth())
+                                - (findDisplay(lc) == null ? 0 : findDisplay(lc).getWidth()))
                                 / 2
                 ) / 10;
 
         int displayY = lc.getDisplayTop() / 10;
 
         int displayWidth =
-                lc.getDisplayWidth() / 10;
+                (findDisplay(lc) == null ? 0 : findDisplay(lc).getWidth()) / 10;
 
         int displayHeight =
-                lc.getDisplayHeight() / 10;
+                (findDisplay(lc) == null ? 0 : findDisplay(lc).getHeight()) / 10;
 
         g2d.fillRoundRect(
                 displayX,
@@ -191,21 +186,16 @@ public class LCImageService {
     /**
      * Формирует изображение LC для представления.
      */
-    public static LCDTO addImage(LCDTO dto) {
-        if (dto == null) {
-            return null;
-        }
-        try {
-            dto.setStringLCImage(getStringLCImage(dto));
-        } catch (RuntimeException exception) {
-            logger.warn("Не удалось сформировать изображение LC id={}", dto.getId(), exception);
-        }
-        return dto;
+    private static Equipment findDisplay(LC lc) {
+        return lc.getEquipment().keySet().stream()
+                .filter(item -> item.getFunctionalType() == EquipmentFunctionalType.DISPLAY)
+                .findFirst()
+                .orElse(null);
     }
 
     /** Создаёт PNG-файл изображения управляющего модуля LC. */
     public static File getFileLCImage(
-            LCDTO lc
+            LC lc
     ) {
 
         BufferedImage img =
@@ -238,7 +228,7 @@ public class LCImageService {
 
     /** Возвращает PNG-изображение LC в виде массива байтов. */
     public static byte[] getBytesArrayLCImage(
-            LCDTO lc
+            LC lc
     ) {
 
         BufferedImage img =
@@ -269,7 +259,7 @@ public class LCImageService {
 
     /** Возвращает изображение LC в кодировке Base64. */
     public static String getStringLCImage(
-            LCDTO lc
+            LC lc
     ) {
 
         return Base64.getEncoder().encodeToString(

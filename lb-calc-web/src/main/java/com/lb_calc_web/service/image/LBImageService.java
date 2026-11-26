@@ -2,9 +2,7 @@ package com.lb_calc_web.service.image;
 
 import com.lb_calc_web.domain.attributes.Colors;
 import com.lb_calc_web.domain.attributes.DirectionDoorOpening;
-import com.lb_calc_web.dto.LBDTO;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.lb_calc_web.domain.model.LB;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -19,11 +17,8 @@ import java.util.Base64;
 /** Генерирует графическое представление модуля хранения LB. */
 public class LBImageService {
 
-    private static final Logger logger = LoggerFactory.getLogger(LBImageService.class);
-
-
-    static Image createLBImage(
-            LBDTO lb
+static Image createLBImage(
+            LB lb
     ) {
 
         BufferedImage img =
@@ -68,7 +63,7 @@ public class LBImageService {
 
     static void drawLB(
             Image img,
-            LBDTO lb,
+            LB lb,
             int x
     ) {
 
@@ -86,22 +81,17 @@ public class LBImageService {
         );
 
         int serviceZoneWidth =
-                lb.getServiceZoneWidth();
+                lb.getTypeLb().getServiceZoneWidth();
 
         int shelfThickness =
-                lb.getShelfThick();
+                lb.getTypeLb().getShelfThick();
 
         boolean directionLeft =
-                DirectionDoorOpening.LEFT.name()
-                        .equals(
-                                lb.getDirectionDoorOpening()
-                        );
+                DirectionDoorOpening.LEFT == lb.getDirectionDoorOpening();
 
         // Двери
         g2d.setColor(
-                Colors.valueOf(
-                        lb.getColorDoor()
-                ).getColor()
+                lb.getColorDoor().getColor()
         );
 
         g2d.fillRoundRect(
@@ -115,9 +105,7 @@ public class LBImageService {
 
         // Корпус
         g2d.setColor(
-                Colors.valueOf(
-                        lb.getColorBody()
-                ).getColor()
+                lb.getColorBody().getColor()
         );
 
         // Верхняя рама
@@ -179,7 +167,7 @@ public class LBImageService {
                                         lb.getHeight()
                                                 - lb.getBottomFrame()
                                                 - (
-                                                lb.getHeightCell()
+                                                lb.getCellHeight()
                                                         + shelfThickness
                                         ) * (i - 1)
                                 ) / 10
@@ -227,7 +215,7 @@ public class LBImageService {
                                         lb.getHeight()
                                                 - lb.getBottomFrame()
                                                 - (
-                                                lb.getHeightCell()
+                                                lb.getCellHeight()
                                                         + shelfThickness
                                         ) * (i - 1)
                                 ) / 10
@@ -313,7 +301,7 @@ public class LBImageService {
                                         lb.getHeight()
                                                 - lb.getBottomFrame()
                                                 - (
-                                                lb.getHeightCell()
+                                                lb.getCellHeight()
                                                         * (i - 1)
                                                         + shelfThickness
                                                         * (i - 1)
@@ -361,7 +349,7 @@ public class LBImageService {
                                         lb.getHeight()
                                                 - lb.getBottomFrame()
                                                 - (
-                                                lb.getHeightCell()
+                                                lb.getCellHeight()
                                                         * (i - 1)
                                                         + shelfThickness
                                                         * (i - 1)
@@ -385,21 +373,9 @@ public class LBImageService {
     /**
      * Формирует изображение LB для представления.
      */
-    public static LBDTO addImage(LBDTO dto) {
-        if (dto == null) {
-            return null;
-        }
-        try {
-            dto.setStringLBImage(getStringLBImage(dto));
-        } catch (RuntimeException exception) {
-            logger.warn("Не удалось сформировать изображение LB id={}", dto.getId(), exception);
-        }
-        return dto;
-    }
-
     /** Создаёт PNG-файл изображения модуля хранения LB. */
     public static File getFileLBImage(
-            LBDTO lb
+            LB lb
     ) {
 
         BufferedImage img =
@@ -436,7 +412,7 @@ public class LBImageService {
 
     /** Возвращает PNG-изображение LB в виде массива байтов. */
     public static byte[] getBytesArrayLBImage(
-            LBDTO lb
+            LB lb
     ) {
 
         BufferedImage img =
@@ -467,7 +443,7 @@ public class LBImageService {
 
     /** Возвращает изображение LB в кодировке Base64. */
     public static String getStringLBImage(
-            LBDTO lb
+            LB lb
     ) {
 
         return Base64.getEncoder().encodeToString(

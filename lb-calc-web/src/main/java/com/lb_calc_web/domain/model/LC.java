@@ -126,18 +126,6 @@ public class LC extends Module implements ControlModule {
                 .orElse(0);
     }
 
-    /** @return ширина установленного дисплея, мм, либо {@code 0}, если дисплея нет */
-    public int getDisplayWidth() {
-        Equipment display = findDisplay();
-        return display == null ? 0 : display.getWidth();
-    }
-
-    /** @return высота установленного дисплея, мм, либо {@code 0}, если дисплея нет */
-    public int getDisplayHeight() {
-        Equipment display = findDisplay();
-        return display == null ? 0 : display.getHeight();
-    }
-
     /**
      * Рассчитывает положение верхнего края дисплея относительно верхнего края LC.
      *
@@ -149,7 +137,8 @@ public class LC extends Module implements ControlModule {
      *         {@code 0}, если дисплей не установлен
      */
     public int getDisplayTop() {
-        int displayHeight = getDisplayHeight();
+        Equipment display = findDisplay();
+        int displayHeight = display == null ? 0 : display.getHeight();
         if (displayHeight <= 0) {
             return 0;
         }

@@ -1,10 +1,10 @@
 package com.lb_calc_web.service.image;
 
-import com.lb_calc_web.domain.attributes.PositionControlModule;
-import com.lb_calc_web.dto.ALSDTO;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import com.lb_calc_web.dto.LBDTO;
+import com.lb_calc_web.domain.model.ALS;
+import com.lb_calc_web.domain.model.LB;
+import com.lb_calc_web.domain.model.LC;
+import com.lb_calc_web.domain.model.LBC;
+import com.lb_calc_web.domain.model.Module;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -15,262 +15,74 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.Base64;
-import java.util.List;
 
-/** Генерирует графические представления конфигураций ALS и вложенных модулей. */
+/** Генерирует графическое представление конфигурации ALS. */
 public class ALSImageService {
 
-    private static final Logger logger = LoggerFactory.getLogger(ALSImageService.class);
-
-
-    static Image createALSImage(ALSDTO als) {
-
-        BufferedImage img =
-                new BufferedImage(
-                        als.getWidth() / 10 + 1,
-                        als.getHeight() / 10 + 1,
-                        BufferedImage.TYPE_INT_ARGB
-                );
-
-        AffineTransform scalingTransform =
-                new AffineTransform();
-
-        scalingTransform.scale(3, 3);
-
-        AffineTransformOp scaleOp =
-                new AffineTransformOp(
-                        scalingTransform,
-                        AffineTransformOp.TYPE_BILINEAR
-                );
-
-        drawALS(img, als);
-
-        BufferedImage scaledImg =
-                new BufferedImage(
-                        img.getWidth() * 3,
-                        img.getHeight() * 3,
-                        BufferedImage.TYPE_INT_ARGB
-                );
-
-        scaledImg = scaleOp.filter(img, scaledImg);
-
-        return scaledImg;
+    static Image createALSImage(ALS als) {
+        BufferedImage image = new BufferedImage(
+                als.getWidth() / 10 + 1,
+                als.getHeight() / 10 + 1,
+                BufferedImage.TYPE_INT_ARGB
+        );
+        AffineTransform transform = new AffineTransform();
+        transform.scale(3, 3);
+        AffineTransformOp scaleOperation = new AffineTransformOp(
+                transform, AffineTransformOp.TYPE_BILINEAR);
+        drawALS(image, als);
+        BufferedImage scaledImage = new BufferedImage(
+                image.getWidth() * 3, image.getHeight() * 3,
+                BufferedImage.TYPE_INT_ARGB);
+        return scaleOperation.filter(image, scaledImage);
     }
 
-    static void drawALS(
-            BufferedImage img,
-            ALSDTO als
-    ) {
-        Graphics2D g2d =
-                (Graphics2D) img.getGraphics();
-
-        g2d.setRenderingHint(
-                RenderingHints.KEY_ANTIALIASING,
-                RenderingHints.VALUE_ANTIALIAS_ON
-        );
-
-        g2d.setRenderingHint(
-                RenderingHints.KEY_RENDERING,
-                RenderingHints.VALUE_RENDER_QUALITY
-        );
-
-        PositionControlModule position =
-                PositionControlModule.valueOf(
-                        als.getPositionControlModule() == null
-                                ? PositionControlModule.CENTER.name()
-                                : als.getPositionControlModule()
-                );
-
+    /** Рисует модули ALS в их физическом порядке. */
+    static void drawALS(BufferedImage image, ALS als) {
         int x = 0;
-
-        if (position == PositionControlModule.LEFT) {
-            x += drawControlModule(
-                    img,
-                    als,
-                    x
-            );
-        }
-
-        List<LBDTO> lbList =
-                als.getLbList() == null
-                        ? List.of()
-                        : als.getLbList();
-
-        for (int i = 0; i < lbList.size(); i++) {
-            LBDTO lb = lbList.get(i);
-
-            LBImageService.drawLB(
-                    img,
-                    lb,
-                    x
-            );
-
-            x += lb.getWidth() / 10;
-
-            if (position == PositionControlModule.CENTER
-                    && (
-                    i + 1 >= lbList.size() / 2
-                            || lbList.size() <= 1
-            )) {
-                x += drawControlModule(
-                        img,
-                        als,
-                        x
-                );
-
-                position = null;
+        for (Module module : als.getModules()) {
+            if (module instanceof LB lb) {
+                LBImageService.drawLB(image, lb, x);
+                x += lb.getWidth() / 10;
+            } else if (module instanceof LC lc) {
+                LCImageService.drawLC(image, lc, x);
+                x += lc.getWidth() / 10;
+            } else if (module instanceof LBC lbc) {
+                LBCImageService.drawLBC(image, lbc, x);
+                x += lbc.getWidth() / 10;
+            } else {
+                throw new IllegalStateException(
+                        "Неизвестный тип модуля ALS: " + module.getClass().getName());
             }
         }
-
-        if (position == PositionControlModule.RIGHT
-                || (
-                position == PositionControlModule.CENTER
-                        && lbList.isEmpty()
-        )) {
-            x += drawControlModule(
-                    img,
-                    als,
-                    x
-            );
-        }
-
-        g2d.dispose();
     }
 
-    /**
-     * Рисует единственный control-модуль ALS.
-     * LBC остаётся одним физическим модулем и не раскладывается
-     * на отдельные LB и LC.
-     */
-    private static int drawControlModule(
-            BufferedImage img,
-            ALSDTO als,
-            int x
-    ) {
-        if (als.getLBC() != null) {
-            LBCImageService.drawLBC(
-                    img,
-                    als.getLBC(),
-                    x
-            );
-
-            return als.getLBC().getWidth() / 10;
-        }
-
-        if (als.getLC() != null) {
-            LCImageService.drawLC(
-                    img,
-                    als.getLC(),
-                    x
-            );
-
-            return als.getLC().getWidth() / 10;
-        }
-
-        throw new IllegalStateException(
-                "ALS должен содержать модуль управления"
-        );
-    }
-
-    /**
-     * Формирует изображения ALS и входящих в неё модулей для представления.
-     */
-    public static ALSDTO addImages(ALSDTO dto) {
-        if (dto == null) {
-            return null;
-        }
+    /** Создаёт PNG-файл изображения ALS. */
+    public static File getFileALSImage(ALS als) {
+        BufferedImage image = (BufferedImage) createALSImage(als);
+        File file = new File("src/main/resources/static/alss/als" + als.getId() + ".png");
         try {
-            dto.setStringALSImage(getStringALSImage(dto));
-        } catch (RuntimeException exception) {
-            logger.warn("Не удалось сформировать изображение ALS id={}", dto.getId(), exception);
-        }
-        if (dto.getLC() != null) {
-            LCImageService.addImage(dto.getLC());
-        }
-        if (dto.getLBC() != null) {
-            LBCImageService.addImage(dto.getLBC());
-        }
-        if (dto.getLbList() != null) {
-            dto.getLbList().forEach(LBImageService::addImage);
-        }
-        return dto;
-    }
-
-    /** Создаёт PNG-файл изображения ALS в файловой системе. */
-    public static File getFileLCImage(
-            ALSDTO als
-    ) {
-
-        BufferedImage img =
-                (BufferedImage) createALSImage(als);
-
-        File file =
-                new File(
-                        "src/main/resources/static/alss/als"
-                                + als.getId()
-                                + ".png"
-                );
-
-        try {
-
             file.createNewFile();
-
-            ImageIO.write(
-                    img,
-                    "png",
-                    file
-            );
-
-        } catch (IOException e) {
-
-            throw new RuntimeException(
-                    "Error creating file: "
-                            + e.getMessage(),
-                    e
-            );
+            ImageIO.write(image, "png", file);
+        } catch (IOException exception) {
+            throw new RuntimeException("Не удалось создать файл изображения ALS", exception);
         }
-
         return file;
     }
 
     /** Возвращает PNG-изображение ALS в виде массива байтов. */
-    public static byte[] getBytesArrayALSImage(
-            ALSDTO als
-    ) {
-
-        BufferedImage img =
-                (BufferedImage) createALSImage(als);
-
-        ByteArrayOutputStream baos =
-                new ByteArrayOutputStream();
-
+    public static byte[] getBytesArrayALSImage(ALS als) {
+        BufferedImage image = (BufferedImage) createALSImage(als);
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
         try {
-
-            ImageIO.write(
-                    img,
-                    "png",
-                    baos
-            );
-
-        } catch (IOException e) {
-
-            throw new RuntimeException(
-                    "Error creating image: "
-                            + e.getMessage(),
-                    e
-            );
+            ImageIO.write(image, "png", output);
+        } catch (IOException exception) {
+            throw new RuntimeException("Не удалось сформировать изображение ALS", exception);
         }
-
-        return baos.toByteArray();
+        return output.toByteArray();
     }
 
     /** Возвращает изображение ALS в кодировке Base64. */
-    public static String getStringALSImage(
-            ALSDTO als
-    ) {
-
-        return Base64.getEncoder().encodeToString(
-                getBytesArrayALSImage(als)
-        );
+    public static String getStringALSImage(ALS als) {
+        return Base64.getEncoder().encodeToString(getBytesArrayALSImage(als));
     }
 }

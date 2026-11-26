@@ -23,13 +23,6 @@ public class LCDTO {
     private String colorBody;
     private String colorDoor;
 
-    @JsonIgnore
-    private int displayWidth;
-    @JsonIgnore
-    private int displayHeight;
-    @JsonIgnore
-    private int displayTop;
-
     private FunctionalConfigurationDTO functionalConfiguration;
     private List<EquipmentSelectionDTO> equipmentSelections;
     @JsonIgnore
@@ -109,12 +102,6 @@ public class LCDTO {
     public void setColorBody(String colorBody) { this.colorBody = colorBody; }
     public String getColorDoor() { return colorDoor; }
     public void setColorDoor(String colorDoor) { this.colorDoor = colorDoor; }
-    public int getDisplayWidth() { return displayWidth; }
-    public void setDisplayWidth(int displayWidth) { this.displayWidth = displayWidth; }
-    public int getDisplayHeight() { return displayHeight; }
-    public void setDisplayHeight(int displayHeight) { this.displayHeight = displayHeight; }
-    public int getDisplayTop() { return displayTop; }
-    public void setDisplayTop(int displayTop) { this.displayTop = displayTop; }
 
     public FunctionalConfigurationDTO getFunctionalConfiguration() {
         return functionalConfiguration;

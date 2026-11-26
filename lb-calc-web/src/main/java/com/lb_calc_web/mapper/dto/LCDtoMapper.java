@@ -39,11 +39,7 @@ public final class LCDtoMapper {
         dto.setBottomFrame(domain.getBottomFrame());
         dto.setColorBody(domain.getColorBody().name());
         dto.setColorDoor(domain.getColorDoor().name());
-        dto.setDisplayWidth(domain.getDisplayWidth());
-        dto.setDisplayHeight(domain.getDisplayHeight());
-        dto.setDisplayTop(domain.getDisplayTop());
-
-        ControlConfiguration configuration = domain.getControlConfiguration();
+ControlConfiguration configuration = domain.getControlConfiguration();
         dto.setFunctionalConfiguration(toDto(configuration.getFunctionalConfiguration()));
         dto.setEquipmentSelections(configuration.getEquipment().entrySet().stream()
                 .map(entry -> new EquipmentSelectionDTO(entry.getKey().getId(), entry.getValue()))
