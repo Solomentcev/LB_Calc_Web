@@ -87,9 +87,14 @@ class LBCDomainTest {
         assertEquals(1, als.getStorageModules().size());
         assertEquals(10, als.getCountCells());
         assertEquals(500, als.getWidth());
-        assertEquals(169, lbc.getCellHeight());
-        assertEquals(380, lbc.getCellWidth());
+        assertEquals(149, lbc.getCellHeight());
+        assertEquals(400, lbc.getCellWidth());
         assertEquals(580, lbc.getCellDepth());
+        assertEquals(200, lbc.getTechnicalCellWidth());
+        assertEquals(200, lbc.getTechnicalCellHeight());
+        assertEquals(5, lbc.getStorageCellsAbove());
+        assertEquals(5, lbc.getStorageCellsBelow());
+        assertEquals(870, lbc.getTechnicalCellTop());
         assertEquals(
                 com.lb_calc_web.domain.attributes.PositionControlModule.CENTER,
                 als.getPositionControlModule()
