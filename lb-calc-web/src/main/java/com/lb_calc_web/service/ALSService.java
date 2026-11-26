@@ -368,12 +368,7 @@ public class ALSService {
                 current.getControlConfiguration(),
                 sizeBounds.getLcMinimumWidth(), sizeBounds.getLcDisplaySideClearance(),
                 sizeBounds.getLcWidthRoundingStep(), sizeBounds.getLcDisplayCenterHeight(),
-                sizeBounds.getLcDisplayTopClearance(),
-                sizeBounds.getLbcTechnicalCellMinWidth(),
-                sizeBounds.getLbcTechnicalCellMinHeight(),
-                sizeBounds.getLbcEquipmentClearance(),
-                sizeBounds.getLbcDisplayCenterHeight(),
-                sizeBounds.getHeightCellMin()
+                sizeBounds.getLcDisplayTopClearance()
         );
 
         als.replaceLBCWithLC(replacement);
@@ -592,7 +587,12 @@ public class ALSService {
                 sizeBounds.getLcDisplaySideClearance(),
                 sizeBounds.getLcWidthRoundingStep(),
                 sizeBounds.getLcDisplayCenterHeight(),
-                sizeBounds.getLcDisplayTopClearance()
+                sizeBounds.getLcDisplayTopClearance(),
+                sizeBounds.getLbcTechnicalCellMinWidth(),
+                sizeBounds.getLbcTechnicalCellMinHeight(),
+                sizeBounds.getLbcEquipmentClearance(),
+                sizeBounds.getLbcDisplayCenterHeight(),
+                sizeBounds.getHeightCellMin()
         );
     }
 
