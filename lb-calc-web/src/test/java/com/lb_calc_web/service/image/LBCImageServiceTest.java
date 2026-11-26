@@ -3,8 +3,6 @@ package com.lb_calc_web.service.image;
 
 import com.lb_calc_web.domain.attributes.Colors;
 import com.lb_calc_web.domain.attributes.DirectionDoorOpening;
-import com.lb_calc_web.dto.LBCDTO;
-import com.lb_calc_web.mapper.dto.LBCDtoMapper;
 import com.lb_calc_web.domain.model.ControlConfiguration;
 import com.lb_calc_web.domain.model.FunctionalConfiguration;
 import com.lb_calc_web.domain.equipment.DisplayPurpose;
@@ -59,11 +57,7 @@ class LBCImageServiceTest {
                         control
                 );
 
-        LBCDTO dto =
-                LBCDtoMapper.toDto(lbc);
-
-        byte[] image =
-                LBCImageService.getBytesArrayLBCImage(dto);
+        byte[] image = LBCImageService.getBytesArrayLBCImage(lbc);
 
         BufferedImage bufferedImage =
                 ImageIO.read(

@@ -220,12 +220,13 @@ private LBCImageService() {
                 4
         );
 
-        if ((findDisplay(lbc) == null ? 0 : findDisplay(lbc).getWidth()) > 0 && (findDisplay(lbc) == null ? 0 : findDisplay(lbc).getHeight()) > 0) {
+        Equipment display = findDisplay(lbc);
+        if (display != null && display.getWidth() > 0 && display.getHeight() > 0) {
             int displayWidth =
                     Math.min(
                             Math.max(
                                     10,
-                                    (findDisplay(lbc) == null ? 0 : findDisplay(lbc).getWidth()) / 10
+                                    display.getWidth() / 10
                             ),
                             Math.max(
                                     1,
@@ -237,7 +238,7 @@ private LBCImageService() {
                     Math.min(
                             Math.max(
                                     10,
-                                    (findDisplay(lbc) == null ? 0 : findDisplay(lbc).getHeight()) / 10
+                                    display.getHeight() / 10
                             ),
                             Math.max(
                                     1,
@@ -276,12 +277,13 @@ private LBCImageService() {
         }
 
         g2d.setColor(Color.BLACK);
+        com.lb_calc_web.domain.model.FunctionalConfiguration functional =
+                lbc.getControlConfiguration().getFunctionalConfiguration();
 
-        if (lbc.getControlConfiguration().getFunctionalConfiguration() != null
-                && lbc.getControlConfiguration().getFunctionalConfiguration().getAccess() != null
-                && (lbc.getControlConfiguration().getFunctionalConfiguration().getAccess().contains(
+        if (functional.getAccess() != null
+                && (functional.getAccess().contains(
                         com.lb_calc_web.domain.equipment.AccessPurpose.BAR_CODE)
-                || lbc.getControlConfiguration().getFunctionalConfiguration().getAccess().contains(
+                || functional.getAccess().contains(
                         com.lb_calc_web.domain.equipment.AccessPurpose.QR_CODE))) {
             g2d.fillRect(
                     panelX + panelMargin + 2,
@@ -291,9 +293,7 @@ private LBCImageService() {
             );
         }
 
-        if (lbc.getControlConfiguration().getFunctionalConfiguration() != null
-                && lbc.getControlConfiguration().getFunctionalConfiguration().getPrinter() != null
-                && lbc.getControlConfiguration().getFunctionalConfiguration().getPrinter()
+        if (functional.getPrinter()
                 != com.lb_calc_web.domain.equipment.PrinterPurpose.ABSENT) {
             g2d.fillRect(
                     panelX + panelMargin + 2,
@@ -303,9 +303,8 @@ private LBCImageService() {
             );
         }
 
-        if (lbc.getControlConfiguration().getFunctionalConfiguration() != null
-                && lbc.getControlConfiguration().getFunctionalConfiguration().getAccess() != null
-                && lbc.getControlConfiguration().getFunctionalConfiguration().getAccess().contains(
+        if (functional.getAccess() != null
+                && functional.getAccess().contains(
                         com.lb_calc_web.domain.equipment.AccessPurpose.RFID)) {
             g2d.fillRect(
                     panelX + controlWidth - panelMargin - 8,

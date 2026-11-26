@@ -134,21 +134,18 @@ static Image createLCImage(
         // Дисплей
         g2d.setColor(Color.GRAY);
 
+        Equipment display = findDisplay(lc);
+        int displayWidthMm = display == null ? 0 : display.getWidth();
+        int displayHeightMm = display == null ? 0 : display.getHeight();
+
         int displayX =
-                x
-                        + (
-                        (lc.getWidth()
-                                - (findDisplay(lc) == null ? 0 : findDisplay(lc).getWidth()))
-                                / 2
-                ) / 10;
+                x + ((lc.getWidth() - displayWidthMm) / 2) / 10;
 
         int displayY = lc.getDisplayTop() / 10;
 
-        int displayWidth =
-                (findDisplay(lc) == null ? 0 : findDisplay(lc).getWidth()) / 10;
+        int displayWidth = displayWidthMm / 10;
 
-        int displayHeight =
-                (findDisplay(lc) == null ? 0 : findDisplay(lc).getHeight()) / 10;
+        int displayHeight = displayHeightMm / 10;
 
         g2d.fillRoundRect(
                 displayX,
