@@ -423,9 +423,9 @@ public class ModuleSizeValidator {
                 bounds.getHeightCellMin(), bounds.getHeightMax(),
                 "Высота складской ячейки");
         validateRange(result, "technicalCellHeight", lbc.getTechnicalCellHeight(),
-                200, bounds.getHeightMax(), "Высота технической ячейки");
+                bounds.getLbcTechnicalCellMinHeight(), bounds.getHeightMax(), "Высота технической ячейки");
         validateRange(result, "technicalCellWidth", lbc.getTechnicalCellWidth(),
-                200, bounds.getWidthMax(), "Ширина технической ячейки");
+                bounds.getLbcTechnicalCellMinWidth(), bounds.getWidthMax(), "Ширина технической ячейки");
 
         long cellWidth = (long) lbc.getWidth() - lbc.getTypeLb().getDeltaWidth();
         validateRange(result, "widthCell", cellWidth,
