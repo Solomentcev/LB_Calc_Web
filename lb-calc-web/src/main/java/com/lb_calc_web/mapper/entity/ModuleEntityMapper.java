@@ -24,13 +24,24 @@ public final class ModuleEntityMapper {
     /** Восстанавливает модуль с настройками геометрии приложения. */
     public static Module toDomain(ModuleEntity entity, int minimumWidth, int displaySideClearance, int widthRoundingStep,
             int displayCenterHeight, int displayTopClearance) {
+        return toDomain(entity, minimumWidth, displaySideClearance, widthRoundingStep,
+                displayCenterHeight, displayTopClearance, 200, 200, 20, 1300, 85);
+    }
+
+    /** Восстанавливает модуль с настройками геометрии LC и LBC. */
+    public static Module toDomain(ModuleEntity entity, int minimumWidth, int displaySideClearance,
+            int widthRoundingStep, int displayCenterHeight, int displayTopClearance,
+            int lbcTechnicalCellMinWidth, int lbcTechnicalCellMinHeight,
+            int lbcEquipmentClearance, int lbcDisplayCenterHeight, int storageCellMinHeight) {
         if (entity == null) {
             return null;
         }
 
         ModuleEntity concreteEntity = (ModuleEntity) Hibernate.unproxy(entity);
         if (concreteEntity instanceof LBCEntity lbcEntity) {
-            return LBCEntityMapper.toDomain(lbcEntity);
+            return LBCEntityMapper.toDomain(lbcEntity, lbcTechnicalCellMinWidth,
+                    lbcTechnicalCellMinHeight, lbcEquipmentClearance,
+                    lbcDisplayCenterHeight, storageCellMinHeight);
         }
         if (concreteEntity instanceof LBEntity lbEntity) {
             return LBEntityMapper.toDomain(lbEntity);
