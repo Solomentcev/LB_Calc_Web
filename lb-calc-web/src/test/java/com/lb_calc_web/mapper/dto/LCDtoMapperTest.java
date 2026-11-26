@@ -45,7 +45,9 @@ class LCDtoMapperTest {
                         source.getControlConfiguration().getFunctionalConfiguration(),
                         Map.of(scanner, 2)
                 ),
-                TestDataFactory.lcGeometrySettings()
+                TestDataFactory.lcMinimumWidth(), TestDataFactory.lcDisplaySideClearance(),
+                TestDataFactory.lcWidthRoundingStep(), TestDataFactory.lcDisplayCenterHeight(),
+                TestDataFactory.lcDisplayTopClearance()
         );
 
         LCDTO dto = LCDtoMapper.toDto(domain);
@@ -69,7 +71,9 @@ class LCDtoMapperTest {
 
         LC restored = LCDtoMapper.toDomain(dto, id -> {
             throw new AssertionError("Загрузчик не должен вызываться");
-        }, fallback, TestDataFactory.lcGeometrySettings());
+        }, fallback, TestDataFactory.lcMinimumWidth(), TestDataFactory.lcDisplaySideClearance(),
+                TestDataFactory.lcWidthRoundingStep(), TestDataFactory.lcDisplayCenterHeight(),
+                TestDataFactory.lcDisplayTopClearance());
 
         assertEquals(Map.of(scanner, 1), restored.getEquipment());
     }
@@ -89,7 +93,9 @@ class LCDtoMapperTest {
 
         LC restored = LCDtoMapper.toDomain(dto, id -> {
             throw new AssertionError("Загрузчик не должен вызываться");
-        }, fallback, TestDataFactory.lcGeometrySettings());
+        }, fallback, TestDataFactory.lcMinimumWidth(), TestDataFactory.lcDisplaySideClearance(),
+                TestDataFactory.lcWidthRoundingStep(), TestDataFactory.lcDisplayCenterHeight(),
+                TestDataFactory.lcDisplayTopClearance());
 
         assertEquals(Map.of(), restored.getEquipment());
     }
