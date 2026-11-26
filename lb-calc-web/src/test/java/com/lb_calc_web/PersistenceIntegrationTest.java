@@ -351,7 +351,7 @@ class PersistenceIntegrationTest {
         entityManager.clear();
 
         ALSEntity restoredEntity = alsRepository.findById(alsId).orElseThrow();
-        ALS restoredALS = ALSEntityMapper.toDomain(restoredEntity);
+        ALS restoredALS = restoreAlsEntity(restoredEntity);
         LBCEntity restoredLBC = (LBCEntity) Hibernate.unproxy(
                 restoredEntity.getModules().get(0).getModule()
         );
@@ -692,7 +692,7 @@ class PersistenceIntegrationTest {
             assertEquals(originalCreatedAt, restoredEntity.getCreatedAt());
             assertEquals(LocalDate.now(), restoredEntity.getUpdatedAt());
 
-            Project restoredProject = ProjectEntityMapper.toDomain(restoredEntity);
+            Project restoredProject = restoreProjectEntity(restoredEntity);
 
             assertEquals(1, restoredProject.getQuantity(originalConfiguration));
             assertEquals(0, restoredProject.getQuantity(independentConfiguration));

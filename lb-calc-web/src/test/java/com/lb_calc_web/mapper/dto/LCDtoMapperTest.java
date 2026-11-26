@@ -89,7 +89,7 @@ class LCDtoMapperTest {
 
         LC restored = LCDtoMapper.toDomain(dto, id -> {
             throw new AssertionError("Загрузчик не должен вызываться");
-        }, fallback);
+        }, fallback, TestDataFactory.lcGeometrySettings());
 
         assertEquals(Map.of(), restored.getEquipment());
     }

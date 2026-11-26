@@ -43,7 +43,8 @@ class ALSDomainTest {
                 lbc.getHeight(), lbc.getWidth(), lbc.getDepth(),
                 lbc.getUpperFrame(), lbc.getBottomFrame(),
                 lbc.getColorBody(), lbc.getColorDoor(),
-                lbc.getControlConfiguration()
+                lbc.getControlConfiguration(),
+                TestDataFactory.lcGeometrySettings()
         );
 
         als.replaceLBCWithLC(replacementLC);
@@ -75,7 +76,8 @@ class ALSDomainTest {
                 lbc.getHeight(), lbc.getWidth(), lbc.getDepth(),
                 lbc.getUpperFrame(), lbc.getBottomFrame(),
                 lbc.getColorBody(), lbc.getColorDoor(),
-                lbc.getControlConfiguration()
+                lbc.getControlConfiguration(),
+                TestDataFactory.lcGeometrySettings()
         );
 
         assertThrows(

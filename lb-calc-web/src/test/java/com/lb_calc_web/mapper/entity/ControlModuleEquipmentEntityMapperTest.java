@@ -1,5 +1,7 @@
 package com.lb_calc_web.mapper.entity;
 
+import com.lb_calc_web.TestDataFactory;
+
 import com.lb_calc_web.domain.equipment.AccessPurpose;
 import com.lb_calc_web.domain.equipment.DisplayPurpose;
 import com.lb_calc_web.domain.equipment.Equipment;
