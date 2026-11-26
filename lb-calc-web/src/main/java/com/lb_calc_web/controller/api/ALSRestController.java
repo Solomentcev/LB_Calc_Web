@@ -249,8 +249,8 @@ toDto(alsService.createALS())
             @PathVariable Long lbId
     ) {
 
-            ALSDTO saved = toDto(alsService.deleteLBandSaveALS(alsId, lbId));
-            return ResponseEntity.ok(ApiResponse.success(toDto(alsService.findById(alsId))));
+            ALS saved = alsService.deleteLBandSaveALS(alsId, lbId);
+            return ResponseEntity.ok(ApiResponse.success(toDto(saved)));
 
     }
 
