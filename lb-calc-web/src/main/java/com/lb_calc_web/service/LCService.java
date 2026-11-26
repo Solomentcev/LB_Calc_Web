@@ -63,7 +63,7 @@ public class LCService {
         this.environment = Objects.requireNonNull(environment);
         this.sizeValidator = Objects.requireNonNull(sizeValidator);
         this.sizeBounds = Objects.requireNonNull(sizeBounds);
-        this.geometrySettings = sizeBounds.getLCGeometrySettings();
+        this.geometrySettings = sizeBounds.getLcGeometrySettings();
         this.equipmentRepository = Objects.requireNonNull(equipmentRepository);
     }
 

@@ -342,7 +342,7 @@ return als;
     }
     /** Загружает тестовые геометрические настройки из того же файла, что и приложение. */
     public static LCGeometrySettings lcGeometrySettings() {
-        return createSizeBounds().getLCGeometrySettings();
+        return createSizeBounds().getLcGeometrySettings();
     }
 
     private static int intProperty(Properties properties, String key) {

@@ -3,7 +3,7 @@ package com.lb_calc_web.service.validation.size;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-/** Набор граничных значений и ограничений геометрических параметров модулей. */
+/** Конфигурация размерных ограничений и значений по умолчанию модулей. */
 @Component
 public class SizeBounds {
 
@@ -230,30 +230,44 @@ public class SizeBounds {
         return typeServiceZoneWidthMax;
     }
 
+    /** Возвращает значение по умолчанию: heightDefault. */
     public int getHeightDefault() {
         return heightDefault;
     }
+
+    /** Возвращает значение по умолчанию: widthDefault. */
     public int getWidthDefault() {
         return widthDefault;
     }
+
+    /** Возвращает значение по умолчанию: depthDefault. */
     public int getDepthDefault() {
         return depthDefault;
     }
+
+    /** Возвращает значение по умолчанию: upperFrameDefault. */
     public int getUpperFrameDefault() {
         return upperFrameDefault;
     }
+
+    /** Возвращает значение по умолчанию: bottomFrameDefault. */
     public int getBottomFrameDefault() {
         return bottomFrameDefault;
     }
+
+    /** Возвращает значение по умолчанию: countCellsDefault. */
     public int getCountCellsDefault() {
         return countCellsDefault;
     }
+
+    /** Возвращает значение по умолчанию: doorThicknessDefault. */
     public int getDoorThicknessDefault() {
         return doorThicknessDefault;
     }
 
+
     /** Создаёт настройки геометрии LC из значений properties. */
-    public com.lb_calc_web.domain.model.LCGeometrySettings getLCGeometrySettings() {
+    public com.lb_calc_web.domain.model.LCGeometrySettings getLcGeometrySettings() {
         return new com.lb_calc_web.domain.model.LCGeometrySettings(
                 lcMinimumWidth,
                 lcDisplaySideClearance,
