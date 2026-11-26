@@ -163,16 +163,12 @@
             </div>
             <div class="module-section__body">
                 <div class="form-row">
-                    <div class="col-sm-6 col-lg-4 module-field" th:if="${pageContext == 'CATALOG'}">
+                    <div class="col-sm-6 col-lg-4 module-field">
                         <label for="lb-door-direction">Направление открывания дверей</label>
                         <select id="lb-door-direction" class="form-control" th:field="*{directionDoorOpening}">
                             <option th:each="direction : ${directionDoorOpeningList}"
                                     th:value="${direction}" th:text="${direction}"></option>
                         </select>
-                    </div>
-                    <div class="col-sm-6 col-lg-4 module-field" th:if="${pageContext != 'CATALOG'}">
-                        <label for="lb-door-direction-readonly">Направление открывания дверей</label>
-                        <input id="lb-door-direction-readonly" class="form-control" th:field="*{directionDoorOpening}" readonly>
                     </div>
                     <div class="col-sm-6 col-lg-4 module-field" th:if="${pageContext == 'CATALOG'}">
                         <label for="lb-body-color">Цвет корпуса</label>
