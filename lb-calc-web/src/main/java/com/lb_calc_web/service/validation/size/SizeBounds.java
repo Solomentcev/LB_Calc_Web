@@ -40,6 +40,11 @@ public class SizeBounds {
     private final int bottomFrameDefault;
     private final int countCellsDefault;
     private final int doorThicknessDefault;
+    private final int lcMinimumWidth;
+    private final int lcDisplaySideClearance;
+    private final int lcWidthRoundingStep;
+    private final int lcDisplayCenterHeight;
+    private final int lcDisplayTopClearance;
 
     public SizeBounds(
             @Value("${size.frame.upper.min}") int upperFrameMin,
@@ -74,7 +79,12 @@ public class SizeBounds {
             @Value("${size.frame.upper.default}") int upperFrameDefault,
             @Value("${size.frame.bottom.default}") int bottomFrameDefault,
             @Value("${size.count.cells.default}") int countCellsDefault,
-            @Value("${size.door.thickness.default}") int doorThicknessDefault
+            @Value("${size.door.thickness.default}") int doorThicknessDefault,
+            @Value("${lc.geometry.width.min}") int lcMinimumWidth,
+            @Value("${lc.geometry.display.side-clearance}") int lcDisplaySideClearance,
+            @Value("${lc.geometry.width.rounding-step}") int lcWidthRoundingStep,
+            @Value("${lc.geometry.display.center-height}") int lcDisplayCenterHeight,
+            @Value("${lc.geometry.display.top-clearance}") int lcDisplayTopClearance
     ) {
         this.upperFrameMin = upperFrameMin;
         this.upperFrameMax = upperFrameMax;
@@ -109,26 +119,31 @@ public class SizeBounds {
         this.bottomFrameDefault = bottomFrameDefault;
         this.countCellsDefault = countCellsDefault;
         this.doorThicknessDefault = doorThicknessDefault;
+        this.lcMinimumWidth = lcMinimumWidth;
+        this.lcDisplaySideClearance = lcDisplaySideClearance;
+        this.lcWidthRoundingStep = lcWidthRoundingStep;
+        this.lcDisplayCenterHeight = lcDisplayCenterHeight;
+        this.lcDisplayTopClearance = lcDisplayTopClearance;
     }
 
     public int getLcMinimumWidth() {
-        return Integer.parseInt(environment.getRequiredProperty("lc.geometry.width.min"));
+        return lcMinimumWidth;
     }
 
     public int getLcDisplaySideClearance() {
-        return Integer.parseInt(environment.getRequiredProperty("lc.geometry.display.side-clearance"));
+        return lcDisplaySideClearance;
     }
 
     public int getLcWidthRoundingStep() {
-        return Integer.parseInt(environment.getRequiredProperty("lc.geometry.width.rounding-step"));
+        return lcWidthRoundingStep;
     }
 
     public int getLcDisplayCenterHeight() {
-        return Integer.parseInt(environment.getRequiredProperty("lc.geometry.display.center-height"));
+        return lcDisplayCenterHeight;
     }
 
     public int getLcDisplayTopClearance() {
-        return Integer.parseInt(environment.getRequiredProperty("lc.geometry.display.top-clearance"));
+        return lcDisplayTopClearance;
     }
 
     public int getUpperFrameMin() {
