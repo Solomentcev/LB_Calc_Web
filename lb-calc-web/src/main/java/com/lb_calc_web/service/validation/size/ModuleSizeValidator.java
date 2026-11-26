@@ -271,9 +271,10 @@ public class ModuleSizeValidator {
 
         validateType(result, typeLb, objectType);
 
+        boolean lbcModule = module instanceof LBC;
         long storageWidthMin = (long) bounds.getWidthCellMin()
                 + typeLb.getDeltaWidth()
-                + typeLb.getServiceZoneWidth();
+                + (lbcModule ? 0 : typeLb.getServiceZoneWidth());
         long requiredWidth = Math.max((long) bounds.getWidthMin(), storageWidthMin);
 
         if (module instanceof LBC lbc) {
@@ -289,15 +290,19 @@ public class ModuleSizeValidator {
                 bounds.getDoorThicknessMin(),
                 bounds.getDoorThicknessMax(), "Толщина дверцы");
 
-        validateLBCellCount(
-                result, height, upperFrame, bottomFrame,
-                module.getCountCells(), typeLb
-        );
-        validateStorageCellDimensions(
-                result, height, depth, upperFrame, bottomFrame,
-                module.getWidth(), module.getDoorThickness(),
-                module.getCountCells(), typeLb
-        );
+        if (module instanceof LBC lbc) {
+            validateLBCGeometry(result, lbc, height, depth, upperFrame, bottomFrame);
+        } else {
+            validateLBCellCount(
+                    result, height, upperFrame, bottomFrame,
+                    module.getCountCells(), typeLb
+            );
+            validateStorageCellDimensions(
+                    result, height, depth, upperFrame, bottomFrame,
+                    module.getWidth(), module.getDoorThickness(),
+                    module.getCountCells(), typeLb
+            );
+        }
 
         logValidationResult(result);
         return result;
@@ -359,12 +364,11 @@ public class ModuleSizeValidator {
                 bounds.getDepthCellMin(), bounds.getDepthCellMax(),
                 "Глубина ячейки");
 
-        long widthCell = (long) width
-                - typeLb.getDeltaWidth()
-                - typeLb.getServiceZoneWidth();
+        long serviceZoneWidth = result.getObjectType().equals("LBC")
+                ? 0 : typeLb.getServiceZoneWidth();
+        long widthCell = (long) width - typeLb.getDeltaWidth() - serviceZoneWidth;
         long widthCellMax = (long) bounds.getWidthMax()
-                - typeLb.getDeltaWidth()
-                - typeLb.getServiceZoneWidth();
+                - typeLb.getDeltaWidth() - serviceZoneWidth;
 
         validateRange(result, "widthCell", widthCell,
                 bounds.getWidthCellMin(), widthCellMax,
@@ -396,10 +400,68 @@ public class ModuleSizeValidator {
     }
 
     private long requiredLBCControlWidth(LBC lbc) {
-        return lbc.getEquipment().keySet().stream()
-                .mapToLong(Equipment::getWidth)
-                .max()
-                .orElse(0L);
+        return lbc.getTechnicalCellWidth();
+    }
+
+    /** Проверяет отдельную техническую ячейку и равномерность складских ячеек LBC. */
+    private void validateLBCGeometry(
+            ValidationResult result,
+            LBC lbc,
+            int height,
+            int depth,
+            int upperFrame,
+            int bottomFrame
+    ) {
+        int count = lbc.getCountCells();
+        validateRange(result, "countCells", count,
+                bounds.getCountCellsMin(), bounds.getCountCellsMax(),
+                "Количество складских ячеек");
+
+        long usableHeight = (long) height - upperFrame - bottomFrame;
+        long requiredHeight = (long) lbc.getTechnicalCellHeight()
+                + (long) count * (bounds.getHeightCellMin()
+                + lbc.getTypeLb().getShelfThick());
+        if (usableHeight < requiredHeight) {
+            addError(result, "heightConsistency",
+                    "Высоты корпуса недостаточно для технической и складских ячеек",
+                    usableHeight, requiredHeight, bounds.getHeightMax());
+        }
+
+        validateRange(result, "heightCell", lbc.getCellHeight(),
+                bounds.getHeightCellMin(), bounds.getHeightMax(),
+                "Высота складской ячейки");
+        validateRange(result, "technicalCellHeight", lbc.getTechnicalCellHeight(),
+                200, bounds.getHeightMax(), "Высота технической ячейки");
+        validateRange(result, "technicalCellWidth", lbc.getTechnicalCellWidth(),
+                200, bounds.getWidthMax(), "Ширина технической ячейки");
+
+        long cellWidth = (long) lbc.getWidth() - lbc.getTypeLb().getDeltaWidth();
+        validateRange(result, "widthCell", cellWidth,
+                bounds.getWidthCellMin(),
+                (long) bounds.getWidthMax() - lbc.getTypeLb().getDeltaWidth(),
+                "Ширина складской ячейки");
+
+        long cellDepth = (long) depth - lbc.getDoorThickness();
+        validateRange(result, "depthCell", cellDepth,
+                bounds.getDepthCellMin(), bounds.getDepthCellMax(),
+                "Глубина складской ячейки");
+
+        long equipmentWidth = lbc.getEquipment().keySet().stream()
+                .mapToLong(Equipment::getWidth).max().orElse(0);
+        long equipmentHeight = lbc.getEquipment().keySet().stream()
+                .mapToLong(Equipment::getHeight).max().orElse(0);
+        long equipmentDepth = lbc.getEquipment().keySet().stream()
+                .mapToLong(Equipment::getDepth).max().orElse(0);
+
+        validateRange(result, "technicalEquipmentWidth", equipmentWidth,
+                0, lbc.getTechnicalCellWidth(),
+                "Ширина оборудования технической ячейки");
+        validateRange(result, "technicalEquipmentHeight", equipmentHeight,
+                0, lbc.getTechnicalCellHeight(),
+                "Высота оборудования технической ячейки");
+        validateRange(result, "technicalEquipmentDepth", equipmentDepth,
+                0, cellDepth,
+                "Глубина оборудования технической ячейки");
     }
 
     private void validateFrames(
