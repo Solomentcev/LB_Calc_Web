@@ -64,7 +64,9 @@
                 <div class="form-row">
                     <div class="col-sm-6 col-lg-3 module-field">
                         <label for="lbc-type">Тип модуля</label>
-                        <input id="lbc-type" class="form-control" th:field="*{type}" readonly>
+                        <select id="lbc-type" class="form-control" th:field="*{type}" required>
+                            <option th:each="type : ${typeLbList}" th:value="${type}" th:text="${type}"></option>
+                        </select>
                     </div>
                     <div class="col-sm-6 col-lg-3 module-field">
                         <label for="lbc-count-cells">Количество ячеек</label>
