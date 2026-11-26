@@ -32,6 +32,7 @@ import com.lb_calc_web.repository.ProjectALSRepository;
 import com.lb_calc_web.service.factory.TypeLbFactory;
 import com.lb_calc_web.service.validation.ValidationSizeException;
 import com.lb_calc_web.service.validation.size.SizeValidator;
+import com.lb_calc_web.service.validation.size.SizeBounds;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.env.Environment;
@@ -61,6 +62,7 @@ public class ALSService {
     private final Environment environment;
     private final SizeValidator sizeValidator;
     private final EquipmentRepository equipmentRepository;
+    private final SizeBounds sizeBounds;
 
     public ALSService(
             ALSRepository alsRepository,
@@ -72,7 +74,8 @@ public class ALSService {
             FindOrCreateLockService findOrCreateLockService,
             Environment environment,
             SizeValidator sizeValidator,
-            EquipmentRepository equipmentRepository
+            EquipmentRepository equipmentRepository,
+            SizeBounds sizeBounds
     ) {
         this.alsRepository = Objects.requireNonNull(alsRepository);
         this.projectALSRepository = Objects.requireNonNull(projectALSRepository);
@@ -84,6 +87,7 @@ public class ALSService {
         this.environment = Objects.requireNonNull(environment);
         this.sizeValidator = Objects.requireNonNull(sizeValidator);
         this.equipmentRepository = Objects.requireNonNull(equipmentRepository);
+        this.sizeBounds = Objects.requireNonNull(sizeBounds);
     }
 
     /**
@@ -161,10 +165,10 @@ public class ALSService {
     /** Создаёт доменную конфигурацию ALS с параметрами по умолчанию. */
     @Transactional
     public ALS createALS() {
-        int height = requiredInt("size.height.default");
-        int depth = requiredInt("size.depth.default");
-        int upperFrame = requiredInt("size.frame.upper.default");
-        int bottomFrame = requiredInt("size.frame.bottom.default");
+        int height = sizeBounds.getHeightDefault();
+        int depth = sizeBounds.getDepthDefault();
+        int upperFrame = sizeBounds.getUpperFrameDefault();
+        int bottomFrame = sizeBounds.getBottomFrameDefault();
         Colors colorBody = Colors.valueOf(getRequired("als.color.body.default"));
         Colors colorDoor = Colors.valueOf(getRequired("als.color.door.default"));
 

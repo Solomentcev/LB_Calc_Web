@@ -19,6 +19,7 @@ import com.lb_calc_web.repository.EquipmentRepository;
 import com.lb_calc_web.service.validation.ValidationResult;
 import com.lb_calc_web.service.validation.ValidationSizeException;
 import com.lb_calc_web.service.validation.size.SizeValidator;
+import com.lb_calc_web.service.validation.size.SizeBounds;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.env.Environment;
@@ -45,6 +46,7 @@ public class LCService {
     private final LCRepository lcRepository;
     private final Environment environment;
     private final SizeValidator sizeValidator;
+    private final SizeBounds sizeBounds;
     private final com.lb_calc_web.domain.model.LCGeometrySettings geometrySettings;
     private final EquipmentRepository equipmentRepository;
 
@@ -53,29 +55,25 @@ public class LCService {
             FindOrCreateLockService findOrCreateLockService,
             Environment environment,
             SizeValidator sizeValidator,
-            EquipmentRepository equipmentRepository
+            EquipmentRepository equipmentRepository,
+            SizeBounds sizeBounds
     ) {
         this.lcRepository = Objects.requireNonNull(lcRepository);
         this.findOrCreateLockService = Objects.requireNonNull(findOrCreateLockService);
         this.environment = Objects.requireNonNull(environment);
-        this.geometrySettings = new com.lb_calc_web.domain.model.LCGeometrySettings(
-                requiredInt(environment, "lc.geometry.width.min"),
-                requiredInt(environment, "lc.geometry.display.side-clearance"),
-                requiredInt(environment, "lc.geometry.width.rounding-step"),
-                requiredInt(environment, "lc.geometry.display.center-height"),
-                requiredInt(environment, "lc.geometry.display.top-clearance")
-        );
         this.sizeValidator = Objects.requireNonNull(sizeValidator);
+        this.sizeBounds = Objects.requireNonNull(sizeBounds);
+        this.geometrySettings = sizeBounds.getLCGeometrySettings();
         this.equipmentRepository = Objects.requireNonNull(equipmentRepository);
     }
 
     /** Создаёт несохранённый LC с параметрами по умолчанию. */
     public LC createLC() {
         return createLC(
-                requiredInt("size.height.default"),
-                requiredInt("size.depth.default"),
-                requiredInt("size.frame.upper.default"),
-                requiredInt("size.frame.bottom.default"),
+                sizeBounds.getHeightDefault(),
+                sizeBounds.getDepthDefault(),
+                sizeBounds.getUpperFrameDefault(),
+                sizeBounds.getBottomFrameDefault(),
                 requiredColor("lc.color.body.default")
         );
     }
@@ -97,7 +95,7 @@ public class LCService {
 
         return new LC(
                 height,
-                requiredInt("size.width.default"),
+                sizeBounds.getWidthDefault(),
                 depth,
                 upperFrame,
                 bottomFrame,
@@ -251,14 +249,6 @@ public class LCService {
 
     public com.lb_calc_web.domain.model.LCGeometrySettings getGeometrySettings() {
         return geometrySettings;
-    }
-
-    private int requiredInt(String key) {
-        return requiredInt(environment, key);
-    }
-
-    private static int requiredInt(Environment environment, String key) {
-        return environment.getRequiredProperty(key, Integer.class);
     }
 
     private Colors requiredColor(String key) {

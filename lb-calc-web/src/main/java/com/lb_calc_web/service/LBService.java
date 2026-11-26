@@ -11,6 +11,7 @@ import com.lb_calc_web.mapper.entity.LBEntityMapper;
 import com.lb_calc_web.repository.LBRepository;
 import com.lb_calc_web.service.factory.TypeLbFactory;
 import com.lb_calc_web.service.validation.size.SizeValidator;
+import com.lb_calc_web.service.validation.size.SizeBounds;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.env.Environment;
@@ -33,26 +34,29 @@ public class LBService {
     private final LBRepository lbRepository;
     private final Environment environment;
     private final SizeValidator sizeValidator;
+    private final SizeBounds sizeBounds;
 
     public LBService(
             LBRepository lbRepository,
             FindOrCreateLockService findOrCreateLockService,
             Environment environment,
-            SizeValidator sizeValidator
+            SizeValidator sizeValidator,
+            SizeBounds sizeBounds
     ) {
         this.lbRepository = lbRepository;
         this.findOrCreateLockService = findOrCreateLockService;
         this.environment = environment;
         this.sizeValidator = sizeValidator;
+        this.sizeBounds = Objects.requireNonNull(sizeBounds);
     }
 
     /** Создаёт новую доменную модель LB с параметрами по умолчанию без сохранения. */
     public LB createLB() {
         return createLB(
-                requiredInt("size.height.default"),
-                requiredInt("size.depth.default"),
-                requiredInt("size.frame.upper.default"),
-                requiredInt("size.frame.bottom.default"),
+                sizeBounds.getHeightDefault(),
+                sizeBounds.getDepthDefault(),
+                sizeBounds.getUpperFrameDefault(),
+                sizeBounds.getBottomFrameDefault(),
                 Colors.Blue,
                 Colors.White
         );
@@ -71,19 +75,19 @@ public class LBService {
         TypeLb typeLb = TypeLbFactory.forLB(environment, type);
         return new LB(
                 height,
-                requiredInt("size.width.default"),
+                sizeBounds.getWidthDefault(),
                 depth,
                 upperFrame,
                 bottomFrame,
                 colorBody,
                 colorDoor,
                 typeLb,
-                requiredInt("size.count.cells.default"),
+                sizeBounds.getCountCellsDefault(),
                 DirectionDoorOpening.valueOf(environment.getProperty(
                         "lb.direction.default",
                         DirectionDoorOpening.LEFT.name()
                 )),
-                requiredInt("size.door.thickness.default")
+                sizeBounds.getDoorThicknessDefault()
         );
     }
 

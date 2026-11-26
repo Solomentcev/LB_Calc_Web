@@ -22,6 +22,7 @@ import com.lb_calc_web.service.factory.TypeLbFactory;
 import com.lb_calc_web.service.validation.ValidationResult;
 import com.lb_calc_web.service.validation.ValidationSizeException;
 import com.lb_calc_web.service.validation.size.SizeValidator;
+import com.lb_calc_web.service.validation.size.SizeBounds;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.env.Environment;
@@ -47,28 +48,31 @@ public class LBCService {
     private final Environment environment;
     private final SizeValidator sizeValidator;
     private final EquipmentRepository equipmentRepository;
+    private final SizeBounds sizeBounds;
 
     public LBCService(
             LBCRepository lbcRepository,
             FindOrCreateLockService findOrCreateLockService,
             Environment environment,
             SizeValidator sizeValidator,
-            EquipmentRepository equipmentRepository
+            EquipmentRepository equipmentRepository,
+            SizeBounds sizeBounds
     ) {
         this.lbcRepository = Objects.requireNonNull(lbcRepository);
         this.findOrCreateLockService = Objects.requireNonNull(findOrCreateLockService);
         this.environment = Objects.requireNonNull(environment);
         this.sizeValidator = Objects.requireNonNull(sizeValidator);
         this.equipmentRepository = Objects.requireNonNull(equipmentRepository);
+        this.sizeBounds = Objects.requireNonNull(sizeBounds);
     }
 
     /** Создаёт несохранённый LBC с параметрами по умолчанию. */
     public LBC createLBC() {
         return createLBC(
-                requiredInt("size.height.default"),
-                requiredInt("size.depth.default"),
-                requiredInt("size.frame.upper.default"),
-                requiredInt("size.frame.bottom.default"),
+                sizeBounds.getHeightDefault(),
+                sizeBounds.getDepthDefault(),
+                sizeBounds.getUpperFrameDefault(),
+                sizeBounds.getBottomFrameDefault(),
                 requiredColor("lbc.color.body.default"),
                 requiredColor("lbc.color.door.default")
         );
@@ -94,17 +98,17 @@ public class LBCService {
 
         return new LBC(
                 height,
-                requiredInt("size.width.default"),
+                sizeBounds.getWidthDefault(),
                 depth,
                 upperFrame,
                 bottomFrame,
                 Objects.requireNonNull(colorBody, "Цвет корпуса не должен быть null"),
                 Objects.requireNonNull(colorDoor, "Цвет дверей не должен быть null"),
                 typeLb,
-                requiredInt("size.count.cells.default"),
+                sizeBounds.getCountCellsDefault(),
                 DirectionDoorOpening.valueOf(environment.getProperty(
                         "lbc.direction.default", DirectionDoorOpening.LEFT.name())),
-                requiredInt("size.door.thickness.default"),
+                sizeBounds.getDoorThicknessDefault(),
                 new ControlConfiguration(functional, Map.of())
         );
     }
@@ -228,10 +232,6 @@ public class LBCService {
 
     private Colors requiredColor(String key) {
         return Colors.valueOf(environment.getRequiredProperty(key));
-    }
-
-    private int requiredInt(String key) {
-        return environment.getRequiredProperty(key, Integer.class);
     }
 
     private <E extends Enum<E>> E enumProperty(String key, Class<E> type, E defaultValue) {
