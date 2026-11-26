@@ -1,10 +1,6 @@
 package com.lb_calc_web.controller;
 
 import com.lb_calc_web.domain.model.LBC;
-import com.lb_calc_web.domain.equipment.AccessPurpose;
-import com.lb_calc_web.domain.equipment.DisplayPurpose;
-import com.lb_calc_web.domain.equipment.PaymentPurpose;
-import com.lb_calc_web.domain.equipment.PrinterPurpose;
 import com.lb_calc_web.dto.EquipmentDTO;
 import com.lb_calc_web.mapper.dto.EquipmentDtoMapper;
 import com.lb_calc_web.service.EquipmentCatalogService;
@@ -67,10 +63,6 @@ public class LBCController extends BaseCatalogController {
         model.addAttribute("direction", pageable.getSort().stream().findFirst()
                 .map(order -> order.getDirection().name().toLowerCase()).orElse("asc"));
         model.addAttribute("size", pageable.getPageSize());
-        model.addAttribute("displayPurposes", List.of(DisplayPurpose.values()));
-        model.addAttribute("accessPurposes", List.of(AccessPurpose.values()));
-        model.addAttribute("paymentPurposes", List.of(PaymentPurpose.values()));
-        model.addAttribute("printerPurposes", List.of(PrinterPurpose.values()));
         return "lbcs/lbcs";
     }
 
@@ -154,9 +146,5 @@ public class LBCController extends BaseCatalogController {
         model.addAttribute("equipmentList", equipmentCatalogService.findAll().stream()
                 .map(EquipmentDtoMapper::toDto).toList());
         model.addAttribute("defaultEquipmentIds", equipmentCatalogService.findDefaultModelIds());
-        model.addAttribute("displayPurposes", List.of(DisplayPurpose.values()));
-        model.addAttribute("accessPurposes", List.of(AccessPurpose.values()));
-        model.addAttribute("paymentPurposes", List.of(PaymentPurpose.values()));
-        model.addAttribute("printerPurposes", List.of(PrinterPurpose.values()));
     }
 }
