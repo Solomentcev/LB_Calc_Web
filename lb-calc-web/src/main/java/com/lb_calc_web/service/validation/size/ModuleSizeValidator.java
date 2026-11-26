@@ -5,7 +5,6 @@ import com.lb_calc_web.domain.equipment.Equipment;
 import com.lb_calc_web.domain.model.LB;
 import com.lb_calc_web.domain.model.LBC;
 import com.lb_calc_web.domain.model.LC;
-import com.lb_calc_web.domain.model.LCGeometryCalculator;
 import com.lb_calc_web.domain.model.StorageModule;
 import com.lb_calc_web.service.validation.ValidationResult;
 import org.slf4j.Logger;
@@ -146,9 +145,8 @@ public class ModuleSizeValidator {
         ValidationResult result = new ValidationResult("LC", lc.getId());
         logger.debug("Валидация размеров доменной модели LC");
 
-        long requiredWidth = LCGeometryCalculator.calculateWidth(lc.getEquipment());
         validateRange(result, "width", lc.getWidth(),
-                requiredWidth, bounds.getWidthMax(), "Ширина модуля");
+                0, bounds.getWidthMax(), "Ширина модуля");
 
         if (validateCommonDimensions) {
             validateFrames(result, upperFrame, bottomFrame);
@@ -288,7 +286,8 @@ public class ModuleSizeValidator {
                 requiredWidth, bounds.getWidthMax(), "Ширина модуля");
         validateRange(result, "doorThickness", module.getDoorThickness(),
                 bounds.getDoorThicknessMin(),
-                bounds.getDoorThicknessMax(), "Толщина дверцы");
+                bounds.getDoorThicknessMax(),
+                "Толщина дверцы");
 
         validateLBCellCount(
                 result, height, upperFrame, bottomFrame,

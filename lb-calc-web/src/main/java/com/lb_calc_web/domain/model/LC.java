@@ -2,6 +2,7 @@ package com.lb_calc_web.domain.model;
 
 import com.lb_calc_web.domain.attributes.Colors;
 import com.lb_calc_web.domain.equipment.Equipment;
+import com.lb_calc_web.domain.equipment.EquipmentFunctionalType;
 
 import java.util.Map;
 import java.util.Objects;
@@ -13,13 +14,19 @@ import java.util.Objects;
  * {@link ControlModule}. Модуль предназначен для размещения оборудования,
  * необходимого для управления автоматизированной системой.</p>
  *
- * <p>Ширина LC рассчитывается по габаритам установленного дисплея.
- * При отсутствии дисплея используется минимальная ширина 200 мм.</p>
+ * <p>Ширина LC и положение дисплея рассчитываются по физическим габаритам
+ * установленного дисплея и конструктивным параметрам модуля.</p>
  *
  * <p>Наименование и описание являются производными значениями
  * и формируются при пересчёте модуля.</p>
  */
 public class LC extends Module implements ControlModule {
+
+    private static final int MIN_WIDTH = 200;
+    private static final int DISPLAY_SIDE_CLEARANCE = 20;
+    private static final int WIDTH_ROUNDING_STEP = 50;
+    private static final int DISPLAY_CENTER_HEIGHT = 1300;
+    private static final int DISPLAY_TOP_CLEARANCE = 20;
 
     /** Конфигурация функций управления LC. */
     private ControlConfiguration controlConfiguration;
@@ -119,11 +126,71 @@ public class LC extends Module implements ControlModule {
                 .orElse(0);
     }
 
+    /** @return ширина установленного дисплея, мм, либо {@code 0}, если дисплея нет */
+    public int getDisplayWidth() {
+        Equipment display = findDisplay();
+        return display == null ? 0 : display.getWidth();
+    }
+
+    /** @return высота установленного дисплея, мм, либо {@code 0}, если дисплея нет */
+    public int getDisplayHeight() {
+        Equipment display = findDisplay();
+        return display == null ? 0 : display.getHeight();
+    }
+
+    /**
+     * Рассчитывает положение верхнего края дисплея относительно верхнего края LC.
+     *
+     * <p>Центр дисплея располагается на высоте 1300 мм от нижнего края корпуса.
+     * Если расстояние до верхней рамы меньше 20 мм, дисплей смещается вниз
+     * до обеспечения минимального зазора.</p>
+     *
+     * @return координата верхнего края дисплея от верхнего края LC, мм;
+     *         {@code 0}, если дисплей не установлен
+     */
+    public int getDisplayTop() {
+        int displayHeight = getDisplayHeight();
+        if (displayHeight <= 0) {
+            return 0;
+        }
+
+        int centeredTop = getHeight() - DISPLAY_CENTER_HEIGHT - displayHeight / 2;
+        return Math.max(centeredTop, getUpperFrame() + DISPLAY_TOP_CLEARANCE);
+    }
+
     /** Пересчитывает производные характеристики LC. */
     @Override
     public void recalculate() {
-        setWidth(LCGeometryCalculator.calculateWidth(controlConfiguration.getEquipment()));
+        setWidth(calculateWidth());
         updateNameAndDescription();
+    }
+
+    /**
+     * Рассчитывает ширину корпуса LC по габаритам дисплея.
+     *
+     * @return минимальная ширина 200 мм без дисплея либо ширина дисплея
+     *         с боковыми зазорами по 20 мм, округлённая вверх до 50 мм
+     */
+    private int calculateWidth() {
+        Equipment display = findDisplay();
+        if (display == null) {
+            return MIN_WIDTH;
+        }
+
+        long requiredWidth = Math.max(
+                MIN_WIDTH,
+                (long) display.getWidth() + 2L * DISPLAY_SIDE_CLEARANCE
+        );
+        long roundedWidth = ((requiredWidth + WIDTH_ROUNDING_STEP - 1)
+                / WIDTH_ROUNDING_STEP) * WIDTH_ROUNDING_STEP;
+        return Math.toIntExact(roundedWidth);
+    }
+
+    private Equipment findDisplay() {
+        return controlConfiguration.getEquipment().keySet().stream()
+                .filter(item -> item.getFunctionalType() == EquipmentFunctionalType.DISPLAY)
+                .findFirst()
+                .orElse(null);
     }
 
     private void updateNameAndDescription() {
