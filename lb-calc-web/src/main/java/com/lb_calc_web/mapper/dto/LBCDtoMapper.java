@@ -51,14 +51,7 @@ public final class LBCDtoMapper {
         dto.setDirectionDoorOpening(domain.getDirectionDoorOpening().name());
         dto.setColorBody(domain.getColorBody().name());
         dto.setColorDoor(domain.getColorDoor().name());
-        domain.getControlConfiguration().getEquipment().keySet().stream()
-                .filter(item -> item.getFunctionalType() == com.lb_calc_web.domain.equipment.EquipmentFunctionalType.DISPLAY)
-                .findFirst().ifPresent(display -> {
-                    dto.setDisplayWidth(display.getWidth());
-                    dto.setDisplayHeight(display.getHeight());
-                });
-
-        ControlConfiguration configuration = domain.getControlConfiguration();
+ControlConfiguration configuration = domain.getControlConfiguration();
         dto.setFunctionalConfiguration(toDto(configuration.getFunctionalConfiguration()));
         dto.setEquipmentSelections(configuration.getEquipment().entrySet().stream()
                 .map(entry -> new EquipmentSelectionDTO(entry.getKey().getId(), entry.getValue()))
