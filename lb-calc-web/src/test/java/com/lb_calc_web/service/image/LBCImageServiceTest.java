@@ -18,6 +18,7 @@ import java.util.Set;
 
 import javax.imageio.ImageIO;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -68,4 +69,41 @@ class LBCImageServiceTest {
         assertTrue(bufferedImage.getWidth() > 0);
         assertTrue(bufferedImage.getHeight() > 0);
     }
+    @Test
+    void rendersServiceZoneOnTheSideOppositeToDoorOpening() {
+        LBC leftOpening = createLbc(DirectionDoorOpening.LEFT);
+        LBC rightOpening = createLbc(DirectionDoorOpening.RIGHT);
+
+        BufferedImage leftImage = LBCImageService.createLBCImage(leftOpening);
+        BufferedImage rightImage = LBCImageService.createLBCImage(rightOpening);
+
+        int y = 100 * 3 + 1;
+        int leftSideX = 1 * 3 + 1;
+        int rightSideX = 49 * 3 + 1;
+
+        assertEquals(Colors.White.getColor().getRGB(), leftImage.getRGB(leftSideX, y));
+        assertEquals(Colors.Blue.getColor().getRGB(), leftImage.getRGB(rightSideX, y));
+        assertEquals(Colors.Blue.getColor().getRGB(), rightImage.getRGB(leftSideX, y));
+        assertEquals(Colors.White.getColor().getRGB(), rightImage.getRGB(rightSideX, y));
+    }
+
+    private LBC createLbc(DirectionDoorOpening direction) {
+        ControlConfiguration control = new ControlConfiguration(
+                new FunctionalConfiguration(
+                        DisplayPurpose.INCH_10,
+                        Set.of(),
+                        PaymentPurpose.NONE,
+                        PrinterPurpose.ABSENT
+                ),
+                java.util.Map.of()
+        );
+
+        return new LBC(
+                1940, 500, 600, 100, 100,
+                Colors.Blue, Colors.White,
+                new TypeLb("TYPE1", 100, 5, 20),
+                10, direction, 20, control
+        );
+    }
+
 }
