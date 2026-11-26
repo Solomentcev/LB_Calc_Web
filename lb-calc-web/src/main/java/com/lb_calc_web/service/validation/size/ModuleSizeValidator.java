@@ -145,10 +145,8 @@ public class ModuleSizeValidator {
         ValidationResult result = new ValidationResult("LC", lc.getId());
         logger.debug("Валидация размеров доменной модели LC");
 
-        if (lc.getWidth() > bounds.getWidthMax()) {
-            addError(result, "width", "Ширина модуля больше допустимой",
-                    lc.getWidth(), null, bounds.getWidthMax());
-        }
+        validateRange(result, "width", lc.getWidth(),
+                lc.getRequiredWidth(), bounds.getWidthMax(), "Ширина модуля");
 
         if (validateCommonDimensions) {
             validateFrames(result, upperFrame, bottomFrame);

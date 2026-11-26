@@ -25,6 +25,14 @@ class LCTest {
     }
 
     @Test
+    void recalculate_shouldPreserveConfiguredWidthWhenDisplayIsNotInstalled() {
+        LC lc = createLC(1940, 500, Map.of());
+
+        assertEquals(500, lc.getWidth());
+        assertEquals(200, lc.getRequiredWidth());
+    }
+
+    @Test
     void recalculate_shouldCalculateWidthForTenInchDisplay() {
         LC lc = createLC(1940, Map.of(display(255, 174), 1));
 
@@ -61,6 +69,10 @@ class LCTest {
     }
 
     private LC createLC(int height, Map<Equipment, Integer> equipment) {
+        return createLC(height, 0, equipment);
+    }
+
+    private LC createLC(int height, int width, Map<Equipment, Integer> equipment) {
         FunctionalConfiguration functionalConfiguration = new FunctionalConfiguration(
                 DisplayPurpose.CUSTOM,
                 Set.of(),
@@ -69,7 +81,7 @@ class LCTest {
         );
         ControlConfiguration configuration = new ControlConfiguration(
                 functionalConfiguration, equipment);
-        return new LC(height, 0, 600, 50, 50,
+        return new LC(height, width, 600, 50, 50,
                 Colors.Black, Colors.Black, configuration);
     }
 

@@ -124,7 +124,7 @@ class SizeValidatorTest {
                 lc.getControlConfiguration().getFunctionalConfiguration(),
                 Map.of(display, 1)
         );
-        LC narrowLC = new LC(
+        TestableLC narrowLC = new TestableLC(
                 lc.getHeight(),
                 100,
                 lc.getDepth(),
@@ -134,6 +134,7 @@ class SizeValidatorTest {
                 lc.getColorDoor(),
                 configuration
         );
+        narrowLC.setWidthForTest(100);
 
         ValidationResult result = sizeValidator.validateLC(narrowLC);
 
@@ -421,5 +422,27 @@ class SizeValidatorTest {
     private boolean hasError(ValidationResult result, String field) {
         return result.getErrors().stream()
                 .anyMatch(error -> field.equals(error.getField()));
+    }
+
+    /** Позволяет проверить защиту валидатора от нарушения доменного инварианта ширины. */
+    private static final class TestableLC extends LC {
+
+        private TestableLC(
+                int height,
+                int width,
+                int depth,
+                int upperFrame,
+                int bottomFrame,
+                Colors colorBody,
+                Colors colorDoor,
+                ControlConfiguration configuration
+        ) {
+            super(height, width, depth, upperFrame, bottomFrame,
+                    colorBody, colorDoor, configuration);
+        }
+
+        private void setWidthForTest(int width) {
+            setWidth(width);
+        }
     }
 }
