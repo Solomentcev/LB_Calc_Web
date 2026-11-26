@@ -366,6 +366,13 @@ public class ALSController extends BaseCatalogController {
     /**
      * Заменяет текущий control-модуль на новый LBC.
      */
+    /** Преобразует LBC в LC и отдельный LB в каталожной конфигурации ALS. */
+    @PostMapping("/{alsId}/replaceLC")
+    public String replaceLBCWithLC(@PathVariable Long alsId) {
+        ALS saved = alsService.replaceWithNewLCandSaveALS(alsId);
+        return "redirect:/alss/" + saved.getId();
+    }
+
     @PostMapping("/{alsId}/replaceLBC")
     public String replaceLBC(@PathVariable Long alsId) {
         com.lb_calc_web.domain.model.ALS saved = alsService.replaceWithNewLBCandSaveALS(alsId);
