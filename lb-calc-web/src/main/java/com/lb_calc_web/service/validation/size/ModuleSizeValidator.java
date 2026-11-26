@@ -145,8 +145,10 @@ public class ModuleSizeValidator {
         ValidationResult result = new ValidationResult("LC", lc.getId());
         logger.debug("Валидация размеров доменной модели LC");
 
-        validateRange(result, "width", lc.getWidth(),
-                0, bounds.getWidthMax(), "Ширина модуля");
+        if (lc.getWidth() > bounds.getWidthMax()) {
+            addError(result, "width", "Ширина модуля больше допустимой",
+                    lc.getWidth(), null, bounds.getWidthMax());
+        }
 
         if (validateCommonDimensions) {
             validateFrames(result, upperFrame, bottomFrame);
@@ -286,8 +288,7 @@ public class ModuleSizeValidator {
                 requiredWidth, bounds.getWidthMax(), "Ширина модуля");
         validateRange(result, "doorThickness", module.getDoorThickness(),
                 bounds.getDoorThicknessMin(),
-                bounds.getDoorThicknessMax(),
-                "Толщина дверцы");
+                bounds.getDoorThicknessMax(), "Толщина дверцы");
 
         validateLBCellCount(
                 result, height, upperFrame, bottomFrame,
