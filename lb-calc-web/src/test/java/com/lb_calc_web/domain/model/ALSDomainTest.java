@@ -44,7 +44,9 @@ class ALSDomainTest {
                 lbc.getUpperFrame(), lbc.getBottomFrame(),
                 lbc.getColorBody(), lbc.getColorDoor(),
                 lbc.getControlConfiguration(),
-                TestDataFactory.lcGeometrySettings()
+                TestDataFactory.lcMinimumWidth(), TestDataFactory.lcDisplaySideClearance(),
+                TestDataFactory.lcWidthRoundingStep(), TestDataFactory.lcDisplayCenterHeight(),
+                TestDataFactory.lcDisplayTopClearance()
         );
 
         als.replaceLBCWithLC(replacementLC);
@@ -77,7 +79,9 @@ class ALSDomainTest {
                 lbc.getUpperFrame(), lbc.getBottomFrame(),
                 lbc.getColorBody(), lbc.getColorDoor(),
                 lbc.getControlConfiguration(),
-                TestDataFactory.lcGeometrySettings()
+                TestDataFactory.lcMinimumWidth(), TestDataFactory.lcDisplaySideClearance(),
+                TestDataFactory.lcWidthRoundingStep(), TestDataFactory.lcDisplayCenterHeight(),
+                TestDataFactory.lcDisplayTopClearance()
         );
 
         assertThrows(
