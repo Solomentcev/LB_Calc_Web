@@ -347,7 +347,25 @@ return als;
 
         return project;
     }
-    /** Загружает тестовые геометрические настройки из того же файла, что и приложение. */
+    public static int lcMinimumWidth() {
+        return createSizeBounds().getLcMinimumWidth();
+    }
+
+    public static int lcDisplaySideClearance() {
+        return createSizeBounds().getLcDisplaySideClearance();
+    }
+
+    public static int lcWidthRoundingStep() {
+        return createSizeBounds().getLcWidthRoundingStep();
+    }
+
+    public static int lcDisplayCenterHeight() {
+        return createSizeBounds().getLcDisplayCenterHeight();
+    }
+
+    public static int lcDisplayTopClearance() {
+        return createSizeBounds().getLcDisplayTopClearance();
+    }
 
 
     private static int intProperty(Properties properties, String key) {
