@@ -45,6 +45,10 @@ public class SizeBounds {
     private final int lcWidthRoundingStep;
     private final int lcDisplayCenterHeight;
     private final int lcDisplayTopClearance;
+    private final int lbcTechnicalCellMinWidth;
+    private final int lbcTechnicalCellMinHeight;
+    private final int lbcEquipmentClearance;
+    private final int lbcDisplayCenterHeight;
 
     public SizeBounds(
             @Value("${size.frame.upper.min}") int upperFrameMin,
@@ -84,7 +88,11 @@ public class SizeBounds {
             @Value("${lc.geometry.display.side-clearance}") int lcDisplaySideClearance,
             @Value("${lc.geometry.width.rounding-step}") int lcWidthRoundingStep,
             @Value("${lc.geometry.display.center-height}") int lcDisplayCenterHeight,
-            @Value("${lc.geometry.display.top-clearance}") int lcDisplayTopClearance
+            @Value("${lc.geometry.display.top-clearance}") int lcDisplayTopClearance,
+            @Value("${lbc.geometry.technical-cell.width.min}") int lbcTechnicalCellMinWidth,
+            @Value("${lbc.geometry.technical-cell.height.min}") int lbcTechnicalCellMinHeight,
+            @Value("${lbc.geometry.equipment.clearance}") int lbcEquipmentClearance,
+            @Value("${lbc.geometry.display.center-height}") int lbcDisplayCenterHeight
     ) {
         this.upperFrameMin = upperFrameMin;
         this.upperFrameMax = upperFrameMax;
@@ -124,6 +132,10 @@ public class SizeBounds {
         this.lcWidthRoundingStep = lcWidthRoundingStep;
         this.lcDisplayCenterHeight = lcDisplayCenterHeight;
         this.lcDisplayTopClearance = lcDisplayTopClearance;
+        this.lbcTechnicalCellMinWidth = lbcTechnicalCellMinWidth;
+        this.lbcTechnicalCellMinHeight = lbcTechnicalCellMinHeight;
+        this.lbcEquipmentClearance = lbcEquipmentClearance;
+        this.lbcDisplayCenterHeight = lbcDisplayCenterHeight;
     }
 
     public int getLcMinimumWidth() {
@@ -145,6 +157,14 @@ public class SizeBounds {
     public int getLcDisplayTopClearance() {
         return lcDisplayTopClearance;
     }
+
+    public int getLbcTechnicalCellMinWidth() { return lbcTechnicalCellMinWidth; }
+
+    public int getLbcTechnicalCellMinHeight() { return lbcTechnicalCellMinHeight; }
+
+    public int getLbcEquipmentClearance() { return lbcEquipmentClearance; }
+
+    public int getLbcDisplayCenterHeight() { return lbcDisplayCenterHeight; }
 
     public int getUpperFrameMin() {
         return upperFrameMin;
