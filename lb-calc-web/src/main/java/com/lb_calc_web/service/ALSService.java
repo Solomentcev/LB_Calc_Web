@@ -458,6 +458,7 @@ public class ALSService {
                 sizeBounds.getLbcTechnicalCellMinHeight(),
                 sizeBounds.getLbcEquipmentClearance(),
                 sizeBounds.getLbcDisplayCenterHeight(),
+                sizeBounds.getLbcStorageCellMinWidth(),
                 sizeBounds.getHeightCellMin()
             );
             if (existingALS == null) {
@@ -576,6 +577,7 @@ public class ALSService {
                 sizeBounds.getLbcTechnicalCellMinHeight(),
                 sizeBounds.getLbcEquipmentClearance(),
                 sizeBounds.getLbcDisplayCenterHeight(),
+                sizeBounds.getLbcStorageCellMinWidth(),
                 sizeBounds.getHeightCellMin()
         );
     }
@@ -592,6 +594,7 @@ public class ALSService {
                 sizeBounds.getLbcTechnicalCellMinHeight(),
                 sizeBounds.getLbcEquipmentClearance(),
                 sizeBounds.getLbcDisplayCenterHeight(),
+                sizeBounds.getLbcStorageCellMinWidth(),
                 sizeBounds.getHeightCellMin()
         );
     }

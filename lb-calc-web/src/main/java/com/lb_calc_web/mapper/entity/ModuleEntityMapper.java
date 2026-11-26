@@ -21,18 +21,12 @@ public final class ModuleEntityMapper {
     private ModuleEntityMapper() {
     }
 
-    /** Восстанавливает модуль с настройками геометрии приложения. */
-    public static Module toDomain(ModuleEntity entity, int minimumWidth, int displaySideClearance, int widthRoundingStep,
-            int displayCenterHeight, int displayTopClearance) {
-        return toDomain(entity, minimumWidth, displaySideClearance, widthRoundingStep,
-                displayCenterHeight, displayTopClearance, 200, 200, 20, 1300, 85);
-    }
-
     /** Восстанавливает модуль с настройками геометрии LC и LBC. */
     public static Module toDomain(ModuleEntity entity, int minimumWidth, int displaySideClearance,
             int widthRoundingStep, int displayCenterHeight, int displayTopClearance,
             int lbcTechnicalCellMinWidth, int lbcTechnicalCellMinHeight,
-            int lbcEquipmentClearance, int lbcDisplayCenterHeight, int storageCellMinHeight) {
+            int lbcEquipmentClearance, int lbcDisplayCenterHeight,
+            int lbcStorageCellMinWidth, int storageCellMinHeight {
         if (entity == null) {
             return null;
         }
@@ -41,7 +35,7 @@ public final class ModuleEntityMapper {
         if (concreteEntity instanceof LBCEntity lbcEntity) {
             return LBCEntityMapper.toDomain(lbcEntity, lbcTechnicalCellMinWidth,
                     lbcTechnicalCellMinHeight, lbcEquipmentClearance,
-                    lbcDisplayCenterHeight, storageCellMinHeight);
+                    lbcDisplayCenterHeight, lbcStorageCellMinWidth, storageCellMinHeight);
         }
         if (concreteEntity instanceof LBEntity lbEntity) {
             return LBEntityMapper.toDomain(lbEntity);

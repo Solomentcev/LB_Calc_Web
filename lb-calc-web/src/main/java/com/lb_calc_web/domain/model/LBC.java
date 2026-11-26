@@ -18,11 +18,6 @@ import java.util.Objects;
  */
 public class LBC extends StorageModule implements ControlModule {
 
-    private static final int DEFAULT_TECHNICAL_CELL_MIN_WIDTH = 200;
-    private static final int DEFAULT_TECHNICAL_CELL_MIN_HEIGHT = 200;
-    private static final int DEFAULT_EQUIPMENT_CLEARANCE = 20;
-    private static final int DEFAULT_DISPLAY_CENTER_HEIGHT = 1300;
-
     private final int storageCellMinWidth;
     private final int technicalCellMinWidth;
     private final int technicalCellMinHeight;
@@ -38,29 +33,6 @@ public class LBC extends StorageModule implements ControlModule {
     private int storageCellsAbove;
     private int storageCellsBelow;
     private int displayTop = -1;
-
-    public LBC(int height, int width, int depth, int upperFrame, int bottomFrame,
-               Colors colorBody, Colors colorDoor, TypeLb typeLb, int countCells,
-               DirectionDoorOpening directionDoorOpening, int doorThickness,
-               ControlConfiguration controlConfiguration) {
-        this(height, width, depth, upperFrame, bottomFrame, colorBody, colorDoor,
-                typeLb, countCells, directionDoorOpening, doorThickness,
-                controlConfiguration, DEFAULT_TECHNICAL_CELL_MIN_WIDTH,
-                DEFAULT_TECHNICAL_CELL_MIN_HEIGHT, DEFAULT_EQUIPMENT_CLEARANCE,
-                DEFAULT_DISPLAY_CENTER_HEIGHT, 200, 85);
-    }
-
-    public LBC(int height, int width, int depth, int upperFrame, int bottomFrame,
-               Colors colorBody, Colors colorDoor, TypeLb typeLb, int countCells,
-               DirectionDoorOpening directionDoorOpening, int doorThickness,
-               ControlConfiguration controlConfiguration, int technicalCellMinWidth,
-               int technicalCellMinHeight, int equipmentClearance,
-               int targetDisplayCenterHeight) {
-        this(height, width, depth, upperFrame, bottomFrame, colorBody, colorDoor,
-                typeLb, countCells, directionDoorOpening, doorThickness, controlConfiguration,
-                technicalCellMinWidth, technicalCellMinHeight, equipmentClearance,
-                targetDisplayCenterHeight, 200, 85);
-    }
 
     public LBC(int height, int width, int depth, int upperFrame, int bottomFrame,
                Colors colorBody, Colors colorDoor, TypeLb typeLb, int countCells,

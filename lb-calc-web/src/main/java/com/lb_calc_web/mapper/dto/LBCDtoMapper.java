@@ -68,39 +68,6 @@ ControlConfiguration configuration = domain.getControlConfiguration();
         return dto;
     }
 
-    /** Восстанавливает доменную конфигурацию LBC из DTO. */
-    public static LBC toDomain(LBCDTO dto) {
-        if (dto == null) {
-            return null;
-        }
-        TypeLb typeLb = new TypeLb(
-                dto.getType(), dto.getDeltaWidth(), dto.getShelfThick(), dto.getServiceZoneWidth());
-        return toDomain(dto, typeLb, id -> {
-            throw new IllegalStateException(
-                    "Для восстановления оборудования требуется загрузчик оборудования");
-        }, null);
-    }
-
-    /** Восстанавливает доменную конфигурацию LBC из DTO. */
-    public static LBC toDomain(
-            LBCDTO dto,
-            TypeLb typeLb,
-            Function<Long, Equipment> equipmentLookup
-    ) {
-        return toDomain(dto, typeLb, equipmentLookup, null);
-    }
-
-    /** Восстанавливает доменную конфигурацию LBC из DTO. */
-    public static LBC toDomain(
-            LBCDTO dto,
-            TypeLb typeLb,
-            Function<Long, Equipment> equipmentLookup,
-            ControlConfiguration fallbackConfiguration
-    ) {
-        return toDomain(dto, typeLb, equipmentLookup, fallbackConfiguration,
-                200, 200, 20, 1300, 200, 85);
-    }
-
     /** Восстанавливает LBC с заданными ограничениями физической геометрии. */
     public static LBC toDomain(
             LBCDTO dto,

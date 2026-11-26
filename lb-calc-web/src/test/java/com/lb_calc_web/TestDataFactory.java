@@ -143,7 +143,13 @@ public final class TestDataFactory {
                 lcDisplaySideClearance(),
                 lcWidthRoundingStep(),
                 lcDisplayCenterHeight(),
-                lcDisplayTopClearance()
+                lcDisplayTopClearance(),
+                lbcTechnicalCellMinWidth(),
+                lbcTechnicalCellMinHeight(),
+                lbcEquipmentClearance(),
+                lbcDisplayCenterHeight(),
+                lbcStorageCellMinWidth(),
+                storageCellMinHeight()
         );
     }
 
@@ -217,7 +223,18 @@ public final class TestDataFactory {
 
     public static LBC validLBC(Long id) {
         return LBCDtoMapper.toDomain(
-                validLBCDTO(id)
+                validLBCDTO(id),
+                type1(),
+                equipmentId -> {
+                    throw new IllegalStateException("Оборудование в тестовой конфигурации не загружается");
+                },
+                null,
+                lbcTechnicalCellMinWidth(),
+                lbcTechnicalCellMinHeight(),
+                lbcEquipmentClearance(),
+                lbcDisplayCenterHeight(),
+                lbcStorageCellMinWidth(),
+                storageCellMinHeight()
         );
     }
 
@@ -327,7 +344,13 @@ return als;
                 lcDisplaySideClearance(),
                 lcWidthRoundingStep(),
                 lcDisplayCenterHeight(),
-                lcDisplayTopClearance()
+                lcDisplayTopClearance(),
+                lbcTechnicalCellMinWidth(),
+                lbcTechnicalCellMinHeight(),
+                lbcEquipmentClearance(),
+                lbcDisplayCenterHeight(),
+                lbcStorageCellMinWidth(),
+                storageCellMinHeight()
         );
     }
 
@@ -372,6 +395,29 @@ return als;
         return createSizeBounds().getLcDisplayTopClearance();
     }
 
+    public static int lbcTechnicalCellMinWidth() {
+        return createSizeBounds().getLbcTechnicalCellMinWidth();
+    }
+
+    public static int lbcTechnicalCellMinHeight() {
+        return createSizeBounds().getLbcTechnicalCellMinHeight();
+    }
+
+    public static int lbcEquipmentClearance() {
+        return createSizeBounds().getLbcEquipmentClearance();
+    }
+
+    public static int lbcDisplayCenterHeight() {
+        return createSizeBounds().getLbcDisplayCenterHeight();
+    }
+
+    public static int lbcStorageCellMinWidth() {
+        return createSizeBounds().getLbcStorageCellMinWidth();
+    }
+
+    public static int storageCellMinHeight() {
+        return createSizeBounds().getHeightCellMin();
+    }
 
     private static int intProperty(Properties properties, String key) {
         String value = properties.getProperty(key);

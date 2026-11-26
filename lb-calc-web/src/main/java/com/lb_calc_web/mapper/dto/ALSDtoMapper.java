@@ -114,21 +114,6 @@ public final class ALSDtoMapper {
                 "Не удалось сопоставить LB DTO с модулем доменной ALS");
     }
 
-    /** Восстанавливает ALS с настройками геометрии LC приложения. */
-    public static ALS toDomain(
-            ALSDTO dto,
-            Function<LBDTO, TypeLb> lbTypeResolver,
-            Function<LBCDTO, TypeLb> lbcTypeResolver,
-            Function<Long, com.lb_calc_web.domain.equipment.Equipment> equipmentLookup,
-            com.lb_calc_web.domain.model.ControlConfiguration fallbackConfiguration,
-            int minimumWidth, int displaySideClearance, int widthRoundingStep,
-            int displayCenterHeight, int displayTopClearance
-    ) {
-        return toDomain(dto, lbTypeResolver, lbcTypeResolver, equipmentLookup,
-                fallbackConfiguration, minimumWidth, displaySideClearance, widthRoundingStep,
-                displayCenterHeight, displayTopClearance, 200, 200, 20, 1300, 85);
-    }
-
     /** Восстанавливает ALS с настройками физической геометрии LC и LBC. */
     public static ALS toDomain(
             ALSDTO dto,
@@ -139,7 +124,8 @@ public final class ALSDtoMapper {
             int minimumWidth, int displaySideClearance, int widthRoundingStep,
             int displayCenterHeight, int displayTopClearance,
             int lbcTechnicalCellMinWidth, int lbcTechnicalCellMinHeight,
-            int lbcEquipmentClearance, int lbcDisplayCenterHeight, int storageCellMinHeight
+            int lbcEquipmentClearance, int lbcDisplayCenterHeight,
+            int lbcStorageCellMinWidth, int storageCellMinHeight
     ) {
         if (dto == null) {
             return null;
@@ -161,13 +147,13 @@ public final class ALSDtoMapper {
                         minimumWidth, displaySideClearance, widthRoundingStep,
                         displayCenterHeight, displayTopClearance,
                         lbcTechnicalCellMinWidth, lbcTechnicalCellMinHeight,
-                        lbcEquipmentClearance, lbcDisplayCenterHeight, storageCellMinHeight)
+                        lbcEquipmentClearance, lbcDisplayCenterHeight, lbcStorageCellMinWidth, storageCellMinHeight)
                 : restoreExplicitOrder(
                         dto, lbTypeResolver, lbcTypeResolver, equipmentLookup, fallbackConfiguration,
                         minimumWidth, displaySideClearance, widthRoundingStep,
                         displayCenterHeight, displayTopClearance,
                         lbcTechnicalCellMinWidth, lbcTechnicalCellMinHeight,
-                        lbcEquipmentClearance, lbcDisplayCenterHeight, storageCellMinHeight);
+                        lbcEquipmentClearance, lbcDisplayCenterHeight, lbcStorageCellMinWidth, storageCellMinHeight);
 
         ALS domain = new ALS(
                 dto.getHeight(),
@@ -210,7 +196,8 @@ public final class ALSDtoMapper {
             int minimumWidth, int displaySideClearance, int widthRoundingStep,
             int displayCenterHeight, int displayTopClearance,
             int lbcTechnicalCellMinWidth, int lbcTechnicalCellMinHeight,
-            int lbcEquipmentClearance, int lbcDisplayCenterHeight, int storageCellMinHeight
+            int lbcEquipmentClearance, int lbcDisplayCenterHeight,
+            int lbcStorageCellMinWidth, int storageCellMinHeight
     ) {
         List<LBDTO> lbDtos = dto.getLbList() == null ? List.of() : dto.getLbList();
         List<Module> modules = new ArrayList<>();
@@ -224,7 +211,7 @@ public final class ALSDtoMapper {
         Module control = dto.getLBC() != null
                 ? LBCDtoMapper.toDomain(dto.getLBC(), lbcTypeResolver.apply(dto.getLBC()), equipmentLookup,
                         fallbackConfiguration, lbcTechnicalCellMinWidth, lbcTechnicalCellMinHeight,
-                        lbcEquipmentClearance, lbcDisplayCenterHeight, storageCellMinHeight)
+                        lbcEquipmentClearance, lbcDisplayCenterHeight, lbcStorageCellMinWidth, storageCellMinHeight)
                 : LCDtoMapper.toDomain(
                         dto.getLC(), equipmentLookup, fallbackConfiguration,
                         minimumWidth, displaySideClearance, widthRoundingStep,
@@ -241,7 +228,8 @@ public final class ALSDtoMapper {
             int minimumWidth, int displaySideClearance, int widthRoundingStep,
             int displayCenterHeight, int displayTopClearance,
             int lbcTechnicalCellMinWidth, int lbcTechnicalCellMinHeight,
-            int lbcEquipmentClearance, int lbcDisplayCenterHeight, int storageCellMinHeight
+            int lbcEquipmentClearance, int lbcDisplayCenterHeight,
+            int lbcStorageCellMinWidth, int storageCellMinHeight
     ) {
         List<LBDTO> lbDtos = dto.getLbList() == null ? List.of() : dto.getLbList();
         boolean[] usedLbIndexes = new boolean[lbDtos.size()];
@@ -284,7 +272,7 @@ public final class ALSDtoMapper {
                     modules.add(LBCDtoMapper.toDomain(
                             dto.getLBC(), lbcTypeResolver.apply(dto.getLBC()), equipmentLookup, fallbackConfiguration,
                             lbcTechnicalCellMinWidth, lbcTechnicalCellMinHeight,
-                            lbcEquipmentClearance, lbcDisplayCenterHeight, storageCellMinHeight));
+                            lbcEquipmentClearance, lbcDisplayCenterHeight, lbcStorageCellMinWidth, storageCellMinHeight));
                 }
                 default -> throw new IllegalStateException(
                         "Неизвестный тип модуля в moduleOrder: " + item.getType());

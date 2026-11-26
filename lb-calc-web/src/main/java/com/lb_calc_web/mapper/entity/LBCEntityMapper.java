@@ -24,11 +24,6 @@ public final class LBCEntityMapper {
     private LBCEntityMapper() {
     }
 
-    /** Восстанавливает доменную конфигурацию LBC из JPA-сущности. */
-    public static LBC toDomain(LBCEntity entity) {
-        return toDomain(entity, 200, 200, 20, 1300, 200, 85);
-    }
-
     /** Восстанавливает LBC с актуальными настройками физической геометрии. */
     public static LBC toDomain(
             LBCEntity entity,
@@ -155,12 +150,22 @@ public final class LBCEntityMapper {
         entity.setEquipment(equipment);
     }
 
-    /** Преобразует LBCEntity в DTO, сохраняя persistence ID. */
-    public static LBCDTO toDto(LBCEntity entity) {
+    /** Преобразует LBCEntity в DTO с актуальными настройками геометрии. */
+    public static LBCDTO toDto(
+            LBCEntity entity,
+            int technicalCellMinWidth,
+            int technicalCellMinHeight,
+            int equipmentClearance,
+            int displayCenterHeight,
+            int storageCellMinWidth,
+            int storageCellMinHeight
+    ) {
         if (entity == null) {
             return null;
         }
-        LBCDTO dto = LBCDtoMapper.toDto(toDomain(entity));
+        LBCDTO dto = LBCDtoMapper.toDto(toDomain(entity, technicalCellMinWidth,
+                technicalCellMinHeight, equipmentClearance, displayCenterHeight,
+                storageCellMinWidth, storageCellMinHeight));
         dto.setId(entity.getId());
         return dto;
     }
