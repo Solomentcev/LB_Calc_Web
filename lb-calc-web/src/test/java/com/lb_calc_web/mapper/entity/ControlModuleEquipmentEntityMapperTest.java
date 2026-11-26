@@ -94,12 +94,26 @@ class ControlModuleEquipmentEntityMapperTest {
                 sourceBase.getColorBody(), sourceBase.getColorDoor(), sourceBase.getTypeLb(),
                 sourceBase.getCountCells(), sourceBase.getDirectionDoorOpening(),
                 sourceBase.getDoorThickness(),
-                new ControlConfiguration(FUNCTIONAL, Map.of(rfid, 2))
+                new ControlConfiguration(FUNCTIONAL, Map.of(rfid, 2)),
+                TestDataFactory.lbcTechnicalCellMinWidth(),
+                TestDataFactory.lbcTechnicalCellMinHeight(),
+                TestDataFactory.lbcEquipmentClearance(),
+                TestDataFactory.lbcDisplayCenterHeight(),
+                TestDataFactory.lbcStorageCellMinWidth(),
+                TestDataFactory.storageCellMinHeight()
         );
         EquipmentEntity persisted = persisted(rfid);
 
         LBCEntity entity = LBCEntityMapper.toEntity(source, item -> persisted);
-        LBC restored = LBCEntityMapper.toDomain(entity);
+        LBC restored = LBCEntityMapper.toDomain(
+                entity,
+                TestDataFactory.lbcTechnicalCellMinWidth(),
+                TestDataFactory.lbcTechnicalCellMinHeight(),
+                TestDataFactory.lbcEquipmentClearance(),
+                TestDataFactory.lbcDisplayCenterHeight(),
+                TestDataFactory.lbcStorageCellMinWidth(),
+                TestDataFactory.storageCellMinHeight()
+        );
 
         assertEquals(source, restored);
         assertEquals(FUNCTIONAL, entity.getFunctionalConfiguration());

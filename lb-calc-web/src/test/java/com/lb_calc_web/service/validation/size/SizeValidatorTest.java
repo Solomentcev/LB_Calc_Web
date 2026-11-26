@@ -378,7 +378,13 @@ class SizeValidatorTest {
                 countCells,
                 DirectionDoorOpening.LEFT,
                 doorThickness,
-                lbc.getControlConfiguration().copy()
+                lbc.getControlConfiguration().copy(),
+                TestDataFactory.lbcTechnicalCellMinWidth(),
+                TestDataFactory.lbcTechnicalCellMinHeight(),
+                TestDataFactory.lbcEquipmentClearance(),
+                TestDataFactory.lbcDisplayCenterHeight(),
+                TestDataFactory.lbcStorageCellMinWidth(),
+                TestDataFactory.storageCellMinHeight()
         );
     }
 

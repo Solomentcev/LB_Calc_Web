@@ -40,7 +40,13 @@ class ALSEntityMapperTest {
 
         ALS restored = ALSEntityMapper.toDomain(entity, TestDataFactory.lcMinimumWidth(), TestDataFactory.lcDisplaySideClearance(),
                 TestDataFactory.lcWidthRoundingStep(), TestDataFactory.lcDisplayCenterHeight(),
-                TestDataFactory.lcDisplayTopClearance());
+                TestDataFactory.lcDisplayTopClearance(),
+                TestDataFactory.lbcTechnicalCellMinWidth(),
+                TestDataFactory.lbcTechnicalCellMinHeight(),
+                TestDataFactory.lbcEquipmentClearance(),
+                TestDataFactory.lbcDisplayCenterHeight(),
+                TestDataFactory.lbcStorageCellMinWidth(),
+                TestDataFactory.storageCellMinHeight());
 
         assertEquals(domain, restored);
         assertEquals(domain.getModules(), restored.getModules());
@@ -78,7 +84,13 @@ class ALSEntityMapperTest {
 
         ALS restored = ALSEntityMapper.toDomain(entity, TestDataFactory.lcMinimumWidth(), TestDataFactory.lcDisplaySideClearance(),
                 TestDataFactory.lcWidthRoundingStep(), TestDataFactory.lcDisplayCenterHeight(),
-                TestDataFactory.lcDisplayTopClearance());
+                TestDataFactory.lcDisplayTopClearance(),
+                TestDataFactory.lbcTechnicalCellMinWidth(),
+                TestDataFactory.lbcTechnicalCellMinHeight(),
+                TestDataFactory.lbcEquipmentClearance(),
+                TestDataFactory.lbcDisplayCenterHeight(),
+                TestDataFactory.lbcStorageCellMinWidth(),
+                TestDataFactory.storageCellMinHeight());
 
         assertEquals(independentAlsConfiguration, restored.getFunctionalConfiguration());
         assertEquals(
@@ -104,7 +116,13 @@ class ALSEntityMapperTest {
                         .map(com.lb_calc_web.entity.ALSModuleEntity::getModule)
                         .filter(existing -> ModuleEntityMapper.toDomain(existing, TestDataFactory.lcMinimumWidth(), TestDataFactory.lcDisplaySideClearance(),
                 TestDataFactory.lcWidthRoundingStep(), TestDataFactory.lcDisplayCenterHeight(),
-                TestDataFactory.lcDisplayTopClearance()).equals(module))
+                TestDataFactory.lcDisplayTopClearance(),
+                TestDataFactory.lbcTechnicalCellMinWidth(),
+                TestDataFactory.lbcTechnicalCellMinHeight(),
+                TestDataFactory.lbcEquipmentClearance(),
+                TestDataFactory.lbcDisplayCenterHeight(),
+                TestDataFactory.lbcStorageCellMinWidth(),
+                TestDataFactory.storageCellMinHeight()).equals(module))
                         .findFirst()
                         .orElseThrow()
         );
@@ -132,7 +150,13 @@ class ALSEntityMapperTest {
 
         ALS restored = ALSEntityMapper.toDomain(entity, TestDataFactory.lcMinimumWidth(), TestDataFactory.lcDisplaySideClearance(),
                 TestDataFactory.lcWidthRoundingStep(), TestDataFactory.lcDisplayCenterHeight(),
-                TestDataFactory.lcDisplayTopClearance());
+                TestDataFactory.lcDisplayTopClearance(),
+                TestDataFactory.lbcTechnicalCellMinWidth(),
+                TestDataFactory.lbcTechnicalCellMinHeight(),
+                TestDataFactory.lbcEquipmentClearance(),
+                TestDataFactory.lbcDisplayCenterHeight(),
+                TestDataFactory.lbcStorageCellMinWidth(),
+                TestDataFactory.storageCellMinHeight());
 
         assertEquals("Устаревшее название", restored.getName());
         assertEquals("Устаревшее описание", restored.getDescription());
