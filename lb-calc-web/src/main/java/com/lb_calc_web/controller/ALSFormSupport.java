@@ -39,6 +39,8 @@ final class ALSFormSupport {
             controlModule.setEquipmentSelections(equipmentCatalogService.prepareSelections(
                     als.getFunctionalConfiguration(), controlModule.getEquipmentSelections()));
             controlModule.setEquipmentSelectionsProvided(true);
+            equipmentCatalogService.validateSelections(
+                    als.getFunctionalConfiguration(), controlModule.getEquipmentSelections());
             return;
         }
 
@@ -48,6 +50,8 @@ final class ALSFormSupport {
             controlModule.setEquipmentSelections(equipmentCatalogService.prepareSelections(
                     als.getFunctionalConfiguration(), controlModule.getEquipmentSelections()));
             controlModule.setEquipmentSelectionsProvided(true);
+            equipmentCatalogService.validateSelections(
+                    als.getFunctionalConfiguration(), controlModule.getEquipmentSelections());
             return;
         }
 
