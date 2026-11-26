@@ -54,8 +54,7 @@ public class LBCController extends BaseCatalogController {
                 "depth", "displayPurpose", "accessSort", "paymentPurpose", "printerPurpose",
                 "colorBody", "colorDoor");
         Pageable pageable = CatalogPageSupport.pageable(page, size, sort, direction, "id", allowedSorts);
-        var result = lbcService.findPage(filter, pageable).map(
-                LBCDtoMapper::toDto).map(LBCImageService::addImage);
+        var result = lbcService.findPage(filter, pageable).map(this::toDtoWithImage);
         model.addAttribute("lbcs", result.getContent());
         model.addAttribute("page", result);
         model.addAttribute("filters", filter);
@@ -74,7 +73,7 @@ public class LBCController extends BaseCatalogController {
         model.addAttribute("pageContext", "CATALOG");
         logger.debug("Открытие страницы создания LBC");
 
-        prepareForm(model, LBCImageService.addImage(LBCDtoMapper.toDto(lbcService.createLBC())));
+        prepareForm(model, toDtoWithImage(lbcService.createLBC()));
 
         return "lbcs/lbc";
     }
@@ -93,7 +92,7 @@ public class LBCController extends BaseCatalogController {
                 id
         );
 
-        prepareForm(model, LBCImageService.addImage(LBCDtoMapper.toDto(lbcService.findById(id))));
+        prepareForm(model, toDtoWithImage(lbcService.findById(id)));
 
         return "lbcs/lbc";
     }
@@ -105,11 +104,11 @@ public class LBCController extends BaseCatalogController {
         try {
             lbc.setEquipmentSelections(equipmentCatalogService.prepareSelections(
                     lbc.getFunctionalConfiguration(), lbc.getEquipmentSelections()));
-            lbc = LBCDtoMapper.toDto(lbcService.restoreDomain(lbc));
+            lbc = toDtoWithImage(lbcService.restoreDomain(lbc));
         } catch (ValidationSizeException exception) {
             model.addAttribute("errors", ValidationErrorFormatter.format(exception.getValidationResult()));
         }
-        prepareForm(model, LBCImageService.addImage(lbc));
+        prepareForm(model, lbc);
         return "lbcs/lbc";
     }
 
@@ -133,10 +132,16 @@ public class LBCController extends BaseCatalogController {
                     "errors",
                     ValidationErrorFormatter.format(e.getValidationResult())
             );
-            prepareForm(model, LBCImageService.addImage(lbc));
+            prepareForm(model, lbc);
 
             return "lbcs/lbc";
         }
+    }
+
+    private LBCDTO toDtoWithImage(LBC domain) {
+        LBCDTO dto = LBCDtoMapper.toDto(domain);
+        dto.setStringLBCImage(LBCImageService.getStringLBCImage(domain));
+        return dto;
     }
 
     private void prepareForm(Model model, LBCDTO lbc) {

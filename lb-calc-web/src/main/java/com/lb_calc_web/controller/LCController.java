@@ -54,9 +54,8 @@ public class LCController {
         LCDTO lc = LCDtoMapper.toDto(lcService.createLC());
         lc.setEquipmentSelections(equipmentCatalogService.prepareSelections(
                 lc.getFunctionalConfiguration(), null));
-        lc = LCDtoMapper.toDto(lcService.restoreDomain(lc));
+        lc = toDtoWithImage(lcService.restoreDomain(lc));
         lc.setId(0L);
-        lc = LCImageService.addImage(lc);
 
         prepareForm(model, lc);
 
@@ -78,7 +77,7 @@ public class LCController {
                 id
         );
 
-        LCDTO lc = LCImageService.addImage(LCDtoMapper.toDto(lcService.findById(id)));
+        LCDTO lc = toDtoWithImage(lcService.findById(id));
 
         prepareForm(model, lc);
 
@@ -92,11 +91,11 @@ public class LCController {
         try {
             lc.setEquipmentSelections(equipmentCatalogService.prepareSelections(
                     lc.getFunctionalConfiguration(), lc.getEquipmentSelections()));
-            lc = LCDtoMapper.toDto(lcService.restoreDomain(lc));
+            lc = toDtoWithImage(lcService.restoreDomain(lc));
         } catch (ValidationSizeException exception) {
             model.addAttribute("errors", ValidationErrorFormatter.format(exception.getValidationResult()));
         }
-        prepareForm(model, LCImageService.addImage(lc));
+        prepareForm(model, lc);
         return "lcs/lc";
     }
 
@@ -137,7 +136,7 @@ public class LCController {
                     ValidationErrorFormatter.format(e.getValidationResult())
             );
 
-            prepareForm(model, LCImageService.addImage(lc));
+            prepareForm(model, lc);
 
             return "lcs/lc";
         }
@@ -149,6 +148,12 @@ public class LCController {
     @ModelAttribute("colorsList")
     public List<Colors> colorsList() {
         return colorsList;
+    }
+
+    private LCDTO toDtoWithImage(LC domain) {
+        LCDTO dto = LCDtoMapper.toDto(domain);
+        dto.setStringLCImage(LCImageService.getStringLCImage(domain));
+        return dto;
     }
 
     private void prepareForm(Model model, LCDTO lc) {

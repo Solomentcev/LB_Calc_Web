@@ -2,6 +2,7 @@ package com.lb_calc_web.controller;
 
 import com.lb_calc_web.domain.attributes.Colors;
 import com.lb_calc_web.domain.attributes.DirectionDoorOpening;
+import com.lb_calc_web.domain.model.LB;
 import com.lb_calc_web.dto.LBDTO;
 import com.lb_calc_web.mapper.dto.LBDtoMapper;
 import com.lb_calc_web.service.factory.TypeLbFactory;
@@ -52,7 +53,7 @@ public class LBController {
 
         logger.debug("Открытие страницы создания LB");
 
-        LBDTO lb = LBImageService.addImage(LBDtoMapper.toDto(lbService.createLB()));
+        LBDTO lb = toDtoWithImage(lbService.createLB());
 
         model.addAttribute("lb", lb);
 
@@ -74,7 +75,7 @@ public class LBController {
                 id
         );
 
-        LBDTO lb = LBImageService.addImage(LBDtoMapper.toDto(lbService.findById(id)));
+        LBDTO lb = toDtoWithImage(lbService.findById(id));
 
         model.addAttribute("lb", lb);
 
@@ -88,12 +89,11 @@ public class LBController {
     public String refreshLB(@ModelAttribute("lb") LBDTO lb, Model model) {
         model.addAttribute("pageContext", "CATALOG");
         try {
-            lb = LBDtoMapper.toDto(LBDtoMapper.toDomain(
-                    lb, TypeLbFactory.forLB(environment, lb.getType())));
+            lb = toDtoWithImage(LBDtoMapper.toDomain(lb, TypeLbFactory.forLB(environment, lb.getType())));
         } catch (IllegalArgumentException | NullPointerException exception) {
             // При незаполненных промежуточных значениях сохраняем введённые данные формы.
         }
-        model.addAttribute("lb", LBImageService.addImage(lb));
+        model.addAttribute("lb", lb);
         return "lbs/lb";
     }
 
@@ -134,11 +134,17 @@ public class LBController {
 
             model.addAttribute(
                     "lb",
-                    LBImageService.addImage(lb)
+                    lb
             );
 
             return "lbs/lb";
         }
+    }
+
+    private LBDTO toDtoWithImage(LB domain) {
+        LBDTO dto = LBDtoMapper.toDto(domain);
+        dto.setStringLBImage(LBImageService.getStringLBImage(domain));
+        return dto;
     }
 
     /**
