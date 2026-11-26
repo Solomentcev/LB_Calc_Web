@@ -62,7 +62,7 @@
                                     : '/alss/' + als.id + '/replaceLBC'}}">
                 Заменить LC на LBC
             </button>
-            <button th:if="${als.LBC != null}" type="submit"
+            <button th:if="${als.LBC != null and !#lists.isEmpty(als.lbList)}" type="submit"
                     class="btn btn-outline-warning btn-sm"
                     th:formaction="@{${pageContext == 'PROJECT'
                                     ? '/projects/' + projectId + '/alss/' + alsId + '/replaceLC'
