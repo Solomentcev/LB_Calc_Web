@@ -814,6 +814,18 @@ public class ProjectController
     }
 
     /**
+     * Преобразует LBC в LC и отдельный LB в выбранной ALS проекта.
+     */
+    @PostMapping("/{projectId}/alss/{alsId}/replaceLC")
+    public String replaceLBCWithLC(
+            @PathVariable Long projectId,
+            @PathVariable Long alsId
+    ) {
+        ALS als = projectService.replaceWithNewLCAtProject(projectId, alsId);
+        return "redirect:/projects/" + projectId + "/alss/" + als.getId();
+    }
+
+    /**
      * Добавление LB в ALS.
      */
     @PostMapping(
