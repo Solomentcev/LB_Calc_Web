@@ -6,12 +6,16 @@ import com.lb_calc_web.domain.attributes.DirectionDoorOpening;
 import com.lb_calc_web.domain.model.ControlConfiguration;
 import com.lb_calc_web.domain.model.FunctionalConfiguration;
 import com.lb_calc_web.domain.equipment.DisplayPurpose;
+import com.lb_calc_web.domain.equipment.Equipment;
+import com.lb_calc_web.domain.equipment.EquipmentCategory;
+import com.lb_calc_web.domain.equipment.EquipmentFunctionalType;
 import com.lb_calc_web.domain.equipment.PaymentPurpose;
 import com.lb_calc_web.domain.equipment.PrinterPurpose;
 import com.lb_calc_web.domain.model.LBC;
 import com.lb_calc_web.domain.attributes.TypeLb;
 import org.junit.jupiter.api.Test;
 
+import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.util.Set;
@@ -82,6 +86,44 @@ class LBCImageServiceTest {
         // не должно приводить к отрисовке условного квадрата.
         assertEquals(Colors.White.getColor().getRGB(),
                 image.getRGB(technicalCenterX, technicalCenterY));
+    }
+
+    @Test
+    void rendersPhysicalDisplayWithoutTechnicalCellBackground() {
+        Equipment display = new Equipment(
+                1L,
+                EquipmentFunctionalType.DISPLAY,
+                DisplayPurpose.INCH_10,
+                EquipmentCategory.DISPLAY,
+                "Дисплей",
+                "",
+                300,
+                180,
+                30
+        );
+        ControlConfiguration control = new ControlConfiguration(
+                new FunctionalConfiguration(
+                        DisplayPurpose.INCH_10,
+                        Set.of(),
+                        PaymentPurpose.NONE,
+                        PrinterPurpose.ABSENT
+                ),
+                java.util.Map.of(display, 1)
+        );
+        LBC lbc = new LBC(
+                1940, 500, 600, 100, 100,
+                Colors.Blue, Colors.White,
+                new TypeLb("TYPE1", 100, 5, 20),
+                10, DirectionDoorOpening.LEFT, 20, control
+        );
+
+        BufferedImage image = LBCImageService.createLBCImage(lbc);
+        int displayCenterX = ((lbc.getWidth() - display.getWidth()) / 2
+                + display.getWidth() / 2) / 10 * 3 + 1;
+        int displayCenterY = (lbc.getDisplayTop() + display.getHeight() / 2)
+                / 10 * 3 + 1;
+
+        assertEquals(Color.GRAY.getRGB(), image.getRGB(displayCenterX, displayCenterY));
     }
 
     @Test

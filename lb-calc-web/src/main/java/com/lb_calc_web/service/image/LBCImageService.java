@@ -108,8 +108,15 @@ public final class LBCImageService {
             drawShelf(graphics, lbc.getColorBody().getColor(), storageAreaX, shelfY, storageAreaWidth, shelf);
         }
 
-        // Техническая ячейка является расчётной областью и отдельно не рисуется.
-        // На изображении отображается только фактически установленное оборудование.
+        // Техническая ячейка и дисплей отображаются по физическим размерам.
+        int technicalWidth = Math.max(1, mm(lbc.getTechnicalCellWidth()));
+        int technicalX = x + (width - technicalWidth) / 2;
+
+        graphics.setColor(Color.DARK_GRAY);
+        graphics.fillRoundRect(technicalX, technicalTop, technicalWidth, technicalHeight, 1, 1);
+        graphics.setColor(Color.BLACK);
+        graphics.drawRoundRect(technicalX, technicalTop, technicalWidth, technicalHeight, 1, 1);
+
         Equipment display = lbc.getDisplay();
         if (display != null && display.getWidth() > 0 && display.getHeight() > 0) {
             int displayWidth = mm(display.getWidth());
