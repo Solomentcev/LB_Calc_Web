@@ -63,6 +63,30 @@ class ALSDomainTest {
     }
 
     @Test
+    void replaceLBCWithLC_shouldRejectALSWithoutOtherStorageModulesAtomically() {
+        LBC lbc = TestDataFactory.validLBC(201L);
+        ALS als = new ALS(
+                1940, 500, 50, 50,
+                lbc.getColorBody(), lbc.getColorDoor(),
+                List.of(lbc)
+        );
+
+        LC replacement = new LC(
+                lbc.getHeight(), lbc.getWidth(), lbc.getDepth(),
+                lbc.getUpperFrame(), lbc.getBottomFrame(),
+                lbc.getColorBody(), lbc.getColorDoor(),
+                lbc.getControlConfiguration()
+        );
+
+        assertThrows(
+                IllegalStateException.class,
+                () -> als.replaceLBCWithLC(replacement)
+        );
+        assertNotNull(als.getLBC());
+        assertEquals(3, als.getCountCells());
+    }
+
+    @Test
     void copy_shouldPreserveEqualityAndHashCodeContract() {
         ALS original = TestDataFactory.validALS(1L);
         ALS copy = original.copy();
