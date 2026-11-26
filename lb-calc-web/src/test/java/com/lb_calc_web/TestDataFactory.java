@@ -11,7 +11,6 @@ import com.lb_calc_web.domain.model.ALS;
 import com.lb_calc_web.domain.model.LBC;
 import com.lb_calc_web.domain.model.LB;
 import com.lb_calc_web.domain.model.LC;
-import com.lb_calc_web.domain.model.LCGeometrySettings;
 import com.lb_calc_web.dto.ALSDTO;
 import com.lb_calc_web.dto.LBCDTO;
 import com.lb_calc_web.dto.LBDTO;
@@ -135,7 +134,11 @@ public final class TestDataFactory {
                     throw new IllegalStateException("Оборудование в тестовой конфигурации не загружается");
                 },
                 null,
-                lcGeometrySettings()
+                lcMinimumWidth(),
+                lcDisplaySideClearance(),
+                lcWidthRoundingStep(),
+                lcDisplayCenterHeight(),
+                lcDisplayTopClearance()
         );
     }
 
@@ -315,7 +318,11 @@ return als;
                     throw new IllegalStateException("Оборудование в тестовой конфигурации не загружается");
                 },
                 null,
-                lcGeometrySettings()
+                lcMinimumWidth(),
+                lcDisplaySideClearance(),
+                lcWidthRoundingStep(),
+                lcDisplayCenterHeight(),
+                lcDisplayTopClearance()
         );
     }
 
@@ -341,9 +348,7 @@ return als;
         return project;
     }
     /** Загружает тестовые геометрические настройки из того же файла, что и приложение. */
-    public static LCGeometrySettings lcGeometrySettings() {
-        return createSizeBounds().getLcGeometrySettings();
-    }
+
 
     private static int intProperty(Properties properties, String key) {
         String value = properties.getProperty(key);
