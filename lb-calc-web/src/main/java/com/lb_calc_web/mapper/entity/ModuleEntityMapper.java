@@ -26,7 +26,7 @@ public final class ModuleEntityMapper {
             int widthRoundingStep, int displayCenterHeight, int displayTopClearance,
             int lbcTechnicalCellMinWidth, int lbcTechnicalCellMinHeight,
             int lbcEquipmentClearance, int lbcDisplayCenterHeight,
-            int lbcStorageCellMinWidth, int storageCellMinHeight {
+            int lbcStorageCellMinWidth, int storageCellMinHeight) {
         if (entity == null) {
             return null;
         }
