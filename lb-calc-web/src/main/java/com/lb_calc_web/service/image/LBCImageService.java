@@ -1,6 +1,6 @@
 package com.lb_calc_web.service.image;
 
-import com.lb_calc_web.domain.attributes.Colors;
+import com.lb_calc_web.domain.attributes.DirectionDoorOpening;
 import com.lb_calc_web.domain.equipment.Equipment;
 import com.lb_calc_web.domain.model.LBC;
 
@@ -44,7 +44,11 @@ public final class LBCImageService {
         return scaled;
     }
 
-    /** Рисует корпус, техническую ячейку и складские ячейки по координатам доменной модели. */
+    /**
+     * Рисует LBC с сохранением правил оформления LB: сервисная зона
+     * располагается со стороны, противоположной открыванию двери,
+     * а полки ограничиваются шириной области хранения.
+     */
     static void drawLBC(BufferedImage image, LBC lbc, int x) {
         Graphics2D graphics = (Graphics2D) image.getGraphics();
         graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
@@ -57,38 +61,61 @@ public final class LBCImageService {
         int upperFrame = mm(lbc.getUpperFrame());
         int bottomFrame = mm(lbc.getBottomFrame());
         int shelf = Math.max(1, mm(lbc.getTypeLb().getShelfThick()));
+        int serviceZoneWidth = mm(lbc.getTypeLb().getServiceZoneWidth());
+        boolean directionLeft = lbc.getDirectionDoorOpening() == DirectionDoorOpening.LEFT;
+
+        int serviceZoneX = directionLeft
+                ? x + width - serviceZoneWidth
+                : x;
+        int storageAreaX = directionLeft
+                ? x
+                : x + serviceZoneWidth;
+        int storageAreaWidth = Math.max(0, width - serviceZoneWidth);
+
+        // Дверь и корпус.
+        graphics.setColor(lbc.getColorDoor().getColor());
+        graphics.fillRoundRect(x, 0, width, height, 1, 1);
+
+        graphics.setColor(lbc.getColorBody().getColor());
+        graphics.fillRoundRect(x, 0, width, upperFrame, 1, 1);
+        graphics.fillRoundRect(x, height - bottomFrame, width, bottomFrame, 1, 1);
+
+        // Сервисная зона сохраняет визуальное оформление LB,
+        // но не участвует в расчёте размеров ячеек LBC.
+        graphics.fillRoundRect(
+                serviceZoneX,
+                upperFrame,
+                serviceZoneWidth,
+                Math.max(0, height - upperFrame - bottomFrame),
+                1,
+                1
+        );
+
+        // Полки складских ячеек ниже технической ячейки.
+        int cellHeight = mm(lbc.getCellHeight());
         int technicalTop = mm(lbc.getTechnicalCellTop());
-        int technicalHeight = Math.max(1, mm(lbc.getTechnicalCellHeight()));
+        int technicalHeight = mm(lbc.getTechnicalCellHeight());
+        int bottomBoundary = technicalTop + technicalHeight;
+
+        for (int i = 0; i < lbc.getStorageCellsBelow(); i++) {
+            int shelfY = bottomBoundary + i * (cellHeight + shelf);
+            drawShelf(graphics, storageAreaX, shelfY, storageAreaWidth, shelf);
+        }
+
+        // Полки складских ячеек выше технической ячейки.
+        for (int i = 0; i < lbc.getStorageCellsAbove(); i++) {
+            int shelfY = technicalTop - (i + 1) * shelf - i * cellHeight;
+            drawShelf(graphics, storageAreaX, shelfY, storageAreaWidth, shelf);
+        }
+
+        // Техническая ячейка и дисплей отображаются по физическим размерам.
         int technicalWidth = Math.max(1, mm(lbc.getTechnicalCellWidth()));
         int technicalX = x + (width - technicalWidth) / 2;
 
-        graphics.setColor(lbc.getColorBody().getColor());
-        graphics.fillRect(x, 0, width, height);
-        graphics.setColor(lbc.getColorDoor().getColor());
-        graphics.fillRect(x + 1, 1, Math.max(1, width - 2), Math.max(1, height - 2));
-
-        graphics.setColor(lbc.getColorBody().getColor());
-        graphics.fillRect(x, 0, width, upperFrame);
-        graphics.fillRect(x, height - bottomFrame, width, bottomFrame);
-
-        // Перегородки складских ячеек под технической ячейкой.
-        int bottomBoundary = technicalTop + technicalHeight;
-        for (int i = 0; i < lbc.getStorageCellsBelow(); i++) {
-            int y = bottomBoundary + i * (mm(lbc.getCellHeight()) + shelf);
-            graphics.fillRect(x, y, width, shelf);
-        }
-
-        // Перегородки складских ячеек над технической ячейкой.
-        for (int i = 0; i < lbc.getStorageCellsAbove(); i++) {
-            int y = technicalTop - (i + 1) * shelf
-                    - i * mm(lbc.getCellHeight());
-            graphics.fillRect(x, y, width, shelf);
-        }
-
         graphics.setColor(Color.DARK_GRAY);
-        graphics.fillRect(technicalX, technicalTop, technicalWidth, technicalHeight);
+        graphics.fillRoundRect(technicalX, technicalTop, technicalWidth, technicalHeight, 1, 1);
         graphics.setColor(Color.BLACK);
-        graphics.drawRect(technicalX, technicalTop, technicalWidth, technicalHeight);
+        graphics.drawRoundRect(technicalX, technicalTop, technicalWidth, technicalHeight, 1, 1);
 
         Equipment display = lbc.getDisplay();
         if (display != null && display.getWidth() > 0 && display.getHeight() > 0) {
@@ -97,14 +124,37 @@ public final class LBCImageService {
             int displayX = x + (width - displayWidth) / 2;
             int displayY = mm(lbc.getDisplayTop());
             graphics.setColor(Color.GRAY);
-            graphics.fillRect(displayX, displayY, displayWidth, displayHeight);
+            graphics.fillRoundRect(displayX, displayY, displayWidth, displayHeight, 1, 1);
             graphics.setColor(Color.BLACK);
-            graphics.drawRect(displayX, displayY, displayWidth, displayHeight);
+            graphics.drawRoundRect(displayX, displayY, displayWidth, displayHeight, 1, 1);
         }
 
+        // Контуры корпуса, рам и сервисной зоны.
         graphics.setColor(Color.BLACK);
-        graphics.drawRect(x, 0, width, height);
+        graphics.drawRoundRect(x, 0, width, height, 1, 1);
+        graphics.drawRoundRect(x, 0, width, upperFrame, 1, 1);
+        graphics.drawRoundRect(x, height - bottomFrame, width, bottomFrame, 1, 1);
+        graphics.drawRoundRect(
+                serviceZoneX,
+                upperFrame,
+                serviceZoneWidth,
+                Math.max(0, height - upperFrame - bottomFrame),
+                1,
+                1
+        );
+
         graphics.dispose();
+    }
+
+    /** Рисует полку с заливкой и чёрным контуром в пределах области хранения. */
+    private static void drawShelf(Graphics2D graphics, int x, int y, int width, int shelf) {
+        if (width <= 0 || shelf <= 0) {
+            return;
+        }
+        graphics.setColor(graphics.getColor());
+        graphics.fillRoundRect(x, y, width, shelf, 1, 1);
+        graphics.setColor(Color.BLACK);
+        graphics.drawRoundRect(x, y, width, shelf, 1, 1);
     }
 
     private static int mm(int value) {
@@ -113,7 +163,7 @@ public final class LBCImageService {
 
     /** Создаёт PNG-файл изображения LBC. */
     public static File getFileLBCImage(LBC lbc) {
-        BufferedImage image = (BufferedImage) createLBCImage(lbc);
+        BufferedImage image = createLBCImage(lbc);
         File file = new File("src/main/resources/static/lbcs/lbc" + lbc.getId() + ".png");
         try {
             file.createNewFile();
@@ -126,7 +176,7 @@ public final class LBCImageService {
 
     /** Возвращает PNG-изображение LBC в виде массива байтов. */
     public static byte[] getBytesArrayLBCImage(LBC lbc) {
-        BufferedImage image = (BufferedImage) createLBCImage(lbc);
+        BufferedImage image = createLBCImage(lbc);
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         try {
             ImageIO.write(image, "png", output);
