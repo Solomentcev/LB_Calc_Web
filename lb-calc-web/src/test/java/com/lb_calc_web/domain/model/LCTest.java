@@ -43,6 +43,7 @@ class LCTest {
         LC lc = createLC(1940, Map.of(display(376, 301), 1));
 
         assertEquals(450, lc.getWidth());
+        assertEquals(489, lc.getDisplayTop());
     }
 
     @Test
