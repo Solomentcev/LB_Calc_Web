@@ -59,7 +59,8 @@ class LBCImageServiceTest {
                         10,
                         DirectionDoorOpening.LEFT,
                         20,
-                        control
+                        control,
+                        200, 200, 20, 1300, 200, 85
                 );
 
         byte[] image = LBCImageService.getBytesArrayLBCImage(lbc);
