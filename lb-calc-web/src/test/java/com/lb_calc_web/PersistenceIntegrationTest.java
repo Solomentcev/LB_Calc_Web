@@ -756,7 +756,13 @@ class PersistenceIntegrationTest {
     private ALS restoreAlsEntity(ALSEntity entity) {
         return ALSEntityMapper.toDomain(entity, TestDataFactory.lcMinimumWidth(), TestDataFactory.lcDisplaySideClearance(),
                 TestDataFactory.lcWidthRoundingStep(), TestDataFactory.lcDisplayCenterHeight(),
-                TestDataFactory.lcDisplayTopClearance());
+                TestDataFactory.lcDisplayTopClearance(),
+                TestDataFactory.lbcTechnicalCellMinWidth(),
+                TestDataFactory.lbcTechnicalCellMinHeight(),
+                TestDataFactory.lbcEquipmentClearance(),
+                TestDataFactory.lbcDisplayCenterHeight(),
+                TestDataFactory.lbcStorageCellMinWidth(),
+                TestDataFactory.storageCellMinHeight());
     }
 
     private Project restoreProjectEntity(ProjectEntity entity) {
@@ -778,7 +784,13 @@ class PersistenceIntegrationTest {
                 null,
                 TestDataFactory.lcMinimumWidth(), TestDataFactory.lcDisplaySideClearance(),
                 TestDataFactory.lcWidthRoundingStep(), TestDataFactory.lcDisplayCenterHeight(),
-                TestDataFactory.lcDisplayTopClearance()
+                TestDataFactory.lcDisplayTopClearance(),
+                TestDataFactory.lbcTechnicalCellMinWidth(),
+                TestDataFactory.lbcTechnicalCellMinHeight(),
+                TestDataFactory.lbcEquipmentClearance(),
+                TestDataFactory.lbcDisplayCenterHeight(),
+                TestDataFactory.lbcStorageCellMinWidth(),
+                TestDataFactory.storageCellMinHeight()
         );
     }
 
