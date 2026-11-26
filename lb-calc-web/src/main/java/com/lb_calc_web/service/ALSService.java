@@ -130,6 +130,13 @@ public class ALSService {
         return alsRepository.findAll(specification, pageable).map(entity -> ALSEntityMapper.toDomain(entity, lcService.getGeometrySettings()));
     }
 
+    /** Восстанавливает доменную ALS из загруженной JPA-сущности. */
+    @Transactional(readOnly = true)
+    public ALS restoreDomain(ALSEntity entity) {
+        Objects.requireNonNull(entity, "ALSEntity не должна быть null");
+        return ALSEntityMapper.toDomain(entity, lcService.getGeometrySettings());
+    }
+
     /** Возвращает все сохранённые конфигурации ALS. */
     @Transactional(readOnly = true)
     public List<ALS> findAll() {

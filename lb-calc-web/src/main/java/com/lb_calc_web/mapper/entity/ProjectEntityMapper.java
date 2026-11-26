@@ -28,18 +28,6 @@ public final class ProjectEntityMapper {
     }
 
     /**
-     * Преобразует ProjectEntity в доменный Project.
-     *
-     * @param entity persistence-модель проекта
-     * @return доменный проект
-     */
-    public static Project toDomain(
-            ProjectEntity entity
-    ) {
-        return toDomain(entity, (als, alsEntity) -> { });
-    }
-
-    /**
      * Преобразует ProjectEntity в доменный Project и передаёт
      * соответствие каждой доменной ALS её persistence-сущности.
      *
@@ -49,12 +37,14 @@ public final class ProjectEntityMapper {
      */
     public static Project toDomain(
             ProjectEntity entity,
+            Function<ALSEntity, ALS> alsMapper,
             BiConsumer<ALS, ALSEntity> alsObserver
     ) {
         Objects.requireNonNull(
                 entity,
                 "ProjectEntity не должен быть null"
         );
+        Objects.requireNonNull(alsMapper, "alsMapper не должен быть null");
         Objects.requireNonNull(
                 alsObserver,
                 "alsObserver не должен быть null"
@@ -76,8 +66,10 @@ public final class ProjectEntityMapper {
         for (ProjectALSEntity entry :
                 entity.getAlsEntries()) {
 
-            ALS als =
-                    ALSEntityMapper.toDomain(entry.getAls());
+            ALS als = Objects.requireNonNull(
+                    alsMapper.apply(entry.getAls()),
+                    "ALS не должна быть null"
+            );
 
             alsObserver.accept(als, entry.getAls());
 

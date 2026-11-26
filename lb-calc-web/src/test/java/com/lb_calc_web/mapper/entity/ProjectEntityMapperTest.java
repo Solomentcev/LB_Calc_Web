@@ -71,6 +71,7 @@ class ProjectEntityMapperTest {
 
         Project restored = ProjectEntityMapper.toDomain(
                 entity,
+                alsEntity -> ALSEntityMapper.toDomain(alsEntity, TestDataFactory.lcGeometrySettings()),
                 (mappedDomain, mappedEntity) -> {
                     mappedAls.set(mappedDomain);
                     mappedAlsEntity.set(mappedEntity);
@@ -109,7 +110,11 @@ class ProjectEntityMapperTest {
         );
         entity.setDescription("Устаревшее описание");
 
-        Project restored = ProjectEntityMapper.toDomain(entity);
+        Project restored = ProjectEntityMapper.toDomain(
+                entity,
+                alsEntity -> ALSEntityMapper.toDomain(alsEntity, TestDataFactory.lcGeometrySettings()),
+                (mappedDomain, mappedEntity) -> { }
+        );
 
         assertEquals(domain.getDescription(), restored.getDescription());
     }

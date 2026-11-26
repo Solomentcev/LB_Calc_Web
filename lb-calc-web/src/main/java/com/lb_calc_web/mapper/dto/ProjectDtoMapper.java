@@ -233,22 +233,6 @@ public final class ProjectDtoMapper {
     }
 
     /**
-     * Преобразует DTO в доменную модель.
-     *
-     * <p>Количество ALS рассчитывается исключительно
-     * по списку {@code alsList}. Поле {@code quantityALS}
-     * DTO является только представлением для UI.</p>
-     *
-     * @param dto DTO проекта
-     * @return доменный проект или {@code null}
-     */
-    public static Project toDomain(
-            ProjectDTO dto
-    ) {
-        return toDomain(dto, ALSDtoMapper::toDomain);
-    }
-
-    /**
      * Преобразует DTO проекта в доменную модель с заданным преобразованием ALS.
      *
      * <p>Application-слой может передать преобразователь, который разрешает
@@ -334,14 +318,15 @@ public final class ProjectDtoMapper {
      * @return список доменных проектов
      */
     public static List<Project> toDomainList(
-            List<ProjectDTO> dtos
+            List<ProjectDTO> dtos,
+            Function<ALSDTO, ALS> alsMapper
     ) {
         if (dtos == null) {
             return List.of();
         }
-
+        Objects.requireNonNull(alsMapper, "alsMapper не должен быть null");
         return dtos.stream()
-                .map(ProjectDtoMapper::toDomain)
+                .map(dto -> toDomain(dto, alsMapper))
                 .toList();
     }
 

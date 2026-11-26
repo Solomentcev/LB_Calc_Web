@@ -121,7 +121,7 @@ public class ProjectService {
                 .orElse((root, query, builder) -> builder.conjunction());
 
         return projectRepository.findAll(specification, pageable)
-                .map(entity -> ProjectEntityMapper.toDomain(entity, (als, alsEntity) -> { }));
+                .map(entity -> ProjectEntityMapper.toDomain(entity, alsService::restoreDomain, (als, alsEntity) -> { }));
     }
 
     private void addTextFilter(
@@ -167,6 +167,7 @@ return projectRepository.findAllWithUsers()
                 .stream()
                 .map(entity -> ProjectEntityMapper.toDomain(
                         entity,
+                        alsService::restoreDomain,
                         (als, alsEntity) -> { }
                 ))
                 .toList();
@@ -182,9 +183,10 @@ return projectRepository.findAllWithUsers()
         }
 
         return ProjectEntityMapper.toDomain(
-                entity,
-                (als, alsEntity) -> { }
-        );
+                        entity,
+                        alsService::restoreDomain,
+                        (als, alsEntity) -> { }
+                );
     }
 
     /**
@@ -272,6 +274,7 @@ return projectRepository.findAllWithUsers()
         ProjectEntity saved = persistProjectEntity(domain, existing);
         return ProjectEntityMapper.toDomain(
                 saved,
+                alsService::restoreDomain,
                 (als, alsEntity) -> { }
         );
     }
@@ -654,9 +657,10 @@ return projectRepository.findAllWithUsers()
 
         ProjectEntity entity = loadExistingProject(projectId);
         return ProjectEntityMapper.toDomain(
-                entity,
-                (als, alsEntity) -> { }
-        );
+                        entity,
+                        alsService::restoreDomain,
+                        (als, alsEntity) -> { }
+                );
     }
 
     /**
@@ -700,6 +704,7 @@ return projectRepository.findAllWithUsers()
         ProjectEntity saved = persistProjectEntity(domain, existing);
         return ProjectEntityMapper.toDomain(
                 saved,
+                alsService::restoreDomain,
                 (als, alsEntity) -> { }
         );
     }
