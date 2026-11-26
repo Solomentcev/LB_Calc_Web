@@ -5,6 +5,9 @@ import com.lb_calc_web.domain.attributes.DirectionDoorOpening;
 import com.lb_calc_web.domain.attributes.TypeLb;
 import com.lb_calc_web.domain.equipment.AccessPurpose;
 import com.lb_calc_web.domain.equipment.DisplayPurpose;
+import com.lb_calc_web.domain.equipment.Equipment;
+import com.lb_calc_web.domain.equipment.EquipmentCategory;
+import com.lb_calc_web.domain.equipment.EquipmentFunctionalType;
 import com.lb_calc_web.domain.equipment.PaymentPurpose;
 import com.lb_calc_web.domain.equipment.PrinterPurpose;
 import org.junit.jupiter.api.Test;
@@ -17,6 +20,37 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class LBCDomainTest {
+
+    @Test
+    void technicalCellWithoutPhysicalDisplayUsesMinimumDimensions() {
+        FunctionalConfiguration functional = new FunctionalConfiguration(
+                DisplayPurpose.INCH_10, Set.of(), PaymentPurpose.NONE, PrinterPurpose.ABSENT);
+        LBC module = new LBC(1940, 500, 600, 100, 100,
+                Colors.Blue, Colors.White, new TypeLb("TYPE1", 100, 5, 40),
+                10, DirectionDoorOpening.LEFT, 20,
+                new ControlConfiguration(functional, Map.of()));
+
+        assertEquals(200, module.getTechnicalCellWidth());
+        assertEquals(200, module.getTechnicalCellHeight());
+        assertEquals(-1, module.getDisplayTop());
+    }
+
+    @Test
+    void technicalCellUsesPhysicalDisplayDimensionsAndClearance() {
+        Equipment display = new Equipment(1L, EquipmentFunctionalType.DISPLAY,
+                DisplayPurpose.INCH_10, EquipmentCategory.DISPLAY,
+                "Дисплей", "", 300, 180, 30);
+        FunctionalConfiguration functional = new FunctionalConfiguration(
+                DisplayPurpose.INCH_10, Set.of(), PaymentPurpose.NONE, PrinterPurpose.ABSENT);
+        LBC module = new LBC(1940, 500, 600, 100, 100,
+                Colors.Blue, Colors.White, new TypeLb("TYPE1", 100, 5, 40),
+                10, DirectionDoorOpening.LEFT, 20,
+                new ControlConfiguration(functional, Map.of(display, 1)));
+
+        assertEquals(340, module.getTechnicalCellWidth());
+        assertEquals(220, module.getTechnicalCellHeight());
+        assertEquals(module.getTechnicalCellTop() + 20, module.getDisplayTop());
+    }
 
     @Test
     void lbcActsAsControlAndStorageModule() {
