@@ -1,6 +1,9 @@
 package com.lb_calc_web.mapper.dto;
 
 import com.lb_calc_web.TestDataFactory;
+import com.lb_calc_web.domain.attributes.TypeLb;
+import com.lb_calc_web.domain.equipment.Equipment;
+import java.util.function.Function;
 import com.lb_calc_web.domain.model.LBC;
 import com.lb_calc_web.dto.LBCDTO;
 import org.junit.jupiter.api.Test;
@@ -9,10 +12,17 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class LBCDtoMapperTest {
 
+    private static final class TestDataFactoryType {
+        private static TypeLb type(LBCDTO dto) {
+            return new TypeLb(dto.getType(), dto.getDeltaWidth(), dto.getShelfThick(), dto.getServiceZoneWidth());
+        }
+    }
+
     @Test
     void toDomain_shouldMapFunctionalAndStructuralConfiguration() {
         LBCDTO dto = TestDataFactory.validLBCDTO(1L);
-        LBC domain = LBCDtoMapper.toDomain(dto);
+        LBC domain = LBCDtoMapper.toDomain(dto, TestDataFactoryType.type(dto), id -> { throw new IllegalStateException(); }, null,
+                200, 200, 20, 1300, 200, 85);
 
         assertNotNull(domain);
         assertEquals(dto.getHeight(), domain.getHeight());
@@ -29,7 +39,8 @@ class LBCDtoMapperTest {
     @Test
     void roundTrip_shouldPreserveFunctionalConfiguration() {
         LBCDTO source = TestDataFactory.validLBCDTO(1L);
-        LBC domain = LBCDtoMapper.toDomain(source);
+        LBC domain = LBCDtoMapper.toDomain(source, TestDataFactoryType.type(source), id -> { throw new IllegalStateException(); }, null,
+                200, 200, 20, 1300, 200, 85);
         LBCDTO result = LBCDtoMapper.toDto(domain);
 
         assertEquals(source.getType(), result.getType());

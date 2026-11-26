@@ -28,7 +28,8 @@ class LBCDomainTest {
         LBC module = new LBC(1940, 500, 600, 100, 100,
                 Colors.Blue, Colors.White, new TypeLb("TYPE1", 100, 5, 40),
                 10, DirectionDoorOpening.LEFT, 20,
-                new ControlConfiguration(functional, Map.of()));
+                new ControlConfiguration(functional, Map.of()),
+                200, 200, 20, 1300, 200, 85);
 
         assertEquals(200, module.getTechnicalCellWidth());
         assertEquals(200, module.getTechnicalCellHeight());
@@ -45,7 +46,8 @@ class LBCDomainTest {
         LBC module = new LBC(1940, 500, 600, 100, 100,
                 Colors.Blue, Colors.White, new TypeLb("TYPE1", 100, 5, 40),
                 10, DirectionDoorOpening.LEFT, 20,
-                new ControlConfiguration(functional, Map.of(display, 1)));
+                new ControlConfiguration(functional, Map.of(display, 1)),
+                200, 200, 20, 1300, 200, 85);
 
         assertEquals(340, module.getTechnicalCellWidth());
         assertEquals(220, module.getTechnicalCellHeight());
@@ -62,7 +64,8 @@ class LBCDomainTest {
         LBC module = new LBC(1940, 200, 600, 100, 100,
                 Colors.Blue, Colors.White, new TypeLb("TYPE3", 160, 5, 40),
                 10, DirectionDoorOpening.LEFT, 20,
-                new ControlConfiguration(functional, Map.of(display, 1)));
+                new ControlConfiguration(functional, Map.of(display, 1)),
+                200, 200, 20, 1300, 200, 85);
 
         assertEquals(340, module.getTechnicalCellWidth());
         assertEquals(500, module.getWidth());
@@ -84,7 +87,8 @@ class LBCDomainTest {
             LBC module = new LBC(1940, 200, 600, 100, 100,
                     Colors.Blue, Colors.White, new TypeLb(type, deltaWidth, 5, 40),
                     10, DirectionDoorOpening.LEFT, 20,
-                    new ControlConfiguration(functional, Map.of()));
+                    new ControlConfiguration(functional, Map.of()),
+                200, 200, 20, 1300, 200, 85);
 
             assertEquals(200, module.getCellWidth(), type);
             assertEquals(200 + deltaWidth, module.getWidth(), type);
@@ -113,7 +117,8 @@ class LBCDomainTest {
                 10,
                 DirectionDoorOpening.LEFT,
                 20,
-                control
+                control,
+                200, 200, 20, 1300, 200, 85
         );
 
         ALS als = new ALS(

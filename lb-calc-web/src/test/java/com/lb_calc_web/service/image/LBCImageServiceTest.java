@@ -114,7 +114,8 @@ class LBCImageServiceTest {
                 1940, 500, 600, 100, 100,
                 Colors.Blue, Colors.White,
                 new TypeLb("TYPE1", 100, 5, 20),
-                10, DirectionDoorOpening.LEFT, 20, control
+                10, DirectionDoorOpening.LEFT, 20, control,
+                200, 200, 20, 1300, 200, 85
         );
 
         BufferedImage image = LBCImageService.createLBCImage(lbc);
@@ -160,7 +161,8 @@ class LBCImageServiceTest {
                 1940, 500, 600, 100, 100,
                 Colors.Blue, Colors.White,
                 new TypeLb("TYPE1", 100, 5, 20),
-                10, direction, 20, control
+                10, direction, 20, control,
+                200, 200, 20, 1300, 200, 85
         );
     }
 
