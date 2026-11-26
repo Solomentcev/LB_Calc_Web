@@ -71,7 +71,9 @@ class ProjectEntityMapperTest {
 
         Project restored = ProjectEntityMapper.toDomain(
                 entity,
-                entityForAls -> ALSEntityMapper.toDomain(entityForAls, TestDataFactory.lcGeometrySettings()),
+                entityForAls -> ALSEntityMapper.toDomain(entityForAls, TestDataFactory.lcMinimumWidth(), TestDataFactory.lcDisplaySideClearance(),
+                TestDataFactory.lcWidthRoundingStep(), TestDataFactory.lcDisplayCenterHeight(),
+                TestDataFactory.lcDisplayTopClearance()),
                 (mappedDomain, mappedEntity) -> {
                     mappedAls.set(mappedDomain);
                     mappedAlsEntity.set(mappedEntity);
@@ -112,7 +114,9 @@ class ProjectEntityMapperTest {
 
         Project restored = ProjectEntityMapper.toDomain(
                 entity,
-                alsEntity -> ALSEntityMapper.toDomain(alsEntity, TestDataFactory.lcGeometrySettings()),
+                alsEntity -> ALSEntityMapper.toDomain(alsEntity, TestDataFactory.lcMinimumWidth(), TestDataFactory.lcDisplaySideClearance(),
+                TestDataFactory.lcWidthRoundingStep(), TestDataFactory.lcDisplayCenterHeight(),
+                TestDataFactory.lcDisplayTopClearance()),
                 (mappedDomain, mappedEntity) -> { }
         );
 
