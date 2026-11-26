@@ -605,12 +605,9 @@ public class ProjectRestController {
             @PathVariable Long id
     ) {
 
-            ProjectDTO project =
-                    ProjectDtoMapper.toDto(projectService.findById(id));
-
             InputStreamResource file =
                     new InputStreamResource(
-                            projectExcelExportService.exportToExcel(project)
+                            projectExcelExportService.exportToExcel(projectService.findById(id))
                     );
 
             return ResponseEntity.ok()
