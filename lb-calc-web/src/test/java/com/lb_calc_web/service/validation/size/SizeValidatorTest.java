@@ -353,7 +353,9 @@ class SizeValidatorTest {
                 lc.getColorBody(),
                 lc.getColorDoor(),
                 lc.getControlConfiguration().copy(),
-                TestDataFactory.lcGeometrySettings()
+                TestDataFactory.lcMinimumWidth(), TestDataFactory.lcDisplaySideClearance(),
+                TestDataFactory.lcWidthRoundingStep(), TestDataFactory.lcDisplayCenterHeight(),
+                TestDataFactory.lcDisplayTopClearance()
         );
     }
 
@@ -437,7 +439,9 @@ class SizeValidatorTest {
                 ControlConfiguration configuration
         ) {
             super(height, width, depth, upperFrame, bottomFrame,
-                    colorBody, colorDoor, configuration, TestDataFactory.lcGeometrySettings());
+                    colorBody, colorDoor, configuration, TestDataFactory.lcMinimumWidth(), TestDataFactory.lcDisplaySideClearance(),
+                TestDataFactory.lcWidthRoundingStep(), TestDataFactory.lcDisplayCenterHeight(),
+                TestDataFactory.lcDisplayTopClearance());
         }
 
         private void setWidthForTest(int width) {
