@@ -70,6 +70,21 @@ class LBCImageServiceTest {
         assertTrue(bufferedImage.getHeight() > 0);
     }
     @Test
+    void doesNotRenderTechnicalCellWhenPhysicalEquipmentIsAbsent() {
+        LBC lbc = createLbc(DirectionDoorOpening.LEFT);
+        BufferedImage image = LBCImageService.createLBCImage(lbc);
+
+        int technicalCenterX = lbc.getWidth() / 2 / 10 * 3 + 1;
+        int technicalCenterY = (lbc.getTechnicalCellTop()
+                + lbc.getTechnicalCellHeight() / 2) / 10 * 3 + 1;
+
+        // Функциональное назначение дисплея без физического оборудования
+        // не должно приводить к отрисовке условного квадрата.
+        assertEquals(Colors.White.getColor().getRGB(),
+                image.getRGB(technicalCenterX, technicalCenterY));
+    }
+
+    @Test
     void rendersServiceZoneOnTheSideOppositeToDoorOpening() {
         LBC leftOpening = createLbc(DirectionDoorOpening.LEFT);
         LBC rightOpening = createLbc(DirectionDoorOpening.RIGHT);
