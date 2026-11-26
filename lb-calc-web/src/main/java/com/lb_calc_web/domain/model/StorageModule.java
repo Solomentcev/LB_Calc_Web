@@ -24,7 +24,7 @@ import java.util.Objects;
  */
 public abstract class StorageModule extends Module {
 
-    private static final int MAX_SUPPORTED_CELLS = 20;
+    private static final int MAX_TECHNICAL_CELLS = 1_000;
 
     /**
      * Конструктивный тип модуля хранения.
@@ -265,10 +265,10 @@ public abstract class StorageModule extends Module {
             );
         }
 
-        if (countCells > MAX_SUPPORTED_CELLS) {
+        if (countCells > MAX_TECHNICAL_CELLS) {
             throw new IllegalArgumentException(
                     "Количество ячеек не должно превышать "
-                            + MAX_SUPPORTED_CELLS
+                            + MAX_TECHNICAL_CELLS
             );
         }
 
