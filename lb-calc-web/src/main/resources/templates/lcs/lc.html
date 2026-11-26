@@ -110,8 +110,9 @@
             </div>
         </section>
 
-        <div th:if="${pageContext == 'CATALOG'}"
-             th:replace="~{fragments/module-form :: functionalConfiguration}"></div>
+        <th:block th:if="${pageContext == 'CATALOG'}">
+            <div th:replace="~{fragments/module-form :: functionalConfiguration}"></div>
+        </th:block>
         <div th:if="${pageContext != 'CATALOG'}">
             <input type="hidden" th:field="*{functionalConfiguration.display}">
             <input type="hidden" th:field="*{functionalConfiguration.payment}">
