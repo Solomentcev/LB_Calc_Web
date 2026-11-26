@@ -64,7 +64,7 @@ class ALSDtoMapperTest {
                         .map(ALSModuleOrderDTO::getIndex)
                         .toList()
         );
-        assertEquals(source, ALSDtoMapper.toDomain(dto));
+        assertEquals(source, TestDataFactory.restoreALS(dto));
     }
 
     @Test
@@ -94,7 +94,7 @@ class ALSDtoMapperTest {
                         .map(ALSModuleOrderDTO::getType)
                         .toList()
         );
-        assertEquals(source, ALSDtoMapper.toDomain(dto));
+        assertEquals(source, TestDataFactory.restoreALS(dto));
     }
 
     @Test
@@ -102,7 +102,7 @@ class ALSDtoMapperTest {
         ALSDTO dto = TestDataFactory.validALSDTO(2L);
         dto.setModuleOrder(null);
 
-        ALS restored = ALSDtoMapper.toDomain(dto);
+        ALS restored = TestDataFactory.restoreALS(dto);
 
         assertEquals(
                 List.of("LB", "LC", "LB"),
@@ -123,7 +123,7 @@ class ALSDtoMapperTest {
 
         assertThrows(
                 IllegalStateException.class,
-                () -> ALSDtoMapper.toDomain(dto)
+                () -> TestDataFactory.restoreALS(dto)
         );
     }
 
@@ -137,7 +137,7 @@ class ALSDtoMapperTest {
 
         assertThrows(
                 IllegalStateException.class,
-                () -> ALSDtoMapper.toDomain(dto)
+                () -> TestDataFactory.restoreALS(dto)
         );
     }
 }

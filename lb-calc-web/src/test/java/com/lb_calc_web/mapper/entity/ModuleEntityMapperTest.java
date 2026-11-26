@@ -34,7 +34,7 @@ class ModuleEntityMapperTest {
         var domain = TestDataFactory.validLC(null);
         ModuleEntity entity = toEntity(domain);
         assertInstanceOf(LCEntity.class, entity);
-        assertEquals(domain, ModuleEntityMapper.toDomain(entity));
+        assertEquals(domain, ModuleEntityMapper.toDomain(entity, TestDataFactory.lcGeometrySettings()));
     }
 
     @Test
@@ -42,7 +42,7 @@ class ModuleEntityMapperTest {
         var domain = TestDataFactory.validLBC(null);
         ModuleEntity entity = toEntity(domain);
         assertInstanceOf(LBCEntity.class, entity);
-        assertEquals(domain, ModuleEntityMapper.toDomain(entity));
+        assertEquals(domain, ModuleEntityMapper.toDomain(entity, TestDataFactory.lcGeometrySettings()));
     }
 
     @Test
@@ -52,7 +52,7 @@ class ModuleEntityMapperTest {
         entity.setName("Устаревшее наименование");
         entity.setDescription("Устаревшее описание");
 
-        var restored = ModuleEntityMapper.toDomain(entity);
+        var restored = ModuleEntityMapper.toDomain(entity, TestDataFactory.lcGeometrySettings());
 
         assertEquals("Устаревшее наименование", restored.getName());
         assertEquals("Устаревшее описание", restored.getDescription());
@@ -68,7 +68,7 @@ class ModuleEntityMapperTest {
         entity.setWidthCell(entity.getWidthCell() + 1);
         entity.setDepthCell(entity.getDepthCell() + 1);
 
-        var restored = ModuleEntityMapper.toDomain(entity);
+        var restored = ModuleEntityMapper.toDomain(entity, TestDataFactory.lcGeometrySettings());
 
         assertEquals("Устаревшее наименование", restored.getName());
         assertEquals("Устаревшее описание", restored.getDescription());
@@ -87,7 +87,7 @@ class ModuleEntityMapperTest {
         entity.setWidthCell(entity.getWidthCell() + 1);
         entity.setDepthCell(entity.getDepthCell() + 1);
 
-        var restored = ModuleEntityMapper.toDomain(entity);
+        var restored = ModuleEntityMapper.toDomain(entity, TestDataFactory.lcGeometrySettings());
 
         assertEquals("Устаревшее наименование", restored.getName());
         assertEquals("Устаревшее описание", restored.getDescription());
@@ -133,7 +133,7 @@ class ModuleEntityMapperTest {
         };
         for (var module : modules) {
             ModuleEntity entity = toEntity(module);
-            var restored = ModuleEntityMapper.toDomain(entity);
+            var restored = ModuleEntityMapper.toDomain(entity, TestDataFactory.lcGeometrySettings());
             assertEquals(module.getClass(), restored.getClass());
             assertEquals(module, restored);
         }

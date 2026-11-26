@@ -74,7 +74,7 @@ class ALSEntityMapperTest {
                 );
         entity.setFunctionalConfiguration(independentAlsConfiguration);
 
-        ALS restored = ALSEntityMapper.toDomain(entity);
+        ALS restored = ALSEntityMapper.toDomain(entity, TestDataFactory.lcGeometrySettings());
 
         assertEquals(independentAlsConfiguration, restored.getFunctionalConfiguration());
         assertEquals(
@@ -124,7 +124,7 @@ class ALSEntityMapperTest {
         });
         entity.setWidth(entity.getWidth() + 1);
 
-        ALS restored = ALSEntityMapper.toDomain(entity);
+        ALS restored = ALSEntityMapper.toDomain(entity, TestDataFactory.lcGeometrySettings());
 
         assertEquals("Устаревшее название", restored.getName());
         assertEquals("Устаревшее описание", restored.getDescription());
