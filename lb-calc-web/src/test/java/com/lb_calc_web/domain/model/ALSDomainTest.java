@@ -68,7 +68,10 @@ class ALSDomainTest {
         assertEquals(lbc.getTypeLb(), convertedStorage.getTypeLb());
         assertEquals(lbc.getCountCells(), convertedStorage.getCountCells());
         assertEquals(lbc.getDoorThickness(), convertedStorage.getDoorThickness());
-        assertEquals(lbc.getDirectionDoorOpening(), convertedStorage.getDirectionDoorOpening());
+        assertEquals(
+                com.lb_calc_web.domain.attributes.DirectionDoorOpening.RIGHT,
+                convertedStorage.getDirectionDoorOpening()
+        );
     }
 
     @Test
