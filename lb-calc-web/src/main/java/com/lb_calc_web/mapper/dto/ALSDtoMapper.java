@@ -122,9 +122,7 @@ public final class ALSDtoMapper {
             Function<Long, com.lb_calc_web.domain.equipment.Equipment> equipmentLookup,
             com.lb_calc_web.domain.model.ControlConfiguration fallbackConfiguration,
             int minimumWidth, int displaySideClearance, int widthRoundingStep,
-            int displayCenterHeight, int displayTopClearance,
-            int lbcTechnicalCellMinWidth, int lbcTechnicalCellMinHeight,
-            int lbcEquipmentClearance, int lbcDisplayCenterHeight, int storageCellMinHeight
+            int displayCenterHeight, int displayTopClearance
     ) {
         return toDomain(dto, lbTypeResolver, lbcTypeResolver, equipmentLookup,
                 fallbackConfiguration, minimumWidth, displaySideClearance, widthRoundingStep,
@@ -210,7 +208,9 @@ public final class ALSDtoMapper {
             Function<Long, com.lb_calc_web.domain.equipment.Equipment> equipmentLookup,
             com.lb_calc_web.domain.model.ControlConfiguration fallbackConfiguration,
             int minimumWidth, int displaySideClearance, int widthRoundingStep,
-            int displayCenterHeight, int displayTopClearance
+            int displayCenterHeight, int displayTopClearance,
+            int lbcTechnicalCellMinWidth, int lbcTechnicalCellMinHeight,
+            int lbcEquipmentClearance, int lbcDisplayCenterHeight, int storageCellMinHeight
     ) {
         List<LBDTO> lbDtos = dto.getLbList() == null ? List.of() : dto.getLbList();
         List<Module> modules = new ArrayList<>();
