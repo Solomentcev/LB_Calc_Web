@@ -47,7 +47,7 @@ public class LBC extends StorageModule implements ControlModule {
                 typeLb, countCells, directionDoorOpening, doorThickness,
                 controlConfiguration, DEFAULT_TECHNICAL_CELL_MIN_WIDTH,
                 DEFAULT_TECHNICAL_CELL_MIN_HEIGHT, DEFAULT_EQUIPMENT_CLEARANCE,
-                DEFAULT_DISPLAY_CENTER_HEIGHT, 85);
+                DEFAULT_DISPLAY_CENTER_HEIGHT, 200, 85);
     }
 
     public LBC(int height, int width, int depth, int upperFrame, int bottomFrame,
