@@ -602,6 +602,50 @@ public class ALS {
     }
 
     /**
+     * Преобразует LBC в отдельные LC и LB, сохраняя физическую сторону хранения.
+     *
+     * <p>Операция выполняется на копии агрегата: исходная ALS изменяется
+     * только после проверки структуры и успешного пересчёта.</p>
+     *
+     * @param controlReplacement новый управляющий модуль LC
+     * @param storageReplacement новый модуль хранения LB
+     */
+    public void replaceLBCWithLC(LC controlReplacement, LB storageReplacement) {
+        Objects.requireNonNull(controlReplacement, "Новый LC не должен быть null");
+        Objects.requireNonNull(storageReplacement, "Новый LB не должен быть null");
+
+        mutate(candidate -> {
+            int controlIndex = candidate.getControlModuleIndex();
+            if (!(candidate.modules.get(controlIndex) instanceof LBC)) {
+                throw new IllegalStateException("В ALS отсутствует LBC для преобразования");
+            }
+
+            PositionControlModule position = candidate.getPositionControlModule();
+            int insertionIndex;
+            switch (position) {
+                case LEFT -> insertionIndex = controlIndex + 1;
+                case RIGHT -> insertionIndex = controlIndex;
+                case CENTER -> {
+                    int leftCount = controlIndex;
+                    int rightCount = candidate.modules.size() - controlIndex - 1;
+                    insertionIndex = leftCount < rightCount
+                            ? controlIndex
+                            : controlIndex + 1;
+                }
+                default -> throw new IllegalStateException(
+                        "Неизвестное положение модуля управления");
+            }
+
+            LC controlCopy = controlReplacement.copy();
+            LB storageCopy = storageReplacement.copy();
+            candidate.modules.set(controlIndex, controlCopy);
+            candidate.modules.add(insertionIndex, storageCopy);
+            candidate.functionalConfiguration =
+                    controlCopy.getControlConfiguration().getFunctionalConfiguration();
+        });
+    }
+
+    /**
      * Возвращает единственный модуль управления.
      *
      * @return модуль управления
