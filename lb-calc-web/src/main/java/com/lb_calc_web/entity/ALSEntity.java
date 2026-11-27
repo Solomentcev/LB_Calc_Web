@@ -340,46 +340,55 @@ public class ALSEntity {
                 "Список модулей не должен быть null"
         );
 
+        /*
+         * Сначала переносим существующие связи на временные уникальные позиции.
+         * Это исключает конфликт ограничения (als_id, module_order) при перестановке.
+         */
+        int temporaryOrder = modules.size() + desiredModules.size() + 1;
+        for (int index = 0; index < modules.size(); index++) {
+            modules.get(index).setModuleOrder(temporaryOrder + index);
+        }
+
         List<ALSModuleEntity> unmatched = new ArrayList<>(modules);
         List<ALSModuleEntity> synchronizedModules = new ArrayList<>();
 
-        for (int order = 0; order < desiredModules.size(); order++) {
-            int expectedOrder = order;
+        for (ModuleEntity desiredModule : desiredModules) {
             ModuleEntity module = Objects.requireNonNull(
-                    desiredModules.get(order),
+                    desiredModule,
                     "Модуль не должен быть null"
             );
 
-            ALSModuleEntity existing = unmatched.stream()
-                    .filter(association -> {
-                        ModuleEntity existingModule = association.getModule();
-                        return association.getModuleOrder() == expectedOrder
-                                && (existingModule == module
-                                || (existingModule.getId() != null
-                                && existingModule.getId().equals(module.getId())));
+            ALSModuleEntity association = unmatched.stream()
+                    .filter(candidate -> {
+                        ModuleEntity current = candidate.getModule();
+                        return current == module
+                                || (current.getId() != null
+                                && current.getId().equals(module.getId()));
                     })
                     .findFirst()
                     .orElse(null);
 
-            if (existing != null) {
-                unmatched.remove(existing);
-                synchronizedModules.add(existing);
-                continue;
+            if (association != null) {
+                unmatched.remove(association);
+                association.setModule(module);
+            } else {
+                association = new ALSModuleEntity();
+                association.setAls(this);
+                association.setModule(module);
+                modules.add(association);
             }
-
-            ALSModuleEntity association = new ALSModuleEntity();
-            association.setAls(this);
-            association.setModule(module);
-            association.setModuleOrder(order);
             synchronizedModules.add(association);
         }
 
+        // Удаляем только связи с модулями, которых больше нет в ALS.
         modules.removeAll(unmatched);
-        for (ALSModuleEntity association : synchronizedModules) {
-            if (!modules.contains(association)) {
-                modules.add(association);
-            }
+
+        // Все оставшиеся связи уже находятся на временных позициях.
+        // Теперь можно безопасно назначить итоговый физический порядок.
+        for (int order = 0; order < synchronizedModules.size(); order++) {
+            synchronizedModules.get(order).setModuleOrder(order);
         }
+
         modules.sort(Comparator.comparingInt(ALSModuleEntity::getModuleOrder));
     }
 
