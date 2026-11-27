@@ -72,7 +72,10 @@ class ControlModuleEquipmentEntityMapperTest {
         LC restored = LCEntityMapper.toDomain(entity, TestDataFactory.createSizeBounds());
 
         assertEquals(source, restored);
-        assertEquals(FUNCTIONAL, entity.getFunctionalConfiguration());
+        assertEquals(FUNCTIONAL.getDisplay(), entity.getDisplayPurpose());
+        assertEquals(FUNCTIONAL.getAccess(), entity.getAccessPurposes());
+        assertEquals(FUNCTIONAL.getPayment(), entity.getPaymentPurpose());
+        assertEquals(FUNCTIONAL.getPrinter(), entity.getPrinterPurpose());
         assertEquals(3, entity.getEquipment().size());
         assertEquals(2, entity.getEquipment().stream()
                 .filter(item -> item.getEquipment().getId().equals(2L))
@@ -102,7 +105,10 @@ class ControlModuleEquipmentEntityMapperTest {
         );
 
         assertEquals(source, restored);
-        assertEquals(FUNCTIONAL, entity.getFunctionalConfiguration());
+        assertEquals(FUNCTIONAL.getDisplay(), entity.getDisplayPurpose());
+        assertEquals(FUNCTIONAL.getAccess(), entity.getAccessPurposes());
+        assertEquals(FUNCTIONAL.getPayment(), entity.getPaymentPurpose());
+        assertEquals(FUNCTIONAL.getPrinter(), entity.getPrinterPurpose());
         assertEquals(2, entity.getEquipment().iterator().next().getQuantity());
     }
 
