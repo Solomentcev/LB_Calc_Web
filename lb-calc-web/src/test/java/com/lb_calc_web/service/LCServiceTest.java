@@ -100,7 +100,8 @@ class LCServiceTest {
         id.set(equipmentEntity, 71L);
         when(equipmentRepository.findById(71L)).thenReturn(Optional.of(equipmentEntity));
         LCDTO dto = TestDataFactory.validLCDTO(null);
-        dto.setEquipment(Map.of(71L, 2));
+        dto.setSelectedEquipment(List.of(TestDataFactory.selectedEquipment(71L, 2)));
+        dto.setEquipmentProvided(true);
 
         LC restored = service.restoreDomain(dto);
 
@@ -119,7 +120,6 @@ class LCServiceTest {
         );
         LCDTO dto = TestDataFactory.validLCDTO(17L);
         dto.setFunctionalConfiguration(null);
-        dto.setEquipment(null);
 
         LC restored = service.restoreDomain(dto, fallback);
 
@@ -182,7 +182,8 @@ class LCServiceTest {
                 Map.of(equipment, 1)
         );
         LCDTO dto = TestDataFactory.validLCDTO(18L);
-        dto.setEquipment(Map.of());
+        dto.setSelectedEquipment(List.of());
+        dto.setEquipmentProvided(true);
 
         LC restored = service.restoreDomain(dto, fallback);
 
