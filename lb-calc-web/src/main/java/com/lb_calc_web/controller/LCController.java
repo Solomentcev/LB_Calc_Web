@@ -89,6 +89,7 @@ public class LCController {
     public String refreshLC(@ModelAttribute("lc") LCDTO lc, Model model) {
         model.addAttribute("pageContext", "CATALOG");
         try {
+            ModuleEquipmentFormSupport.applySelection(lc);
             LC domain = lcService.restoreDomain(lc);
             configureEquipment(domain.getControlConfiguration());
             lc = toDtoWithImage(domain);
@@ -118,7 +119,7 @@ public class LCController {
         );
 
         try {
-
+            ModuleEquipmentFormSupport.applySelection(lc);
             LC domain = lcService.restoreDomain(lc);
             configureEquipment(domain.getControlConfiguration());
             LC savedLC = lcService.saveLC(domain);
@@ -139,6 +140,10 @@ public class LCController {
 
             prepareForm(model, lc);
 
+            return "lcs/lc";
+        } catch (IllegalArgumentException e) {
+            model.addAttribute("errors", List.of(e.getMessage()));
+            prepareForm(model, lc);
             return "lcs/lc";
         }
     }
