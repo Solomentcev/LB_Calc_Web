@@ -13,7 +13,6 @@ import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -66,20 +65,12 @@ class ProjectEntityMapperTest {
         assertSame(entity, entity.getAlsEntries().get(0).getProject());
         assertSame(alsEntity, entity.getAlsEntries().get(0).getAls());
 
-        AtomicReference<ALS> mappedAls = new AtomicReference<>();
-        AtomicReference<ALSEntity> mappedAlsEntity = new AtomicReference<>();
-
         Project restored = ProjectEntityMapper.toDomain(
                 entity,
-                entityForAls -> ALSEntityMapper.toDomain(entityForAls, TestDataFactory.createSizeBounds()),
-                (mappedDomain, mappedEntity) -> {
-                    mappedAls.set(mappedDomain);
-                    mappedAlsEntity.set(mappedEntity);
-                }
+                entityForAls -> ALSEntityMapper.toDomain(entityForAls, TestDataFactory.createSizeBounds())
         );
 
-        assertEquals(als, mappedAls.get());
-        assertSame(alsEntity, mappedAlsEntity.get());
+        assertEquals(als, restored.getQuantityALS().keySet().iterator().next());
         assertEquals(domain.getName(), restored.getName());
         assertEquals(domain.getCompany(), restored.getCompany());
         assertEquals(domain.getCreatedAt(), restored.getCreatedAt());
@@ -112,8 +103,7 @@ class ProjectEntityMapperTest {
 
         Project restored = ProjectEntityMapper.toDomain(
                 entity,
-                alsEntity -> ALSEntityMapper.toDomain(alsEntity, TestDataFactory.createSizeBounds()),
-                (mappedDomain, mappedEntity) -> { }
+                alsEntity -> ALSEntityMapper.toDomain(alsEntity, TestDataFactory.createSizeBounds())
         );
 
         assertEquals(domain.getDescription(), restored.getDescription());
