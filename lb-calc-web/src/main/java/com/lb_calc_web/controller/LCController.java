@@ -6,6 +6,7 @@ import com.lb_calc_web.domain.equipment.DisplayPurpose;
 import com.lb_calc_web.domain.equipment.PaymentPurpose;
 import com.lb_calc_web.domain.equipment.PrinterPurpose;
 import com.lb_calc_web.mapper.dto.EquipmentDtoMapper;
+import com.lb_calc_web.mapper.dto.EquipmentSelectionDtoMapper;
 import com.lb_calc_web.service.EquipmentCatalogService;
 import com.lb_calc_web.domain.model.LC;
 import com.lb_calc_web.dto.LCDTO;
@@ -52,8 +53,9 @@ public class LCController {
         logger.debug("Открытие страницы создания LC");
 
         LCDTO lc = LCDtoMapper.toDto(lcService.createLC());
-        lc.setEquipmentSelections(lcService.prepareEquipmentSelections(
-                lc.getFunctionalConfiguration(), null));
+        lc.setEquipmentSelections(EquipmentSelectionDtoMapper.prepareSelections(
+                lc.getFunctionalConfiguration(), null,
+                equipmentCatalogService.findAll(), equipmentCatalogService.findDefaultModelIds()));
         lc = toDtoWithImage(lcService.restoreDomain(lc));
         lc.setId(0L);
 
@@ -89,8 +91,9 @@ public class LCController {
     public String refreshLC(@ModelAttribute("lc") LCDTO lc, Model model) {
         model.addAttribute("pageContext", "CATALOG");
         try {
-            lc.setEquipmentSelections(lcService.prepareEquipmentSelections(
-                    lc.getFunctionalConfiguration(), lc.getEquipmentSelections()));
+            lc.setEquipmentSelections(EquipmentSelectionDtoMapper.prepareSelections(
+                    lc.getFunctionalConfiguration(), lc.getEquipmentSelections(),
+                    equipmentCatalogService.findAll(), equipmentCatalogService.findDefaultModelIds()));
             lc = toDtoWithImage(lcService.restoreDomain(lc));
         } catch (ValidationSizeException exception) {
             model.addAttribute("errors", ValidationErrorFormatter.format(exception.getValidationResult()));
@@ -159,8 +162,9 @@ public class LCController {
 
     private void prepareForm(Model model, LCDTO lc) {
         model.addAttribute("lc", lc);
-        lc.setEquipmentSelections(lcService.prepareEquipmentSelections(
-                lc.getFunctionalConfiguration(), lc.getEquipmentSelections()));
+        lc.setEquipmentSelections(EquipmentSelectionDtoMapper.prepareSelections(
+                lc.getFunctionalConfiguration(), lc.getEquipmentSelections(),
+                equipmentCatalogService.findAll(), equipmentCatalogService.findDefaultModelIds()));
         model.addAttribute("equipmentList", equipmentCatalogService.findAll().stream()
                 .map(EquipmentDtoMapper::toDto).toList());
         model.addAttribute("defaultEquipmentIds", equipmentCatalogService.findDefaultModelIds());
