@@ -2,23 +2,17 @@ package com.lb_calc_web.service;
 
 import com.lb_calc_web.domain.attributes.Role;
 import com.lb_calc_web.domain.model.Employee;
-import com.lb_calc_web.dto.CreateEmployeeDTO;
-import com.lb_calc_web.dto.EmployeeDTO;
-import com.lb_calc_web.dto.JwtResponse;
-import com.lb_calc_web.dto.LoginRequest;
-import com.lb_calc_web.dto.RegistrationDTO;
 import com.lb_calc_web.entity.EmployeeEntity;
 import com.lb_calc_web.event.UserEvent;
 import com.lb_calc_web.event.UserEventType;
 import com.lb_calc_web.mapper.entity.EmployeeEntityMapper;
-import com.lb_calc_web.mapper.dto.EmployeeDtoMapper;
 import com.lb_calc_web.repository.EmployeeRepository;
 import com.lb_calc_web.security.EmployeePrincipal;
 import com.lb_calc_web.security.jwt.JwtService;
+import com.lb_calc_web.security.jwt.AuthTokens;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import jakarta.security.auth.message.AuthException;
-import jakarta.servlet.http.Cookie;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -81,17 +75,16 @@ public class AuthService {
      *
      * Главный объект здесь — EmployeePrincipal.
      */
-    public JwtResponse login(
-            LoginRequest loginRequest
+    public AuthTokens login(
+            String email,
+            String password
     ) throws AuthException {
 
         EmployeePrincipal principal;
 
         try {
             principal =
-                    employeeService.loadUserByUsername(
-                            loginRequest.getEmail()
-                    );
+                    employeeService.loadUserByUsername(email);
         } catch (UsernameNotFoundException e) {
 
             throw new AuthException(
@@ -106,7 +99,7 @@ public class AuthService {
         }
 
         if (!passwordEncoder.matches(
-                loginRequest.getPassword(),
+                password,
                 principal.getPassword()
         )) {
 
@@ -140,14 +133,11 @@ public class AuthService {
                 principal.getUsername()
         );
 
-        return new JwtResponse(
-                accessToken,
-                refreshToken
-        );
+        return new AuthTokens(accessToken, refreshToken);
     }
 
     /** Проверяет refresh token и выпускает новую пару токенов для активной учётной записи. */
-    public JwtResponse refresh(
+    public AuthTokens refresh(
             @NonNull String refreshToken
     ) {
 
@@ -177,24 +167,7 @@ public class AuthService {
         String newRefreshToken =
                 jwtService.generateRefreshToken(principal);
 
-        return new JwtResponse(
-                accessToken,
-                newRefreshToken
-        );
-    }
-
-    /** Создаёт cookie для access token с настройками безопасности из JWT-сервиса. */
-    public Cookie generateAccessTokenCookie(
-            String token
-    ) {
-        return jwtService.generateAccessTokenCookie(token);
-    }
-
-    /** Создаёт cookie для refresh token с настройками безопасности из JWT-сервиса. */
-    public Cookie generateRefreshTokenCookie(
-            String token
-    ) {
-        return jwtService.generateRefreshTokenCookie(token);
+        return new AuthTokens(accessToken, newRefreshToken);
     }
 
     /** Проверяет, зарегистрирован ли сотрудник с указанным адресом электронной почты. */
@@ -208,42 +181,25 @@ public class AuthService {
     }
 
     /**
-     * Обычная регистрация пользователя.
-     * Зарегистрированный пользователь получает ROLE_MANAGER.
+     * Регистрирует пользователя с ролью менеджера по умолчанию.
      */
     @Transactional
-    public EmployeeDTO registration(
-            RegistrationDTO registrationDTO
+    public Employee registration(
+            String firstName,
+            String lastName,
+            String email,
+            String password,
+            String confirmPassword
     ) {
-        Objects.requireNonNull(registrationDTO, "Данные регистрации не должны быть null");
-
-        validatePasswords(
-                registrationDTO.getPassword(),
-                registrationDTO.getConfirmPassword()
-        );
-
-        if (existsByEmail(registrationDTO.getEmail())) {
-            throw new IllegalArgumentException(
-                    "Email уже используется"
-            );
+        validatePasswords(password, confirmPassword);
+        if (existsByEmail(email)) {
+            throw new IllegalArgumentException("Email уже используется");
         }
 
         Employee domain = new Employee(
-                registrationDTO.getFirstName(),
-                registrationDTO.getLastName(),
-                registrationDTO.getEmail(),
-                LocalDate.now(),
-                Role.ROLE_MANAGER
-        );
-
-        EmployeeEntity entity =
-                EmployeeEntityMapper.toEntity(domain);
-
-        entity.setEncryptedPassword(
-                passwordEncoder.encode(
-                        registrationDTO.getPassword()
-                )
-        );
+                firstName, lastName, email, LocalDate.now(), Role.ROLE_MANAGER);
+        EmployeeEntity entity = EmployeeEntityMapper.toEntity(domain);
+        entity.setEncryptedPassword(passwordEncoder.encode(password));
 
         EmployeeEntity saved;
         try {
@@ -252,55 +208,29 @@ public class AuthService {
             throw toEmailConflict(exception);
         }
 
-        EmployeeDTO result = EmployeeDtoMapper.toDto(
-                employeeService.loadUserById(saved.getId())
-        );
-
-        publishEvent(
-                UserEventType.USER_REGISTERED,
-                saved.getId(),
-                saved.getEmail()
-        );
-
+        Employee result = EmployeeEntityMapper.toDomain(saved);
+        publishEvent(UserEventType.USER_REGISTERED, saved.getId(), saved.getEmail());
         return result;
     }
 
-    /**
-     * Создание сотрудника администратором.
-     */
+    /** Создаёт учётную запись сотрудника по доменной модели и паролю. */
     @Transactional
-    public EmployeeDTO createEmployee(
-            CreateEmployeeDTO createEmployeeDTO
+    public Employee createEmployee(
+            Employee domain,
+            String password,
+            String confirmPassword
     ) {
-        Objects.requireNonNull(createEmployeeDTO, "Данные сотрудника не должны быть null");
-
-        validatePasswords(
-                createEmployeeDTO.getPassword(),
-                createEmployeeDTO.getConfirmPassword()
-        );
-
-        if (existsByEmail(createEmployeeDTO.getEmail())) {
-            throw new IllegalArgumentException(
-                    "Пользователь с таким email уже существует"
-            );
+        Objects.requireNonNull(domain, "Доменный сотрудник не должен быть null");
+        if (domain.getId() != null) {
+            throw new IllegalArgumentException("Для создания сотрудника ID должен отсутствовать");
+        }
+        validatePasswords(password, confirmPassword);
+        if (existsByEmail(domain.getEmail())) {
+            throw new IllegalArgumentException("Пользователь с таким email уже существует");
         }
 
-        Employee domain = new Employee(
-                createEmployeeDTO.getFirstName(),
-                createEmployeeDTO.getLastName(),
-                createEmployeeDTO.getEmail(),
-                LocalDate.now(),
-                createEmployeeDTO.getRole()
-        );
-
-        EmployeeEntity entity =
-                EmployeeEntityMapper.toEntity(domain);
-
-        entity.setEncryptedPassword(
-                passwordEncoder.encode(
-                        createEmployeeDTO.getPassword()
-                )
-        );
+        EmployeeEntity entity = EmployeeEntityMapper.toEntity(domain);
+        entity.setEncryptedPassword(passwordEncoder.encode(password));
 
         EmployeeEntity saved;
         try {
@@ -309,16 +239,8 @@ public class AuthService {
             throw toEmailConflict(exception);
         }
 
-        EmployeeDTO result = EmployeeDtoMapper.toDto(
-                employeeService.loadUserById(saved.getId())
-        );
-
-        publishEvent(
-                UserEventType.EMPLOYEE_CREATED,
-                saved.getId(),
-                saved.getEmail()
-        );
-
+        Employee result = EmployeeEntityMapper.toDomain(saved);
+        publishEvent(UserEventType.EMPLOYEE_CREATED, saved.getId(), saved.getEmail());
         return result;
     }
 
