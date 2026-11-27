@@ -9,14 +9,17 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 /** REST API административного управления каталогом оборудования. */
 @RestController
+@Validated
 @RequestMapping("/api/v1/equipment")
 @PreAuthorize("hasAuthority('ROLE_ADMIN')")
 @Tag(name = "Equipment", description = "Управление каталогом физических моделей оборудования")
@@ -41,7 +44,7 @@ public class EquipmentRestController {
     /** Возвращает модель оборудования по идентификатору. */
     @GetMapping("/{id}")
     @Operation(summary = "Получить модель оборудования по ID")
-    public ResponseEntity<ApiResponse<EquipmentDTO>> findById(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<EquipmentDTO>> findById(@PathVariable @Positive Long id) {
         return ResponseEntity.ok(ApiResponse.success(
                 EquipmentDtoMapper.toDto(equipmentCatalogService.findById(id))));
     }
@@ -59,7 +62,7 @@ public class EquipmentRestController {
     @PutMapping("/{id}")
     @Operation(summary = "Изменить модель оборудования")
     public ResponseEntity<ApiResponse<EquipmentDTO>> update(
-            @PathVariable Long id,
+            @PathVariable @Positive Long id,
             @Valid @RequestBody EquipmentDTO dto
     ) {
         Equipment saved = equipmentCatalogService.save(EquipmentDtoMapper.toDomain(dto, id));
@@ -70,7 +73,7 @@ public class EquipmentRestController {
     /** Удаляет модель оборудования по идентификатору. */
     @DeleteMapping("/{id}")
     @Operation(summary = "Удалить модель оборудования")
-    public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<Void>> delete(@PathVariable @Positive Long id) {
         equipmentCatalogService.delete(id);
         return ResponseEntity.ok(ApiResponse.success("Модель оборудования удалена"));
     }
