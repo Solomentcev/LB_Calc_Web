@@ -207,7 +207,4 @@ public class LBService {
         return Colors.valueOf(environment.getRequiredProperty(key));
     }
 
-    private int requiredInt(String key) {
-        return environment.getRequiredProperty(key, Integer.class);
-    }
 }
