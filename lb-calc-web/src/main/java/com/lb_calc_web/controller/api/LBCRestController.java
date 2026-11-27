@@ -8,6 +8,7 @@ import com.lb_calc_web.service.LBCService;
 import com.lb_calc_web.service.EquipmentCatalogService;
 import com.lb_calc_web.service.factory.TypeLbFactory;
 import com.lb_calc_web.domain.geometry.SizeBounds;
+import jakarta.validation.constraints.Positive;
 import org.springframework.core.env.Environment;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -16,11 +17,13 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
+@Validated
 @RequestMapping("/api/v1/lbcs")
 @PreAuthorize("isAuthenticated()")
 @Tag(
@@ -59,7 +62,7 @@ public class LBCRestController {
     @Operation(summary = "Получить LBC по ID")
     public ResponseEntity<?> getLBCById(
             @Parameter(description = "Идентификатор LBC")
-            @PathVariable Long id
+            @PathVariable @Positive Long id
     ) {
         return ResponseEntity.ok(
                 ApiResponse.success(LBCDtoMapper.toDto(lbcService.findById(id)))
@@ -76,7 +79,7 @@ public class LBCRestController {
 
     @PostMapping
     @Operation(summary = "Сохранить LBC")
-    public ResponseEntity<?> saveLBC(@RequestBody LBCDTO dto) {
+    public ResponseEntity<?> saveLBC(@RequestBody @Valid LBCDTO dto) {
         LBC domain = LBCDtoMapper.toDomain(
                 dto,
                 TypeLbFactory.forLBC(environment, dto.getType()),
