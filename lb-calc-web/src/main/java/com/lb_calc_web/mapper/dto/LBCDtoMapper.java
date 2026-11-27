@@ -51,6 +51,7 @@ public final class LBCDtoMapper {
         dto.setFunctionalConfiguration(ControlConfigurationDtoMapper.toFunctionalDto(
                 configuration.getFunctionalConfiguration()));
         dto.setEquipment(ControlConfigurationDtoMapper.toEquipmentIds(configuration));
+        dto.setSelectedEquipment(ControlConfigurationDtoMapper.toEquipmentDetails(configuration));
         return dto;
     }
 
