@@ -355,7 +355,7 @@ public class ALSController extends BaseCatalogController {
             lc = toDtoWithImage(replacement);
         } catch (ValidationSizeException exception) {
             model.addAttribute("errors", ValidationErrorFormatter.format(exception.getValidationResult()));
-        } catch (IllegalArgumentException | IllegalStateException exception) {
+        } catch (IllegalArgumentException | IllegalStateException | NoSuchElementException exception) {
             model.addAttribute("errors", List.of(exception.getMessage()));
         }
         model.addAttribute("als", toDtoWithImages(source));
@@ -444,7 +444,7 @@ public class ALSController extends BaseCatalogController {
             lbc = toDtoWithImage(replacement);
         } catch (ValidationSizeException exception) {
             model.addAttribute("errors", ValidationErrorFormatter.format(exception.getValidationResult()));
-        } catch (IllegalArgumentException | IllegalStateException exception) {
+        } catch (IllegalArgumentException | IllegalStateException | NoSuchElementException exception) {
             model.addAttribute("errors", List.of(exception.getMessage()));
         }
         model.addAttribute("als", toDtoWithImages(source));
