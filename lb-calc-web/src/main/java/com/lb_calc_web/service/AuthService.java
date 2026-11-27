@@ -11,6 +11,7 @@ import com.lb_calc_web.entity.EmployeeEntity;
 import com.lb_calc_web.event.UserEvent;
 import com.lb_calc_web.event.UserEventType;
 import com.lb_calc_web.mapper.entity.EmployeeEntityMapper;
+import com.lb_calc_web.mapper.dto.EmployeeDtoMapper;
 import com.lb_calc_web.repository.EmployeeRepository;
 import com.lb_calc_web.security.EmployeePrincipal;
 import com.lb_calc_web.security.jwt.JwtService;
@@ -251,10 +252,9 @@ public class AuthService {
             throw toEmailConflict(exception);
         }
 
-        EmployeeDTO result =
-                employeeService.loadUserById(
-                        saved.getId()
-                );
+        EmployeeDTO result = EmployeeDtoMapper.toDto(
+                employeeService.loadUserById(saved.getId())
+        );
 
         publishEvent(
                 UserEventType.USER_REGISTERED,
