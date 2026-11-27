@@ -186,10 +186,35 @@ class LCServiceTest {
         assertThrows(java.util.NoSuchElementException.class, () -> service.findById(25L));
     }
 
+    private List<Equipment> configureValidEquipment(LC domain) {
+        Equipment display = new Equipment(
+                7101L, EquipmentFunctionalType.DISPLAY, DisplayPurpose.INCH_10,
+                EquipmentCategory.DISPLAY, "Дисплей 10", "", 300, 180, 30);
+        Equipment rfid = new Equipment(
+                7102L, EquipmentFunctionalType.ACCESS, AccessPurpose.RFID,
+                EquipmentCategory.RFID_READER, "RFID-считыватель", "", 100, 50, 30);
+        ControlConfiguration configuration = domain.getControlConfiguration();
+        configuration.setEquipment(Map.of(display, 1, rfid, 1));
+        domain.setControlConfiguration(configuration);
+        return List.of(display, rfid);
+    }
+
+    private void stubEquipment(List<Equipment> models) throws Exception {
+        Field idField = EquipmentEntity.class.getDeclaredField("id");
+        idField.setAccessible(true);
+        for (Equipment model : models) {
+            EquipmentEntity entity = EquipmentEntityMapper.toEntity(model);
+            idField.set(entity, model.getId());
+            when(equipmentRepository.findById(model.getId())).thenReturn(Optional.of(entity));
+        }
+    }
+
     @Test
-    void saveLC_shouldPersistUsingExistingEquipmentReferences() {
+    void saveLC_shouldPersistUsingExistingEquipmentReferences() throws Exception {
         LC domain = TestDataFactory.validLC(null);
-        LCEntity saved = spy(LCEntityMapper.toEntity(domain, equipment -> null));
+        List<Equipment> equipment = configureValidEquipment(domain);
+        stubEquipment(equipment);
+        LCEntity saved = spy(LCEntityMapper.toEntity(domain, equipmentModel -> null));
         doReturn(99L).when(saved).getId();
         when(repository.findCandidates(anyInt(), anyInt(), anyInt(), anyInt(),
                 anyInt(), any(), any())).thenReturn(List.of());
@@ -209,6 +234,7 @@ class LCServiceTest {
                 10, source.getWidth(), source.getDepth(), source.getUpperFrame(),
                 source.getBottomFrame(), source.getColorBody(), source.getColorDoor(),
                 source.getControlConfiguration(), TestDataFactory.createSizeBounds());
+        configureValidEquipment(domain);
 
         assertThrows(ValidationSizeException.class, () -> service.saveLC(domain));
         verify(repository, never()).save(any());
