@@ -1,5 +1,6 @@
 package com.lb_calc_web.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -10,6 +11,7 @@ import java.util.List;
 import java.util.Objects;
 
 /** DTO конфигурации ALS, включая управляющий модуль, модули хранения и геометрические параметры. */
+@Schema(description = "Конфигурация автоматизированной камеры хранения: геометрия, состав модулей и их физический порядок.")
 public class ALSDTO {
 
     private Long id;
