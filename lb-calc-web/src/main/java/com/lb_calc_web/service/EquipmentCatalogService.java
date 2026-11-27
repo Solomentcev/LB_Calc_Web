@@ -2,17 +2,6 @@ package com.lb_calc_web.service;
 
 import com.lb_calc_web.domain.equipment.Equipment;
 import com.lb_calc_web.domain.equipment.EquipmentFunctionalType;
-import com.lb_calc_web.domain.equipment.EquipmentPurpose;
-import com.lb_calc_web.domain.equipment.AccessPurpose;
-import com.lb_calc_web.domain.equipment.DisplayPurpose;
-import com.lb_calc_web.domain.equipment.PaymentPurpose;
-import com.lb_calc_web.domain.equipment.PrinterPurpose;
-import com.lb_calc_web.domain.model.FunctionalConfiguration;
-import com.lb_calc_web.domain.model.FunctionalConfigurationResolver;
-import com.lb_calc_web.dto.EquipmentDTO;
-import com.lb_calc_web.dto.EquipmentSelectionDTO;
-import com.lb_calc_web.dto.FunctionalConfigurationDTO;
-import com.lb_calc_web.mapper.dto.EquipmentDtoMapper;
 import com.lb_calc_web.entity.EquipmentEntity;
 import com.lb_calc_web.mapper.entity.EquipmentEntityMapper;
 import com.lb_calc_web.repository.EquipmentRepository;
@@ -38,9 +27,6 @@ public class EquipmentCatalogService {
     private static final Logger logger = LoggerFactory.getLogger(EquipmentCatalogService.class);
 
     private final EquipmentRepository equipmentRepository;
-    private final FunctionalConfigurationResolver functionalConfigurationResolver =
-            new FunctionalConfigurationResolver();
-
     public EquipmentCatalogService(EquipmentRepository equipmentRepository) {
         this.equipmentRepository = Objects.requireNonNull(equipmentRepository);
     }
@@ -137,109 +123,6 @@ public class EquipmentCatalogService {
         return equipmentRepository.findAllByDefaultModelTrue().stream()
                 .map(EquipmentEntity::getId)
                 .collect(java.util.stream.Collectors.toUnmodifiableSet());
-    }
-
-    /** Формирует строки комплектации для формы без сохранения модуля. */
-    @Transactional(readOnly = true)
-    public List<EquipmentSelectionDTO> prepareSelections(
-            FunctionalConfigurationDTO configuration, List<EquipmentSelectionDTO> currentSelections) {
-        Objects.requireNonNull(configuration, "Функциональная конфигурация не должна быть null");
-        List<Equipment> catalog = findAll();
-        java.util.Map<Long, Equipment> byId = catalog.stream().filter(e -> e.getId() != null)
-                .collect(java.util.stream.Collectors.toMap(Equipment::getId, e -> e));
-        java.util.Map<EquipmentKey, EquipmentSelectionDTO> previous = new java.util.LinkedHashMap<>();
-        if (currentSelections != null) for (EquipmentSelectionDTO selection : currentSelections) {
-            Equipment item = byId.get(selection.getEquipmentId());
-            if (item != null) previous.put(key(item), selection);
-        }
-        FunctionalConfiguration normalized = functionalConfigurationResolver.normalize(
-                toDomain(configuration));
-        configuration.setDisplay(normalized.getDisplay());
-        java.util.LinkedHashSet<EquipmentKey> required = requiredKeys(normalized);
-        previous.forEach((key, selection) -> {
-            Equipment item = byId.get(selection.getEquipmentId());
-            if (item != null && item.getFunctionalType() == EquipmentFunctionalType.SYSTEM) required.add(key(item));
-        });
-
-        java.util.Set<Long> defaults = findDefaultModelIds();
-        List<EquipmentSelectionDTO> result = new ArrayList<>();
-        for (EquipmentKey key : required) {
-            List<EquipmentDTO> models = catalog.stream()
-                    .filter(e -> e.getFunctionalType() == key.functionalType())
-                    .filter(e -> e.getPurpose().equals(key.purpose()))
-                    .map(EquipmentDtoMapper::toDto).toList();
-            EquipmentSelectionDTO old = previous.get(key);
-            Long id = old != null && models.stream().anyMatch(e -> Objects.equals(e.getId(), old.getEquipmentId()))
-                    ? old.getEquipmentId()
-                    : models.stream().filter(e -> defaults.contains(e.getId()))
-                            .map(EquipmentDTO::getId).findFirst().orElse(null);
-            if (id == null && models.size() == 1) id = models.get(0).getId();
-            EquipmentSelectionDTO row = new EquipmentSelectionDTO(id, old == null ? 1 : old.getQuantity());
-            row.setAvailableModels(models);
-            result.add(row);
-        }
-        return result;
-    }
-
-    /** Преобразует транспортные функциональные назначения в доменную конфигурацию. */
-    private FunctionalConfiguration toDomain(FunctionalConfigurationDTO dto) {
-        Objects.requireNonNull(dto, "Функциональная конфигурация не должна быть null");
-        return new FunctionalConfiguration(
-                dto.getDisplay() == null ? DisplayPurpose.NONE : dto.getDisplay(),
-                dto.getAccess() == null ? java.util.Set.of() : dto.getAccess(),
-                dto.getPayment() == null ? PaymentPurpose.NONE : dto.getPayment(),
-                dto.getPrinter() == null ? PrinterPurpose.ABSENT : dto.getPrinter()
-        );
-    }
-
-    /** Получает ключи физических назначений из доменного резолвера. */
-    private java.util.LinkedHashSet<EquipmentKey> requiredKeys(FunctionalConfiguration configuration) {
-        java.util.LinkedHashSet<EquipmentKey> result = new java.util.LinkedHashSet<>();
-        functionalConfigurationResolver.resolveRequiredEquipment(configuration)
-                .forEach((type, purposes) -> purposes.forEach(
-                        purpose -> result.add(new EquipmentKey(type, purpose))));
-        return result;
-    }
-
-    /** Формирует ключ функционального назначения модели оборудования. */
-    private EquipmentKey key(Equipment item) {
-        return new EquipmentKey(item.getFunctionalType(), item.getPurpose());
-    }
-
-    /** Составной ключ назначения физического оборудования. */
-    private record EquipmentKey(EquipmentFunctionalType functionalType, EquipmentPurpose purpose) {
-    }
-
-    /**
-     * Проверяет, что отправленные формы содержат ровно по одной модели для каждого
-     * активного физического назначения и что каждая модель относится к своему назначению.
-     */
-    @Transactional(readOnly = true)
-    public void validateSelections(
-            FunctionalConfigurationDTO configuration, List<EquipmentSelectionDTO> selections) {
-        Objects.requireNonNull(configuration, "Функциональная конфигурация не должна быть null");
-        FunctionalConfiguration normalized = functionalConfigurationResolver.normalize(
-                toDomain(configuration));
-        configuration.setDisplay(normalized.getDisplay());
-        List<Equipment> catalog = findAll();
-        java.util.Map<Long, Equipment> byId = catalog.stream().filter(e -> e.getId() != null)
-                .collect(java.util.stream.Collectors.toMap(Equipment::getId, e -> e));
-        java.util.LinkedHashSet<EquipmentKey> required = requiredKeys(normalized);
-
-        java.util.Set<EquipmentKey> received = new java.util.HashSet<>();
-        if (selections != null) for (EquipmentSelectionDTO selection : selections) {
-            Equipment item = byId.get(selection.getEquipmentId());
-            if (item == null) throw new IllegalArgumentException("Выбрана несуществующая модель оборудования");
-            EquipmentKey key = key(item);
-            if (item.getFunctionalType() != EquipmentFunctionalType.SYSTEM && !required.contains(key))
-                throw new IllegalArgumentException("Модель оборудования не соответствует функциональной конфигурации: " + key);
-            if (!received.add(key))
-                throw new IllegalArgumentException("Для назначения выбрано несколько моделей: " + key);
-        }
-        for (EquipmentKey key : required) {
-            if (!received.contains(key))
-                throw new IllegalArgumentException("Не выбрана модель оборудования для назначения: " + key);
-        }
     }
 
     /** Находит модель оборудования по идентификатору. */
