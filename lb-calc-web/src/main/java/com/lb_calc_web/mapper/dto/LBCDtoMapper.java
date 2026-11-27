@@ -113,14 +113,7 @@ ControlConfiguration configuration = domain.getControlConfiguration();
             }
         }
 
-        ControlConfiguration configuration = fallbackConfiguration == null
-                ? new ControlConfiguration(functional, Map.of())
-                : fallbackConfiguration.copy();
-        configuration.setFunctionalConfiguration(functional);
-        if (dto.getEquipmentSelections() != null || dto.isEquipmentSelectionsProvided()
-                || fallbackConfiguration == null) {
-            configuration.setEquipment(equipment);
-        }
+        ControlConfiguration configuration = new ControlConfiguration(functional, equipment);
 
         LBC domain = new LBC(
                 dto.getHeight(),
