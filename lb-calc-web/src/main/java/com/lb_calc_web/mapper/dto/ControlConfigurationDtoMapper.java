@@ -5,6 +5,7 @@ import com.lb_calc_web.domain.model.ControlConfiguration;
 import com.lb_calc_web.domain.model.FunctionalConfiguration;
 import com.lb_calc_web.dto.FunctionalConfigurationDTO;
 import com.lb_calc_web.dto.EquipmentDTO;
+import com.lb_calc_web.dto.EquipmentDTO;
 import com.lb_calc_web.mapper.dto.EquipmentDtoMapper;
 
 import java.util.ArrayList;
@@ -65,7 +66,7 @@ public final class ControlConfigurationDtoMapper {
      */
     public static ControlConfiguration toDomain(
             FunctionalConfigurationDTO functionalDto,
-            Map<Long, Integer> equipmentIds,
+            List<EquipmentDTO> selectedEquipment,
             boolean equipmentProvided,
             ControlConfiguration fallback,
             Function<Long, Equipment> equipmentLookup
@@ -74,10 +75,11 @@ public final class ControlConfigurationDtoMapper {
         FunctionalConfiguration functional = toFunctionalDomain(functionalDto, fallback);
         Map<Equipment, Integer> equipment = new LinkedHashMap<>();
 
-        if (equipmentIds == null && !equipmentProvided && fallback != null) {
+        if ((selectedEquipment == null || selectedEquipment.isEmpty())
+                && !equipmentProvided && fallback != null) {
             equipment.putAll(fallback.getEquipment());
-        } else if (equipmentIds != null) {
-            equipmentIds.forEach((equipmentId, quantity) -> {
+        } else if (selectedEquipment != null) {
+            toEquipmentIds(selectedEquipment).forEach((equipmentId, quantity) -> {
                 if (equipmentId == null || equipmentId <= 0) {
                     throw new IllegalArgumentException(
                             "Идентификатор модели оборудования должен быть положительным");
@@ -93,6 +95,27 @@ public final class ControlConfigurationDtoMapper {
             });
         }
         return new ControlConfiguration(functional, equipment);
+    }
+
+    /** Преобразует выбранные в форме модели оборудования в идентификаторы и количества. */
+    public static Map<Long, Integer> toEquipmentIds(List<EquipmentDTO> selections) {
+        Map<Long, Integer> result = new LinkedHashMap<>();
+        if (selections == null) {
+            return result;
+        }
+        for (EquipmentDTO selection : selections) {
+            if (selection == null || selection.getId() == null || selection.getId() <= 0) {
+                throw new IllegalArgumentException("Выберите модель оборудования");
+            }
+            Integer quantity = selection.getQuantity();
+            if (quantity == null || quantity < 1) {
+                throw new IllegalArgumentException("Количество оборудования должно быть не меньше 1");
+            }
+            if (result.putIfAbsent(selection.getId(), quantity) != null) {
+                throw new IllegalArgumentException("Одна модель оборудования не может быть указана несколько раз");
+            }
+        }
+        return result;
     }
 
     private static FunctionalConfiguration toFunctionalDomain(
