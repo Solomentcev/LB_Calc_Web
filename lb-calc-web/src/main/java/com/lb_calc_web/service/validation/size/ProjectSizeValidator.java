@@ -37,7 +37,7 @@ public class ProjectSizeValidator {
 
         if (project == null) {
             ValidationResult invalid = new ValidationResult("Project", null);
-            invalid.addError(invalid, "project", "Проект не задан",
+            invalid.addError("project", "Проект не задан",
                     null, null, null);
             results.add(invalid);
             return results;
@@ -54,7 +54,7 @@ public class ProjectSizeValidator {
 
             if (als == null) {
                 ValidationResult invalid = new ValidationResult("ALS", null);
-                invalid.addError(invalid, "als",
+                invalid.addError("als",
                         "Проект содержит пустую конфигурацию ALS",
                         null, null, null);
                 results.add(invalid);
