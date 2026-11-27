@@ -128,6 +128,7 @@ public class LBCController extends BaseCatalogController {
                     lbc, TypeLbFactory.forLBC(environment, lbc.getType()),
                     equipmentCatalogService::findById, fallback, sizeBounds);
             lbcService.prepareFunctionalEquipment(domain, fallback, lbc.isEquipmentProvided());
+            lbcService.validateForSave(domain);
             lbc = toDtoWithImage(domain);
         } catch (ValidationSizeException exception) {
             model.addAttribute("errors", ValidationErrorFormatter.format(exception.getValidationResult()));
