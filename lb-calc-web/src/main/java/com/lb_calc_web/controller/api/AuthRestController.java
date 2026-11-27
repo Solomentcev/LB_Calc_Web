@@ -27,7 +27,7 @@ public class AuthRestController {
 
     /** Выполняет вход по учётным данным и возвращает пару JWT-токенов. */
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody @Valid LoginRequest loginRequest) throws AuthException {
+    public ResponseEntity<ApiResponse<JwtResponse>> login(@RequestBody @Valid LoginRequest loginRequest) throws AuthException {
         AuthTokens tokens = authService.login(loginRequest.getEmail(), loginRequest.getPassword());
         JwtResponse response = new JwtResponse(tokens.accessToken(), tokens.refreshToken());
         return ResponseEntity.ok(ApiResponse.success("Login successful", response));
@@ -37,7 +37,7 @@ public class AuthRestController {
     /** Регистрирует пользователя с ролью по умолчанию. */
 
     @PostMapping("/registration")
-    public ResponseEntity<?> registration(@RequestBody @Valid RegistrationDTO registrationDTO) {
+    public ResponseEntity<ApiResponse<EmployeeDTO>> registration(@RequestBody @Valid RegistrationDTO registrationDTO) {
         EmployeeDTO employee = EmployeeDtoMapper.toDto(authService.registration(
                 registrationDTO.getFirstName(),
                 registrationDTO.getLastName(),
@@ -52,7 +52,7 @@ public class AuthRestController {
 
     /** Обновляет пару JWT-токенов по refresh token из заголовка запроса. */
     @PostMapping("/refresh")
-    public ResponseEntity<?> refresh(@RequestHeader(value = "Refresh-Token") String refreshToken) {
+    public ResponseEntity<ApiResponse<JwtResponse>> refresh(@RequestHeader(value = "Refresh-Token") String refreshToken) {
         if (refreshToken == null || refreshToken.isBlank()) {
             throw new IllegalArgumentException("Refresh token is missing");
         }
@@ -66,7 +66,7 @@ public class AuthRestController {
 
     /** Завершает клиентскую сессию, удаляя access- и refresh-cookie. */
     @PostMapping("/logout")
-    public ResponseEntity<?> logout(HttpServletResponse response) {
+    public ResponseEntity<ApiResponse<Void>> logout(HttpServletResponse response) {
         response.addHeader("Set-Cookie", "jwtAccess=; Max-Age=0; Path=/; HttpOnly");
         response.addHeader("Set-Cookie", "jwtRefresh=; Max-Age=0; Path=/; HttpOnly");
         ApiResponse<Void> responseBody = ApiResponse.success("Logout successful");
