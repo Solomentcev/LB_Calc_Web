@@ -192,10 +192,6 @@ public class AuthService {
             String confirmPassword
     ) {
         validatePasswords(password, confirmPassword);
-        if (existsByEmail(email)) {
-            throw new IllegalArgumentException("Email уже используется");
-        }
-
         Employee domain = new Employee(
                 firstName, lastName, email, LocalDate.now(), Role.ROLE_MANAGER);
         return persistEmployee(domain, password, UserEventType.USER_REGISTERED);
@@ -214,10 +210,6 @@ public class AuthService {
         validatePasswords(password, confirmPassword);
         Employee domain = new Employee(
                 firstName, lastName, email, LocalDate.now(), role);
-        if (existsByEmail(domain.getEmail())) {
-            throw new IllegalArgumentException("Пользователь с таким email уже существует");
-        }
-
         return persistEmployee(domain, password, UserEventType.EMPLOYEE_CREATED);
     }
 
