@@ -433,6 +433,11 @@ public class ALSService {
         Objects.requireNonNull(restored, "Восстановленная ALS не должна быть null");
         boolean functionalChanged = existing != null
                 && !existing.getFunctionalConfiguration().equals(restored.getFunctionalConfiguration());
+        if (!equipmentSelectionProvided && existing != null) {
+            ControlConfiguration fallback = existing.getControlModule().getControlConfiguration();
+            restored.setControlConfiguration(new ControlConfiguration(
+                    restored.getFunctionalConfiguration(), fallback.getEquipment()));
+        }
         if (!equipmentSelectionProvided || functionalChanged) {
             configureFunctionalEquipment(restored);
         }
