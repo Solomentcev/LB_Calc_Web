@@ -1,5 +1,6 @@
 package com.lb_calc_web.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -10,6 +11,7 @@ import java.util.List;
 import java.util.Objects;
 
 /** DTO комбинированного модуля LBC, включая функциональные назначения и выбранное оборудование. */
+@Schema(description = "Конфигурация комбинированного модуля LBC, объединяющего модуль хранения и управляющий модуль.")
 public class LBCDTO {
 
     private Long id;
