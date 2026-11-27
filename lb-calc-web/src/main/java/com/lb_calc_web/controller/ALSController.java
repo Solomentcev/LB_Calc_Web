@@ -91,7 +91,7 @@ public class ALSController extends BaseCatalogController {
         } catch (ValidationSizeException exception) {
             model.addAttribute("ALSErrors",
                     ValidationErrorFormatter.format(exception.getValidationResult()));
-        } catch (IllegalArgumentException | IllegalStateException exception) {
+        } catch (IllegalArgumentException | IllegalStateException | NoSuchElementException exception) {
             model.addAttribute("ALSErrors", List.of(exception.getMessage()));
         }
         model.addAttribute("als", als);
@@ -121,7 +121,7 @@ public class ALSController extends BaseCatalogController {
             model.addAttribute("ALSErrors", ValidationErrorFormatter.format(e.getValidationResult()));
             model.addAttribute("als", als);
             return "alss/als";
-        } catch (IllegalArgumentException | IllegalStateException e) {
+        } catch (IllegalArgumentException | IllegalStateException | NoSuchElementException e) {
             model.addAttribute("ALSErrors", List.of(e.getMessage()));
             model.addAttribute("als", als);
             return "alss/als";
