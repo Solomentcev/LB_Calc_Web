@@ -571,9 +571,9 @@
         }
 
         /* Компактная компоновка: параметры слева, чертёж справа. */
-        .module-editor__layout {
+         .module-editor__layout {
             display: grid;
-            grid-template-columns: minmax(0, 1fr);
+            grid-template-columns: minmax(0, 1fr) 260px;
             gap: 1.25rem;
             align-items: start;
         }
@@ -622,6 +622,8 @@
         .module-editor__preview {
             position: sticky;
             top: .75rem;
+            width: 260px;
+            max-width: 100%;
         }
         .module-editor__preview .module-section { margin-bottom: 0; }
         .module-editor__preview .module-visual {
@@ -629,7 +631,9 @@
             padding: .75rem;
         }
         .module-editor__preview .module-visual img {
-            max-height: calc(100vh - 260px);
+            max-width: 220px;
+            max-height: 300px;
+            object-fit: contain;
         }
         .module-editor .module-section { margin-bottom: .85rem; }
         .module-editor .module-section__header { padding: .75rem 1rem .65rem; }
