@@ -197,7 +197,7 @@ public class LBCService {
             boolean functionalConfigurationChanged = fallbackConfiguration != null
                     && !restored.getControlConfiguration().getFunctionalConfiguration().equals(
                     fallbackConfiguration.getFunctionalConfiguration());
-            if ((dto.getEquipment() == null && !dto.isEquipmentProvided())
+            if ((!dto.isEquipmentProvided() && dto.getSelectedEquipment().isEmpty())
                     || functionalConfigurationChanged) {
                 configureFunctionalEquipment(restored);
             }
