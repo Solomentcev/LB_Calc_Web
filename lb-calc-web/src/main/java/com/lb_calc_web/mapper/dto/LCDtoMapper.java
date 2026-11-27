@@ -4,7 +4,6 @@ import com.lb_calc_web.domain.geometry.SizeBounds;
 
 import com.lb_calc_web.domain.attributes.Colors;
 import com.lb_calc_web.domain.equipment.Equipment;
-import com.lb_calc_web.domain.model.ControlConfiguration;
 import com.lb_calc_web.domain.model.LC;
 import com.lb_calc_web.dto.LCDTO;
 
@@ -46,7 +45,6 @@ public final class LCDtoMapper {
     public static LC toDomain(
             LCDTO dto,
             Function<Long, Equipment> equipmentLookup,
-            ControlConfiguration fallbackConfiguration,
             SizeBounds bounds
     ) {
         if (dto == null) {
@@ -58,7 +56,6 @@ public final class LCDtoMapper {
                 dto.getFunctionalConfiguration(),
                 dto.getSelectedEquipment(),
                 dto.isEquipmentProvided(),
-                fallbackConfiguration,
                 equipmentLookup
         );
 
