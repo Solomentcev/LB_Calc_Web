@@ -157,8 +157,9 @@ class ALSServiceTest {
         when(alsRepository.findById(77L)).thenReturn(Optional.of(existing));
         when(alsRepository.findCandidates(anyInt(), anyInt(), anyInt(), anyInt(), any(), any()))
                 .thenReturn(List.of());
-        when(moduleRepository.findCandidates(anyInt(), anyInt(), anyInt(), anyInt(),
-                any(), any())).thenReturn(modules);
+        when(moduleRepository.findCandidates(anyInt(), anyInt(), anyInt(), anyInt(), anyInt(),
+                any(com.lb_calc_web.domain.attributes.Colors.class),
+                any(com.lb_calc_web.domain.attributes.Colors.class))).thenReturn(modules);
         when(alsRepository.save(any(ALSEntity.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
