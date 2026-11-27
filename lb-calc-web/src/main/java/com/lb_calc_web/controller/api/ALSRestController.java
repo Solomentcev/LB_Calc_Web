@@ -168,7 +168,7 @@ toDto(alsService.createALS())
                     fallback,
                     sizeBounds
             );
-            restored = alsService.prepareConfiguration(existing, restored);
+            restored = alsService.prepareConfiguration(existing, restored, dto.isEquipmentSelectionProvided());
             ALS savedDomain = alsService.saveALS(restored);
             ALSDTO saved = toDto(savedDomain);
 
