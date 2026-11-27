@@ -73,7 +73,7 @@ public class LBCController extends BaseCatalogController {
         model.addAttribute("pageContext", "CATALOG");
         logger.debug("Открытие страницы создания LBC");
 
-        prepareForm(model, toDtoWithImage(lbcService.createLBC()));
+        prepareForm(model, LBCDtoMapper.toDto(lbcService.createLBC()));
 
         return "lbcs/lbc";
     }
@@ -92,7 +92,7 @@ public class LBCController extends BaseCatalogController {
                 id
         );
 
-        prepareForm(model, toDtoWithImage(lbcService.findById(id)));
+        prepareForm(model, LBCDtoMapper.toDto(lbcService.findById(id)));
 
         return "lbcs/lbc";
     }
@@ -104,7 +104,7 @@ public class LBCController extends BaseCatalogController {
         try {
             lbc.setEquipmentSelections(equipmentCatalogService.prepareSelections(
                     lbc.getFunctionalConfiguration(), lbc.getEquipmentSelections()));
-            lbc = toDtoWithImage(lbcService.restoreDomain(lbc));
+            lbc = LBCDtoMapper.toDto(lbcService.restoreDomain(lbc));
         } catch (ValidationSizeException exception) {
             model.addAttribute("errors", ValidationErrorFormatter.format(exception.getValidationResult()));
         }
@@ -148,6 +148,14 @@ public class LBCController extends BaseCatalogController {
         model.addAttribute("lbc", lbc);
         lbc.setEquipmentSelections(equipmentCatalogService.prepareSelections(
                 lbc.getFunctionalConfiguration(), lbc.getEquipmentSelections()));
+        // Сначала определяем выбранные по умолчанию физические модели,
+        // затем строим изображение по восстановленной доменной конфигурации.
+        try {
+            lbc.setStringLBCImage(LBCImageService.getStringLBCImage(
+                    lbcService.restoreDomain(lbc)));
+        } catch (ValidationSizeException exception) {
+            lbc.setStringLBCImage(null);
+        }
         model.addAttribute("equipmentList", equipmentCatalogService.findAll().stream()
                 .map(EquipmentDtoMapper::toDto).toList());
         model.addAttribute("defaultEquipmentIds", equipmentCatalogService.findDefaultModelIds());
