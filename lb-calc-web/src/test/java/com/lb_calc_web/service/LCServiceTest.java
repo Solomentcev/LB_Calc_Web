@@ -246,6 +246,26 @@ class LCServiceTest {
                 "Ширина LC должна пересчитываться по новой физической модели дисплея");
     }
 
+    @Test
+    void configureWithoutDisplay_shouldRestoreMinimumWidth() {
+        LC domain = TestDataFactory.validLC(null);
+        Equipment display = new Equipment(
+                7992L, EquipmentFunctionalType.DISPLAY, DisplayPurpose.INCH_17,
+                EquipmentCategory.DISPLAY, "Дисплей 17", "", 400, 250, 30);
+
+        ControlConfiguration configuration = domain.getControlConfiguration();
+        configuration.setEquipment(Map.of(display, 1));
+        domain.setControlConfiguration(configuration);
+        assertEquals(450, domain.getWidth());
+
+        configuration = domain.getControlConfiguration();
+        configuration.setEquipment(Map.of());
+        domain.setControlConfiguration(configuration);
+
+        assertEquals(200, domain.getWidth(),
+                "После удаления дисплея ширина LC должна вернуться к минимуму");
+    }
+
     private List<Equipment> configureValidEquipment(LC domain) {
         Equipment display = new Equipment(
                 7101L, EquipmentFunctionalType.DISPLAY, DisplayPurpose.INCH_10,
