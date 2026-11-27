@@ -191,6 +191,14 @@ public class ALSController extends BaseCatalogController {
     private ALSDTO toDtoWithImages(ALS domain) {
         ALSDTO dto = ALSDtoMapper.toDto(domain);
         dto.setStringALSImage(ALSImageService.getStringALSImage(domain));
+        if (dto.getLC() != null) {
+            dto.getLC().setEquipmentSelections(equipmentCatalogService.prepareSelections(
+                    dto.getLC().getFunctionalConfiguration(), dto.getLC().getEquipmentSelections()));
+        }
+        if (dto.getLBC() != null) {
+            dto.getLBC().setEquipmentSelections(equipmentCatalogService.prepareSelections(
+                    dto.getLBC().getFunctionalConfiguration(), dto.getLBC().getEquipmentSelections()));
+        }
         int lbIndex = 0;
         for (com.lb_calc_web.domain.model.Module module : domain.getModules()) {
             if (module instanceof LB lb) {
