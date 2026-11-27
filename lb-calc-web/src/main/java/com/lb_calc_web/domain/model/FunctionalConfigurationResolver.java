@@ -8,6 +8,7 @@ import com.lb_calc_web.domain.equipment.EquipmentPurpose;
 import com.lb_calc_web.domain.equipment.PaymentPurpose;
 import com.lb_calc_web.domain.equipment.PrinterPurpose;
 
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -108,8 +109,9 @@ public final class FunctionalConfigurationResolver {
         }
 
         Map<EquipmentFunctionalType, Set<EquipmentPurpose>> result = new LinkedHashMap<>();
-        requirements.forEach((type, purposes) -> result.put(type, Set.copyOf(purposes)));
-        return Map.copyOf(result);
+        requirements.forEach((type, purposes) -> result.put(
+                type, Collections.unmodifiableSet(new LinkedHashSet<>(purposes))));
+        return Collections.unmodifiableMap(result);
     }
 
     /** Добавляет требование к физическому оборудованию. */
