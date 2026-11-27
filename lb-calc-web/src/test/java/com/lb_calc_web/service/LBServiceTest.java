@@ -137,7 +137,7 @@ class LBServiceTest {
     void saveLB_invalid_shouldThrowValidationException() {
         LBDTO dto = TestDataFactory.validLBDTO(null);
         dto.setHeight(10);
-        LB domain = LBDtoMapper.toDomain(dto);
+        LB domain = TestDataFactory.restoreLB(dto);
 
         assertThrows(ValidationSizeException.class, () -> lbService.saveLB(domain));
         verify(lbRepository, never()).save(any());
