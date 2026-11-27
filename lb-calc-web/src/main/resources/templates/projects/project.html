@@ -105,7 +105,7 @@
             <div>
                 <h2 class="h5 mb-1">Состав проекта</h2>
                 <p class="text-muted small mb-0">
-                    Конфигурации АКХ и их количество. Для изменения параметров откройте редактор АКХ.
+                    Каждая строка — отдельная АКХ; количество одинаковых конфигураций указано справа.
                 </p>
             </div>
             <form th:if="${project.id != null and project.id > 0}"
@@ -118,15 +118,15 @@
             В проекте пока нет конфигураций АКХ.
         </div>
 
-        <article th:each="als, item : ${project.alsList}" class="card project-als-card mb-2">
+        <article th:each="alsEntry, item : ${project.quantityALS}" class="card project-als-card mb-2">
             <div class="card-header py-2 d-flex flex-wrap align-items-center justify-content-between">
                 <div class="d-flex flex-wrap align-items-baseline">
                     <strong class="mr-2" th:text="|№${item.count}|">№1</strong>
-                    <h3 class="h6 mb-0 mr-2" th:text="${als.name}">Название АКХ</h3>
-                    <span class="text-muted small" th:text="|ID: ${als.id}|">ID АКХ</span>
+                    <h3 class="h6 mb-0 mr-2" th:text="${alsEntry.key.name}">Название АКХ</h3>
+                    <span class="text-muted small" th:text="|ID: ${alsEntry.key.id}|">ID АКХ</span>
                 </div>
                 <span class="text-muted small project-als-card__quantity"
-                      th:text="|Количество: ${project.quantityALS.get(als)} шт.|">Количество</span>
+                      th:text="|Количество: ${alsEntry.value} шт.|">Количество</span>
             </div>
 
             <div class="card-body py-2">
@@ -134,33 +134,33 @@
                     <div class="col-lg-3 project-als-card__preview"
                          th:if="${als.stringALSImage != null}">
                         <img class="img-thumbnail"
-                             th:src="|data:image/png;base64,${als.stringALSImage}|"
+                             th:src="|data:image/png;base64,${alsEntry.key.stringALSImage}|"
                              alt="Чертёж АКХ">
                     </div>
 
                     <div th:class="${als.stringALSImage != null ? 'col-lg-9' : 'col-12'}">
                         <div class="d-flex flex-wrap align-items-center small mb-2">
-                            <span class="mr-3" th:text="|${als.countCells} ячеек|">Ячейки</span>
+                            <span class="mr-3" th:text="|${alsEntry.key.countCells} ячеек|">Ячейки</span>
                             <span class="mr-3"
                                   th:text="|${#lists.size(als.lbList) + (als.LC != null or als.LBC != null ? 1 : 0)} модулей|">Модули</span>
-                            <span class="mr-3" th:text="|${als.height} × ${als.width} × ${als.depth} мм|">Габариты</span>
-                            <span th:text="|Модуль управления: ${als.positionControlModule}|">Положение</span>
+                            <span class="mr-3" th:text="|${alsEntry.key.height} × ${alsEntry.key.width} × ${alsEntry.key.depth} мм|">Габариты</span>
+                            <span th:text="|Модуль управления: ${alsEntry.key.positionControlModule}|">Положение</span>
                         </div>
 
                         <div class="project-als-card__modules">
-                            <div th:if="${als.LC != null}"
+                            <div th:if="${alsEntry.key.LC != null}"
                                  class="project-module-summary d-flex flex-wrap align-items-baseline border-top py-1">
                                 <strong class="mr-2">Модуль управления (LC)</strong>
-                                <span th:text="${als.LC.description}">Описание LC</span>
+                                <span th:text="${alsEntry.key.LC.description}">Описание LC</span>
                             </div>
 
-                            <div th:if="${als.LBC != null}"
+                            <div th:if="${alsEntry.key.LBC != null}"
                                  class="project-module-summary d-flex flex-wrap align-items-baseline border-top py-1">
                                 <strong class="mr-2">Комбинированный модуль (LBC)</strong>
-                                <span th:text="${als.LBC.description}">Описание LBC</span>
+                                <span th:text="${alsEntry.key.LBC.description}">Описание LBC</span>
                             </div>
 
-                            <div th:each="lb, lbItem : ${als.lbList}"
+                            <div th:each="lb, lbItem : ${alsEntry.key.lbList}"
                                  class="project-module-summary d-flex flex-wrap align-items-baseline border-top py-1">
                                 <strong class="mr-2" th:text="|Модуль хранения (LB ${lbItem.count})|">Модуль хранения</strong>
                                 <span th:text="${lb.description}">Описание LB</span>
@@ -169,15 +169,15 @@
 
                         <div class="d-flex flex-wrap align-items-center mt-3">
                             <a th:if="${project.id != null and project.id > 0 and als.id != null}"
-                               th:href="@{/projects/{projectId}/alss/{alsId}(projectId=${project.id},alsId=${als.id})}"
+                               th:href="@{/projects/{projectId}/alss/{alsId}(projectId=${project.id},alsId=${alsEntry.key.id})}"
                                class="btn btn-primary btn-sm">Открыть редактор АКХ</a>
 
                             <form th:if="${project.id != null and project.id > 0 and als.id != null}"
-                                  th:action="@{/projects/{projectId}/alss/{alsId}/delete(projectId=${project.id},alsId=${als.id})}"
+                                  th:action="@{/projects/{projectId}/alss/{alsId}/delete(projectId=${project.id},alsId=${alsEntry.key.id})}"
                                   method="post" class="ml-2"
-                                  onsubmit="return confirm('Удалить один экземпляр этой конфигурации АКХ из проекта?');">
+                                  onsubmit="return confirm('Уменьшить количество этой АКХ на один?');">
                                 <button type="submit" class="btn btn-outline-danger btn-sm">
-                                    Удалить один экземпляр
+                                    Уменьшить количество
                                 </button>
                             </form>
                         </div>
