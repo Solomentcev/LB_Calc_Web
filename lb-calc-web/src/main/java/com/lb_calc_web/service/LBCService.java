@@ -213,6 +213,7 @@ public class LBCService {
                         typeLb.getServiceZoneWidth(), domain.getDoorThickness(),
                         domain.getDirectionDoorOpening(), domain.getCountCells())
                 .stream()
+                .filter(entity -> !Objects.equals(entity.getId(), domain.getId()))
                 .filter(entity -> toDomain(entity).equals(domain))
                 .findFirst();
 
