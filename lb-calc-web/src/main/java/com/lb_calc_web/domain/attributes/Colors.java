@@ -1,36 +1,34 @@
 package com.lb_calc_web.domain.attributes;
 
-import java.awt.*;
-
-/** Цвета корпуса и дверей модулей, сопоставленные с цветами {@link java.awt.Color}. */
+/** Цвета корпуса и дверей модулей в независимом от графической библиотеки RGB-представлении. */
 public enum Colors {
-    Black(Color.BLACK),
-    Blue(Color.BLUE),
-    Cyan(Color.CYAN),
-    DarkGray(Color.DARK_GRAY),
-    Gray(Color.GRAY),
-    Green(Color.GREEN),
-    LightGray(Color.lightGray),
-    Magenta(Color.MAGENTA),
-    Orange(Color.ORANGE),
-    Pink(Color.PINK),
-    Red(Color.RED),
-    White(Color.WHITE),
-    Yellow(Color.YELLOW);
-    final Color color;
-    final String name;
-    Colors(Color color){
-        this.color=color;
-        name= String.valueOf(this);
+    Black(0x000000),
+    Blue(0x0000FF),
+    Cyan(0x00FFFF),
+    DarkGray(0x404040),
+    Gray(0x808080),
+    Green(0x00FF00),
+    LightGray(0xC0C0C0),
+    Magenta(0xFF00FF),
+    Orange(0xFFC800),
+    Pink(0xFFAFAF),
+    Red(0xFF0000),
+    White(0xFFFFFF),
+    Yellow(0xFFFF00);
+
+    private final int rgb;
+
+    Colors(int rgb) {
+        this.rgb = rgb;
     }
 
-    /** @return цвет для построения графического представления */
-    public Color getColor() {
-        return color;
+    /** Возвращает RGB-значение цвета без зависимости домена от AWT. */
+    public int getRgb() {
+        return rgb;
     }
 
-    /** @return имя константы цвета */
+    /** Возвращает имя константы цвета. */
     public String getName() {
-        return name;
+        return name();
     }
 }
