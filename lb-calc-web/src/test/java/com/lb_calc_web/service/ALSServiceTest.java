@@ -2,6 +2,10 @@ package com.lb_calc_web.service;
 
 import com.lb_calc_web.TestDataFactory;
 import com.lb_calc_web.domain.model.ALS;
+import com.lb_calc_web.domain.model.ControlConfiguration;
+import com.lb_calc_web.domain.attributes.TypeLb;
+import com.lb_calc_web.dto.ALSDTO;
+import com.lb_calc_web.mapper.dto.ALSDtoMapper;
 import com.lb_calc_web.entity.ALSEntity;
 import com.lb_calc_web.mapper.entity.ALSEntityMapper;
 import com.lb_calc_web.mapper.entity.ModuleEntityMapper;
@@ -155,7 +159,8 @@ class ALSServiceTest {
 
         ALS existing = service.findById(15L);
         var dto = com.lb_calc_web.mapper.dto.ALSDtoMapper.toDto(existing);
-        ALS restored = service.restoreDomain(dto);
+        ALS restored = service.preserveExistingModules(existing,
+                restoreAlsDto(dto, existing.getControlModule().getControlConfiguration()));
 
         assertEquals("Сохранённое название АКХ", restored.getName());
         assertEquals("Сохранённое описание АКХ", restored.getDescription());
@@ -198,10 +203,25 @@ class ALSServiceTest {
     void restoreDomain_shouldConvertDtoWithoutLegacyCatalogDependencies() {
         var dto = TestDataFactory.validALSDTO(3L);
         dto.setId(null);
-        ALS result = service.restoreDomain(dto);
+        ALS result = restoreAlsDto(dto, null);
 
         assertNotNull(result);
         assertEquals(3, result.getModules().size());
-        verifyNoInteractions(equipmentRepository);
     }
+    private ALS restoreAlsDto(ALSDTO dto, ControlConfiguration fallback) {
+        return ALSDtoMapper.toDomain(
+                dto,
+                value -> new TypeLb(value.getType(), value.getDeltaWidth(),
+                        value.getShelfThick(), value.getServiceZoneWidth()),
+                value -> new TypeLb(value.getType(), value.getDeltaWidth(),
+                        value.getShelfThick(), value.getServiceZoneWidth()),
+                equipmentId -> {
+                    throw new IllegalStateException(
+                            "Оборудование в этом тесте не должно загружаться");
+                },
+                fallback,
+                TestDataFactory.createSizeBounds()
+        );
+    }
+
 }
