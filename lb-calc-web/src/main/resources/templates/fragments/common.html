@@ -573,7 +573,7 @@
         /* Компактная компоновка: параметры слева, чертёж справа. */
          .module-editor__layout {
             display: grid;
-            grid-template-columns: minmax(0, 1fr) 260px;
+            grid-template-columns: minmax(0, 1fr) 400px;
             gap: 1.25rem;
             align-items: start;
         }
@@ -613,8 +613,8 @@
             display: block;
             width: auto;
             height: auto;
-            max-width: 220px;
-            max-height: 300px;
+            max-width: 360px;
+            max-height: 500px;
             object-fit: contain;
         }
         .module-editor__parameters,
@@ -622,12 +622,12 @@
         .module-editor__preview {
             position: sticky;
             top: .75rem;
-            width: 260px;
+            width: 400px;
             max-width: 100%;
         }
         .module-editor__preview .module-section { margin-bottom: 0; }
         .module-editor__preview .module-visual {
-            min-height: 260px;
+            min-height: 420px;
             padding: .75rem;
         }
         .module-editor__preview .module-visual img {
