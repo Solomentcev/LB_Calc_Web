@@ -231,8 +231,8 @@
                                              : '/alss/' + als.id + '/lcs/' + als.LC.id}}"
                                    class="btn btn-outline-primary btn-sm mt-3">Редактировать LC</a>
                             </div>
-                            <div class="module-card-layout__drawing">
-                                <div class="module-visual module-visual--module" th:if="${als.LC.stringLCImage != null}">
+                            <div class="module-card-layout__drawing" th:if="${als.LC.stringLCImage != null}">
+                                <div class="module-visual module-visual--module">
                                     <img th:src="|data:image/png;base64,${als.LC.stringLCImage}|"
                                          alt="Чертёж модуля управления LC">
                                 </div>
@@ -310,8 +310,8 @@
                                              : '/alss/' + als.id + '/lbcs/' + als.LBC.id}}"
                                    class="btn btn-outline-primary btn-sm mt-3">Редактировать LBC</a>
                             </div>
-                            <div class="module-card-layout__drawing">
-                                <div class="module-visual module-visual--module" th:if="${als.LBC.stringLBCImage != null}">
+                            <div class="module-card-layout__drawing" th:if="${als.LBC.stringLBCImage != null}">
+                                <div class="module-visual module-visual--module">
                                     <img th:src="|data:image/png;base64,${als.LBC.stringLBCImage}|"
                                          alt="Чертёж совмещённого модуля LBC">
                                 </div>
@@ -384,8 +384,8 @@
                                         </button>
                                     </div>
                                 </div>
-                                <div class="module-card-layout__drawing">
-                                    <div class="module-visual module-visual--module" th:if="${lb.stringLBImage != null}">
+                                <div class="module-card-layout__drawing" th:if="${lb.stringLBImage != null}">
+                                    <div class="module-visual module-visual--module">
                                         <img th:src="|data:image/png;base64,${lb.stringLBImage}|"
                                              th:alt="|Чертёж модуля хранения ${lb.name}|">
                                     </div>
