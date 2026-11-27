@@ -222,8 +222,7 @@ public class ProjectRestController {
                                 fallback,
                                 sizeBounds
                         );
-                        alsService.configureFunctionalEquipment(restored);
-                        return alsService.preserveExistingModules(existing, restored);
+                        return alsService.prepareConfiguration(existing, restored);
                     }
             );
             Project saved = projectService.saveProject(domain);
@@ -325,8 +324,7 @@ public class ProjectRestController {
                     fallback,
                     sizeBounds
             );
-            alsService.configureFunctionalEquipment(restored);
-            ALS replacement = alsService.preserveExistingModules(existing, restored);
+            ALS replacement = alsService.prepareConfiguration(existing, restored);
             ALS saved = projectService.replaceALSandSaveProject(
                     projectId,
                     alsId,
