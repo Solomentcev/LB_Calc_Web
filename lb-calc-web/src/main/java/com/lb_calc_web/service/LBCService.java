@@ -173,7 +173,9 @@ public class LBCService {
     /** Дополняет комплектацию LBC физическими моделями по функциональным назначениям. */
     public void configureFunctionalEquipment(LBC domain) {
         Objects.requireNonNull(domain, "LBC не должен быть null");
-        equipmentCatalogService.configureFunctionalEquipment(domain.getControlConfiguration());
+        ControlConfiguration configuration = domain.getControlConfiguration();
+        equipmentCatalogService.configureFunctionalEquipment(configuration);
+        domain.setControlConfiguration(configuration);
     }
 
     /** Проверяет и сохраняет доменную конфигурацию LBC. */
@@ -195,7 +197,10 @@ public class LBCService {
         }
 
         findOrCreateLockService.acquire();
-        if (domain.getId() != null && lbcRepository.findById(domain.getId()).isEmpty()) {
+        Optional<LBCEntity> existing = domain.getId() == null
+                ? Optional.empty()
+                : lbcRepository.findById(domain.getId());
+        if (domain.getId() != null && existing.isEmpty()) {
             throw new NoSuchElementException("LBC с id=" + domain.getId() + " не найден");
         }
 
@@ -215,8 +220,9 @@ public class LBCService {
             return toDomain(duplicate.get());
         }
 
-        LBCEntity saved = lbcRepository.save(
-                LBCEntityMapper.toEntity(domain, this::findEquipmentEntity));
+        LBCEntity entity = existing.orElseGet(LBCEntity::create);
+        LBCEntityMapper.updateEntity(domain, entity, this::findEquipmentEntity);
+        LBCEntity saved = lbcRepository.save(entity);
         domain.setId(saved.getId());
         logger.info("LBC сохранён, id={}", saved.getId());
         return domain;
