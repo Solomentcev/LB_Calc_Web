@@ -172,14 +172,6 @@ public class EquipmentCatalogService {
                 .toList();
     }
 
-    /** Возвращает идентификаторы моделей, выбранных по умолчанию в каталоге. */
-    @Transactional(readOnly = true)
-    public java.util.Set<Long> findDefaultModelIds() {
-        return equipmentRepository.findAllByDefaultModelTrue().stream()
-                .map(EquipmentEntity::getId)
-                .collect(java.util.stream.Collectors.toUnmodifiableSet());
-    }
-
     /** Находит модель оборудования по идентификатору. */
     @Transactional(readOnly = true)
     public Equipment findById(Long id) {
