@@ -5,6 +5,8 @@ import com.lb_calc_web.dto.ChangePasswordDTO;
 import com.lb_calc_web.dto.CreateEmployeeDTO;
 import com.lb_calc_web.dto.EmployeeDTO;
 import com.lb_calc_web.dto.ProfileDTO;
+import com.lb_calc_web.domain.model.Employee;
+import com.lb_calc_web.mapper.dto.EmployeeDtoMapper;
 import com.lb_calc_web.service.AuthService;
 import com.lb_calc_web.service.EmployeeService;
 import jakarta.validation.Valid;
@@ -37,7 +39,7 @@ public class EmployeeRestController {
     public ResponseEntity<?> getAllEmployees() {
 
             List<EmployeeDTO> employees =
-                    employeeService.findAll();
+                    EmployeeDtoMapper.toDtoList(employeeService.findAll());
 
             return ResponseEntity.ok(
                     ApiResponse.success(employees)
@@ -62,7 +64,7 @@ public class EmployeeRestController {
     ) {
 
             EmployeeDTO employee =
-                    employeeService.loadUserById(id);
+                    EmployeeDtoMapper.toDto(employeeService.loadUserById(id));
 
             return ResponseEntity.ok(
                     ApiResponse.success(employee)
@@ -100,8 +102,7 @@ public class EmployeeRestController {
             @RequestBody @Valid ProfileDTO employeeUpd
     ) {
 
-            EmployeeDTO employee =
-                    employeeService.loadUserById(id);
+            Employee employee = employeeService.loadUserById(id);
 
             if (!employee.getEmail().equals(
                     employeeUpd.getEmail()
@@ -115,24 +116,14 @@ public class EmployeeRestController {
                 );
             }
 
-            employee.setFirstName(
-                    employeeUpd.getFirstName()
-            );
-
-            employee.setLastName(
-                    employeeUpd.getLastName()
-            );
-
-            employee.setEmail(
+            employee.changePersonalData(
+                    employeeUpd.getFirstName(),
+                    employeeUpd.getLastName(),
                     employeeUpd.getEmail()
             );
+            employee.changeRole(employeeUpd.getRole());
 
-            employee.setRole(
-                    employeeUpd.getRole()
-            );
-
-            EmployeeDTO saved =
-                    employeeService.save(employee);
+            EmployeeDTO saved = EmployeeDtoMapper.toDto(employeeService.save(employee));
 
             return ResponseEntity.ok(
                     ApiResponse.success(saved)
@@ -177,7 +168,7 @@ public class EmployeeRestController {
     public ResponseEntity<?> getCurrentProfile() {
 
             return ResponseEntity.ok(
-                    ApiResponse.success(employeeService.getCurrentEmployee())
+                    ApiResponse.success(EmployeeDtoMapper.toDto(employeeService.getCurrentEmployee()))
             );
 
     }
@@ -189,7 +180,7 @@ public class EmployeeRestController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> getAllProfiles() {
         return ResponseEntity.ok(
-                ApiResponse.success(employeeService.getAllProfiles())
+                ApiResponse.success(EmployeeDtoMapper.toProfileDtoList(employeeService.getAllProfiles()))
         );
     }
 
@@ -203,7 +194,7 @@ public class EmployeeRestController {
     ) {
 
             return ResponseEntity.ok(
-                    ApiResponse.success(employeeService.getProfileById(id))
+                    ApiResponse.success(EmployeeDtoMapper.toProfileDto(employeeService.getProfileById(id)))
             );
 
     }
@@ -220,7 +211,7 @@ public class EmployeeRestController {
             throw new IllegalArgumentException("Пароли не совпадают");
         }
 
-            EmployeeDTO currentEmployee = employeeService.getCurrentEmployee();
+            Employee currentEmployee = employeeService.getCurrentEmployee();
             authService.changePassword(currentEmployee.getId(), passwordDTO.getPassword());
             return ResponseEntity.ok(
                     ApiResponse.success("Пароль успешно изменён")
