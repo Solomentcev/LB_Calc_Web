@@ -412,15 +412,17 @@ public class ALSService {
 
     /** Заменяет LC в ALS и сохраняет обновлённую конфигурацию. */
     @Transactional
-    public ALS replaceLCandSaveALS(ALS als, LC replacement) {
-        configureFunctionalEquipment(replacement);
+    public ALS replaceLCandSaveALS(ALS als, LC replacement, boolean equipmentSelectionProvided) {
+        ControlConfiguration fallback = als.getControlModule().getControlConfiguration();
+        prepareFunctionalEquipment(replacement, fallback, equipmentSelectionProvided);
         return saveALS(replaceLC(als, replacement));
     }
 
     /** Заменяет LBC в ALS и сохраняет обновлённую конфигурацию. */
     @Transactional
-    public ALS replaceLBCandSaveALS(ALS als, LBC replacement) {
-        configureFunctionalEquipment(replacement);
+    public ALS replaceLBCandSaveALS(ALS als, LBC replacement, boolean equipmentSelectionProvided) {
+        ControlConfiguration fallback = als.getControlModule().getControlConfiguration();
+        prepareFunctionalEquipment(replacement, fallback, equipmentSelectionProvided);
         return saveALS(replaceLBC(als, replacement));
     }
 
@@ -435,10 +437,30 @@ public class ALSService {
      * Подбирает недостающую физическую комплектацию и сохраняет идентичность
      * неизменённых модулей относительно исходной конфигурации.
      */
-    public ALS prepareConfiguration(ALS existing, ALS restored) {
+    public ALS prepareConfiguration(
+            ALS existing, ALS restored, boolean equipmentSelectionProvided
+    ) {
         Objects.requireNonNull(restored, "Восстановленная ALS не должна быть null");
-        configureFunctionalEquipment(restored);
+        boolean functionalChanged = existing != null
+                && !existing.getFunctionalConfiguration().equals(restored.getFunctionalConfiguration());
+        if (!equipmentSelectionProvided || functionalChanged) {
+            configureFunctionalEquipment(restored);
+        }
         return preserveExistingModules(existing, restored);
+    }
+
+    /** Подготавливает комплектацию LC с учётом прежнего функционального назначения. */
+    public void prepareFunctionalEquipment(
+            LC domain, ControlConfiguration fallback, boolean equipmentSelectionProvided
+    ) {
+        lcService.prepareFunctionalEquipment(domain, fallback, equipmentSelectionProvided);
+    }
+
+    /** Подготавливает комплектацию LBC с учётом прежнего функционального назначения. */
+    public void prepareFunctionalEquipment(
+            LBC domain, ControlConfiguration fallback, boolean equipmentSelectionProvided
+    ) {
+        lbcService.prepareFunctionalEquipment(domain, fallback, equipmentSelectionProvided);
     }
 
     /**
