@@ -289,7 +289,6 @@ public class ALSController extends BaseCatalogController {
         model.addAttribute("lc", toDtoWithImage(lc));
         model.addAttribute("equipmentList", equipmentCatalogService.findAll().stream()
                 .map(EquipmentDtoMapper::toDto).toList());
-        model.addAttribute("defaultEquipmentIds", equipmentCatalogService.findDefaultModelIds());
         return "lcs/lc";
     }
 
@@ -324,7 +323,6 @@ public class ALSController extends BaseCatalogController {
             model.addAttribute("lc", lc);
             model.addAttribute("equipmentList", equipmentCatalogService.findAll().stream()
                 .map(EquipmentDtoMapper::toDto).toList());
-        model.addAttribute("defaultEquipmentIds", equipmentCatalogService.findDefaultModelIds());
             return "lcs/lc";
         } catch (IllegalArgumentException | IllegalStateException | NoSuchElementException exception) {
             model.addAttribute("errors", List.of(exception.getMessage()));
@@ -333,7 +331,6 @@ public class ALSController extends BaseCatalogController {
             model.addAttribute("lc", lc);
             model.addAttribute("equipmentList", equipmentCatalogService.findAll().stream()
                 .map(EquipmentDtoMapper::toDto).toList());
-        model.addAttribute("defaultEquipmentIds", equipmentCatalogService.findDefaultModelIds());
             return "lcs/lc";
         }
     }
@@ -362,7 +359,6 @@ public class ALSController extends BaseCatalogController {
         model.addAttribute("lc", lc);
             model.addAttribute("equipmentList", equipmentCatalogService.findAll().stream()
                 .map(EquipmentDtoMapper::toDto).toList());
-        model.addAttribute("defaultEquipmentIds", equipmentCatalogService.findDefaultModelIds());
         return "lcs/lc";
     }
 
@@ -383,7 +379,6 @@ public class ALSController extends BaseCatalogController {
         model.addAttribute("lbc", toDtoWithImage(alsService.findLBCInALS(domain, lbcId)));
         model.addAttribute("equipmentList", equipmentCatalogService.findAll().stream()
                 .map(EquipmentDtoMapper::toDto).toList());
-        model.addAttribute("defaultEquipmentIds", equipmentCatalogService.findDefaultModelIds());
         return "lbcs/lbc";
     }
 
@@ -414,7 +409,6 @@ public class ALSController extends BaseCatalogController {
             model.addAttribute("lbc", lbc);
             model.addAttribute("equipmentList", equipmentCatalogService.findAll().stream()
                 .map(EquipmentDtoMapper::toDto).toList());
-        model.addAttribute("defaultEquipmentIds", equipmentCatalogService.findDefaultModelIds());
             return "lbcs/lbc";
         } catch (IllegalArgumentException | IllegalStateException | NoSuchElementException exception) {
             model.addAttribute("errors", List.of(exception.getMessage()));
@@ -422,7 +416,6 @@ public class ALSController extends BaseCatalogController {
             model.addAttribute("lbc", lbc);
             model.addAttribute("equipmentList", equipmentCatalogService.findAll().stream()
                 .map(EquipmentDtoMapper::toDto).toList());
-        model.addAttribute("defaultEquipmentIds", equipmentCatalogService.findDefaultModelIds());
             return "lbcs/lbc";
         }
     }
@@ -451,7 +444,6 @@ public class ALSController extends BaseCatalogController {
         model.addAttribute("lbc", lbc);
             model.addAttribute("equipmentList", equipmentCatalogService.findAll().stream()
                 .map(EquipmentDtoMapper::toDto).toList());
-        model.addAttribute("defaultEquipmentIds", equipmentCatalogService.findDefaultModelIds());
         return "lbcs/lbc";
     }
 
