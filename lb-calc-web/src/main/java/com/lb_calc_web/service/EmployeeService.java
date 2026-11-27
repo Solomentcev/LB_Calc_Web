@@ -66,26 +66,7 @@ public class EmployeeService implements UserDetailsService {
         );
     }
 
-    /**
-     * Обычная загрузка сотрудника приложения.
-     *
-     * Возвращает DTO, а не Security Principal.
-     */
-    @Transactional(readOnly = true)
-    public Employee loadUserByEmail(String email) {
-
-        EmployeeEntity entity = employeeRepository
-                .findByEmail(email)
-                .orElseThrow(() ->
-                        new UsernameNotFoundException(
-                                "Пользователь " + email + " не найден"
-                        )
-                );
-
-        return EmployeeEntityMapper.toDomain(entity);
-    }
-
-    /** Возвращает DTO сотрудника по числовому идентификатору. */
+    /** Загружает доменного сотрудника по числовому идентификатору. */
     public Employee loadUserById(int id) {
         return loadUserById((long) id);
     }
@@ -323,22 +304,6 @@ public class EmployeeService implements UserDetailsService {
                 .toList();
     }
 
-    /** Возвращает профили всех сотрудников. */
-    @Transactional(readOnly = true)
-    public List<Employee> getAllProfiles() {
-
-        List<EmployeeEntity> entities =
-                employeeRepository.findAll();
-
-        entities.sort(
-                Comparator.comparing(EmployeeEntity::getId)
-        );
-
-        return entities.stream()
-                .map(EmployeeEntityMapper::toProfileDto)
-                .toList();
-    }
-
     /** Проверяет наличие учётной записи с указанным email. */
     @Transactional(readOnly = true)
     public boolean existsByEmail(String email) {
@@ -347,7 +312,7 @@ public class EmployeeService implements UserDetailsService {
     }
 
     /**
-     * Возвращает DTO текущего сотрудника для границы представления.
+     * Возвращает доменную модель текущего сотрудника.
      */
     @Transactional(readOnly = true)
     public Employee getCurrentEmployee() {
