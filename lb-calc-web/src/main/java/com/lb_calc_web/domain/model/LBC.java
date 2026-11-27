@@ -1,6 +1,7 @@
 package com.lb_calc_web.domain.model;
 
 import com.lb_calc_web.domain.attributes.Colors;
+import com.lb_calc_web.service.validation.size.SizeBounds;
 import com.lb_calc_web.domain.attributes.DirectionDoorOpening;
 import com.lb_calc_web.domain.attributes.TypeLb;
 import com.lb_calc_web.domain.equipment.Equipment;
@@ -18,7 +19,7 @@ import java.util.Objects;
  */
 public class LBC extends StorageModule implements ControlModule {
 
-    private final ModuleGeometryBounds bounds;
+    private final SizeBounds bounds;
 
     private ControlConfiguration controlConfiguration;
     private int technicalCellWidth;
@@ -32,7 +33,7 @@ public class LBC extends StorageModule implements ControlModule {
     public LBC(int height, int width, int depth, int upperFrame, int bottomFrame,
                Colors colorBody, Colors colorDoor, TypeLb typeLb, int countCells,
                DirectionDoorOpening directionDoorOpening, int doorThickness,
-               ControlConfiguration controlConfiguration, ModuleGeometryBounds bounds) {
+               ControlConfiguration controlConfiguration, SizeBounds bounds) {
         super(doorThickness);
         this.bounds = Objects.requireNonNull(bounds, "Ограничения геометрии не должны быть null");
         setHeight(height);

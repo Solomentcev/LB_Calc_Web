@@ -1,6 +1,7 @@
 package com.lb_calc_web.domain.model;
 
 import com.lb_calc_web.domain.attributes.Colors;
+import com.lb_calc_web.service.validation.size.SizeBounds;
 import com.lb_calc_web.domain.equipment.Equipment;
 import com.lb_calc_web.domain.equipment.EquipmentFunctionalType;
 
@@ -23,7 +24,7 @@ import java.util.Objects;
  */
 public class LC extends Module implements ControlModule {
 
-    private final ModuleGeometryBounds bounds;
+    private final SizeBounds bounds;
 
     /** Конфигурация функций управления LC. */
     private ControlConfiguration controlConfiguration;
@@ -32,7 +33,7 @@ public class LC extends Module implements ControlModule {
     public LC(int height, int width, int depth, int upperFrame, int bottomFrame,
               Colors colorBody, Colors colorDoor,
               ControlConfiguration controlConfiguration,
-              ModuleGeometryBounds bounds) {
+              SizeBounds bounds) {
         this.bounds = Objects.requireNonNull(bounds, "Ограничения геометрии не должны быть null");
         setHeight(height);
         setWidth(width);
