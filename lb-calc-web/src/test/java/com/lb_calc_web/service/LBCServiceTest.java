@@ -123,6 +123,26 @@ class LBCServiceTest {
     }
 
     @Test
+    void configureFunctionalEquipment_shouldApplySelectedModelsToLbc() {
+        LBC domain = TestDataFactory.validLBC(null);
+        var functional = domain.getControlConfiguration().getFunctionalConfiguration();
+        var display = new com.lb_calc_web.domain.equipment.Equipment(
+                7991L, com.lb_calc_web.domain.equipment.EquipmentFunctionalType.DISPLAY,
+                functional.getDisplay(), com.lb_calc_web.domain.equipment.EquipmentCategory.DISPLAY,
+                "Дисплей", "", 300, 180, 30);
+        doAnswer(invocation -> {
+            var configuration = invocation.<com.lb_calc_web.domain.model.ControlConfiguration>getArgument(0);
+            configuration.setEquipment(Map.of(display, 1));
+            return null;
+        }).when(equipmentCatalogService).configureFunctionalEquipment(
+                any(com.lb_calc_web.domain.model.ControlConfiguration.class));
+
+        service.configureFunctionalEquipment(domain);
+
+        assertEquals(Map.of(display, 1), domain.getEquipment());
+    }
+
+    @Test
     void findById_shouldReturnMappedDomain() {
         LBCEntity entity = spy(LBCEntityMapper.toEntity(
                 TestDataFactory.validLBC(null), equipment -> null));
