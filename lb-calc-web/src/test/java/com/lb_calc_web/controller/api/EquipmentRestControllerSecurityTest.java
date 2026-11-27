@@ -106,6 +106,15 @@ class EquipmentRestControllerSecurityTest {
 
     @Test
     @WithMockUser(authorities = "ROLE_ADMIN")
+    void unknownApiRoute_shouldReturn404ApiErrorEnvelope() throws Exception {
+        mockMvc.perform(get("/api/v1/unknown-resource"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value("error"))
+                .andExpect(jsonPath("$.message").value("Запрашиваемый ресурс не найден"));
+    }
+
+    @Test
+    @WithMockUser(authorities = "ROLE_ADMIN")
     void unsupportedMethod_shouldReturn405ApiErrorEnvelope() throws Exception {
         mockMvc.perform(put("/api/v1/equipment"))
                 .andExpect(status().isMethodNotAllowed())
