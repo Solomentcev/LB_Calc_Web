@@ -4,9 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 /** DTO комбинированного модуля LBC, включая функциональные назначения и выбранное оборудование. */
@@ -46,7 +44,6 @@ public class LBCDTO {
     /** Выбранные модели с названиями и характеристиками для отображения в форме. */
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private List<EquipmentDTO> selectedEquipment = new ArrayList<>();
-    private Map<Long, Integer> equipment;
     @JsonIgnore
     private boolean equipmentProvided;
 
@@ -233,14 +230,6 @@ public class LBCDTO {
         this.selectedEquipment = selectedEquipment == null ? new ArrayList<>() : new ArrayList<>(selectedEquipment);
     }
 
-    public Map<Long, Integer> getEquipment() {
-        return equipment == null ? null : Map.copyOf(equipment);
-    }
-
-    public void setEquipment(Map<Long, Integer> equipment) {
-        this.equipment = equipment == null ? null : new LinkedHashMap<>(equipment);
-    }
-
     public boolean isEquipmentProvided() {
         return equipmentProvided;
     }
@@ -279,7 +268,7 @@ public class LBCDTO {
         return Objects.hash(type, height, width, depth, upperFrame, bottomFrame, shelfThick,
                 deltaWidth, serviceZoneWidth, doorThickness, countCells, heightCell,
                 widthCell, depthCell, directionDoorOpening, colorDoor, colorBody,
-                functionalConfiguration, equipment);
+                functionalConfiguration);
     }
 
     @Override
@@ -289,7 +278,6 @@ public class LBCDTO {
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
                 ", functionalConfiguration=" + functionalConfiguration +
-                ", equipment=" + equipment +
                 '}';
     }
 }
