@@ -267,17 +267,6 @@ public class LCService {
         return result;
     }
 
-    private com.lb_calc_web.domain.equipment.Equipment findEquipment(Long id) {
-        if (id == null || id <= 0) {
-            throw new IllegalArgumentException(
-                    "Идентификатор модели оборудования должен быть положительным");
-        }
-        EquipmentEntity entity = equipmentRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException(
-                        "Модель оборудования с id=" + id + " не найдена"));
-        return EquipmentEntityMapper.toDomain(entity);
-    }
-
     private EquipmentEntity findEquipmentEntity(
             com.lb_calc_web.domain.equipment.Equipment equipment
     ) {
