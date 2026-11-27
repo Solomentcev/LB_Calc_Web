@@ -218,6 +218,10 @@ public class ALSService {
 
         List<ModuleEntity> cache = new ArrayList<>();
         ALSEntity entity = existing.orElseGet(ALSEntity::new);
+        if (existing.isPresent()) {
+            entity.moveModuleOrdersToTemporary();
+            alsRepository.flush();
+        }
         ALSEntityMapper.updateEntity(domain, entity, module -> resolveModule(module, cache));
         ALSEntity saved = alsRepository.save(entity);
         domain.setId(saved.getId());
