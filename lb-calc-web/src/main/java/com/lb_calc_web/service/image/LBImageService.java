@@ -10,7 +10,6 @@ import java.awt.geom.AffineTransform;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.util.Base64;
 
@@ -377,43 +376,6 @@ static Image createLBImage(
      * Формирует изображение LB для представления.
      */
     /** Создаёт PNG-файл изображения модуля хранения LB. */
-    public static File getFileLBImage(
-            LB lb
-    ) {
-
-        BufferedImage img =
-                (BufferedImage) createLBImage(lb);
-
-        File file =
-                new File(
-                        "src/main/resources/static/lbs/lb"
-                                + lb.getId()
-                                + ".png"
-                );
-
-        try {
-
-            file.createNewFile();
-
-            ImageIO.write(
-                    img,
-                    "png",
-                    file
-            );
-
-        } catch (IOException e) {
-
-            throw new RuntimeException(
-                    "Error creating file: "
-                            + e.getMessage(),
-                    e
-            );
-        }
-
-        return file;
-    }
-
-    /** Возвращает PNG-изображение LB в виде массива байтов. */
     public static byte[] getBytesArrayLBImage(
             LB lb
     ) {
