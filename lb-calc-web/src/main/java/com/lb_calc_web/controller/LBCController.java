@@ -155,7 +155,7 @@ public class LBCController extends BaseCatalogController {
             LBC domain = LBCDtoMapper.toDomain(
                     lbc, TypeLbFactory.forLBC(environment, lbc.getType()),
                     equipmentCatalogService::findById, fallback, sizeBounds);
-            lbcService.configureFunctionalEquipment(domain);
+            lbcService.prepareFunctionalEquipment(domain, fallback, lbc.isEquipmentProvided());
             LBC saved = lbcService.saveLBC(domain);
 
             return "redirect:/lbcs/" + saved.getId();
