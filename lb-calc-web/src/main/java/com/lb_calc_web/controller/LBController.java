@@ -116,7 +116,7 @@ public class LBController {
         try {
 
             LBDTO savedLB =
-                    LBDtoMapper.toDto(lbService.saveLB(LBDtoMapper.toDomain(lb)));
+                    LBDtoMapper.toDto(lbService.saveLB(LBDtoMapper.toDomain(lb, TypeLbFactory.forLB(environment, lb.getType()))));
 
             return "redirect:/lbs/" + savedLB.getId();
 
