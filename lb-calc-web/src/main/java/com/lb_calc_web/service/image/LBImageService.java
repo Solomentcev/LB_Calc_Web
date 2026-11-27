@@ -15,7 +15,10 @@ import java.io.IOException;
 import java.util.Base64;
 
 /** Генерирует графическое представление модуля хранения LB. */
-public class LBImageService {
+public final class LBImageService {
+
+    private LBImageService() {
+    }
 
 static Image createLBImage(
             LB lb
