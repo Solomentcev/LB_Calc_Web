@@ -5,6 +5,7 @@ import com.lb_calc_web.domain.geometry.SizeBounds;
 import com.lb_calc_web.domain.attributes.TypeLb;
 import com.lb_calc_web.domain.equipment.Equipment;
 import com.lb_calc_web.domain.model.ControlConfiguration;
+import com.lb_calc_web.domain.model.FunctionalConfiguration;
 import com.lb_calc_web.domain.model.LBC;
 import com.lb_calc_web.domain.model.Module;
 import com.lb_calc_web.dto.LBCDTO;
@@ -53,7 +54,9 @@ public final class LBCEntityMapper {
                 entity.getServiceZoneWidth()
         );
         ControlConfiguration configuration = new ControlConfiguration(
-                entity.getFunctionalConfiguration(),
+                new FunctionalConfiguration(
+                        entity.getDisplayPurpose(), entity.getAccessPurposes(),
+                        entity.getPaymentPurpose(), entity.getPrinterPurpose()),
                 equipment
         );
         LBC domain = new LBC(
@@ -128,7 +131,11 @@ public final class LBCEntityMapper {
         entity.setCountCells(domain.getCountCells());
 
         ControlConfiguration configuration = domain.getControlConfiguration();
-        entity.setFunctionalConfiguration(configuration.getFunctionalConfiguration());
+        FunctionalConfiguration functional = configuration.getFunctionalConfiguration();
+        entity.setDisplayPurpose(functional.getDisplay());
+        entity.setAccessPurposes(functional.getAccess());
+        entity.setPaymentPurpose(functional.getPayment());
+        entity.setPrinterPurpose(functional.getPrinter());
         Set<EquipmentQuantityEmbeddable> equipment = configuration.getEquipment().entrySet()
                 .stream()
                 .map(entry -> new EquipmentQuantityEmbeddable(
