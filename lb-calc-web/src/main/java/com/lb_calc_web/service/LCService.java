@@ -207,11 +207,6 @@ public class LCService {
         }
     }
 
-    /** Принудительно дополняет комплектацию LC по функциональным назначениям. */
-    public void configureFunctionalEquipment(LC domain) {
-        prepareFunctionalEquipment(domain, null, false);
-    }
-
     /** Проверяет и сохраняет доменную конфигурацию LC. */
     @Transactional
     public LC saveLC(LC domain) {
