@@ -171,10 +171,7 @@ public class ALSService {
         LC lc = lcService.createLC(height, depth, upperFrame, bottomFrame, colorBody);
         LB lb = lbService.createLB(height, depth, upperFrame, bottomFrame, colorBody, colorDoor);
 
-        String configuredPosition = environment.getProperty(
-                "als.position.control-module.default",
-                getRequired("als.position.lc.default")
-        );
+        String configuredPosition = getRequired("als.position.control-module.default");
         PositionControlModule position = PositionControlModule.valueOf(configuredPosition);
 
         List<Module> modules = new ArrayList<>();
@@ -236,7 +233,7 @@ public class ALSService {
     }
 
     /** Подбирает и устанавливает физическую комплектацию управляющего модуля ALS. */
-    public void configureFunctionalEquipment(ALS domain) {
+    private void configureFunctionalEquipment(ALS domain) {
         Objects.requireNonNull(domain, "ALS не должна быть null");
         ControlConfiguration configuration = domain.getControlModule().getControlConfiguration();
         equipmentCatalogService.configureFunctionalEquipment(configuration);
