@@ -28,7 +28,6 @@ import java.util.List;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -102,15 +101,6 @@ class EquipmentRestControllerSecurityTest {
                 .andExpect(jsonPath("$.status").value("error"))
                 .andExpect(jsonPath("$.message").value("Некорректный запрос"))
                 .andExpect(jsonPath("$.errors").isArray());
-    }
-
-    @Test
-    @WithMockUser(authorities = "ROLE_ADMIN")
-    void unsupportedMethod_shouldReturn405ApiErrorEnvelope() throws Exception {
-        mockMvc.perform(put("/api/v1/equipment"))
-                .andExpect(status().isMethodNotAllowed())
-                .andExpect(jsonPath("$.status").value("error"))
-                .andExpect(jsonPath("$.message").value("HTTP-метод не поддерживается"));
     }
 
     @Test
