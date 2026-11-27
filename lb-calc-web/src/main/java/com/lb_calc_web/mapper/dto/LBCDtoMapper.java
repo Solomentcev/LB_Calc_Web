@@ -6,7 +6,6 @@ import com.lb_calc_web.domain.attributes.Colors;
 import com.lb_calc_web.domain.equipment.Equipment;
 import com.lb_calc_web.domain.attributes.DirectionDoorOpening;
 import com.lb_calc_web.domain.attributes.TypeLb;
-import com.lb_calc_web.domain.model.ControlConfiguration;
 import com.lb_calc_web.domain.model.LBC;
 import com.lb_calc_web.dto.LBCDTO;
 
@@ -59,7 +58,6 @@ public final class LBCDtoMapper {
             LBCDTO dto,
             TypeLb typeLb,
             Function<Long, Equipment> equipmentLookup,
-            ControlConfiguration fallbackConfiguration,
             SizeBounds bounds
     ) {
         if (dto == null) {
@@ -76,7 +74,6 @@ public final class LBCDtoMapper {
                 dto.getFunctionalConfiguration(),
                 dto.getSelectedEquipment(),
                 dto.isEquipmentProvided(),
-                fallbackConfiguration,
                 equipmentLookup
         );
 
