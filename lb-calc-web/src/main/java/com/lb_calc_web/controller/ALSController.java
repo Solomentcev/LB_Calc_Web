@@ -87,7 +87,21 @@ public class ALSController extends BaseCatalogController {
                 als.setLC(persisted.getLC());
                 als.setLBC(persisted.getLBC());
             }
-            als = toDtoWithImages(toDomain(als, existing));
+            ControlConfiguration fallback = existing == null ? null
+                    : existing.getControlModule().getControlConfiguration();
+            if (fallback != null) {
+                fallback.setFunctionalConfiguration(existing.getFunctionalConfiguration());
+            }
+            ALS restored = ALSDtoMapper.toDomain(
+                    als,
+                    candidate -> TypeLbFactory.forLB(environment, candidate.getType()),
+                    candidate -> TypeLbFactory.forLBC(environment, candidate.getType()),
+                    equipmentCatalogService::findById,
+                    fallback,
+                    sizeBounds
+            );
+            alsService.configureFunctionalEquipment(restored);
+            als = toDtoWithImages(alsService.preserveExistingModules(existing, restored));
         } catch (ValidationSizeException exception) {
             model.addAttribute("ALSErrors",
                     ValidationErrorFormatter.format(exception.getValidationResult()));
@@ -114,7 +128,21 @@ public class ALSController extends BaseCatalogController {
                 als.setLBC(persisted.getLBC());
             }
 
-            ALS domain = toDomain(als, existing);
+            ControlConfiguration fallback = existing == null ? null
+                    : existing.getControlModule().getControlConfiguration();
+            if (fallback != null) {
+                fallback.setFunctionalConfiguration(existing.getFunctionalConfiguration());
+            }
+            ALS restored = ALSDtoMapper.toDomain(
+                    als,
+                    candidate -> TypeLbFactory.forLB(environment, candidate.getType()),
+                    candidate -> TypeLbFactory.forLBC(environment, candidate.getType()),
+                    equipmentCatalogService::findById,
+                    fallback,
+                    sizeBounds
+            );
+            alsService.configureFunctionalEquipment(restored);
+            ALS domain = alsService.preserveExistingModules(existing, restored);
             ALS saved = alsService.saveALS(domain);
             return "redirect:/alss/" + saved.getId();
         } catch (ValidationSizeException e) {
@@ -209,62 +237,6 @@ public class ALSController extends BaseCatalogController {
         }
     }
 
-    /** Преобразует данные формы ALS в доменную модель и сохраняет данные неизменённых модулей. */
-    private ALS toDomain(ALSDTO dto, ALS existing) {
-        ControlConfiguration fallback = null;
-        if (existing != null) {
-            ControlModule currentControl = existing.getControlModule();
-            if ((dto.getLC() != null && currentControl instanceof LC)
-                    || (dto.getLBC() != null && currentControl instanceof LBC)) {
-                fallback = currentControl.getControlConfiguration();
-                fallback.setFunctionalConfiguration(existing.getFunctionalConfiguration());
-            }
-        }
-
-        ALS restored = ALSDtoMapper.toDomain(
-                dto,
-                candidate -> TypeLbFactory.forLB(environment, candidate.getType()),
-                candidate -> TypeLbFactory.forLBC(environment, candidate.getType()),
-                equipmentCatalogService::findById,
-                fallback,
-                sizeBounds
-        );
-
-        ControlConfiguration configuration = restored.getControlModule().getControlConfiguration();
-        equipmentCatalogService.configureFunctionalEquipment(configuration);
-        restored.setControlConfiguration(configuration);
-
-        return alsService.preserveExistingModules(existing, restored);
-    }
-
-    /** Восстанавливает LC из формы с учётом текущей комплектации управляющего модуля ALS. */
-    private LC toDomain(LCDTO dto, ALS als) {
-        ControlConfiguration fallback = als.getControlModule() instanceof LC
-                ? als.getControlModule().getControlConfiguration() : null;
-        LC restored = LCDtoMapper.toDomain(dto, equipmentCatalogService::findById, fallback, sizeBounds);
-        ControlConfiguration configuration = restored.getControlConfiguration();
-        equipmentCatalogService.configureFunctionalEquipment(configuration);
-        restored.setControlConfiguration(configuration);
-        return restored;
-    }
-
-    /** Восстанавливает LBC из формы с учётом текущей комплектации управляющего модуля ALS. */
-    private LBC toDomain(LBCDTO dto, ALS als) {
-        ControlConfiguration fallback = als.getControlModule() instanceof LBC
-                ? als.getControlModule().getControlConfiguration() : null;
-        LBC restored = LBCDtoMapper.toDomain(
-                dto,
-                TypeLbFactory.forLBC(environment, dto.getType()),
-                equipmentCatalogService::findById,
-                fallback,
-                sizeBounds
-        );
-        ControlConfiguration configuration = restored.getControlConfiguration();
-        equipmentCatalogService.configureFunctionalEquipment(configuration);
-        restored.setControlConfiguration(configuration);
-        return restored;
-    }
-
     private ALSDTO toDtoWithImages(ALS domain) {
         ALSDTO dto = ALSDtoMapper.toDto(domain);
         dto.setStringALSImage(ALSImageService.getStringALSImage(domain));
@@ -350,7 +322,11 @@ public class ALSController extends BaseCatalogController {
             }
             lc.setId(lcId);
 
-            LC replacement = toDomain(lc, als);
+            ControlConfiguration fallback = als.getControlModule() instanceof LC
+                    ? als.getControlModule().getControlConfiguration() : null;
+            LC replacement = LCDtoMapper.toDomain(
+                    lc, equipmentCatalogService::findById, fallback, sizeBounds);
+            alsService.configureFunctionalEquipment(replacement);
             com.lb_calc_web.domain.model.ALS saved =
                     alsService.saveALS(alsService.replaceLC(als, replacement));
             return "redirect:/alss/" + saved.getId();
@@ -379,7 +355,11 @@ public class ALSController extends BaseCatalogController {
             throw new NoSuchElementException("LC с id " + lcId + " не найден в ALS " + alsId);
         lc.setId(lcId);
         try {
-            LC replacement = toDomain(lc, source);
+            ControlConfiguration fallback = source.getControlModule() instanceof LC
+                    ? als.getControlModule().getControlConfiguration() : null;
+            LC replacement = LCDtoMapper.toDomain(
+                    lc, equipmentCatalogService::findById, fallback, sizeBounds);
+            alsService.configureFunctionalEquipment(replacement);
             source = alsService.replaceLC(source.copy(), replacement);
             lc = toDtoWithImage(replacement);
         } catch (ValidationSizeException exception) {
@@ -433,7 +413,12 @@ public class ALSController extends BaseCatalogController {
             com.lb_calc_web.domain.model.ALS als = alsService.findById(alsId);
             lbc.setId(lbcId);
 
-            LBC replacement = toDomain(lbc, als);
+            ControlConfiguration fallback = als.getControlModule() instanceof LBC
+                    ? als.getControlModule().getControlConfiguration() : null;
+            LBC replacement = LBCDtoMapper.toDomain(
+                    lbc, TypeLbFactory.forLBC(environment, lbc.getType()),
+                    equipmentCatalogService::findById, fallback, sizeBounds);
+            alsService.configureFunctionalEquipment(replacement);
             com.lb_calc_web.domain.model.ALS saved =
                     alsService.saveALS(alsService.replaceLBC(als, replacement));
             return "redirect:/alss/" + saved.getId();
@@ -459,7 +444,12 @@ public class ALSController extends BaseCatalogController {
         alsService.findLBCInALS(source, lbcId);
         lbc.setId(lbcId);
         try {
-            LBC replacement = toDomain(lbc, source);
+            ControlConfiguration fallback = source.getControlModule() instanceof LBC
+                    ? als.getControlModule().getControlConfiguration() : null;
+            LBC replacement = LBCDtoMapper.toDomain(
+                    lbc, TypeLbFactory.forLBC(environment, lbc.getType()),
+                    equipmentCatalogService::findById, fallback, sizeBounds);
+            alsService.configureFunctionalEquipment(replacement);
             source = alsService.replaceLBC(source.copy(), replacement);
             lbc = toDtoWithImage(replacement);
         } catch (ValidationSizeException exception) {
