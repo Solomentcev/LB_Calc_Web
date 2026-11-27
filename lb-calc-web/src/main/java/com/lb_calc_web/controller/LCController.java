@@ -96,6 +96,7 @@ public class LCController extends BaseCatalogController {
             LC domain = LCDtoMapper.toDomain(
                     lc, equipmentCatalogService::findById, fallback, sizeBounds);
             lcService.prepareFunctionalEquipment(domain, fallback, lc.isEquipmentProvided());
+            lcService.validateForSave(domain);
             lc = toDtoWithImage(domain);
         } catch (ValidationSizeException exception) {
             model.addAttribute("errors", ValidationErrorFormatter.format(exception.getValidationResult()));
