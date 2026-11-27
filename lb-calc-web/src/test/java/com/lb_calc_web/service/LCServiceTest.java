@@ -222,7 +222,7 @@ class LCServiceTest {
     }
 
     @Test
-    void configureFunctionalEquipment_shouldApplySelectionToModuleAndRecalculateWidth() {
+    void prepareFunctionalEquipment_shouldApplySelectionToModuleAndRecalculateWidth() {
         LC domain = TestDataFactory.validLC(null);
         ControlConfiguration configuration = domain.getControlConfiguration();
         var functional = configuration.getFunctionalConfiguration();
@@ -239,7 +239,7 @@ class LCServiceTest {
             return null;
         }).when(equipmentCatalogService).configureFunctionalEquipment(any(ControlConfiguration.class));
 
-        service.configureFunctionalEquipment(domain);
+        service.prepareFunctionalEquipment(domain, null, false);
 
         assertEquals(Map.of(display, 1), domain.getEquipment());
         assertEquals(450, domain.getWidth(),
