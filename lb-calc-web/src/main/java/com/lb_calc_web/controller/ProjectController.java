@@ -484,14 +484,11 @@ public class ProjectController
                         projectService.findALSInProject(projectId, alsId)
                 );
 
-        LCDTO lc =
-                LCDtoMapper.toDto(
-                        projectService.findLCInProject(projectId, alsId, lcId)
-                );
+        LC lcDomain = projectService.findLCInProject(projectId, alsId, lcId);
 
         model.addAttribute("project", addALSImages(project));
         model.addAttribute("als", addALSImage(als));
-        LCDTO lcForm = addLCImage(lc, projectId, alsId);
+        LCDTO lcForm = toDtoWithImage(lcDomain);
         model.addAttribute("lc", lcForm);
         model.addAttribute("equipmentList", equipmentCatalogService.findAll().stream()
                 .map(EquipmentDtoMapper::toDto).toList());
@@ -512,6 +509,7 @@ public class ProjectController
         lc.setId(lcId);
         com.lb_calc_web.domain.model.Project preview = projectService.findById(projectId);
         ALS updatedALS = sourceALS;
+        LCDTO lcForm = lc;
         try {
             com.lb_calc_web.domain.model.LC replacement = LCDtoMapper.toDomain(
                     lc, equipmentCatalogService::findById,
@@ -520,13 +518,12 @@ public class ProjectController
             ALS candidateALS = alsService.replaceLC(sourceALS.copy(), replacement);
             preview = projectService.previewALSReplacement(projectId, alsId, candidateALS);
             updatedALS = candidateALS;
-            lc = LCDtoMapper.toDto(replacement);
+            lcForm = toDtoWithImage(replacement);
         } catch (ValidationSizeException exception) {
             model.addAttribute("errors", ValidationErrorFormatter.format(exception.getValidationResult()));
         }
         model.addAttribute("project", addALSImages(ProjectDtoMapper.toDto(preview)));
         model.addAttribute("als", toDtoWithImages(updatedALS));
-        LCDTO lcForm = addLCImage(lc, projectId, alsId);
         model.addAttribute("lc", lcForm);
         model.addAttribute("equipmentList", equipmentCatalogService.findAll().stream()
                 .map(EquipmentDtoMapper::toDto).toList());
@@ -550,11 +547,11 @@ public class ProjectController
             @ModelAttribute("lc") LCDTO lc,
             Model model
     ) {
+        LC replacement = null;
         try {
             lc.setId(lcId);
             projectService.findLCInProject(projectId, alsId, lcId);
-            ALS sourceALS = projectService.findALSInProject(projectId, alsId);
-            LC replacement = LCDtoMapper.toDomain(
+            replacement = LCDtoMapper.toDomain(
                     lc, equipmentCatalogService::findById,
                     sizeBounds);
             ALS savedALS = projectService.saveLCAtProject(
@@ -587,8 +584,8 @@ public class ProjectController
                     toDtoWithImages(projectService.findALSInProject(projectId, alsId))
             );
 
-            LCDTO lcForm = addLCImage(lc, projectId, alsId);
-        model.addAttribute("lc", lcForm);
+            LCDTO lcForm = replacement == null ? lc : toDtoWithImage(replacement);
+            model.addAttribute("lc", lcForm);
         model.addAttribute("equipmentList", equipmentCatalogService.findAll().stream()
                 .map(EquipmentDtoMapper::toDto).toList());
         model.addAttribute("defaultEquipmentIds", equipmentCatalogService.findDefaultModelIds());
@@ -632,14 +629,11 @@ public class ProjectController
                         projectService.findALSInProject(projectId, alsId)
                 );
 
-        LBCDTO lbc =
-                LBCDtoMapper.toDto(
-                        projectService.findLBCInProject(projectId, alsId, lbcId)
-                );
+        LBC lbcDomain = projectService.findLBCInProject(projectId, alsId, lbcId);
 
         model.addAttribute("project", addALSImages(project));
         model.addAttribute("als", addALSImage(als));
-        LBCDTO lbcForm = addLBCImage(lbc, projectId, alsId);
+        LBCDTO lbcForm = toDtoWithImage(lbcDomain);
         model.addAttribute("lbc", lbcForm);
         model.addAttribute("equipmentList", equipmentCatalogService.findAll().stream()
                 .map(EquipmentDtoMapper::toDto).toList());
@@ -660,6 +654,7 @@ public class ProjectController
         lbc.setId(lbcId);
         com.lb_calc_web.domain.model.Project preview = projectService.findById(projectId);
         ALS updatedALS = sourceALS;
+        LBCDTO lbcForm = lbc;
         try {
             com.lb_calc_web.domain.model.LBC replacement = LBCDtoMapper.toDomain(
                     lbc, TypeLbFactory.forLBC(environment, lbc.getType()),
@@ -669,13 +664,12 @@ public class ProjectController
             ALS candidateALS = alsService.replaceLBC(sourceALS.copy(), replacement);
             preview = projectService.previewALSReplacement(projectId, alsId, candidateALS);
             updatedALS = candidateALS;
-            lbc = LBCDtoMapper.toDto(replacement);
+            lbcForm = toDtoWithImage(replacement);
         } catch (ValidationSizeException exception) {
             model.addAttribute("errors", ValidationErrorFormatter.format(exception.getValidationResult()));
         }
         model.addAttribute("project", addALSImages(ProjectDtoMapper.toDto(preview)));
         model.addAttribute("als", toDtoWithImages(updatedALS));
-        LBCDTO lbcForm = addLBCImage(lbc, projectId, alsId);
         model.addAttribute("lbc", lbcForm);
         model.addAttribute("equipmentList", equipmentCatalogService.findAll().stream()
                 .map(EquipmentDtoMapper::toDto).toList());
@@ -699,11 +693,11 @@ public class ProjectController
             @ModelAttribute("lbc") LBCDTO lbc,
             Model model
     ) {
+        LBC replacement = null;
         try {
             lbc.setId(lbcId);
             projectService.findLBCInProject(projectId, alsId, lbcId);
-            ALS sourceALS = projectService.findALSInProject(projectId, alsId);
-            LBC replacement = LBCDtoMapper.toDomain(
+            replacement = LBCDtoMapper.toDomain(
                     lbc, TypeLbFactory.forLBC(environment, lbc.getType()),
                     equipmentCatalogService::findById,
                     sizeBounds);
@@ -730,8 +724,8 @@ public class ProjectController
 
             model.addAttribute("als", toDtoWithImages(projectService.findALSInProject(projectId, alsId)));
 
-            LBCDTO lbcForm = addLBCImage(lbc, projectId, alsId);
-        model.addAttribute("lbc", lbcForm);
+            LBCDTO lbcForm = replacement == null ? lbc : toDtoWithImage(replacement);
+            model.addAttribute("lbc", lbcForm);
         model.addAttribute("equipmentList", equipmentCatalogService.findAll().stream()
                 .map(EquipmentDtoMapper::toDto).toList());
         model.addAttribute("defaultEquipmentIds", equipmentCatalogService.findDefaultModelIds());
@@ -1047,37 +1041,6 @@ public class ProjectController
             }
         }
         return dto;
-    }
-
-    private LCDTO addLCImage(LCDTO dto, Long projectId, Long alsId) {
-        try {
-            ALS als = projectService.findALSInProject(projectId, alsId);
-            LC restored = LCDtoMapper.toDomain(
-                    dto,
-                    equipmentCatalogService::findById,
-                    sizeBounds
-            );
-            alsService.prepareForReplacement(als, restored, dto.isEquipmentProvided());
-            return toDtoWithImage(restored);
-        } catch (ValidationSizeException | IllegalArgumentException exception) {
-            return dto;
-        }
-    }
-
-    private LBCDTO addLBCImage(LBCDTO dto, Long projectId, Long alsId) {
-        try {
-            ALS als = projectService.findALSInProject(projectId, alsId);
-            LBC restored = LBCDtoMapper.toDomain(
-                    dto,
-                    TypeLbFactory.forLBC(environment, dto.getType()),
-                    equipmentCatalogService::findById,
-                    sizeBounds
-            );
-            alsService.prepareForReplacement(als, restored, dto.isEquipmentProvided());
-            return toDtoWithImage(restored);
-        } catch (ValidationSizeException | IllegalArgumentException exception) {
-            return dto;
-        }
     }
 
     private LBDTO addLBImage(LBDTO dto) {
