@@ -404,7 +404,7 @@ public class ALSService {
     @Transactional
     public ALS replaceLCandSaveALS(ALS als, LC replacement, boolean equipmentSelectionProvided) {
         ControlConfiguration fallback = als.getControlModule().getControlConfiguration();
-        prepareFunctionalEquipment(replacement, fallback, equipmentSelectionProvided);
+        prepareForReplacement(replacement, fallback, equipmentSelectionProvided);
         return saveALS(replaceLC(als, replacement));
     }
 
@@ -412,7 +412,7 @@ public class ALSService {
     @Transactional
     public ALS replaceLBCandSaveALS(ALS als, LBC replacement, boolean equipmentSelectionProvided) {
         ControlConfiguration fallback = als.getControlModule().getControlConfiguration();
-        prepareFunctionalEquipment(replacement, fallback, equipmentSelectionProvided);
+        prepareForReplacement(replacement, fallback, equipmentSelectionProvided);
         return saveALS(replaceLBC(als, replacement));
     }
 
@@ -437,6 +437,28 @@ public class ALSService {
             configureFunctionalEquipment(restored);
         }
         return preserveExistingModules(existing, restored);
+    }
+
+    /**
+     * Подготавливает LC для замены в ALS: согласует комплектацию и проверяет
+     * физические требования и геометрию перед сохранением агрегата.
+     */
+    public void prepareForReplacement(
+            LC domain, ControlConfiguration fallback, boolean equipmentSelectionProvided
+    ) {
+        lcService.prepareFunctionalEquipment(domain, fallback, equipmentSelectionProvided);
+        lcService.validateForSave(domain);
+    }
+
+    /**
+     * Подготавливает LBC для замены в ALS: согласует комплектацию и проверяет
+     * физические требования и геометрию перед сохранением агрегата.
+     */
+    public void prepareForReplacement(
+            LBC domain, ControlConfiguration fallback, boolean equipmentSelectionProvided
+    ) {
+        lbcService.prepareFunctionalEquipment(domain, fallback, equipmentSelectionProvided);
+        lbcService.validateForSave(domain);
     }
 
     /** Подготавливает комплектацию LC с учётом прежнего функционального назначения. */
