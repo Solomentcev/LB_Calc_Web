@@ -6,7 +6,6 @@ import com.lb_calc_web.dto.LCDTO;
 import com.lb_calc_web.dto.LBDTO;
 import com.lb_calc_web.domain.model.ALS;
 import com.lb_calc_web.domain.model.LB;
-import com.lb_calc_web.domain.model.ControlConfiguration;
 import com.lb_calc_web.domain.model.ControlModule;
 import com.lb_calc_web.domain.model.LC;
 import com.lb_calc_web.domain.model.LBC;
