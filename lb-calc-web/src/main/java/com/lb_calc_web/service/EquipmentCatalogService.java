@@ -2,6 +2,7 @@ package com.lb_calc_web.service;
 
 import com.lb_calc_web.domain.equipment.Equipment;
 import com.lb_calc_web.domain.equipment.EquipmentFunctionalType;
+import com.lb_calc_web.domain.equipment.EquipmentPurpose;
 import com.lb_calc_web.domain.equipment.AccessPurpose;
 import com.lb_calc_web.domain.equipment.DisplayPurpose;
 import com.lb_calc_web.domain.equipment.PaymentPurpose;
@@ -146,7 +147,7 @@ public class EquipmentCatalogService {
         List<Equipment> catalog = findAll();
         java.util.Map<Long, Equipment> byId = catalog.stream().filter(e -> e.getId() != null)
                 .collect(java.util.stream.Collectors.toMap(Equipment::getId, e -> e));
-        java.util.Map<String, EquipmentSelectionDTO> previous = new java.util.LinkedHashMap<>();
+        java.util.Map<EquipmentKey, EquipmentSelectionDTO> previous = new java.util.LinkedHashMap<>();
         if (currentSelections != null) for (EquipmentSelectionDTO selection : currentSelections) {
             Equipment item = byId.get(selection.getEquipmentId());
             if (item != null) previous.put(key(item), selection);
@@ -154,19 +155,18 @@ public class EquipmentCatalogService {
         FunctionalConfiguration normalized = functionalConfigurationResolver.normalize(
                 toDomain(configuration));
         configuration.setDisplay(normalized.getDisplay());
-        java.util.LinkedHashSet<String> required = requiredKeys(normalized);
+        java.util.LinkedHashSet<EquipmentKey> required = requiredKeys(normalized);
         previous.forEach((key, selection) -> {
             Equipment item = byId.get(selection.getEquipmentId());
-            if (item != null && item.getFunctionalType() == EquipmentFunctionalType.SYSTEM) required.add(key);
+            if (item != null && item.getFunctionalType() == EquipmentFunctionalType.SYSTEM) required.add(key(item));
         });
 
         java.util.Set<Long> defaults = findDefaultModelIds();
         List<EquipmentSelectionDTO> result = new ArrayList<>();
-        for (String key : required) {
-            String[] parts = key.split(":", 2);
-            EquipmentFunctionalType type = EquipmentFunctionalType.valueOf(parts[0]);
-            List<EquipmentDTO> models = catalog.stream().filter(e -> e.getFunctionalType() == type)
-                    .filter(e -> e.getPurpose().toString().equals(parts[1]))
+        for (EquipmentKey key : required) {
+            List<EquipmentDTO> models = catalog.stream()
+                    .filter(e -> e.getFunctionalType() == key.functionalType())
+                    .filter(e -> e.getPurpose().equals(key.purpose()))
                     .map(EquipmentDtoMapper::toDto).toList();
             EquipmentSelectionDTO old = previous.get(key);
             Long id = old != null && models.stream().anyMatch(e -> Objects.equals(e.getId(), old.getEquipmentId()))
@@ -193,17 +193,21 @@ public class EquipmentCatalogService {
     }
 
     /** Получает ключи физических назначений из доменного резолвера. */
-    private java.util.LinkedHashSet<String> requiredKeys(FunctionalConfiguration configuration) {
-        java.util.LinkedHashSet<String> result = new java.util.LinkedHashSet<>();
+    private java.util.LinkedHashSet<EquipmentKey> requiredKeys(FunctionalConfiguration configuration) {
+        java.util.LinkedHashSet<EquipmentKey> result = new java.util.LinkedHashSet<>();
         functionalConfigurationResolver.resolveRequiredEquipment(configuration)
                 .forEach((type, purposes) -> purposes.forEach(
-                        purpose -> result.add(type.name() + ":" + purpose)));
+                        purpose -> result.add(new EquipmentKey(type, purpose))));
         return result;
     }
 
     /** Формирует ключ функционального назначения модели оборудования. */
-    private String key(Equipment item) {
-        return item.getFunctionalType().name() + ":" + item.getPurpose().toString();
+    private EquipmentKey key(Equipment item) {
+        return new EquipmentKey(item.getFunctionalType(), item.getPurpose());
+    }
+
+    /** Составной ключ назначения физического оборудования. */
+    private record EquipmentKey(EquipmentFunctionalType functionalType, EquipmentPurpose purpose) {
     }
 
     /**
@@ -220,19 +224,19 @@ public class EquipmentCatalogService {
         List<Equipment> catalog = findAll();
         java.util.Map<Long, Equipment> byId = catalog.stream().filter(e -> e.getId() != null)
                 .collect(java.util.stream.Collectors.toMap(Equipment::getId, e -> e));
-        java.util.LinkedHashSet<String> required = requiredKeys(normalized);
+        java.util.LinkedHashSet<EquipmentKey> required = requiredKeys(normalized);
 
-        java.util.Set<String> received = new java.util.HashSet<>();
+        java.util.Set<EquipmentKey> received = new java.util.HashSet<>();
         if (selections != null) for (EquipmentSelectionDTO selection : selections) {
             Equipment item = byId.get(selection.getEquipmentId());
             if (item == null) throw new IllegalArgumentException("Выбрана несуществующая модель оборудования");
-            String key = key(item);
+            EquipmentKey key = key(item);
             if (item.getFunctionalType() != EquipmentFunctionalType.SYSTEM && !required.contains(key))
                 throw new IllegalArgumentException("Модель оборудования не соответствует функциональной конфигурации: " + key);
             if (!received.add(key))
                 throw new IllegalArgumentException("Для назначения выбрано несколько моделей: " + key);
         }
-        for (String key : required) {
+        for (EquipmentKey key : required) {
             if (!received.contains(key))
                 throw new IllegalArgumentException("Не выбрана модель оборудования для назначения: " + key);
         }
