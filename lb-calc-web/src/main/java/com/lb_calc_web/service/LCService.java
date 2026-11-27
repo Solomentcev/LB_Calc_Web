@@ -231,6 +231,7 @@ public class LCService {
                         domain.getUpperFrame(), domain.getBottomFrame(),
                         domain.getColorBody(), domain.getColorDoor())
                 .stream()
+                .filter(entity -> !Objects.equals(entity.getId(), domain.getId()))
                 .filter(entity -> toDomain(entity).equals(domain))
                 .findFirst();
 
