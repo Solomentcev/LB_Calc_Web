@@ -365,7 +365,7 @@ public class ALSController extends BaseCatalogController {
                     ? source.getControlModule().getControlConfiguration() : null;
             LC replacement = LCDtoMapper.toDomain(
                     lc, equipmentCatalogService::findById, fallback, sizeBounds);
-            alsService.prepareFunctionalEquipment(replacement, fallback, lc.isEquipmentProvided());
+            alsService.prepareForReplacement(replacement, fallback, lc.isEquipmentProvided());
             source = alsService.replaceLC(source.copy(), replacement);
             lc = toDtoWithImage(replacement);
         } catch (ValidationSizeException exception) {
@@ -458,7 +458,7 @@ public class ALSController extends BaseCatalogController {
             LBC replacement = LBCDtoMapper.toDomain(
                     lbc, TypeLbFactory.forLBC(environment, lbc.getType()),
                     equipmentCatalogService::findById, fallback, sizeBounds);
-            alsService.prepareFunctionalEquipment(replacement, fallback, lbc.isEquipmentProvided());
+            alsService.prepareForReplacement(replacement, fallback, lbc.isEquipmentProvided());
             source = alsService.replaceLBC(source.copy(), replacement);
             lbc = toDtoWithImage(replacement);
         } catch (ValidationSizeException exception) {
