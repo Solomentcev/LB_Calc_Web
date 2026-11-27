@@ -416,7 +416,7 @@ public class ALSController extends BaseCatalogController {
                     lbc, TypeLbFactory.forLBC(environment, lbc.getType()),
                     equipmentCatalogService::findById, fallback, sizeBounds);
             com.lb_calc_web.domain.model.ALS saved =
-                    alsService.replaceLBCandSaveALS(als, replacement);
+                    alsService.replaceLBCandSaveALS(als, replacement, lbc.isEquipmentProvided());
             return "redirect:/alss/" + saved.getId();
         } catch (ValidationSizeException e) {
             model.addAttribute("errors", ValidationErrorFormatter.format(e.getValidationResult()));
