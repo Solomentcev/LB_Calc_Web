@@ -170,7 +170,8 @@ class PersistenceIntegrationTest {
         lbcFunctional.setAccess(Set.of(AccessPurpose.BAR_CODE));
         lbcFunctional.setPayment(PaymentPurpose.NONE);
         lbcFunctional.setPrinter(PrinterPurpose.ABSENT);
-        dto.getLBC().setEquipment(Map.of(saved.getId(), 1));
+        dto.getLBC().setSelectedEquipment(List.of(TestDataFactory.selectedEquipment(saved.getId(), 1)));
+        dto.getLBC().setEquipmentProvided(true);
 
         ALS domainALS = restoreAlsDto(dto);
         Map<Module, ModuleEntity> resolvedModules = new HashMap<>();
@@ -327,8 +328,11 @@ class PersistenceIntegrationTest {
         lbcFunctional.setAccess(Set.of(AccessPurpose.RFID, AccessPurpose.BAR_CODE));
         lbcFunctional.setPayment(PaymentPurpose.NONE);
         lbcFunctional.setPrinter(PrinterPurpose.ABSENT);
-        lbcALS.getLBC().setEquipment(Map.of(
-                display.getId(), 1, barcode.getId(), 2, rfid.getId(), 1));
+        lbcALS.getLBC().setSelectedEquipment(List.of(
+                TestDataFactory.selectedEquipment(display.getId(), 1),
+                TestDataFactory.selectedEquipment(barcode.getId(), 2),
+                TestDataFactory.selectedEquipment(rfid.getId(), 1)));
+        lbcALS.getLBC().setEquipmentProvided(true);
 
         ALS domainALS = restoreAlsDto(lbcALS);
         Map<Module, ModuleEntity> resolvedModules = new HashMap<>();
@@ -641,21 +645,23 @@ class PersistenceIntegrationTest {
                     EquipmentFunctionalType.ACCESS, AccessPurpose.BAR_CODE,
                     EquipmentCategory.BAR_READER, "Сканер штрихкода для LC");
             changedLCDTO.getFunctionalConfiguration().setAccess(Set.of(AccessPurpose.BAR_CODE));
-            changedLCDTO.setEquipment(Map.of(barcodeScanner.getId(), 1));
+            changedLCDTO.setSelectedEquipment(List.of(TestDataFactory.selectedEquipment(barcodeScanner.getId(), 1)));
+            changedLCDTO.setEquipmentProvided(true);
             ALS changedWithLC = projectService.saveLCAtProject(
                     projectId,
                     changedALS.getId(),
                     changedLCDTO.getId(),
                     alsService.restoreLC(changedLCDTO, changedALS)
             );
-            assertEquals(
-                    Map.of(barcodeScanner.getId(), 1),
-                    LCDtoMapper.toDto(changedWithLC.getLC()).getEquipment()
-            );
+            var selectedLCEquipment = LCDtoMapper.toDto(changedWithLC.getLC()).getSelectedEquipment();
+            assertEquals(1, selectedLCEquipment.size());
+            assertEquals(barcodeScanner.getId(), selectedLCEquipment.get(0).getId());
+            assertEquals(1, selectedLCEquipment.get(0).getQuantity());
 
             LBCDTO changedLBCDTO = LBCDtoMapper.toDto(independentConfiguration.getLBC());
             changedLBCDTO.getFunctionalConfiguration().setAccess(Set.of(AccessPurpose.BAR_CODE));
-            changedLBCDTO.setEquipment(Map.of(barcodeScanner.getId(), 1));
+            changedLBCDTO.setSelectedEquipment(List.of(TestDataFactory.selectedEquipment(barcodeScanner.getId(), 1)));
+            changedLBCDTO.setEquipmentProvided(true);
             ALS changedWithLBC = projectService.saveLBCAtProject(
                     projectId,
                     independentAlsId,
@@ -713,10 +719,11 @@ class PersistenceIntegrationTest {
                     .filter(value -> value.getId().equals(changedWithLC.getId()))
                     .findFirst()
                     .orElseThrow();
-            assertEquals(
-                    Map.of(barcodeScanner.getId(), 1),
-                    persistedLCConfiguration.getLC().getEquipment()
-            );
+            assertEquals(1, persistedLCConfiguration.getLC().getSelectedEquipment().size());
+            assertEquals(barcodeScanner.getId(),
+                    persistedLCConfiguration.getLC().getSelectedEquipment().get(0).getId());
+            assertEquals(1,
+                    persistedLCConfiguration.getLC().getSelectedEquipment().get(0).getQuantity());
 
             ALSDTO persistedLBCConfiguration = restoredDTO.getAlsList().stream()
                     .filter(value -> value.getId().equals(regeneratedLBC.getId()))
