@@ -32,8 +32,8 @@ class LCImageServiceTest {
 
         // При высоте 1400 мм дисплей сдвинут вниз до зазора 20 мм от верхней рамы.
         assertEquals(Color.GRAY.getRGB(), image.getRGB(23, 22));
-        assertEquals(lc.getColorBody().getColor().getRGB(), image.getRGB(23, 2));
-        assertEquals(lc.getColorDoor().getColor().getRGB(), image.getRGB(23, 6));
+        assertEquals(new java.awt.Color(lc.getColorBody().getRgb()).getRGB(), image.getRGB(23, 2));
+        assertEquals(new java.awt.Color(lc.getColorDoor().getRgb()).getRGB(), image.getRGB(23, 6));
         // Нижняя граница панели совпадает с верхним краем нижней рамы.
         assertEquals(Color.BLACK.getRGB(), image.getRGB(23, 135));
     }
