@@ -42,9 +42,8 @@ public class LCController extends BaseCatalogController {
 
         logger.debug("Открытие страницы создания LC");
 
-        LCDTO lc = LCDtoMapper.toDto(lcService.createLC());
         LC domain = lcService.createLC();
-        lc = toDtoWithImage(domain);
+        LCDTO lc = toDtoWithImage(domain);
         lc.setId(0L);
 
         prepareForm(model, lc);
