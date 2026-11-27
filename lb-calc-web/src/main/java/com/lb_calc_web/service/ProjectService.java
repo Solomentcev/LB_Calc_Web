@@ -207,7 +207,7 @@ return projectRepository.findAllWithUsers()
      * Инициализирует новый доменный проект.
      */
     public Project initProject(String company) {
-        Employee currentEmployee = employeeService.getCurrentEmployeeDomain();
+        Employee currentEmployee = employeeService.getCurrentEmployee();
         LocalDate today = LocalDate.now();
 
         Project project = new Project(
