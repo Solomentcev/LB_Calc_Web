@@ -12,9 +12,6 @@ import org.springframework.data.repository.query.Param;
 public interface EquipmentRepository
         extends JpaRepository<EquipmentEntity, Long>, JpaSpecificationExecutor<EquipmentEntity> {
 
-    /** Возвращает модели, назначенные по умолчанию для своих функциональных назначений. */
-    java.util.List<EquipmentEntity> findAllByDefaultModelTrue();
-
     /** Проверяет наличие модели по умолчанию для функционального типа и назначения. */
     boolean existsByFunctionalTypeAndPurposeAndDefaultModelTrue(
             EquipmentFunctionalType functionalType, String purpose);
