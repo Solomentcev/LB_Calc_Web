@@ -2,9 +2,6 @@ package com.lb_calc_web.mapper.entity;
 
 import com.lb_calc_web.domain.model.Employee;
 import com.lb_calc_web.entity.EmployeeEntity;
-import com.lb_calc_web.dto.EmployeeDTO;
-import com.lb_calc_web.dto.ProfileDTO;
-import com.lb_calc_web.mapper.dto.EmployeeDtoMapper;
 
 /**
  * Маппер между JPA-сущностью сотрудника и доменной моделью.
@@ -40,20 +37,6 @@ public final class EmployeeEntityMapper {
     }
 
     /**
-     * Преобразует persistence-сущность сотрудника в DTO.
-     */
-    public static EmployeeDTO toDto(EmployeeEntity entity) {
-        return EmployeeDtoMapper.toDto(toDomain(entity));
-    }
-
-    /**
-     * Преобразует JPA-сущность сотрудника в DTO профиля.
-     */
-    public static ProfileDTO toProfileDto(EmployeeEntity entity) {
-        return EmployeeDtoMapper.toProfileDto(toDomain(entity));
-    }
-
-    /**
      * Создаёт новую JPA-сущность из доменного объекта.
      *
      * <p>Идентификатор назначается базой данных, а хэш пароля
@@ -77,16 +60,6 @@ public final class EmployeeEntityMapper {
         updateEntity(domain, entity);
 
         return entity;
-    }
-
-    /**
-     * Обновляет JPA-сущность данными DTO сотрудника.
-     */
-    public static void updateEntity(EmployeeDTO dto, EmployeeEntity entity) {
-        if (dto == null) {
-            throw new IllegalArgumentException("EmployeeDTO не должен быть null");
-        }
-        updateEntity(EmployeeDtoMapper.toDomain(dto), entity);
     }
 
     /**
