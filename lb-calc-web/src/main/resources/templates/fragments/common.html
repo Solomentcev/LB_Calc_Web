@@ -573,7 +573,7 @@
         /* Компактная компоновка: параметры слева, чертёж справа. */
          .module-editor__layout {
             display: grid;
-            grid-template-columns: minmax(0, 1fr) 400px;
+            grid-template-columns: minmax(0, 1fr) 480px;
             gap: 1.25rem;
             align-items: start;
         }
@@ -622,7 +622,7 @@
         .module-editor__preview {
             position: sticky;
             top: .75rem;
-            width: 400px;
+            width: 480px;
             max-width: 100%;
         }
         .module-editor__preview .module-section { margin-bottom: 0; }
@@ -635,11 +635,12 @@
             max-height: 300px;
             object-fit: contain;
         }
-        .module-editor .module-section { margin-bottom: .85rem; }
-        .module-editor .module-section__header { padding: .75rem 1rem .65rem; }
-        .module-editor .module-section__body { padding: .85rem 1rem .35rem; }
-        .module-editor .module-field { margin-bottom: .7rem; }
-        .module-editor .module-field .form-control { min-height: 2.25rem; }
+        /* Уплотняем блоки параметров, не уменьшая читаемость подписей и полей. */
+        .module-editor__parameters .module-section { margin-bottom: .6rem; }
+        .module-editor__parameters .module-section__header { padding: .6rem .85rem .5rem; }
+        .module-editor__parameters .module-section__body { padding: .65rem .85rem .2rem; }
+        .module-editor__parameters .module-field { margin-bottom: .45rem; }
+        .module-editor__parameters .module-field .form-control { min-height: 2.1rem; }
         .module-editor__heading { margin-bottom: 1rem; }
         .module-editor .page-actions { margin-bottom: .85rem; }
         .module-editor .module-access-options {
