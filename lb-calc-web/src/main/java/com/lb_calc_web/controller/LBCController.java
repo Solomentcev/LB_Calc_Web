@@ -13,7 +13,7 @@ import com.lb_calc_web.service.ModuleCatalogFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.lb_calc_web.service.factory.TypeLbFactory;
-import com.lb_calc_web.service.validation.size.SizeBounds;
+import com.lb_calc_web.domain.geometry.SizeBounds;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Controller;
 import org.springframework.data.domain.Pageable;
