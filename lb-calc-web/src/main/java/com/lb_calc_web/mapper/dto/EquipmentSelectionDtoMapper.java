@@ -1,6 +1,5 @@
 package com.lb_calc_web.mapper.dto;
 
-import com.lb_calc_web.domain.equipment.AccessPurpose;
 import com.lb_calc_web.domain.equipment.DisplayPurpose;
 import com.lb_calc_web.domain.equipment.Equipment;
 import com.lb_calc_web.domain.equipment.EquipmentFunctionalType;
@@ -77,9 +76,13 @@ public final class EquipmentSelectionDtoMapper {
 
         LinkedHashSet<EquipmentKey> required = new LinkedHashSet<>();
         requirements.forEach((type, purposes) -> {
+            boolean previousSeparatePaymentSelection =
+                    previous.containsKey(new EquipmentKey(type, PaymentPurpose.CARDS))
+                            && previous.containsKey(new EquipmentKey(type, PaymentPurpose.CASH));
             boolean combinedPaymentAvailable = type == EquipmentFunctionalType.PAYMENT
                     && purposes.contains(PaymentPurpose.CARDS)
                     && purposes.contains(PaymentPurpose.CASH)
+                    && !previousSeparatePaymentSelection
                     && catalog.stream().anyMatch(item ->
                     item.getFunctionalType() == EquipmentFunctionalType.PAYMENT
                             && item.getPurpose() == PaymentPurpose.CARDS_AND_CASH);
