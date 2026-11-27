@@ -137,7 +137,7 @@ public class LBCController extends BaseCatalogController {
     ) {
         model.addAttribute("pageContext", "CATALOG");
         try {
-            LBC domain = lbcService.restoreDomain(lbc);
+            LBC domain = toDomain(lbc);
             LBC saved = lbcService.saveLBC(domain);
 
             return "redirect:/lbcs/" + saved.getId();
