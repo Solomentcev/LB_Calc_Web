@@ -661,6 +661,77 @@
             min-height: 1.95rem;
         }
 
+        /* Верхняя конфигурация АКХ: параметры слева, функциональные назначения справа. */
+        .als-configuration-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr);
+            gap: .75rem;
+            align-items: start;
+        }
+        .als-configuration-grid > .module-section,
+        .als-configuration-grid > .als-functional-configuration {
+            min-width: 0;
+            margin-bottom: .5rem;
+        }
+        .als-configuration-grid > .module-section .module-section__header {
+            padding: .5rem .75rem .35rem;
+        }
+        .als-configuration-grid > .module-section .module-section__header p {
+            margin-top: .2rem;
+            font-size: .78rem;
+        }
+        .als-configuration-grid > .module-section .module-section__body {
+            padding: .45rem .65rem .15rem;
+        }
+        .als-configuration-grid > .module-section .form-row {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: .4rem .5rem;
+            margin: 0;
+        }
+        .als-configuration-grid > .module-section .form-row > .module-field {
+            width: auto;
+            max-width: none;
+            flex: initial;
+            min-width: 0;
+            margin: 0 0 .35rem;
+            padding: 0;
+        }
+        .als-configuration-grid > .module-section .module-field label {
+            margin-bottom: .2rem;
+            font-size: .78rem;
+            line-height: 1.2;
+        }
+        .als-configuration-grid > .module-section .module-field .form-control {
+            min-width: 0;
+            min-height: 1.85rem;
+            padding: .2rem .4rem;
+            font-size: .82rem;
+        }
+        .als-configuration-grid > .module-section #positionControlModule {
+            grid-column: span 2;
+        }
+        .als-configuration-grid .als-functional-configuration .form-row {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+        @media (max-width: 991.98px) {
+            .als-configuration-grid {
+                grid-template-columns: minmax(0, 1fr);
+            }
+            .als-configuration-grid .als-functional-configuration .form-row {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+        @media (max-width: 420px) {
+            .als-configuration-grid > .module-section .form-row,
+            .als-configuration-grid .als-functional-configuration .form-row {
+                grid-template-columns: minmax(0, 1fr);
+            }
+            .als-configuration-grid > .module-section #positionControlModule {
+                grid-column: auto;
+            }
+        }
+
         /* Четыре функциональных назначения АКХ размещаются в одной компактной строке. */
         .als-functional-configuration > .module-section {
             margin-bottom: .5rem;
