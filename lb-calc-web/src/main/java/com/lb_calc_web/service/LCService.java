@@ -192,16 +192,29 @@ public class LCService {
         return toDomain(entity);
     }
 
+    /** Подготавливает комплектацию LC, самостоятельно восстанавливая прежнюю конфигурацию по ID. */
+    public void prepareFunctionalEquipment(LC domain, boolean equipmentSelectionProvided) {
+        Objects.requireNonNull(domain, "LC не должен быть null");
+        ControlConfiguration fallback = domain.getId() == null ? null
+                : findById(domain.getId()).getControlConfiguration();
+        prepareFunctionalEquipment(domain, fallback, equipmentSelectionProvided);
+    }
+
     /** Подбирает оборудование, если выбор не передан или изменились функциональные назначения. */
     public void prepareFunctionalEquipment(
             LC domain, ControlConfiguration fallback, boolean equipmentSelectionProvided
     ) {
         Objects.requireNonNull(domain, "LC не должен быть null");
+        ControlConfiguration configuration = domain.getControlConfiguration();
         boolean functionalChanged = fallback != null
-                && !domain.getControlConfiguration().getFunctionalConfiguration()
-                .equals(fallback.getFunctionalConfiguration());
+                && !configuration.getFunctionalConfiguration().equals(
+                        fallback.getFunctionalConfiguration());
+        if (!equipmentSelectionProvided && fallback != null) {
+            configuration = new ControlConfiguration(
+                    configuration.getFunctionalConfiguration(), fallback.getEquipment());
+            domain.setControlConfiguration(configuration);
+        }
         if (!equipmentSelectionProvided || functionalChanged) {
-            ControlConfiguration configuration = domain.getControlConfiguration();
             equipmentCatalogService.configureFunctionalEquipment(configuration);
             domain.setControlConfiguration(configuration);
         }
