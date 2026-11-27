@@ -420,7 +420,8 @@ public class ProjectRestController {
                     projectId,
                     alsId,
                     lcId,
-                    replacement
+                    replacement,
+                    lc.isEquipmentProvided()
             );
             LCDTO saved = LCDtoMapper.toDto(savedALS.getLC());
 
@@ -517,7 +518,8 @@ public class ProjectRestController {
                     projectId,
                     alsId,
                     lbcId,
-                    replacement
+                    replacement,
+                    lbc.isEquipmentProvided()
             );
             LBCDTO saved = LBCDtoMapper.toDto(savedALS.getLBC());
 
