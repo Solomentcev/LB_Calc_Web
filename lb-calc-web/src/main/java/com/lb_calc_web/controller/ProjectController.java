@@ -513,7 +513,11 @@ ControlConfiguration fallback = persistedALS.getControlModule().getControlConfig
 
         model.addAttribute("project", addALSImages(project));
         model.addAttribute("als", addALSImage(als));
-        prepareLCForm(model, addLCImage(lc, projectId, alsId));
+        LCDTO lcForm = addLCImage(lc, projectId, alsId);
+        model.addAttribute("lc", lcForm);
+        model.addAttribute("equipmentList", equipmentCatalogService.findAll().stream()
+                .map(EquipmentDtoMapper::toDto).toList());
+        model.addAttribute("defaultEquipmentIds", equipmentCatalogService.findDefaultModelIds());
         model.addAttribute("projectId", projectId);
         model.addAttribute("alsId", alsId);
         model.addAttribute("lcId", lcId);
@@ -546,7 +550,11 @@ ControlConfiguration fallback = persistedALS.getControlModule().getControlConfig
         }
         model.addAttribute("project", addALSImages(ProjectDtoMapper.toDto(preview)));
         model.addAttribute("als", toDtoWithImages(updatedALS));
-        prepareLCForm(model, addLCImage(lc, projectId, alsId));
+        LCDTO lcForm = addLCImage(lc, projectId, alsId);
+        model.addAttribute("lc", lcForm);
+        model.addAttribute("equipmentList", equipmentCatalogService.findAll().stream()
+                .map(EquipmentDtoMapper::toDto).toList());
+        model.addAttribute("defaultEquipmentIds", equipmentCatalogService.findDefaultModelIds());
         model.addAttribute("projectId", projectId);
         model.addAttribute("alsId", alsId);
         model.addAttribute("lcId", lcId);
@@ -605,7 +613,11 @@ ControlConfiguration fallback = persistedALS.getControlModule().getControlConfig
                     toDtoWithImages(projectService.findALSInProject(projectId, alsId))
             );
 
-            prepareLCForm(model, addLCImage(lc, projectId, alsId));
+            LCDTO lcForm = addLCImage(lc, projectId, alsId);
+        model.addAttribute("lc", lcForm);
+        model.addAttribute("equipmentList", equipmentCatalogService.findAll().stream()
+                .map(EquipmentDtoMapper::toDto).toList());
+        model.addAttribute("defaultEquipmentIds", equipmentCatalogService.findDefaultModelIds());
 
             model.addAttribute(
                     "projectId",
@@ -653,7 +665,11 @@ ControlConfiguration fallback = persistedALS.getControlModule().getControlConfig
 
         model.addAttribute("project", addALSImages(project));
         model.addAttribute("als", addALSImage(als));
-        prepareLBCForm(model, addLBCImage(lbc, projectId, alsId));
+        LBCDTO lbcForm = addLBCImage(lbc, projectId, alsId);
+        model.addAttribute("lbc", lbcForm);
+        model.addAttribute("equipmentList", equipmentCatalogService.findAll().stream()
+                .map(EquipmentDtoMapper::toDto).toList());
+        model.addAttribute("defaultEquipmentIds", equipmentCatalogService.findDefaultModelIds());
         model.addAttribute("projectId", projectId);
         model.addAttribute("alsId", alsId);
         model.addAttribute("lbcId", lbcId);
@@ -687,7 +703,11 @@ ControlConfiguration fallback = persistedALS.getControlModule().getControlConfig
         }
         model.addAttribute("project", addALSImages(ProjectDtoMapper.toDto(preview)));
         model.addAttribute("als", toDtoWithImages(updatedALS));
-        prepareLBCForm(model, addLBCImage(lbc, projectId, alsId));
+        LBCDTO lbcForm = addLBCImage(lbc, projectId, alsId);
+        model.addAttribute("lbc", lbcForm);
+        model.addAttribute("equipmentList", equipmentCatalogService.findAll().stream()
+                .map(EquipmentDtoMapper::toDto).toList());
+        model.addAttribute("defaultEquipmentIds", equipmentCatalogService.findDefaultModelIds());
         model.addAttribute("projectId", projectId);
         model.addAttribute("alsId", alsId);
         model.addAttribute("lbcId", lbcId);
@@ -740,7 +760,11 @@ ControlConfiguration fallback = persistedALS.getControlModule().getControlConfig
 
             model.addAttribute("als", toDtoWithImages(projectService.findALSInProject(projectId, alsId)));
 
-            prepareLBCForm(model, addLBCImage(lbc, projectId, alsId));
+            LBCDTO lbcForm = addLBCImage(lbc, projectId, alsId);
+        model.addAttribute("lbc", lbcForm);
+        model.addAttribute("equipmentList", equipmentCatalogService.findAll().stream()
+                .map(EquipmentDtoMapper::toDto).toList());
+        model.addAttribute("defaultEquipmentIds", equipmentCatalogService.findDefaultModelIds());
 
             model.addAttribute("projectId", projectId);
             model.addAttribute("alsId", alsId);
@@ -1131,20 +1155,6 @@ ControlConfiguration fallback = persistedALS.getControlModule().getControlConfig
         return dto;
     }
 
-
-    private void prepareLCForm(Model model, LCDTO lc) {
-        model.addAttribute("lc", lc);
-        model.addAttribute("equipmentList", equipmentCatalogService.findAll().stream()
-                .map(EquipmentDtoMapper::toDto).toList());
-        model.addAttribute("defaultEquipmentIds", equipmentCatalogService.findDefaultModelIds());
-    }
-
-    private void prepareLBCForm(Model model, LBCDTO lbc) {
-        model.addAttribute("lbc", lbc);
-        model.addAttribute("equipmentList", equipmentCatalogService.findAll().stream()
-                .map(EquipmentDtoMapper::toDto).toList());
-        model.addAttribute("defaultEquipmentIds", equipmentCatalogService.findDefaultModelIds());
-    }
 
 
 }
