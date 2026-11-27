@@ -100,8 +100,7 @@ public class ALSController extends BaseCatalogController {
                     fallback,
                     sizeBounds
             );
-            alsService.configureFunctionalEquipment(restored);
-            als = toDtoWithImages(alsService.preserveExistingModules(existing, restored));
+            als = toDtoWithImages(alsService.prepareConfiguration(existing, restored));
         } catch (ValidationSizeException exception) {
             model.addAttribute("ALSErrors",
                     ValidationErrorFormatter.format(exception.getValidationResult()));
@@ -141,8 +140,7 @@ public class ALSController extends BaseCatalogController {
                     fallback,
                     sizeBounds
             );
-            alsService.configureFunctionalEquipment(restored);
-            ALS domain = alsService.preserveExistingModules(existing, restored);
+            ALS domain = alsService.prepareConfiguration(existing, restored);
             ALS saved = alsService.saveALS(domain);
             return "redirect:/alss/" + saved.getId();
         } catch (ValidationSizeException e) {
@@ -326,9 +324,8 @@ public class ALSController extends BaseCatalogController {
                     ? als.getControlModule().getControlConfiguration() : null;
             LC replacement = LCDtoMapper.toDomain(
                     lc, equipmentCatalogService::findById, fallback, sizeBounds);
-            alsService.configureFunctionalEquipment(replacement);
             com.lb_calc_web.domain.model.ALS saved =
-                    alsService.saveALS(alsService.replaceLC(als, replacement));
+                    alsService.replaceLCandSaveALS(als, replacement);
             return "redirect:/alss/" + saved.getId();
         } catch (ValidationSizeException e) {
             model.addAttribute("errors", ValidationErrorFormatter.format(e.getValidationResult()));
@@ -418,9 +415,8 @@ public class ALSController extends BaseCatalogController {
             LBC replacement = LBCDtoMapper.toDomain(
                     lbc, TypeLbFactory.forLBC(environment, lbc.getType()),
                     equipmentCatalogService::findById, fallback, sizeBounds);
-            alsService.configureFunctionalEquipment(replacement);
             com.lb_calc_web.domain.model.ALS saved =
-                    alsService.saveALS(alsService.replaceLBC(als, replacement));
+                    alsService.replaceLBCandSaveALS(als, replacement);
             return "redirect:/alss/" + saved.getId();
         } catch (ValidationSizeException e) {
             model.addAttribute("errors", ValidationErrorFormatter.format(e.getValidationResult()));
