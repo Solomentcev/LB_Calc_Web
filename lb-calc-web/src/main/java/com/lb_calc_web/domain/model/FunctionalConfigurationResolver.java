@@ -51,7 +51,8 @@ public final class FunctionalConfigurationResolver {
 
         return new FunctionalConfiguration(
                 displayChanged ? resolveDisplay(updatedEquipment) : current.getDisplay(),
-                accessChanged ? resolveAccess(updatedEquipment) : current.getAccess(),
+                accessChanged ? resolveAccess(updatedEquipment, current.getAccess().contains(AccessPurpose.PIN))
+                        : current.getAccess(),
                 paymentChanged ? resolvePayment(updatedEquipment) : current.getPayment(),
                 printerChanged ? resolvePrinter(updatedEquipment) : current.getPrinter()
         );
@@ -147,12 +148,17 @@ public final class FunctionalConfigurationResolver {
     }
 
     /** Определяет набор назначений доступа по установленным считывателям. */
-    private Set<AccessPurpose> resolveAccess(Map<Equipment, Integer> equipment) {
+    private Set<AccessPurpose> resolveAccess(
+            Map<Equipment, Integer> equipment, boolean pinEnabled
+    ) {
         EnumSet<AccessPurpose> purposes = EnumSet.noneOf(AccessPurpose.class);
         equipment.keySet().stream()
                 .filter(item -> item.getFunctionalType() == EquipmentFunctionalType.ACCESS)
                 .map(Equipment::getPurpose).map(AccessPurpose.class::cast)
                 .forEach(purposes::add);
+        if (pinEnabled) {
+            purposes.add(AccessPurpose.PIN);
+        }
         return purposes;
     }
 
