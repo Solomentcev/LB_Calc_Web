@@ -85,7 +85,7 @@ environment = new MockEnvironment()
         Employee employee = new Employee(1L, "Иван", "Иванов", "ivan@example.com",
                 java.time.LocalDate.of(2026, 9, 18), Role.ROLE_MANAGER);
 
-        when(employeeService.getCurrentEmployeeDomain())
+        when(employeeService.getCurrentEmployee())
                 .thenReturn(employee);
 
         ALSDTO alsDto = TestDataFactory.validALSDTO(10L);
@@ -102,7 +102,7 @@ environment = new MockEnvironment()
     void saveProject_domain_shouldValidateBeforePersistingALS() {
         Employee employee = new Employee(1L, "Иван", "Иванов", "ivan@example.com",
                 java.time.LocalDate.of(2026, 9, 18), Role.ROLE_MANAGER);
-        when(employeeService.getCurrentEmployeeDomain()).thenReturn(employee);
+        when(employeeService.getCurrentEmployee()).thenReturn(employee);
 
         ProjectDTO dto = TestDataFactory.validProject(1L);
         dto.setId(null);
@@ -132,7 +132,7 @@ environment = new MockEnvironment()
         Employee admin = new Employee(1L, "Админ", "Админов", "admin@example.com",
                 java.time.LocalDate.of(2026, 9, 18), Role.ROLE_ADMIN);
 
-        when(employeeService.getCurrentEmployeeDomain())
+        when(employeeService.getCurrentEmployee())
                 .thenReturn(admin);
         when(projectRepository.findById(10L))
                 .thenReturn(Optional.of(entity));
@@ -229,7 +229,7 @@ environment = new MockEnvironment()
 
         Employee manager = new Employee(11L, "Иван", "Иванов", "ivan@example.com",
                 java.time.LocalDate.of(2026, 9, 18), Role.ROLE_MANAGER);
-        when(employeeService.getCurrentEmployeeDomain()).thenReturn(manager);
+        when(employeeService.getCurrentEmployee()).thenReturn(manager);
 
         ProjectDTO dto = TestDataFactory.validProject(1L);
         dto.setId(1L);
@@ -261,7 +261,7 @@ environment = new MockEnvironment()
 
         Employee manager = new Employee(11L, "Иван", "Иванов", "ivan@example.com",
                 java.time.LocalDate.of(2026, 9, 18), Role.ROLE_MANAGER);
-        when(employeeService.getCurrentEmployeeDomain()).thenReturn(manager);
+        when(employeeService.getCurrentEmployee()).thenReturn(manager);
 
         assertThrows(
                 AccessDeniedException.class,
