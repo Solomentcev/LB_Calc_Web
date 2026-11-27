@@ -180,7 +180,7 @@ public class EmployeeRestController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> getAllProfiles() {
         return ResponseEntity.ok(
-                ApiResponse.success(EmployeeDtoMapper.toProfileDtoList(employeeService.getAllProfiles()))
+                ApiResponse.success(EmployeeDtoMapper.toProfileDtoList(employeeService.findAll()))
         );
     }
 
