@@ -90,7 +90,7 @@ public class ProjectRestController {
     @Operation(
             summary = "Получить список проектов"
     )
-    public ResponseEntity<?> getAllProjects() {
+    public ResponseEntity<ApiResponse<List<ProjectDTO>>> getAllProjects() {
 
         List<ProjectDTO> projects =
                 ProjectDtoMapper.toDtoList(projectService.findAll());
@@ -110,7 +110,7 @@ public class ProjectRestController {
     @Operation(
             summary = "Получить проект по ID"
     )
-    public ResponseEntity<?> getProjectById(
+    public ResponseEntity<ApiResponse<ProjectDTO>> getProjectById(
             @PathVariable @Positive Long id
     ) {
 
@@ -129,7 +129,7 @@ public class ProjectRestController {
     @Operation(
             summary = "Получить шаблон нового проекта"
     )
-    public ResponseEntity<?> createProject() {
+    public ResponseEntity<ApiResponse<ProjectDTO>> createProject() {
 
         return ResponseEntity.ok(
                 ApiResponse.success(
@@ -190,7 +190,7 @@ public class ProjectRestController {
     @Operation(
             summary = "Обновить проект"
     )
-    public ResponseEntity<?> updateProject(
+    public ResponseEntity<ApiResponse<ProjectDTO>> updateProject(
             @PathVariable @Positive Long id,
             @RequestBody @Valid ProjectDTO project
     ) {
@@ -230,7 +230,7 @@ public class ProjectRestController {
     @Operation(
             summary = "Удалить проект"
     )
-    public ResponseEntity<?> deleteProject(
+    public ResponseEntity<ApiResponse<Void>> deleteProject(
             @PathVariable @Positive Long id
     ) {
 
@@ -251,7 +251,7 @@ public class ProjectRestController {
     @Operation(
             summary = "Получить ALS проекта"
     )
-    public ResponseEntity<?> getALS(
+    public ResponseEntity<ApiResponse<ALSDTO>> getALS(
             @PathVariable @Positive Long projectId,
             @PathVariable @Positive Long alsId
     ) {
@@ -271,7 +271,7 @@ public class ProjectRestController {
     @Operation(
             summary = "Добавить ALS в проект"
     )
-    public ResponseEntity<?> addALS(
+    public ResponseEntity<ApiResponse<ProjectDTO>> addALS(
             @PathVariable @Positive Long projectId
     ) {
 
@@ -295,7 +295,7 @@ public class ProjectRestController {
     @Operation(
             summary = "Обновить ALS в проекте"
     )
-    public ResponseEntity<?> updateALS(
+    public ResponseEntity<ApiResponse<ALSDTO>> updateALS(
             @PathVariable @Positive Long projectId,
             @PathVariable @Positive Long alsId,
             @RequestBody @Valid ALSDTO als
@@ -334,7 +334,7 @@ public class ProjectRestController {
     @Operation(
             summary = "Удалить ALS из проекта"
     )
-    public ResponseEntity<?> deleteALS(
+    public ResponseEntity<ApiResponse<ProjectDTO>> deleteALS(
             @PathVariable @Positive Long projectId,
             @PathVariable @Positive Long alsId
     ) {
@@ -362,7 +362,7 @@ public class ProjectRestController {
     @Operation(
             summary = "Получить LC ALS проекта"
     )
-    public ResponseEntity<?> getLC(
+    public ResponseEntity<ApiResponse<LCDTO>> getLC(
             @PathVariable @Positive Long projectId,
             @PathVariable @Positive Long alsId,
             @PathVariable @Positive Long lcId
@@ -386,7 +386,7 @@ public class ProjectRestController {
     @Operation(
             summary = "Обновить LC ALS проекта"
     )
-    public ResponseEntity<?> updateLC(
+    public ResponseEntity<ApiResponse<LCDTO>> updateLC(
             @PathVariable @Positive Long projectId,
             @PathVariable @Positive Long alsId,
             @PathVariable @Positive Long lcId,
@@ -424,7 +424,7 @@ public class ProjectRestController {
     @Operation(
             summary = "Заменить control-модуль ALS на LBC"
     )
-    public ResponseEntity<?> replaceLBC(
+    public ResponseEntity<ApiResponse<ALSDTO>> replaceLBC(
             @PathVariable @Positive Long projectId,
             @PathVariable @Positive Long alsId
     ) {
@@ -453,7 +453,7 @@ public class ProjectRestController {
     @Operation(
             summary = "Получить LBC ALS проекта"
     )
-    public ResponseEntity<?> getLBC(
+    public ResponseEntity<ApiResponse<LBCDTO>> getLBC(
             @PathVariable @Positive Long projectId,
             @PathVariable @Positive Long alsId,
             @PathVariable @Positive Long lbcId
@@ -477,7 +477,7 @@ public class ProjectRestController {
     @Operation(
             summary = "Обновить LBC ALS проекта"
     )
-    public ResponseEntity<?> updateLBC(
+    public ResponseEntity<ApiResponse<LBCDTO>> updateLBC(
             @PathVariable @Positive Long projectId,
             @PathVariable @Positive Long alsId,
             @PathVariable @Positive Long lbcId,
@@ -517,7 +517,7 @@ public class ProjectRestController {
     @Operation(
             summary = "Получить LB ALS проекта"
     )
-    public ResponseEntity<?> getLB(
+    public ResponseEntity<ApiResponse<LBDTO>> getLB(
             @PathVariable @Positive Long projectId,
             @PathVariable @Positive Long alsId,
             @PathVariable @Positive Long lbId
@@ -541,7 +541,7 @@ public class ProjectRestController {
     @Operation(
             summary = "Обновить LB ALS проекта"
     )
-    public ResponseEntity<?> updateLB(
+    public ResponseEntity<ApiResponse<LBDTO>> updateLB(
             @PathVariable @Positive Long projectId,
             @PathVariable @Positive Long alsId,
             @PathVariable @Positive Long lbId,
@@ -593,7 +593,7 @@ public class ProjectRestController {
     @Operation(
             summary = "Добавить LB в ALS проекта"
     )
-    public ResponseEntity<?> addLB(
+    public ResponseEntity<ApiResponse<ALSDTO>> addLB(
             @PathVariable @Positive Long projectId,
             @PathVariable @Positive Long alsId
     ) {
@@ -624,7 +624,7 @@ public class ProjectRestController {
     @Operation(
             summary = "Удалить LB из ALS проекта"
     )
-    public ResponseEntity<?> deleteLB(
+    public ResponseEntity<ApiResponse<ALSDTO>> deleteLB(
             @PathVariable @Positive Long projectId,
             @PathVariable @Positive Long alsId,
             @PathVariable @Positive Long lbId
@@ -653,7 +653,7 @@ public class ProjectRestController {
     @Operation(
             summary = "Экспортировать проект в Excel"
     )
-    public ResponseEntity<?> exportProjectToExcel(
+    public ResponseEntity<org.springframework.core.io.InputStreamResource> exportProjectToExcel(
             @PathVariable @Positive Long id
     ) {
 
