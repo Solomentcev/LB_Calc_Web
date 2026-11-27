@@ -21,7 +21,7 @@ class LBCDtoMapperTest {
     @Test
     void toDomain_shouldMapFunctionalAndStructuralConfiguration() {
         LBCDTO dto = TestDataFactory.validLBCDTO(1L);
-        LBC domain = LBCDtoMapper.toDomain(dto, TestDataFactoryType.type(dto), id -> { throw new IllegalStateException(); }, null,
+        LBC domain = LBCDtoMapper.toDomain(dto, TestDataFactoryType.type(dto), id -> { throw new IllegalStateException(); },
                 TestDataFactory.createSizeBounds());
 
         assertNotNull(domain);
