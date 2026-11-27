@@ -144,6 +144,32 @@ class ALSServiceTest {
     }
 
     @Test
+    void saveALS_shouldUpdateExistingEntityInsteadOfCreatingAnotherOne() {
+        ALS domain = TestDataFactory.validALS(77L);
+        ALSEntity existing = ALSEntityMapper.toEntity(
+                TestDataFactory.validALS(77L),
+                module -> ModuleEntityMapper.toEntity(module, equipment -> null)
+        );
+        List<com.lb_calc_web.entity.ModuleEntity> modules = existing.getModules().stream()
+                .map(com.lb_calc_web.entity.ALSModuleEntity::getModule)
+                .toList();
+
+        when(alsRepository.findById(77L)).thenReturn(Optional.of(existing));
+        when(alsRepository.findCandidates(anyInt(), anyInt(), anyInt(), anyInt(), any(), any()))
+                .thenReturn(List.of());
+        when(moduleRepository.findCandidates(anyInt(), anyInt(), anyInt(), anyInt(),
+                any(), any())).thenReturn(modules);
+        when(alsRepository.save(any(ALSEntity.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        ALS saved = service.saveALS(domain);
+
+        assertSame(domain, saved);
+        assertEquals(77L, saved.getId());
+        verify(alsRepository).save(same(existing));
+    }
+
+    @Test
     void restoreDomain_shouldPreserveStoredTextsWhenConfigurationIsUnchanged() {
         ALS source = TestDataFactory.validALS(15L);
         ALSEntity entity = spy(ALSEntityMapper.toEntity(
