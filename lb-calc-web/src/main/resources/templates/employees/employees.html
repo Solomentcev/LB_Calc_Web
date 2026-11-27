@@ -95,7 +95,7 @@
                 <td th:text="${employee.firstName}"></td>
                 <td th:text="${employee.lastName}"></td>
                 <td th:text="${employee.email}"></td>
-                <td th:text="${employee.role}"></td>
+                <td th:text="${employee.role == T(com.lb_calc_web.domain.attributes.Role).ROLE_ADMIN ? 'Администратор' : 'Менеджер'}"></td>
                 <td>
                     <span th:if="${employeeStatuses[employee.id]}" class="badge badge-success">Активен</span>
                     <span th:unless="${employeeStatuses[employee.id]}" class="badge badge-secondary">Деактивирован</span>
