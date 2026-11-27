@@ -149,7 +149,13 @@ public class LCController extends BaseCatalogController {
                 : null;
         LC domain = LCDtoMapper.toDomain(
                 dto, equipmentCatalogService::findById, fallback, sizeBounds);
-        lcService.configureFunctionalEquipment(domain);
+        boolean selectionOmitted = !dto.isEquipmentProvided() && dto.getSelectedEquipment().isEmpty();
+        boolean functionalChanged = fallback != null
+                && !domain.getControlConfiguration().getFunctionalConfiguration().equals(
+                fallback.getFunctionalConfiguration());
+        if (selectionOmitted || functionalChanged) {
+            lcService.configureFunctionalEquipment(domain);
+        }
         return domain;
     }
 
