@@ -309,10 +309,9 @@ public class AuthService {
             throw toEmailConflict(exception);
         }
 
-        EmployeeDTO result =
-                employeeService.loadUserById(
-                        saved.getId()
-                );
+        EmployeeDTO result = EmployeeDtoMapper.toDto(
+                employeeService.loadUserById(saved.getId())
+        );
 
         publishEvent(
                 UserEventType.EMPLOYEE_CREATED,
