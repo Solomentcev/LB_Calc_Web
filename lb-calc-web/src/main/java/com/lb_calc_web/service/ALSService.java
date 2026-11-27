@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
 
 /** Сервис координации доменных операций с конфигурациями ALS и вложенными модулями. */
 @Service
