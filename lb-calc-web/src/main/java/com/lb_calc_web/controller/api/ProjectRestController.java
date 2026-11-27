@@ -176,7 +176,7 @@ public class ProjectRestController {
                                 fallback,
                                 sizeBounds
                         );
-                        return alsService.prepareConfiguration(existing, restored);
+                        return alsService.prepareConfiguration(existing, restored, dto.isEquipmentSelectionProvided());
                     }
             );
             Project saved = projectService.saveProject(domain);
