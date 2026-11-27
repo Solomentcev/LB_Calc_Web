@@ -29,7 +29,6 @@ import java.util.Base64;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -39,7 +38,6 @@ class LBCControllerTest {
     void createLBC_shouldRenderDefaultSelectedPhysicalDisplay() throws Exception {
         LBCService lbcService = mock(LBCService.class);
         EquipmentCatalogService equipmentCatalogService = mock(EquipmentCatalogService.class);
-        LBC initial = createLbc(Map.of());
         Equipment display = new Equipment(
                 1L,
                 EquipmentFunctionalType.DISPLAY,
@@ -55,7 +53,6 @@ class LBCControllerTest {
 
         when(lbcService.createLBC()).thenReturn(configured);
         when(equipmentCatalogService.findAll()).thenReturn(List.of(display));
-        when(equipmentCatalogService.findDefaultModels()).thenReturn(Set.of(display));
 
         LBCController controller = new LBCController(lbcService, equipmentCatalogService);
         ExtendedModelMap model = new ExtendedModelMap();
