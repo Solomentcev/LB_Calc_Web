@@ -198,19 +198,7 @@ public class AuthService {
 
         Employee domain = new Employee(
                 firstName, lastName, email, LocalDate.now(), Role.ROLE_MANAGER);
-        EmployeeEntity entity = EmployeeEntityMapper.toEntity(domain);
-        entity.setEncryptedPassword(passwordEncoder.encode(password));
-
-        EmployeeEntity saved;
-        try {
-            saved = employeeRepository.save(entity);
-        } catch (DataIntegrityViolationException exception) {
-            throw toEmailConflict(exception);
-        }
-
-        Employee result = EmployeeEntityMapper.toDomain(saved);
-        publishEvent(UserEventType.USER_REGISTERED, saved.getId(), saved.getEmail());
-        return result;
+        return persistEmployee(domain, password, UserEventType.USER_REGISTERED);
     }
 
     /** Создаёт учётную запись сотрудника по доменной модели и паролю. */
@@ -230,19 +218,7 @@ public class AuthService {
             throw new IllegalArgumentException("Пользователь с таким email уже существует");
         }
 
-        EmployeeEntity entity = EmployeeEntityMapper.toEntity(domain);
-        entity.setEncryptedPassword(passwordEncoder.encode(password));
-
-        EmployeeEntity saved;
-        try {
-            saved = employeeRepository.save(entity);
-        } catch (DataIntegrityViolationException exception) {
-            throw toEmailConflict(exception);
-        }
-
-        Employee result = EmployeeEntityMapper.toDomain(saved);
-        publishEvent(UserEventType.EMPLOYEE_CREATED, saved.getId(), saved.getEmail());
-        return result;
+        return persistEmployee(domain, password, UserEventType.EMPLOYEE_CREATED);
     }
 
     /**
@@ -283,6 +259,27 @@ public class AuthService {
                 employee.getId(),
                 employee.getEmail()
         );
+    }
+
+    /** Сохраняет сотрудника с зашифрованным паролем и публикует событие создания. */
+    private Employee persistEmployee(Employee domain, String password, UserEventType eventType) {
+        if (employeeRepository.existsByEmail(domain.getEmail())) {
+            throw new IllegalArgumentException("Пользователь с таким email уже существует");
+        }
+
+        EmployeeEntity entity = EmployeeEntityMapper.toEntity(domain);
+        entity.setEncryptedPassword(passwordEncoder.encode(password));
+
+        EmployeeEntity saved;
+        try {
+            saved = employeeRepository.save(entity);
+        } catch (DataIntegrityViolationException exception) {
+            throw toEmailConflict(exception);
+        }
+
+        Employee result = EmployeeEntityMapper.toDomain(saved);
+        publishEvent(eventType, saved.getId(), saved.getEmail());
+        return result;
     }
 
     private IllegalArgumentException toEmailConflict(DataIntegrityViolationException exception) {
