@@ -162,12 +162,14 @@ public class LCController {
 
     private void prepareForm(Model model, LCDTO lc) {
         model.addAttribute("lc", lc);
+        var equipmentCatalog = equipmentCatalogService.findAll();
+        var defaultEquipmentIds = equipmentCatalogService.findDefaultModelIds();
         lc.setEquipmentSelections(EquipmentSelectionDtoMapper.prepareSelections(
                 lc.getFunctionalConfiguration(), lc.getEquipmentSelections(),
-                equipmentCatalogService.findAll(), equipmentCatalogService.findDefaultModelIds()));
-        model.addAttribute("equipmentList", equipmentCatalogService.findAll().stream()
+                equipmentCatalog, defaultEquipmentIds));
+        model.addAttribute("equipmentList", equipmentCatalog.stream()
                 .map(EquipmentDtoMapper::toDto).toList());
-        model.addAttribute("defaultEquipmentIds", equipmentCatalogService.findDefaultModelIds());
+        model.addAttribute("defaultEquipmentIds", defaultEquipmentIds);
         model.addAttribute("displayPurposes", List.of(DisplayPurpose.values()));
         model.addAttribute("accessPurposes", List.of(AccessPurpose.values()));
         model.addAttribute("paymentPurposes", List.of(PaymentPurpose.values()));
