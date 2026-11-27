@@ -646,6 +646,20 @@
         .module-editor__parameters .module-section__body { padding: .65rem .85rem .2rem; }
         .module-editor__parameters .module-field { margin-bottom: .45rem; }
         .module-editor__parameters .module-field .form-control { min-height: 2.1rem; }
+
+        /* Основные параметры АКХ занимают меньше места без скрытия полей. */
+        .module-editor__parameters > .module-section:first-child .module-section__body {
+            padding-bottom: .35rem;
+        }
+        .module-editor__parameters > .module-section:first-child .module-field {
+            margin-bottom: .35rem;
+        }
+        .module-editor__parameters > .module-section:first-child .module-field label {
+            margin-bottom: .25rem;
+        }
+        .module-editor__parameters > .module-section:first-child .module-field .form-control {
+            min-height: 1.95rem;
+        }
         .module-editor__heading { margin-bottom: 1rem; }
         .module-editor .page-actions { margin-bottom: .85rem; }
         .module-editor .module-access-options {
