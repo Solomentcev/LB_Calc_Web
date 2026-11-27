@@ -78,16 +78,12 @@ public class LBCRestController {
     @PostMapping
     @Operation(summary = "Сохранить LBC")
     public ResponseEntity<?> saveLBC(@RequestBody LBCDTO dto) {
-        ControlConfiguration fallback = dto.getId() != null && dto.getId() > 0
-                ? lbcService.findById(dto.getId()).getControlConfiguration() : null;
         LBC domain = LBCDtoMapper.toDomain(
                 dto,
                 TypeLbFactory.forLBC(environment, dto.getType()),
-                equipmentCatalogService::findById,
-                fallback,
-                sizeBounds
+                equipmentCatalogService::findById, sizeBounds
         );
-        lbcService.prepareFunctionalEquipment(domain, fallback, dto.isEquipmentProvided());
+        lbcService.prepareFunctionalEquipment(domain, dto.isEquipmentProvided());
         LBCDTO saved = LBCDtoMapper.toDto(lbcService.saveLBC(domain));
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success("LBC успешно сохранён", saved));
