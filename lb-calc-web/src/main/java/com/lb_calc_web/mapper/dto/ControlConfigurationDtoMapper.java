@@ -9,7 +9,6 @@ import com.lb_calc_web.domain.equipment.EquipmentPurpose;
 import com.lb_calc_web.domain.model.FunctionalConfiguration;
 import com.lb_calc_web.dto.FunctionalConfigurationDTO;
 import com.lb_calc_web.dto.EquipmentDTO;
-import com.lb_calc_web.mapper.dto.EquipmentDtoMapper;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -101,7 +100,7 @@ public final class ControlConfigurationDtoMapper {
     }
 
     /** Преобразует выбранные в форме модели оборудования в идентификаторы и количества. */
-    public static Map<Long, Integer> toEquipmentIds(List<EquipmentDTO> selections) {
+    private static Map<Long, Integer> toEquipmentIds(List<EquipmentDTO> selections) {
         Map<Long, Integer> result = new LinkedHashMap<>();
         if (selections == null) {
             return result;
