@@ -266,6 +266,32 @@ class LCServiceTest {
                 "После удаления дисплея ширина LC должна вернуться к минимуму");
     }
 
+    @Test
+    void prepareFunctionalEquipment_shouldPreserveExplicitEmptySelectionWhenFunctionsAreUnchanged() {
+        LC domain = TestDataFactory.validLC(null);
+        ControlConfiguration fallback = domain.getControlConfiguration();
+
+        service.prepareFunctionalEquipment(domain, fallback, true);
+
+        verify(equipmentCatalogService, never()).configureFunctionalEquipment(any());
+    }
+
+    @Test
+    void prepareFunctionalEquipment_shouldResolveEquipmentWhenFunctionsChange() {
+        LC domain = TestDataFactory.validLC(null);
+        ControlConfiguration fallback = domain.getControlConfiguration();
+        ControlConfiguration updated = domain.getControlConfiguration();
+        var current = updated.getFunctionalConfiguration();
+        updated.setFunctionalConfiguration(new com.lb_calc_web.domain.model.FunctionalConfiguration(
+                DisplayPurpose.INCH_17, current.getAccess(), current.getPayment(), current.getPrinter()));
+        domain.setControlConfiguration(updated);
+
+        service.prepareFunctionalEquipment(domain, fallback, true);
+
+        verify(equipmentCatalogService).configureFunctionalEquipment(any());
+    }
+
+
     private List<Equipment> configureValidEquipment(LC domain) {
         Equipment display = new Equipment(
                 7101L, EquipmentFunctionalType.DISPLAY, DisplayPurpose.INCH_10,
