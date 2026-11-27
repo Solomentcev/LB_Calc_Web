@@ -2,6 +2,10 @@ package com.lb_calc_web.mapper.dto;
 
 import com.lb_calc_web.domain.equipment.Equipment;
 import com.lb_calc_web.domain.model.ControlConfiguration;
+import com.lb_calc_web.domain.model.FunctionalConfigurationResolver;
+import com.lb_calc_web.domain.equipment.EquipmentCategory;
+import com.lb_calc_web.domain.equipment.EquipmentFunctionalType;
+import com.lb_calc_web.domain.equipment.EquipmentPurpose;
 import com.lb_calc_web.domain.model.FunctionalConfiguration;
 import com.lb_calc_web.dto.FunctionalConfigurationDTO;
 import com.lb_calc_web.dto.EquipmentDTO;
@@ -17,6 +21,9 @@ import java.util.function.Function;
 
 /** Преобразует функциональную конфигурацию и комплектацию управляющего модуля между DTO и доменом. */
 public final class ControlConfigurationDtoMapper {
+
+    private static final FunctionalConfigurationResolver RESOLVER =
+            new FunctionalConfigurationResolver();
 
     private ControlConfigurationDtoMapper() {
     }
@@ -44,6 +51,13 @@ public final class ControlConfigurationDtoMapper {
             dto.setQuantity(quantity);
             result.add(dto);
         });
+
+        RESOLVER.findMissingRequirements(
+                configuration.getFunctionalConfiguration(),
+                configuration.getEquipment()
+        ).forEach((type, purposes) -> purposes.forEach(purpose ->
+                result.add(createUnselectedEquipment(type, purpose))));
+
         return List.copyOf(result);
     }
 
@@ -91,8 +105,14 @@ public final class ControlConfigurationDtoMapper {
             return result;
         }
         for (EquipmentDTO selection : selections) {
-            if (selection == null || selection.getId() == null || selection.getId() <= 0) {
-                throw new IllegalArgumentException("Выберите модель оборудования");
+            if (selection == null) {
+                throw new IllegalArgumentException("Строка комплектации не должна быть пустой");
+            }
+            if (selection.getId() == null) {
+                continue;
+            }
+            if (selection.getId() <= 0) {
+                throw new IllegalArgumentException("Идентификатор модели оборудования должен быть положительным");
             }
             Integer quantity = selection.getQuantity();
             if (quantity == null || quantity < 1) {
@@ -103,6 +123,27 @@ public final class ControlConfigurationDtoMapper {
             }
         }
         return result;
+    }
+
+    /** Создаёт строку комплектации для обязательного назначения без выбранной модели. */
+    private static EquipmentDTO createUnselectedEquipment(
+            EquipmentFunctionalType type, EquipmentPurpose purpose
+    ) {
+        EquipmentCategory category = java.util.Arrays.stream(EquipmentCategory.values())
+                .filter(candidate -> candidate.getFunctionalType() == type
+                        && candidate.supports(purpose))
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException(
+                        "Для назначения " + purpose + " не определена категория оборудования"));
+
+        EquipmentDTO dto = new EquipmentDTO();
+        dto.setFunctionalType(type);
+        dto.setPurpose(purpose.toString());
+        dto.setCategory(category);
+        dto.setName("Модель не выбрана");
+        dto.setDescription("");
+        dto.setQuantity(1);
+        return dto;
     }
 
     private static FunctionalConfiguration toFunctionalDomain(
