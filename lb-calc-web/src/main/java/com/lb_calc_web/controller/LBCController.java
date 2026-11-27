@@ -159,12 +159,16 @@ public class LBCController extends BaseCatalogController {
                     "errors",
                     ValidationErrorFormatter.format(e.getValidationResult())
             );
-            prepareForm(model, lbc);
+            model.addAttribute("lbc", lbc);
+            model.addAttribute("equipmentList", equipmentCatalogService.findAll().stream()
+                    .map(EquipmentDtoMapper::toDto).toList());
 
             return "lbcs/lbc";
         } catch (IllegalArgumentException | NoSuchElementException e) {
             model.addAttribute("errors", List.of(e.getMessage()));
-            prepareForm(model, lbc);
+            model.addAttribute("lbc", lbc);
+            model.addAttribute("equipmentList", equipmentCatalogService.findAll().stream()
+                    .map(EquipmentDtoMapper::toDto).toList());
             return "lbcs/lbc";
         }
     }
