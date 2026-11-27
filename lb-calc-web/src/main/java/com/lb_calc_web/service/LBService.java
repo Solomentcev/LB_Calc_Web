@@ -164,8 +164,15 @@ public class LBService {
         }
 
         findOrCreateLockService.acquire();
+        Optional<LBEntity> existing = domain.getId() == null
+                ? Optional.empty()
+                : lbRepository.findById(domain.getId());
+        if (domain.getId() != null && existing.isEmpty()) {
+            throw new NoSuchElementException("LB с id=" + domain.getId() + " не найден");
+        }
+
         TypeLb typeLb = domain.getTypeLb();
-        Optional<LBEntity> existing = lbRepository.findCandidates(
+        Optional<LBEntity> duplicate = lbRepository.findCandidates(
                         domain.getHeight(), domain.getWidth(), domain.getDepth(),
                         domain.getUpperFrame(), domain.getBottomFrame(),
                         typeLb.getType(), typeLb.getDeltaWidth(), typeLb.getShelfThick(),
@@ -173,16 +180,24 @@ public class LBService {
                         domain.getDirectionDoorOpening(), domain.getCountCells(),
                         domain.getColorBody(), domain.getColorDoor()
                 ).stream()
+                .filter(entity -> !Objects.equals(entity.getId(), domain.getId()))
                 .filter(entity -> LBEntityMapper.toDomain(entity).equals(domain))
                 .findFirst();
 
-        if (existing.isPresent()) {
-            LB result = LBEntityMapper.toDomain(existing.get());
-            logger.info("Аналогичный LB уже существует, id={}", result.getId());
-            return result;
+        if (duplicate.isPresent()) {
+            domain.setId(duplicate.get().getId());
+            logger.info("Аналогичный LB уже существует, id={}", domain.getId());
+            return LBEntityMapper.toDomain(duplicate.get());
         }
 
-        LBEntity saved = lbRepository.save(LBEntityMapper.toEntity(domain));
+        LBEntity entity;
+        if (existing.isPresent()) {
+            entity = existing.get();
+            LBEntityMapper.updateEntity(domain, entity);
+        } else {
+            entity = LBEntityMapper.toEntity(domain);
+        }
+        LBEntity saved = lbRepository.save(entity);
         domain.setId(saved.getId());
         logger.info("LB сохранён, id={}", saved.getId());
         return LBEntityMapper.toDomain(saved);
