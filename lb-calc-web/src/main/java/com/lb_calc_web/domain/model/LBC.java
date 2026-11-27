@@ -154,9 +154,7 @@ public class LBC extends StorageModule implements ControlModule {
                 .mapToLong(Equipment::getWidth).max().orElse(0);
         long equipmentHeight = getEquipment().keySet().stream()
                 .mapToLong(Equipment::getHeight).max().orElse(0);
-        long equipmentDepth = getEquipment().keySet().stream()
-                .mapToLong(Equipment::getDepth).max().orElse(0);
-
+ 
         technicalCellWidth = saturatedInt(Math.max(
                 bounds.getLbcTechnicalCellMinWidth(),
                 Math.max(equipmentWidth, display == null ? 0L
