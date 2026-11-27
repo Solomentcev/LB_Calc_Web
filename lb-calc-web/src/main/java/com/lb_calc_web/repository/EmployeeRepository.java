@@ -1,8 +1,6 @@
 package com.lb_calc_web.repository;
 
 import com.lb_calc_web.entity.EmployeeEntity;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
