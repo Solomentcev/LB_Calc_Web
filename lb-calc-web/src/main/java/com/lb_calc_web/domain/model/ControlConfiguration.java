@@ -99,6 +99,17 @@ public class ControlConfiguration {
             throw new IllegalStateException(
                     "Выбранное физическое оборудование не соответствует функциональной конфигурации");
         }
+        getRequiredEquipment().forEach((type, purposes) -> purposes.forEach(purpose -> {
+            long modelCount = equipment.keySet().stream()
+                    .filter(model -> model.getFunctionalType() == type)
+                    .filter(model -> RESOLVER.supportsRequirement(model, purpose))
+                    .count();
+            if (modelCount > 1) {
+                throw new IllegalStateException(
+                        "Для назначения " + type + ":" + purpose
+                                + " выбрано несколько моделей оборудования");
+            }
+        }));
     }
 
     /** @return неизменяемое соответствие моделей оборудования и их количества */
