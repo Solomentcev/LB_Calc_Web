@@ -10,6 +10,7 @@ import com.lb_calc_web.domain.model.LC;
 import com.lb_calc_web.dto.LCDTO;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -60,42 +61,46 @@ class LCDtoMapperTest {
         assertTrue(dto.getSelectedEquipment().stream().anyMatch(item -> item.getId() == null
                 && item.getName().equals("Модель не выбрана")));
     }
+
     @Test
-    void toDomain_shouldPreserveEquipmentWhenSelectionWasNotSubmitted() {
-        LC source = TestDataFactory.validLC(null);
+    void toDomain_shouldResolveOnlySelectedEquipmentIds() {
         Equipment scanner = new Equipment(
                 502L, EquipmentFunctionalType.ACCESS, AccessPurpose.RFID,
                 EquipmentCategory.RFID_READER, "Сканер", "", 0, 0, 0);
-        ControlConfiguration fallback = new ControlConfiguration(
-                source.getControlConfiguration().getFunctionalConfiguration(), Map.of(scanner, 1));
-
         LCDTO dto = TestDataFactory.validLCDTO(10L);
-        dto.setEquipmentProvided(false);
-
-        LC restored = LCDtoMapper.toDomain(dto, id -> {
-            throw new AssertionError("Загрузчик не должен вызываться");
-        }, fallback, TestDataFactory.createSizeBounds());
-
-        assertEquals(Map.of(scanner, 1), restored.getEquipment());
-    }
-
-    @Test
-    void toDomain_shouldClearEquipmentWhenEmptySelectionWasSubmitted() {
-        LC source = TestDataFactory.validLC(null);
-        Equipment scanner = new Equipment(
-                503L, EquipmentFunctionalType.ACCESS, AccessPurpose.RFID,
-                EquipmentCategory.RFID_READER, "Сканер", "", 0, 0, 0);
-        ControlConfiguration fallback = new ControlConfiguration(
-                source.getControlConfiguration().getFunctionalConfiguration(), Map.of(scanner, 1));
-
-        LCDTO dto = TestDataFactory.validLCDTO(11L);
+        dto.setSelectedEquipment(List.of(TestDataFactory.selectedEquipment(502L, 2)));
         dto.setEquipmentProvided(true);
 
         LC restored = LCDtoMapper.toDomain(dto, id -> {
-            throw new AssertionError("Загрузчик не должен вызываться");
-        }, fallback, TestDataFactory.createSizeBounds());
+            assertEquals(502L, id);
+            return scanner;
+        }, TestDataFactory.createSizeBounds());
 
-        assertEquals(Map.of(), restored.getEquipment());
+        assertEquals(Map.of(scanner, 2), restored.getEquipment());
     }
 
+    @Test
+    void toDomain_shouldNotRestoreEquipmentWhenSelectionWasNotSubmitted() {
+        LCDTO dto = TestDataFactory.validLCDTO(11L);
+        dto.setEquipmentProvided(false);
+
+        LC restored = LCDtoMapper.toDomain(dto, id -> {
+            throw new AssertionError("Без выбранных ID поиск оборудования не требуется");
+        }, TestDataFactory.createSizeBounds());
+
+        assertTrue(restored.getEquipment().isEmpty());
+    }
+
+    @Test
+    void toDomain_shouldKeepExplicitlyEmptySelectionEmpty() {
+        LCDTO dto = TestDataFactory.validLCDTO(12L);
+        dto.setEquipmentProvided(true);
+        dto.setSelectedEquipment(List.of());
+
+        LC restored = LCDtoMapper.toDomain(dto, id -> {
+            throw new AssertionError("Для пустого выбора каталог вызываться не должен");
+        }, TestDataFactory.createSizeBounds());
+
+        assertTrue(restored.getEquipment().isEmpty());
+    }
 }
