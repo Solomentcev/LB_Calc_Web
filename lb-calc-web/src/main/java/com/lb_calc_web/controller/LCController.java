@@ -124,11 +124,9 @@ public class LCController extends BaseCatalogController {
         );
 
         try {
-            ControlConfiguration fallback = lc.getId() != null && lc.getId() > 0
-                    ? lcService.findById(lc.getId()).getControlConfiguration() : null;
             LC domain = LCDtoMapper.toDomain(
-                    lc, equipmentCatalogService::findById, fallback, sizeBounds);
-            lcService.prepareFunctionalEquipment(domain, fallback, lc.isEquipmentProvided());
+                    lc, equipmentCatalogService::findById, sizeBounds);
+            lcService.prepareFunctionalEquipment(domain, lc.isEquipmentProvided());
             LC savedLC = lcService.saveLC(domain);
 
             return "redirect:/lcs/" + savedLC.getId();
