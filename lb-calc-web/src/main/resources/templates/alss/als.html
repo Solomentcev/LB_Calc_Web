@@ -183,15 +183,18 @@
                         <input type="hidden" th:field="*{LC.bottomFrame}">
                         <input type="hidden" th:field="*{LC.colorBody}">
                         <input type="hidden" th:field="*{LC.colorDoor}">
-                        <input type="hidden" name="LC.equipmentSelectionsProvided" value="true">
                         <input type="hidden"
-                               th:each="selection, selectionStat : ${als.LC.equipmentSelections}"
-                               th:name="|LC.equipmentSelections[${selectionStat.index}].equipmentId|"
-                               th:value="${selection.equipmentId}">
+                               th:each="selection, selectionStat : ${als.LC.selectedEquipment}"
+                               th:field="*{LC.selectedEquipment[__${selectionStat.index}__].id}">
                         <input type="hidden"
-                               th:each="selection, selectionStat : ${als.LC.equipmentSelections}"
-                               th:name="|LC.equipmentSelections[${selectionStat.index}].quantity|"
-                               th:value="${selection.quantity}">
+                               th:each="selection, selectionStat : ${als.LC.selectedEquipment}"
+                               th:field="*{LC.selectedEquipment[__${selectionStat.index}__].quantity}">
+                        <input type="hidden"
+                               th:each="selection, selectionStat : ${als.LC.selectedEquipment}"
+                               th:field="*{LC.selectedEquipment[__${selectionStat.index}__].functionalType}">
+                        <input type="hidden"
+                               th:each="selection, selectionStat : ${als.LC.selectedEquipment}"
+                               th:field="*{LC.selectedEquipment[__${selectionStat.index}__].purpose}">
 
                         <div class="module-card-layout">
                             <div class="module-card-layout__information">
@@ -204,15 +207,10 @@
                                     <div class="col-md-9">
                                         <span class="text-muted small">Физическое оборудование</span>
                                         <ul class="list-unstyled mb-0">
-                                            <li th:each="selection : ${als.LC.equipmentSelections}">
-                                                <span th:each="equipment : ${selection.availableModels}"
-                                                      th:if="${equipment.id == selection.equipmentId}"
-                                                      th:text="|${equipment.name} — ${selection.quantity} шт.|">Оборудование</span>
-                                                <span th:if="${selection.equipmentId == null}">Модель не выбрана</span>
-                                                <span th:if="${selection.equipmentId != null and #lists.isEmpty(selection.availableModels)}"
-                                                      th:text="|${selection.quantity} шт. — модель отсутствует в каталоге|">Модель недоступна</span>
-                                            </li>
-                                            <li th:if="${#lists.isEmpty(als.LC.equipmentSelections)}"
+                                            <li th:each="selection : ${als.LC.selectedEquipment}"
+                                                th:text="|${selection.name} — ${selection.quantity} шт.|">Оборудование</li>
+                                            <li th:if="${#lists.isEmpty(als.LC.selectedEquipment)}"
+                                                class="text-muted">Отдельное оборудование не требуется</li>                                            <li th:if="${#lists.isEmpty(als.LC.equipmentSelections)}"
                                                 class="text-muted">Отдельное оборудование не требуется</li>
                                         </ul>
                                     </div>
@@ -265,15 +263,18 @@
                         <input type="hidden" th:field="*{LBC.directionDoorOpening}">
                         <input type="hidden" th:field="*{LBC.colorBody}">
                         <input type="hidden" th:field="*{LBC.colorDoor}">
-                        <input type="hidden" name="LBC.equipmentSelectionsProvided" value="true">
                         <input type="hidden"
-                               th:each="selection, selectionStat : ${als.LBC.equipmentSelections}"
-                               th:name="|LBC.equipmentSelections[${selectionStat.index}].equipmentId|"
-                               th:value="${selection.equipmentId}">
+                               th:each="selection, selectionStat : ${als.LBC.selectedEquipment}"
+                               th:field="*{LBC.selectedEquipment[__${selectionStat.index}__].id}">
                         <input type="hidden"
-                               th:each="selection, selectionStat : ${als.LBC.equipmentSelections}"
-                               th:name="|LBC.equipmentSelections[${selectionStat.index}].quantity|"
-                               th:value="${selection.quantity}">
+                               th:each="selection, selectionStat : ${als.LBC.selectedEquipment}"
+                               th:field="*{LBC.selectedEquipment[__${selectionStat.index}__].quantity}">
+                        <input type="hidden"
+                               th:each="selection, selectionStat : ${als.LBC.selectedEquipment}"
+                               th:field="*{LBC.selectedEquipment[__${selectionStat.index}__].functionalType}">
+                        <input type="hidden"
+                               th:each="selection, selectionStat : ${als.LBC.selectedEquipment}"
+                               th:field="*{LBC.selectedEquipment[__${selectionStat.index}__].purpose}">
 
                         <div class="module-card-layout">
                             <div class="module-card-layout__information">
@@ -290,15 +291,10 @@
                                     <div class="col-md-6">
                                         <span class="text-muted small">Физическое оборудование</span>
                                         <ul class="list-unstyled mb-0">
-                                            <li th:each="selection : ${als.LBC.equipmentSelections}">
-                                                <span th:each="equipment : ${selection.availableModels}"
-                                                      th:if="${equipment.id == selection.equipmentId}"
-                                                      th:text="|${equipment.name} — ${selection.quantity} шт.|">Оборудование</span>
-                                                <span th:if="${selection.equipmentId == null}">Модель не выбрана</span>
-                                                <span th:if="${selection.equipmentId != null and #lists.isEmpty(selection.availableModels)}"
-                                                      th:text="|${selection.quantity} шт. — модель отсутствует в каталоге|">Модель недоступна</span>
-                                            </li>
-                                            <li th:if="${#lists.isEmpty(als.LBC.equipmentSelections)}"
+                                            <li th:each="selection : ${als.LBC.selectedEquipment}"
+                                                th:text="|${selection.name} — ${selection.quantity} шт.|">Оборудование</li>
+                                            <li th:if="${#lists.isEmpty(als.LBC.selectedEquipment)}"
+                                                class="text-muted">Отдельное оборудование не требуется</li>                                            <li th:if="${#lists.isEmpty(als.LBC.equipmentSelections)}"
                                                 class="text-muted">Отдельное оборудование не требуется</li>
                                         </ul>
                                     </div>
