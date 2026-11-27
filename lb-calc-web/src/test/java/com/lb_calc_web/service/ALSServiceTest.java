@@ -56,7 +56,7 @@ class ALSServiceTest {
                 .withProperty("als.color.body.default", "Blue")
                 .withProperty("als.color.door.default", "White")
                 .withProperty("als.position.control-module.default", "LEFT")
-                .withProperty("als.position.lc.default", "LEFT")
+                .withProperty("als.position.control-module.default", "LEFT")
                 .withProperty("lb.type.TYPE1.delta-width", "100")
                 .withProperty("lb.type.TYPE1.shelf-thick", "5")
                 .withProperty("lb.type.TYPE1.service-zone-width", "40");
