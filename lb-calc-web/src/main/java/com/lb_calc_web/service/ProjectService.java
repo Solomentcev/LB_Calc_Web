@@ -229,7 +229,7 @@ return projectRepository.findAllWithUsers()
         Objects.requireNonNull(requested, "Проект не должен быть null");
 
         ProjectEntity existing = loadExistingProject(requested.getId());
-        Employee currentEmployee = employeeService.getCurrentEmployeeDomain();
+        Employee currentEmployee = employeeService.getCurrentEmployee();
         assertCanModifyProject(existing, currentEmployee);
         LocalDate today = LocalDate.now();
 
@@ -304,7 +304,7 @@ return projectRepository.findAllWithUsers()
 
         assertCanModifyProject(
                 entity,
-                employeeService.getCurrentEmployeeDomain()
+                employeeService.getCurrentEmployee()
         );
 
         projectRepository.delete(entity);
@@ -695,7 +695,7 @@ return projectRepository.findAllWithUsers()
      */
     private Project saveDomainProject(Project domain) {
         ProjectEntity existing = loadExistingProject(domain.getId());
-        Employee currentEmployee = employeeService.getCurrentEmployeeDomain();
+        Employee currentEmployee = employeeService.getCurrentEmployee();
         assertCanModifyProject(existing, currentEmployee);
 
         domain.setUpdatedBy(currentEmployee);
