@@ -45,6 +45,23 @@ class LCServiceTest {
         repository = mock(LCRepository.class);
         equipmentRepository = mock(EquipmentRepository.class);
         equipmentCatalogService = mock(EquipmentCatalogService.class);
+        doAnswer(invocation -> {
+            ControlConfiguration configuration = invocation.getArgument(0);
+            ControlConfiguration fallback = invocation.getArgument(1);
+            boolean selectionProvided = invocation.getArgument(2);
+            boolean functionalChanged = fallback != null
+                    && !configuration.getFunctionalConfiguration()
+                    .equals(fallback.getFunctionalConfiguration());
+            if (!selectionProvided && fallback != null) {
+                configuration = new ControlConfiguration(
+                        configuration.getFunctionalConfiguration(), fallback.getEquipment());
+            }
+            if (!selectionProvided || functionalChanged) {
+                equipmentCatalogService.configureFunctionalEquipment(configuration);
+            }
+            return configuration;
+        }).when(equipmentCatalogService).prepareFunctionalEquipment(
+                any(ControlConfiguration.class), nullable(ControlConfiguration.class), anyBoolean());
         environment = new MockEnvironment()
                 .withProperty("size.height.default", "1940")
                 .withProperty("size.width.default", "500")
