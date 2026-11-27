@@ -726,11 +726,14 @@ class PersistenceIntegrationTest {
                     .filter(value -> value.getId().equals(changedWithLC.getId()))
                     .findFirst()
                     .orElseThrow();
-            assertEquals(1, persistedLCConfiguration.getLC().getSelectedEquipment().size());
-            assertEquals(barcodeScanner.getId(),
-                    persistedLCConfiguration.getLC().getSelectedEquipment().get(0).getId());
-            assertEquals(1,
-                    persistedLCConfiguration.getLC().getSelectedEquipment().get(0).getQuantity());
+            assertEquals(2, persistedLCConfiguration.getLC().getSelectedEquipment().size());
+            var persistedBarcodeScanner = persistedLCConfiguration.getLC().getSelectedEquipment().stream()
+                    .filter(item -> barcodeScanner.getId().equals(item.getId()))
+                    .findFirst().orElseThrow();
+            assertEquals(1, persistedBarcodeScanner.getQuantity());
+            assertTrue(persistedLCConfiguration.getLC().getSelectedEquipment().stream().anyMatch(item ->
+                    item.getFunctionalType() == EquipmentFunctionalType.DISPLAY
+                            && item.getId() != null));
 
             ALSDTO persistedLBCConfiguration = restoredDTO.getAlsList().stream()
                     .filter(value -> value.getId().equals(regeneratedLBC.getId()))
