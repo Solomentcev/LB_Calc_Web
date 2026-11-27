@@ -2,9 +2,12 @@ package com.lb_calc_web.controller.api;
 
 import com.lb_calc_web.controller.api.response.ApiResponse;
 import com.lb_calc_web.domain.model.LC;
+import com.lb_calc_web.domain.model.ControlConfiguration;
 import com.lb_calc_web.dto.LCDTO;
 import com.lb_calc_web.mapper.dto.LCDtoMapper;
 import com.lb_calc_web.service.LCService;
+import com.lb_calc_web.service.EquipmentCatalogService;
+import com.lb_calc_web.service.validation.size.SizeBounds;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -32,9 +35,27 @@ public class LCRestController {
             LoggerFactory.getLogger(LCRestController.class);
 
     private final LCService lcService;
+    private final EquipmentCatalogService equipmentCatalogService;
+    private final SizeBounds sizeBounds;
 
-    public LCRestController(LCService lcService) {
+    public LCRestController(
+            LCService lcService,
+            EquipmentCatalogService equipmentCatalogService,
+            SizeBounds sizeBounds
+    ) {
         this.lcService = lcService;
+        this.equipmentCatalogService = equipmentCatalogService;
+        this.sizeBounds = sizeBounds;
+    }
+
+    /** Преобразует DTO LC в доменную модель с учётом сохранённой комплектации. */
+    private LC toDomain(LCDTO dto) {
+        ControlConfiguration fallback = dto.getId() != null && dto.getId() > 0
+                ? lcService.findById(dto.getId()).getControlConfiguration() : null;
+        LC restored = LCDtoMapper.toDomain(
+                dto, equipmentCatalogService::findById, fallback, sizeBounds);
+        lcService.configureFunctionalEquipment(restored);
+        return restored;
     }
 
     /**
@@ -96,7 +117,7 @@ public class LCRestController {
                 dto != null && dto.getFunctionalConfiguration() != null
                         ? dto.getFunctionalConfiguration().getDisplay() : null
         );
-        LC domain = lcService.restoreDomain(dto);
+        LC domain = toDomain(dto);
         LCDTO saved = LCDtoMapper.toDto(lcService.saveLC(domain));
         return ResponseEntity.ok(
                 ApiResponse.success("LC успешно сохранён", saved)
