@@ -10,15 +10,18 @@ import com.lb_calc_web.mapper.dto.EmployeeDtoMapper;
 import com.lb_calc_web.service.AuthService;
 import com.lb_calc_web.service.EmployeeService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 /** REST-контроллер управления сотрудниками и их профилями. */
 @RestController
+@Validated
 @RequestMapping("/api/v1/employees")
 @PreAuthorize("hasAuthority('ROLE_ADMIN')")
 public class EmployeeRestController {
@@ -60,7 +63,7 @@ public class EmployeeRestController {
     /** Возвращает сотрудника по идентификатору. */
     @GetMapping("/{id}")
     public ResponseEntity<?> getEmployeeById(
-            @PathVariable Long id
+            @PathVariable @Positive Long id
     ) {
 
             EmployeeDTO employee =
@@ -102,7 +105,7 @@ public class EmployeeRestController {
     /** Обновляет данные учётной записи сотрудника. */
     @PutMapping("/{id}")
     public ResponseEntity<?> updateEmployee(
-            @PathVariable int id,
+            @PathVariable @Positive int id,
             @RequestBody @Valid ProfileDTO employeeUpd
     ) {
 
@@ -138,7 +141,7 @@ public class EmployeeRestController {
     /** Активирует учётную запись сотрудника. */
     @PostMapping("/{id}/activate")
     public ResponseEntity<?> activateEmployee(
-            @PathVariable Long id
+            @PathVariable @Positive Long id
     ) {
 
             employeeService.activateById(id);
@@ -151,7 +154,7 @@ public class EmployeeRestController {
     /** Деактивирует или удаляет учётную запись сотрудника согласно правилам сервиса. */
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteEmployee(
-            @PathVariable Long id
+            @PathVariable @Positive Long id
     ) {
 
             employeeService.deactivateById(id);
@@ -194,7 +197,7 @@ public class EmployeeRestController {
     @GetMapping("/profiles/{id}")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> getProfileById(
-            @PathVariable int id
+            @PathVariable @Positive int id
     ) {
 
             return ResponseEntity.ok(
@@ -228,7 +231,7 @@ public class EmployeeRestController {
      */
     @PutMapping("/{id}/password")
     public ResponseEntity<?> changeEmployeePassword(
-            @PathVariable Long id,
+            @PathVariable @Positive Long id,
             @RequestBody @Valid ChangePasswordDTO passwordDTO
     ) {
         if (!passwordDTO.getPassword().equals(passwordDTO.getConfirmPassword())) {
