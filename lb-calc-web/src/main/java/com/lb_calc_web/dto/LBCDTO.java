@@ -3,6 +3,8 @@ package com.lb_calc_web.dto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import jakarta.validation.Valid;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -40,8 +42,10 @@ public class LBCDTO {
     private String colorDoor;
     private String colorBody;
 
+    @Valid
     private FunctionalConfigurationDTO functionalConfiguration;
     /** Выбранные модели с названиями и характеристиками для отображения в форме. */
+    @Valid
     private List<EquipmentDTO> selectedEquipment = new ArrayList<>();
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private boolean equipmentProvided;
