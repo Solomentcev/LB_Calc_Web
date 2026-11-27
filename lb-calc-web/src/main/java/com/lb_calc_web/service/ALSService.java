@@ -240,16 +240,6 @@ public class ALSService {
         domain.setControlConfiguration(configuration);
     }
 
-    /** Подбирает оборудование для LC, входящего в ALS. */
-    public void configureFunctionalEquipment(LC domain) {
-        lcService.configureFunctionalEquipment(domain);
-    }
-
-    /** Подбирает оборудование для LBC, входящего в ALS. */
-    public void configureFunctionalEquipment(LBC domain) {
-        lbcService.configureFunctionalEquipment(domain);
-    }
-
     /** Удаляет сохранённую конфигурацию ALS. */
     @Transactional
     public void deleteALS(Long id) {
