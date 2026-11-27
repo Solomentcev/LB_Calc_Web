@@ -1,10 +1,8 @@
 package com.lb_calc_web.service;
 
-import com.lb_calc_web.dto.EmployeeDTO;
-import com.lb_calc_web.dto.ProfileDTO;
+import com.lb_calc_web.domain.model.Employee;
 import com.lb_calc_web.entity.EmployeeEntity;
 import com.lb_calc_web.mapper.entity.EmployeeEntityMapper;
-import com.lb_calc_web.mapper.dto.EmployeeDtoMapper;
 import com.lb_calc_web.repository.EmployeeRepository;
 import com.lb_calc_web.security.EmployeePrincipal;
 import org.slf4j.Logger;
@@ -74,7 +72,7 @@ public class EmployeeService implements UserDetailsService {
      * Возвращает DTO, а не Security Principal.
      */
     @Transactional(readOnly = true)
-    public EmployeeDTO loadUserByEmail(String email) {
+    public Employee loadUserByEmail(String email) {
 
         EmployeeEntity entity = employeeRepository
                 .findByEmail(email)
@@ -84,11 +82,11 @@ public class EmployeeService implements UserDetailsService {
                         )
                 );
 
-        return EmployeeDtoMapper.toDto(EmployeeEntityMapper.toDomain(entity));
+        return EmployeeEntityMapper.toDomain(entity);
     }
 
     /** Возвращает DTO сотрудника по числовому идентификатору. */
-    public EmployeeDTO loadUserById(int id) {
+    public Employee loadUserById(int id) {
         return loadUserById((long) id);
     }
 
@@ -96,7 +94,7 @@ public class EmployeeService implements UserDetailsService {
      * Загружает сотрудника по стабильному идентификатору.
      */
     @Transactional(readOnly = true)
-    public EmployeeDTO loadUserById(Long id) {
+    public Employee loadUserById(Long id) {
         if (id == null || id <= 0) {
             throw new NoSuchElementException("Пользователь с id=" + id + " не найден");
         }
@@ -113,7 +111,7 @@ public class EmployeeService implements UserDetailsService {
 
     /** Возвращает профиль сотрудника по идентификатору. */
     @Transactional(readOnly = true)
-    public ProfileDTO getProfileById(int id) {
+    public Employee getProfileById(int id) {
         if (id <= 0) {
             throw new NoSuchElementException("Пользователь с id=" + id + " не найден");
         }
@@ -126,7 +124,7 @@ public class EmployeeService implements UserDetailsService {
                         )
                 );
 
-        return EmployeeDtoMapper.toProfileDto(EmployeeEntityMapper.toDomain(entity));
+        return EmployeeEntityMapper.toDomain(entity);
     }
 
     /**
@@ -136,32 +134,32 @@ public class EmployeeService implements UserDetailsService {
      */
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @Transactional
-    public EmployeeDTO save(EmployeeDTO employeeDTO) {
+    public Employee save(Employee employee) {
 
-        if (employeeDTO == null || employeeDTO.getId() == null || employeeDTO.getId() <= 0) {
+        if (employee == null || employee.getId() == null || employee.getId() <= 0) {
             throw new IllegalArgumentException(
                     "Для обновления сотрудника требуется корректный ID"
             );
         }
 
-        logger.info("Обновление учётной записи сотрудника: id={}", employeeDTO.getId());
+        logger.info("Обновление учётной записи сотрудника: id={}", employee.getId());
 
         EmployeeEntity entity = employeeRepository
-                .findById(employeeDTO.getId())
+                .findById(employee.getId())
                 .orElseThrow(() ->
                         new NoSuchElementException(
                                 "Сотрудник с id=" +
-                                        employeeDTO.getId() +
+                                        employee.getId() +
                                         " не найден"
                         )
                 );
 
-        EmployeeEntityMapper.updateEntity(EmployeeDtoMapper.toDomain(employeeDTO), entity);
+        EmployeeEntityMapper.updateEntity(employee, entity);
 
         EmployeeEntity saved =
                 employeeRepository.save(entity);
 
-        return EmployeeDtoMapper.toDto(EmployeeEntityMapper.toDomain(saved));
+        return EmployeeEntityMapper.toDomain(saved);
     }
 
     /**
@@ -235,7 +233,7 @@ public class EmployeeService implements UserDetailsService {
      * Фильтрация выполняется в БД до сортировки и пагинации.
      */
     @Transactional(readOnly = true)
-    public org.springframework.data.domain.Page<ProfileDTO> findProfilesPage(
+    public org.springframework.data.domain.Page<Employee> findProfilesPage(
             EmployeeCatalogFilter filter, org.springframework.data.domain.Pageable pageable
     ) {
         List<Specification<EmployeeEntity>> specifications = new ArrayList<>();
@@ -271,7 +269,7 @@ public class EmployeeService implements UserDetailsService {
                 .orElse((root, query, builder) -> builder.conjunction());
 
         return employeeRepository.findAll(specification, pageable)
-                .map(entity -> EmployeeDtoMapper.toProfileDto(EmployeeEntityMapper.toDomain(entity)));
+                .map(EmployeeEntityMapper::toDomain);
     }
 
     private void addTextFilter(
@@ -311,7 +309,7 @@ public class EmployeeService implements UserDetailsService {
     /** Возвращает список сотрудников. */
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @Transactional(readOnly = true)
-    public List<EmployeeDTO> findAll() {
+    public List<Employee> findAll() {
 
         List<EmployeeEntity> entities =
                 employeeRepository.findAll();
@@ -321,13 +319,13 @@ public class EmployeeService implements UserDetailsService {
         );
 
         return entities.stream()
-                .map(entity -> EmployeeDtoMapper.toDto(EmployeeEntityMapper.toDomain(entity)))
+                .map(EmployeeEntityMapper::toDomain)
                 .toList();
     }
 
     /** Возвращает профили всех сотрудников. */
     @Transactional(readOnly = true)
-    public List<ProfileDTO> getAllProfiles() {
+    public List<Employee> getAllProfiles() {
 
         List<EmployeeEntity> entities =
                 employeeRepository.findAll();
@@ -352,17 +350,10 @@ public class EmployeeService implements UserDetailsService {
      * Возвращает DTO текущего сотрудника для границы представления.
      */
     @Transactional(readOnly = true)
-    public EmployeeDTO getCurrentEmployee() {
-        return EmployeeDtoMapper.toDto(EmployeeEntityMapper.toDomain(getCurrentEmployeeEntity()));
-    }
-
-    /**
-     * Возвращает доменную модель текущего сотрудника для прикладной логики.
-     */
-    @Transactional(readOnly = true)
-    public com.lb_calc_web.domain.model.Employee getCurrentEmployeeDomain() {
+    public Employee getCurrentEmployee() {
         return EmployeeEntityMapper.toDomain(getCurrentEmployeeEntity());
     }
+
 
     private EmployeeEntity getCurrentEmployeeEntity() {
         Authentication authentication =
