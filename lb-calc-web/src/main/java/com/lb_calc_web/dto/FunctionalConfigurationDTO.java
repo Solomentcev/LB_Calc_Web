@@ -1,5 +1,6 @@
 package com.lb_calc_web.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import com.lb_calc_web.domain.equipment.AccessPurpose;
@@ -13,6 +14,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 /** Транспортное представление функциональных назначений ALS и управляющего модуля. */
+@Schema(description = "Функциональные назначения управляющего модуля: дисплей, доступ, оплата и печать.")
 public class FunctionalConfigurationDTO {
 
     private DisplayPurpose display;
