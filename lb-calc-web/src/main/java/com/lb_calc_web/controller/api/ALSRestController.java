@@ -130,7 +130,7 @@ toDto(alsService.createALS())
                     null,
                     sizeBounds
             );
-            alsService.configureFunctionalEquipment(restored);
+            restored = alsService.prepareConfiguration(null, restored);
             ALS savedDomain = alsService.saveALS(restored);
             ALSDTO saved = toDto(savedDomain);
 
@@ -168,8 +168,7 @@ toDto(alsService.createALS())
                     fallback,
                     sizeBounds
             );
-            alsService.configureFunctionalEquipment(restored);
-            restored = alsService.preserveExistingModules(existing, restored);
+            restored = alsService.prepareConfiguration(existing, restored);
             ALS savedDomain = alsService.saveALS(restored);
             ALSDTO saved = toDto(savedDomain);
 
@@ -246,8 +245,7 @@ toDto(alsService.createALS())
                     fallback,
                     sizeBounds
             );
-            alsService.configureFunctionalEquipment(replacement);
-            ALS saved = alsService.saveALS(alsService.replaceLBC(als, replacement));
+            ALS saved = alsService.replaceLBCandSaveALS(als, replacement);
             com.lb_calc_web.domain.model.LBC savedLBC =
                     (com.lb_calc_web.domain.model.LBC) saved.getControlModule();
             return ResponseEntity.ok(
