@@ -56,8 +56,9 @@ class LBCDtoMapperTest {
                 result.getFunctionalConfiguration().getPayment());
         assertEquals(source.getFunctionalConfiguration().getPrinter(),
                 result.getFunctionalConfiguration().getPrinter());
-        assertEquals(1, result.getSelectedEquipment().size());
-        assertNull(result.getSelectedEquipment().get(0).getId());
-        assertEquals("Модель не выбрана", result.getSelectedEquipment().get(0).getName());
+        assertEquals(2, result.getSelectedEquipment().size());
+        assertTrue(result.getSelectedEquipment().stream().allMatch(item -> item.getId() == null));
+        assertTrue(result.getSelectedEquipment().stream()
+                .allMatch(item -> item.getName().equals("Модель не выбрана")));
     }
 }
