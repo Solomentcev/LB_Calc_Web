@@ -183,19 +183,8 @@ public class LBCService {
             LBC domain, ControlConfiguration fallback, boolean equipmentSelectionProvided
     ) {
         Objects.requireNonNull(domain, "LBC не должен быть null");
-        ControlConfiguration configuration = domain.getControlConfiguration();
-        boolean functionalChanged = fallback != null
-                && !configuration.getFunctionalConfiguration().equals(
-                        fallback.getFunctionalConfiguration());
-        if (!equipmentSelectionProvided && fallback != null) {
-            configuration = new ControlConfiguration(
-                    configuration.getFunctionalConfiguration(), fallback.getEquipment());
-            domain.setControlConfiguration(configuration);
-        }
-        if (!equipmentSelectionProvided || functionalChanged) {
-            equipmentCatalogService.configureFunctionalEquipment(configuration);
-            domain.setControlConfiguration(configuration);
-        }
+        domain.setControlConfiguration(equipmentCatalogService.prepareFunctionalEquipment(
+                domain.getControlConfiguration(), fallback, equipmentSelectionProvided));
     }
 
     /** Проверяет комплектацию и геометрию LBC перед сохранением в каталоге или составе ALS. */
