@@ -74,28 +74,6 @@ public final class LBDtoMapper {
     }
 
     /**
-
-     * DTO -> Domain.
-     */
-    public static LB toDomain(LBDTO dto) {
-        if (dto == null) {
-            return null;
-        }
-
-        TypeLb typeLb = new TypeLb(
-                Objects.requireNonNull(
-                        dto.getType(),
-                        "Тип LB не должен быть null"
-                ),
-                dto.getDeltaWidth(),
-                dto.getShelfThick(),
-                dto.getServiceZoneWidth()
-        );
-
-        return toDomain(dto, typeLb);
-    }
-
-    /**
      * Преобразует DTO в доменную модель с конструктивным типом,
      * разрешённым application-слоем.
      */
@@ -128,28 +106,6 @@ public final class LBDtoMapper {
         );
         domain.setId(dto.getId() == null || dto.getId() <= 0 ? null : dto.getId());
         return domain;
-    }
-
-    /**
-
-     * Domain -> DTO.
-     */
-    public static List<LBDTO> toDtoList(
-            List<LB> domains
-    ) {
-        if (domains == null) {
-            return List.of();
-        }
-
-        List<LBDTO> result = new ArrayList<>(
-                domains.size()
-        );
-
-        for (LB domain : domains) {
-            result.add(toDto(domain));
-        }
-
-        return result;
     }
 
 
