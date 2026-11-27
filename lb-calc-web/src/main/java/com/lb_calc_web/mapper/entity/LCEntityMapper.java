@@ -10,8 +10,6 @@ import com.lb_calc_web.domain.model.Module;
 import com.lb_calc_web.entity.EquipmentQuantityEmbeddable;
 import com.lb_calc_web.entity.EquipmentEntity;
 import com.lb_calc_web.entity.LCEntity;
-import com.lb_calc_web.dto.LCDTO;
-import com.lb_calc_web.mapper.dto.LCDtoMapper;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -121,13 +119,5 @@ public final class LCEntityMapper {
         entity.setEquipment(equipment);
     }
 
-    /** Преобразует LCEntity в DTO, сохраняя persistence ID. */
-    public static LCDTO toDto(LCEntity entity, SizeBounds bounds) {
-        if (entity == null) {
-            return null;
-        }
-        LCDTO dto = LCDtoMapper.toDto(toDomain(entity, bounds));
-        dto.setId(entity.getId());
-        return dto;
-    }
+
 }
