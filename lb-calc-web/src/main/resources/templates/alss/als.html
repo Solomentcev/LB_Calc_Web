@@ -46,6 +46,22 @@
                    th:name="|moduleOrder[${itemStat.index}].index|" th:value="${item.index}">
         </div>
 
+<div th:if="${ALSErrors != null}" class="alert alert-danger" role="alert">
+            <div th:each="error : ${ALSErrors}" th:text="${error}">Ошибка</div>
+        </div>
+        <div th:if="${LBErrors != null}" class="alert alert-danger" role="alert">
+            <div th:each="error : ${LBErrors}" th:text="${error}">Ошибка</div>
+        </div>
+
+        <header class="module-editor__heading">
+            <div>
+                <div class="module-editor__eyebrow">Конфигурация автоматической камеры хранения</div>
+                <h1 class="module-editor__title" th:text="${als.name}">АКХ</h1>
+                <p class="module-editor__subtitle" th:text="${als.description}">Описание АКХ</p>
+            </div>
+            <div class="module-editor__id" th:text="|ID: ${als.id}|">ID</div>
+        </header>
+
         <div class="page-actions">
             <button type="submit" class="btn btn-primary btn-sm">Сохранить АКХ</button>
             <a th:href="@{${pageContext == 'PROJECT'
@@ -70,22 +86,6 @@
                 Заменить LBC на LC
             </button>
         </div>
-
-        <div th:if="${ALSErrors != null}" class="alert alert-danger" role="alert">
-            <div th:each="error : ${ALSErrors}" th:text="${error}">Ошибка</div>
-        </div>
-        <div th:if="${LBErrors != null}" class="alert alert-danger" role="alert">
-            <div th:each="error : ${LBErrors}" th:text="${error}">Ошибка</div>
-        </div>
-
-        <header class="module-editor__heading">
-            <div>
-                <div class="module-editor__eyebrow">Конфигурация автоматической камеры хранения</div>
-                <h1 class="module-editor__title" th:text="${als.name}">АКХ</h1>
-                <p class="module-editor__subtitle" th:text="${als.description}">Описание АКХ</p>
-            </div>
-            <div class="module-editor__id" th:text="|ID: ${als.id}|">ID</div>
-        </header>
 
         <div class="module-editor__layout">
             <div class="module-editor__parameters">

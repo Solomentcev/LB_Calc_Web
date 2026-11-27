@@ -29,17 +29,7 @@
         <input type="hidden" th:field="*{name}">
 
         <button type="submit" hidden formnovalidate data-form-refresh th:formaction="${pageContext == 'CATALOG'} ? @{/lbcs/refresh} : (${pageContext == 'ALS_CATALOG'} ? @{/alss/{alsId}/lbcs/{lbcId}/refresh(alsId=${als.id},lbcId=${lbc.id})} : @{/projects/{projectId}/alss/{alsId}/lbcs/{lbcId}/refresh(projectId=${projectId},alsId=${alsId},lbcId=${lbcId})})"></button>
-        <div class="page-actions">
-            <button type="submit" class="btn btn-primary">Сохранить модуль</button>
-            <a th:if="${pageContext == 'CATALOG'}" th:href="@{/lbcs}" class="btn btn-outline-secondary">К списку модулей</a>
-            <a th:if="${pageContext == 'ALS_CATALOG'}" th:href="@{/alss/{id}(id=${als.id})}"
-               class="btn btn-outline-secondary">Вернуться к ALS</a>
-            <a th:if="${pageContext == 'PROJECT'}"
-               th:href="@{/projects/{projectId}/alss/{alsId}(projectId=${projectId},alsId=${alsId})}"
-               class="btn btn-outline-secondary">Вернуться к ALS проекта</a>
-        </div>
-
-        <div th:if="${errors != null}" class="alert alert-danger" role="alert">
+<div th:if="${errors != null}" class="alert alert-danger" role="alert">
             <div th:each="error : ${errors}" th:text="${error}">Ошибка</div>
         </div>
 
@@ -51,6 +41,16 @@
             </div>
             <span class="module-editor__id" th:if="*{id != null and id > 0}" th:text="${'ID: ' + lbc.id}">ID</span>
         </header>
+
+        <div class="page-actions">
+            <button type="submit" class="btn btn-primary">Сохранить модуль</button>
+            <a th:if="${pageContext == 'CATALOG'}" th:href="@{/lbcs}" class="btn btn-outline-secondary">К списку модулей</a>
+            <a th:if="${pageContext == 'ALS_CATALOG'}" th:href="@{/alss/{id}(id=${als.id})}"
+               class="btn btn-outline-secondary">Вернуться к ALS</a>
+            <a th:if="${pageContext == 'PROJECT'}"
+               th:href="@{/projects/{projectId}/alss/{alsId}(projectId=${projectId},alsId=${alsId})}"
+               class="btn btn-outline-secondary">Вернуться к ALS проекта</a>
+        </div>
 
         <div class="module-editor__layout">
             <div class="module-editor__parameters">
