@@ -107,7 +107,7 @@ class FindOrCreateLockIntegrationTest {
     void saveConfigurations_shouldExecuteLockingCandidateQueries() {
         ALS als = alsService.saveALS(TestDataFactory.validALS(0L));
         ALS lbcAls = alsService.saveALS(
-                alsService.restoreDomain(TestDataFactory.validLBCALSDTO(0L))
+                TestDataFactory.restoreALS(TestDataFactory.validLBCALSDTO(0L))
         );
         LC lcDomain = TestDataFactory.validLC(0L);
         configureEquipment(lcDomain);
