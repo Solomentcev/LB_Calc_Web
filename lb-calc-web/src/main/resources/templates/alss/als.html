@@ -72,20 +72,6 @@
                th:text="${pageContext == 'PROJECT' ? 'Назад к проекту' : 'К списку АКХ'}">
                 Назад
             </a>
-            <button th:if="${als.LC != null}" type="submit"
-                    class="btn btn-outline-warning btn-sm"
-                    th:formaction="@{${pageContext == 'PROJECT'
-                                    ? '/projects/' + projectId + '/alss/' + alsId + '/replaceLBC'
-                                    : '/alss/' + als.id + '/replaceLBC'}}">
-                Заменить LC на LBC
-            </button>
-            <button th:if="${als.LBC != null and !#lists.isEmpty(als.lbList)}" type="submit"
-                    class="btn btn-outline-warning btn-sm"
-                    th:formaction="@{${pageContext == 'PROJECT'
-                                    ? '/projects/' + projectId + '/alss/' + alsId + '/replaceLC'
-                                    : '/alss/' + als.id + '/replaceLC'}}">
-                Заменить LBC на LC
-            </button>
         </div>
 
         <div class="module-editor__layout">
@@ -98,27 +84,27 @@
                     </div>
                     <div class="module-section__body">
                         <div class="form-row">
-                            <div class="col-md-3 module-field">
+                            <div class="col-md-2 module-field">
                                 <label for="als-height">Высота, мм</label>
                                 <input id="als-height" class="form-control" type="number"
                                        min="1" th:field="*{height}">
                             </div>
-                            <div class="col-md-3 module-field">
+                            <div class="col-md-2 module-field">
                                 <label for="als-width">Ширина, мм</label>
                                 <input id="als-width" class="form-control" type="number"
                                        th:field="*{width}" readonly>
                             </div>
-                            <div class="col-md-3 module-field">
+                            <div class="col-md-2 module-field">
                                 <label for="als-depth">Глубина, мм</label>
                                 <input id="als-depth" class="form-control" type="number"
                                        min="1" th:field="*{depth}">
                             </div>
-                            <div class="col-md-3 module-field">
+                            <div class="col-md-2 module-field">
                                 <label for="als-cells">Количество ячеек</label>
                                 <input id="als-cells" class="form-control" type="number"
                                        th:field="*{countCells}" readonly>
                             </div>
-                            <div class="col-md-4 module-field">
+                            <div class="col-md-3 module-field">
                                 <label for="positionControlModule">Положение модуля управления</label>
                                 <select id="positionControlModule" class="form-control"
                                         th:field="*{positionControlModule}">
@@ -126,7 +112,7 @@
                                             th:value="${position}" th:text="${position}"></option>
                                 </select>
                             </div>
-                            <div class="col-md-4 module-field">
+                            <div class="col-md-2 module-field">
                                 <label for="als-depth-cell">Глубина ячейки, мм</label>
                                 <input id="als-depth-cell" class="form-control" type="number"
                                        th:field="*{depthCell}" readonly>
@@ -141,14 +127,14 @@
                                 <input id="als-bottom-frame" class="form-control" type="number"
                                        min="0" th:field="*{bottomFrame}">
                             </div>
-                            <div class="col-md-6 module-field">
+                            <div class="col-md-3 module-field">
                                 <label for="als-body-color">Цвет корпуса</label>
                                 <select id="als-body-color" class="form-control" th:field="*{colorBody}">
                                     <option th:each="color : ${colorsList}"
                                             th:value="${color}" th:text="${color}"></option>
                                 </select>
                             </div>
-                            <div class="col-md-6 module-field">
+                            <div class="col-md-3 module-field">
                                 <label for="als-door-color">Цвет дверей</label>
                                 <select id="als-door-color" class="form-control" th:field="*{colorDoor}">
                                     <option th:each="color : ${colorsList}"
@@ -178,7 +164,7 @@
 
                 <section th:if="${als.LC != null}" class="module-section">
                     <div class="module-section__header">
-                        <h2>Модуль управления LC</h2>
+                        <h2 th:text="|${als.LC.name} (ID: ${als.LC.id})|">Модуль управления LC</h2>
                         <p th:text="${als.LC.description}">Описание LC</p>
                     </div>
                     <div class="module-section__body">
@@ -205,7 +191,7 @@
                         <div class="module-card-layout">
                             <div class="module-card-layout__information">
                                 <div class="row module-summary">
-                                    <div class="col-md-3"><span class="text-muted small">ID</span><strong th:text="${als.LC.id}"></strong></div>
+                                    <div class="col-md-3"><span class="text-muted small">Габариты модуля</span><strong th:text="|${als.LC.height} × ${als.LC.width} × ${als.LC.depth} мм|"></strong></div>
                                     <div class="col-md-3"><span class="text-muted small">Дисплей</span><strong th:text="${als.LC.functionalConfiguration.display}"></strong></div>
                                     <div class="col-md-3"><span class="text-muted small">Доступ</span><strong th:text="${als.LC.functionalConfiguration.access}"></strong></div>
                                     <div class="col-md-3"><span class="text-muted small">Оплата</span><strong th:text="${als.LC.functionalConfiguration.payment}"></strong></div>
@@ -226,10 +212,18 @@
                                         </ul>
                                     </div>
                                 </div>
-                                <a th:href="@{${pageContext == 'PROJECT'
-                                             ? '/projects/' + projectId + '/alss/' + alsId + '/lcs/' + als.LC.id
-                                             : '/alss/' + als.id + '/lcs/' + als.LC.id}}"
-                                   class="btn btn-outline-primary btn-sm mt-3">Редактировать LC</a>
+                                <div class="module-card-layout__actions">
+                                    <a th:href="@{${pageContext == 'PROJECT'
+                                                 ? '/projects/' + projectId + '/alss/' + alsId + '/lcs/' + als.LC.id
+                                                 : '/alss/' + als.id + '/lcs/' + als.LC.id}}"
+                                       class="btn btn-outline-primary btn-sm">Редактировать LC</a>
+                                    <button type="submit" class="btn btn-outline-warning btn-sm"
+                                            th:formaction="@{${pageContext == 'PROJECT'
+                                                            ? '/projects/' + projectId + '/alss/' + alsId + '/replaceLBC'
+                                                            : '/alss/' + als.id + '/replaceLBC'}}">
+                                        Заменить LC на LBC
+                                    </button>
+                                </div>
                             </div>
                             <div class="module-card-layout__drawing" th:if="${als.LC.stringLCImage != null}">
                                 <div class="module-visual module-visual--module">
@@ -242,7 +236,7 @@
 
                 <section th:if="${als.LBC != null}" class="module-section">
                     <div class="module-section__header">
-                        <h2>Модуль хранения и управления LBC</h2>
+                        <h2 th:text="|${als.LBC.name} (ID: ${als.LBC.id})|">Модуль хранения и управления LBC</h2>
                         <p th:text="${als.LBC.description}">Описание LBC</p>
                     </div>
                     <div class="module-section__body">
@@ -279,7 +273,6 @@
                         <div class="module-card-layout">
                             <div class="module-card-layout__information">
                                 <div class="row module-summary">
-                                    <div class="col-md-3"><span class="text-muted small">ID</span><strong th:text="${als.LBC.id}"></strong></div>
                                     <div class="col-md-3"><span class="text-muted small">Габариты модуля</span><strong th:text="|${als.LBC.height} × ${als.LBC.width} × ${als.LBC.depth} мм|"></strong></div>
                                     <div class="col-md-3"><span class="text-muted small">Количество ячеек</span><strong th:text="${als.LBC.countCells}"></strong></div>
                                     <div class="col-md-3"><span class="text-muted small">Размер ячейки (В × Ш × Г)</span><strong th:text="|${als.LBC.heightCell} × ${als.LBC.widthCell} × ${als.LBC.depthCell} мм|"></strong></div>
@@ -305,10 +298,19 @@
                                         </ul>
                                     </div>
                                 </div>
-                                <a th:href="@{${pageContext == 'PROJECT'
-                                             ? '/projects/' + projectId + '/alss/' + alsId + '/lbcs/' + als.LBC.id
-                                             : '/alss/' + als.id + '/lbcs/' + als.LBC.id}}"
-                                   class="btn btn-outline-primary btn-sm mt-3">Редактировать LBC</a>
+                                <div class="module-card-layout__actions">
+                                    <a th:href="@{${pageContext == 'PROJECT'
+                                                 ? '/projects/' + projectId + '/alss/' + alsId + '/lbcs/' + als.LBC.id
+                                                 : '/alss/' + als.id + '/lbcs/' + als.LBC.id}}"
+                                       class="btn btn-outline-primary btn-sm">Редактировать LBC</a>
+                                    <button th:if="${!#lists.isEmpty(als.lbList)}" type="submit"
+                                            class="btn btn-outline-warning btn-sm"
+                                            th:formaction="@{${pageContext == 'PROJECT'
+                                                            ? '/projects/' + projectId + '/alss/' + alsId + '/replaceLC'
+                                                            : '/alss/' + als.id + '/replaceLC'}}">
+                                        Заменить LBC на LC
+                                    </button>
+                                </div>
                             </div>
                             <div class="module-card-layout__drawing" th:if="${als.LBC.stringLBCImage != null}">
                                 <div class="module-visual module-visual--module">
