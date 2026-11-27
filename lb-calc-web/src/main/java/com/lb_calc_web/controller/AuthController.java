@@ -4,6 +4,7 @@ import com.lb_calc_web.dto.JwtResponse;
 import com.lb_calc_web.dto.LoginRequest;
 import com.lb_calc_web.dto.RegistrationDTO;
 import com.lb_calc_web.service.AuthService;
+import jakarta.security.auth.message.AuthException;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
@@ -43,8 +44,8 @@ public class AuthController {
             authService.registration(registrationDTO);
             redirectAttributes.addFlashAttribute("successMessage", "Вы успешно зарегистрировались");
             return "redirect:/login";
-        } catch (Exception e) {
-            model.addAttribute("errorMessage", "Ошибка регистрации: " + e.getMessage());
+        } catch (IllegalArgumentException exception) {
+            model.addAttribute("errorMessage", "Ошибка регистрации: " + exception.getMessage());
             return "registration";
         }
     }
@@ -67,8 +68,8 @@ public class AuthController {
             JwtResponse tokens =authService.login(loginRequest);
             response.addCookie(authService.generateAccessTokenCookie(tokens.getAccessToken()));
             response.addCookie(authService.generateRefreshTokenCookie(tokens.getRefreshToken()));
-        } catch (Exception e) {
-                redirectAttributes.addFlashAttribute("error", e.getMessage());
+        } catch (AuthException exception) {
+                redirectAttributes.addFlashAttribute("error", "Неверный email или пароль");
                 redirectAttributes.addFlashAttribute("loginRequest", loginRequest);
                 return "redirect:/login";
         }

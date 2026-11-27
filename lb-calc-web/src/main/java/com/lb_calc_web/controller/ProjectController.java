@@ -709,7 +709,7 @@ public class ProjectController
             preview = projectService.previewALSReplacement(projectId, alsId, candidateALS);
             updatedALS = candidateALS;
             lb = LBDtoMapper.toDto(replacement);
-        } catch (IllegalArgumentException | IllegalStateException exception) {
+        } catch (IllegalArgumentException exception) {
             model.addAttribute("errors", List.of("Проверьте введённые параметры модуля."));
         } catch (ValidationSizeException exception) {
             model.addAttribute("errors", ValidationErrorFormatter.format(exception.getValidationResult()));

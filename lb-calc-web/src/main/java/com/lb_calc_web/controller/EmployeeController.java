@@ -133,14 +133,11 @@ public class EmployeeController {
 
             return "redirect:/myprofile";
 
-        } catch (Exception e) {
-
+        } catch (IllegalArgumentException exception) {
             model.addAttribute(
                     "errorMessage",
-                    "Ошибка смены пароля: " +
-                            e.getMessage()
+                    "Проверьте введённый пароль."
             );
-
             return "change_password";
         }
     }
@@ -217,14 +214,11 @@ public class EmployeeController {
             return "redirect:/employees/" +
                     employee.getId();
 
-        } catch (Exception e) {
-
+        } catch (IllegalArgumentException exception) {
             model.addAttribute(
                     "errorMessage",
-                    "Ошибка смены пароля: " +
-                            e.getMessage()
+                    "Проверьте введённый пароль."
             );
-
             return "change_passwordEmployee";
         }
     }
@@ -399,14 +393,11 @@ public class EmployeeController {
             return "redirect:/employees/" +
                     employeeDTO.getId();
 
-        } catch (Exception e) {
-
+        } catch (IllegalArgumentException exception) {
             model.addAttribute(
                     "errorMessage",
-                    "Ошибка создания сотрудника: " +
-                            e.getMessage()
+                    "Не удалось создать сотрудника: " + exception.getMessage()
             );
-
             return "employees/create_employee";
         }
     }
