@@ -123,7 +123,6 @@ public class LBCController extends BaseCatalogController {
     ) {
         model.addAttribute("pageContext", "CATALOG");
         try {
-            ModuleEquipmentFormSupport.applySelection(lbc);
             LBC domain = lbcService.restoreDomain(lbc);
             LBC saved = lbcService.saveLBC(domain);
 
