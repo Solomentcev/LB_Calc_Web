@@ -50,6 +50,7 @@ public class LBCService {
     private final SizeValidator sizeValidator;
     private final EquipmentRepository equipmentRepository;
     private final SizeBounds sizeBounds;
+    private final EquipmentCatalogService equipmentCatalogService;
 
     public LBCService(
             LBCRepository lbcRepository,
@@ -57,7 +58,8 @@ public class LBCService {
             Environment environment,
             SizeValidator sizeValidator,
             EquipmentRepository equipmentRepository,
-            SizeBounds sizeBounds
+            SizeBounds sizeBounds,
+            EquipmentCatalogService equipmentCatalogService
     ) {
         this.lbcRepository = Objects.requireNonNull(lbcRepository);
         this.findOrCreateLockService = Objects.requireNonNull(findOrCreateLockService);
@@ -65,6 +67,7 @@ public class LBCService {
         this.sizeValidator = Objects.requireNonNull(sizeValidator);
         this.equipmentRepository = Objects.requireNonNull(equipmentRepository);
         this.sizeBounds = Objects.requireNonNull(sizeBounds);
+        this.equipmentCatalogService = Objects.requireNonNull(equipmentCatalogService);
     }
 
     /** Создаёт несохранённый LBC с параметрами по умолчанию. */
@@ -97,6 +100,9 @@ public class LBCService {
                 enumProperty("lbc.printer-purpose.default", PrinterPurpose.class, PrinterPurpose.ABSENT)
         );
 
+        ControlConfiguration controlConfiguration = new ControlConfiguration(functional, Map.of());
+        equipmentCatalogService.configureFunctionalEquipment(controlConfiguration);
+
         return new LBC(
                 height,
                 sizeBounds.getWidthDefault(),
@@ -110,7 +116,7 @@ public class LBCService {
                 DirectionDoorOpening.valueOf(environment.getProperty(
                         "lbc.direction.default", DirectionDoorOpening.LEFT.name())),
                 sizeBounds.getDoorThicknessDefault(),
-                new ControlConfiguration(functional, Map.of()),
+                controlConfiguration,
                 sizeBounds
         );
     }
@@ -181,13 +187,18 @@ public class LBCService {
     public LBC restoreDomain(LBCDTO dto, ControlConfiguration fallbackConfiguration) {
         Objects.requireNonNull(dto, "LBC не должен быть null");
         try {
-            return LBCDtoMapper.toDomain(
+            LBC restored = LBCDtoMapper.toDomain(
                     dto,
                     TypeLbFactory.forLBC(environment, dto.getType()),
                     this::findEquipment,
                     fallbackConfiguration,
                     sizeBounds
             );
+            if (dto.getEquipment() == null && !dto.isEquipmentProvided()) {
+                equipmentCatalogService.configureFunctionalEquipment(
+                        restored.getControlConfiguration());
+            }
+            return restored;
         } catch (RuntimeException exception) {
             throw createMappingValidationException("LBC", dto.getId(), exception);
         }

@@ -34,6 +34,7 @@ class LCServiceTest {
     private FindOrCreateLockService lockService;
     private LCRepository repository;
     private EquipmentRepository equipmentRepository;
+    private EquipmentCatalogService equipmentCatalogService;
     private MockEnvironment environment;
     private LCService service;
 
@@ -42,6 +43,7 @@ class LCServiceTest {
         lockService = mock(FindOrCreateLockService.class);
         repository = mock(LCRepository.class);
         equipmentRepository = mock(EquipmentRepository.class);
+        equipmentCatalogService = mock(EquipmentCatalogService.class);
         environment = new MockEnvironment()
                 .withProperty("size.height.default", "1940")
                 .withProperty("size.width.default", "500")
@@ -55,7 +57,8 @@ class LCServiceTest {
                 .withProperty("lc.color.door.default", "White");
         service = new LCService(
                 repository, lockService, environment,
-                TestDataFactory.createSizeValidator(), equipmentRepository, TestDataFactory.createSizeBounds());
+                TestDataFactory.createSizeValidator(), equipmentRepository, TestDataFactory.createSizeBounds(),
+                equipmentCatalogService);
     }
 
     @Test

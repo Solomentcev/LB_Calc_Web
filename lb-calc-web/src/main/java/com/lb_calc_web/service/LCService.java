@@ -49,6 +49,7 @@ public class LCService {
     private final SizeValidator sizeValidator;
     private final SizeBounds sizeBounds;
     private final EquipmentRepository equipmentRepository;
+    private final EquipmentCatalogService equipmentCatalogService;
 
     public LCService(
             LCRepository lcRepository,
@@ -56,7 +57,8 @@ public class LCService {
             Environment environment,
             SizeValidator sizeValidator,
             EquipmentRepository equipmentRepository,
-            SizeBounds sizeBounds
+            SizeBounds sizeBounds,
+            EquipmentCatalogService equipmentCatalogService
     ) {
         this.lcRepository = Objects.requireNonNull(lcRepository);
         this.findOrCreateLockService = Objects.requireNonNull(findOrCreateLockService);
@@ -64,6 +66,7 @@ public class LCService {
         this.sizeValidator = Objects.requireNonNull(sizeValidator);
         this.sizeBounds = Objects.requireNonNull(sizeBounds);
         this.equipmentRepository = Objects.requireNonNull(equipmentRepository);
+        this.equipmentCatalogService = Objects.requireNonNull(equipmentCatalogService);
     }
 
     /** Создаёт несохранённый LC с параметрами по умолчанию. */
@@ -92,6 +95,9 @@ public class LCService {
                 enumProperty("lc.printer-purpose.default", PrinterPurpose.class, PrinterPurpose.ABSENT)
         );
 
+        ControlConfiguration controlConfiguration = new ControlConfiguration(functional, Map.of());
+        equipmentCatalogService.configureFunctionalEquipment(controlConfiguration);
+
         return new LC(
                 height,
                 sizeBounds.getWidthDefault(),
@@ -100,7 +106,7 @@ public class LCService {
                 bottomFrame,
                 Objects.requireNonNull(colorBody, "Цвет корпуса не должен быть null"),
                 requiredColor("lc.color.door.default"),
-                new ControlConfiguration(functional, Map.of()),
+                controlConfiguration,
                 sizeBounds
         );
     }
@@ -203,9 +209,14 @@ public class LCService {
     public LC restoreDomain(LCDTO dto, ControlConfiguration fallbackConfiguration) {
         Objects.requireNonNull(dto, "LC не должен быть null");
         try {
-            return LCDtoMapper.toDomain(
+            LC restored = LCDtoMapper.toDomain(
                     dto, this::findEquipment, fallbackConfiguration,
                     sizeBounds);
+            if (dto.getEquipment() == null && !dto.isEquipmentProvided()) {
+                equipmentCatalogService.configureFunctionalEquipment(
+                        restored.getControlConfiguration());
+            }
+            return restored;
         } catch (RuntimeException exception) {
             throw createMappingValidationException("LC", dto.getId(), exception);
         }

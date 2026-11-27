@@ -2,6 +2,7 @@ package com.lb_calc_web.service;
 
 import com.lb_calc_web.domain.equipment.Equipment;
 import com.lb_calc_web.domain.equipment.EquipmentFunctionalType;
+import com.lb_calc_web.domain.model.ControlConfiguration;
 import com.lb_calc_web.entity.EquipmentEntity;
 import com.lb_calc_web.mapper.entity.EquipmentEntityMapper;
 import com.lb_calc_web.repository.EquipmentRepository;
@@ -105,6 +106,32 @@ public class EquipmentCatalogService {
             specifications.add((root, query, builder) ->
                     builder.lessThanOrEqualTo(root.<Integer>get(attribute), maximum));
         }
+    }
+
+    /**
+     * Подбирает физические модели по функциональным назначениям управляющего модуля.
+     * Для каждого требования используется модель по умолчанию; если она не задана,
+     * автоматически выбирается только единственный доступный вариант.
+     */
+    @Transactional(readOnly = true)
+    public void configureFunctionalEquipment(ControlConfiguration configuration) {
+        Objects.requireNonNull(configuration,
+                "Конфигурация управляющего модуля не должна быть null");
+
+        List<EquipmentEntity> entities = equipmentRepository.findAll();
+        List<Equipment> catalog = entities.stream()
+                .map(EquipmentEntityMapper::toDomain)
+                .toList();
+        Set<Equipment> defaultModels = entities.stream()
+                .filter(EquipmentEntity::isDefaultModel)
+                .map(EquipmentEntityMapper::toDomain)
+                .collect(Collectors.toUnmodifiableSet());
+
+        configuration.configureEquipment(
+                configuration.getFunctionalConfiguration(),
+                catalog,
+                defaultModels
+        );
     }
 
     /** Возвращает все модели оборудования из каталога. */

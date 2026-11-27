@@ -3,17 +3,11 @@ package com.lb_calc_web.mapper.dto;
 import com.lb_calc_web.service.validation.size.SizeBounds;
 
 import com.lb_calc_web.domain.attributes.Colors;
-import com.lb_calc_web.domain.equipment.Equipment;
 import com.lb_calc_web.domain.model.ControlConfiguration;
-import com.lb_calc_web.domain.model.FunctionalConfiguration;
 import com.lb_calc_web.domain.model.LC;
-import com.lb_calc_web.dto.FunctionalConfigurationDTO;
 import com.lb_calc_web.dto.LCDTO;
 
-import java.util.LinkedHashMap;
-import java.util.Set;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 
@@ -41,19 +35,9 @@ public final class LCDtoMapper {
         dto.setColorBody(domain.getColorBody().name());
         dto.setColorDoor(domain.getColorDoor().name());
 ControlConfiguration configuration = domain.getControlConfiguration();
-        dto.setFunctionalConfiguration(toDto(configuration.getFunctionalConfiguration()));
-        Map<Long, Integer> selectedEquipment = new LinkedHashMap<>();
-        configuration.getEquipment().forEach((item, quantity) -> selectedEquipment.put(item.getId(), quantity));
-        dto.setEquipment(selectedEquipment);
-        return dto;
-    }
-
-    private static FunctionalConfigurationDTO toDto(FunctionalConfiguration configuration) {
-        FunctionalConfigurationDTO dto = new FunctionalConfigurationDTO();
-        dto.setDisplay(configuration.getDisplay());
-        dto.setAccess(configuration.getAccess());
-        dto.setPayment(configuration.getPayment());
-        dto.setPrinter(configuration.getPrinter());
+        dto.setFunctionalConfiguration(ControlConfigurationDtoMapper.toFunctionalDto(
+                configuration.getFunctionalConfiguration()));
+        dto.setEquipment(ControlConfigurationDtoMapper.toEquipmentIds(configuration));
         return dto;
     }
 
@@ -69,31 +53,13 @@ ControlConfiguration configuration = domain.getControlConfiguration();
         }
         Objects.requireNonNull(equipmentLookup, "equipmentLookup не должен быть null");
 
-        FunctionalConfiguration functional = toDomain(
-                dto.getFunctionalConfiguration(), fallbackConfiguration);
-
-        Map<Equipment, Integer> equipment = new LinkedHashMap<>();
-        if (dto.getEquipment() == null && !dto.isEquipmentProvided()
-                && fallbackConfiguration != null) {
-            equipment.putAll(fallbackConfiguration.getEquipment());
-        } else if (dto.getEquipment() != null) {
-            dto.getEquipment().forEach((equipmentId, quantity) -> {
-                if (equipmentId == null || equipmentId <= 0) {
-                    throw new IllegalArgumentException(
-                            "Идентификатор модели оборудования должен быть положительным");
-                }
-                if (quantity == null || quantity < 1) {
-                    throw new IllegalArgumentException(
-                            "Количество оборудования должно быть не меньше 1");
-                }
-                Equipment model = Objects.requireNonNull(
-                        equipmentLookup.apply(equipmentId),
-                        "Модель оборудования не найдена: " + equipmentId);
-                equipment.merge(model, quantity, Math::addExact);
-            });
-        }
-
-        ControlConfiguration configuration = new ControlConfiguration(functional, equipment);
+        ControlConfiguration configuration = ControlConfigurationDtoMapper.toDomain(
+                dto.getFunctionalConfiguration(),
+                dto.getEquipment(),
+                dto.isEquipmentProvided(),
+                fallbackConfiguration,
+                equipmentLookup
+        );
 
         LC domain = new LC(
                 dto.getHeight(),
@@ -108,28 +74,6 @@ ControlConfiguration configuration = domain.getControlConfiguration();
         );
         domain.setId(dto.getId() == null || dto.getId() <= 0 ? null : dto.getId());
         return domain;
-    }
-
-    private static FunctionalConfiguration toDomain(
-            FunctionalConfigurationDTO dto,
-            ControlConfiguration fallback
-    ) {
-        boolean provided = dto != null && (dto.getDisplay() != null
-                || dto.getAccess() != null
-                || dto.getPayment() != null
-                || dto.getPrinter() != null);
-        if (!provided && fallback != null) {
-            return fallback.getFunctionalConfiguration();
-        }
-        return new FunctionalConfiguration(
-                dto == null || dto.getDisplay() == null
-                        ? com.lb_calc_web.domain.equipment.DisplayPurpose.NONE : dto.getDisplay(),
-                dto == null || dto.getAccess() == null ? Set.of() : dto.getAccess(),
-                dto == null || dto.getPayment() == null
-                        ? com.lb_calc_web.domain.equipment.PaymentPurpose.NONE : dto.getPayment(),
-                dto == null || dto.getPrinter() == null
-                        ? com.lb_calc_web.domain.equipment.PrinterPurpose.ABSENT : dto.getPrinter()
-        );
     }
 
     /** Преобразует список доменных конфигураций LC в список DTO. */

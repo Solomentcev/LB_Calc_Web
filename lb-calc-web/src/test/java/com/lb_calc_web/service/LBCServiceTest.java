@@ -30,6 +30,7 @@ class LBCServiceTest {
     private FindOrCreateLockService lockService;
     private LBCRepository repository;
     private EquipmentRepository equipmentRepository;
+    private EquipmentCatalogService equipmentCatalogService;
     private MockEnvironment environment;
     private LBCService service;
 
@@ -38,6 +39,7 @@ class LBCServiceTest {
         lockService = mock(FindOrCreateLockService.class);
         repository = mock(LBCRepository.class);
         equipmentRepository = mock(EquipmentRepository.class);
+        equipmentCatalogService = mock(EquipmentCatalogService.class);
         environment = new MockEnvironment()
                 .withProperty("size.height.default", "1940")
                 .withProperty("size.width.default", "500")
@@ -58,7 +60,8 @@ class LBCServiceTest {
                 .withProperty("lb.type.TYPE1.service-zone-width", "40");
         service = new LBCService(
                 repository, lockService, environment,
-                TestDataFactory.createSizeValidator(), equipmentRepository, TestDataFactory.createSizeBounds());
+                TestDataFactory.createSizeValidator(), equipmentRepository, TestDataFactory.createSizeBounds(),
+                equipmentCatalogService);
     }
 
     @Test
