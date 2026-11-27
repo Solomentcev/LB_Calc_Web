@@ -127,7 +127,6 @@ toDto(alsService.createALS())
                     candidate -> TypeLbFactory.forLB(environment, candidate.getType()),
                     candidate -> TypeLbFactory.forLBC(environment, candidate.getType()),
                     equipmentCatalogService::findById,
-                    null,
                     sizeBounds
             );
             restored = alsService.prepareConfiguration(null, restored, dto.isEquipmentSelectionProvided());
@@ -158,14 +157,11 @@ toDto(alsService.createALS())
             dto.setId(id);
 
             ALS existing = alsService.findById(id);
-            ControlConfiguration fallback = existing.getControlModule().getControlConfiguration();
-            fallback.setFunctionalConfiguration(existing.getFunctionalConfiguration());
             ALS restored = ALSDtoMapper.toDomain(
                     dto,
                     candidate -> TypeLbFactory.forLB(environment, candidate.getType()),
                     candidate -> TypeLbFactory.forLBC(environment, candidate.getType()),
                     equipmentCatalogService::findById,
-                    fallback,
                     sizeBounds
             );
             restored = alsService.prepareConfiguration(existing, restored, dto.isEquipmentSelectionProvided());
@@ -236,13 +232,10 @@ toDto(alsService.createALS())
             }
             lbc.setId(lbcId);
 
-            ControlConfiguration fallback = als.getControlModule() instanceof LBC
-                    ? als.getControlModule().getControlConfiguration() : null;
             LBC replacement = LBCDtoMapper.toDomain(
                     lbc,
                     TypeLbFactory.forLBC(environment, lbc.getType()),
                     equipmentCatalogService::findById,
-                    fallback,
                     sizeBounds
             );
             ALS saved = alsService.replaceLBCandSaveALS(als, replacement, lbc.isEquipmentProvided());
