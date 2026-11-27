@@ -72,7 +72,7 @@ public final class ProjectDtoMapper {
      * @param alsIdResolver функция получения persistence-id для ALS
      * @return DTO проекта
      */
-    public static ProjectDTO toDto(
+    private static ProjectDTO toDto(
             Project domain,
             Function<ALS, Long> alsIdResolver
     ) {
