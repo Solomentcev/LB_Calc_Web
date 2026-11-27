@@ -149,7 +149,7 @@ class ControlConfigurationTest {
     }
 
     @Test
-    void shouldPreserveEquipmentWhenFunctionalConfigurationChanges() {
+    void shouldRemoveEquipmentThatNoLongerMatchesFunctionalConfiguration() {
         Equipment scanner = new Equipment(
                 10L, EquipmentFunctionalType.ACCESS, AccessPurpose.BAR_CODE,
                 EquipmentCategory.BAR_READER, "Сканер", "", 0, 0, 0);
@@ -172,8 +172,49 @@ class ControlConfigurationTest {
         configuration.setFunctionalConfiguration(updated);
 
         assertEquals(updated, configuration.getFunctionalConfiguration());
-        assertEquals(Map.of(scanner, 2), configuration.getEquipment());
+        assertTrue(configuration.getEquipment().isEmpty());
+        assertEquals(
+                Map.of(
+                        EquipmentFunctionalType.DISPLAY, Set.of(DisplayPurpose.INCH_17),
+                        EquipmentFunctionalType.ACCESS, Set.of(AccessPurpose.RFID, AccessPurpose.QR_CODE),
+                        EquipmentFunctionalType.PAYMENT, Set.of(PaymentPurpose.CARDS, PaymentPurpose.CASH),
+                        EquipmentFunctionalType.PRINTER, Set.of(PrinterPurpose.OTHER)
+                ),
+                configuration.getRequiredEquipment()
+        );
     }
+
+    @Test
+    void shouldRejectIncompletePhysicalEquipmentConfiguration() {
+        ControlConfiguration configuration = new ControlConfiguration(
+                functionalConfiguration(
+                        DisplayPurpose.INCH_10,
+                        Set.of(AccessPurpose.RFID),
+                        PaymentPurpose.NONE,
+                        PrinterPurpose.ABSENT
+                ),
+                Map.of()
+        );
+
+        assertThrows(IllegalStateException.class, configuration::validateEquipmentRequirements);
+    }
+
+    @Test
+    void combinedPaymentEquipmentShouldSatisfyCardAndCashRequirements() {
+        Equipment combinedPayment = new Equipment(
+                41L, EquipmentFunctionalType.PAYMENT, PaymentPurpose.CARDS_AND_CASH,
+                EquipmentCategory.PAYMENT_TERMINAL, "Комбинированный терминал", "", 0, 0, 0);
+        ControlConfiguration configuration = new ControlConfiguration(
+                functionalConfiguration(
+                        DisplayPurpose.NONE, Set.of(),
+                        PaymentPurpose.CARDS_AND_CASH, PrinterPurpose.ABSENT
+                ),
+                Map.of(combinedPayment, 1)
+        );
+
+        assertDoesNotThrow(configuration::validateEquipmentRequirements);
+    }
+
     @Test
     void equipmentChanges_shouldResolveOnlyAffectedFunctionalAreas() {
         FunctionalConfiguration initial = functionalConfiguration(
