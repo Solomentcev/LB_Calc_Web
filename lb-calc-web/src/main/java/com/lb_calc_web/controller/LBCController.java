@@ -1,7 +1,6 @@
 package com.lb_calc_web.controller;
 
 import com.lb_calc_web.domain.model.LBC;
-import com.lb_calc_web.dto.EquipmentDTO;
 import com.lb_calc_web.mapper.dto.EquipmentDtoMapper;
 import com.lb_calc_web.mapper.dto.EquipmentSelectionDtoMapper;
 import com.lb_calc_web.service.EquipmentCatalogService;
@@ -149,9 +148,11 @@ public class LBCController extends BaseCatalogController {
 
     private void prepareForm(Model model, LBCDTO lbc) {
         model.addAttribute("lbc", lbc);
+        var equipmentCatalog = equipmentCatalogService.findAll();
+        var defaultEquipmentIds = equipmentCatalogService.findDefaultModelIds();
         lbc.setEquipmentSelections(EquipmentSelectionDtoMapper.prepareSelections(
                 lbc.getFunctionalConfiguration(), lbc.getEquipmentSelections(),
-                equipmentCatalogService.findAll(), equipmentCatalogService.findDefaultModelIds()));
+                equipmentCatalog, defaultEquipmentIds));
         // Сначала определяем выбранные по умолчанию физические модели,
         // затем строим изображение по восстановленной доменной конфигурации.
         try {
@@ -161,8 +162,8 @@ public class LBCController extends BaseCatalogController {
             lbc.setStringLBCImage(null);
             model.addAttribute("errors", ValidationErrorFormatter.format(exception.getValidationResult()));
         }
-        model.addAttribute("equipmentList", equipmentCatalogService.findAll().stream()
+        model.addAttribute("equipmentList", equipmentCatalog.stream()
                 .map(EquipmentDtoMapper::toDto).toList());
-        model.addAttribute("defaultEquipmentIds", equipmentCatalogService.findDefaultModelIds());
+        model.addAttribute("defaultEquipmentIds", defaultEquipmentIds);
     }
 }
