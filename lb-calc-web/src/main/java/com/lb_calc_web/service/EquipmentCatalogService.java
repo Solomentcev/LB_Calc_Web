@@ -19,6 +19,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.NoSuchElementException;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /** Управляет каталогом физических моделей оборудования. */
 @Service
@@ -123,6 +125,14 @@ public class EquipmentCatalogService {
         return equipmentRepository.findAllByDefaultModelTrue().stream()
                 .map(EquipmentEntity::getId)
                 .collect(java.util.stream.Collectors.toUnmodifiableSet());
+    }
+
+    /** Возвращает доменные модели оборудования, отмеченные в каталоге как используемые по умолчанию. */
+    @Transactional(readOnly = true)
+    public Set<Equipment> findDefaultModels() {
+        return equipmentRepository.findAllByDefaultModelTrue().stream()
+                .map(EquipmentEntityMapper::toDomain)
+                .collect(Collectors.toUnmodifiableSet());
     }
 
     /** Находит модель оборудования по идентификатору. */

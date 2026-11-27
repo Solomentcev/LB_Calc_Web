@@ -6,7 +6,6 @@ import com.lb_calc_web.domain.equipment.DisplayPurpose;
 import com.lb_calc_web.domain.equipment.PaymentPurpose;
 import com.lb_calc_web.domain.equipment.PrinterPurpose;
 import com.lb_calc_web.mapper.dto.EquipmentDtoMapper;
-import com.lb_calc_web.mapper.dto.EquipmentSelectionDtoMapper;
 import com.lb_calc_web.service.EquipmentCatalogService;
 import com.lb_calc_web.domain.model.LC;
 import com.lb_calc_web.dto.LCDTO;
@@ -53,10 +52,9 @@ public class LCController {
         logger.debug("Открытие страницы создания LC");
 
         LCDTO lc = LCDtoMapper.toDto(lcService.createLC());
-        lc.setEquipmentSelections(EquipmentSelectionDtoMapper.prepareSelections(
-                lc.getFunctionalConfiguration(), null,
-                equipmentCatalogService.findAll(), equipmentCatalogService.findDefaultModelIds()));
-        lc = toDtoWithImage(lcService.restoreDomain(lc));
+        LC domain = lcService.restoreDomain(lc);
+        configureEquipment(domain.getControlConfiguration());
+        lc = toDtoWithImage(domain);
         lc.setId(0L);
 
         prepareForm(model, lc);
@@ -91,10 +89,9 @@ public class LCController {
     public String refreshLC(@ModelAttribute("lc") LCDTO lc, Model model) {
         model.addAttribute("pageContext", "CATALOG");
         try {
-            lc.setEquipmentSelections(EquipmentSelectionDtoMapper.prepareSelections(
-                    lc.getFunctionalConfiguration(), lc.getEquipmentSelections(),
-                    equipmentCatalogService.findAll(), equipmentCatalogService.findDefaultModelIds()));
-            lc = toDtoWithImage(lcService.restoreDomain(lc));
+            LC domain = lcService.restoreDomain(lc);
+            configureEquipment(domain.getControlConfiguration());
+            lc = toDtoWithImage(domain);
         } catch (ValidationSizeException exception) {
             model.addAttribute("errors", ValidationErrorFormatter.format(exception.getValidationResult()));
         } catch (IllegalArgumentException exception) {
@@ -123,7 +120,7 @@ public class LCController {
         try {
 
             LC domain = lcService.restoreDomain(lc);
-            lc = LCDtoMapper.toDto(domain);
+            configureEquipment(domain.getControlConfiguration());
             LC savedLC = lcService.saveLC(domain);
 
             return "redirect:/lcs/" + savedLC.getId();
@@ -160,16 +157,16 @@ public class LCController {
         return dto;
     }
 
+    private void configureEquipment(com.lb_calc_web.domain.model.ControlConfiguration configuration) {
+        configuration.configureEquipment(configuration.getFunctionalConfiguration(),
+                equipmentCatalogService.findAll(), equipmentCatalogService.findDefaultModels());
+    }
+
     private void prepareForm(Model model, LCDTO lc) {
         model.addAttribute("lc", lc);
         var equipmentCatalog = equipmentCatalogService.findAll();
-        var defaultEquipmentIds = equipmentCatalogService.findDefaultModelIds();
-        lc.setEquipmentSelections(EquipmentSelectionDtoMapper.prepareSelections(
-                lc.getFunctionalConfiguration(), lc.getEquipmentSelections(),
-                equipmentCatalog, defaultEquipmentIds));
         model.addAttribute("equipmentList", equipmentCatalog.stream()
                 .map(EquipmentDtoMapper::toDto).toList());
-        model.addAttribute("defaultEquipmentIds", defaultEquipmentIds);
         model.addAttribute("displayPurposes", List.of(DisplayPurpose.values()));
         model.addAttribute("accessPurposes", List.of(AccessPurpose.values()));
         model.addAttribute("paymentPurposes", List.of(PaymentPurpose.values()));

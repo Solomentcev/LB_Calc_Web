@@ -2,8 +2,8 @@ package com.lb_calc_web.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Objects;
 
 /** DTO управляющего модуля LC для передачи параметров между веб-слоем и сервисами. */
@@ -24,9 +24,9 @@ public class LCDTO {
     private String colorDoor;
 
     private FunctionalConfigurationDTO functionalConfiguration;
-    private List<EquipmentSelectionDTO> equipmentSelections;
+    private Map<Long, Integer> equipment;
     @JsonIgnore
-    private boolean equipmentSelectionsProvided;
+    private boolean equipmentProvided;
 
     @JsonIgnore
     private String stringLCImage;
@@ -111,20 +111,20 @@ public class LCDTO {
         this.functionalConfiguration = configuration;
     }
 
-    public List<EquipmentSelectionDTO> getEquipmentSelections() {
-        return equipmentSelections;
+    public Map<Long, Integer> getEquipment() {
+        return equipment == null ? null : Map.copyOf(equipment);
     }
 
-    public void setEquipmentSelections(List<EquipmentSelectionDTO> selections) {
-        this.equipmentSelections = selections == null ? null : new ArrayList<>(selections);
+    public void setEquipment(Map<Long, Integer> equipment) {
+        this.equipment = equipment == null ? null : new LinkedHashMap<>(equipment);
     }
 
-    public boolean isEquipmentSelectionsProvided() {
-        return equipmentSelectionsProvided;
+    public boolean isEquipmentProvided() {
+        return equipmentProvided;
     }
 
-    public void setEquipmentSelectionsProvided(boolean provided) {
-        this.equipmentSelectionsProvided = provided;
+    public void setEquipmentProvided(boolean provided) {
+        this.equipmentProvided = provided;
     }
 
     public String getStringLCImage() {
@@ -142,14 +142,14 @@ public class LCDTO {
         return height == other.height && width == other.width && depth == other.depth
                 && upperFrame == other.upperFrame && bottomFrame == other.bottomFrame
                 && Objects.equals(functionalConfiguration, other.functionalConfiguration)
-                && Objects.equals(equipmentSelections, other.equipmentSelections)
+                && Objects.equals(equipment, other.equipment)
                 && Objects.equals(colorBody, other.colorBody) && Objects.equals(colorDoor, other.colorDoor);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(height, width, depth, upperFrame, bottomFrame,
-                colorBody, colorDoor, functionalConfiguration, equipmentSelections);
+                colorBody, colorDoor, functionalConfiguration, equipment);
     }
 
     @Override

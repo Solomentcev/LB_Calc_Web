@@ -65,7 +65,7 @@ public class ControlConfiguration {
 
     /**
      * Обновляет функциональные назначения и удаляет оборудование, которое больше им не соответствует.
-     * Недостающие модели подбираются сервисным слоем из каталога.
+     * Недостающие модели подбираются методом {@link #configureEquipment} из каталога.
      */
     public void setFunctionalConfiguration(FunctionalConfiguration configuration) {
         FunctionalConfiguration normalized = RESOLVER.normalize(Objects.requireNonNull(
@@ -75,6 +75,82 @@ public class ControlConfiguration {
         equipment.clear();
         equipment.putAll(compatible);
         functionalConfiguration = normalized;
+    }
+
+
+    /**
+     * Согласует функциональные назначения с каталогом и подбирает физические модели.
+     * Уже выбранные совместимые модели и их количества сохраняются; системное оборудование
+     * не затрагивается функциональными требованиями.
+     */
+    public void configureEquipment(
+            FunctionalConfiguration configuration,
+            java.util.Collection<Equipment> catalog,
+            java.util.Set<Equipment> defaultModels
+    ) {
+        Objects.requireNonNull(catalog, "Каталог оборудования не должен быть null");
+        Objects.requireNonNull(defaultModels, "Модели по умолчанию не должны быть null");
+
+        FunctionalConfiguration normalized = RESOLVER.normalize(Objects.requireNonNull(
+                configuration, "Функциональная конфигурация не должна быть null"));
+        Map<Equipment, Integer> selected =
+                new LinkedHashMap<>(RESOLVER.retainRequiredEquipment(normalized, equipment));
+        Map<EquipmentFunctionalType, java.util.Set<EquipmentPurpose>> requirements =
+                RESOLVER.resolveRequiredEquipment(normalized);
+
+        boolean hasSeparatePayment = selected.keySet().stream().anyMatch(model ->
+                model.getFunctionalType() == EquipmentFunctionalType.PAYMENT
+                        && (model.getPurpose() == com.lb_calc_web.domain.equipment.PaymentPurpose.CARDS
+                        || model.getPurpose() == com.lb_calc_web.domain.equipment.PaymentPurpose.CASH));
+        boolean needsCardsAndCash = requirements.getOrDefault(
+                EquipmentFunctionalType.PAYMENT, java.util.Set.of()).contains(
+                com.lb_calc_web.domain.equipment.PaymentPurpose.CARDS)
+                && requirements.getOrDefault(EquipmentFunctionalType.PAYMENT, java.util.Set.of()).contains(
+                com.lb_calc_web.domain.equipment.PaymentPurpose.CASH);
+
+        if (needsCardsAndCash && !hasSeparatePayment
+                && selected.keySet().stream().noneMatch(model ->
+                model.getFunctionalType() == EquipmentFunctionalType.PAYMENT
+                        && model.getPurpose() == com.lb_calc_web.domain.equipment.PaymentPurpose.CARDS_AND_CASH)) {
+            Equipment combined = selectModel(catalog, defaultModels,
+                    EquipmentFunctionalType.PAYMENT,
+                    com.lb_calc_web.domain.equipment.PaymentPurpose.CARDS_AND_CASH);
+            if (combined != null) {
+                selected.put(combined, 1);
+            }
+        }
+
+        requirements.forEach((type, purposes) -> purposes.forEach(purpose -> {
+            boolean covered = selected.keySet().stream().anyMatch(model ->
+                    model.getFunctionalType() == type && RESOLVER.supportsRequirement(model, purpose));
+            if (!covered) {
+                Equipment model = selectModel(catalog, defaultModels, type, purpose);
+                if (model != null) {
+                    selected.put(model, 1);
+                }
+            }
+        }));
+
+        equipment.clear();
+        equipment.putAll(selected);
+        functionalConfiguration = normalized;
+    }
+
+    /** Выбирает модель по умолчанию, а при единственном варианте — автоматически. */
+    private Equipment selectModel(
+            java.util.Collection<Equipment> catalog,
+            java.util.Set<Equipment> defaultModels,
+            EquipmentFunctionalType type,
+            EquipmentPurpose purpose
+    ) {
+        java.util.List<Equipment> candidates = catalog.stream()
+                .filter(model -> model.getFunctionalType() == type && model.getPurpose().equals(purpose))
+                .toList();
+        Equipment preferred = candidates.stream().filter(defaultModels::contains).findFirst().orElse(null);
+        if (preferred != null) {
+            return preferred;
+        }
+        return candidates.size() == 1 ? candidates.get(0) : null;
     }
 
     /** Возвращает требования к физической комплектации для текущих функциональных назначений. */

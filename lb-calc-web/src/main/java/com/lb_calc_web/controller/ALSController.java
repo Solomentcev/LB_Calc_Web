@@ -191,14 +191,6 @@ public class ALSController extends BaseCatalogController {
     private ALSDTO toDtoWithImages(ALS domain) {
         ALSDTO dto = ALSDtoMapper.toDto(domain);
         dto.setStringALSImage(ALSImageService.getStringALSImage(domain));
-        if (dto.getLC() != null) {
-            dto.getLC().setEquipmentSelections(equipmentCatalogService.prepareSelections(
-                    dto.getLC().getFunctionalConfiguration(), dto.getLC().getEquipmentSelections()));
-        }
-        if (dto.getLBC() != null) {
-            dto.getLBC().setEquipmentSelections(equipmentCatalogService.prepareSelections(
-                    dto.getLBC().getFunctionalConfiguration(), dto.getLBC().getEquipmentSelections()));
-        }
         int lbIndex = 0;
         for (com.lb_calc_web.domain.model.Module module : domain.getModules()) {
             if (module instanceof LB lb) {
@@ -281,7 +273,7 @@ public class ALSController extends BaseCatalogController {
             }
             lc.setId(lcId);
 
-            equipmentCatalogService.validateSelections(lc.getFunctionalConfiguration(), lc.getEquipmentSelections());
+            ALSFormSupport.configure(lc, equipmentCatalogService);
             com.lb_calc_web.domain.model.LC replacement = alsService.restoreLC(lc, als);
             com.lb_calc_web.domain.model.ALS saved =
                     alsService.saveALS(alsService.replaceLC(als, replacement));
@@ -305,8 +297,7 @@ public class ALSController extends BaseCatalogController {
             throw new NoSuchElementException("LC с id " + lcId + " не найден в ALS " + alsId);
         lc.setId(lcId);
         try {
-            lc.setEquipmentSelections(equipmentCatalogService.prepareSelections(
-                    lc.getFunctionalConfiguration(), lc.getEquipmentSelections()));
+            ALSFormSupport.configure(lc, equipmentCatalogService);
             com.lb_calc_web.domain.model.LC replacement = alsService.restoreLC(lc, source);
             source = alsService.replaceLC(source.copy(), replacement);
             lc = toDtoWithImage(replacement);
@@ -320,8 +311,6 @@ public class ALSController extends BaseCatalogController {
 
     private void prepareLCForm(Model model, LCDTO lc) {
         model.addAttribute("lc", lc);
-        lc.setEquipmentSelections(equipmentCatalogService.prepareSelections(
-                lc.getFunctionalConfiguration(), lc.getEquipmentSelections()));
         model.addAttribute("equipmentList", equipmentCatalogService.findAll().stream()
                 .map(EquipmentDtoMapper::toDto).toList());
         model.addAttribute("defaultEquipmentIds", equipmentCatalogService.findDefaultModelIds());
@@ -361,7 +350,7 @@ public class ALSController extends BaseCatalogController {
             com.lb_calc_web.domain.model.ALS als = alsService.findById(alsId);
             lbc.setId(lbcId);
 
-            equipmentCatalogService.validateSelections(lbc.getFunctionalConfiguration(), lbc.getEquipmentSelections());
+            ALSFormSupport.configure(lbc, equipmentCatalogService);
             com.lb_calc_web.domain.model.LBC replacement = alsService.restoreLBC(lbc, als);
             com.lb_calc_web.domain.model.ALS saved =
                     alsService.saveALS(alsService.replaceLBC(als, replacement));
@@ -383,8 +372,7 @@ public class ALSController extends BaseCatalogController {
         alsService.findLBCInALS(source, lbcId);
         lbc.setId(lbcId);
         try {
-            lbc.setEquipmentSelections(equipmentCatalogService.prepareSelections(
-                    lbc.getFunctionalConfiguration(), lbc.getEquipmentSelections()));
+            ALSFormSupport.configure(lbc, equipmentCatalogService);
             com.lb_calc_web.domain.model.LBC replacement = alsService.restoreLBC(lbc, source);
             source = alsService.replaceLBC(source.copy(), replacement);
             lbc = toDtoWithImage(replacement);
@@ -398,8 +386,6 @@ public class ALSController extends BaseCatalogController {
 
     private void prepareLBCForm(Model model, LBCDTO lbc) {
         model.addAttribute("lbc", lbc);
-        lbc.setEquipmentSelections(equipmentCatalogService.prepareSelections(
-                lbc.getFunctionalConfiguration(), lbc.getEquipmentSelections()));
         model.addAttribute("equipmentList", equipmentCatalogService.findAll().stream()
                 .map(EquipmentDtoMapper::toDto).toList());
         model.addAttribute("defaultEquipmentIds", equipmentCatalogService.findDefaultModelIds());

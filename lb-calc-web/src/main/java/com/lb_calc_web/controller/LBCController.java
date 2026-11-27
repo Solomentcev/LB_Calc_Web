@@ -2,7 +2,6 @@ package com.lb_calc_web.controller;
 
 import com.lb_calc_web.domain.model.LBC;
 import com.lb_calc_web.mapper.dto.EquipmentDtoMapper;
-import com.lb_calc_web.mapper.dto.EquipmentSelectionDtoMapper;
 import com.lb_calc_web.service.EquipmentCatalogService;
 import com.lb_calc_web.dto.LBCDTO;
 import com.lb_calc_web.mapper.dto.LBCDtoMapper;
@@ -102,10 +101,9 @@ public class LBCController extends BaseCatalogController {
     public String refreshLBC(@ModelAttribute("lbc") LBCDTO lbc, Model model) {
         model.addAttribute("pageContext", "CATALOG");
         try {
-            lbc.setEquipmentSelections(EquipmentSelectionDtoMapper.prepareSelections(
-                    lbc.getFunctionalConfiguration(), lbc.getEquipmentSelections(),
-                    equipmentCatalogService.findAll(), equipmentCatalogService.findDefaultModelIds()));
-            lbc = LBCDtoMapper.toDto(lbcService.restoreDomain(lbc));
+            LBC domain = lbcService.restoreDomain(lbc);
+            configureEquipment(domain.getControlConfiguration());
+            lbc = toDtoWithImage(domain);
         } catch (ValidationSizeException exception) {
             model.addAttribute("errors", ValidationErrorFormatter.format(exception.getValidationResult()));
         } catch (IllegalArgumentException exception) {
@@ -125,7 +123,9 @@ public class LBCController extends BaseCatalogController {
     ) {
         model.addAttribute("pageContext", "CATALOG");
         try {
-            LBC saved = lbcService.saveLBC(lbcService.restoreDomain(lbc));
+            LBC domain = lbcService.restoreDomain(lbc);
+            configureEquipment(domain.getControlConfiguration());
+            LBC saved = lbcService.saveLBC(domain);
 
             return "redirect:/lbcs/" + saved.getId();
 
@@ -146,15 +146,15 @@ public class LBCController extends BaseCatalogController {
         return dto;
     }
 
+    private void configureEquipment(com.lb_calc_web.domain.model.ControlConfiguration configuration) {
+        configuration.configureEquipment(configuration.getFunctionalConfiguration(),
+                equipmentCatalogService.findAll(), equipmentCatalogService.findDefaultModels());
+    }
+
     private void prepareForm(Model model, LBCDTO lbc) {
         model.addAttribute("lbc", lbc);
         var equipmentCatalog = equipmentCatalogService.findAll();
-        var defaultEquipmentIds = equipmentCatalogService.findDefaultModelIds();
-        lbc.setEquipmentSelections(EquipmentSelectionDtoMapper.prepareSelections(
-                lbc.getFunctionalConfiguration(), lbc.getEquipmentSelections(),
-                equipmentCatalog, defaultEquipmentIds));
-        // Сначала определяем выбранные по умолчанию физические модели,
-        // затем строим изображение по восстановленной доменной конфигурации.
+        // Чертёж строится по уже восстановленной доменной конфигурации.
         try {
             lbc.setStringLBCImage(LBCImageService.getStringLBCImage(
                     lbcService.restoreDomain(lbc)));
@@ -164,6 +164,6 @@ public class LBCController extends BaseCatalogController {
         }
         model.addAttribute("equipmentList", equipmentCatalog.stream()
                 .map(EquipmentDtoMapper::toDto).toList());
-        model.addAttribute("defaultEquipmentIds", defaultEquipmentIds);
+
     }
 }

@@ -285,4 +285,32 @@ class ControlConfigurationTest {
         assertEquals(initial, configuration.getFunctionalConfiguration());
     }
 
+
+    @Test
+    void configureEquipment_shouldPreserveSelectionAndFillMissingRequirementsFromDefaults() {
+        Equipment selectedRfid = new Equipment(
+                61L, EquipmentFunctionalType.ACCESS, AccessPurpose.RFID,
+                EquipmentCategory.BAR_READER, "Выбранный RFID", "", 0, 0, 0);
+        Equipment defaultDisplay = new Equipment(
+                62L, EquipmentFunctionalType.DISPLAY, DisplayPurpose.INCH_10,
+                EquipmentCategory.DISPLAY, "Дисплей по умолчанию", "", 0, 0, 0);
+        Equipment defaultPayment = new Equipment(
+                63L, EquipmentFunctionalType.PAYMENT, PaymentPurpose.CARDS_AND_CASH,
+                EquipmentCategory.PAYMENT_TERMINAL, "Комбинированная оплата", "", 0, 0, 0);
+
+        FunctionalConfiguration functional = functionalConfiguration(
+                DisplayPurpose.INCH_10, Set.of(AccessPurpose.RFID),
+                PaymentPurpose.CARDS_AND_CASH, PrinterPurpose.ABSENT);
+        ControlConfiguration configuration = new ControlConfiguration(
+                functional, Map.of(selectedRfid, 3));
+
+        configuration.configureEquipment(functional,
+                java.util.List.of(selectedRfid, defaultDisplay, defaultPayment),
+                Set.of(defaultDisplay, defaultPayment));
+
+        assertEquals(Map.of(selectedRfid, 3, defaultDisplay, 1, defaultPayment, 1),
+                configuration.getEquipment());
+        assertDoesNotThrow(configuration::validateEquipmentRequirements);
+    }
+
 }

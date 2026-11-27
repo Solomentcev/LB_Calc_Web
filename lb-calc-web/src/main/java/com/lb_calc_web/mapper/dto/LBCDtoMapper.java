@@ -9,7 +9,6 @@ import com.lb_calc_web.domain.equipment.Equipment;
 import com.lb_calc_web.domain.model.ControlConfiguration;
 import com.lb_calc_web.domain.model.FunctionalConfiguration;
 import com.lb_calc_web.domain.model.LBC;
-import com.lb_calc_web.dto.EquipmentSelectionDTO;
 import com.lb_calc_web.dto.FunctionalConfigurationDTO;
 import com.lb_calc_web.dto.LBCDTO;
 
@@ -55,9 +54,9 @@ public final class LBCDtoMapper {
         dto.setColorDoor(domain.getColorDoor().name());
 ControlConfiguration configuration = domain.getControlConfiguration();
         dto.setFunctionalConfiguration(toDto(configuration.getFunctionalConfiguration()));
-        dto.setEquipmentSelections(configuration.getEquipment().entrySet().stream()
-                .map(entry -> new EquipmentSelectionDTO(entry.getKey().getId(), entry.getValue()))
-                .toList());
+        Map<Long, Integer> selectedEquipment = new LinkedHashMap<>();
+        configuration.getEquipment().forEach((item, quantity) -> selectedEquipment.put(item.getId(), quantity));
+        dto.setEquipment(selectedEquipment);
         return dto;
     }
 
@@ -92,25 +91,24 @@ ControlConfiguration configuration = domain.getControlConfiguration();
                 dto.getFunctionalConfiguration(), fallbackConfiguration);
 
         Map<Equipment, Integer> equipment = new LinkedHashMap<>();
-        if (dto.getEquipmentSelections() == null && !dto.isEquipmentSelectionsProvided()
+        if (dto.getEquipment() == null && !dto.isEquipmentProvided()
                 && fallbackConfiguration != null) {
             equipment.putAll(fallbackConfiguration.getEquipment());
-        } else if (dto.getEquipmentSelections() != null) {
-            for (EquipmentSelectionDTO selection : dto.getEquipmentSelections()) {
-                Objects.requireNonNull(selection, "Позиция оборудования не должна быть null");
-                if (selection.getEquipmentId() == null) {
-                    if (dto.isEquipmentSelectionsProvided()) {
-                        continue;
-                    }
+        } else if (dto.getEquipment() != null) {
+            dto.getEquipment().forEach((equipmentId, quantity) -> {
+                if (equipmentId == null || equipmentId <= 0) {
                     throw new IllegalArgumentException(
-                            "Идентификатор модели оборудования не должен быть null");
+                            "Идентификатор модели оборудования должен быть положительным");
+                }
+                if (quantity == null || quantity < 1) {
+                    throw new IllegalArgumentException(
+                            "Количество оборудования должно быть не меньше 1");
                 }
                 Equipment model = Objects.requireNonNull(
-                        equipmentLookup.apply(selection.getEquipmentId()),
-                        "Модель оборудования не найдена: " + selection.getEquipmentId()
-                );
-                equipment.merge(model, selection.getQuantity(), Math::addExact);
-            }
+                        equipmentLookup.apply(equipmentId),
+                        "Модель оборудования не найдена: " + equipmentId);
+                equipment.merge(model, quantity, Math::addExact);
+            });
         }
 
         ControlConfiguration configuration = new ControlConfiguration(functional, equipment);

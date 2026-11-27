@@ -2,8 +2,8 @@ package com.lb_calc_web.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Objects;
 
 /** DTO комбинированного модуля LBC, включая функциональные назначения и выбранное оборудование. */
@@ -40,9 +40,9 @@ public class LBCDTO {
     private String colorBody;
 
     private FunctionalConfigurationDTO functionalConfiguration;
-    private List<EquipmentSelectionDTO> equipmentSelections;
+    private Map<Long, Integer> equipment;
     @JsonIgnore
-    private boolean equipmentSelectionsProvided;
+    private boolean equipmentProvided;
 
     @JsonIgnore
     private String stringLBCImage;
@@ -219,20 +219,20 @@ public class LBCDTO {
         this.functionalConfiguration = configuration;
     }
 
-    public List<EquipmentSelectionDTO> getEquipmentSelections() {
-        return equipmentSelections;
+    public Map<Long, Integer> getEquipment() {
+        return equipment == null ? null : Map.copyOf(equipment);
     }
 
-    public void setEquipmentSelections(List<EquipmentSelectionDTO> selections) {
-        this.equipmentSelections = selections == null ? null : new ArrayList<>(selections);
+    public void setEquipment(Map<Long, Integer> equipment) {
+        this.equipment = equipment == null ? null : new LinkedHashMap<>(equipment);
     }
 
-    public boolean isEquipmentSelectionsProvided() {
-        return equipmentSelectionsProvided;
+    public boolean isEquipmentProvided() {
+        return equipmentProvided;
     }
 
-    public void setEquipmentSelectionsProvided(boolean provided) {
-        this.equipmentSelectionsProvided = provided;
+    public void setEquipmentProvided(boolean provided) {
+        this.equipmentProvided = provided;
     }
 
     public String getStringLBCImage() {
@@ -257,7 +257,7 @@ public class LBCDTO {
                 && Objects.equals(directionDoorOpening, other.directionDoorOpening)
                 && Objects.equals(colorDoor, other.colorDoor) && Objects.equals(colorBody, other.colorBody)
                 && Objects.equals(functionalConfiguration, other.functionalConfiguration)
-                && Objects.equals(equipmentSelections, other.equipmentSelections);
+                && Objects.equals(equipment, other.equipment);
     }
 
     @Override
@@ -265,7 +265,7 @@ public class LBCDTO {
         return Objects.hash(type, height, width, depth, upperFrame, bottomFrame, shelfThick,
                 deltaWidth, serviceZoneWidth, doorThickness, countCells, heightCell,
                 widthCell, depthCell, directionDoorOpening, colorDoor, colorBody,
-                functionalConfiguration, equipmentSelections);
+                functionalConfiguration, equipment);
     }
 
     @Override
