@@ -68,7 +68,7 @@ environment = new MockEnvironment()
         Employee employee = new Employee(1L, "Иван", "Иванов", "ivan@example.com",
                 java.time.LocalDate.of(2026, 9, 18), Role.ROLE_MANAGER);
 
-        when(employeeService.getCurrentEmployeeDomain())
+        when(employeeService.getCurrentEmployee())
                 .thenReturn(employee);
 
         com.lb_calc_web.domain.model.Project result =
