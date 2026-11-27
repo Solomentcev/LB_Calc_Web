@@ -2,6 +2,8 @@ package com.lb_calc_web.domain.model;
 
 import com.lb_calc_web.domain.equipment.Equipment;
 import com.lb_calc_web.domain.equipment.EquipmentCategory;
+import com.lb_calc_web.domain.equipment.EquipmentFunctionalType;
+import com.lb_calc_web.domain.equipment.EquipmentPurpose;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -61,10 +63,42 @@ public class ControlConfiguration {
         return functionalConfiguration.copy();
     }
 
-    /** Обновляет назначения, сохраняя установленное оборудование. */
+    /**
+     * Обновляет функциональные назначения и удаляет оборудование, которое больше им не соответствует.
+     * Недостающие модели подбираются сервисным слоем из каталога.
+     */
     public void setFunctionalConfiguration(FunctionalConfiguration configuration) {
-        functionalConfiguration = RESOLVER.normalize(Objects.requireNonNull(
+        FunctionalConfiguration normalized = RESOLVER.normalize(Objects.requireNonNull(
                 configuration, "Функциональная конфигурация не должна быть null"));
+        Map<Equipment, Integer> compatible =
+                RESOLVER.retainRequiredEquipment(normalized, equipment);
+        equipment.clear();
+        equipment.putAll(compatible);
+        functionalConfiguration = normalized;
+    }
+
+    /** Возвращает требования к физической комплектации для текущих функциональных назначений. */
+    public Map<EquipmentFunctionalType, java.util.Set<EquipmentPurpose>> getRequiredEquipment() {
+        return RESOLVER.resolveRequiredEquipment(functionalConfiguration);
+    }
+
+    /**
+     * Проверяет, что выбранная физическая комплектация покрывает все функциональные требования
+     * и не содержит лишнего оборудования.
+     */
+    public void validateEquipmentRequirements() {
+        Map<EquipmentFunctionalType, java.util.Set<EquipmentPurpose>> missing =
+                RESOLVER.findMissingRequirements(functionalConfiguration, equipment);
+        if (!missing.isEmpty()) {
+            throw new IllegalStateException(
+                    "Не выбрано физическое оборудование для функциональных назначений: " + missing);
+        }
+        Map<Equipment, Integer> compatible =
+                RESOLVER.retainRequiredEquipment(functionalConfiguration, equipment);
+        if (compatible.size() != equipment.size()) {
+            throw new IllegalStateException(
+                    "Выбранное физическое оборудование не соответствует функциональной конфигурации");
+        }
     }
 
     /** @return неизменяемое соответствие моделей оборудования и их количества */
