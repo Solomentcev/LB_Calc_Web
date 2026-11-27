@@ -217,12 +217,17 @@ public class ALSService {
         }
 
         List<ModuleEntity> cache = new ArrayList<>();
-        ALSEntity entity = existing.orElseGet(ALSEntity::new);
+        Function<Module, ModuleEntity> moduleResolver =
+                module -> resolveModule(module, cache);
+        ALSEntity entity;
         if (existing.isPresent()) {
+            entity = existing.get();
             entity.moveModuleOrdersToTemporary();
             alsRepository.flush();
+            ALSEntityMapper.updateEntity(domain, entity, moduleResolver);
+        } else {
+            entity = ALSEntityMapper.toEntity(domain, moduleResolver);
         }
-        ALSEntityMapper.updateEntity(domain, entity, module -> resolveModule(module, cache));
         ALSEntity saved = alsRepository.save(entity);
         domain.setId(saved.getId());
         logger.info("АКХ сохранена: id={}", saved.getId());
