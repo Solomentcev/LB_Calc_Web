@@ -536,7 +536,10 @@ ControlConfiguration fallback = persistedALS.getControlModule().getControlConfig
                     sourceALS.getControlModule() instanceof LC
                             ? sourceALS.getControlModule().getControlConfiguration() : null,
                     sizeBounds);
-            alsService.configureFunctionalEquipment(replacement);
+            alsService.prepareFunctionalEquipment(
+                    replacement,
+                    sourceALS.getControlModule().getControlConfiguration(),
+                    lc.isEquipmentProvided());
             ALS candidateALS = alsService.replaceLC(sourceALS.copy(), replacement);
             preview = projectService.previewALSReplacement(projectId, alsId, candidateALS);
             updatedALS = candidateALS;
@@ -689,7 +692,10 @@ ControlConfiguration fallback = persistedALS.getControlModule().getControlConfig
                     sourceALS.getControlModule() instanceof LBC
                             ? sourceALS.getControlModule().getControlConfiguration() : null,
                     sizeBounds);
-            alsService.configureFunctionalEquipment(replacement);
+            alsService.prepareFunctionalEquipment(
+                    replacement,
+                    sourceALS.getControlModule().getControlConfiguration(),
+                    lbc.isEquipmentProvided());
             ALS candidateALS = alsService.replaceLBC(sourceALS.copy(), replacement);
             preview = projectService.previewALSReplacement(projectId, alsId, candidateALS);
             updatedALS = candidateALS;
@@ -1097,7 +1103,10 @@ ControlConfiguration fallback = persistedALS.getControlModule().getControlConfig
                             ? als.getControlModule().getControlConfiguration() : null,
                     sizeBounds
             );
-            alsService.configureFunctionalEquipment(restored);
+            alsService.prepareFunctionalEquipment(
+                    restored,
+                    als.getControlModule().getControlConfiguration(),
+                    dto.isEquipmentProvided());
             return toDtoWithImage(restored);
         } catch (ValidationSizeException | IllegalArgumentException exception) {
             return dto;
