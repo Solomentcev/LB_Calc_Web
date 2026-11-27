@@ -14,7 +14,7 @@ import com.lb_calc_web.dto.LBCDTO;
 import com.lb_calc_web.service.ALSService;
 import com.lb_calc_web.service.EquipmentCatalogService;
 import com.lb_calc_web.service.factory.TypeLbFactory;
-import com.lb_calc_web.service.validation.size.SizeBounds;
+import com.lb_calc_web.domain.geometry.SizeBounds;
 import org.springframework.core.env.Environment;
 import com.lb_calc_web.service.image.ALSImageService;
 import io.swagger.v3.oas.annotations.Operation;
