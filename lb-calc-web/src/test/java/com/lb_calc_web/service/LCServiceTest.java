@@ -84,7 +84,8 @@ class LCServiceTest {
         assertEquals(DisplayPurpose.INCH_10, functional.getDisplay());
         assertEquals(Set.of(AccessPurpose.RFID), functional.getAccess());
         assertEquals(Map.of(display, 1, rfid, 1), domain.getEquipment());
-        assertEquals(500, domain.getWidth());
+        assertEquals(350, domain.getWidth(),
+                "Ширина LC должна рассчитываться с учётом габаритов выбранного дисплея");
         verify(equipmentCatalogService).configureFunctionalEquipment(domain.getControlConfiguration());
     }
 
