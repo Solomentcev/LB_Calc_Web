@@ -86,7 +86,7 @@ class LBCImageServiceTest {
 
         // Функциональное назначение дисплея без физического оборудования
         // не должно приводить к отрисовке условного квадрата.
-        assertEquals(Colors.White.getColor().getRGB(),
+        assertEquals(new java.awt.Color(Colors.White.getRgb()).getRGB(),
                 image.getRGB(technicalCenterX, technicalCenterY));
     }
 
@@ -143,7 +143,7 @@ class LBCImageServiceTest {
         int rightSideX = 45 * 3 + 1;
 
         assertEquals(Colors.White.getColor().getRGB(), leftImage.getRGB(leftSideX, y));
-        assertEquals(Colors.Blue.getColor().getRGB(), leftImage.getRGB(rightSideX, y));
+        assertEquals(new java.awt.Color(Colors.Blue.getRgb()).getRGB(), leftImage.getRGB(rightSideX, y));
         assertEquals(Colors.Blue.getColor().getRGB(), rightImage.getRGB(leftSideX, y));
         assertEquals(Colors.White.getColor().getRGB(), rightImage.getRGB(rightSideX, y));
     }
