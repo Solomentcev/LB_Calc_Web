@@ -21,7 +21,7 @@ class ModuleNamingDescriptionTest {
         assertTrue(left.getName().startsWith("Модуль хранения: 3 яч."));
         assertTrue(left.getName().contains("TYPE1"));
         assertTrue(left.getName().contains("влево"));
-        assertTrue(left.getName().contains("1940×500×500 мм"));
+        assertTrue(left.getName().contains("1940×200×500 мм"));
         assertTrue(left.getName().contains("синий/белый"));
         assertTrue(left.getName().contains("синий/белый"));
 
