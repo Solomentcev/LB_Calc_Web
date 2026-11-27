@@ -197,10 +197,9 @@
                                 <span class="text-muted small">Физическое оборудование</span>
                                 <ul class="list-unstyled mb-0">
                                     <li th:each="selection : ${als.LC.equipmentSelections}"
-                                        th:text="${selection.equipmentId == null
+                                        th:text="|${selection.equipmentId == null
                                                 ? 'Модель не выбрана'
-                                                : 'Модель ID: ' + selection.equipmentId}
-                                                + ', количество: ' + selection.quantity">
+                                                : 'Модель ID: ' + selection.equipmentId}, количество: ${selection.quantity}|">
                                         Оборудование
                                     </li>
                                     <li th:if="${#lists.isEmpty(als.LC.equipmentSelections)}"
@@ -263,10 +262,9 @@
                                 <span class="text-muted small">Физическое оборудование</span>
                                 <ul class="list-unstyled mb-0">
                                     <li th:each="selection : ${als.LBC.equipmentSelections}"
-                                        th:text="${selection.equipmentId == null
+                                        th:text="|${selection.equipmentId == null
                                                 ? 'Модель не выбрана'
-                                                : 'Модель ID: ' + selection.equipmentId}
-                                                + ', количество: ' + selection.quantity">
+                                                : 'Модель ID: ' + selection.equipmentId}, количество: ${selection.quantity}|">
                                         Оборудование
                                     </li>
                                     <li th:if="${#lists.isEmpty(als.LBC.equipmentSelections)}"
