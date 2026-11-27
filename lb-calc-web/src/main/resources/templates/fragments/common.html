@@ -586,24 +586,35 @@
         }
         .module-editor .module-section__header--actions h2 { margin: 0; }
         .module-editor .module-section__header--actions p { margin-bottom: 0; }
+        /* Общий чертёж сохраняет исходные пропорции и не растягивается по ширине контейнера. */
         .module-editor .module-visual--wide {
             min-height: 0;
-            padding: 1rem;
+            padding: .75rem 1rem;
         }
         .module-editor .module-visual--wide img {
-            width: 100%;
+            display: block;
+            width: auto;
+            height: auto;
             max-width: 100%;
-            max-height: none;
+            max-height: min(65vh, 560px);
             object-fit: contain;
         }
+        /* Чертежи отдельных модулей узкие: ограничиваем именно изображение, а не карточку. */
         .module-editor .module-visual--module {
-            margin-top: 1rem;
+            display: flex;
+            justify-content: center;
+            margin-top: .75rem;
+            padding: .5rem;
             border: 1px solid #edf0f2;
             border-radius: .4rem;
+            background: #f8fafb;
         }
         .module-editor .module-visual--module img {
-            max-width: 100%;
-            max-height: 360px;
+            display: block;
+            width: auto;
+            height: auto;
+            max-width: 220px;
+            max-height: 300px;
             object-fit: contain;
         }
         .module-editor__parameters,
