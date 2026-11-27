@@ -25,38 +25,6 @@ public final class ProjectDtoMapper {
     }
 
     /**
-     * Создаёт независимую копию контейнера DTO проекта.
-     *
-     * <p>Вложенные DTO ALS не изменяются маппером и могут быть
-     * безопасно переиспользованы; коллекции верхнего уровня копируются.</p>
-     *
-     * @param source исходный DTO
-     * @return копия DTO или {@code null}
-     */
-    public static ProjectDTO copy(ProjectDTO source) {
-        if (source == null) {
-            return null;
-        }
-
-        ProjectDTO copy = new ProjectDTO();
-        copy.setId(source.getId());
-        copy.setName(source.getName());
-        copy.setDescription(source.getDescription());
-        copy.setCompany(source.getCompany());
-        copy.setCreatedBy(source.getCreatedBy());
-        copy.setCreatedAt(source.getCreatedAt());
-        copy.setUpdatedBy(source.getUpdatedBy());
-        copy.setUpdatedAt(source.getUpdatedAt());
-        copy.setAlsList(source.getAlsList() == null
-                ? List.of()
-                : new ArrayList<>(source.getAlsList()));
-        copy.setQuantityALS(source.getQuantityALS() == null
-                ? Map.of()
-                : new LinkedHashMap<>(source.getQuantityALS()));
-        return copy;
-    }
-
-    /**
      * Пересчитывает количество одинаковых ALS по фактическому списку DTO.
      *
      * <p>Карта является производным представлением для пользовательского
