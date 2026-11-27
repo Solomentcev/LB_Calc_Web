@@ -202,7 +202,9 @@
                                th:name="|LC.equipmentSelections[${selectionStat.index}].quantity|"
                                th:value="${selection.quantity}">
 
-                        <div class="row module-summary">
+                        <div class="module-card-layout">
+                            <div class="module-card-layout__information">
+                                <div class="row module-summary">
                             <div class="col-md-3"><span class="text-muted small">ID</span><strong th:text="${als.LC.id}"></strong></div>
                             <div class="col-md-3"><span class="text-muted small">Дисплей</span><strong th:text="${als.LC.functionalConfiguration.display}"></strong></div>
                             <div class="col-md-3"><span class="text-muted small">Доступ</span><strong th:text="${als.LC.functionalConfiguration.access}"></strong></div>
@@ -223,8 +225,10 @@
                                         class="text-muted">Отдельное оборудование не требуется</li>
                                 </ul>
                             </div>
-                        </div>
-                        <div class="module-visual module-visual--module" th:if="${als.LC.stringLCImage != null}">
+                                </div>
+                            </div>
+                            <div class="module-card-layout__drawing">
+                                <div class="module-visual module-visual--module" th:if="${als.LC.stringLCImage != null}">
                             <img th:src="|data:image/png;base64,${als.LC.stringLCImage}|"
                                  alt="Чертёж модуля управления LC">
                         </div>
@@ -271,7 +275,9 @@
                                th:name="|LBC.equipmentSelections[${selectionStat.index}].quantity|"
                                th:value="${selection.quantity}">
 
-                        <div class="row module-summary">
+                        <div class="module-card-layout">
+                            <div class="module-card-layout__information">
+                                <div class="row module-summary">
                             <div class="col-md-3"><span class="text-muted small">ID</span><strong th:text="${als.LBC.id}"></strong></div>
                             <div class="col-md-3"><span class="text-muted small">Габариты модуля</span><strong th:text="|${als.LBC.height} × ${als.LBC.width} × ${als.LBC.depth} мм|"></strong></div>
                             <div class="col-md-3"><span class="text-muted small">Количество ячеек</span><strong th:text="${als.LBC.countCells}"></strong></div>
@@ -298,9 +304,15 @@
                                 </ul>
                             </div>
                         </div>
-                        <div class="module-visual module-visual--module" th:if="${als.LBC.stringLBCImage != null}">
+                                                        </div>
+                            </div>
+                            <div class="module-card-layout__drawing">
+                                <div class="module-visual module-visual--module" th:if="${als.LBC.stringLBCImage != null}">
                             <img th:src="|data:image/png;base64,${als.LBC.stringLBCImage}|"
                                  alt="Чертёж совмещённого модуля LBC">
+                        </div>
+                                </div>
+                            </div>
                         </div>
                         <a th:href="@{${pageContext == 'PROJECT'
                                      ? '/projects/' + projectId + '/alss/' + alsId + '/lbcs/' + als.LBC.id
@@ -344,6 +356,8 @@
                             <input type="hidden" th:field="*{lbList[__${lbStat.index}__].colorBody}">
                             <input type="hidden" th:field="*{lbList[__${lbStat.index}__].colorDoor}">
 
+                            <div class="module-card-layout">
+                                <div class="module-card-layout__information">
                             <div class="d-flex flex-wrap align-items-start justify-content-between">
                                 <div>
                                     <h3 class="h6 mb-1" th:text="|${lb.name} (ID: ${lb.id})|">LB</h3>
@@ -361,10 +375,14 @@
                                 <div class="col-sm-3"><span class="text-muted small">Конструктивный тип</span><strong th:text="${lb.type}"></strong></div>
                             </div>
 
-                            <div class="module-visual module-visual--module" th:if="${lb.stringLBImage != null}">
+                                                            </div>
+<div class="module-visual module-visual--module" th:if="${lb.stringLBImage != null}">
                                 <img th:src="|data:image/png;base64,${lb.stringLBImage}|"
                                      th:alt="|Чертёж модуля хранения ${lb.name}|">
                             </div>
+                                </div>
+                                <div class="module-card-layout__drawing">
+                                <div class="module-card-layout__actions">
                             <div class="d-flex flex-wrap align-items-center mt-3">
                                 <a th:href="@{${pageContext == 'PROJECT'
                                              ? '/projects/' + projectId + '/alss/' + alsId + '/lbs/' + lb.id
@@ -377,6 +395,9 @@
                                     Удалить LB
                                 </button>
                             </div>
+                                </div>
+                            </div>
+
                         </div>
 
                         <div th:if="${#lists.isEmpty(als.lbList)}" class="text-muted py-2">
