@@ -32,6 +32,7 @@ final class ALSFormSupport {
         FunctionalConfigurationDTO functional = Objects.requireNonNull(
                 als.getFunctionalConfiguration(), "Функциональная конфигурация ALS не должна быть null");
         if (als.getLC() != null) {
+            ModuleEquipmentFormSupport.applySelection(als.getLC());
             als.getLC().setFunctionalConfiguration(functional);
             configure(als.getLC().getEquipment(),
                     als.getLC()::setEquipment, als.getLC()::setEquipmentProvided,
@@ -39,6 +40,7 @@ final class ALSFormSupport {
             return;
         }
         if (als.getLBC() != null) {
+            ModuleEquipmentFormSupport.applySelection(als.getLBC());
             als.getLBC().setFunctionalConfiguration(functional);
             configure(als.getLBC().getEquipment(),
                     als.getLBC()::setEquipment, als.getLBC()::setEquipmentProvided,
