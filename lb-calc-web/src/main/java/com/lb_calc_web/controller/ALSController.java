@@ -325,7 +325,7 @@ public class ALSController extends BaseCatalogController {
             LC replacement = LCDtoMapper.toDomain(
                     lc, equipmentCatalogService::findById, fallback, sizeBounds);
             com.lb_calc_web.domain.model.ALS saved =
-                    alsService.replaceLCandSaveALS(als, replacement);
+                    alsService.replaceLCandSaveALS(als, replacement, lc.isEquipmentProvided());
             return "redirect:/alss/" + saved.getId();
         } catch (ValidationSizeException e) {
             model.addAttribute("errors", ValidationErrorFormatter.format(e.getValidationResult()));
