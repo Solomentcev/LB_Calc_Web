@@ -1,5 +1,6 @@
 package com.lb_calc_web.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import com.lb_calc_web.domain.equipment.EquipmentCategory;
 import com.lb_calc_web.domain.equipment.EquipmentFunctionalType;
 import jakarta.validation.constraints.Min;
@@ -8,6 +9,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 /** Данные физической модели оборудования для интерфейса и REST API. */
+@Schema(description = "Модель физического оборудования из каталога, включая функциональный тип, назначение и габариты.")
 public class EquipmentDTO {
 
     private Long id;
