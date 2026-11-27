@@ -857,5 +857,67 @@
             }
         }
 
-    </style>
+    
+        /* Карточки модулей АКХ: параметры слева, чертёж справа. */
+        .module-card-layout {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 240px;
+            gap: 1rem;
+            align-items: start;
+            width: 100%;
+            min-width: 0;
+        }
+
+        .module-card-layout__information {
+            min-width: 0;
+        }
+
+        .module-card-layout__drawing {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            width: 240px;
+            max-width: 100%;
+            min-width: 0;
+        }
+
+        .module-card-layout__drawing .module-visual--module {
+            width: 100%;
+            margin-top: 0;
+        }
+
+        .module-card-layout__drawing .module-visual--module img {
+            max-width: 220px;
+            max-height: 300px;
+        }
+
+        .module-card-layout__actions {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: .5rem;
+            margin-top: 1rem;
+        }
+
+        .module-storage-card {
+            width: 100%;
+            min-width: 0;
+        }
+
+        @media (max-width: 767.98px) {
+            .module-card-layout {
+                grid-template-columns: minmax(0, 1fr);
+            }
+
+            .module-card-layout__drawing {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .module-card-layout__drawing .module-visual--module {
+                width: auto;
+                max-width: 100%;
+            }
+        }
+</style>
 </head>
