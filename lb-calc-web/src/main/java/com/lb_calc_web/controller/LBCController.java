@@ -149,12 +149,10 @@ public class LBCController extends BaseCatalogController {
     ) {
         model.addAttribute("pageContext", "CATALOG");
         try {
-            ControlConfiguration fallback = lbc.getId() != null && lbc.getId() > 0
-                    ? lbcService.findById(lbc.getId()).getControlConfiguration() : null;
             LBC domain = LBCDtoMapper.toDomain(
                     lbc, TypeLbFactory.forLBC(environment, lbc.getType()),
-                    equipmentCatalogService::findById, fallback, sizeBounds);
-            lbcService.prepareFunctionalEquipment(domain, fallback, lbc.isEquipmentProvided());
+                    equipmentCatalogService::findById, sizeBounds);
+            lbcService.prepareFunctionalEquipment(domain, lbc.isEquipmentProvided());
             LBC saved = lbcService.saveLBC(domain);
 
             return "redirect:/lbcs/" + saved.getId();
