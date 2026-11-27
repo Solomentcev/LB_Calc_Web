@@ -230,17 +230,9 @@ public class ALSController extends BaseCatalogController {
                 sizeBounds
         );
 
-        boolean equipmentSelectionOmitted = dto.getLC() != null
-                ? !dto.getLC().isEquipmentProvided() && dto.getLC().getSelectedEquipment().isEmpty()
-                : !dto.getLBC().isEquipmentProvided() && dto.getLBC().getSelectedEquipment().isEmpty();
-        boolean functionalConfigurationChanged = fallback != null
-                && !restored.getFunctionalConfiguration().equals(
-                fallback.getFunctionalConfiguration());
-        if (equipmentSelectionOmitted || functionalConfigurationChanged) {
-            ControlConfiguration configuration = restored.getControlModule().getControlConfiguration();
-            equipmentCatalogService.configureFunctionalEquipment(configuration);
-            restored.setControlConfiguration(configuration);
-        }
+        ControlConfiguration configuration = restored.getControlModule().getControlConfiguration();
+        equipmentCatalogService.configureFunctionalEquipment(configuration);
+        restored.setControlConfiguration(configuration);
 
         return alsService.preserveExistingModules(existing, restored);
     }
@@ -250,13 +242,9 @@ public class ALSController extends BaseCatalogController {
         ControlConfiguration fallback = als.getControlModule() instanceof LC
                 ? als.getControlModule().getControlConfiguration() : null;
         LC restored = LCDtoMapper.toDomain(dto, equipmentCatalogService::findById, fallback, sizeBounds);
-        boolean selectionOmitted = !dto.isEquipmentProvided() && dto.getSelectedEquipment().isEmpty();
-        boolean functionalChanged = fallback != null
-                && !restored.getControlConfiguration().getFunctionalConfiguration().equals(
-                fallback.getFunctionalConfiguration());
-        if (selectionOmitted || functionalChanged) {
-            equipmentCatalogService.configureFunctionalEquipment(restored.getControlConfiguration());
-        }
+        ControlConfiguration configuration = restored.getControlConfiguration();
+        equipmentCatalogService.configureFunctionalEquipment(configuration);
+        restored.setControlConfiguration(configuration);
         return restored;
     }
 
@@ -271,13 +259,9 @@ public class ALSController extends BaseCatalogController {
                 fallback,
                 sizeBounds
         );
-        boolean selectionOmitted = !dto.isEquipmentProvided() && dto.getSelectedEquipment().isEmpty();
-        boolean functionalChanged = fallback != null
-                && !restored.getControlConfiguration().getFunctionalConfiguration().equals(
-                fallback.getFunctionalConfiguration());
-        if (selectionOmitted || functionalChanged) {
-            equipmentCatalogService.configureFunctionalEquipment(restored.getControlConfiguration());
-        }
+        ControlConfiguration configuration = restored.getControlConfiguration();
+        equipmentCatalogService.configureFunctionalEquipment(configuration);
+        restored.setControlConfiguration(configuration);
         return restored;
     }
 
