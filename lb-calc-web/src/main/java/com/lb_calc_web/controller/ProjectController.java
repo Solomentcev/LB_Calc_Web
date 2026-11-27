@@ -186,8 +186,7 @@ public class ProjectController
                                 fallback,
                                 sizeBounds
                         );
-                        alsService.configureFunctionalEquipment(restored);
-                        return alsService.preserveExistingModules(existing, restored);
+                        return alsService.prepareConfiguration(existing, restored);
                     });
             project = ProjectDtoMapper.toDto(projectService.previewProject(domain));
         } catch (ValidationSizeException exception) {
@@ -234,8 +233,7 @@ public class ProjectController
                                 fallback,
                                 sizeBounds
                         );
-                        alsService.configureFunctionalEquipment(restored);
-                        return alsService.preserveExistingModules(existing, restored);
+                        return alsService.prepareConfiguration(existing, restored);
                     }
                     );
             com.lb_calc_web.domain.model.Project saved =
@@ -401,8 +399,7 @@ ControlConfiguration fallback = persistedALS.getControlModule().getControlConfig
                     fallback,
                     sizeBounds
             );
-            alsService.configureFunctionalEquipment(restored);
-            ALS replacement = alsService.preserveExistingModules(persistedALS, restored);
+            ALS replacement = alsService.prepareConfiguration(persistedALS, restored);
             preview = projectService.previewALSReplacement(projectId, alsId, replacement);
             als = ALSDtoMapper.toDto(replacement);
         } catch (ValidationSizeException exception) {
@@ -446,8 +443,7 @@ ControlConfiguration fallback = persistedALS.getControlModule().getControlConfig
                     fallback,
                     sizeBounds
             );
-            alsService.configureFunctionalEquipment(restored);
-            ALS replacement = alsService.preserveExistingModules(persistedALS, restored);
+            ALS replacement = alsService.prepareConfiguration(persistedALS, restored);
             ALS savedALS = projectService.replaceALSandSaveProject(
                     projectId,
                     alsId,
@@ -583,7 +579,6 @@ ControlConfiguration fallback = persistedALS.getControlModule().getControlConfig
                     sourceALS.getControlModule() instanceof LC
                             ? sourceALS.getControlModule().getControlConfiguration() : null,
                     sizeBounds);
-            alsService.configureFunctionalEquipment(replacement);
             ALS savedALS = projectService.saveLCAtProject(
                     projectId,
                     alsId,
@@ -737,7 +732,6 @@ ControlConfiguration fallback = persistedALS.getControlModule().getControlConfig
                     sourceALS.getControlModule() instanceof LBC
                             ? sourceALS.getControlModule().getControlConfiguration() : null,
                     sizeBounds);
-            alsService.configureFunctionalEquipment(replacement);
             ALS savedALS = projectService.saveLBCAtProject(
                     projectId,
                     alsId,
@@ -1041,8 +1035,7 @@ ControlConfiguration fallback = persistedALS.getControlModule().getControlConfig
                             fallback,
                             sizeBounds
                     );
-                    alsService.configureFunctionalEquipment(restored);
-                    restored = alsService.preserveExistingModules(existing, restored);
+                    restored = alsService.prepareConfiguration(existing, restored);
                     project.getAlsList().set(index, toDtoWithImages(restored));
                 } catch (ValidationSizeException | IllegalArgumentException | NoSuchElementException exception) {
                     // Для некорректной промежуточной формы изображение не формируется.
@@ -1070,8 +1063,7 @@ ControlConfiguration fallback = persistedALS.getControlModule().getControlConfig
                     fallback,
                     sizeBounds
             );
-            alsService.configureFunctionalEquipment(restored);
-            return toDtoWithImages(alsService.preserveExistingModules(existing, restored));
+            return toDtoWithImages(alsService.prepareConfiguration(existing, restored));
         } catch (ValidationSizeException | IllegalArgumentException | NoSuchElementException exception) {
             return dto;
         }
