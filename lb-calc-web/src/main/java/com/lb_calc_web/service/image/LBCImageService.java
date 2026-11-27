@@ -74,10 +74,10 @@ public final class LBCImageService {
         int storageAreaWidth = Math.max(0, width - serviceZoneWidth);
 
         // Дверь и корпус.
-        graphics.setColor(lbc.getColorDoor().getColor());
+        graphics.setColor(new Color(lbc.getColorDoor().getRgb()));
         graphics.fillRoundRect(x, 0, width, height, 1, 1);
 
-        graphics.setColor(lbc.getColorBody().getColor());
+        graphics.setColor(new Color(lbc.getColorBody().getRgb()));
         graphics.fillRoundRect(x, 0, width, upperFrame, 1, 1);
         graphics.fillRoundRect(x, height - bottomFrame, width, bottomFrame, 1, 1);
 
@@ -100,13 +100,13 @@ public final class LBCImageService {
 
         for (int i = 0; i < lbc.getStorageCellsBelow(); i++) {
             int shelfY = bottomBoundary + i * (cellHeight + shelf);
-            drawShelf(graphics, lbc.getColorBody().getColor(), storageAreaX, shelfY, storageAreaWidth, shelf);
+            drawShelf(graphics, new Color(lbc.getColorBody().getRgb()), storageAreaX, shelfY, storageAreaWidth, shelf);
         }
 
         // Полки складских ячеек выше технической ячейки.
         for (int i = 0; i < lbc.getStorageCellsAbove(); i++) {
             int shelfY = technicalTop - (i + 1) * shelf - i * cellHeight;
-            drawShelf(graphics, lbc.getColorBody().getColor(), storageAreaX, shelfY, storageAreaWidth, shelf);
+            drawShelf(graphics, new Color(lbc.getColorBody().getRgb()), storageAreaX, shelfY, storageAreaWidth, shelf);
         }
 
         // Пустая техническая ячейка не визуализируется.
