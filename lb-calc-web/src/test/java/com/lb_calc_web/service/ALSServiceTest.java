@@ -33,6 +33,7 @@ class ALSServiceTest {
     private LBCService lbcService;
     private FindOrCreateLockService lockService;
     private EquipmentRepository equipmentRepository;
+    private EquipmentCatalogService equipmentCatalogService;
     private ALSService service;
 
     @BeforeEach
@@ -45,6 +46,7 @@ class ALSServiceTest {
         lbcService = mock(LBCService.class);
         lockService = mock(FindOrCreateLockService.class);
         equipmentRepository = mock(EquipmentRepository.class);
+        equipmentCatalogService = mock(EquipmentCatalogService.class);
 
         MockEnvironment environment = new MockEnvironment()
                 .withProperty("size.height.default", "1940")
@@ -63,7 +65,7 @@ class ALSServiceTest {
                 alsRepository, projectALSRepository, moduleRepository,
                 lbService, lcService, lbcService, lockService,
                 environment, TestDataFactory.createSizeValidator(), equipmentRepository,
-                TestDataFactory.createSizeBounds());
+                equipmentCatalogService, TestDataFactory.createSizeBounds());
     }
 
     @Test
