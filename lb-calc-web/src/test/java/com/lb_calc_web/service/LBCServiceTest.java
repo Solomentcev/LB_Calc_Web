@@ -140,7 +140,7 @@ class LBCServiceTest {
         LBC domain = TestDataFactory.validLBC(null);
         List<com.lb_calc_web.domain.equipment.Equipment> equipment = configureValidEquipment(domain);
         stubEquipment(equipment);
-        LBCEntity saved = spy(LBCEntityMapper.toEntity(domain, EquipmentEntityMapper::toEntity));
+        LBCEntity saved = spy(LBCEntityMapper.toEntity(domain, equipmentModel -> equipmentRepository.findById(equipmentModel.getId()).orElseThrow()));
         doReturn(100L).when(saved).getId();
         when(repository.findCandidates(anyInt(), anyInt(), anyInt(), anyInt(), anyInt(),
                 any(), any(), anyString(), anyInt(), anyInt(), anyInt(), anyInt(),
