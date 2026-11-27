@@ -40,6 +40,8 @@ class LBServiceTest {
                 .withProperty("size.count.cells.default", "3")
                 .withProperty("size.door.thickness.default", "20")
                 .withProperty("lb.type.default", "TYPE1")
+                .withProperty("lb.color.body.default", "Blue")
+                .withProperty("lb.color.door.default", "White")
                 .withProperty("lb.direction.default", "RIGHT")
                 .withProperty("lb.type.TYPE1.delta-width", "100")
                 .withProperty("lb.type.TYPE1.shelf-thick", "5")
