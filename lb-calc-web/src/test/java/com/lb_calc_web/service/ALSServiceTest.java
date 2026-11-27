@@ -128,7 +128,7 @@ class ALSServiceTest {
 
     @Test
     void saveALS_shouldReuseExistingIdenticalConfiguration() {
-        ALS domain = TestDataFactory.validALS(1L);
+        ALS domain = TestDataFactory.validALS(null);
         ALSEntity existing = spy(ALSEntityMapper.toEntity(
                 TestDataFactory.validALS(77L),
                 module -> ModuleEntityMapper.toEntity(module, equipment -> null)));
@@ -146,10 +146,11 @@ class ALSServiceTest {
     @Test
     void saveALS_shouldUpdateExistingEntityInsteadOfCreatingAnotherOne() {
         ALS domain = TestDataFactory.validALS(77L);
-        ALSEntity existing = ALSEntityMapper.toEntity(
+        ALSEntity existing = spy(ALSEntityMapper.toEntity(
                 TestDataFactory.validALS(77L),
                 module -> ModuleEntityMapper.toEntity(module, equipment -> null)
-        );
+        ));
+        doReturn(77L).when(existing).getId();
         List<com.lb_calc_web.entity.ModuleEntity> modules = existing.getModules().stream()
                 .map(com.lb_calc_web.entity.ALSModuleEntity::getModule)
                 .toList();
