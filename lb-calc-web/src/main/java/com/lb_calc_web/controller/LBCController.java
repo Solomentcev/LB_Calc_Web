@@ -128,7 +128,9 @@ public class LBCController extends BaseCatalogController {
         } catch (IllegalArgumentException | NoSuchElementException exception) {
             model.addAttribute("errors", List.of("Проверьте введённые параметры модуля."));
         }
-        prepareForm(model, lbc);
+        model.addAttribute("lbc", lbc);
+            model.addAttribute("equipmentList", equipmentCatalogService.findAll().stream()
+                    .map(EquipmentDtoMapper::toDto).toList());
         return "lbcs/lbc";
     }
 
@@ -173,11 +175,4 @@ public class LBCController extends BaseCatalogController {
         return dto;
     }
 
-    private void prepareForm(Model model, LBCDTO lbc) {
-        model.addAttribute("lbc", lbc);
-        var equipmentCatalog = equipmentCatalogService.findAll();
-        model.addAttribute("equipmentList", equipmentCatalog.stream()
-                .map(EquipmentDtoMapper::toDto).toList());
-
-    }
 }
