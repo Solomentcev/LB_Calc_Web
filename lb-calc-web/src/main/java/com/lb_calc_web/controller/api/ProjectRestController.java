@@ -11,12 +11,18 @@ import com.lb_calc_web.domain.model.ALS;
 import com.lb_calc_web.domain.model.LB;
 import com.lb_calc_web.domain.model.LC;
 import com.lb_calc_web.domain.model.LBC;
+import com.lb_calc_web.domain.model.ControlConfiguration;
+import com.lb_calc_web.domain.model.ControlModule;
 import com.lb_calc_web.mapper.dto.ProjectDtoMapper;
 import com.lb_calc_web.mapper.dto.ALSDtoMapper;
 import com.lb_calc_web.mapper.dto.LCDtoMapper;
 import com.lb_calc_web.mapper.dto.LBCDtoMapper;
 import com.lb_calc_web.mapper.dto.LBDtoMapper;
 import com.lb_calc_web.service.ALSService;
+import com.lb_calc_web.service.EquipmentCatalogService;
+import com.lb_calc_web.service.factory.TypeLbFactory;
+import com.lb_calc_web.service.validation.size.SizeBounds;
+import org.springframework.core.env.Environment;
 import com.lb_calc_web.service.export.ProjectExcelExportService;
 import com.lb_calc_web.service.ProjectService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -55,15 +61,93 @@ public class ProjectRestController {
     private final ProjectService projectService;
     private final ALSService alsService;
     private final ProjectExcelExportService projectExcelExportService;
+    private final EquipmentCatalogService equipmentCatalogService;
+    private final SizeBounds sizeBounds;
+    private final Environment environment;
 
     public ProjectRestController(
             ProjectService projectService,
             ALSService alsService,
-            ProjectExcelExportService projectExcelExportService
+            ProjectExcelExportService projectExcelExportService,
+            EquipmentCatalogService equipmentCatalogService,
+            SizeBounds sizeBounds,
+            Environment environment
     ) {
         this.projectService = projectService;
         this.alsService = alsService;
         this.projectExcelExportService = projectExcelExportService;
+        this.equipmentCatalogService = equipmentCatalogService;
+        this.sizeBounds = sizeBounds;
+        this.environment = environment;
+    }
+
+    /** Преобразует DTO ALS в доменную модель с учётом сохранённой конфигурации. */
+    private ALS toDomain(ALSDTO dto) {
+        ALS existing = dto.getId() != null && dto.getId() > 0
+                ? alsService.findById(dto.getId()) : null;
+        return toDomain(dto, existing);
+    }
+
+    /** Преобразует DTO ALS и сохраняет неизменённые доменные модули. */
+    private ALS toDomain(ALSDTO dto, ALS existing) {
+        ControlConfiguration fallback = null;
+        if (existing != null) {
+            ControlModule currentControl = existing.getControlModule();
+            if ((dto.getLC() != null && currentControl instanceof LC)
+                    || (dto.getLBC() != null && currentControl instanceof LBC)) {
+                fallback = currentControl.getControlConfiguration();
+                fallback.setFunctionalConfiguration(existing.getFunctionalConfiguration());
+            }
+        }
+        ALS restored = ALSDtoMapper.toDomain(
+                dto,
+                candidate -> TypeLbFactory.forLB(environment, candidate.getType()),
+                candidate -> TypeLbFactory.forLBC(environment, candidate.getType()),
+                equipmentCatalogService::findById,
+                fallback,
+                sizeBounds
+        );
+        boolean equipmentSelectionOmitted = dto.getLC() != null
+                ? !dto.getLC().isEquipmentProvided() && dto.getLC().getSelectedEquipment().isEmpty()
+                : !dto.getLBC().isEquipmentProvided() && dto.getLBC().getSelectedEquipment().isEmpty();
+        boolean functionalConfigurationChanged = fallback != null
+                && !restored.getFunctionalConfiguration().equals(
+                fallback.getFunctionalConfiguration());
+        if (equipmentSelectionOmitted || functionalConfigurationChanged) {
+            ControlConfiguration configuration = restored.getControlModule().getControlConfiguration();
+            equipmentCatalogService.configureFunctionalEquipment(configuration);
+            restored.setControlConfiguration(configuration);
+        }
+        return alsService.preserveExistingModules(existing, restored);
+    }
+
+    /** Преобразует DTO управляющего модуля LC с учётом прежней комплектации. */
+    private LC toDomain(LCDTO dto, ALS sourceALS) {
+        ControlConfiguration fallback = sourceALS.getControlModule() instanceof LC
+                ? sourceALS.getControlModule().getControlConfiguration() : null;
+        LC restored = LCDtoMapper.toDomain(dto, equipmentCatalogService::findById, fallback, sizeBounds);
+        equipmentCatalogService.configureFunctionalEquipment(restored.getControlConfiguration());
+        return restored;
+    }
+
+    /** Преобразует DTO управляющего модуля LBC с учётом прежней комплектации. */
+    private LBC toDomain(LBCDTO dto, ALS sourceALS) {
+        ControlConfiguration fallback = sourceALS.getControlModule() instanceof LBC
+                ? sourceALS.getControlModule().getControlConfiguration() : null;
+        LBC restored = LBCDtoMapper.toDomain(
+                dto,
+                TypeLbFactory.forLBC(environment, dto.getType()),
+                equipmentCatalogService::findById,
+                fallback,
+                sizeBounds
+        );
+        equipmentCatalogService.configureFunctionalEquipment(restored.getControlConfiguration());
+        return restored;
+    }
+
+    /** Преобразует DTO LB в доменную модель с конструктивными параметрами из конфигурации. */
+    private LB toDomain(LBDTO dto) {
+        return LBDtoMapper.toDomain(dto, TypeLbFactory.forLB(environment, dto.getType()));
     }
 
     /**
@@ -145,7 +229,7 @@ public class ProjectRestController {
 
             Project domain = ProjectDtoMapper.toDomain(
                     project,
-                    alsService::restoreDomain
+                    this::toDomain
             );
             Project saved = projectService.saveProject(domain);
 
@@ -264,7 +348,7 @@ public class ProjectRestController {
 
             projectService.findALSInProject(projectId, alsId);
             als.setId(alsId);
-            ALS replacement = alsService.restoreDomain(als);
+            ALS replacement = toDomain(als, projectService.findALSInProject(projectId, alsId));
             ALS saved = projectService.replaceALSandSaveProject(
                     projectId,
                     alsId,
@@ -349,7 +433,7 @@ public class ProjectRestController {
             projectService.findLCInProject(projectId, alsId, lcId);
             lc.setId(lcId);
             ALS sourceALS = projectService.findALSInProject(projectId, alsId);
-            LC replacement = alsService.restoreLC(lc, sourceALS);
+            LC replacement = toDomain(lc, sourceALS);
             ALS savedALS = projectService.saveLCAtProject(
                     projectId,
                     alsId,
@@ -439,7 +523,7 @@ public class ProjectRestController {
             projectService.findLBCInProject(projectId, alsId, lbcId);
             lbc.setId(lbcId);
             ALS sourceALS = projectService.findALSInProject(projectId, alsId);
-            LBC replacement = alsService.restoreLBC(lbc, sourceALS);
+            LBC replacement = toDomain(lbc, sourceALS);
             ALS savedALS = projectService.saveLBCAtProject(
                     projectId,
                     alsId,
@@ -514,7 +598,7 @@ public class ProjectRestController {
                 );
             }
 
-            LB replacement = alsService.restoreLB(lb);
+            LB replacement = toDomain(lb);
             ALS savedALS = projectService.saveLBAtProject(
                     projectId,
                     alsId,
