@@ -200,6 +200,25 @@ class ControlConfigurationTest {
     }
 
     @Test
+    void shouldRejectSeveralModelsForOneFunctionalRequirement() {
+        Equipment first = new Equipment(
+                51L, EquipmentFunctionalType.ACCESS, AccessPurpose.RFID,
+                EquipmentCategory.RFID_READER, "Считыватель 1", "", 0, 0, 0);
+        Equipment second = new Equipment(
+                52L, EquipmentFunctionalType.ACCESS, AccessPurpose.RFID,
+                EquipmentCategory.RFID_READER, "Считыватель 2", "", 0, 0, 0);
+        ControlConfiguration configuration = new ControlConfiguration(
+                functionalConfiguration(
+                        DisplayPurpose.NONE, Set.of(AccessPurpose.RFID),
+                        PaymentPurpose.NONE, PrinterPurpose.ABSENT
+                ),
+                Map.of(first, 1, second, 1)
+        );
+
+        assertThrows(IllegalStateException.class, configuration::validateEquipmentRequirements);
+    }
+
+    @Test
     void combinedPaymentEquipmentShouldSatisfyCardAndCashRequirements() {
         Equipment combinedPayment = new Equipment(
                 41L, EquipmentFunctionalType.PAYMENT, PaymentPurpose.CARDS_AND_CASH,
