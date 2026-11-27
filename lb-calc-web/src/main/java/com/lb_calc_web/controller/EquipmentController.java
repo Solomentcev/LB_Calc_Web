@@ -83,14 +83,20 @@ public class EquipmentController {
     /** Открывает форму создания модели оборудования. */
     @GetMapping("/create")
     public String createForm(Model model) {
-        prepareForm(model, new EquipmentDTO());
+        model.addAttribute("equipment", new EquipmentDTO());
+        model.addAttribute("functionalTypes", Arrays.asList(EquipmentFunctionalType.values()));
+        model.addAttribute("categories", Arrays.asList(EquipmentCategory.values()));
+        model.addAttribute("purposes", equipmentPurposes());
         return "equipment/equipment";
     }
 
     /** Открывает форму редактирования выбранной модели оборудования. */
     @GetMapping("/{id}")
     public String editForm(@PathVariable Long id, Model model) {
-        prepareForm(model, EquipmentDtoMapper.toDto(equipmentCatalogService.findById(id)));
+        model.addAttribute("equipment", EquipmentDtoMapper.toDto(equipmentCatalogService.findById(id)));
+        model.addAttribute("functionalTypes", Arrays.asList(EquipmentFunctionalType.values()));
+        model.addAttribute("categories", Arrays.asList(EquipmentCategory.values()));
+        model.addAttribute("purposes", equipmentPurposes());
         return "equipment/equipment";
     }
 
@@ -103,7 +109,10 @@ public class EquipmentController {
             RedirectAttributes redirectAttributes
     ) {
         if (bindingResult.hasErrors()) {
-            prepareForm(model, dto);
+            model.addAttribute("equipment", dto);
+            model.addAttribute("functionalTypes", Arrays.asList(EquipmentFunctionalType.values()));
+        model.addAttribute("categories", Arrays.asList(EquipmentCategory.values()));
+        model.addAttribute("purposes", equipmentPurposes());
             return "equipment/equipment";
         }
 
@@ -114,7 +123,10 @@ public class EquipmentController {
             return "redirect:/equipment/" + saved.getId();
         } catch (IllegalArgumentException exception) {
             model.addAttribute("errorMessage", exception.getMessage());
-            prepareForm(model, dto);
+            model.addAttribute("equipment", dto);
+            model.addAttribute("functionalTypes", Arrays.asList(EquipmentFunctionalType.values()));
+        model.addAttribute("categories", Arrays.asList(EquipmentCategory.values()));
+        model.addAttribute("purposes", equipmentPurposes());
             return "equipment/equipment";
         }
     }
@@ -134,17 +146,13 @@ public class EquipmentController {
         return "redirect:/equipment";
     }
 
-    private void prepareForm(Model model, EquipmentDTO dto) {
-        model.addAttribute("equipment", dto);
-        model.addAttribute("functionalTypes", Arrays.asList(EquipmentFunctionalType.values()));
-        model.addAttribute("categories", Arrays.asList(EquipmentCategory.values()));
-
+    private static List<String> equipmentPurposes() {
         List<String> purposes = new ArrayList<>();
         Arrays.stream(DisplayPurpose.values()).map(Enum::name).forEach(purposes::add);
         Arrays.stream(AccessPurpose.values()).map(Enum::name).forEach(purposes::add);
         Arrays.stream(PaymentPurpose.values()).map(Enum::name).forEach(purposes::add);
         Arrays.stream(PrinterPurpose.values()).map(Enum::name).forEach(purposes::add);
         Arrays.stream(SystemPurpose.values()).map(Enum::name).forEach(purposes::add);
-        model.addAttribute("purposes", purposes.stream().distinct().toList());
+        return purposes.stream().distinct().toList();
     }
 }
