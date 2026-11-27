@@ -296,17 +296,9 @@ toDto(alsService.createALS())
                 fallback,
                 sizeBounds
         );
-        boolean equipmentSelectionOmitted = dto.getLC() != null
-                ? !dto.getLC().isEquipmentProvided() && dto.getLC().getSelectedEquipment().isEmpty()
-                : !dto.getLBC().isEquipmentProvided() && dto.getLBC().getSelectedEquipment().isEmpty();
-        boolean functionalConfigurationChanged = fallback != null
-                && !restored.getFunctionalConfiguration().equals(
-                fallback.getFunctionalConfiguration());
-        if (equipmentSelectionOmitted || functionalConfigurationChanged) {
-            ControlConfiguration configuration = restored.getControlModule().getControlConfiguration();
-            equipmentCatalogService.configureFunctionalEquipment(configuration);
-            restored.setControlConfiguration(configuration);
-        }
+        ControlConfiguration configuration = restored.getControlModule().getControlConfiguration();
+        equipmentCatalogService.configureFunctionalEquipment(configuration);
+        restored.setControlConfiguration(configuration);
         return alsService.preserveExistingModules(existing, restored);
     }
 
@@ -321,13 +313,9 @@ toDto(alsService.createALS())
                 fallback,
                 sizeBounds
         );
-        boolean selectionOmitted = !dto.isEquipmentProvided() && dto.getSelectedEquipment().isEmpty();
-        boolean functionalChanged = fallback != null
-                && !restored.getControlConfiguration().getFunctionalConfiguration().equals(
-                fallback.getFunctionalConfiguration());
-        if (selectionOmitted || functionalChanged) {
-            equipmentCatalogService.configureFunctionalEquipment(restored.getControlConfiguration());
-        }
+        ControlConfiguration configuration = restored.getControlConfiguration();
+        equipmentCatalogService.configureFunctionalEquipment(configuration);
+        restored.setControlConfiguration(configuration);
         return restored;
     }
 
