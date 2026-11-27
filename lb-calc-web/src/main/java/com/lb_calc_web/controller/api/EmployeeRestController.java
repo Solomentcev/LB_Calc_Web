@@ -80,10 +80,11 @@ public class EmployeeRestController {
             CreateEmployeeDTO createEmployeeDTO
     ) {
 
-            EmployeeDTO employee =
-                    authService.createEmployee(
-                            createEmployeeDTO
-                    );
+            EmployeeDTO employee = EmployeeDtoMapper.toDto(authService.createEmployee(
+                    EmployeeDtoMapper.toDomain(createEmployeeDTO),
+                    createEmployeeDTO.getPassword(),
+                    createEmployeeDTO.getConfirmPassword()
+            ));
 
             return ResponseEntity
                     .status(HttpStatus.CREATED)
