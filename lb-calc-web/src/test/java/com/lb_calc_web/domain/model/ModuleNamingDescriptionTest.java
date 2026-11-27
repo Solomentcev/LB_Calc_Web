@@ -21,7 +21,7 @@ class ModuleNamingDescriptionTest {
         assertTrue(left.getName().startsWith("Модуль хранения: 3 яч."));
         assertTrue(left.getName().contains("TYPE1"));
         assertTrue(left.getName().contains("влево"));
-        assertTrue(left.getName().contains("1940×200×500 мм"));
+        assertTrue(left.getName().contains("1940×500×500 мм"));
         assertTrue(left.getName().contains("синий/белый"));
         assertTrue(left.getName().contains("синий/белый"));
 
@@ -37,7 +37,7 @@ class ModuleNamingDescriptionTest {
 
         assertTrue(lc.getName().startsWith("Модуль управления: дисплей 10″"));
         assertTrue(lc.getName().contains("RFID"));
-        assertTrue(lc.getName().contains("1940×500×500 мм"));
+        assertTrue(lc.getName().contains("1940×200×500 мм"));
         assertTrue(lc.getDescription().contains("Функциональные назначения:"));
         assertTrue(lc.getDescription().contains("RFID"));
         assertTrue(lc.getDescription().contains("Установленное оборудование:"));
