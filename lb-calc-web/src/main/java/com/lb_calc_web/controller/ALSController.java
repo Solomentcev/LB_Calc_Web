@@ -72,7 +72,6 @@ public class ALSController extends BaseCatalogController {
                 als.setLC(persisted.getLC());
                 als.setLBC(persisted.getLBC());
             }
-            ALSFormSupport.synchronizeFunctionalConfiguration(als, equipmentCatalogService);
             als = toDtoWithImages(alsService.restoreDomain(als));
         } catch (ValidationSizeException exception) {
             model.addAttribute("ALSErrors",
@@ -273,7 +272,6 @@ public class ALSController extends BaseCatalogController {
             }
             lc.setId(lcId);
 
-            ALSFormSupport.configure(lc, equipmentCatalogService);
             com.lb_calc_web.domain.model.LC replacement = alsService.restoreLC(lc, als);
             com.lb_calc_web.domain.model.ALS saved =
                     alsService.saveALS(alsService.replaceLC(als, replacement));
@@ -350,7 +348,6 @@ public class ALSController extends BaseCatalogController {
             com.lb_calc_web.domain.model.ALS als = alsService.findById(alsId);
             lbc.setId(lbcId);
 
-            ALSFormSupport.configure(lbc, equipmentCatalogService);
             com.lb_calc_web.domain.model.LBC replacement = alsService.restoreLBC(lbc, als);
             com.lb_calc_web.domain.model.ALS saved =
                     alsService.saveALS(alsService.replaceLBC(als, replacement));
