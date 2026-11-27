@@ -245,7 +245,7 @@ toDto(alsService.createALS())
                     fallback,
                     sizeBounds
             );
-            ALS saved = alsService.replaceLBCandSaveALS(als, replacement);
+            ALS saved = alsService.replaceLBCandSaveALS(als, replacement, lbc.isEquipmentProvided());
             com.lb_calc_web.domain.model.LBC savedLBC =
                     (com.lb_calc_web.domain.model.LBC) saved.getControlModule();
             return ResponseEntity.ok(
