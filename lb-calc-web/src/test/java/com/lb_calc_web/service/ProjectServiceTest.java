@@ -152,7 +152,7 @@ environment = new MockEnvironment()
                         1L,
                         10L,
                         100L,
-                        LBDtoMapper.toDomain(TestDataFactory.validLBDTO(100L))
+                        TestDataFactory.validLB(100L)
                 )
         );
 
