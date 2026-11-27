@@ -52,7 +52,7 @@ public class LBRestController {
             summary = "Получить все LB",
             description = "Возвращает список всех модулей хранения LB"
     )
-    public ResponseEntity<?> getAllLB() {
+    public ResponseEntity<ApiResponse<List<LBDTO>>> getAllLB() {
 
         logger.debug("GET /api/v1/lbs");
 
@@ -72,7 +72,7 @@ public class LBRestController {
             summary = "Получить LB по ID",
             description = "Возвращает модуль хранения LB по идентификатору"
     )
-    public ResponseEntity<?> getLBById(
+    public ResponseEntity<ApiResponse<LBDTO>> getLBById(
             @Parameter(
                     description = "Идентификатор LB",
                     example = "1"
@@ -99,7 +99,7 @@ public class LBRestController {
             summary = "Создать шаблон LB",
             description = "Возвращает LB с параметрами по умолчанию без сохранения в БД"
     )
-    public ResponseEntity<?> createLB() {
+    public ResponseEntity<ApiResponse<LBDTO>> createLB() {
 
         logger.debug("GET /api/v1/lbs/create");
 
@@ -119,7 +119,7 @@ public class LBRestController {
             summary = "Сохранить LB",
             description = "Проверяет и сохраняет модуль хранения LB"
     )
-    public ResponseEntity<?> saveLB(
+    public ResponseEntity<ApiResponse<LBDTO>> saveLB(
             @RequestBody @Valid LBDTO dto
     ) {
 
