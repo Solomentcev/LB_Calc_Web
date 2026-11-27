@@ -60,7 +60,13 @@ public class LBCRestController {
                 fallback,
                 sizeBounds
         );
-        lbcService.configureFunctionalEquipment(restored);
+        boolean selectionOmitted = !dto.isEquipmentProvided() && dto.getSelectedEquipment().isEmpty();
+        boolean functionalChanged = fallback != null
+                && !restored.getControlConfiguration().getFunctionalConfiguration().equals(
+                fallback.getFunctionalConfiguration());
+        if (selectionOmitted || functionalChanged) {
+            lbcService.configureFunctionalEquipment(restored);
+        }
         return restored;
     }
 
