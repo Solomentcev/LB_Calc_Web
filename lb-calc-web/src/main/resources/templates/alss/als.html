@@ -159,6 +159,8 @@
                     </div>
                 </section>
 
+                <div th:replace="~{fragments/module-form :: functionalConfiguration}"></div>
+
                 <section class="module-section module-section--als-preview">
                     <div class="module-section__header">
                         <h2>Визуализация АКХ</h2>
@@ -173,8 +175,6 @@
                         Чертёж пока недоступен.
                     </div>
                 </section>
-
-                <div th:replace="~{fragments/module-form :: functionalConfiguration}"></div>
 
                 <section th:if="${als.LC != null}" class="module-section">
                     <div class="module-section__header">
