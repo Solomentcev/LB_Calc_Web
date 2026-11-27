@@ -69,7 +69,7 @@ public class ALSRestController {
             summary = "Получить список ALS"
     )
     /** Возвращает список конфигураций ALS. */
-    public ResponseEntity<?> getAllALS() {
+    public ResponseEntity<ApiResponse<List<ALSDTO>>> getAllALS() {
 
         List<ALSDTO> alsList =
                 alsService.findAll().stream().map(this::toDto).toList();
@@ -87,7 +87,7 @@ public class ALSRestController {
             summary = "Получить ALS по ID"
     )
     /** Возвращает конфигурацию ALS по идентификатору. */
-    public ResponseEntity<?> getALSById(
+    public ResponseEntity<ApiResponse<ALSDTO>> getALSById(
             @PathVariable @Positive Long id
     ) {
 
@@ -104,7 +104,7 @@ public class ALSRestController {
             summary = "Получить шаблон ALS"
     )
     /** Создаёт конфигурацию ALS из переданных данных. */
-    public ResponseEntity<?> createALS() {
+    public ResponseEntity<ApiResponse<ALSDTO>> createALS() {
 
         return ResponseEntity.ok(
                 ApiResponse.success(
@@ -151,7 +151,7 @@ toDto(alsService.createALS())
             summary = "Обновить ALS"
     )
     /** Обновляет сохранённую конфигурацию ALS. */
-    public ResponseEntity<?> updateALS(
+    public ResponseEntity<ApiResponse<ALSDTO>> updateALS(
             @PathVariable @Positive Long id,
             @RequestBody @Valid ALSDTO dto
     ) {
@@ -181,7 +181,7 @@ toDto(alsService.createALS())
             summary = "Удалить ALS"
     )
     /** Удаляет конфигурацию ALS по идентификатору. */
-    public ResponseEntity<?> deleteALS(
+    public ResponseEntity<ApiResponse<Void>> deleteALS(
             @PathVariable @Positive Long id
     ) {
 
@@ -200,7 +200,7 @@ toDto(alsService.createALS())
      */
     @GetMapping("/{alsId}/lbc/{lbcId}")
     @Operation(summary = "Получить LBC ALS")
-    public ResponseEntity<?> getLBC(
+    public ResponseEntity<ApiResponse<LBCDTO>> getLBC(
             @PathVariable @Positive Long alsId,
             @PathVariable @Positive Long lbcId
     ) {
@@ -219,7 +219,7 @@ toDto(alsService.createALS())
      */
     @PutMapping("/{alsId}/lbc/{lbcId}")
     @Operation(summary = "Обновить LBC ALS")
-    public ResponseEntity<?> updateLBC(
+    public ResponseEntity<ApiResponse<LBCDTO>> updateLBC(
             @PathVariable @Positive Long alsId,
             @PathVariable @Positive Long lbcId,
             @RequestBody @Valid LBCDTO lbc
@@ -256,7 +256,7 @@ toDto(alsService.createALS())
      */
     @PostMapping("/{alsId}/replace-lbc")
     @Operation(summary = "Заменить управляющий модуль ALS на новый LBC")
-    public ResponseEntity<?> replaceWithNewLBC(
+    public ResponseEntity<ApiResponse<ALSDTO>> replaceWithNewLBC(
             @PathVariable @Positive Long alsId
     ) {
 
@@ -270,7 +270,7 @@ toDto(alsService.createALS())
      */
     @PostMapping("/{alsId}/lb")
     @Operation(summary = "Добавить LB в ALS")
-    public ResponseEntity<?> addLB(
+    public ResponseEntity<ApiResponse<ALSDTO>> addLB(
             @PathVariable @Positive Long alsId
     ) {
 
@@ -285,7 +285,7 @@ toDto(alsService.createALS())
      */
     @DeleteMapping("/{alsId}/lb/{lbId}")
     @Operation(summary = "Удалить LB из ALS")
-    public ResponseEntity<?> deleteLB(
+    public ResponseEntity<ApiResponse<ALSDTO>> deleteLB(
             @PathVariable @Positive Long alsId,
             @PathVariable @Positive Long lbId
     ) {
