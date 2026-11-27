@@ -10,7 +10,6 @@ import java.awt.geom.AffineTransform;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.util.Base64;
 
@@ -147,25 +146,6 @@ public final class LCImageService {
     }
 
     /** Создаёт PNG-файл изображения управляющего модуля LC. */
-    public static File getFileLCImage(LC lc) {
-        BufferedImage image = (BufferedImage) createLCImage(lc);
-        File file = new File(
-                "src/main/resources/static/lcs/lc" + lc.getId() + ".png"
-        );
-
-        try {
-            file.createNewFile();
-            ImageIO.write(image, "png", file);
-        } catch (IOException exception) {
-            throw new RuntimeException(
-                    "Не удалось создать файл изображения LC",
-                    exception
-            );
-        }
-        return file;
-    }
-
-    /** Возвращает PNG-изображение LC в виде массива байтов. */
     public static byte[] getBytesArrayLCImage(LC lc) {
         BufferedImage image = (BufferedImage) createLCImage(lc);
         ByteArrayOutputStream output = new ByteArrayOutputStream();
