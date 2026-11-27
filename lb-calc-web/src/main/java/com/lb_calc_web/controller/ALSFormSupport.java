@@ -55,7 +55,7 @@ final class ALSFormSupport {
     }
 
     static void configure(LBCDTO dto, EquipmentCatalogService service) {
-        configure(dto.getEquipment(), dto.isEquipmentProvided(), dto::setEquipment,
+        configure(dto.getEquipment(), dto::setEquipment,
                 dto::setEquipmentProvided, dto::setFunctionalConfiguration,
                 dto.getFunctionalConfiguration(), service);
     }
