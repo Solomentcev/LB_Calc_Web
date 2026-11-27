@@ -91,11 +91,9 @@ public class LCController extends BaseCatalogController {
     public String refreshLC(@ModelAttribute("lc") LCDTO lc, Model model) {
         model.addAttribute("pageContext", "CATALOG");
         try {
-            ControlConfiguration fallback = lc.getId() != null && lc.getId() > 0
-                    ? lcService.findById(lc.getId()).getControlConfiguration() : null;
             LC domain = LCDtoMapper.toDomain(
-                    lc, equipmentCatalogService::findById, fallback, sizeBounds);
-            lcService.prepareFunctionalEquipment(domain, fallback, lc.isEquipmentProvided());
+                    lc, equipmentCatalogService::findById, sizeBounds);
+            lcService.prepareFunctionalEquipment(domain, lc.isEquipmentProvided());
             lcService.validateForSave(domain);
             lc = toDtoWithImage(domain);
         } catch (ValidationSizeException exception) {
