@@ -259,8 +259,7 @@ public class LBCDTO {
                 && Objects.equals(type, other.type)
                 && Objects.equals(directionDoorOpening, other.directionDoorOpening)
                 && Objects.equals(colorDoor, other.colorDoor) && Objects.equals(colorBody, other.colorBody)
-                && Objects.equals(functionalConfiguration, other.functionalConfiguration)
-                ;
+                && Objects.equals(functionalConfiguration, other.functionalConfiguration);
     }
 
     @Override
