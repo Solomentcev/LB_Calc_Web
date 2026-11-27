@@ -9,7 +9,6 @@ import com.lb_calc_web.domain.model.ControlConfiguration;
 import com.lb_calc_web.domain.equipment.Equipment;
 import com.lb_calc_web.domain.equipment.EquipmentFunctionalType;
 import com.lb_calc_web.domain.equipment.EquipmentPurpose;
-import com.lb_calc_web.domain.model.FunctionalConfigurationResolver;
 import com.lb_calc_web.dto.EquipmentDTO;
 import com.lb_calc_web.dto.EquipmentSelectionDTO;
 import com.lb_calc_web.dto.FunctionalConfigurationDTO;
@@ -58,8 +57,6 @@ public class LCService {
     private final SizeBounds sizeBounds;
     private final EquipmentRepository equipmentRepository;
     private final EquipmentCatalogService equipmentCatalogService;
-    private final FunctionalConfigurationResolver functionalConfigurationResolver =
-            new FunctionalConfigurationResolver();
 
     public LCService(
             LCRepository lcRepository,
@@ -234,6 +231,10 @@ public class LCService {
     ) {
         ControlConfiguration controlConfiguration =
                 new ControlConfiguration(toFunctionalConfiguration(configuration), Map.of());
+        FunctionalConfiguration normalized = controlConfiguration.getFunctionalConfiguration();
+        if (configuration != null) {
+            configuration.setDisplay(normalized.getDisplay());
+        }
         Map<EquipmentFunctionalType, java.util.Set<EquipmentPurpose>> requirements =
                 controlConfiguration.getRequiredEquipment();
 
@@ -280,7 +281,7 @@ public class LCService {
         for (EquipmentKey key : required) {
             List<EquipmentDTO> models = catalog.stream()
                     .filter(item -> item.getFunctionalType() == key.functionalType())
-                    .filter(item -> functionalConfigurationResolver.supportsRequirement(item, key.purpose()))
+                    .filter(item -> item.getPurpose().equals(key.purpose()))
                     .map(EquipmentDtoMapper::toDto)
                     .toList();
             EquipmentSelectionDTO old = previous.get(key);
