@@ -211,11 +211,13 @@
                             <div class="col-md-9">
                                 <span class="text-muted small">Физическое оборудование</span>
                                 <ul class="list-unstyled mb-0">
-                                    <li th:each="selection : ${als.LC.equipmentSelections}"
-                                        th:text="|${selection.equipmentId == null
-                                                ? 'Модель не выбрана'
-                                                : 'Модель ID: ' + selection.equipmentId}, количество: ${selection.quantity}|">
-                                        Оборудование
+                                    <li th:each="selection : ${als.LC.equipmentSelections}">
+                                        <span th:each="equipment : ${selection.availableModels}"
+                                              th:if="${equipment.id == selection.equipmentId}"
+                                              th:text="|${equipment.name} — ${selection.quantity} шт.|">Оборудование</span>
+                                        <span th:if="${selection.equipmentId == null}">Модель не выбрана</span>
+                                        <span th:if="${selection.equipmentId != null and #lists.isEmpty(selection.availableModels)}"
+                                              th:text="|${selection.quantity} шт. — модель отсутствует в каталоге|">Модель недоступна</span>
                                     </li>
                                     <li th:if="${#lists.isEmpty(als.LC.equipmentSelections)}"
                                         class="text-muted">Отдельное оборудование не требуется</li>
@@ -271,8 +273,11 @@
 
                         <div class="row module-summary">
                             <div class="col-md-3"><span class="text-muted small">ID</span><strong th:text="${als.LBC.id}"></strong></div>
-                            <div class="col-md-3"><span class="text-muted small">Тип</span><strong th:text="${als.LBC.type}"></strong></div>
-                            <div class="col-md-3"><span class="text-muted small">Ячеек</span><strong th:text="${als.LBC.countCells}"></strong></div>
+                            <div class="col-md-3"><span class="text-muted small">Габариты модуля</span><strong th:text="|${als.LBC.height} × ${als.LBC.width} × ${als.LBC.depth} мм|"></strong></div>
+                            <div class="col-md-3"><span class="text-muted small">Количество ячеек</span><strong th:text="${als.LBC.countCells}"></strong></div>
+                            <div class="col-md-3"><span class="text-muted small">Размер ячейки (В × Ш × Г)</span><strong th:text="|${als.LBC.heightCell} × ${als.LBC.widthCell} × ${als.LBC.depthCell} мм|"></strong></div>
+                            <div class="col-md-3"><span class="text-muted small">Толщина дверцы</span><strong th:text="|${als.LBC.doorThickness} мм|"></strong></div>
+                            <div class="col-md-3"><span class="text-muted small">Толщина полки</span><strong th:text="|${als.LBC.shelfThick} мм|"></strong></div>
                             <div class="col-md-3"><span class="text-muted small">Дисплей</span><strong th:text="${als.LBC.functionalConfiguration.display}"></strong></div>
                             <div class="col-md-3"><span class="text-muted small">Доступ</span><strong th:text="${als.LBC.functionalConfiguration.access}"></strong></div>
                             <div class="col-md-3"><span class="text-muted small">Оплата</span><strong th:text="${als.LBC.functionalConfiguration.payment}"></strong></div>
@@ -280,11 +285,13 @@
                             <div class="col-md-6">
                                 <span class="text-muted small">Физическое оборудование</span>
                                 <ul class="list-unstyled mb-0">
-                                    <li th:each="selection : ${als.LBC.equipmentSelections}"
-                                        th:text="|${selection.equipmentId == null
-                                                ? 'Модель не выбрана'
-                                                : 'Модель ID: ' + selection.equipmentId}, количество: ${selection.quantity}|">
-                                        Оборудование
+                                    <li th:each="selection : ${als.LBC.equipmentSelections}">
+                                        <span th:each="equipment : ${selection.availableModels}"
+                                              th:if="${equipment.id == selection.equipmentId}"
+                                              th:text="|${equipment.name} — ${selection.quantity} шт.|">Оборудование</span>
+                                        <span th:if="${selection.equipmentId == null}">Модель не выбрана</span>
+                                        <span th:if="${selection.equipmentId != null and #lists.isEmpty(selection.availableModels)}"
+                                              th:text="|${selection.quantity} шт. — модель отсутствует в каталоге|">Модель недоступна</span>
                                     </li>
                                     <li th:if="${#lists.isEmpty(als.LBC.equipmentSelections)}"
                                         class="text-muted">Отдельное оборудование не требуется</li>
@@ -346,10 +353,12 @@
                             </div>
 
                             <div class="row module-summary">
-                                <div class="col-sm-3"><span class="text-muted small">Высота</span><strong th:text="|${lb.height} мм|"></strong></div>
-                                <div class="col-sm-3"><span class="text-muted small">Ширина</span><strong th:text="|${lb.width} мм|"></strong></div>
-                                <div class="col-sm-3"><span class="text-muted small">Глубина</span><strong th:text="|${lb.depth} мм|"></strong></div>
-                                <div class="col-sm-3"><span class="text-muted small">Ячеек</span><strong th:text="${lb.countCells}"></strong></div>
+                                <div class="col-sm-3"><span class="text-muted small">Габариты модуля</span><strong th:text="|${lb.height} × ${lb.width} × ${lb.depth} мм|"></strong></div>
+                                <div class="col-sm-3"><span class="text-muted small">Количество ячеек</span><strong th:text="${lb.countCells}"></strong></div>
+                                <div class="col-sm-3"><span class="text-muted small">Размер ячейки (В × Ш × Г)</span><strong th:text="|${lb.heightCell} × ${lb.widthCell} × ${lb.depthCell} мм|"></strong></div>
+                                <div class="col-sm-3"><span class="text-muted small">Толщина дверцы</span><strong th:text="|${lb.doorThickness} мм|"></strong></div>
+                                <div class="col-sm-3"><span class="text-muted small">Толщина полки</span><strong th:text="|${lb.shelfThick} мм|"></strong></div>
+                                <div class="col-sm-3"><span class="text-muted small">Конструктивный тип</span><strong th:text="${lb.type}"></strong></div>
                             </div>
 
                             <div class="module-visual module-visual--module" th:if="${lb.stringLBImage != null}">
