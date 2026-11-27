@@ -221,6 +221,31 @@ class LCServiceTest {
         assertThrows(java.util.NoSuchElementException.class, () -> service.findById(25L));
     }
 
+    @Test
+    void configureFunctionalEquipment_shouldApplySelectionToModuleAndRecalculateWidth() {
+        LC domain = TestDataFactory.validLC(null);
+        ControlConfiguration configuration = domain.getControlConfiguration();
+        var functional = configuration.getFunctionalConfiguration();
+        configuration.setFunctionalConfiguration(new com.lb_calc_web.domain.model.FunctionalConfiguration(
+                DisplayPurpose.INCH_17, functional.getAccess(), functional.getPayment(), functional.getPrinter()));
+        domain.setControlConfiguration(configuration);
+
+        Equipment display = new Equipment(
+                799L, EquipmentFunctionalType.DISPLAY, DisplayPurpose.INCH_17,
+                EquipmentCategory.DISPLAY, "Дисплей 17", "", 400, 250, 30);
+        doAnswer(invocation -> {
+            ControlConfiguration selected = invocation.getArgument(0);
+            selected.setEquipment(Map.of(display, 1));
+            return null;
+        }).when(equipmentCatalogService).configureFunctionalEquipment(any(ControlConfiguration.class));
+
+        service.configureFunctionalEquipment(domain);
+
+        assertEquals(Map.of(display, 1), domain.getEquipment());
+        assertEquals(450, domain.getWidth(),
+                "Ширина LC должна пересчитываться по новой физической модели дисплея");
+    }
+
     private List<Equipment> configureValidEquipment(LC domain) {
         Equipment display = new Equipment(
                 7101L, EquipmentFunctionalType.DISPLAY, DisplayPurpose.INCH_10,
