@@ -4,10 +4,13 @@ import com.lb_calc_web.domain.equipment.AccessPurpose;
 import com.lb_calc_web.domain.equipment.DisplayPurpose;
 import com.lb_calc_web.domain.equipment.Equipment;
 import com.lb_calc_web.domain.equipment.EquipmentFunctionalType;
+import com.lb_calc_web.domain.equipment.EquipmentPurpose;
 import com.lb_calc_web.domain.equipment.PaymentPurpose;
 import com.lb_calc_web.domain.equipment.PrinterPurpose;
 
 import java.util.EnumSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -51,6 +54,71 @@ public final class FunctionalConfigurationResolver {
                 paymentChanged ? resolvePayment(updatedEquipment) : current.getPayment(),
                 printerChanged ? resolvePrinter(updatedEquipment) : current.getPrinter()
         );
+    }
+
+    /**
+     * Нормализует функциональные назначения с учётом зависимостей между ними.
+     * PIN использует дисплей и при отсутствии выбранного дисплея требует модель 10 дюймов.
+     */
+    public FunctionalConfiguration normalize(FunctionalConfiguration configuration) {
+        Objects.requireNonNull(configuration, "Функциональная конфигурация не должна быть null");
+        if (configuration.getAccess().contains(AccessPurpose.PIN)
+                && configuration.getDisplay() == DisplayPurpose.NONE) {
+            return new FunctionalConfiguration(
+                    DisplayPurpose.INCH_10,
+                    configuration.getAccess(),
+                    configuration.getPayment(),
+                    configuration.getPrinter()
+            );
+        }
+        return configuration;
+    }
+
+    /**
+     * Выполняет обратное преобразование функциональных назначений в требования
+     * к физическому оборудованию. Конкретные модели выбираются из каталога сервисным слоем.
+     *
+     * @param configuration функциональные назначения управляющего модуля
+     * @return требования, сгруппированные по функциональному типу оборудования
+     */
+    public Map<EquipmentFunctionalType, Set<EquipmentPurpose>> resolveRequiredEquipment(
+            FunctionalConfiguration configuration
+    ) {
+        FunctionalConfiguration normalized = normalize(configuration);
+        Map<EquipmentFunctionalType, Set<EquipmentPurpose>> requirements = new LinkedHashMap<>();
+
+        if (normalized.getDisplay() != DisplayPurpose.NONE) {
+            addRequirement(requirements, EquipmentFunctionalType.DISPLAY, normalized.getDisplay());
+        }
+        normalized.getAccess().stream()
+                .filter(purpose -> purpose != AccessPurpose.PIN)
+                .sorted()
+                .forEach(purpose -> addRequirement(
+                        requirements, EquipmentFunctionalType.ACCESS, purpose));
+
+        PaymentPurpose payment = normalized.getPayment();
+        if (payment == PaymentPurpose.CARDS || payment == PaymentPurpose.CARDS_AND_CASH) {
+            addRequirement(requirements, EquipmentFunctionalType.PAYMENT, PaymentPurpose.CARDS);
+        }
+        if (payment == PaymentPurpose.CASH || payment == PaymentPurpose.CARDS_AND_CASH) {
+            addRequirement(requirements, EquipmentFunctionalType.PAYMENT, PaymentPurpose.CASH);
+        }
+        if (normalized.getPrinter() != PrinterPurpose.ABSENT) {
+            addRequirement(requirements, EquipmentFunctionalType.PRINTER, normalized.getPrinter());
+        }
+
+        Map<EquipmentFunctionalType, Set<EquipmentPurpose>> result = new LinkedHashMap<>();
+        requirements.forEach((type, purposes) -> result.put(type, Set.copyOf(purposes)));
+        return Map.copyOf(result);
+    }
+
+    /** Добавляет требование к физическому оборудованию. */
+    private void addRequirement(
+            Map<EquipmentFunctionalType, Set<EquipmentPurpose>> requirements,
+            EquipmentFunctionalType type,
+            EquipmentPurpose purpose
+    ) {
+        requirements.computeIfAbsent(type, ignored -> new LinkedHashSet<>()).add(purpose);
     }
 
     /** Проверяет, изменился ли состав оборудования заданной функциональной области. */
