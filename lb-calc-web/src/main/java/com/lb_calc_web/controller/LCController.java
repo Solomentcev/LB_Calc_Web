@@ -3,7 +3,6 @@ package com.lb_calc_web.controller;
 import com.lb_calc_web.mapper.dto.EquipmentDtoMapper;
 import com.lb_calc_web.service.EquipmentCatalogService;
 import com.lb_calc_web.domain.model.LC;
-import com.lb_calc_web.domain.model.ControlConfiguration;
 import com.lb_calc_web.dto.LCDTO;
 import com.lb_calc_web.mapper.dto.LCDtoMapper;
 import com.lb_calc_web.service.validation.ValidationSizeException;
