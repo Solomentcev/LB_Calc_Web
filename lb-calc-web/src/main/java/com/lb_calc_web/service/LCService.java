@@ -192,12 +192,24 @@ public class LCService {
         return toDomain(entity);
     }
 
-    /** Дополняет комплектацию LC физическими моделями по функциональным назначениям. */
-    public void configureFunctionalEquipment(LC domain) {
+    /** Подбирает оборудование, если выбор не передан или изменились функциональные назначения. */
+    public void prepareFunctionalEquipment(
+            LC domain, ControlConfiguration fallback, boolean equipmentSelectionProvided
+    ) {
         Objects.requireNonNull(domain, "LC не должен быть null");
-        ControlConfiguration configuration = domain.getControlConfiguration();
-        equipmentCatalogService.configureFunctionalEquipment(configuration);
-        domain.setControlConfiguration(configuration);
+        boolean functionalChanged = fallback != null
+                && !domain.getControlConfiguration().getFunctionalConfiguration()
+                .equals(fallback.getFunctionalConfiguration());
+        if (!equipmentSelectionProvided || functionalChanged) {
+            ControlConfiguration configuration = domain.getControlConfiguration();
+            equipmentCatalogService.configureFunctionalEquipment(configuration);
+            domain.setControlConfiguration(configuration);
+        }
+    }
+
+    /** Принудительно дополняет комплектацию LC по функциональным назначениям. */
+    public void configureFunctionalEquipment(LC domain) {
+        prepareFunctionalEquipment(domain, null, false);
     }
 
     /** Проверяет и сохраняет доменную конфигурацию LC. */
