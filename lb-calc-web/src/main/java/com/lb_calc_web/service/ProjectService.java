@@ -418,8 +418,7 @@ return projectRepository.findAllWithUsers()
          * ID определяется URL, а не телом запроса.
          * Это исключает подмену идентификатора ALS клиентом.
          */
-        replacement.setId(alsId);
-        domain.replaceALS(oldConfiguration, replacement);
+        replaceProjectConfiguration(domain, oldConfiguration, replacement);
 
         Project savedProject = saveDomainProject(domain);
         return findDomainALS(savedProject, replacement);
@@ -451,7 +450,7 @@ return projectRepository.findAllWithUsers()
 
         replacement.setId(lcId);
         ALS updated = alsService.replaceLC(original.copy(), replacement);
-        domain.replaceALS(original, updated);
+        replaceProjectConfiguration(domain, original, updated);
 
         Project savedProject = saveDomainProject(domain);
         return findDomainALS(savedProject, updated);
@@ -483,7 +482,7 @@ return projectRepository.findAllWithUsers()
 
         replacement.setId(lbcId);
         ALS updated = alsService.replaceLBC(original.copy(), replacement);
-        domain.replaceALS(original, updated);
+        replaceProjectConfiguration(domain, original, updated);
 
         Project savedProject = saveDomainProject(domain);
         return findDomainALS(savedProject, updated);
@@ -500,7 +499,7 @@ return projectRepository.findAllWithUsers()
         Project domain = findDomainProject(projectId);
         ALS original = findDomainALS(domain, alsId);
         ALS updated = alsService.replaceWithNewLBC(original.copy());
-        domain.replaceALS(original, updated);
+        replaceProjectConfiguration(domain, original, updated);
 
         Project savedProject = saveDomainProject(domain);
         return findDomainALS(savedProject, updated);
@@ -514,7 +513,7 @@ return projectRepository.findAllWithUsers()
         Project domain = findDomainProject(projectId);
         ALS original = findDomainALS(domain, alsId);
         ALS updated = alsService.replaceWithNewLC(original.copy());
-        domain.replaceALS(original, updated);
+        replaceProjectConfiguration(domain, original, updated);
 
         Project savedProject = saveDomainProject(domain);
         return findDomainALS(savedProject, updated);
@@ -531,7 +530,7 @@ return projectRepository.findAllWithUsers()
         Project domain = findDomainProject(projectId);
         ALS original = findDomainALS(domain, alsId);
         ALS updated = alsService.addNewLB(original.copy());
-        domain.replaceALS(original, updated);
+        replaceProjectConfiguration(domain, original, updated);
 
         Project savedProject = saveDomainProject(domain);
         return findDomainALS(savedProject, updated);
@@ -569,7 +568,7 @@ return projectRepository.findAllWithUsers()
 
         replacement.setId(lbId);
         ALS updated = alsService.replaceLB(original.copy(), lbId, replacement);
-        domain.replaceALS(original, updated);
+        replaceProjectConfiguration(domain, original, updated);
 
         Project savedProject = saveDomainProject(domain);
         ALS savedALS = findDomainALS(savedProject, updated);
@@ -603,12 +602,22 @@ return projectRepository.findAllWithUsers()
         Project domain = findDomainProject(projectId);
         ALS original = findDomainALS(domain, alsId);
         ALS updated = alsService.deleteLB(original.copy(), lbId);
-        domain.replaceALS(original, updated);
+        replaceProjectConfiguration(domain, original, updated);
 
         Project savedProject = saveDomainProject(domain);
         return findDomainALS(savedProject, updated);
     }
 
+
+    /**
+     * Заменяет конфигурацию ALS в проекте, создавая новую глобальную конфигурацию.
+     * Существующая ALS может использоваться другими проектами, поэтому её запись
+     * нельзя изменять при редактировании состава только одного проекта.
+     */
+    private void replaceProjectConfiguration(Project project, ALS current, ALS replacement) {
+        replacement.setId(null);
+        project.replaceALS(current, replacement);
+    }
 
     /**
      * Проверяет доменный проект после полного восстановления его конфигураций,
