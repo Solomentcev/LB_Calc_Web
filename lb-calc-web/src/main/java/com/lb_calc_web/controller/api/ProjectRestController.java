@@ -163,17 +163,11 @@ public class ProjectRestController {
                     dto -> {
                         ALS existing = dto.getId() != null && dto.getId() > 0
                                 ? alsService.findById(dto.getId()) : null;
-                        ControlConfiguration fallback = existing == null ? null
-                                : existing.getControlModule().getControlConfiguration();
-                        if (fallback != null) {
-                            fallback.setFunctionalConfiguration(existing.getFunctionalConfiguration());
-                        }
                         ALS restored = ALSDtoMapper.toDomain(
                                 dto,
                                 candidate -> TypeLbFactory.forLB(environment, candidate.getType()),
                                 candidate -> TypeLbFactory.forLBC(environment, candidate.getType()),
                                 equipmentCatalogService::findById,
-                                fallback,
                                 sizeBounds
                         );
                         return alsService.prepareConfiguration(existing, restored, dto.isEquipmentSelectionProvided());
@@ -209,17 +203,11 @@ public class ProjectRestController {
                     dto -> {
                         ALS existing = dto.getId() != null && dto.getId() > 0
                                 ? alsService.findById(dto.getId()) : null;
-                        ControlConfiguration fallback = existing == null ? null
-                                : existing.getControlModule().getControlConfiguration();
-                        if (fallback != null) {
-                            fallback.setFunctionalConfiguration(existing.getFunctionalConfiguration());
-                        }
                         ALS restored = ALSDtoMapper.toDomain(
                                 dto,
                                 candidate -> TypeLbFactory.forLB(environment, candidate.getType()),
                                 candidate -> TypeLbFactory.forLBC(environment, candidate.getType()),
                                 equipmentCatalogService::findById,
-                                fallback,
                                 sizeBounds
                         );
                         return alsService.prepareConfiguration(existing, restored, dto.isEquipmentSelectionProvided());
@@ -314,14 +302,11 @@ public class ProjectRestController {
             projectService.findALSInProject(projectId, alsId);
             als.setId(alsId);
             ALS existing = projectService.findALSInProject(projectId, alsId);
-            ControlConfiguration fallback = existing.getControlModule().getControlConfiguration();
-            fallback.setFunctionalConfiguration(existing.getFunctionalConfiguration());
             ALS restored = ALSDtoMapper.toDomain(
                     als,
                     candidate -> TypeLbFactory.forLB(environment, candidate.getType()),
                     candidate -> TypeLbFactory.forLBC(environment, candidate.getType()),
                     equipmentCatalogService::findById,
-                    fallback,
                     sizeBounds
             );
             ALS replacement = alsService.prepareConfiguration(existing, restored, als.isEquipmentSelectionProvided());
