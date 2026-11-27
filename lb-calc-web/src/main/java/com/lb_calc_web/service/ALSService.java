@@ -508,17 +508,6 @@ public class ALSService {
         );
     }
 
-    private com.lb_calc_web.domain.equipment.Equipment findEquipment(Long id) {
-        if (id == null || id <= 0) {
-            throw new IllegalArgumentException(
-                    "Идентификатор модели оборудования должен быть положительным");
-        }
-        EquipmentEntity entity = equipmentRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException(
-                        "Модель оборудования с id=" + id + " не найдена"));
-        return EquipmentEntityMapper.toDomain(entity);
-    }
-
     private EquipmentEntity findEquipmentEntity(
             com.lb_calc_web.domain.equipment.Equipment equipment
     ) {
@@ -543,16 +532,6 @@ public class ALSService {
             errors.forEach(result::addError);
             throw new ValidationSizeException(result);
         }
-    }
-
-    private ValidationSizeException createValidationException(
-            ALSDTO dto,
-            String field,
-            RuntimeException exception
-    ) {
-        var result = new com.lb_calc_web.service.validation.ValidationResult("ALS", dto.getId());
-        result.addError(field, exception.getMessage(), null, null, null);
-        return new ValidationSizeException(result);
     }
 
     private String getRequired(String key) {
