@@ -134,6 +134,32 @@ public class EquipmentCatalogService {
         );
     }
 
+    /**
+     * Согласует комплектацию с функциональными назначениями и при необходимости
+     * восстанавливает совместимые модели из прежней конфигурации.
+     */
+    @Transactional(readOnly = true)
+    public ControlConfiguration prepareFunctionalEquipment(
+            ControlConfiguration configuration,
+            ControlConfiguration fallback,
+            boolean equipmentSelectionProvided
+    ) {
+        Objects.requireNonNull(configuration,
+                "Конфигурация управляющего модуля не должна быть null");
+
+        boolean functionalChanged = fallback != null
+                && !configuration.getFunctionalConfiguration()
+                .equals(fallback.getFunctionalConfiguration());
+        if (!equipmentSelectionProvided && fallback != null) {
+            configuration = new ControlConfiguration(
+                    configuration.getFunctionalConfiguration(), fallback.getEquipment());
+        }
+        if (!equipmentSelectionProvided || functionalChanged) {
+            configureFunctionalEquipment(configuration);
+        }
+        return configuration;
+    }
+
     /** Возвращает все модели оборудования из каталога. */
     @Transactional(readOnly = true)
     public List<Equipment> findAll() {
