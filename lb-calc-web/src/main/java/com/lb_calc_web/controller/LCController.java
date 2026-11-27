@@ -115,7 +115,7 @@ public class LCController extends BaseCatalogController {
         );
 
         try {
-            LC domain = lcService.restoreDomain(lc);
+            LC domain = toDomain(lc);
             LC savedLC = lcService.saveLC(domain);
 
             return "redirect:/lcs/" + savedLC.getId();
