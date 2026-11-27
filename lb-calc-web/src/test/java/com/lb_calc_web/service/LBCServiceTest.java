@@ -109,7 +109,8 @@ class LBCServiceTest {
         id.set(equipmentEntity, 72L);
         when(equipmentRepository.findById(72L)).thenReturn(Optional.of(equipmentEntity));
         LBCDTO dto = TestDataFactory.validLBCDTO(null);
-        dto.setEquipment(Map.of(72L, 3));
+        dto.setSelectedEquipment(List.of(TestDataFactory.selectedEquipment(72L, 3)));
+        dto.setEquipmentProvided(true);
 
         LBC restored = service.restoreDomain(dto);
 
