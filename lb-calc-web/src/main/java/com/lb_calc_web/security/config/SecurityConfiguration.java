@@ -68,6 +68,10 @@ public class SecurityConfiguration {
                                         response, HttpStatus.FORBIDDEN,
                                         "Недостаточно прав для выполнения операции"),
                                 request -> request.getRequestURI().startsWith("/api/"))
+                        .defaultAccessDeniedHandlerFor(
+                                (request, response, exception) ->
+                                        response.sendError(HttpServletResponse.SC_FORBIDDEN),
+                                request -> true)
                         .defaultAuthenticationEntryPointFor(
                                 new LoginUrlAuthenticationEntryPoint("/login"),
                                 request -> true))

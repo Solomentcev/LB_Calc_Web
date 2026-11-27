@@ -56,6 +56,9 @@ public class JwtAuthentificationFilter
                     logger.debug("JWT отклонён: тип ошибки={}",
                             exception.getClass().getSimpleName());
                     clearAuthentication(response);
+                } catch (RuntimeException exception) {
+                    logger.error("Ошибка восстановления аутентификации по JWT", exception);
+                    throw exception;
                 }
             }
         }
