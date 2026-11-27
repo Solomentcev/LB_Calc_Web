@@ -87,7 +87,7 @@ public class LBCRestController {
                 fallback,
                 sizeBounds
         );
-        lbcService.configureFunctionalEquipment(domain);
+        lbcService.prepareFunctionalEquipment(domain, fallback, dto.isEquipmentProvided());
         LBCDTO saved = LBCDtoMapper.toDto(lbcService.saveLBC(domain));
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success("LBC успешно сохранён", saved));
