@@ -162,7 +162,6 @@ class LCServiceTest {
         );
         LCDTO dto = TestDataFactory.validLCDTO(19L);
         dto.setFunctionalConfiguration(new com.lb_calc_web.dto.FunctionalConfigurationDTO());
-        dto.setEquipment(null);
 
         LC restored = service.restoreDomain(dto, fallback);
 
