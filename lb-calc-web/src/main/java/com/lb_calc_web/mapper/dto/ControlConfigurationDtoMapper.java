@@ -68,19 +68,16 @@ public final class ControlConfigurationDtoMapper {
             FunctionalConfigurationDTO functionalDto,
             List<EquipmentDTO> selectedEquipment,
             boolean equipmentProvided,
-            ControlConfiguration fallback,
             Function<Long, Equipment> equipmentLookup
     ) {
         Objects.requireNonNull(equipmentLookup, "Функция поиска оборудования не должна быть null");
-        FunctionalConfiguration functional = toFunctionalDomain(functionalDto, fallback);
+        FunctionalConfiguration functional = toFunctionalDomain(functionalDto);
         Map<Equipment, Integer> equipment = new LinkedHashMap<>();
 
         boolean noSelectedModels = selectedEquipment == null
                 || selectedEquipment.stream().allMatch(
                 selection -> selection == null || selection.getId() == null);
-        if (noSelectedModels && !equipmentProvided && fallback != null) {
-            equipment.putAll(fallback.getEquipment());
-        } else if (selectedEquipment != null) {
+        if (selectedEquipment != null && (equipmentProvided || !noSelectedModels)) {
             toEquipmentIds(selectedEquipment).forEach((equipmentId, quantity) -> {
                 if (equipmentId == null || equipmentId <= 0) {
                     throw new IllegalArgumentException(
@@ -147,17 +144,7 @@ public final class ControlConfigurationDtoMapper {
         return dto;
     }
 
-    private static FunctionalConfiguration toFunctionalDomain(
-            FunctionalConfigurationDTO dto,
-            ControlConfiguration fallback
-    ) {
-        boolean provided = dto != null && (dto.getDisplay() != null
-                || dto.getAccess() != null
-                || dto.getPayment() != null
-                || dto.getPrinter() != null);
-        if (!provided && fallback != null) {
-            return fallback.getFunctionalConfiguration();
-        }
+    private static FunctionalConfiguration toFunctionalDomain(FunctionalConfigurationDTO dto) {
         return new FunctionalConfiguration(
                 dto == null || dto.getDisplay() == null
                         ? com.lb_calc_web.domain.equipment.DisplayPurpose.NONE : dto.getDisplay(),
