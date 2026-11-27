@@ -70,7 +70,8 @@ public final class LBCImageService {
         int storageAreaX = directionLeft
                 ? x
                 : x + serviceZoneWidth;
-        int storageAreaWidth = Math.max(0, mm(lbc.getCellWidth()));
+        // Полки доходят до границы сервисной зоны независимо от deltaWidth.
+        int storageAreaWidth = Math.max(0, width - serviceZoneWidth);
 
         // Дверь и корпус.
         graphics.setColor(lbc.getColorDoor().getColor());
