@@ -52,7 +52,7 @@ public class LCController {
         logger.debug("Открытие страницы создания LC");
 
         LCDTO lc = LCDtoMapper.toDto(lcService.createLC());
-        lc.setEquipmentSelections(equipmentCatalogService.prepareSelections(
+        lc.setEquipmentSelections(lcService.prepareEquipmentSelections(
                 lc.getFunctionalConfiguration(), null));
         lc = toDtoWithImage(lcService.restoreDomain(lc));
         lc.setId(0L);
@@ -89,7 +89,7 @@ public class LCController {
     public String refreshLC(@ModelAttribute("lc") LCDTO lc, Model model) {
         model.addAttribute("pageContext", "CATALOG");
         try {
-            lc.setEquipmentSelections(equipmentCatalogService.prepareSelections(
+            lc.setEquipmentSelections(lcService.prepareEquipmentSelections(
                     lc.getFunctionalConfiguration(), lc.getEquipmentSelections()));
             lc = toDtoWithImage(lcService.restoreDomain(lc));
         } catch (ValidationSizeException exception) {
@@ -119,7 +119,6 @@ public class LCController {
 
         try {
 
-            equipmentCatalogService.validateSelections(lc.getFunctionalConfiguration(), lc.getEquipmentSelections());
             LC domain = lcService.restoreDomain(lc);
             lc = LCDtoMapper.toDto(domain);
             LC savedLC = lcService.saveLC(domain);
@@ -160,7 +159,7 @@ public class LCController {
 
     private void prepareForm(Model model, LCDTO lc) {
         model.addAttribute("lc", lc);
-        lc.setEquipmentSelections(equipmentCatalogService.prepareSelections(
+        lc.setEquipmentSelections(lcService.prepareEquipmentSelections(
                 lc.getFunctionalConfiguration(), lc.getEquipmentSelections()));
         model.addAttribute("equipmentList", equipmentCatalogService.findAll().stream()
                 .map(EquipmentDtoMapper::toDto).toList());
