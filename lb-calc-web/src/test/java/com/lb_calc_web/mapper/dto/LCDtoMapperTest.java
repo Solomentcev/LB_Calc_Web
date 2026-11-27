@@ -49,7 +49,6 @@ class LCDtoMapperTest {
 
         assertEquals(AccessPurpose.RFID,
                 dto.getFunctionalConfiguration().getAccess().iterator().next());
-        assertEquals(Map.of(501L, 2), dto.getEquipment());
         assertEquals(1, dto.getSelectedEquipment().size());
         assertEquals(501L, dto.getSelectedEquipment().get(0).getId());
         assertEquals("Сканер штрихкода", dto.getSelectedEquipment().get(0).getName());
@@ -65,7 +64,6 @@ class LCDtoMapperTest {
                 source.getControlConfiguration().getFunctionalConfiguration(), Map.of(scanner, 1));
 
         LCDTO dto = TestDataFactory.validLCDTO(10L);
-        dto.setEquipment(null);
         dto.setEquipmentProvided(false);
 
         LC restored = LCDtoMapper.toDomain(dto, id -> {
@@ -85,7 +83,6 @@ class LCDtoMapperTest {
                 source.getControlConfiguration().getFunctionalConfiguration(), Map.of(scanner, 1));
 
         LCDTO dto = TestDataFactory.validLCDTO(11L);
-        dto.setEquipment(Map.of());
         dto.setEquipmentProvided(true);
 
         LC restored = LCDtoMapper.toDomain(dto, id -> {
