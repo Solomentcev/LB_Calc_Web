@@ -18,8 +18,8 @@ public class ControlConfiguration {
 
     public ControlConfiguration(FunctionalConfiguration functionalConfiguration,
                                 Map<Equipment, Integer> equipment) {
-        this.functionalConfiguration = Objects.requireNonNull(
-                functionalConfiguration, "Функциональная конфигурация не должна быть null").copy();
+        this.functionalConfiguration = RESOLVER.normalize(Objects.requireNonNull(
+                functionalConfiguration, "Функциональная конфигурация не должна быть null"));
         this.equipment = copyEquipment(equipment);
         validateEquipment(this.equipment);
     }
@@ -63,8 +63,8 @@ public class ControlConfiguration {
 
     /** Обновляет назначения, сохраняя установленное оборудование. */
     public void setFunctionalConfiguration(FunctionalConfiguration configuration) {
-        functionalConfiguration = Objects.requireNonNull(
-                configuration, "Функциональная конфигурация не должна быть null").copy();
+        functionalConfiguration = RESOLVER.normalize(Objects.requireNonNull(
+                configuration, "Функциональная конфигурация не должна быть null"));
     }
 
     /** @return неизменяемое соответствие моделей оборудования и их количества */
@@ -115,7 +115,7 @@ public class ControlConfiguration {
                 functionalConfiguration, equipment, updated);
         equipment.clear();
         equipment.putAll(updated);
-        functionalConfiguration = resolved;
+        functionalConfiguration = RESOLVER.normalize(resolved);
     }
 
     /** @return независимая копия функциональных назначений и установленного оборудования */
