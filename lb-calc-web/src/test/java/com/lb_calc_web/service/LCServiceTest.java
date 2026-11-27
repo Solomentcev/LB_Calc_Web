@@ -214,7 +214,7 @@ class LCServiceTest {
         LC domain = TestDataFactory.validLC(null);
         List<Equipment> equipment = configureValidEquipment(domain);
         stubEquipment(equipment);
-        LCEntity saved = spy(LCEntityMapper.toEntity(domain, EquipmentEntityMapper::toEntity));
+        LCEntity saved = spy(LCEntityMapper.toEntity(domain, equipmentModel -> equipmentRepository.findById(equipmentModel.getId()).orElseThrow()));
         doReturn(99L).when(saved).getId();
         when(repository.findCandidates(anyInt(), anyInt(), anyInt(), anyInt(),
                 anyInt(), any(), any())).thenReturn(List.of());
