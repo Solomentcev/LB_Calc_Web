@@ -107,41 +107,27 @@ class LCServiceTest {
         LC restored = LCDtoMapper.toDomain(dto, idValue -> {
             assertEquals(71L, idValue);
             return equipment;
-        }, null, TestDataFactory.createSizeBounds());
+        }, TestDataFactory.createSizeBounds());
 
         assertEquals(2, restored.getControlConfiguration().getQuantity(equipment));
     }
 
     @Test
-    void restoreDomain_shouldRetainEquipmentWhenSelectionListIsOmitted() {
-        Equipment equipment = new Equipment(
-                73L, EquipmentFunctionalType.ACCESS, AccessPurpose.RFID,
-                EquipmentCategory.RFID_READER, "RFID", "", 100, 50, 30);
-        ControlConfiguration fallback = new ControlConfiguration(
-                TestDataFactory.validLC(null).getControlConfiguration().getFunctionalConfiguration(),
-                Map.of(equipment, 2)
-        );
+    void mapper_shouldNotRestoreEquipmentWhenSelectionListIsOmitted() {
         LCDTO dto = TestDataFactory.validLCDTO(17L);
-        dto.setFunctionalConfiguration(null);
+        dto.setEquipmentProvided(false);
 
         LC restored = LCDtoMapper.toDomain(dto, idValue -> {
             fail("Для отсутствующей комплектации поиск оборудования не требуется");
             return null;
-        }, fallback, TestDataFactory.createSizeBounds());
+        }, TestDataFactory.createSizeBounds());
 
-        assertEquals(fallback, restored.getControlConfiguration());
+        assertTrue(restored.getEquipment().isEmpty());
         verifyNoInteractions(equipmentRepository);
     }
 
     @Test
-    void restoreDomain_shouldTreatMissingAccessInProvidedFunctionalConfigurationAsEmpty() {
-        Equipment equipment = new Equipment(
-                76L, EquipmentFunctionalType.ACCESS, AccessPurpose.RFID,
-                EquipmentCategory.RFID_READER, "RFID", "", 100, 50, 30);
-        ControlConfiguration fallback = new ControlConfiguration(
-                TestDataFactory.validLC(null).getControlConfiguration().getFunctionalConfiguration(),
-                Map.of(equipment, 1)
-        );
+    void mapper_shouldTreatMissingAccessInProvidedFunctionalConfigurationAsEmpty() {
         LCDTO dto = TestDataFactory.validLCDTO(20L);
         var functional = new com.lb_calc_web.dto.FunctionalConfigurationDTO();
         functional.setDisplay(com.lb_calc_web.domain.equipment.DisplayPurpose.INCH_19);
@@ -152,53 +138,39 @@ class LCServiceTest {
         LC restored = LCDtoMapper.toDomain(dto, idValue -> {
             fail("Для отсутствующей комплектации поиск оборудования не требуется");
             return null;
-        }, fallback, TestDataFactory.createSizeBounds());
+        }, TestDataFactory.createSizeBounds());
 
         assertTrue(restored.getControlConfiguration().getFunctionalConfiguration()
                 .getAccess().isEmpty());
-        assertTrue(restored.getEquipment().isEmpty(),
-                "Комплектация должна очищаться, если функциональное назначение больше не выбрано");
+        assertTrue(restored.getEquipment().isEmpty());
     }
 
     @Test
-    void restoreDomain_shouldPreserveFunctionalConfigurationWhenNestedDtoIsEmpty() {
-        Equipment equipment = new Equipment(
-                75L, EquipmentFunctionalType.ACCESS, AccessPurpose.RFID,
-                EquipmentCategory.RFID_READER, "RFID", "", 100, 50, 30);
-        ControlConfiguration fallback = new ControlConfiguration(
-                TestDataFactory.validLC(null).getControlConfiguration().getFunctionalConfiguration(),
-                Map.of(equipment, 1)
-        );
+    void mapper_shouldUseDomainDefaultsWhenNestedFunctionalDtoIsEmpty() {
         LCDTO dto = TestDataFactory.validLCDTO(19L);
         dto.setFunctionalConfiguration(new com.lb_calc_web.dto.FunctionalConfigurationDTO());
 
         LC restored = LCDtoMapper.toDomain(dto, idValue -> {
             fail("Для отсутствующей комплектации поиск оборудования не требуется");
             return null;
-        }, fallback, TestDataFactory.createSizeBounds());
+        }, TestDataFactory.createSizeBounds());
 
-        assertEquals(fallback.getFunctionalConfiguration(),
-                restored.getControlConfiguration().getFunctionalConfiguration());
-        assertEquals(fallback.getEquipment(), restored.getEquipment());
+        assertEquals(DisplayPurpose.NONE,
+                restored.getControlConfiguration().getFunctionalConfiguration().getDisplay());
+        assertTrue(restored.getControlConfiguration().getFunctionalConfiguration().getAccess().isEmpty());
+        assertTrue(restored.getEquipment().isEmpty());
     }
 
     @Test
-    void restoreDomain_shouldClearEquipmentWhenEmptySelectionListIsExplicit() {
-        Equipment equipment = new Equipment(
-                74L, EquipmentFunctionalType.ACCESS, AccessPurpose.RFID,
-                EquipmentCategory.RFID_READER, "RFID", "", 100, 50, 30);
-        ControlConfiguration fallback = new ControlConfiguration(
-                TestDataFactory.validLC(null).getControlConfiguration().getFunctionalConfiguration(),
-                Map.of(equipment, 1)
-        );
+    void mapper_shouldKeepExplicitlyEmptySelectionEmpty() {
         LCDTO dto = TestDataFactory.validLCDTO(18L);
         dto.setSelectedEquipment(List.of());
         dto.setEquipmentProvided(true);
 
         LC restored = LCDtoMapper.toDomain(dto, idValue -> {
-            fail("Для отсутствующей комплектации поиск оборудования не требуется");
+            fail("Для пустого выбора каталог вызываться не должен");
             return null;
-        }, fallback, TestDataFactory.createSizeBounds());
+        }, TestDataFactory.createSizeBounds());
 
         assertTrue(restored.getControlConfiguration().getEquipment().isEmpty());
     }
