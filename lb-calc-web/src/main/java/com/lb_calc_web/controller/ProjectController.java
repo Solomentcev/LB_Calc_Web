@@ -186,7 +186,7 @@ public class ProjectController
                                 fallback,
                                 sizeBounds
                         );
-                        return alsService.prepareConfiguration(existing, restored);
+                        return alsService.prepareConfiguration(existing, restored, dto.isEquipmentSelectionProvided());
                     });
             project = ProjectDtoMapper.toDto(projectService.previewProject(domain));
         } catch (ValidationSizeException exception) {
@@ -233,7 +233,7 @@ public class ProjectController
                                 fallback,
                                 sizeBounds
                         );
-                        return alsService.prepareConfiguration(existing, restored);
+                        return alsService.prepareConfiguration(existing, restored, dto.isEquipmentSelectionProvided());
                     }
                     );
             com.lb_calc_web.domain.model.Project saved =
@@ -1035,7 +1035,7 @@ ControlConfiguration fallback = persistedALS.getControlModule().getControlConfig
                             fallback,
                             sizeBounds
                     );
-                    restored = alsService.prepareConfiguration(existing, restored);
+                    restored = alsService.prepareConfiguration(existing, restored, dto.isEquipmentSelectionProvided());
                     project.getAlsList().set(index, toDtoWithImages(restored));
                 } catch (ValidationSizeException | IllegalArgumentException | NoSuchElementException exception) {
                     // Для некорректной промежуточной формы изображение не формируется.
@@ -1063,7 +1063,7 @@ ControlConfiguration fallback = persistedALS.getControlModule().getControlConfig
                     fallback,
                     sizeBounds
             );
-            return toDtoWithImages(alsService.prepareConfiguration(existing, restored));
+            return toDtoWithImages(alsService.prepareConfiguration(existing, restored, dto.isEquipmentSelectionProvided()));
         } catch (ValidationSizeException | IllegalArgumentException | NoSuchElementException exception) {
             return dto;
         }
