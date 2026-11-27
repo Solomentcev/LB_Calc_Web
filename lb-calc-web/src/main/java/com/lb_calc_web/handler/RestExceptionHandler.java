@@ -21,6 +21,7 @@ import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.validation.BindException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
+import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
@@ -73,16 +74,25 @@ public class RestExceptionHandler {
             ConstraintViolationException.class,
             MethodArgumentTypeMismatchException.class,
             MissingServletRequestParameterException.class,
+            MissingRequestHeaderException.class,
             HttpMessageNotReadableException.class,
             MethodArgumentNotValidException.class,
             BindException.class
     })
     public ResponseEntity<ApiResponse<Void>> handleBadRequest(Exception exception) {
-        List<String> errors = exception instanceof BindException bindException
-                ? bindException.getBindingResult().getFieldErrors().stream()
-                        .map(error -> error.getField() + ": " + error.getDefaultMessage())
-                        .toList()
-                : List.of("Проверьте переданные данные запроса");
+        List<String> errors;
+        if (exception instanceof BindException bindException) {
+            errors = bindException.getBindingResult().getFieldErrors().stream()
+                    .map(error -> error.getField() + ": " + error.getDefaultMessage())
+                    .toList();
+        } else if (exception instanceof ConstraintViolationException violationException) {
+            errors = violationException.getConstraintViolations().stream()
+                    .map(violation -> violation.getPropertyPath() + ": "
+                            + violation.getMessage())
+                    .toList();
+        } else {
+            errors = List.of("Проверьте переданные данные запроса");
+        }
         return response(HttpStatus.BAD_REQUEST, "Некорректный запрос", errors);
     }
 
