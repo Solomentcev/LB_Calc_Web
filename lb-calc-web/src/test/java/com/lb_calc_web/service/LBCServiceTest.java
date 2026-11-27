@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.mock.env.MockEnvironment;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -105,10 +106,42 @@ class LBCServiceTest {
         assertEquals(26L, service.findById(26L).getId());
     }
 
+    private List<com.lb_calc_web.domain.equipment.Equipment> configureValidEquipment(LBC domain) {
+        var display = new com.lb_calc_web.domain.equipment.Equipment(
+                7201L,
+                com.lb_calc_web.domain.equipment.EquipmentFunctionalType.DISPLAY,
+                DisplayPurpose.INCH_10,
+                com.lb_calc_web.domain.equipment.EquipmentCategory.DISPLAY,
+                "Дисплей 10", "", 300, 180, 30);
+        var rfid = new com.lb_calc_web.domain.equipment.Equipment(
+                7202L,
+                com.lb_calc_web.domain.equipment.EquipmentFunctionalType.ACCESS,
+                AccessPurpose.RFID,
+                com.lb_calc_web.domain.equipment.EquipmentCategory.RFID_READER,
+                "RFID-считыватель", "", 100, 50, 30);
+        var configuration = domain.getControlConfiguration();
+        configuration.setEquipment(Map.of(display, 1, rfid, 1));
+        domain.setControlConfiguration(configuration);
+        return List.of(display, rfid);
+    }
+
+    private void stubEquipment(List<com.lb_calc_web.domain.equipment.Equipment> models)
+            throws Exception {
+        Field idField = EquipmentEntity.class.getDeclaredField("id");
+        idField.setAccessible(true);
+        for (var model : models) {
+            EquipmentEntity entity = EquipmentEntityMapper.toEntity(model);
+            idField.set(entity, model.getId());
+            when(equipmentRepository.findById(model.getId())).thenReturn(Optional.of(entity));
+        }
+    }
+
     @Test
-    void saveLBC_shouldPersistNewConfiguration() {
+    void saveLBC_shouldPersistNewConfiguration() throws Exception {
         LBC domain = TestDataFactory.validLBC(null);
-        LBCEntity saved = spy(LBCEntityMapper.toEntity(domain, equipment -> null));
+        List<com.lb_calc_web.domain.equipment.Equipment> equipment = configureValidEquipment(domain);
+        stubEquipment(equipment);
+        LBCEntity saved = spy(LBCEntityMapper.toEntity(domain, equipmentModel -> null));
         doReturn(100L).when(saved).getId();
         when(repository.findCandidates(anyInt(), anyInt(), anyInt(), anyInt(), anyInt(),
                 any(), any(), anyString(), anyInt(), anyInt(), anyInt(), anyInt(),
@@ -131,6 +164,7 @@ class LBCServiceTest {
                 source.getTypeLb(), source.getCountCells(), source.getDirectionDoorOpening(),
                 source.getDoorThickness(), source.getControlConfiguration(),
                 TestDataFactory.createSizeBounds());
+        configureValidEquipment(domain);
 
         assertThrows(ValidationSizeException.class, () -> service.saveLBC(domain));
         verify(repository, never()).save(any());
