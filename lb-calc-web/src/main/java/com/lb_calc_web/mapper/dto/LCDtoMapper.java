@@ -1,8 +1,7 @@
 package com.lb_calc_web.mapper.dto;
 
-import com.lb_calc_web.domain.geometry.SizeBounds;
-
 import com.lb_calc_web.domain.attributes.Colors;
+import com.lb_calc_web.domain.geometry.SizeBounds;
 import com.lb_calc_web.domain.equipment.Equipment;
 import com.lb_calc_web.domain.model.LC;
 import com.lb_calc_web.domain.model.ControlConfiguration;
@@ -38,7 +37,7 @@ public final class LCDtoMapper {
         ControlConfiguration configuration = domain.getControlConfiguration();
         dto.setFunctionalConfiguration(ControlConfigurationDtoMapper.toFunctionalDto(
                 configuration.getFunctionalConfiguration()));
-                dto.setSelectedEquipment(ControlConfigurationDtoMapper.toEquipmentDetails(configuration));
+        dto.setSelectedEquipment(ControlConfigurationDtoMapper.toEquipmentDetails(configuration));
         return dto;
     }
 
