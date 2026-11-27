@@ -834,7 +834,8 @@ ControlConfiguration fallback = persistedALS.getControlModule().getControlConfig
         try {
             projectService.findLBInProject(projectId, alsId, lbId);
             lb.setId(lbId);
-            LB replacement = toDomain(lb);
+            LB replacement = LBDtoMapper.toDomain(
+                    lb, TypeLbFactory.forLB(environment, lb.getType()));
             ALS savedALS = projectService.saveLBAtProject(
                     projectId,
                     alsId,
@@ -1001,7 +1002,24 @@ ControlConfiguration fallback = persistedALS.getControlModule().getControlConfig
             for (int index = 0; index < project.getAlsList().size(); index++) {
                 ALSDTO als = project.getAlsList().get(index);
                 try {
-                    project.getAlsList().set(index, toDtoWithImages(toDomain(als)));
+                    ALS existing = als.getId() != null && als.getId() > 0
+                            ? alsService.findById(als.getId()) : null;
+                    ControlConfiguration fallback = existing == null ? null
+                            : existing.getControlModule().getControlConfiguration();
+                    if (fallback != null) {
+                        fallback.setFunctionalConfiguration(existing.getFunctionalConfiguration());
+                    }
+                    ALS restored = ALSDtoMapper.toDomain(
+                            als,
+                            candidate -> TypeLbFactory.forLB(environment, candidate.getType()),
+                            candidate -> TypeLbFactory.forLBC(environment, candidate.getType()),
+                            equipmentCatalogService::findById,
+                            fallback,
+                            sizeBounds
+                    );
+                    alsService.configureFunctionalEquipment(restored);
+                    restored = alsService.preserveExistingModules(existing, restored);
+                    project.getAlsList().set(index, toDtoWithImages(restored));
                 } catch (ValidationSizeException | IllegalArgumentException | NoSuchElementException exception) {
                     // Для некорректной промежуточной формы изображение не формируется.
                 }
@@ -1013,7 +1031,23 @@ ControlConfiguration fallback = persistedALS.getControlModule().getControlConfig
 
     private ALSDTO addALSImage(ALSDTO dto) {
         try {
-            return toDtoWithImages(toDomain(dto));
+            ALS existing = dto.getId() != null && dto.getId() > 0
+                    ? alsService.findById(dto.getId()) : null;
+            ControlConfiguration fallback = existing == null ? null
+                    : existing.getControlModule().getControlConfiguration();
+            if (fallback != null) {
+                fallback.setFunctionalConfiguration(existing.getFunctionalConfiguration());
+            }
+            ALS restored = ALSDtoMapper.toDomain(
+                    dto,
+                    candidate -> TypeLbFactory.forLB(environment, candidate.getType()),
+                    candidate -> TypeLbFactory.forLBC(environment, candidate.getType()),
+                    equipmentCatalogService::findById,
+                    fallback,
+                    sizeBounds
+            );
+            alsService.configureFunctionalEquipment(restored);
+            return toDtoWithImages(alsService.preserveExistingModules(existing, restored));
         } catch (ValidationSizeException | IllegalArgumentException | NoSuchElementException exception) {
             return dto;
         }
@@ -1038,7 +1072,15 @@ ControlConfiguration fallback = persistedALS.getControlModule().getControlConfig
     private LCDTO addLCImage(LCDTO dto, Long projectId, Long alsId) {
         try {
             ALS als = projectService.findALSInProject(projectId, alsId);
-            return toDtoWithImage(toDomain(dto, als));
+            LC restored = LCDtoMapper.toDomain(
+                    dto,
+                    equipmentCatalogService::findById,
+                    als.getControlModule() instanceof LC
+                            ? als.getControlModule().getControlConfiguration() : null,
+                    sizeBounds
+            );
+            alsService.configureFunctionalEquipment(restored);
+            return toDtoWithImage(restored);
         } catch (ValidationSizeException | IllegalArgumentException exception) {
             return dto;
         }
@@ -1047,7 +1089,16 @@ ControlConfiguration fallback = persistedALS.getControlModule().getControlConfig
     private LBCDTO addLBCImage(LBCDTO dto, Long projectId, Long alsId) {
         try {
             ALS als = projectService.findALSInProject(projectId, alsId);
-            return toDtoWithImage(toDomain(dto, als));
+            LBC restored = LBCDtoMapper.toDomain(
+                    dto,
+                    TypeLbFactory.forLBC(environment, dto.getType()),
+                    equipmentCatalogService::findById,
+                    als.getControlModule() instanceof LBC
+                            ? als.getControlModule().getControlConfiguration() : null,
+                    sizeBounds
+            );
+            alsService.configureFunctionalEquipment(restored);
+            return toDtoWithImage(restored);
         } catch (ValidationSizeException | IllegalArgumentException exception) {
             return dto;
         }
@@ -1055,7 +1106,8 @@ ControlConfiguration fallback = persistedALS.getControlModule().getControlConfig
 
     private LBDTO addLBImage(LBDTO dto) {
         try {
-            return toDtoWithImage(toDomain(dto));
+            return toDtoWithImage(LBDtoMapper.toDomain(
+                    dto, TypeLbFactory.forLB(environment, dto.getType())));
         } catch (ValidationSizeException | IllegalArgumentException exception) {
             return dto;
         }
