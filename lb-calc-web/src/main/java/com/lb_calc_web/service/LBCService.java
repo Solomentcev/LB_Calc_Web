@@ -170,12 +170,24 @@ public class LBCService {
         return toDomain(entity);
     }
 
-    /** Дополняет комплектацию LBC физическими моделями по функциональным назначениям. */
-    public void configureFunctionalEquipment(LBC domain) {
+    /** Подбирает оборудование, если выбор не передан или изменились функциональные назначения. */
+    public void prepareFunctionalEquipment(
+            LBC domain, ControlConfiguration fallback, boolean equipmentSelectionProvided
+    ) {
         Objects.requireNonNull(domain, "LBC не должен быть null");
-        ControlConfiguration configuration = domain.getControlConfiguration();
-        equipmentCatalogService.configureFunctionalEquipment(configuration);
-        domain.setControlConfiguration(configuration);
+        boolean functionalChanged = fallback != null
+                && !domain.getControlConfiguration().getFunctionalConfiguration()
+                .equals(fallback.getFunctionalConfiguration());
+        if (!equipmentSelectionProvided || functionalChanged) {
+            ControlConfiguration configuration = domain.getControlConfiguration();
+            equipmentCatalogService.configureFunctionalEquipment(configuration);
+            domain.setControlConfiguration(configuration);
+        }
+    }
+
+    /** Принудительно дополняет комплектацию LBC по функциональным назначениям. */
+    public void configureFunctionalEquipment(LBC domain) {
+        prepareFunctionalEquipment(domain, null, false);
     }
 
     /** Проверяет и сохраняет доменную конфигурацию LBC. */
