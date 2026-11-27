@@ -185,11 +185,6 @@ public class LBCService {
         }
     }
 
-    /** Принудительно дополняет комплектацию LBC по функциональным назначениям. */
-    public void configureFunctionalEquipment(LBC domain) {
-        prepareFunctionalEquipment(domain, null, false);
-    }
-
     /** Проверяет и сохраняет доменную конфигурацию LBC. */
     @Transactional
     public LBC saveLBC(LBC domain) {
