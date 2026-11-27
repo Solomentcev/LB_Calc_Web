@@ -110,17 +110,7 @@
             </div>
         </section>
 
-        <th:block th:if="${pageContext == 'CATALOG'}">
-            <div th:replace="~{fragments/module-form :: functionalConfiguration}"></div>
-        </th:block>
-        <div th:if="${pageContext != 'CATALOG'}">
-            <input type="hidden" th:field="*{functionalConfiguration.display}">
-            <input type="hidden" th:field="*{functionalConfiguration.payment}">
-            <input type="hidden" th:field="*{functionalConfiguration.printer}">
-            <input type="hidden" name="_functionalConfiguration.access" value="on">
-            <input type="hidden" th:each="purpose : *{functionalConfiguration.access}"
-                   name="functionalConfiguration.access" th:value="${purpose}">
-        </div>
+        <div th:replace="~{fragments/module-form :: functionalConfiguration}"></div>
         <div th:replace="~{fragments/module-form :: equipmentSelections}"></div>
 
 </div>
