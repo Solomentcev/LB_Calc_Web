@@ -1,6 +1,7 @@
 package com.lb_calc_web.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.validation.Valid;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -75,6 +76,7 @@ public class ProjectDTO {
      * <p>Из списка рассчитывается количество одинаковых
      * конфигураций ALS.</p>
      */
+    @Valid
     private List<ALSDTO> alsList =
             new ArrayList<>();
 
