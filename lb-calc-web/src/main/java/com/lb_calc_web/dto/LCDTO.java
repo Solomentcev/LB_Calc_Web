@@ -2,7 +2,9 @@ package com.lb_calc_web.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -24,6 +26,8 @@ public class LCDTO {
     private String colorDoor;
 
     private FunctionalConfigurationDTO functionalConfiguration;
+    /** Выбранные модели с названиями и характеристиками для отображения в форме. */
+    private List<EquipmentDTO> selectedEquipment = new ArrayList<>();
     private Map<Long, Integer> equipment;
     @JsonIgnore
     private boolean equipmentProvided;
@@ -109,6 +113,14 @@ public class LCDTO {
 
     public void setFunctionalConfiguration(FunctionalConfigurationDTO configuration) {
         this.functionalConfiguration = configuration;
+    }
+
+    public List<EquipmentDTO> getSelectedEquipment() {
+        return List.copyOf(selectedEquipment);
+    }
+
+    public void setSelectedEquipment(List<EquipmentDTO> selectedEquipment) {
+        this.selectedEquipment = selectedEquipment == null ? new ArrayList<>() : new ArrayList<>(selectedEquipment);
     }
 
     public Map<Long, Integer> getEquipment() {
