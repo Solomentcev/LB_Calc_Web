@@ -147,7 +147,6 @@ public final class TestDataFactory {
                 equipmentId -> {
                     throw new IllegalStateException("Оборудование в тестовой конфигурации не загружается");
                 },
-                null,
                 createSizeBounds()
         );
     }
@@ -237,7 +236,6 @@ public final class TestDataFactory {
                 equipmentId -> {
                     throw new IllegalStateException("Оборудование в тестовой конфигурации не загружается");
                 },
-                null,
                 createSizeBounds()
         );
     }
