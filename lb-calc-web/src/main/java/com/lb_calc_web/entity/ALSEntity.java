@@ -326,6 +326,17 @@ public class ALSEntity {
     }
 
     /**
+     * Перемещает существующие связи на временные позиции перед вставкой новых связей.
+     * Вызвавший сервис должен выполнить flush до синхронизации итогового порядка.
+     */
+    public void moveModuleOrdersToTemporary() {
+        int temporaryOrder = modules.size() * 2 + 1;
+        for (int index = 0; index < modules.size(); index++) {
+            modules.get(index).setModuleOrder(temporaryOrder + index);
+        }
+    }
+
+    /**
      * Синхронизирует связи с модулями, сохраняя неизменившиеся позиции.
      *
      * <p>Связи, у которых изменился модуль или его физическая позиция,
