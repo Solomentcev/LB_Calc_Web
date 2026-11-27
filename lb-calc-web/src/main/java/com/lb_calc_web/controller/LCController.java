@@ -79,7 +79,9 @@ public class LCController extends BaseCatalogController {
 
         LCDTO lc = toDtoWithImage(lcService.findById(id));
 
-        prepareForm(model, lc);
+        model.addAttribute("lc", lc);
+        model.addAttribute("equipmentList", equipmentCatalogService.findAll().stream()
+                .map(EquipmentDtoMapper::toDto).toList());
 
         return "lcs/lc";
     }
@@ -100,7 +102,9 @@ public class LCController extends BaseCatalogController {
         } catch (IllegalArgumentException | NoSuchElementException exception) {
             model.addAttribute("errors", List.of("Проверьте введённые параметры модуля."));
         }
-        prepareForm(model, lc);
+        model.addAttribute("lc", lc);
+        model.addAttribute("equipmentList", equipmentCatalogService.findAll().stream()
+                .map(EquipmentDtoMapper::toDto).toList());
         return "lcs/lc";
     }
 
@@ -142,12 +146,16 @@ public class LCController extends BaseCatalogController {
                     ValidationErrorFormatter.format(e.getValidationResult())
             );
 
-            prepareForm(model, lc);
+            model.addAttribute("lc", lc);
+        model.addAttribute("equipmentList", equipmentCatalogService.findAll().stream()
+                .map(EquipmentDtoMapper::toDto).toList());
 
             return "lcs/lc";
         } catch (IllegalArgumentException | NoSuchElementException e) {
             model.addAttribute("errors", List.of(e.getMessage()));
-            prepareForm(model, lc);
+            model.addAttribute("lc", lc);
+        model.addAttribute("equipmentList", equipmentCatalogService.findAll().stream()
+                .map(EquipmentDtoMapper::toDto).toList());
             return "lcs/lc";
         }
     }
