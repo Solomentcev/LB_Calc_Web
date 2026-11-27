@@ -1,6 +1,5 @@
 package com.lb_calc_web.controller;
 
-import com.lb_calc_web.domain.equipment.AccessPurpose;
 import com.lb_calc_web.domain.equipment.DisplayPurpose;
 import com.lb_calc_web.domain.equipment.PaymentPurpose;
 import com.lb_calc_web.domain.equipment.PrinterPurpose;
@@ -34,14 +33,14 @@ final class ALSFormSupport {
                 als.getFunctionalConfiguration(), "Функциональная конфигурация ALS не должна быть null");
         if (als.getLC() != null) {
             als.getLC().setFunctionalConfiguration(functional);
-            configure(als.getLC().getEquipment(), als.getLC().isEquipmentProvided(),
+            configure(als.getLC().getEquipment(),
                     als.getLC()::setEquipment, als.getLC()::setEquipmentProvided,
                     als.getLC()::setFunctionalConfiguration, functional, equipmentCatalogService);
             return;
         }
         if (als.getLBC() != null) {
             als.getLBC().setFunctionalConfiguration(functional);
-            configure(als.getLBC().getEquipment(), als.getLBC().isEquipmentProvided(),
+            configure(als.getLBC().getEquipment(),
                     als.getLBC()::setEquipment, als.getLBC()::setEquipmentProvided,
                     als.getLBC()::setFunctionalConfiguration, functional, equipmentCatalogService);
             return;
@@ -50,7 +49,7 @@ final class ALSFormSupport {
     }
 
     static void configure(LCDTO dto, EquipmentCatalogService service) {
-        configure(dto.getEquipment(), dto.isEquipmentProvided(), dto::setEquipment,
+        configure(dto.getEquipment(), dto::setEquipment,
                 dto::setEquipmentProvided, dto::setFunctionalConfiguration,
                 dto.getFunctionalConfiguration(), service);
     }
@@ -63,7 +62,6 @@ final class ALSFormSupport {
 
     private static void configure(
             Map<Long, Integer> selectedIds,
-            boolean provided,
             java.util.function.Consumer<Map<Long, Integer>> equipmentSetter,
             java.util.function.Consumer<Boolean> providedSetter,
             java.util.function.Consumer<FunctionalConfigurationDTO> functionalSetter,

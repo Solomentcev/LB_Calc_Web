@@ -6,7 +6,6 @@ import com.lb_calc_web.domain.equipment.Equipment;
 import com.lb_calc_web.domain.equipment.EquipmentCategory;
 import com.lb_calc_web.domain.equipment.EquipmentFunctionalType;
 import com.lb_calc_web.domain.model.ControlConfiguration;
-import java.util.Map;
 import com.lb_calc_web.domain.model.LC;
 import com.lb_calc_web.dto.LCDTO;
 import org.junit.jupiter.api.Test;
