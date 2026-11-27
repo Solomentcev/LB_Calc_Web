@@ -227,6 +227,7 @@ return projectRepository.findAllWithUsers()
     @Transactional
     public Project saveProject(Project requested) {
         Objects.requireNonNull(requested, "Проект не должен быть null");
+        validateProject(requested);
 
         ProjectEntity existing = loadExistingProject(requested.getId());
         Employee currentEmployee = employeeService.getCurrentEmployee();
