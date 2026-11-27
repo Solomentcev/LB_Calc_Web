@@ -185,6 +185,8 @@ public class ProjectController
         } catch (ValidationSizeException exception) {
             model.addAttribute("projectErrors",
                     ValidationErrorFormatter.format(exception.getValidationResult()));
+        } catch (IllegalArgumentException | IllegalStateException | NoSuchElementException exception) {
+            model.addAttribute("projectErrors", List.of(exception.getMessage()));
         }
         model.addAttribute("project", addALSImages(project));
         return "projects/project";
@@ -520,6 +522,8 @@ public class ProjectController
             lcForm = toDtoWithImage(replacement);
         } catch (ValidationSizeException exception) {
             model.addAttribute("errors", ValidationErrorFormatter.format(exception.getValidationResult()));
+        } catch (IllegalArgumentException | IllegalStateException | NoSuchElementException exception) {
+            model.addAttribute("errors", List.of(exception.getMessage()));
         }
         model.addAttribute("project", addALSImages(ProjectDtoMapper.toDto(preview)));
         model.addAttribute("als", toDtoWithImages(updatedALS));
@@ -666,6 +670,8 @@ public class ProjectController
             lbcForm = toDtoWithImage(replacement);
         } catch (ValidationSizeException exception) {
             model.addAttribute("errors", ValidationErrorFormatter.format(exception.getValidationResult()));
+        } catch (IllegalArgumentException | IllegalStateException | NoSuchElementException exception) {
+            model.addAttribute("errors", List.of(exception.getMessage()));
         }
         model.addAttribute("project", addALSImages(ProjectDtoMapper.toDto(preview)));
         model.addAttribute("als", toDtoWithImages(updatedALS));
@@ -1000,7 +1006,8 @@ public class ProjectController
                     );
                     restored = alsService.prepareConfiguration(existing, restored, als.isEquipmentSelectionProvided());
                     project.getAlsList().set(index, toDtoWithImages(restored));
-                } catch (ValidationSizeException | IllegalArgumentException | NoSuchElementException exception) {
+                } catch (ValidationSizeException | IllegalArgumentException | IllegalStateException
+                         | NoSuchElementException exception) {
                     // Для некорректной промежуточной формы изображение не формируется.
                 }
             }
@@ -1021,7 +1028,8 @@ public class ProjectController
                     sizeBounds
             );
             return toDtoWithImages(alsService.prepareConfiguration(existing, restored, dto.isEquipmentSelectionProvided()));
-        } catch (ValidationSizeException | IllegalArgumentException | NoSuchElementException exception) {
+        } catch (ValidationSizeException | IllegalArgumentException | IllegalStateException
+                 | NoSuchElementException exception) {
             return dto;
         }
     }
@@ -1046,7 +1054,8 @@ public class ProjectController
         try {
             return toDtoWithImage(LBDtoMapper.toDomain(
                     dto, TypeLbFactory.forLB(environment, dto.getType())));
-        } catch (ValidationSizeException | IllegalArgumentException exception) {
+        } catch (ValidationSizeException | IllegalArgumentException | IllegalStateException
+                 | NoSuchElementException exception) {
             return dto;
         }
     }
