@@ -111,7 +111,7 @@ public class LCRestController {
                 ? lcService.findById(dto.getId()).getControlConfiguration() : null;
         LC domain = LCDtoMapper.toDomain(
                 dto, equipmentCatalogService::findById, fallback, sizeBounds);
-        lcService.configureFunctionalEquipment(domain);
+        lcService.prepareFunctionalEquipment(domain, fallback, dto.isEquipmentProvided());
         LCDTO saved = LCDtoMapper.toDto(lcService.saveLC(domain));
         return ResponseEntity.ok(
                 ApiResponse.success("LC успешно сохранён", saved)
