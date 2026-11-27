@@ -416,12 +416,14 @@ public class ALSService {
     /** Заменяет LC в ALS и сохраняет обновлённую конфигурацию. */
     @Transactional
     public ALS replaceLCandSaveALS(ALS als, LC replacement) {
+        configureFunctionalEquipment(replacement);
         return saveALS(replaceLC(als, replacement));
     }
 
     /** Заменяет LBC в ALS и сохраняет обновлённую конфигурацию. */
     @Transactional
     public ALS replaceLBCandSaveALS(ALS als, LBC replacement) {
+        configureFunctionalEquipment(replacement);
         return saveALS(replaceLBC(als, replacement));
     }
 
@@ -432,11 +434,21 @@ public class ALSService {
     }
 
     /**
+     * Подготавливает восстановленную конфигурацию ALS к использованию.
+     * Подбирает недостающую физическую комплектацию и сохраняет идентичность
+     * неизменённых модулей относительно исходной конфигурации.
+     */
+    public ALS prepareConfiguration(ALS existing, ALS restored) {
+        Objects.requireNonNull(restored, "Восстановленная ALS не должна быть null");
+        configureFunctionalEquipment(restored);
+        return preserveExistingModules(existing, restored);
+    }
+
+    /**
      * Сохраняет идентичность и пользовательские тексты неизменённых модулей
      * при обновлении агрегата из представленной конфигурации.
      */
-    @Transactional(readOnly = true)
-    public ALS preserveExistingModules(ALS existingALS, ALS restored) {
+    private ALS preserveExistingModules(ALS existingALS, ALS restored) {
         Objects.requireNonNull(restored, "Восстановленная ALS не должна быть null");
         if (existingALS == null) {
             return restored;
