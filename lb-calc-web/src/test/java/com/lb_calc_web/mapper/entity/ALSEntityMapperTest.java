@@ -63,7 +63,10 @@ class ALSEntityMapperTest {
                 ALSEntityMapperTest::toEntity
         );
 
-        assertEquals(expected, entity.getFunctionalConfiguration());
+        assertEquals(expected.getDisplay(), entity.getDisplayPurpose());
+        assertEquals(expected.getAccess(), entity.getAccessPurposes());
+        assertEquals(expected.getPayment(), entity.getPaymentPurpose());
+        assertEquals(expected.getPrinter(), entity.getPrinterPurpose());
 
         var independentAlsConfiguration =
                 new com.lb_calc_web.domain.model.FunctionalConfiguration(
@@ -72,7 +75,10 @@ class ALSEntityMapperTest {
                         com.lb_calc_web.domain.equipment.PaymentPurpose.CASH,
                         com.lb_calc_web.domain.equipment.PrinterPurpose.OTHER
                 );
-        entity.setFunctionalConfiguration(independentAlsConfiguration);
+        entity.setDisplayPurpose(independentAlsConfiguration.getDisplay());
+        entity.setAccessPurposes(independentAlsConfiguration.getAccess());
+        entity.setPaymentPurpose(independentAlsConfiguration.getPayment());
+        entity.setPrinterPurpose(independentAlsConfiguration.getPrinter());
 
         ALS restored = ALSEntityMapper.toDomain(entity, TestDataFactory.createSizeBounds());
 
