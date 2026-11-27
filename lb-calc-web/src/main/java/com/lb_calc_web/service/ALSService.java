@@ -327,8 +327,8 @@ public class ALSService {
         Objects.requireNonNull(als, "ALS не должен быть null");
         Objects.requireNonNull(replacement, "Новый LC не должен быть null");
         ControlModule current = als.getControlModule();
-        if (current instanceof LC currentLC
-                && !Objects.equals(currentLC.getId(), replacement.getId())) {
+        if (!(current instanceof LC currentLC)
+                || !Objects.equals(currentLC.getId(), replacement.getId())) {
             throw new NoSuchElementException(
                     "LC с id " + replacement.getId() + " не найден в ALS " + als.getId());
         }
@@ -342,8 +342,8 @@ public class ALSService {
         Objects.requireNonNull(als, "ALS не должен быть null");
         Objects.requireNonNull(replacement, "Новый LBC не должен быть null");
         ControlModule current = als.getControlModule();
-        if (current instanceof LBC currentLBC
-                && !Objects.equals(currentLBC.getId(), replacement.getId())) {
+        if (!(current instanceof LBC currentLBC)
+                || !Objects.equals(currentLBC.getId(), replacement.getId())) {
             throw new NoSuchElementException(
                     "LBC с id " + replacement.getId() + " не найден в ALS " + als.getId());
         }
