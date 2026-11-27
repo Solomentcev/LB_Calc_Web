@@ -52,7 +52,7 @@ public class AuthRestController {
 
     /** Обновляет пару JWT-токенов по refresh token из заголовка запроса. */
     @PostMapping("/refresh")
-    public ResponseEntity<?> refresh(@RequestHeader(value = "Refresh-Token", required = false) String refreshToken) {
+    public ResponseEntity<?> refresh(@RequestHeader(value = "Refresh-Token") String refreshToken) {
         if (refreshToken == null || refreshToken.isBlank()) {
             throw new IllegalArgumentException("Refresh token is missing");
         }
