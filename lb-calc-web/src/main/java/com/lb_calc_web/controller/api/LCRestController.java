@@ -48,16 +48,6 @@ public class LCRestController {
         this.sizeBounds = sizeBounds;
     }
 
-    /** Преобразует DTO LC в доменную модель с учётом сохранённой комплектации. */
-    private LC toDomain(LCDTO dto) {
-        ControlConfiguration fallback = dto.getId() != null && dto.getId() > 0
-                ? lcService.findById(dto.getId()).getControlConfiguration() : null;
-        LC restored = LCDtoMapper.toDomain(
-                dto, equipmentCatalogService::findById, fallback, sizeBounds);
-        lcService.configureFunctionalEquipment(restored);
-        return restored;
-    }
-
     /**
      * Получить список всех LC.
      */
@@ -117,7 +107,11 @@ public class LCRestController {
                 dto != null && dto.getFunctionalConfiguration() != null
                         ? dto.getFunctionalConfiguration().getDisplay() : null
         );
-        LC domain = toDomain(dto);
+        ControlConfiguration fallback = dto.getId() != null && dto.getId() > 0
+                ? lcService.findById(dto.getId()).getControlConfiguration() : null;
+        LC domain = LCDtoMapper.toDomain(
+                dto, equipmentCatalogService::findById, fallback, sizeBounds);
+        lcService.configureFunctionalEquipment(domain);
         LCDTO saved = LCDtoMapper.toDto(lcService.saveLC(domain));
         return ResponseEntity.ok(
                 ApiResponse.success("LC успешно сохранён", saved)
