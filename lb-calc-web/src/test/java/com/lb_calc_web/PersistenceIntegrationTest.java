@@ -759,11 +759,7 @@ class PersistenceIntegrationTest {
     }
 
     private Project restoreProjectEntity(ProjectEntity entity) {
-        return ProjectEntityMapper.toDomain(
-                entity,
-                this::restoreAlsEntity,
-                (als, alsEntity) -> { }
-        );
+        return ProjectEntityMapper.toDomain(entity, this::restoreAlsEntity);
     }
 
     private ALS restoreAlsDto(ALSDTO dto) {
