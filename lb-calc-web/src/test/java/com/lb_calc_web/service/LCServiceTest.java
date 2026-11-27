@@ -12,6 +12,7 @@ import com.lb_calc_web.dto.LCDTO;
 import com.lb_calc_web.entity.EquipmentEntity;
 import com.lb_calc_web.entity.LCEntity;
 import com.lb_calc_web.mapper.entity.LCEntityMapper;
+import com.lb_calc_web.mapper.dto.LCDtoMapper;
 import com.lb_calc_web.mapper.entity.EquipmentEntityMapper;
 import com.lb_calc_web.repository.LCRepository;
 import com.lb_calc_web.repository.EquipmentRepository;
@@ -103,10 +104,12 @@ class LCServiceTest {
         dto.setSelectedEquipment(List.of(TestDataFactory.selectedEquipment(71L, 2)));
         dto.setEquipmentProvided(true);
 
-        LC restored = service.restoreDomain(dto);
+        LC restored = LCDtoMapper.toDomain(dto, idValue -> {
+            assertEquals(71L, idValue);
+            return equipment;
+        }, null, TestDataFactory.createSizeBounds());
 
         assertEquals(2, restored.getControlConfiguration().getQuantity(equipment));
-        verify(equipmentRepository).findById(71L);
     }
 
     @Test
@@ -121,7 +124,10 @@ class LCServiceTest {
         LCDTO dto = TestDataFactory.validLCDTO(17L);
         dto.setFunctionalConfiguration(null);
 
-        LC restored = service.restoreDomain(dto, fallback);
+        LC restored = LCDtoMapper.toDomain(dto, idValue -> {
+            fail("Для отсутствующей комплектации поиск оборудования не требуется");
+            return null;
+        }, fallback, TestDataFactory.createSizeBounds());
 
         assertEquals(fallback, restored.getControlConfiguration());
         verifyNoInteractions(equipmentRepository);
