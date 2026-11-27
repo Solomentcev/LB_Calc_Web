@@ -103,6 +103,7 @@ public class LBCController extends BaseCatalogController {
     public String refreshLBC(@ModelAttribute("lbc") LBCDTO lbc, Model model) {
         model.addAttribute("pageContext", "CATALOG");
         try {
+            ModuleEquipmentFormSupport.applySelection(lbc);
             LBC domain = lbcService.restoreDomain(lbc);
             configureEquipment(domain.getControlConfiguration());
             lbc = toDtoWithImage(domain);
@@ -125,6 +126,7 @@ public class LBCController extends BaseCatalogController {
     ) {
         model.addAttribute("pageContext", "CATALOG");
         try {
+            ModuleEquipmentFormSupport.applySelection(lbc);
             LBC domain = lbcService.restoreDomain(lbc);
             configureEquipment(domain.getControlConfiguration());
             LBC saved = lbcService.saveLBC(domain);
@@ -138,6 +140,10 @@ public class LBCController extends BaseCatalogController {
             );
             prepareForm(model, lbc);
 
+            return "lbcs/lbc";
+        } catch (IllegalArgumentException e) {
+            model.addAttribute("errors", List.of(e.getMessage()));
+            prepareForm(model, lbc);
             return "lbcs/lbc";
         }
     }
