@@ -165,9 +165,18 @@ class ALSDomainTest {
 
         assertEquals(manual, als.getControlModule()
                 .getControlConfiguration().getFunctionalConfiguration());
+        assertTrue(als.getControlModule().getEquipment().isEmpty());
+
+        var rfidReader = new com.lb_calc_web.domain.equipment.Equipment(
+                72L,
+                com.lb_calc_web.domain.equipment.EquipmentFunctionalType.ACCESS,
+                com.lb_calc_web.domain.equipment.AccessPurpose.RFID,
+                com.lb_calc_web.domain.equipment.EquipmentCategory.RFID_READER,
+                "RFID-считыватель", "", 0, 0, 0);
+        als.addEquipment(rfidReader, 1);
         assertEquals(1, als.getControlModule().getEquipment().size());
 
-        als.removeEquipment(scanner);
+        als.removeEquipment(rfidReader);
         assertTrue(als.getFunctionalConfiguration().getAccess().isEmpty());
         assertEquals(com.lb_calc_web.domain.equipment.DisplayPurpose.INCH_17,
                 als.getFunctionalConfiguration().getDisplay());
