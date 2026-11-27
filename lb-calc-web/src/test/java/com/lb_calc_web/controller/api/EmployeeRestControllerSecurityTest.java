@@ -57,7 +57,7 @@ class EmployeeRestControllerSecurityTest {
     @Test
     @WithMockUser(authorities = "ROLE_USER")
     void profiles_shouldBeAvailableToAuthenticatedUser() throws Exception {
-        when(employeeService.getAllProfiles()).thenReturn(List.of());
+        when(employeeService.findAllProfiles()).thenReturn(List.of());
 
         mockMvc.perform(get("/api/v1/employees/profiles"))
                 .andExpect(status().isOk());
