@@ -1,10 +1,5 @@
 package com.lb_calc_web.controller;
 
-import com.lb_calc_web.domain.attributes.Colors;
-import com.lb_calc_web.domain.equipment.AccessPurpose;
-import com.lb_calc_web.domain.equipment.DisplayPurpose;
-import com.lb_calc_web.domain.equipment.PaymentPurpose;
-import com.lb_calc_web.domain.equipment.PrinterPurpose;
 import com.lb_calc_web.mapper.dto.EquipmentDtoMapper;
 import com.lb_calc_web.service.EquipmentCatalogService;
 import com.lb_calc_web.domain.model.LC;
@@ -19,21 +14,17 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Arrays;
 import java.util.List;
 
 /** MVC-контроллер каталога и редактирования управляющих модулей LC. */
 @Controller
 @RequestMapping("/lcs")
-public class LCController {
+public class LCController extends BaseCatalogController {
 
     private static final Logger logger =
             LoggerFactory.getLogger(LCController.class);
 
     private final LCService lcService;
-
-    private final List<Colors> colorsList =
-            Arrays.asList(Colors.values());
 
     private final EquipmentCatalogService equipmentCatalogService;
 
@@ -52,8 +43,7 @@ public class LCController {
         logger.debug("Открытие страницы создания LC");
 
         LCDTO lc = LCDtoMapper.toDto(lcService.createLC());
-        LC domain = lcService.restoreDomain(lc);
-        configureEquipment(domain.getControlConfiguration());
+        LC domain = lcService.createLC();
         lc = toDtoWithImage(domain);
         lc.setId(0L);
 
@@ -91,7 +81,6 @@ public class LCController {
         try {
             ModuleEquipmentFormSupport.applySelection(lc);
             LC domain = lcService.restoreDomain(lc);
-            configureEquipment(domain.getControlConfiguration());
             lc = toDtoWithImage(domain);
         } catch (ValidationSizeException exception) {
             model.addAttribute("errors", ValidationErrorFormatter.format(exception.getValidationResult()));
@@ -121,7 +110,6 @@ public class LCController {
         try {
             ModuleEquipmentFormSupport.applySelection(lc);
             LC domain = lcService.restoreDomain(lc);
-            configureEquipment(domain.getControlConfiguration());
             LC savedLC = lcService.saveLC(domain);
 
             return "redirect:/lcs/" + savedLC.getId();
@@ -148,23 +136,10 @@ public class LCController {
         }
     }
 
-    /**
-     * Список цветов.
-     */
-    @ModelAttribute("colorsList")
-    public List<Colors> colorsList() {
-        return colorsList;
-    }
-
     private LCDTO toDtoWithImage(LC domain) {
         LCDTO dto = LCDtoMapper.toDto(domain);
         dto.setStringLCImage(LCImageService.getStringLCImage(domain));
         return dto;
-    }
-
-    private void configureEquipment(com.lb_calc_web.domain.model.ControlConfiguration configuration) {
-        configuration.configureEquipment(configuration.getFunctionalConfiguration(),
-                equipmentCatalogService.findAll(), equipmentCatalogService.findDefaultModels());
     }
 
     private void prepareForm(Model model, LCDTO lc) {
@@ -172,9 +147,5 @@ public class LCController {
         var equipmentCatalog = equipmentCatalogService.findAll();
         model.addAttribute("equipmentList", equipmentCatalog.stream()
                 .map(EquipmentDtoMapper::toDto).toList());
-        model.addAttribute("displayPurposes", List.of(DisplayPurpose.values()));
-        model.addAttribute("accessPurposes", List.of(AccessPurpose.values()));
-        model.addAttribute("paymentPurposes", List.of(PaymentPurpose.values()));
-        model.addAttribute("printerPurposes", List.of(PrinterPurpose.values()));
     }
 }
