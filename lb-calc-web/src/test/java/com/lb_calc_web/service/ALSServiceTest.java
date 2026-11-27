@@ -239,7 +239,7 @@ class ALSServiceTest {
         );
 
         ALS restored = service.prepareConfiguration(existing,
-                restoreAlsDto(dto, existing.getControlModule().getControlConfiguration()), false);
+                restoreAlsDto(dto), false);
 
         assertEquals("Сохранённое название модуля", restored.getStorageModules().get(0).getName());
         assertEquals("Сохранённое описание модуля", restored.getStorageModules().get(0).getDescription());
