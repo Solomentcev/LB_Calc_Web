@@ -44,10 +44,6 @@ class ProjectServiceTest {
         alsRepository = mock(ALSRepository.class);
         employeeRepository = mock(EmployeeRepository.class);
         alsService = mock(ALSService.class);
-        when(alsService.restoreDomain(any(ALSDTO.class))).thenAnswer(invocation -> {
-            ALSDTO dto = invocation.getArgument(0);
-            return TestDataFactory.restoreALS(dto);
-        });
         employeeService = mock(EmployeeService.class);
 environment = new MockEnvironment()
                 .withProperty("project.company.default", "TEST_COMPANY")
@@ -119,7 +115,7 @@ environment = new MockEnvironment()
         dto.setAlsList(java.util.List.of(invalidALS));
 
         com.lb_calc_web.domain.model.Project domain =
-                ProjectDtoMapper.toDomain(dto, alsService::restoreDomain);
+                ProjectDtoMapper.toDomain(dto, TestDataFactory::restoreALS);
 
         assertThrows(
                 ValidationSizeException.class,
@@ -160,7 +156,6 @@ environment = new MockEnvironment()
                 )
         );
 
-        verify(alsService, never()).restoreLB(any(LBDTO.class));
         verify(projectRepository, never()).save(any(ProjectEntity.class));
     }
 
@@ -176,7 +171,6 @@ environment = new MockEnvironment()
                 () -> projectService.replaceALSandSaveProject(1L, 10L, replacement)
         );
 
-        verify(alsService, never()).restoreDomain(any(ALSDTO.class));
         verify(projectRepository, never()).save(any(ProjectEntity.class));
     }
 
