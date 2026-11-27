@@ -151,7 +151,7 @@ public class ProjectRestController {
     @Operation(
             summary = "Создать проект"
     )
-    public ResponseEntity<?> createProject(
+    public ResponseEntity<ApiResponse<ProjectDTO>> createProject(
             @RequestBody @Valid ProjectDTO project
     ) {
 
