@@ -6,6 +6,8 @@ import com.lb_calc_web.dto.JwtResponse;
 import com.lb_calc_web.dto.LoginRequest;
 import com.lb_calc_web.dto.RegistrationDTO;
 import com.lb_calc_web.service.AuthService;
+import com.lb_calc_web.security.jwt.AuthTokens;
+import com.lb_calc_web.mapper.dto.EmployeeDtoMapper;
 import jakarta.security.auth.message.AuthException;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -26,8 +28,9 @@ public class AuthRestController {
     /** Выполняет вход по учётным данным и возвращает пару JWT-токенов. */
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody @Valid LoginRequest loginRequest) throws AuthException {
-        JwtResponse tokens = authService.login(loginRequest);
-        return ResponseEntity.ok(ApiResponse.success("Login successful", tokens));
+        AuthTokens tokens = authService.login(loginRequest.getEmail(), loginRequest.getPassword());
+        JwtResponse response = new JwtResponse(tokens.accessToken(), tokens.refreshToken());
+        return ResponseEntity.ok(ApiResponse.success("Login successful", response));
 
     }
 
@@ -35,7 +38,13 @@ public class AuthRestController {
 
     @PostMapping("/registration")
     public ResponseEntity<?> registration(@RequestBody @Valid RegistrationDTO registrationDTO) {
-        EmployeeDTO employee = authService.registration(registrationDTO);
+        EmployeeDTO employee = EmployeeDtoMapper.toDto(authService.registration(
+                registrationDTO.getFirstName(),
+                registrationDTO.getLastName(),
+                registrationDTO.getEmail(),
+                registrationDTO.getPassword(),
+                registrationDTO.getConfirmPassword()
+        ));
         ApiResponse<EmployeeDTO> response = ApiResponse.success("Registration successful", employee);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
 
@@ -48,9 +57,10 @@ public class AuthRestController {
             throw new IllegalArgumentException("Refresh token is missing");
         }
 
-        JwtResponse tokens = authService.refresh(refreshToken);
-        ApiResponse<JwtResponse> response = ApiResponse.success("Token refreshed", tokens);
-        return ResponseEntity.ok(response);
+        AuthTokens tokens = authService.refresh(refreshToken);
+        JwtResponse response = new JwtResponse(tokens.accessToken(), tokens.refreshToken());
+        ApiResponse<JwtResponse> body = ApiResponse.success("Token refreshed", response);
+        return ResponseEntity.ok(body);
 
     }
 
