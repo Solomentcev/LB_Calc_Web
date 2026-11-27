@@ -15,6 +15,7 @@ import com.lb_calc_web.dto.ALSDTO;
 import com.lb_calc_web.dto.LBCDTO;
 import com.lb_calc_web.dto.LBDTO;
 import com.lb_calc_web.dto.LCDTO;
+import com.lb_calc_web.dto.EquipmentDTO;
 import com.lb_calc_web.dto.FunctionalConfigurationDTO;
 import com.lb_calc_web.dto.ProjectDTO;
 import com.lb_calc_web.mapper.dto.ALSDtoMapper;
@@ -108,6 +109,13 @@ public final class TestDataFactory {
                 alsValidator,
                 projectValidator
         );
+    }
+
+    public static EquipmentDTO selectedEquipment(Long id, int quantity) {
+        EquipmentDTO dto = new EquipmentDTO();
+        dto.setId(id);
+        dto.setQuantity(quantity);
+        return dto;
     }
 
     public static LCDTO validLCDTO(Long id) {
