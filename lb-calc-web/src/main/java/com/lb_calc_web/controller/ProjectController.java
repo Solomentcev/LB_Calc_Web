@@ -7,6 +7,8 @@ import com.lb_calc_web.domain.model.ALS;
 import com.lb_calc_web.domain.model.LB;
 import com.lb_calc_web.domain.model.LC;
 import com.lb_calc_web.domain.model.LBC;
+import com.lb_calc_web.domain.model.ControlConfiguration;
+import com.lb_calc_web.domain.model.ControlModule;
 import com.lb_calc_web.mapper.dto.ALSDtoMapper;
 import com.lb_calc_web.mapper.dto.ProjectDtoMapper;
 import com.lb_calc_web.mapper.dto.LCDtoMapper;
@@ -17,6 +19,9 @@ import com.lb_calc_web.dto.LBDTO;
 import com.lb_calc_web.dto.LCDTO;
 import com.lb_calc_web.dto.ProjectDTO;
 import com.lb_calc_web.service.validation.ValidationSizeException;
+import com.lb_calc_web.service.validation.size.SizeBounds;
+import com.lb_calc_web.service.factory.TypeLbFactory;
+import org.springframework.core.env.Environment;
 import com.lb_calc_web.service.ProjectService;
 import com.lb_calc_web.service.ProjectCatalogFilter;
 import com.lb_calc_web.service.ALSService;
@@ -56,17 +61,23 @@ public class ProjectController
     private final ALSService alsService;
     private final ProjectExcelExportService projectExcelExportService;
     private final EquipmentCatalogService equipmentCatalogService;
+    private final SizeBounds sizeBounds;
+    private final Environment environment;
 
     public ProjectController(
             ProjectService projectService,
             ALSService alsService,
             ProjectExcelExportService projectExcelExportService,
-            EquipmentCatalogService equipmentCatalogService
+            EquipmentCatalogService equipmentCatalogService,
+            SizeBounds sizeBounds,
+            Environment environment
     ) {
         this.projectService = projectService;
         this.alsService = alsService;
         this.projectExcelExportService = projectExcelExportService;
         this.equipmentCatalogService = equipmentCatalogService;
+        this.sizeBounds = sizeBounds;
+        this.environment = environment;
     }
 
     /**
@@ -343,7 +354,7 @@ public class ProjectController
         com.lb_calc_web.domain.model.Project preview =
                 projectService.findById(projectId);
         try {
-            ALS replacement = alsService.restoreDomain(als);
+            ALS replacement = toDomain(als, persistedALS);
             preview = projectService.previewALSReplacement(projectId, alsId, replacement);
             als = ALSDtoMapper.toDto(replacement);
         } catch (ValidationSizeException exception) {
@@ -377,7 +388,7 @@ public class ProjectController
             ALSDTO persisted = ALSDtoMapper.toDto(persistedALS);
             als.setLC(persisted.getLC());
             als.setLBC(persisted.getLBC());
-            ALS replacement = alsService.restoreDomain(als);
+            ALS replacement = toDomain(als);
             ALS savedALS = projectService.replaceALSandSaveProject(
                     projectId,
                     alsId,
@@ -461,7 +472,7 @@ public class ProjectController
         com.lb_calc_web.domain.model.Project preview = projectService.findById(projectId);
         ALS updatedALS = sourceALS;
         try {
-            com.lb_calc_web.domain.model.LC replacement = alsService.restoreLC(lc, sourceALS);
+            com.lb_calc_web.domain.model.LC replacement = toDomain(lc, sourceALS);
             ALS candidateALS = alsService.replaceLC(sourceALS.copy(), replacement);
             preview = projectService.previewALSReplacement(projectId, alsId, candidateALS);
             updatedALS = candidateALS;
@@ -591,7 +602,7 @@ public class ProjectController
         com.lb_calc_web.domain.model.Project preview = projectService.findById(projectId);
         ALS updatedALS = sourceALS;
         try {
-            com.lb_calc_web.domain.model.LBC replacement = alsService.restoreLBC(lbc, sourceALS);
+            com.lb_calc_web.domain.model.LBC replacement = toDomain(lbc, sourceALS);
             ALS candidateALS = alsService.replaceLBC(sourceALS.copy(), replacement);
             preview = projectService.previewALSReplacement(projectId, alsId, candidateALS);
             updatedALS = candidateALS;
@@ -706,7 +717,7 @@ public class ProjectController
         ALS sourceALS = projectService.findALSInProject(projectId, alsId);
         ALS updatedALS = sourceALS;
         try {
-            LB replacement = alsService.restoreLB(lb);
+            LB replacement = toDomain(lb);
             ALS candidateALS = alsService.replaceLB(sourceALS.copy(), lbId, replacement);
             preview = projectService.previewALSReplacement(projectId, alsId, candidateALS);
             updatedALS = candidateALS;
@@ -900,6 +911,75 @@ public class ProjectController
                 )
                 .body(file);
     }
+    /** Преобразует DTO ALS в доменную модель с учётом сохранённой конфигурации. */
+    private ALS toDomain(ALSDTO dto) {
+        ALS existing = dto.getId() != null && dto.getId() > 0
+                ? alsService.findById(dto.getId()) : null;
+        return toDomain(dto, existing);
+    }
+
+    /** Преобразует DTO ALS и сохраняет неизменённые доменные модули. */
+    private ALS toDomain(ALSDTO dto, ALS existing) {
+        ControlConfiguration fallback = null;
+        if (existing != null) {
+            ControlModule currentControl = existing.getControlModule();
+            if ((dto.getLC() != null && currentControl instanceof LC)
+                    || (dto.getLBC() != null && currentControl instanceof LBC)) {
+                fallback = currentControl.getControlConfiguration();
+                fallback.setFunctionalConfiguration(existing.getFunctionalConfiguration());
+            }
+        }
+        ALS restored = ALSDtoMapper.toDomain(
+                dto,
+                candidate -> TypeLbFactory.forLB(environment, candidate.getType()),
+                candidate -> TypeLbFactory.forLBC(environment, candidate.getType()),
+                equipmentCatalogService::findById,
+                fallback,
+                sizeBounds
+        );
+        boolean equipmentSelectionOmitted = dto.getLC() != null
+                ? !dto.getLC().isEquipmentProvided() && dto.getLC().getSelectedEquipment().isEmpty()
+                : !dto.getLBC().isEquipmentProvided() && dto.getLBC().getSelectedEquipment().isEmpty();
+        boolean functionalConfigurationChanged = fallback != null
+                && !restored.getFunctionalConfiguration().equals(
+                fallback.getFunctionalConfiguration());
+        if (equipmentSelectionOmitted || functionalConfigurationChanged) {
+            ControlConfiguration configuration = restored.getControlModule().getControlConfiguration();
+            equipmentCatalogService.configureFunctionalEquipment(configuration);
+            restored.setControlConfiguration(configuration);
+        }
+        return alsService.preserveExistingModules(existing, restored);
+    }
+
+    /** Преобразует DTO управляющего модуля LC с учётом прежней комплектации. */
+    private LC toDomain(LCDTO dto, ALS sourceALS) {
+        ControlConfiguration fallback = sourceALS.getControlModule() instanceof LC
+                ? sourceALS.getControlModule().getControlConfiguration() : null;
+        LC restored = LCDtoMapper.toDomain(dto, equipmentCatalogService::findById, fallback, sizeBounds);
+        equipmentCatalogService.configureFunctionalEquipment(restored.getControlConfiguration());
+        return restored;
+    }
+
+    /** Преобразует DTO управляющего модуля LBC с учётом прежней комплектации. */
+    private LBC toDomain(LBCDTO dto, ALS sourceALS) {
+        ControlConfiguration fallback = sourceALS.getControlModule() instanceof LBC
+                ? sourceALS.getControlModule().getControlConfiguration() : null;
+        LBC restored = LBCDtoMapper.toDomain(
+                dto,
+                TypeLbFactory.forLBC(environment, dto.getType()),
+                equipmentCatalogService::findById,
+                fallback,
+                sizeBounds
+        );
+        equipmentCatalogService.configureFunctionalEquipment(restored.getControlConfiguration());
+        return restored;
+    }
+
+    /** Преобразует DTO LB в доменную модель с конструктивными параметрами из конфигурации. */
+    private LB toDomain(LBDTO dto) {
+        return LBDtoMapper.toDomain(dto, TypeLbFactory.forLB(environment, dto.getType()));
+    }
+
     /**
      * Добавляет изображения ALS перед передачей проекта в представление.
      */
@@ -909,7 +989,7 @@ public class ProjectController
                 ALSDTO als = project.getAlsList().get(index);
                 try {
                     project.getAlsList().set(index, toDtoWithImages(alsService.restoreDomain(als)));
-                } catch (ValidationSizeException | IllegalArgumentException exception) {
+                } catch (ValidationSizeException | IllegalArgumentException | NoSuchElementException exception) {
                     // Для некорректной промежуточной формы изображение не формируется.
                 }
             }
@@ -920,8 +1000,8 @@ public class ProjectController
 
     private ALSDTO addALSImage(ALSDTO dto) {
         try {
-            return toDtoWithImages(alsService.restoreDomain(dto));
-        } catch (ValidationSizeException | IllegalArgumentException exception) {
+            return toDtoWithImages(toDomain(dto));
+        } catch (ValidationSizeException | IllegalArgumentException | NoSuchElementException exception) {
             return dto;
         }
     }
@@ -945,7 +1025,7 @@ public class ProjectController
     private LCDTO addLCImage(LCDTO dto, Long projectId, Long alsId) {
         try {
             ALS als = projectService.findALSInProject(projectId, alsId);
-            return toDtoWithImage(alsService.restoreLC(dto, als));
+            return toDtoWithImage(toDomain(dto, als));
         } catch (ValidationSizeException | IllegalArgumentException exception) {
             return dto;
         }
@@ -954,7 +1034,7 @@ public class ProjectController
     private LBCDTO addLBCImage(LBCDTO dto, Long projectId, Long alsId) {
         try {
             ALS als = projectService.findALSInProject(projectId, alsId);
-            return toDtoWithImage(alsService.restoreLBC(dto, als));
+            return toDtoWithImage(toDomain(dto, als));
         } catch (ValidationSizeException | IllegalArgumentException exception) {
             return dto;
         }
@@ -962,7 +1042,7 @@ public class ProjectController
 
     private LBDTO addLBImage(LBDTO dto) {
         try {
-            return toDtoWithImage(alsService.restoreLB(dto));
+            return toDtoWithImage(toDomain(dto));
         } catch (ValidationSizeException | IllegalArgumentException exception) {
             return dto;
         }
