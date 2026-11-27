@@ -71,7 +71,8 @@ class LBCControllerTest {
                 / 10 * 3 + 1;
 
         assertEquals(Color.GRAY.getRGB(), image.getRGB(displayCenterX, displayCenterY));
-        assertEquals(Map.of(1L, 1), dto.getEquipment());
+        assertEquals(1, dto.getSelectedEquipment().size());
+        assertEquals(1L, dto.getSelectedEquipment().get(0).getId());
     }
 
     private LBC createLbc(Map<Equipment, Integer> equipment) {
