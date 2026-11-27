@@ -194,14 +194,23 @@ public class LBCService {
                     fallbackConfiguration,
                     sizeBounds
             );
-            if (dto.getEquipment() == null && !dto.isEquipmentProvided()) {
-                equipmentCatalogService.configureFunctionalEquipment(
-                        restored.getControlConfiguration());
+            boolean functionalConfigurationChanged = fallbackConfiguration != null
+                    && !restored.getControlConfiguration().getFunctionalConfiguration().equals(
+                    fallbackConfiguration.getFunctionalConfiguration());
+            if ((dto.getEquipment() == null && !dto.isEquipmentProvided())
+                    || functionalConfigurationChanged) {
+                configureFunctionalEquipment(restored);
             }
             return restored;
         } catch (RuntimeException exception) {
             throw createMappingValidationException("LBC", dto.getId(), exception);
         }
+    }
+
+    /** Дополняет комплектацию LBC физическими моделями по функциональным назначениям. */
+    public void configureFunctionalEquipment(LBC domain) {
+        Objects.requireNonNull(domain, "LBC не должен быть null");
+        equipmentCatalogService.configureFunctionalEquipment(domain.getControlConfiguration());
     }
 
     /** Проверяет и сохраняет доменную конфигурацию LBC. */

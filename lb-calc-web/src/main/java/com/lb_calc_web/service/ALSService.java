@@ -451,6 +451,21 @@ public class ALSService {
                     fallback,
                     sizeBounds
             );
+
+            boolean equipmentSelectionOmitted = dto.getLC() != null
+                    ? dto.getLC().getEquipment() == null && !dto.getLC().isEquipmentProvided()
+                    : dto.getLBC().getEquipment() == null && !dto.getLBC().isEquipmentProvided();
+            boolean functionalConfigurationChanged = fallback != null
+                    && !restored.getFunctionalConfiguration().equals(
+                    fallback.getFunctionalConfiguration());
+            if (equipmentSelectionOmitted || functionalConfigurationChanged) {
+                if (restored.getControlModule() instanceof LC lc) {
+                    lcService.configureFunctionalEquipment(lc);
+                } else if (restored.getControlModule() instanceof LBC lbc) {
+                    lbcService.configureFunctionalEquipment(lbc);
+                }
+            }
+
             if (existingALS == null) {
                 return restored;
             }

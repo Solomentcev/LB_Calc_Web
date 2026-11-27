@@ -212,14 +212,23 @@ public class LCService {
             LC restored = LCDtoMapper.toDomain(
                     dto, this::findEquipment, fallbackConfiguration,
                     sizeBounds);
-            if (dto.getEquipment() == null && !dto.isEquipmentProvided()) {
-                equipmentCatalogService.configureFunctionalEquipment(
-                        restored.getControlConfiguration());
+            boolean functionalConfigurationChanged = fallbackConfiguration != null
+                    && !restored.getControlConfiguration().getFunctionalConfiguration().equals(
+                    fallbackConfiguration.getFunctionalConfiguration());
+            if ((dto.getEquipment() == null && !dto.isEquipmentProvided())
+                    || functionalConfigurationChanged) {
+                configureFunctionalEquipment(restored);
             }
             return restored;
         } catch (RuntimeException exception) {
             throw createMappingValidationException("LC", dto.getId(), exception);
         }
+    }
+
+    /** Дополняет комплектацию LC физическими моделями по функциональным назначениям. */
+    public void configureFunctionalEquipment(LC domain) {
+        Objects.requireNonNull(domain, "LC не должен быть null");
+        equipmentCatalogService.configureFunctionalEquipment(domain.getControlConfiguration());
     }
 
     /** Проверяет и сохраняет доменную конфигурацию LC. */
