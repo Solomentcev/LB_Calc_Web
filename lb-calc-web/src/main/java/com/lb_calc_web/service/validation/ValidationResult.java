@@ -8,7 +8,6 @@ import java.util.List;
  * Результат прикладной проверки геометрических и структурных ограничений.
  */
 public class ValidationResult {
-    private boolean valid;
     private String objectType; // ALS, LB, LC
     private Long objectId;
     private List<ValidationError> errors;
@@ -23,10 +22,6 @@ public class ValidationResult {
         this();
         this.objectType = objectType;
         this.objectId = objectId;
-    }
-    public void addError(ValidationResult validationResult, String field, String message, Object actual, Object min, Object max) {
-
-        errors.add(new ValidationError(validationResult.getObjectType(), validationResult.getObjectId(), field, message, actual, min, max));
     }
     public void addError(String field, String message, Object actual, Object min, Object max) {
         errors.add(new ValidationError(
@@ -50,9 +45,8 @@ public class ValidationResult {
         return errors.isEmpty();
     }
 
-    // Getters and Setters
-    public boolean getValid() { return valid; }
-    public void setValid(boolean valid) { this.valid = valid; }
+    /** Возвращает состояние результата для JavaBean-сериализации. */
+    public boolean getValid() { return isValid(); }
 
     public String getObjectType() { return objectType; }
     public void setObjectType(String objectType) { this.objectType = objectType; }
