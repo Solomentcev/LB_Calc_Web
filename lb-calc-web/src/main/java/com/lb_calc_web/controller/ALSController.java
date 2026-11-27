@@ -6,6 +6,10 @@ import com.lb_calc_web.dto.LCDTO;
 import com.lb_calc_web.dto.LBDTO;
 import com.lb_calc_web.domain.model.ALS;
 import com.lb_calc_web.domain.model.LB;
+import com.lb_calc_web.domain.model.ControlConfiguration;
+import com.lb_calc_web.domain.model.ControlModule;
+import com.lb_calc_web.domain.model.LC;
+import com.lb_calc_web.domain.model.LBC;
 import com.lb_calc_web.mapper.dto.EquipmentDtoMapper;
 import com.lb_calc_web.service.EquipmentCatalogService;
 import com.lb_calc_web.mapper.dto.ALSDtoMapper;
@@ -17,6 +21,9 @@ import com.lb_calc_web.service.image.LBCImageService;
 import com.lb_calc_web.service.image.LCImageService;
 import com.lb_calc_web.service.image.LBImageService;
 import com.lb_calc_web.service.validation.ValidationSizeException;
+import com.lb_calc_web.service.validation.size.SizeBounds;
+import com.lb_calc_web.service.factory.TypeLbFactory;
+import org.springframework.core.env.Environment;
 import com.lb_calc_web.service.ALSService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -33,13 +40,19 @@ public class ALSController extends BaseCatalogController {
 
     private final ALSService alsService;
     private final EquipmentCatalogService equipmentCatalogService;
+    private final SizeBounds sizeBounds;
+    private final Environment environment;
 
     public ALSController(
             ALSService alsService,
-            EquipmentCatalogService equipmentCatalogService
+            EquipmentCatalogService equipmentCatalogService,
+            SizeBounds sizeBounds,
+            Environment environment
     ) {
         this.alsService = alsService;
         this.equipmentCatalogService = equipmentCatalogService;
+        this.sizeBounds = sizeBounds;
+        this.environment = environment;
     }
 
     /** Открывает форму создания новой конфигурации ALS. */
@@ -67,16 +80,18 @@ public class ALSController extends BaseCatalogController {
     public String refreshALS(@ModelAttribute("als") ALSDTO als, Model model) {
         model.addAttribute("pageContext", "CATALOG");
         try {
-            if (als.getId() != null && als.getId() > 0) {
-                ALSDTO persisted = ALSDtoMapper.toDto(alsService.findById(als.getId()));
+            ALS existing = als.getId() != null && als.getId() > 0
+                    ? alsService.findById(als.getId()) : null;
+            if (existing != null) {
+                ALSDTO persisted = ALSDtoMapper.toDto(existing);
                 als.setLC(persisted.getLC());
                 als.setLBC(persisted.getLBC());
             }
-            als = toDtoWithImages(alsService.restoreDomain(als));
+            als = toDtoWithImages(toDomain(als, existing));
         } catch (ValidationSizeException exception) {
             model.addAttribute("ALSErrors",
                     ValidationErrorFormatter.format(exception.getValidationResult()));
-        } catch (IllegalArgumentException exception) {
+        } catch (IllegalArgumentException | IllegalStateException exception) {
             model.addAttribute("ALSErrors", List.of(exception.getMessage()));
         }
         model.addAttribute("als", als);
@@ -91,20 +106,22 @@ public class ALSController extends BaseCatalogController {
             // Главная форма ALS редактирует параметры агрегата, но не состав LC/LBC.
             // Восстанавливаем управляющий модуль из БД, чтобы форма не теряла
             // каталожное оборудование, которое не редактируется на этой странице.
-            if (als.getId() != null && als.getId() > 0) {
-                ALSDTO persisted = ALSDtoMapper.toDto(alsService.findById(als.getId()));
+            ALS existing = als.getId() != null && als.getId() > 0
+                    ? alsService.findById(als.getId()) : null;
+            if (existing != null) {
+                ALSDTO persisted = ALSDtoMapper.toDto(existing);
                 als.setLC(persisted.getLC());
                 als.setLBC(persisted.getLBC());
             }
 
-            com.lb_calc_web.domain.model.ALS domain = alsService.restoreDomain(als);
-            com.lb_calc_web.domain.model.ALS saved = alsService.saveALS(domain);
+            ALS domain = toDomain(als, existing);
+            ALS saved = alsService.saveALS(domain);
             return "redirect:/alss/" + saved.getId();
         } catch (ValidationSizeException e) {
             model.addAttribute("ALSErrors", ValidationErrorFormatter.format(e.getValidationResult()));
             model.addAttribute("als", als);
             return "alss/als";
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException | IllegalStateException e) {
             model.addAttribute("ALSErrors", List.of(e.getMessage()));
             model.addAttribute("als", als);
             return "alss/als";
@@ -147,7 +164,7 @@ public class ALSController extends BaseCatalogController {
         findLBInALS(als, lbId);
         lb.setId(lbId);
         try {
-            LB replacement = alsService.restoreLB(lb);
+            LB replacement = LBDtoMapper.toDomain(lb, TypeLbFactory.forLB(environment, lb.getType()));
             als = alsService.replaceLB(als.copy(), lbId, replacement);
             lb = toDtoWithImage(replacement);
         } catch (IllegalArgumentException exception) {
@@ -184,6 +201,66 @@ public class ALSController extends BaseCatalogController {
             model.addAttribute("lb", lb);
             return "lbs/lb";
         }
+    }
+
+    /** Преобразует данные формы ALS в доменную модель и сохраняет данные неизменённых модулей. */
+    private ALS toDomain(ALSDTO dto, ALS existing) {
+        ControlConfiguration fallback = null;
+        if (existing != null) {
+            ControlModule currentControl = existing.getControlModule();
+            if ((dto.getLC() != null && currentControl instanceof LC)
+                    || (dto.getLBC() != null && currentControl instanceof LBC)) {
+                fallback = currentControl.getControlConfiguration();
+                fallback.setFunctionalConfiguration(existing.getFunctionalConfiguration());
+            }
+        }
+
+        ALS restored = ALSDtoMapper.toDomain(
+                dto,
+                candidate -> TypeLbFactory.forLB(environment, candidate.getType()),
+                candidate -> TypeLbFactory.forLBC(environment, candidate.getType()),
+                equipmentCatalogService::findById,
+                fallback,
+                sizeBounds
+        );
+
+        boolean equipmentSelectionOmitted = dto.getLC() != null
+                ? !dto.getLC().isEquipmentProvided() && dto.getLC().getSelectedEquipment().isEmpty()
+                : !dto.getLBC().isEquipmentProvided() && dto.getLBC().getSelectedEquipment().isEmpty();
+        boolean functionalConfigurationChanged = fallback != null
+                && !restored.getFunctionalConfiguration().equals(
+                fallback.getFunctionalConfiguration());
+        if (equipmentSelectionOmitted || functionalConfigurationChanged) {
+            ControlConfiguration configuration = restored.getControlModule().getControlConfiguration();
+            equipmentCatalogService.configureFunctionalEquipment(configuration);
+            restored.setControlConfiguration(configuration);
+        }
+
+        return alsService.preserveExistingModules(existing, restored);
+    }
+
+    /** Восстанавливает LC из формы с учётом текущей комплектации управляющего модуля ALS. */
+    private LC toDomain(LCDTO dto, ALS als) {
+        ControlConfiguration fallback = als.getControlModule() instanceof LC
+                ? als.getControlModule().getControlConfiguration() : null;
+        LC restored = LCDtoMapper.toDomain(dto, equipmentCatalogService::findById, fallback, sizeBounds);
+        equipmentCatalogService.configureFunctionalEquipment(restored.getControlConfiguration());
+        return restored;
+    }
+
+    /** Восстанавливает LBC из формы с учётом текущей комплектации управляющего модуля ALS. */
+    private LBC toDomain(LBCDTO dto, ALS als) {
+        ControlConfiguration fallback = als.getControlModule() instanceof LBC
+                ? als.getControlModule().getControlConfiguration() : null;
+        LBC restored = LBCDtoMapper.toDomain(
+                dto,
+                TypeLbFactory.forLBC(environment, dto.getType()),
+                equipmentCatalogService::findById,
+                fallback,
+                sizeBounds
+        );
+        equipmentCatalogService.configureFunctionalEquipment(restored.getControlConfiguration());
+        return restored;
     }
 
     private ALSDTO toDtoWithImages(ALS domain) {
@@ -271,7 +348,7 @@ public class ALSController extends BaseCatalogController {
             }
             lc.setId(lcId);
 
-            com.lb_calc_web.domain.model.LC replacement = alsService.restoreLC(lc, als);
+            LC replacement = toDomain(lc, als);
             com.lb_calc_web.domain.model.ALS saved =
                     alsService.saveALS(alsService.replaceLC(als, replacement));
             return "redirect:/alss/" + saved.getId();
@@ -294,11 +371,13 @@ public class ALSController extends BaseCatalogController {
             throw new NoSuchElementException("LC с id " + lcId + " не найден в ALS " + alsId);
         lc.setId(lcId);
         try {
-            com.lb_calc_web.domain.model.LC replacement = alsService.restoreLC(lc, source);
+            LC replacement = toDomain(lc, source);
             source = alsService.replaceLC(source.copy(), replacement);
             lc = toDtoWithImage(replacement);
         } catch (ValidationSizeException exception) {
             model.addAttribute("errors", ValidationErrorFormatter.format(exception.getValidationResult()));
+        } catch (IllegalArgumentException | IllegalStateException exception) {
+            model.addAttribute("errors", List.of(exception.getMessage()));
         }
         model.addAttribute("als", toDtoWithImages(source));
         prepareLCForm(model, lc);
@@ -346,7 +425,7 @@ public class ALSController extends BaseCatalogController {
             com.lb_calc_web.domain.model.ALS als = alsService.findById(alsId);
             lbc.setId(lbcId);
 
-            com.lb_calc_web.domain.model.LBC replacement = alsService.restoreLBC(lbc, als);
+            LBC replacement = toDomain(lbc, als);
             com.lb_calc_web.domain.model.ALS saved =
                     alsService.saveALS(alsService.replaceLBC(als, replacement));
             return "redirect:/alss/" + saved.getId();
@@ -367,11 +446,13 @@ public class ALSController extends BaseCatalogController {
         alsService.findLBCInALS(source, lbcId);
         lbc.setId(lbcId);
         try {
-            com.lb_calc_web.domain.model.LBC replacement = alsService.restoreLBC(lbc, source);
+            LBC replacement = toDomain(lbc, source);
             source = alsService.replaceLBC(source.copy(), replacement);
             lbc = toDtoWithImage(replacement);
         } catch (ValidationSizeException exception) {
             model.addAttribute("errors", ValidationErrorFormatter.format(exception.getValidationResult()));
+        } catch (IllegalArgumentException | IllegalStateException exception) {
+            model.addAttribute("errors", List.of(exception.getMessage()));
         }
         model.addAttribute("als", toDtoWithImages(source));
         prepareLBCForm(model, lbc);
