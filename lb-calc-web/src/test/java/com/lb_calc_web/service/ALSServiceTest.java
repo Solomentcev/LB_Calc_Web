@@ -234,12 +234,12 @@ class ALSServiceTest {
     void restoreDomain_shouldConvertDtoWithoutLegacyCatalogDependencies() {
         var dto = TestDataFactory.validALSDTO(3L);
         dto.setId(null);
-        ALS result = restoreAlsDto(dto, null);
+        ALS result = restoreAlsDto(dto);
 
         assertNotNull(result);
         assertEquals(3, result.getModules().size());
     }
-    private ALS restoreAlsDto(ALSDTO dto, ControlConfiguration fallback) {
+    private ALS restoreAlsDto(ALSDTO dto) {
         return ALSDtoMapper.toDomain(
                 dto,
                 value -> new TypeLb(value.getType(), value.getDeltaWidth(),
@@ -250,7 +250,6 @@ class ALSServiceTest {
                     throw new IllegalStateException(
                             "Оборудование в этом тесте не должно загружаться");
                 },
-                fallback,
                 TestDataFactory.createSizeBounds()
         );
     }
