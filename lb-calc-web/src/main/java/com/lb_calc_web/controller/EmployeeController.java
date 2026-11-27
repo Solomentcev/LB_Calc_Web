@@ -380,18 +380,18 @@ public class EmployeeController {
 
         try {
 
-            EmployeeDTO employeeDTO =
-                    authService.createEmployee(
-                            createEmployeeDTO
-                    );
+            Employee employee = authService.createEmployee(
+                    EmployeeDtoMapper.toDomain(createEmployeeDTO),
+                    createEmployeeDTO.getPassword(),
+                    createEmployeeDTO.getConfirmPassword()
+            );
 
             redirectAttributes.addFlashAttribute(
                     "successMessage",
                     "Пользователь успешно создан"
             );
 
-            return "redirect:/employees/" +
-                    employeeDTO.getId();
+            return "redirect:/employees/" + employee.getId();
 
         } catch (IllegalArgumentException exception) {
             model.addAttribute(
