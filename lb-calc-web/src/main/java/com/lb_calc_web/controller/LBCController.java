@@ -116,7 +116,12 @@ public class LBCController extends BaseCatalogController {
     public String refreshLBC(@ModelAttribute("lbc") LBCDTO lbc, Model model) {
         model.addAttribute("pageContext", "CATALOG");
         try {
-            LBC domain = toDomain(lbc);
+            ControlConfiguration fallback = lbc.getId() != null && lbc.getId() > 0
+                    ? lbcService.findById(lbc.getId()).getControlConfiguration() : null;
+            LBC domain = LBCDtoMapper.toDomain(
+                    lbc, TypeLbFactory.forLBC(environment, lbc.getType()),
+                    equipmentCatalogService::findById, fallback, sizeBounds);
+            lbcService.configureFunctionalEquipment(domain);
             lbc = toDtoWithImage(domain);
         } catch (ValidationSizeException exception) {
             model.addAttribute("errors", ValidationErrorFormatter.format(exception.getValidationResult()));
@@ -137,7 +142,12 @@ public class LBCController extends BaseCatalogController {
     ) {
         model.addAttribute("pageContext", "CATALOG");
         try {
-            LBC domain = toDomain(lbc);
+            ControlConfiguration fallback = lbc.getId() != null && lbc.getId() > 0
+                    ? lbcService.findById(lbc.getId()).getControlConfiguration() : null;
+            LBC domain = LBCDtoMapper.toDomain(
+                    lbc, TypeLbFactory.forLBC(environment, lbc.getType()),
+                    equipmentCatalogService::findById, fallback, sizeBounds);
+            lbcService.configureFunctionalEquipment(domain);
             LBC saved = lbcService.saveLBC(domain);
 
             return "redirect:/lbcs/" + saved.getId();
@@ -155,28 +165,6 @@ public class LBCController extends BaseCatalogController {
             prepareForm(model, lbc);
             return "lbcs/lbc";
         }
-    }
-
-    /** Восстанавливает доменную модель LBC из данных формы. */
-    private LBC toDomain(LBCDTO dto) {
-        ControlConfiguration fallback = dto.getId() != null && dto.getId() > 0
-                ? lbcService.findById(dto.getId()).getControlConfiguration()
-                : null;
-        LBC domain = LBCDtoMapper.toDomain(
-                dto,
-                TypeLbFactory.forLBC(environment, dto.getType()),
-                equipmentCatalogService::findById,
-                fallback,
-                sizeBounds
-        );
-        boolean selectionOmitted = !dto.isEquipmentProvided() && dto.getSelectedEquipment().isEmpty();
-        boolean functionalChanged = fallback != null
-                && !domain.getControlConfiguration().getFunctionalConfiguration().equals(
-                fallback.getFunctionalConfiguration());
-        if (selectionOmitted || functionalChanged) {
-            lbcService.configureFunctionalEquipment(domain);
-        }
-        return domain;
     }
 
     private LBCDTO toDtoWithImage(LBC domain) {
