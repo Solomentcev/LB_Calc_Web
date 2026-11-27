@@ -90,7 +90,11 @@ public final class ALSEntityMapper {
         entity.setBottomFrame(domain.getBottomFrame());
         entity.setColorBody(domain.getColorBody());
         entity.setColorDoor(domain.getColorDoor());
-        entity.setFunctionalConfiguration(domain.getFunctionalConfiguration());
+        FunctionalConfiguration configuration = domain.getFunctionalConfiguration();
+        entity.setDisplayPurpose(configuration.getDisplay());
+        entity.setAccessPurposes(configuration.getAccess());
+        entity.setPaymentPurpose(configuration.getPayment());
+        entity.setPrinterPurpose(configuration.getPrinter());
 
         List<ModuleEntity> moduleEntities = domain.getModules().stream()
                 .map(module -> Objects.requireNonNull(
