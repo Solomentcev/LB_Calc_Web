@@ -2,7 +2,6 @@ package com.lb_calc_web.mapper.dto;
 
 import com.lb_calc_web.domain.model.Employee;
 import com.lb_calc_web.dto.EmployeeDTO;
-import com.lb_calc_web.dto.CreateEmployeeDTO;
 import com.lb_calc_web.dto.ProfileDTO;
 
 import java.util.ArrayList;
@@ -29,21 +28,6 @@ public final class EmployeeDtoMapper {
                 dto.getLastName(),
                 dto.getEmail(),
                 dto.getRegistrationDate(),
-                dto.getRole()
-        );
-    }
-
-    /** Преобразует DTO создания учётной записи в доменную модель сотрудника. */
-    public static Employee toDomain(CreateEmployeeDTO dto) {
-        if (dto == null) {
-            return null;
-        }
-
-        return new Employee(
-                dto.getFirstName(),
-                dto.getLastName(),
-                dto.getEmail(),
-                java.time.LocalDate.now(),
                 dto.getRole()
         );
     }
