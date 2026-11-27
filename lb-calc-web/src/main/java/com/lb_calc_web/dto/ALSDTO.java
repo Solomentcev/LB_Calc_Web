@@ -185,6 +185,13 @@ public class ALSDTO {
         this.lbc = lbc;
     }
 
+    /** Возвращает, передавал ли клиент выбор физического оборудования управляющего модуля. */
+    @JsonIgnore
+    public boolean isEquipmentSelectionProvided() {
+        return lc != null ? lc.isEquipmentProvided()
+                : lbc != null && lbc.isEquipmentProvided();
+    }
+
     public FunctionalConfigurationDTO getFunctionalConfiguration() {
         return functionalConfiguration;
     }
