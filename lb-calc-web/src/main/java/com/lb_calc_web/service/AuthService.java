@@ -216,15 +216,16 @@ public class AuthService {
     /** Создаёт учётную запись сотрудника по доменной модели и паролю. */
     @Transactional
     public Employee createEmployee(
-            Employee domain,
+            String firstName,
+            String lastName,
+            String email,
+            Role role,
             String password,
             String confirmPassword
     ) {
-        Objects.requireNonNull(domain, "Доменный сотрудник не должен быть null");
-        if (domain.getId() != null) {
-            throw new IllegalArgumentException("Для создания сотрудника ID должен отсутствовать");
-        }
         validatePasswords(password, confirmPassword);
+        Employee domain = new Employee(
+                firstName, lastName, email, LocalDate.now(), role);
         if (existsByEmail(domain.getEmail())) {
             throw new IllegalArgumentException("Пользователь с таким email уже существует");
         }
