@@ -178,19 +178,16 @@
             </section>
 
 </div>
-            <aside class="module-editor__preview">
-                <section class="module-section">
-                    <div class="module-section__header">
-                        <h2>Чертёж модуля</h2>
-                        <p>Текущий чертёж совмещённого модуля.</p>
-                    </div>
-                    <div class="module-visual module-visual--module" th:if="*{stringLBCImage != null}">
-                        <img th:src="'data:image/png;base64,' + ${lbc.stringLBCImage}" alt="Чертёж модуля хранения и управления">
-                    </div>
-                    <div class="module-section__body text-muted" th:if="*{stringLBCImage == null}">
-                        Чертёж пока недоступен.
-                    </div>
-                </section>
+            <aside class="module-editor__preview" th:if="*{stringLBCImage != null}">
+                <section class="module-section" th:if="*{stringLBCImage != null}">
+            <div class="module-section__header">
+                <h2>Чертёж модуля</h2>
+                <p>Текущий чертёж совмещённого модуля.</p>
+            </div>
+            <div class="module-visual module-visual--module">
+                <img th:src="'data:image/png;base64,' + ${lbc.stringLBCImage}" alt="Чертёж модуля хранения и управления">
+            </div>
+        </section>
             </aside>
         </div>
     </form>
