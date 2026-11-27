@@ -655,9 +655,14 @@ class PersistenceIntegrationTest {
                     changedLCDTO.isEquipmentProvided()
             );
             var selectedLCEquipment = LCDtoMapper.toDto(changedWithLC.getLC()).getSelectedEquipment();
-            assertEquals(1, selectedLCEquipment.size());
-            assertEquals(barcodeScanner.getId(), selectedLCEquipment.get(0).getId());
-            assertEquals(1, selectedLCEquipment.get(0).getQuantity());
+            assertEquals(2, selectedLCEquipment.size());
+            var selectedBarcodeScanner = selectedLCEquipment.stream()
+                    .filter(item -> barcodeScanner.getId().equals(item.getId()))
+                    .findFirst().orElseThrow();
+            assertEquals(1, selectedBarcodeScanner.getQuantity());
+            assertTrue(selectedLCEquipment.stream().anyMatch(item ->
+                    item.getFunctionalType() == EquipmentFunctionalType.DISPLAY
+                            && item.getId() != null));
 
             LBCDTO changedLBCDTO = LBCDtoMapper.toDto(independentConfiguration.getLBC());
             changedLBCDTO.getFunctionalConfiguration().setAccess(Set.of(AccessPurpose.BAR_CODE));
