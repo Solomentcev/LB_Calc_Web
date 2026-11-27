@@ -59,7 +59,7 @@ public class LCRestController {
             summary = "Получить все LC",
             description = "Возвращает список всех модулей управления LC"
     )
-    public ResponseEntity<?> getAllLC() {
+    public ResponseEntity<ApiResponse<List<LCDTO>>> getAllLC() {
         logger.debug("GET /api/v1/lcs");
         List<LCDTO> lcList = LCDtoMapper.toDtoList(lcService.findAll());
         return ResponseEntity.ok(ApiResponse.success(lcList));
@@ -73,7 +73,7 @@ public class LCRestController {
             summary = "Получить LC по ID",
             description = "Возвращает модуль управления LC по идентификатору"
     )
-    public ResponseEntity<?> getLCById(
+    public ResponseEntity<ApiResponse<LCDTO>> getLCById(
             @Parameter(description = "Идентификатор LC", example = "1")
             @PathVariable @Positive Long id
     ) {
@@ -90,7 +90,7 @@ public class LCRestController {
             summary = "Создать шаблон LC",
             description = "Возвращает LC с параметрами по умолчанию без сохранения в БД"
     )
-    public ResponseEntity<?> createLC() {
+    public ResponseEntity<ApiResponse<LCDTO>> createLC() {
         logger.debug("GET /api/v1/lcs/create");
         LCDTO lc = LCDtoMapper.toDto(lcService.createLC());
         return ResponseEntity.ok(ApiResponse.success(lc));
@@ -104,7 +104,7 @@ public class LCRestController {
             summary = "Сохранить LC",
             description = "Проверяет и сохраняет модуль управления LC"
     )
-    public ResponseEntity<?> saveLC(@RequestBody @Valid LCDTO dto) {
+    public ResponseEntity<ApiResponse<LCDTO>> saveLC(@RequestBody @Valid LCDTO dto) {
         logger.debug(
                 "POST /api/v1/lcs: display={}",
                 dto != null && dto.getFunctionalConfiguration() != null
