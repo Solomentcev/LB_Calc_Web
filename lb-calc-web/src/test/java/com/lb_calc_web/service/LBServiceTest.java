@@ -87,6 +87,32 @@ class LBServiceTest {
     }
 
     @Test
+    void saveLB_shouldUpdateExistingEntityWhenIdIsProvided() {
+        LB original = TestDataFactory.validLB(7L);
+        LBEntity existing = spy(LBEntityMapper.toEntity(original));
+        doReturn(7L).when(existing).getId();
+
+        LB changed = original.copy();
+        changed.setId(7L);
+        changed.setCountCells(original.getCountCells() + 1);
+
+        when(lbRepository.findById(7L)).thenReturn(Optional.of(existing));
+        when(lbRepository.findCandidates(
+                anyInt(), anyInt(), anyInt(), anyInt(), anyInt(),
+                anyString(), anyInt(), anyInt(), anyInt(), anyInt(),
+                any(), anyInt(), any(), any()
+        )).thenReturn(List.of(existing));
+        when(lbRepository.save(any(LBEntity.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        LB saved = lbService.saveLB(changed);
+
+        assertEquals(7L, saved.getId());
+        verify(lbRepository).save(same(existing));
+        assertEquals(changed.getCountCells(), existing.getCountCells());
+    }
+
+    @Test
     void saveLB_shouldPersistNewConfiguration() {
         LB domain = TestDataFactory.validLB(null);
         LBEntity saved = spy(LBEntityMapper.toEntity(domain));
