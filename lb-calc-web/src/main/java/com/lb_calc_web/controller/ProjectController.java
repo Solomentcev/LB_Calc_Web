@@ -19,7 +19,7 @@ import com.lb_calc_web.dto.LBDTO;
 import com.lb_calc_web.dto.LCDTO;
 import com.lb_calc_web.dto.ProjectDTO;
 import com.lb_calc_web.service.validation.ValidationSizeException;
-import com.lb_calc_web.service.validation.size.SizeBounds;
+import com.lb_calc_web.domain.geometry.SizeBounds;
 import com.lb_calc_web.service.factory.TypeLbFactory;
 import org.springframework.core.env.Environment;
 import com.lb_calc_web.service.ProjectService;
