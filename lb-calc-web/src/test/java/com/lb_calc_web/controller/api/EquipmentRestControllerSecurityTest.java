@@ -74,6 +74,13 @@ class EquipmentRestControllerSecurityTest {
                 .andExpect(status().isOk());
     }
 
+    @Test
+    @WithMockUser(authorities = "ROLE_ADMIN")
+    void equipmentId_shouldBePositive() throws Exception {
+        mockMvc.perform(get("/api/v1/equipment/0"))
+                .andExpect(status().isBadRequest());
+    }
+
     @TestConfiguration
     @EnableMethodSecurity
     static class MethodSecurityConfiguration {
