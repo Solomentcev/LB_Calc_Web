@@ -1,5 +1,6 @@
 package com.lb_calc_web.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -10,6 +11,7 @@ import java.util.List;
 import java.util.Objects;
 
 /** DTO управляющего модуля LC для передачи параметров между веб-слоем и сервисами. */
+@Schema(description = "Конфигурация управляющего модуля LC, его функциональные назначения и выбранное физическое оборудование.")
 public class LCDTO {
 
     private Long id;
