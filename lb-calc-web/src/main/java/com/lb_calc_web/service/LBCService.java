@@ -221,8 +221,13 @@ public class LBCService {
             return toDomain(duplicate.get());
         }
 
-        LBCEntity entity = existing.orElseGet(LBCEntity::create);
-        LBCEntityMapper.updateEntity(domain, entity, this::findEquipmentEntity);
+        LBCEntity entity;
+        if (existing.isPresent()) {
+            entity = existing.get();
+            LBCEntityMapper.updateEntity(domain, entity, this::findEquipmentEntity);
+        } else {
+            entity = LBCEntityMapper.toEntity(domain, this::findEquipmentEntity);
+        }
         LBCEntity saved = lbcRepository.save(entity);
         domain.setId(saved.getId());
         logger.info("LBC сохранён, id={}", saved.getId());
