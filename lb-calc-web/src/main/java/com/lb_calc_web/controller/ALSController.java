@@ -21,7 +21,7 @@ import com.lb_calc_web.service.image.LBCImageService;
 import com.lb_calc_web.service.image.LCImageService;
 import com.lb_calc_web.service.image.LBImageService;
 import com.lb_calc_web.service.validation.ValidationSizeException;
-import com.lb_calc_web.service.validation.size.SizeBounds;
+import com.lb_calc_web.domain.geometry.SizeBounds;
 import com.lb_calc_web.service.factory.TypeLbFactory;
 import org.springframework.core.env.Environment;
 import com.lb_calc_web.service.ALSService;
