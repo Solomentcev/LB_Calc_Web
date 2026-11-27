@@ -46,7 +46,7 @@
             <select class="form-control" th:field="*{role}" required>
                 <option th:each="role : ${roles}"
                         th:value="${role}"
-                        th:text="${role}"
+                        th:text="${role == T(com.lb_calc_web.domain.attributes.Role).ROLE_ADMIN ? 'Администратор' : 'Менеджер'}"
                         th:selected="${role == employee.role}"></option>
             </select>
         </div>
