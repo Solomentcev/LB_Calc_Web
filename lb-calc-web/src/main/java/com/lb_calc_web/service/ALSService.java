@@ -403,16 +403,14 @@ public class ALSService {
     /** Заменяет LC в ALS и сохраняет обновлённую конфигурацию. */
     @Transactional
     public ALS replaceLCandSaveALS(ALS als, LC replacement, boolean equipmentSelectionProvided) {
-        ControlConfiguration fallback = als.getControlModule().getControlConfiguration();
-        prepareForReplacement(replacement, fallback, equipmentSelectionProvided);
+        prepareForReplacement(als, replacement, equipmentSelectionProvided);
         return saveALS(replaceLC(als, replacement));
     }
 
     /** Заменяет LBC в ALS и сохраняет обновлённую конфигурацию. */
     @Transactional
     public ALS replaceLBCandSaveALS(ALS als, LBC replacement, boolean equipmentSelectionProvided) {
-        ControlConfiguration fallback = als.getControlModule().getControlConfiguration();
-        prepareForReplacement(replacement, fallback, equipmentSelectionProvided);
+        prepareForReplacement(als, replacement, equipmentSelectionProvided);
         return saveALS(replaceLBC(als, replacement));
     }
 
@@ -457,12 +455,7 @@ public class ALSService {
                 equipmentSelectionProvided);
     }
 
-    public void prepareForReplacement(
-            LC domain, ControlConfiguration fallback, boolean equipmentSelectionProvided
-    ) {
-        lcService.prepareFunctionalEquipment(domain, fallback, equipmentSelectionProvided);
-        lcService.validateForSave(domain);
-    }
+
 
     /**
      * Подготавливает LBC для замены в ALS: согласует комплектацию и проверяет
@@ -477,26 +470,7 @@ public class ALSService {
                 equipmentSelectionProvided);
     }
 
-    public void prepareForReplacement(
-            LBC domain, ControlConfiguration fallback, boolean equipmentSelectionProvided
-    ) {
-        lbcService.prepareFunctionalEquipment(domain, fallback, equipmentSelectionProvided);
-        lbcService.validateForSave(domain);
-    }
 
-    /** Подготавливает комплектацию LC с учётом прежнего функционального назначения. */
-    public void prepareFunctionalEquipment(
-            LC domain, ControlConfiguration fallback, boolean equipmentSelectionProvided
-    ) {
-        lcService.prepareFunctionalEquipment(domain, fallback, equipmentSelectionProvided);
-    }
-
-    /** Подготавливает комплектацию LBC с учётом прежнего функционального назначения. */
-    public void prepareFunctionalEquipment(
-            LBC domain, ControlConfiguration fallback, boolean equipmentSelectionProvided
-    ) {
-        lbcService.prepareFunctionalEquipment(domain, fallback, equipmentSelectionProvided);
-    }
 
     /**
      * Сохраняет идентичность и пользовательские тексты неизменённых модулей
