@@ -1,11 +1,13 @@
 package com.lb_calc_web.handler;
 
 import com.lb_calc_web.controller.ValidationErrorFormatter;
+import com.lb_calc_web.controller.api.response.ApiResponse;
 import com.lb_calc_web.service.validation.ValidationSizeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.ModelAndView;
+import jakarta.servlet.http.HttpServletRequest;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -74,10 +77,16 @@ public class LBCalcExceptionHandler {
 
     /** Отображает неподдерживаемый HTTP-метод со статусом 405. */
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
-    public ModelAndView handleMethodNotSupported(
-            HttpRequestMethodNotSupportedException exception
+    public Object handleMethodNotSupported(
+            HttpRequestMethodNotSupportedException exception,
+            HttpServletRequest request
     ) {
-        return error(HttpStatus.METHOD_NOT_ALLOWED, "HTTP-метод не поддерживается.");
+        String message = "HTTP-метод не поддерживается";
+        if (request.getRequestURI().startsWith("/api/")) {
+            return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
+                    .body(ApiResponse.error(message));
+        }
+        return error(HttpStatus.METHOD_NOT_ALLOWED, message + ".");
     }
 
     /** Отображает неподдерживаемый формат содержимого запроса со статусом 415. */
