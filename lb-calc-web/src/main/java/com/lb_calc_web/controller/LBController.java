@@ -90,8 +90,8 @@ public class LBController {
         model.addAttribute("pageContext", "CATALOG");
         try {
             lb = toDtoWithImage(LBDtoMapper.toDomain(lb, TypeLbFactory.forLB(environment, lb.getType())));
-        } catch (IllegalArgumentException | NullPointerException exception) {
-            // При незаполненных промежуточных значениях сохраняем введённые данные формы.
+        } catch (IllegalArgumentException exception) {
+            model.addAttribute("errors", List.of("Проверьте введённые параметры модуля."));
         }
         model.addAttribute("lb", lb);
         return "lbs/lb";

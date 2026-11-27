@@ -709,8 +709,8 @@ public class ProjectController
             preview = projectService.previewALSReplacement(projectId, alsId, candidateALS);
             updatedALS = candidateALS;
             lb = LBDtoMapper.toDto(replacement);
-        } catch (IllegalArgumentException | NullPointerException | IllegalStateException exception) {
-            // При незаполненных промежуточных значениях сохраняем введённые данные формы.
+        } catch (IllegalArgumentException | IllegalStateException exception) {
+            model.addAttribute("errors", List.of("Проверьте введённые параметры модуля."));
         } catch (ValidationSizeException exception) {
             model.addAttribute("errors", ValidationErrorFormatter.format(exception.getValidationResult()));
         }
@@ -907,7 +907,7 @@ public class ProjectController
                 ALSDTO als = project.getAlsList().get(index);
                 try {
                     project.getAlsList().set(index, toDtoWithImages(alsService.restoreDomain(als)));
-                } catch (RuntimeException exception) {
+                } catch (ValidationSizeException | IllegalArgumentException exception) {
                     // Для некорректной промежуточной формы изображение не формируется.
                 }
             }
@@ -919,7 +919,7 @@ public class ProjectController
     private ALSDTO addALSImage(ALSDTO dto) {
         try {
             return toDtoWithImages(alsService.restoreDomain(dto));
-        } catch (RuntimeException exception) {
+        } catch (ValidationSizeException | IllegalArgumentException exception) {
             return dto;
         }
     }
@@ -944,7 +944,7 @@ public class ProjectController
         try {
             ALS als = projectService.findALSInProject(projectId, alsId);
             return toDtoWithImage(alsService.restoreLC(dto, als));
-        } catch (RuntimeException exception) {
+        } catch (ValidationSizeException | IllegalArgumentException exception) {
             return dto;
         }
     }
@@ -953,7 +953,7 @@ public class ProjectController
         try {
             ALS als = projectService.findALSInProject(projectId, alsId);
             return toDtoWithImage(alsService.restoreLBC(dto, als));
-        } catch (RuntimeException exception) {
+        } catch (ValidationSizeException | IllegalArgumentException exception) {
             return dto;
         }
     }
@@ -961,7 +961,7 @@ public class ProjectController
     private LBDTO addLBImage(LBDTO dto) {
         try {
             return toDtoWithImage(alsService.restoreLB(dto));
-        } catch (RuntimeException exception) {
+        } catch (ValidationSizeException | IllegalArgumentException exception) {
             return dto;
         }
     }

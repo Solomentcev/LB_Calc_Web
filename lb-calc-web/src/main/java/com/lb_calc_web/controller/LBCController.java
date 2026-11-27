@@ -107,6 +107,8 @@ public class LBCController extends BaseCatalogController {
             lbc = LBCDtoMapper.toDto(lbcService.restoreDomain(lbc));
         } catch (ValidationSizeException exception) {
             model.addAttribute("errors", ValidationErrorFormatter.format(exception.getValidationResult()));
+        } catch (IllegalArgumentException exception) {
+            model.addAttribute("errors", List.of("Проверьте введённые параметры модуля."));
         }
         prepareForm(model, lbc);
         return "lbcs/lbc";
@@ -155,6 +157,7 @@ public class LBCController extends BaseCatalogController {
                     lbcService.restoreDomain(lbc)));
         } catch (ValidationSizeException exception) {
             lbc.setStringLBCImage(null);
+            model.addAttribute("errors", ValidationErrorFormatter.format(exception.getValidationResult()));
         }
         model.addAttribute("equipmentList", equipmentCatalogService.findAll().stream()
                 .map(EquipmentDtoMapper::toDto).toList());

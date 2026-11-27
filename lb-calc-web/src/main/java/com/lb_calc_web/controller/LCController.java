@@ -94,6 +94,8 @@ public class LCController {
             lc = toDtoWithImage(lcService.restoreDomain(lc));
         } catch (ValidationSizeException exception) {
             model.addAttribute("errors", ValidationErrorFormatter.format(exception.getValidationResult()));
+        } catch (IllegalArgumentException exception) {
+            model.addAttribute("errors", List.of("Проверьте введённые параметры модуля."));
         }
         prepareForm(model, lc);
         return "lcs/lc";

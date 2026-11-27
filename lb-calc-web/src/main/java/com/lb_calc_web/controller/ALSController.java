@@ -152,8 +152,8 @@ public class ALSController extends BaseCatalogController {
             LB replacement = alsService.restoreLB(lb);
             als = alsService.replaceLB(als.copy(), lbId, replacement);
             lb = toDtoWithImage(replacement);
-        } catch (IllegalArgumentException | NullPointerException | IllegalStateException exception) {
-            // При незаполненных промежуточных значениях сохраняем введённые данные формы.
+        } catch (IllegalArgumentException | IllegalStateException exception) {
+            model.addAttribute("errors", List.of("Проверьте введённые параметры модуля."));
         }
         model.addAttribute("als", toDtoWithImages(als));
         model.addAttribute("lb", lb);
