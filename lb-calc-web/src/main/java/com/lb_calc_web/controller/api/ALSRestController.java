@@ -118,7 +118,7 @@ toDto(alsService.createALS())
             summary = "Создать ALS"
     )
     /** Создаёт конфигурацию ALS из переданных данных. */
-    public ResponseEntity<?> createALS(
+    public ResponseEntity<ApiResponse<ALSDTO>> createALS(
             @RequestBody @Valid ALSDTO dto
     ) {
 
