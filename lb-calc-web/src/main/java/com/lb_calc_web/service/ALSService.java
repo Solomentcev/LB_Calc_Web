@@ -449,6 +449,15 @@ public class ALSService {
      * физические требования и геометрию перед сохранением агрегата.
      */
     public void prepareForReplacement(
+            ALS existing, LC domain, boolean equipmentSelectionProvided
+    ) {
+        Objects.requireNonNull(existing, "Исходная ALS не должна быть null");
+        prepareForReplacement(
+                domain, existing.getControlModule().getControlConfiguration(),
+                equipmentSelectionProvided);
+    }
+
+    public void prepareForReplacement(
             LC domain, ControlConfiguration fallback, boolean equipmentSelectionProvided
     ) {
         lcService.prepareFunctionalEquipment(domain, fallback, equipmentSelectionProvided);
@@ -459,6 +468,15 @@ public class ALSService {
      * Подготавливает LBC для замены в ALS: согласует комплектацию и проверяет
      * физические требования и геометрию перед сохранением агрегата.
      */
+    public void prepareForReplacement(
+            ALS existing, LBC domain, boolean equipmentSelectionProvided
+    ) {
+        Objects.requireNonNull(existing, "Исходная ALS не должна быть null");
+        prepareForReplacement(
+                domain, existing.getControlModule().getControlConfiguration(),
+                equipmentSelectionProvided);
+    }
+
     public void prepareForReplacement(
             LBC domain, ControlConfiguration fallback, boolean equipmentSelectionProvided
     ) {
