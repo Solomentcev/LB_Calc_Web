@@ -11,15 +11,18 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import jakarta.validation.constraints.Positive;
 import org.springframework.core.env.Environment;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 /** REST-контроллер операций с модулями хранения LB. */
 @RestController
+@Validated
 @RequestMapping("/api/v1/lbs")
 @PreAuthorize("isAuthenticated()")
 @Tag(
@@ -73,7 +76,7 @@ public class LBRestController {
                     description = "Идентификатор LB",
                     example = "1"
             )
-            @PathVariable Long id
+            @PathVariable @Positive Long id
     ) {
 
         logger.debug("GET /api/v1/lbs/{}", id);
@@ -116,7 +119,7 @@ public class LBRestController {
             description = "Проверяет и сохраняет модуль хранения LB"
     )
     public ResponseEntity<?> saveLB(
-            @RequestBody LBDTO dto
+            @RequestBody @Valid LBDTO dto
     ) {
 
         logger.debug(
