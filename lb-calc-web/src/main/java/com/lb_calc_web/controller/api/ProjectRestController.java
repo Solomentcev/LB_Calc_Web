@@ -393,14 +393,8 @@ public class ProjectRestController {
 
             projectService.findLCInProject(projectId, alsId, lcId);
             lc.setId(lcId);
-            ALS sourceALS = projectService.findALSInProject(projectId, alsId);
             LC replacement = LCDtoMapper.toDomain(
-                    lc,
-                    equipmentCatalogService::findById,
-                    sourceALS.getControlModule() instanceof LC
-                            ? sourceALS.getControlModule().getControlConfiguration() : null,
-                    sizeBounds
-            );
+                    lc, equipmentCatalogService::findById, sizeBounds);
             ALS savedALS = projectService.saveLCAtProject(
                     projectId,
                     alsId,
@@ -490,15 +484,10 @@ public class ProjectRestController {
 
             projectService.findLBCInProject(projectId, alsId, lbcId);
             lbc.setId(lbcId);
-            ALS sourceALS = projectService.findALSInProject(projectId, alsId);
             LBC replacement = LBCDtoMapper.toDomain(
                     lbc,
                     TypeLbFactory.forLBC(environment, lbc.getType()),
-                    equipmentCatalogService::findById,
-                    sourceALS.getControlModule() instanceof LBC
-                            ? sourceALS.getControlModule().getControlConfiguration() : null,
-                    sizeBounds
-            );
+                    equipmentCatalogService::findById, sizeBounds);
             ALS savedALS = projectService.saveLBCAtProject(
                     projectId,
                     alsId,
