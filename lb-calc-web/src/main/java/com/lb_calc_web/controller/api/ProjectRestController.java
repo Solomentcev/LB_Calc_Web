@@ -21,6 +21,7 @@ import com.lb_calc_web.service.ALSService;
 import com.lb_calc_web.service.EquipmentCatalogService;
 import com.lb_calc_web.service.factory.TypeLbFactory;
 import com.lb_calc_web.domain.geometry.SizeBounds;
+import jakarta.validation.constraints.Positive;
 import org.springframework.core.env.Environment;
 import com.lb_calc_web.service.export.ProjectExcelExportService;
 import com.lb_calc_web.service.ProjectService;
@@ -48,6 +49,7 @@ import java.util.Objects;
 
 /** REST-контроллер управления проектами и их конфигурациями ALS. */
 @RestController
+@Validated
 @RequestMapping("/api/v1/projects")
 @PreAuthorize("isAuthenticated()")
 @Tag(
@@ -108,7 +110,7 @@ public class ProjectRestController {
             summary = "Получить проект по ID"
     )
     public ResponseEntity<?> getProjectById(
-            @PathVariable Long id
+            @PathVariable @Positive Long id
     ) {
 
             return ResponseEntity.ok(
@@ -149,7 +151,7 @@ public class ProjectRestController {
             summary = "Создать проект"
     )
     public ResponseEntity<?> createProject(
-            @RequestBody ProjectDTO project
+            @RequestBody @Valid ProjectDTO project
     ) {
 
             /*
@@ -188,8 +190,8 @@ public class ProjectRestController {
             summary = "Обновить проект"
     )
     public ResponseEntity<?> updateProject(
-            @PathVariable Long id,
-            @RequestBody ProjectDTO project
+            @PathVariable @Positive Long id,
+            @RequestBody @Valid ProjectDTO project
     ) {
 
             /*
@@ -228,7 +230,7 @@ public class ProjectRestController {
             summary = "Удалить проект"
     )
     public ResponseEntity<?> deleteProject(
-            @PathVariable Long id
+            @PathVariable @Positive Long id
     ) {
 
             projectService.deleteById(id);
@@ -249,8 +251,8 @@ public class ProjectRestController {
             summary = "Получить ALS проекта"
     )
     public ResponseEntity<?> getALS(
-            @PathVariable Long projectId,
-            @PathVariable Long alsId
+            @PathVariable @Positive Long projectId,
+            @PathVariable @Positive Long alsId
     ) {
 
             return ResponseEntity.ok(
@@ -269,7 +271,7 @@ public class ProjectRestController {
             summary = "Добавить ALS в проект"
     )
     public ResponseEntity<?> addALS(
-            @PathVariable Long projectId
+            @PathVariable @Positive Long projectId
     ) {
 
             Project project = projectService.addNewALSandSaveProject(projectId);
@@ -293,9 +295,9 @@ public class ProjectRestController {
             summary = "Обновить ALS в проекте"
     )
     public ResponseEntity<?> updateALS(
-            @PathVariable Long projectId,
-            @PathVariable Long alsId,
-            @RequestBody ALSDTO als
+            @PathVariable @Positive Long projectId,
+            @PathVariable @Positive Long alsId,
+            @RequestBody @Valid ALSDTO als
     ) {
 
             projectService.findALSInProject(projectId, alsId);
@@ -332,8 +334,8 @@ public class ProjectRestController {
             summary = "Удалить ALS из проекта"
     )
     public ResponseEntity<?> deleteALS(
-            @PathVariable Long projectId,
-            @PathVariable Long alsId
+            @PathVariable @Positive Long projectId,
+            @PathVariable @Positive Long alsId
     ) {
 
             Project project = projectService.deleteALSandSaveProject(
@@ -360,9 +362,9 @@ public class ProjectRestController {
             summary = "Получить LC ALS проекта"
     )
     public ResponseEntity<?> getLC(
-            @PathVariable Long projectId,
-            @PathVariable Long alsId,
-            @PathVariable Long lcId
+            @PathVariable @Positive Long projectId,
+            @PathVariable @Positive Long alsId,
+            @PathVariable @Positive Long lcId
     ) {
 
             LCDTO lc =
@@ -384,10 +386,10 @@ public class ProjectRestController {
             summary = "Обновить LC ALS проекта"
     )
     public ResponseEntity<?> updateLC(
-            @PathVariable Long projectId,
-            @PathVariable Long alsId,
-            @PathVariable Long lcId,
-            @RequestBody LCDTO lc
+            @PathVariable @Positive Long projectId,
+            @PathVariable @Positive Long alsId,
+            @PathVariable @Positive Long lcId,
+            @RequestBody @Valid LCDTO lc
     ) {
 
             projectService.findLCInProject(projectId, alsId, lcId);
@@ -422,8 +424,8 @@ public class ProjectRestController {
             summary = "Заменить control-модуль ALS на LBC"
     )
     public ResponseEntity<?> replaceLBC(
-            @PathVariable Long projectId,
-            @PathVariable Long alsId
+            @PathVariable @Positive Long projectId,
+            @PathVariable @Positive Long alsId
     ) {
 
             ALS saved =
@@ -451,9 +453,9 @@ public class ProjectRestController {
             summary = "Получить LBC ALS проекта"
     )
     public ResponseEntity<?> getLBC(
-            @PathVariable Long projectId,
-            @PathVariable Long alsId,
-            @PathVariable Long lbcId
+            @PathVariable @Positive Long projectId,
+            @PathVariable @Positive Long alsId,
+            @PathVariable @Positive Long lbcId
     ) {
 
             LBCDTO lbc =
@@ -475,10 +477,10 @@ public class ProjectRestController {
             summary = "Обновить LBC ALS проекта"
     )
     public ResponseEntity<?> updateLBC(
-            @PathVariable Long projectId,
-            @PathVariable Long alsId,
-            @PathVariable Long lbcId,
-            @RequestBody LBCDTO lbc
+            @PathVariable @Positive Long projectId,
+            @PathVariable @Positive Long alsId,
+            @PathVariable @Positive Long lbcId,
+            @RequestBody @Valid LBCDTO lbc
     ) {
 
             projectService.findLBCInProject(projectId, alsId, lbcId);
@@ -515,9 +517,9 @@ public class ProjectRestController {
             summary = "Получить LB ALS проекта"
     )
     public ResponseEntity<?> getLB(
-            @PathVariable Long projectId,
-            @PathVariable Long alsId,
-            @PathVariable Long lbId
+            @PathVariable @Positive Long projectId,
+            @PathVariable @Positive Long alsId,
+            @PathVariable @Positive Long lbId
     ) {
 
             LBDTO lb =
@@ -539,10 +541,10 @@ public class ProjectRestController {
             summary = "Обновить LB ALS проекта"
     )
     public ResponseEntity<?> updateLB(
-            @PathVariable Long projectId,
-            @PathVariable Long alsId,
-            @PathVariable Long lbId,
-            @RequestBody LBDTO lb
+            @PathVariable @Positive Long projectId,
+            @PathVariable @Positive Long alsId,
+            @PathVariable @Positive Long lbId,
+            @RequestBody @Valid LBDTO lb
     ) {
 
             lb.setId(lbId);
@@ -591,8 +593,8 @@ public class ProjectRestController {
             summary = "Добавить LB в ALS проекта"
     )
     public ResponseEntity<?> addLB(
-            @PathVariable Long projectId,
-            @PathVariable Long alsId
+            @PathVariable @Positive Long projectId,
+            @PathVariable @Positive Long alsId
     ) {
 
             ALS als =
@@ -622,9 +624,9 @@ public class ProjectRestController {
             summary = "Удалить LB из ALS проекта"
     )
     public ResponseEntity<?> deleteLB(
-            @PathVariable Long projectId,
-            @PathVariable Long alsId,
-            @PathVariable Long lbId
+            @PathVariable @Positive Long projectId,
+            @PathVariable @Positive Long alsId,
+            @PathVariable @Positive Long lbId
     ) {
 
             ALS als =
@@ -651,7 +653,7 @@ public class ProjectRestController {
             summary = "Экспортировать проект в Excel"
     )
     public ResponseEntity<?> exportProjectToExcel(
-            @PathVariable Long id
+            @PathVariable @Positive Long id
     ) {
 
             InputStreamResource file =
