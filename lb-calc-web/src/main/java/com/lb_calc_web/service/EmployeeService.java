@@ -91,21 +91,10 @@ public class EmployeeService implements UserDetailsService {
     }
 
     /** Возвращает профиль сотрудника по идентификатору. */
+    /** Возвращает профиль сотрудника по идентификатору. */
     @Transactional(readOnly = true)
     public Employee getProfileById(int id) {
-        if (id <= 0) {
-            throw new NoSuchElementException("Пользователь с id=" + id + " не найден");
-        }
-
-        EmployeeEntity entity = employeeRepository
-                .findById((long) id)
-                .orElseThrow(() ->
-                        new NoSuchElementException(
-                                "Пользователь с id=" + id + " не найден"
-                        )
-                );
-
-        return EmployeeEntityMapper.toDomain(entity);
+        return loadUserById((long) id);
     }
 
     /**
