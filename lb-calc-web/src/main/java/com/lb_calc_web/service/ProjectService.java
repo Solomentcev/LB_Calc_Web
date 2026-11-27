@@ -433,8 +433,9 @@ return projectRepository.findAllWithUsers()
         ALS oldConfiguration = findDomainALS(domain, alsId);
 
         /*
-         * ID определяется URL, а не телом запроса.
-         * Это исключает подмену идентификатора ALS клиентом.
+         * ID из URL определяет исходную конфигурацию.
+         * Новая конфигурация получает отдельную идентичность, чтобы не менять
+         * ALS, которая может использоваться в других проектах.
          */
         replaceProjectConfiguration(domain, oldConfiguration, replacement);
 
