@@ -39,7 +39,7 @@ public class EmployeeRestController {
 
     /** Возвращает список учётных записей сотрудников. */
     @GetMapping
-    public ResponseEntity<?> getAllEmployees() {
+    public ResponseEntity<ApiResponse<List<EmployeeDTO>>> getAllEmployees() {
 
             List<EmployeeDTO> employees =
                     EmployeeDtoMapper.toDtoList(employeeService.findAll());
@@ -54,7 +54,7 @@ public class EmployeeRestController {
      * Получить состояние активности учётных записей сотрудников.
      */
     @GetMapping("/statuses")
-    public ResponseEntity<?> getEmployeeStatuses() {
+    public ResponseEntity<ApiResponse<java.util.Map<Long, Boolean>>> getEmployeeStatuses() {
         return ResponseEntity.ok(
                 ApiResponse.success(employeeService.getActiveStatuses())
         );
@@ -62,7 +62,7 @@ public class EmployeeRestController {
 
     /** Возвращает сотрудника по идентификатору. */
     @GetMapping("/{id}")
-    public ResponseEntity<?> getEmployeeById(
+    public ResponseEntity<ApiResponse<EmployeeDTO>> getEmployeeById(
             @PathVariable @Positive Long id
     ) {
 
@@ -77,7 +77,7 @@ public class EmployeeRestController {
 
     /** Создаёт учётную запись сотрудника. */
     @PostMapping
-    public ResponseEntity<?> createEmployee(
+    public ResponseEntity<ApiResponse<EmployeeDTO>> createEmployee(
             @RequestBody
             @Valid
             CreateEmployeeDTO createEmployeeDTO
@@ -104,7 +104,7 @@ public class EmployeeRestController {
 
     /** Обновляет данные учётной записи сотрудника. */
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateEmployee(
+    public ResponseEntity<ApiResponse<EmployeeDTO>> updateEmployee(
             @PathVariable @Positive int id,
             @RequestBody @Valid ProfileDTO employeeUpd
     ) {
@@ -140,7 +140,7 @@ public class EmployeeRestController {
 
     /** Активирует учётную запись сотрудника. */
     @PostMapping("/{id}/activate")
-    public ResponseEntity<?> activateEmployee(
+    public ResponseEntity<ApiResponse<Void>> activateEmployee(
             @PathVariable @Positive Long id
     ) {
 
@@ -153,7 +153,7 @@ public class EmployeeRestController {
 
     /** Деактивирует или удаляет учётную запись сотрудника согласно правилам сервиса. */
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteEmployee(
+    public ResponseEntity<ApiResponse<Void>> deleteEmployee(
             @PathVariable @Positive Long id
     ) {
 
@@ -172,7 +172,7 @@ public class EmployeeRestController {
      */
     @GetMapping("/me")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> getCurrentProfile() {
+    public ResponseEntity<ApiResponse<EmployeeDTO>> getCurrentProfile() {
 
             return ResponseEntity.ok(
                     ApiResponse.success(EmployeeDtoMapper.toDto(employeeService.getCurrentEmployee()))
@@ -185,7 +185,7 @@ public class EmployeeRestController {
      */
     @GetMapping("/profiles")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> getAllProfiles() {
+    public ResponseEntity<ApiResponse<List<ProfileDTO>>> getAllProfiles() {
         return ResponseEntity.ok(
                 ApiResponse.success(EmployeeDtoMapper.toProfileDtoList(employeeService.findAllProfiles()))
         );
@@ -196,7 +196,7 @@ public class EmployeeRestController {
      */
     @GetMapping("/profiles/{id}")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> getProfileById(
+    public ResponseEntity<ApiResponse<ProfileDTO>> getProfileById(
             @PathVariable @Positive int id
     ) {
 
@@ -211,7 +211,7 @@ public class EmployeeRestController {
      */
     @PutMapping("/me/password")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> changeCurrentPassword(
+    public ResponseEntity<ApiResponse<Void>> changeCurrentPassword(
             @RequestBody @Valid ChangePasswordDTO passwordDTO
     ) {
         if (!passwordDTO.getPassword().equals(passwordDTO.getConfirmPassword())) {
@@ -230,7 +230,7 @@ public class EmployeeRestController {
      * Изменить пароль сотрудника от имени администратора.
      */
     @PutMapping("/{id}/password")
-    public ResponseEntity<?> changeEmployeePassword(
+    public ResponseEntity<ApiResponse<Void>> changeEmployeePassword(
             @PathVariable @Positive Long id,
             @RequestBody @Valid ChangePasswordDTO passwordDTO
     ) {
