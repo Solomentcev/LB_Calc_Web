@@ -446,6 +446,7 @@ public class Project {
         StringBuilder builder = new StringBuilder();
         int totalQuantity = 0;
         int totalCells = 0;
+        int totalModules = 0;
         int index = 1;
 
         var configurations = quantityALS.entrySet().stream()
@@ -460,40 +461,63 @@ public class Project {
             int cellCount = als.getCountCells();
 
             if (!builder.isEmpty()) {
-                builder.append("\n\n");
+                builder.append('\n');
             }
 
-            builder.append(index++)
-                    .append(". ")
-                    .append(als.getName())
+            int moduleCount = als.getModules().size();
+            builder.append("№")
+                    .append(index++)
                     .append(" — ")
+                    .append(als.getName())
+                    .append(", ")
+                    .append(formatCellCount(cellCount))
+                    .append(", ")
+                    .append(formatModuleCount(moduleCount))
+                    .append(", количество: ")
                     .append(quantity)
-                    .append(" шт.\n   ")
-                    .append(formatCellCount(cellCount));
-
-            if (quantity > 1) {
-                builder.append(" в каждой АКХ");
-            }
-            builder.append('.');
+                    .append(" шт.");
 
             totalQuantity = Math.addExact(totalQuantity, quantity);
             totalCells = Math.addExact(
                     totalCells,
                     Math.multiplyExact(cellCount, quantity)
             );
+            totalModules = Math.addExact(
+                    totalModules,
+                    Math.multiplyExact(moduleCount, quantity)
+            );
         }
 
         if (!builder.isEmpty()) {
-            builder.append("\n\n");
+            builder.append('\n');
         }
 
         builder.append("Всего: ")
                 .append(totalQuantity)
-                .append(" АКХ, ")
+                .append(" ")
+                .append(formatQuantityWord(totalQuantity, "АКХ", "АКХ", "АКХ"))
+                .append(", ")
                 .append(formatCellCount(totalCells))
+                .append(", ")
+                .append(formatModuleCount(totalModules))
                 .append('.');
 
         description = builder.toString();
+    }
+
+    /**
+     * Формирует количество модулей с правильной формой существительного.
+     *
+     * @param count количество модулей
+     * @return количество и слово «модуль» в соответствующей форме
+     */
+    private String formatModuleCount(int count) {
+        return count + " " + formatQuantityWord(
+                count,
+                "модуль",
+                "модуля",
+                "модулей"
+        );
     }
 
     /**
