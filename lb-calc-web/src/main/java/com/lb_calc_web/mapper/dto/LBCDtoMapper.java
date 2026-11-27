@@ -3,6 +3,7 @@ package com.lb_calc_web.mapper.dto;
 import com.lb_calc_web.service.validation.size.SizeBounds;
 
 import com.lb_calc_web.domain.attributes.Colors;
+import com.lb_calc_web.domain.equipment.Equipment;
 import com.lb_calc_web.domain.attributes.DirectionDoorOpening;
 import com.lb_calc_web.domain.attributes.TypeLb;
 import com.lb_calc_web.domain.model.ControlConfiguration;
@@ -46,7 +47,7 @@ public final class LBCDtoMapper {
         dto.setDirectionDoorOpening(domain.getDirectionDoorOpening().name());
         dto.setColorBody(domain.getColorBody().name());
         dto.setColorDoor(domain.getColorDoor().name());
-ControlConfiguration configuration = domain.getControlConfiguration();
+        ControlConfiguration configuration = domain.getControlConfiguration();
         dto.setFunctionalConfiguration(ControlConfigurationDtoMapper.toFunctionalDto(
                 configuration.getFunctionalConfiguration()));
         dto.setEquipment(ControlConfigurationDtoMapper.toEquipmentIds(configuration));
