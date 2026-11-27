@@ -1,9 +1,8 @@
 package com.lb_calc_web.service;
 
 import com.lb_calc_web.security.jwt.JwtService;
-import com.lb_calc_web.dto.CreateEmployeeDTO;
 import com.lb_calc_web.domain.attributes.Role;
-import com.lb_calc_web.dto.RegistrationDTO;
+import com.lb_calc_web.domain.model.Employee;
 import com.lb_calc_web.entity.EmployeeEntity;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -116,9 +115,6 @@ class AuthServiceTest {
     @Test
     void registration_shouldRejectMissingPasswordBeforeDatabaseAccess() {
         EmployeeRepository employeeRepository = mock(EmployeeRepository.class);
-        RegistrationDTO dto = mock(RegistrationDTO.class);
-        when(dto.getPassword()).thenReturn(null);
-        when(dto.getConfirmPassword()).thenReturn(null);
 
         AuthService authService = new AuthService(
                 mock(EmployeeService.class),
@@ -131,7 +127,7 @@ class AuthServiceTest {
 
         org.junit.jupiter.api.Assertions.assertThrows(
                 IllegalArgumentException.class,
-                () -> authService.registration(dto)
+                () -> authService.registration("Иван", "Иванов", "user@example.com", null, null)
         );
 
         verifyNoInteractions(employeeRepository);
@@ -164,13 +160,7 @@ class AuthServiceTest {
         EmployeeRepository employeeRepository = mock(EmployeeRepository.class);
         PasswordEncoder passwordEncoder = mock(PasswordEncoder.class);
         KafkaTemplate<String, UserEvent> kafkaTemplate = mock(KafkaTemplate.class);
-        RegistrationDTO dto = mock(RegistrationDTO.class);
 
-        when(dto.getPassword()).thenReturn("secret");
-        when(dto.getConfirmPassword()).thenReturn("secret");
-        when(dto.getFirstName()).thenReturn("Иван");
-        when(dto.getLastName()).thenReturn("Иванов");
-        when(dto.getEmail()).thenReturn("user@example.com");
         when(employeeService.existsByEmail("user@example.com")).thenReturn(false);
         when(passwordEncoder.encode("secret")).thenReturn("encoded");
 
@@ -190,7 +180,8 @@ class AuthServiceTest {
 
         IllegalArgumentException exception = org.junit.jupiter.api.Assertions.assertThrows(
                 IllegalArgumentException.class,
-                () -> authService.registration(dto)
+                () -> authService.registration(
+                    "Иван", "Иванов", "user@example.com", "secret", "secret")
         );
 
         org.junit.jupiter.api.Assertions.assertEquals("Email уже используется", exception.getMessage());
@@ -226,14 +217,7 @@ class AuthServiceTest {
         EmployeeService employeeService = mock(EmployeeService.class);
         EmployeeRepository employeeRepository = mock(EmployeeRepository.class);
         PasswordEncoder passwordEncoder = mock(PasswordEncoder.class);
-        CreateEmployeeDTO dto = mock(CreateEmployeeDTO.class);
 
-        when(dto.getPassword()).thenReturn("secret");
-        when(dto.getConfirmPassword()).thenReturn("secret");
-        when(dto.getFirstName()).thenReturn("Иван");
-        when(dto.getLastName()).thenReturn("Иванов");
-        when(dto.getEmail()).thenReturn("user@example.com");
-        when(dto.getRole()).thenReturn(Role.ROLE_MANAGER);
         when(employeeService.existsByEmail("user@example.com")).thenReturn(false);
         when(passwordEncoder.encode("secret")).thenReturn("encoded");
 
@@ -258,7 +242,11 @@ class AuthServiceTest {
 
         DataIntegrityViolationException thrown = org.junit.jupiter.api.Assertions.assertThrows(
                 DataIntegrityViolationException.class,
-                () -> authService.createEmployee(dto)
+                () -> authService.createEmployee(
+                    new Employee("Иван", "Иванов", "user@example.com",
+                            java.time.LocalDate.now(), Role.ROLE_MANAGER),
+                    "secret",
+                    "secret")
         );
 
         org.junit.jupiter.api.Assertions.assertSame(violation, thrown);
