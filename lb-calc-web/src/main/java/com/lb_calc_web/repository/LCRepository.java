@@ -3,8 +3,6 @@ package com.lb_calc_web.repository;
 import com.lb_calc_web.domain.attributes.Colors;
 import com.lb_calc_web.entity.LCEntity;
 import jakarta.persistence.LockModeType;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Lock;
@@ -16,6 +14,7 @@ import java.util.List;
 /** Репозиторий управляющих модулей LC с запросами поиска кандидатов на совпадение конфигурации. */
 public interface LCRepository extends JpaRepository<LCEntity, Long>, JpaSpecificationExecutor<LCEntity> {
 
+    /** Находит LC-кандидаты с совпадающими базовыми габаритами и цветами под блокирующей блокировкой. */
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("""
             select entity
@@ -28,7 +27,6 @@ public interface LCRepository extends JpaRepository<LCEntity, Long>, JpaSpecific
               and entity.colorBody = :colorBody
               and entity.colorDoor = :colorDoor
             """)
-    /** Находит LC-кандидаты с совпадающими базовыми габаритами и цветами под блокирующей блокировкой. */
     List<LCEntity> findCandidates(
             @Param("height") int height,
             @Param("width") int width,
