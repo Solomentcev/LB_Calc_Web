@@ -9,12 +9,9 @@ import com.lb_calc_web.domain.model.ControlConfiguration;
 
 import com.lb_calc_web.domain.model.FunctionalConfiguration;
 import com.lb_calc_web.domain.model.LC;
-import com.lb_calc_web.dto.LCDTO;
 import com.lb_calc_web.entity.LCEntity;
 import com.lb_calc_web.entity.EquipmentEntity;
-import com.lb_calc_web.mapper.dto.LCDtoMapper;
 import com.lb_calc_web.mapper.entity.LCEntityMapper;
-import com.lb_calc_web.mapper.entity.EquipmentEntityMapper;
 import com.lb_calc_web.repository.LCRepository;
 import com.lb_calc_web.repository.EquipmentRepository;
 import com.lb_calc_web.service.validation.ValidationResult;
@@ -193,36 +190,6 @@ public class LCService {
                 .orElseThrow(() -> new NoSuchElementException(
                         "Модуль управления LC с id=" + id + " не найден"));
         return toDomain(entity);
-    }
-
-    /** Восстанавливает LC из DTO, разрешая выбранное оборудование по Long ID. */
-    @Transactional(readOnly = true)
-    public LC restoreDomain(LCDTO dto) {
-        ControlConfiguration fallback = dto != null && dto.getId() != null && dto.getId() > 0
-                ? findById(dto.getId()).getControlConfiguration()
-                : null;
-        return restoreDomain(dto, fallback);
-    }
-
-    /** Восстанавливает LC с сохранением пропущенных параметров текущей конфигурации. */
-    @Transactional(readOnly = true)
-    public LC restoreDomain(LCDTO dto, ControlConfiguration fallbackConfiguration) {
-        Objects.requireNonNull(dto, "LC не должен быть null");
-        try {
-            LC restored = LCDtoMapper.toDomain(
-                    dto, this::findEquipment, fallbackConfiguration,
-                    sizeBounds);
-            boolean functionalConfigurationChanged = fallbackConfiguration != null
-                    && !restored.getControlConfiguration().getFunctionalConfiguration().equals(
-                    fallbackConfiguration.getFunctionalConfiguration());
-            if ((!dto.isEquipmentProvided() && dto.getSelectedEquipment().isEmpty())
-                    || functionalConfigurationChanged) {
-                configureFunctionalEquipment(restored);
-            }
-            return restored;
-        } catch (RuntimeException exception) {
-            throw createMappingValidationException("LC", dto.getId(), exception);
-        }
     }
 
     /** Дополняет комплектацию LC физическими моделями по функциональным назначениям. */
