@@ -13,6 +13,7 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -26,6 +27,8 @@ import java.util.List;
 
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /** Проверяет административное разграничение доступа к каталогу оборудования. */
@@ -79,6 +82,25 @@ class EquipmentRestControllerSecurityTest {
     void equipmentId_shouldBePositive() throws Exception {
         mockMvc.perform(get("/api/v1/equipment/0"))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @WithMockUser(authorities = "ROLE_ADMIN")
+    void create_shouldRejectInvalidEquipmentAndReturnApiErrorEnvelope() throws Exception {
+        mockMvc.perform(post("/api/v1/equipment")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "functionalType": null,
+                                  "purpose": "",
+                                  "category": null,
+                                  "name": ""
+                                }
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value("error"))
+                .andExpect(jsonPath("$.message").value("Некорректный запрос"))
+                .andExpect(jsonPath("$.errors").isArray());
     }
 
     @TestConfiguration
