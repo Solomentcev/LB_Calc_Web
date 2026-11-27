@@ -123,17 +123,11 @@ public class ALSController extends BaseCatalogController {
                 als.setLBC(persisted.getLBC());
             }
 
-            ControlConfiguration fallback = existing == null ? null
-                    : existing.getControlModule().getControlConfiguration();
-            if (fallback != null) {
-                fallback.setFunctionalConfiguration(existing.getFunctionalConfiguration());
-            }
             ALS restored = ALSDtoMapper.toDomain(
                     als,
                     candidate -> TypeLbFactory.forLB(environment, candidate.getType()),
                     candidate -> TypeLbFactory.forLBC(environment, candidate.getType()),
                     equipmentCatalogService::findById,
-                    fallback,
                     sizeBounds
             );
             ALS domain = alsService.prepareConfiguration(existing, restored, als.isEquipmentSelectionProvided());
