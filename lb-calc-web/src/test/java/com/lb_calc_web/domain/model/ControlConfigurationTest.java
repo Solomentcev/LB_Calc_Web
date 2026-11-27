@@ -72,6 +72,25 @@ class ControlConfigurationTest {
     }
 
     @Test
+    void shouldNormalizeDisplayWhenPinIsEnabledWithoutDisplay() {
+        ControlConfiguration configuration = new ControlConfiguration(
+                functionalConfiguration(
+                        DisplayPurpose.NONE,
+                        Set.of(AccessPurpose.PIN),
+                        PaymentPurpose.NONE,
+                        PrinterPurpose.ABSENT
+                ),
+                Map.of()
+        );
+
+        assertEquals(DisplayPurpose.INCH_10,
+                configuration.getFunctionalConfiguration().getDisplay());
+        assertEquals(Set.of(AccessPurpose.PIN),
+                configuration.getFunctionalConfiguration().getAccess());
+        assertTrue(configuration.getEquipment().isEmpty());
+    }
+
+    @Test
     void shouldStoreEquipmentAndQuantity() {
         Equipment scanner = new Equipment(
                 10L, EquipmentFunctionalType.ACCESS, AccessPurpose.BAR_CODE,
