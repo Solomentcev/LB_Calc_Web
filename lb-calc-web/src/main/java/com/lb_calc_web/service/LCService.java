@@ -205,19 +205,8 @@ public class LCService {
             LC domain, ControlConfiguration fallback, boolean equipmentSelectionProvided
     ) {
         Objects.requireNonNull(domain, "LC не должен быть null");
-        ControlConfiguration configuration = domain.getControlConfiguration();
-        boolean functionalChanged = fallback != null
-                && !configuration.getFunctionalConfiguration().equals(
-                        fallback.getFunctionalConfiguration());
-        if (!equipmentSelectionProvided && fallback != null) {
-            configuration = new ControlConfiguration(
-                    configuration.getFunctionalConfiguration(), fallback.getEquipment());
-            domain.setControlConfiguration(configuration);
-        }
-        if (!equipmentSelectionProvided || functionalChanged) {
-            equipmentCatalogService.configureFunctionalEquipment(configuration);
-            domain.setControlConfiguration(configuration);
-        }
+        domain.setControlConfiguration(equipmentCatalogService.prepareFunctionalEquipment(
+                domain.getControlConfiguration(), fallback, equipmentSelectionProvided));
     }
 
     /** Проверяет комплектацию и геометрию LC перед сохранением в каталоге или составе ALS. */
