@@ -149,7 +149,10 @@ class LCServiceTest {
         functional.setPrinter(com.lb_calc_web.domain.equipment.PrinterPurpose.ABSENT);
         dto.setFunctionalConfiguration(functional);
 
-        LC restored = service.restoreDomain(dto, fallback);
+        LC restored = LCDtoMapper.toDomain(dto, idValue -> {
+            fail("Для отсутствующей комплектации поиск оборудования не требуется");
+            return null;
+        }, fallback, TestDataFactory.createSizeBounds());
 
         assertTrue(restored.getControlConfiguration().getFunctionalConfiguration()
                 .getAccess().isEmpty());
@@ -169,7 +172,10 @@ class LCServiceTest {
         LCDTO dto = TestDataFactory.validLCDTO(19L);
         dto.setFunctionalConfiguration(new com.lb_calc_web.dto.FunctionalConfigurationDTO());
 
-        LC restored = service.restoreDomain(dto, fallback);
+        LC restored = LCDtoMapper.toDomain(dto, idValue -> {
+            fail("Для отсутствующей комплектации поиск оборудования не требуется");
+            return null;
+        }, fallback, TestDataFactory.createSizeBounds());
 
         assertEquals(fallback.getFunctionalConfiguration(),
                 restored.getControlConfiguration().getFunctionalConfiguration());
@@ -189,7 +195,10 @@ class LCServiceTest {
         dto.setSelectedEquipment(List.of());
         dto.setEquipmentProvided(true);
 
-        LC restored = service.restoreDomain(dto, fallback);
+        LC restored = LCDtoMapper.toDomain(dto, idValue -> {
+            fail("Для отсутствующей комплектации поиск оборудования не требуется");
+            return null;
+        }, fallback, TestDataFactory.createSizeBounds());
 
         assertTrue(restored.getControlConfiguration().getEquipment().isEmpty());
     }
