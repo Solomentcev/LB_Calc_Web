@@ -297,7 +297,10 @@ public class ALSController extends BaseCatalogController {
         }
 
         model.addAttribute("als", toDtoWithImages(domain));
-        prepareLCForm(model, toDtoWithImage(lc));
+        model.addAttribute("lc", toDtoWithImage(lc));
+        model.addAttribute("equipmentList", equipmentCatalogService.findAll().stream()
+                .map(EquipmentDtoMapper::toDto).toList());
+        model.addAttribute("defaultEquipmentIds", equipmentCatalogService.findDefaultModelIds());
         return "lcs/lc";
     }
 
@@ -331,13 +334,19 @@ public class ALSController extends BaseCatalogController {
             model.addAttribute("errors", ValidationErrorFormatter.format(e.getValidationResult()));
             com.lb_calc_web.domain.model.ALS als = alsService.findById(alsId);
             model.addAttribute("als", toDtoWithImages(als));
-            prepareLCForm(model, lc);
+            model.addAttribute("lc", lc);
+            model.addAttribute("equipmentList", equipmentCatalogService.findAll().stream()
+                .map(EquipmentDtoMapper::toDto).toList());
+        model.addAttribute("defaultEquipmentIds", equipmentCatalogService.findDefaultModelIds());
             return "lcs/lc";
         } catch (IllegalArgumentException | IllegalStateException | NoSuchElementException exception) {
             model.addAttribute("errors", List.of(exception.getMessage()));
             ALS als = alsService.findById(alsId);
             model.addAttribute("als", toDtoWithImages(als));
-            prepareLCForm(model, lc);
+            model.addAttribute("lc", lc);
+            model.addAttribute("equipmentList", equipmentCatalogService.findAll().stream()
+                .map(EquipmentDtoMapper::toDto).toList());
+        model.addAttribute("defaultEquipmentIds", equipmentCatalogService.findDefaultModelIds());
             return "lcs/lc";
         }
     }
@@ -365,15 +374,11 @@ public class ALSController extends BaseCatalogController {
             model.addAttribute("errors", List.of(exception.getMessage()));
         }
         model.addAttribute("als", toDtoWithImages(source));
-        prepareLCForm(model, lc);
-        return "lcs/lc";
-    }
-
-    private void prepareLCForm(Model model, LCDTO lc) {
         model.addAttribute("lc", lc);
-        model.addAttribute("equipmentList", equipmentCatalogService.findAll().stream()
+            model.addAttribute("equipmentList", equipmentCatalogService.findAll().stream()
                 .map(EquipmentDtoMapper::toDto).toList());
         model.addAttribute("defaultEquipmentIds", equipmentCatalogService.findDefaultModelIds());
+        return "lcs/lc";
     }
 
     /**
@@ -390,8 +395,10 @@ public class ALSController extends BaseCatalogController {
         ALSDTO als = toDtoWithImages(domain);
 
         model.addAttribute("als", als);
-        prepareLBCForm(model,
-                toDtoWithImage(alsService.findLBCInALS(domain, lbcId)));
+        model.addAttribute("lbc", toDtoWithImage(alsService.findLBCInALS(domain, lbcId)));
+        model.addAttribute("equipmentList", equipmentCatalogService.findAll().stream()
+                .map(EquipmentDtoMapper::toDto).toList());
+        model.addAttribute("defaultEquipmentIds", equipmentCatalogService.findDefaultModelIds());
         return "lbcs/lbc";
     }
 
@@ -421,12 +428,18 @@ public class ALSController extends BaseCatalogController {
         } catch (ValidationSizeException e) {
             model.addAttribute("errors", ValidationErrorFormatter.format(e.getValidationResult()));
             model.addAttribute("als", toDtoWithImages(alsService.findById(alsId)));
-            prepareLBCForm(model, lbc);
+            model.addAttribute("lbc", lbc);
+            model.addAttribute("equipmentList", equipmentCatalogService.findAll().stream()
+                .map(EquipmentDtoMapper::toDto).toList());
+        model.addAttribute("defaultEquipmentIds", equipmentCatalogService.findDefaultModelIds());
             return "lbcs/lbc";
         } catch (IllegalArgumentException | IllegalStateException | NoSuchElementException exception) {
             model.addAttribute("errors", List.of(exception.getMessage()));
             model.addAttribute("als", toDtoWithImages(alsService.findById(alsId)));
-            prepareLBCForm(model, lbc);
+            model.addAttribute("lbc", lbc);
+            model.addAttribute("equipmentList", equipmentCatalogService.findAll().stream()
+                .map(EquipmentDtoMapper::toDto).toList());
+        model.addAttribute("defaultEquipmentIds", equipmentCatalogService.findDefaultModelIds());
             return "lbcs/lbc";
         }
     }
@@ -454,15 +467,11 @@ public class ALSController extends BaseCatalogController {
             model.addAttribute("errors", List.of(exception.getMessage()));
         }
         model.addAttribute("als", toDtoWithImages(source));
-        prepareLBCForm(model, lbc);
-        return "lbcs/lbc";
-    }
-
-    private void prepareLBCForm(Model model, LBCDTO lbc) {
         model.addAttribute("lbc", lbc);
-        model.addAttribute("equipmentList", equipmentCatalogService.findAll().stream()
+            model.addAttribute("equipmentList", equipmentCatalogService.findAll().stream()
                 .map(EquipmentDtoMapper::toDto).toList());
         model.addAttribute("defaultEquipmentIds", equipmentCatalogService.findDefaultModelIds());
+        return "lbcs/lbc";
     }
 
     /**
