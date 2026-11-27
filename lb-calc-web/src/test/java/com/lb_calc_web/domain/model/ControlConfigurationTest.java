@@ -72,6 +72,22 @@ class ControlConfigurationTest {
     }
 
     @Test
+    void constructor_shouldRemoveEquipmentThatDoesNotMatchFunctionalConfiguration() {
+        Equipment obsoleteScanner = new Equipment(
+                11L, EquipmentFunctionalType.ACCESS, AccessPurpose.BAR_CODE,
+                EquipmentCategory.BAR_READER, "Старый сканер", "", 0, 0, 0);
+        FunctionalConfiguration functional = functionalConfiguration(
+                DisplayPurpose.NONE, Set.of(AccessPurpose.RFID),
+                PaymentPurpose.NONE, PrinterPurpose.ABSENT);
+
+        ControlConfiguration configuration = new ControlConfiguration(
+                functional, Map.of(obsoleteScanner, 1));
+
+        assertTrue(configuration.getEquipment().isEmpty());
+        assertEquals(functional, configuration.getFunctionalConfiguration());
+    }
+
+    @Test
     void shouldNormalizeDisplayWhenPinIsEnabledWithoutDisplay() {
         ControlConfiguration configuration = new ControlConfiguration(
                 functionalConfiguration(
@@ -276,7 +292,7 @@ class ControlConfigurationTest {
                 32L, EquipmentFunctionalType.DISPLAY, DisplayPurpose.INCH_17,
                 EquipmentCategory.DISPLAY, "Дисплей 17", "", 0, 0, 0);
         FunctionalConfiguration initial = functionalConfiguration(
-                DisplayPurpose.NONE, Set.of(AccessPurpose.RFID),
+                DisplayPurpose.INCH_10, Set.of(AccessPurpose.RFID),
                 PaymentPurpose.CASH, PrinterPurpose.ABSENT);
         ControlConfiguration configuration = new ControlConfiguration(initial, Map.of(first, 1));
 

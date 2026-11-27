@@ -22,8 +22,10 @@ public class ControlConfiguration {
                                 Map<Equipment, Integer> equipment) {
         this.functionalConfiguration = RESOLVER.normalize(Objects.requireNonNull(
                 functionalConfiguration, "Функциональная конфигурация не должна быть null"));
-        this.equipment = copyEquipment(equipment);
-        validateEquipment(this.equipment);
+        Map<Equipment, Integer> selected = copyEquipment(equipment);
+        validateEquipment(selected);
+        this.equipment = new LinkedHashMap<>(
+                RESOLVER.retainRequiredEquipment(this.functionalConfiguration, selected));
     }
 
     /** Создаёт независимую карту оборудования и проверяет количества моделей. */
