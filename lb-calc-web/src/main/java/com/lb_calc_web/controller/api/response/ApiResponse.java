@@ -1,5 +1,6 @@
 package com.lb_calc_web.controller.api.response;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.lb_calc_web.dto.JwtResponse;
 
@@ -8,6 +9,7 @@ import java.util.List;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 /** Унифицированная обёртка успешного REST-ответа и ответа с ошибкой. */
+@Schema(description = "Унифицированный формат REST-ответа. Поле data содержит полезную нагрузку, errors — список ошибок валидации.")
 public class ApiResponse<T> {
 
     public String status;
