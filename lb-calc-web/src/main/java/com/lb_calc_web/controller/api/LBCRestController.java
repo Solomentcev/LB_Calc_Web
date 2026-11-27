@@ -53,14 +53,14 @@ public class LBCRestController {
 
     @GetMapping
     @Operation(summary = "Получить все LBC")
-    public ResponseEntity<?> getAllLBC() {
+    public ResponseEntity<ApiResponse<List<LBCDTO>>> getAllLBC() {
         List<LBCDTO> modules = LBCDtoMapper.toDtoList(lbcService.findAll());
         return ResponseEntity.ok(ApiResponse.success(modules));
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Получить LBC по ID")
-    public ResponseEntity<?> getLBCById(
+    public ResponseEntity<ApiResponse<LBCDTO>> getLBCById(
             @Parameter(description = "Идентификатор LBC")
             @PathVariable @Positive Long id
     ) {
@@ -71,7 +71,7 @@ public class LBCRestController {
 
     @GetMapping("/create")
     @Operation(summary = "Получить шаблон LBC")
-    public ResponseEntity<?> createLBC() {
+    public ResponseEntity<ApiResponse<LBCDTO>> createLBC() {
         return ResponseEntity.ok(
                 ApiResponse.success(LBCDtoMapper.toDto(lbcService.createLBC()))
         );
@@ -79,7 +79,7 @@ public class LBCRestController {
 
     @PostMapping
     @Operation(summary = "Сохранить LBC")
-    public ResponseEntity<?> saveLBC(@RequestBody @Valid LBCDTO dto) {
+    public ResponseEntity<ApiResponse<LBCDTO>> saveLBC(@RequestBody @Valid LBCDTO dto) {
         LBC domain = LBCDtoMapper.toDomain(
                 dto,
                 TypeLbFactory.forLBC(environment, dto.getType()),
