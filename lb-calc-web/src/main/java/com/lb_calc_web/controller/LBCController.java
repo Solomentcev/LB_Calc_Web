@@ -102,7 +102,7 @@ public class LBCController extends BaseCatalogController {
     public String refreshLBC(@ModelAttribute("lbc") LBCDTO lbc, Model model) {
         model.addAttribute("pageContext", "CATALOG");
         try {
-            lbc.setEquipmentSelections(equipmentCatalogService.prepareSelections(
+            lbc.setEquipmentSelections(lbcService.prepareEquipmentSelections(
                     lbc.getFunctionalConfiguration(), lbc.getEquipmentSelections()));
             lbc = LBCDtoMapper.toDto(lbcService.restoreDomain(lbc));
         } catch (ValidationSizeException exception) {
@@ -124,7 +124,6 @@ public class LBCController extends BaseCatalogController {
     ) {
         model.addAttribute("pageContext", "CATALOG");
         try {
-            equipmentCatalogService.validateSelections(lbc.getFunctionalConfiguration(), lbc.getEquipmentSelections());
             LBC saved = lbcService.saveLBC(lbcService.restoreDomain(lbc));
 
             return "redirect:/lbcs/" + saved.getId();
@@ -148,7 +147,7 @@ public class LBCController extends BaseCatalogController {
 
     private void prepareForm(Model model, LBCDTO lbc) {
         model.addAttribute("lbc", lbc);
-        lbc.setEquipmentSelections(equipmentCatalogService.prepareSelections(
+        lbc.setEquipmentSelections(lbcService.prepareEquipmentSelections(
                 lbc.getFunctionalConfiguration(), lbc.getEquipmentSelections()));
         // Сначала определяем выбранные по умолчанию физические модели,
         // затем строим изображение по восстановленной доменной конфигурации.
