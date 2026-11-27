@@ -145,7 +145,7 @@ class LBCImageServiceTest {
         assertEquals(new Color(Colors.White.getRgb()).getRGB(), leftImage.getRGB(leftSideX, y));
         assertEquals(new java.awt.Color(Colors.Blue.getRgb()).getRGB(), leftImage.getRGB(rightSideX, y));
         assertEquals(new Color(Colors.Blue.getRgb()).getRGB(), rightImage.getRGB(leftSideX, y));
-        assertEquals(Colors.White.getColor().getRGB(), rightImage.getRGB(rightSideX, y));
+        assertEquals(new Color(Colors.White.getRgb()).getRGB(), rightImage.getRGB(rightSideX, y));
     }
 
     private LBC createLbc(DirectionDoorOpening direction) {
