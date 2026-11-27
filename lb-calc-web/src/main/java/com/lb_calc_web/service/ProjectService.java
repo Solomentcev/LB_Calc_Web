@@ -273,8 +273,7 @@ return projectRepository.findAllWithUsers()
         ProjectEntity saved = persistProjectEntity(domain, existing);
         return ProjectEntityMapper.toDomain(
                 saved,
-                alsService::restoreDomain,
-                (als, alsEntity) -> { }
+                alsService::restoreDomain
         );
     }
 
@@ -731,8 +730,7 @@ return projectRepository.findAllWithUsers()
         ProjectEntity saved = persistProjectEntity(domain, existing);
         return ProjectEntityMapper.toDomain(
                 saved,
-                alsService::restoreDomain,
-                (als, alsEntity) -> { }
+                alsService::restoreDomain
         );
     }
 
