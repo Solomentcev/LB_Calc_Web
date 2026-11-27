@@ -493,7 +493,6 @@ public class ProjectController
         model.addAttribute("lc", lcForm);
         model.addAttribute("equipmentList", equipmentCatalogService.findAll().stream()
                 .map(EquipmentDtoMapper::toDto).toList());
-        model.addAttribute("defaultEquipmentIds", equipmentCatalogService.findDefaultModelIds());
         model.addAttribute("projectId", projectId);
         model.addAttribute("alsId", alsId);
         model.addAttribute("lcId", lcId);
@@ -530,7 +529,6 @@ public class ProjectController
         model.addAttribute("lc", lcForm);
         model.addAttribute("equipmentList", equipmentCatalogService.findAll().stream()
                 .map(EquipmentDtoMapper::toDto).toList());
-        model.addAttribute("defaultEquipmentIds", equipmentCatalogService.findDefaultModelIds());
         model.addAttribute("projectId", projectId);
         model.addAttribute("alsId", alsId);
         model.addAttribute("lcId", lcId);
@@ -591,7 +589,6 @@ public class ProjectController
             model.addAttribute("lc", lcForm);
         model.addAttribute("equipmentList", equipmentCatalogService.findAll().stream()
                 .map(EquipmentDtoMapper::toDto).toList());
-        model.addAttribute("defaultEquipmentIds", equipmentCatalogService.findDefaultModelIds());
 
             model.addAttribute(
                     "projectId",
@@ -640,7 +637,6 @@ public class ProjectController
         model.addAttribute("lbc", lbcForm);
         model.addAttribute("equipmentList", equipmentCatalogService.findAll().stream()
                 .map(EquipmentDtoMapper::toDto).toList());
-        model.addAttribute("defaultEquipmentIds", equipmentCatalogService.findDefaultModelIds());
         model.addAttribute("projectId", projectId);
         model.addAttribute("alsId", alsId);
         model.addAttribute("lbcId", lbcId);
@@ -678,7 +674,6 @@ public class ProjectController
         model.addAttribute("lbc", lbcForm);
         model.addAttribute("equipmentList", equipmentCatalogService.findAll().stream()
                 .map(EquipmentDtoMapper::toDto).toList());
-        model.addAttribute("defaultEquipmentIds", equipmentCatalogService.findDefaultModelIds());
         model.addAttribute("projectId", projectId);
         model.addAttribute("alsId", alsId);
         model.addAttribute("lbcId", lbcId);
@@ -733,7 +728,6 @@ public class ProjectController
             model.addAttribute("lbc", lbcForm);
         model.addAttribute("equipmentList", equipmentCatalogService.findAll().stream()
                 .map(EquipmentDtoMapper::toDto).toList());
-        model.addAttribute("defaultEquipmentIds", equipmentCatalogService.findDefaultModelIds());
 
             model.addAttribute("projectId", projectId);
             model.addAttribute("alsId", alsId);
