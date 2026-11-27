@@ -143,6 +143,24 @@ class LBCServiceTest {
     }
 
     @Test
+    void prepareFunctionalEquipment_shouldRestoreCompatibleFallbackWhenSelectionWasNotProvided() {
+        LBC domain = TestDataFactory.validLBC(42L);
+        Equipment scanner = new Equipment(
+                7042L, EquipmentFunctionalType.ACCESS, AccessPurpose.RFID,
+                com.lb_calc_web.domain.equipment.EquipmentCategory.RFID_READER,
+                "RFID", "", 100, 50, 30);
+        ControlConfiguration fallback = new ControlConfiguration(
+                domain.getControlConfiguration().getFunctionalConfiguration(),
+                Map.of(scanner, 2));
+
+        service.prepareFunctionalEquipment(domain, fallback, false);
+
+        assertEquals(Map.of(scanner, 2), domain.getEquipment());
+        verify(equipmentCatalogService).configureFunctionalEquipment(any(ControlConfiguration.class));
+    }
+
+
+    @Test
     void prepareFunctionalEquipment_shouldPreserveExplicitEmptySelectionWhenFunctionsAreUnchanged() {
         LBC domain = TestDataFactory.validLBC(null);
         var fallback = domain.getControlConfiguration();
