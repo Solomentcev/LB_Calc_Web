@@ -170,7 +170,25 @@ public class ProjectController
         populateProjectComposition(project, id);
         try {
             com.lb_calc_web.domain.model.Project domain =
-                    ProjectDtoMapper.toDomain(project, this::toDomain);
+                    ProjectDtoMapper.toDomain(project, dto -> {
+                        ALS existing = dto.getId() != null && dto.getId() > 0
+                                ? alsService.findById(dto.getId()) : null;
+                        ControlConfiguration fallback = existing == null ? null
+                                : existing.getControlModule().getControlConfiguration();
+                        if (fallback != null) {
+                            fallback.setFunctionalConfiguration(existing.getFunctionalConfiguration());
+                        }
+                        ALS restored = ALSDtoMapper.toDomain(
+                                dto,
+                                candidate -> TypeLbFactory.forLB(environment, candidate.getType()),
+                                candidate -> TypeLbFactory.forLBC(environment, candidate.getType()),
+                                equipmentCatalogService::findById,
+                                fallback,
+                                sizeBounds
+                        );
+                        alsService.configureFunctionalEquipment(restored);
+                        return alsService.preserveExistingModules(existing, restored);
+                    });
             project = ProjectDtoMapper.toDto(projectService.previewProject(domain));
         } catch (ValidationSizeException exception) {
             model.addAttribute("projectErrors",
@@ -200,7 +218,25 @@ public class ProjectController
             com.lb_calc_web.domain.model.Project domain =
                     com.lb_calc_web.mapper.dto.ProjectDtoMapper.toDomain(
                             project,
-                            this::toDomain
+                            dto -> {
+                        ALS existing = dto.getId() != null && dto.getId() > 0
+                                ? alsService.findById(dto.getId()) : null;
+                        ControlConfiguration fallback = existing == null ? null
+                                : existing.getControlModule().getControlConfiguration();
+                        if (fallback != null) {
+                            fallback.setFunctionalConfiguration(existing.getFunctionalConfiguration());
+                        }
+                        ALS restored = ALSDtoMapper.toDomain(
+                                dto,
+                                candidate -> TypeLbFactory.forLB(environment, candidate.getType()),
+                                candidate -> TypeLbFactory.forLBC(environment, candidate.getType()),
+                                equipmentCatalogService::findById,
+                                fallback,
+                                sizeBounds
+                        );
+                        alsService.configureFunctionalEquipment(restored);
+                        return alsService.preserveExistingModules(existing, restored);
+                    }
                     );
             com.lb_calc_web.domain.model.Project saved =
                     projectService.saveProject(domain);
@@ -355,7 +391,18 @@ public class ProjectController
         com.lb_calc_web.domain.model.Project preview =
                 projectService.findById(projectId);
         try {
-            ALS replacement = toDomain(als, persistedALS);
+ControlConfiguration fallback = persistedALS.getControlModule().getControlConfiguration();
+            fallback.setFunctionalConfiguration(persistedALS.getFunctionalConfiguration());
+            ALS restored = ALSDtoMapper.toDomain(
+                    als,
+                    candidate -> TypeLbFactory.forLB(environment, candidate.getType()),
+                    candidate -> TypeLbFactory.forLBC(environment, candidate.getType()),
+                    equipmentCatalogService::findById,
+                    fallback,
+                    sizeBounds
+            );
+            alsService.configureFunctionalEquipment(restored);
+            ALS replacement = alsService.preserveExistingModules(persistedALS, restored);
             preview = projectService.previewALSReplacement(projectId, alsId, replacement);
             als = ALSDtoMapper.toDto(replacement);
         } catch (ValidationSizeException exception) {
@@ -389,7 +436,18 @@ public class ProjectController
             ALSDTO persisted = ALSDtoMapper.toDto(persistedALS);
             als.setLC(persisted.getLC());
             als.setLBC(persisted.getLBC());
-            ALS replacement = toDomain(als, persistedALS);
+ControlConfiguration fallback = persistedALS.getControlModule().getControlConfiguration();
+            fallback.setFunctionalConfiguration(persistedALS.getFunctionalConfiguration());
+            ALS restored = ALSDtoMapper.toDomain(
+                    als,
+                    candidate -> TypeLbFactory.forLB(environment, candidate.getType()),
+                    candidate -> TypeLbFactory.forLBC(environment, candidate.getType()),
+                    equipmentCatalogService::findById,
+                    fallback,
+                    sizeBounds
+            );
+            alsService.configureFunctionalEquipment(restored);
+            ALS replacement = alsService.preserveExistingModules(persistedALS, restored);
             ALS savedALS = projectService.replaceALSandSaveProject(
                     projectId,
                     alsId,
@@ -473,7 +531,12 @@ public class ProjectController
         com.lb_calc_web.domain.model.Project preview = projectService.findById(projectId);
         ALS updatedALS = sourceALS;
         try {
-            com.lb_calc_web.domain.model.LC replacement = toDomain(lc, sourceALS);
+            com.lb_calc_web.domain.model.LC replacement = LCDtoMapper.toDomain(
+                    lc, equipmentCatalogService::findById,
+                    sourceALS.getControlModule() instanceof LC
+                            ? sourceALS.getControlModule().getControlConfiguration() : null,
+                    sizeBounds);
+            alsService.configureFunctionalEquipment(replacement);
             ALS candidateALS = alsService.replaceLC(sourceALS.copy(), replacement);
             preview = projectService.previewALSReplacement(projectId, alsId, candidateALS);
             updatedALS = candidateALS;
@@ -507,7 +570,12 @@ public class ProjectController
             lc.setId(lcId);
             projectService.findLCInProject(projectId, alsId, lcId);
             ALS sourceALS = projectService.findALSInProject(projectId, alsId);
-            LC replacement = toDomain(lc, sourceALS);
+            LC replacement = LCDtoMapper.toDomain(
+                    lc, equipmentCatalogService::findById,
+                    sourceALS.getControlModule() instanceof LC
+                            ? sourceALS.getControlModule().getControlConfiguration() : null,
+                    sizeBounds);
+            alsService.configureFunctionalEquipment(replacement);
             ALS savedALS = projectService.saveLCAtProject(
                     projectId,
                     alsId,
@@ -603,7 +671,13 @@ public class ProjectController
         com.lb_calc_web.domain.model.Project preview = projectService.findById(projectId);
         ALS updatedALS = sourceALS;
         try {
-            com.lb_calc_web.domain.model.LBC replacement = toDomain(lbc, sourceALS);
+            com.lb_calc_web.domain.model.LBC replacement = LBCDtoMapper.toDomain(
+                    lbc, TypeLbFactory.forLBC(environment, lbc.getType()),
+                    equipmentCatalogService::findById,
+                    sourceALS.getControlModule() instanceof LBC
+                            ? sourceALS.getControlModule().getControlConfiguration() : null,
+                    sizeBounds);
+            alsService.configureFunctionalEquipment(replacement);
             ALS candidateALS = alsService.replaceLBC(sourceALS.copy(), replacement);
             preview = projectService.previewALSReplacement(projectId, alsId, candidateALS);
             updatedALS = candidateALS;
@@ -637,7 +711,13 @@ public class ProjectController
             lbc.setId(lbcId);
             projectService.findLBCInProject(projectId, alsId, lbcId);
             ALS sourceALS = projectService.findALSInProject(projectId, alsId);
-            LBC replacement = toDomain(lbc, sourceALS);
+            LBC replacement = LBCDtoMapper.toDomain(
+                    lbc, TypeLbFactory.forLBC(environment, lbc.getType()),
+                    equipmentCatalogService::findById,
+                    sourceALS.getControlModule() instanceof LBC
+                            ? sourceALS.getControlModule().getControlConfiguration() : null,
+                    sizeBounds);
+            alsService.configureFunctionalEquipment(replacement);
             ALS savedALS = projectService.saveLBCAtProject(
                     projectId,
                     alsId,
@@ -718,7 +798,8 @@ public class ProjectController
         ALS sourceALS = projectService.findALSInProject(projectId, alsId);
         ALS updatedALS = sourceALS;
         try {
-            LB replacement = toDomain(lb);
+            LB replacement = LBDtoMapper.toDomain(
+                    lb, TypeLbFactory.forLB(environment, lb.getType()));
             ALS candidateALS = alsService.replaceLB(sourceALS.copy(), lbId, replacement);
             preview = projectService.previewALSReplacement(projectId, alsId, candidateALS);
             updatedALS = candidateALS;
@@ -912,87 +993,6 @@ public class ProjectController
                 )
                 .body(file);
     }
-    /** Преобразует DTO ALS в доменную модель с учётом сохранённой конфигурации. */
-    private ALS toDomain(ALSDTO dto) {
-        ALS existing = dto.getId() != null && dto.getId() > 0
-                ? alsService.findById(dto.getId()) : null;
-        return toDomain(dto, existing);
-    }
-
-    /** Преобразует DTO ALS и сохраняет неизменённые доменные модули. */
-    private ALS toDomain(ALSDTO dto, ALS existing) {
-        ControlConfiguration fallback = null;
-        if (existing != null) {
-            ControlModule currentControl = existing.getControlModule();
-            if ((dto.getLC() != null && currentControl instanceof LC)
-                    || (dto.getLBC() != null && currentControl instanceof LBC)) {
-                fallback = currentControl.getControlConfiguration();
-                fallback.setFunctionalConfiguration(existing.getFunctionalConfiguration());
-            }
-        }
-        ALS restored = ALSDtoMapper.toDomain(
-                dto,
-                candidate -> TypeLbFactory.forLB(environment, candidate.getType()),
-                candidate -> TypeLbFactory.forLBC(environment, candidate.getType()),
-                equipmentCatalogService::findById,
-                fallback,
-                sizeBounds
-        );
-        boolean equipmentSelectionOmitted = dto.getLC() != null
-                ? !dto.getLC().isEquipmentProvided() && dto.getLC().getSelectedEquipment().isEmpty()
-                : !dto.getLBC().isEquipmentProvided() && dto.getLBC().getSelectedEquipment().isEmpty();
-        boolean functionalConfigurationChanged = fallback != null
-                && !restored.getFunctionalConfiguration().equals(
-                fallback.getFunctionalConfiguration());
-        if (equipmentSelectionOmitted || functionalConfigurationChanged) {
-            ControlConfiguration configuration = restored.getControlModule().getControlConfiguration();
-            equipmentCatalogService.configureFunctionalEquipment(configuration);
-            restored.setControlConfiguration(configuration);
-        }
-        return alsService.preserveExistingModules(existing, restored);
-    }
-
-    /** Преобразует DTO управляющего модуля LC с учётом прежней комплектации. */
-    private LC toDomain(LCDTO dto, ALS sourceALS) {
-        ControlConfiguration fallback = sourceALS.getControlModule() instanceof LC
-                ? sourceALS.getControlModule().getControlConfiguration() : null;
-        LC restored = LCDtoMapper.toDomain(dto, equipmentCatalogService::findById, fallback, sizeBounds);
-        boolean selectionOmitted = !dto.isEquipmentProvided() && dto.getSelectedEquipment().isEmpty();
-        boolean functionalChanged = fallback != null
-                && !restored.getControlConfiguration().getFunctionalConfiguration().equals(
-                fallback.getFunctionalConfiguration());
-        if (selectionOmitted || functionalChanged) {
-            equipmentCatalogService.configureFunctionalEquipment(restored.getControlConfiguration());
-        }
-        return restored;
-    }
-
-    /** Преобразует DTO управляющего модуля LBC с учётом прежней комплектации. */
-    private LBC toDomain(LBCDTO dto, ALS sourceALS) {
-        ControlConfiguration fallback = sourceALS.getControlModule() instanceof LBC
-                ? sourceALS.getControlModule().getControlConfiguration() : null;
-        LBC restored = LBCDtoMapper.toDomain(
-                dto,
-                TypeLbFactory.forLBC(environment, dto.getType()),
-                equipmentCatalogService::findById,
-                fallback,
-                sizeBounds
-        );
-        boolean selectionOmitted = !dto.isEquipmentProvided() && dto.getSelectedEquipment().isEmpty();
-        boolean functionalChanged = fallback != null
-                && !restored.getControlConfiguration().getFunctionalConfiguration().equals(
-                fallback.getFunctionalConfiguration());
-        if (selectionOmitted || functionalChanged) {
-            equipmentCatalogService.configureFunctionalEquipment(restored.getControlConfiguration());
-        }
-        return restored;
-    }
-
-    /** Преобразует DTO LB в доменную модель с конструктивными параметрами из конфигурации. */
-    private LB toDomain(LBDTO dto) {
-        return LBDtoMapper.toDomain(dto, TypeLbFactory.forLB(environment, dto.getType()));
-    }
-
     /**
      * Добавляет изображения ALS перед передачей проекта в представление.
      */
