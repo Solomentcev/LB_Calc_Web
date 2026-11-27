@@ -11,7 +11,7 @@ import com.lb_calc_web.mapper.entity.LBEntityMapper;
 import com.lb_calc_web.repository.LBRepository;
 import com.lb_calc_web.service.factory.TypeLbFactory;
 import com.lb_calc_web.service.validation.size.SizeValidator;
-import com.lb_calc_web.service.validation.size.SizeBounds;
+import com.lb_calc_web.domain.geometry.SizeBounds;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.env.Environment;
