@@ -203,6 +203,6 @@ public class ALSSizeValidator {
             Object min,
             Object max
     ) {
-        result.addError(result, field, message, actual, min, max);
+        result.addError(field, message, actual, min, max);
     }
 }
