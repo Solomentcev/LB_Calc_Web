@@ -4,6 +4,7 @@ import com.lb_calc_web.domain.geometry.SizeBounds;
 
 import com.lb_calc_web.domain.equipment.Equipment;
 import com.lb_calc_web.domain.model.ControlConfiguration;
+import com.lb_calc_web.domain.model.FunctionalConfiguration;
 import com.lb_calc_web.domain.model.LC;
 import com.lb_calc_web.domain.model.Module;
 import com.lb_calc_web.entity.EquipmentQuantityEmbeddable;
@@ -43,7 +44,9 @@ public final class LCEntityMapper {
                 ));
 
         ControlConfiguration configuration = new ControlConfiguration(
-                entity.getFunctionalConfiguration(),
+                new FunctionalConfiguration(
+                        entity.getDisplayPurpose(), entity.getAccessPurposes(),
+                        entity.getPaymentPurpose(), entity.getPrinterPurpose()),
                 equipment
         );
         LC domain = new LC(
@@ -100,7 +103,11 @@ public final class LCEntityMapper {
         entity.setColorDoor(domain.getColorDoor());
 
         ControlConfiguration configuration = domain.getControlConfiguration();
-        entity.setFunctionalConfiguration(configuration.getFunctionalConfiguration());
+        FunctionalConfiguration functional = configuration.getFunctionalConfiguration();
+        entity.setDisplayPurpose(functional.getDisplay());
+        entity.setAccessPurposes(functional.getAccess());
+        entity.setPaymentPurpose(functional.getPayment());
+        entity.setPrinterPurpose(functional.getPrinter());
         Set<EquipmentQuantityEmbeddable> equipment = configuration.getEquipment().entrySet()
                 .stream()
                 .map(entry -> new EquipmentQuantityEmbeddable(
