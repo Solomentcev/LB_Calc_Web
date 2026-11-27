@@ -226,7 +226,7 @@ public class LBCDTO {
     }
 
     public List<EquipmentDTO> getSelectedEquipment() {
-        return List.copyOf(selectedEquipment);
+        return selectedEquipment;
     }
 
     public void setSelectedEquipment(List<EquipmentDTO> selectedEquipment) {
