@@ -159,7 +159,7 @@ public class LCDTO {
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
                 ", functionalConfiguration=" + functionalConfiguration +
-                ", equipmentSelections=" + equipmentSelections +
+                ", equipment=" + equipment +
                 '}';
     }
 }

@@ -275,7 +275,7 @@ public class LBCDTO {
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
                 ", functionalConfiguration=" + functionalConfiguration +
-                ", equipmentSelections=" + equipmentSelections +
+                ", equipment=" + equipment +
                 '}';
     }
 }

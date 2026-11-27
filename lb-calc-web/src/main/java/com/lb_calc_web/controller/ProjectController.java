@@ -463,8 +463,7 @@ public class ProjectController
         com.lb_calc_web.domain.model.Project preview = projectService.findById(projectId);
         ALS updatedALS = sourceALS;
         try {
-            lc.setEquipmentSelections(equipmentCatalogService.prepareSelections(
-                    lc.getFunctionalConfiguration(), lc.getEquipmentSelections()));
+            ALSFormSupport.configure(lc, equipmentCatalogService);
             com.lb_calc_web.domain.model.LC replacement = alsService.restoreLC(lc, sourceALS);
             ALS candidateALS = alsService.replaceLC(sourceALS.copy(), replacement);
             preview = projectService.previewALSReplacement(projectId, alsId, candidateALS);
@@ -499,7 +498,7 @@ public class ProjectController
             lc.setId(lcId);
             projectService.findLCInProject(projectId, alsId, lcId);
             ALS sourceALS = projectService.findALSInProject(projectId, alsId);
-            equipmentCatalogService.validateSelections(lc.getFunctionalConfiguration(), lc.getEquipmentSelections());
+            ALSFormSupport.configure(lc, equipmentCatalogService);
             LC replacement = alsService.restoreLC(lc, sourceALS);
             ALS savedALS = projectService.saveLCAtProject(
                     projectId,
@@ -596,8 +595,7 @@ public class ProjectController
         com.lb_calc_web.domain.model.Project preview = projectService.findById(projectId);
         ALS updatedALS = sourceALS;
         try {
-            lbc.setEquipmentSelections(equipmentCatalogService.prepareSelections(
-                    lbc.getFunctionalConfiguration(), lbc.getEquipmentSelections()));
+            ALSFormSupport.configure(lbc, equipmentCatalogService);
             com.lb_calc_web.domain.model.LBC replacement = alsService.restoreLBC(lbc, sourceALS);
             ALS candidateALS = alsService.replaceLBC(sourceALS.copy(), replacement);
             preview = projectService.previewALSReplacement(projectId, alsId, candidateALS);
@@ -632,7 +630,7 @@ public class ProjectController
             lbc.setId(lbcId);
             projectService.findLBCInProject(projectId, alsId, lbcId);
             ALS sourceALS = projectService.findALSInProject(projectId, alsId);
-            equipmentCatalogService.validateSelections(lbc.getFunctionalConfiguration(), lbc.getEquipmentSelections());
+            ALSFormSupport.configure(lbc, equipmentCatalogService);
             LBC replacement = alsService.restoreLBC(lbc, sourceALS);
             ALS savedALS = projectService.saveLBCAtProject(
                     projectId,
@@ -997,8 +995,6 @@ public class ProjectController
 
     private void prepareLCForm(Model model, LCDTO lc) {
         model.addAttribute("lc", lc);
-        lc.setEquipmentSelections(equipmentCatalogService.prepareSelections(
-                lc.getFunctionalConfiguration(), lc.getEquipmentSelections()));
         model.addAttribute("equipmentList", equipmentCatalogService.findAll().stream()
                 .map(EquipmentDtoMapper::toDto).toList());
         model.addAttribute("defaultEquipmentIds", equipmentCatalogService.findDefaultModelIds());
@@ -1006,8 +1002,6 @@ public class ProjectController
 
     private void prepareLBCForm(Model model, LBCDTO lbc) {
         model.addAttribute("lbc", lbc);
-        lbc.setEquipmentSelections(equipmentCatalogService.prepareSelections(
-                lbc.getFunctionalConfiguration(), lbc.getEquipmentSelections()));
         model.addAttribute("equipmentList", equipmentCatalogService.findAll().stream()
                 .map(EquipmentDtoMapper::toDto).toList());
         model.addAttribute("defaultEquipmentIds", equipmentCatalogService.findDefaultModelIds());
