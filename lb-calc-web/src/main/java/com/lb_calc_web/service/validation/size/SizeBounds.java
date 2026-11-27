@@ -155,18 +155,25 @@ public class SizeBounds implements com.lb_calc_web.domain.geometry.SizeBounds {
         validateRange("толщина полки", typeShelfThickMin, typeShelfThickMax);
         validateRange("ширина сервисной зоны", typeServiceZoneWidthMin, typeServiceZoneWidthMax);
 
-        if (heightCellMin <= 0 || widthCellMin <= 0 || countCellsMin <= 0
+        if (upperFrameMin <= 0 || bottomFrameMin <= 0
+                || heightMin <= 0 || widthMin <= 0 || depthMin <= 0
+                || heightCellMin <= 0 || widthCellMin <= 0 || depthCellMin <= 0
+                || heightLcMin <= 0 || heightLcPanelMin <= 0
+                || doorThicknessMin <= 0 || countCellsMin <= 0
                 || countCellsMax < countCellsMin || lcMinimumWidth <= 0
+                || lcMinimumWidth > widthMax
                 || lcDisplaySideClearance < 0 || lcWidthRoundingStep <= 0
-                || lcDisplayCenterHeight < 0 || lcDisplayTopClearance < 0
+                || lcDisplayCenterHeight <= 0 || lcDisplayTopClearance < 0
                 || lbcStorageCellMinWidth <= 0 || lbcTechnicalCellMinWidth <= 0
                 || lbcTechnicalCellMinHeight <= 0 || lbcEquipmentClearance < 0
-                || lbcDisplayCenterHeight < 0) {
+                || lbcDisplayCenterHeight <= 0) {
             throw new IllegalArgumentException("Размерные ограничения содержат недопустимые значения");
         }
         validateDefault("высота", heightDefault, heightMin, heightMax);
         validateDefault("ширина", widthDefault, widthMin, widthMax);
         validateDefault("глубина", depthDefault, depthMin, depthMax);
+        validateDefault("верхняя рама", upperFrameDefault, upperFrameMin, upperFrameMax);
+        validateDefault("нижняя рама", bottomFrameDefault, bottomFrameMin, bottomFrameMax);
         validateDefault("толщина двери", doorThicknessDefault, doorThicknessMin, doorThicknessMax);
         validateDefault("количество ячеек", countCellsDefault, countCellsMin, countCellsMax);
     }
