@@ -3,6 +3,7 @@ package com.lb_calc_web.controller;
 import com.lb_calc_web.domain.model.LBC;
 import com.lb_calc_web.dto.EquipmentDTO;
 import com.lb_calc_web.mapper.dto.EquipmentDtoMapper;
+import com.lb_calc_web.mapper.dto.EquipmentSelectionDtoMapper;
 import com.lb_calc_web.service.EquipmentCatalogService;
 import com.lb_calc_web.dto.LBCDTO;
 import com.lb_calc_web.mapper.dto.LBCDtoMapper;
@@ -102,8 +103,9 @@ public class LBCController extends BaseCatalogController {
     public String refreshLBC(@ModelAttribute("lbc") LBCDTO lbc, Model model) {
         model.addAttribute("pageContext", "CATALOG");
         try {
-            lbc.setEquipmentSelections(lbcService.prepareEquipmentSelections(
-                    lbc.getFunctionalConfiguration(), lbc.getEquipmentSelections()));
+            lbc.setEquipmentSelections(EquipmentSelectionDtoMapper.prepareSelections(
+                    lbc.getFunctionalConfiguration(), lbc.getEquipmentSelections(),
+                    equipmentCatalogService.findAll(), equipmentCatalogService.findDefaultModelIds()));
             lbc = LBCDtoMapper.toDto(lbcService.restoreDomain(lbc));
         } catch (ValidationSizeException exception) {
             model.addAttribute("errors", ValidationErrorFormatter.format(exception.getValidationResult()));
@@ -147,8 +149,9 @@ public class LBCController extends BaseCatalogController {
 
     private void prepareForm(Model model, LBCDTO lbc) {
         model.addAttribute("lbc", lbc);
-        lbc.setEquipmentSelections(lbcService.prepareEquipmentSelections(
-                lbc.getFunctionalConfiguration(), lbc.getEquipmentSelections()));
+        lbc.setEquipmentSelections(EquipmentSelectionDtoMapper.prepareSelections(
+                lbc.getFunctionalConfiguration(), lbc.getEquipmentSelections(),
+                equipmentCatalogService.findAll(), equipmentCatalogService.findDefaultModelIds()));
         // Сначала определяем выбранные по умолчанию физические модели,
         // затем строим изображение по восстановленной доменной конфигурации.
         try {
