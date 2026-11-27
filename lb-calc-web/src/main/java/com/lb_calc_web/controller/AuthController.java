@@ -4,6 +4,8 @@ import com.lb_calc_web.dto.JwtResponse;
 import com.lb_calc_web.dto.LoginRequest;
 import com.lb_calc_web.dto.RegistrationDTO;
 import com.lb_calc_web.service.AuthService;
+import com.lb_calc_web.security.jwt.AuthTokens;
+import com.lb_calc_web.security.jwt.JwtService;
 import jakarta.security.auth.message.AuthException;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -19,10 +21,11 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 public class AuthController {
     private final AuthService authService;
+    private final JwtService jwtService;
 
-    public AuthController(AuthService authService) {
+    public AuthController(AuthService authService, JwtService jwtService) {
         this.authService = authService;
-
+        this.jwtService = jwtService;
     }
     /** Отображает форму регистрации пользователя. */
     @GetMapping("/registration")
@@ -41,7 +44,13 @@ public class AuthController {
             return "registration";
         }
         try {
-            authService.registration(registrationDTO);
+            authService.registration(
+                    registrationDTO.getFirstName(),
+                    registrationDTO.getLastName(),
+                    registrationDTO.getEmail(),
+                    registrationDTO.getPassword(),
+                    registrationDTO.getConfirmPassword()
+            );
             redirectAttributes.addFlashAttribute("successMessage", "Вы успешно зарегистрировались");
             return "redirect:/login";
         } catch (IllegalArgumentException exception) {
@@ -65,9 +74,10 @@ public class AuthController {
             return "login";
         }
         try {
-            JwtResponse tokens =authService.login(loginRequest);
-            response.addCookie(authService.generateAccessTokenCookie(tokens.getAccessToken()));
-            response.addCookie(authService.generateRefreshTokenCookie(tokens.getRefreshToken()));
+            AuthTokens tokens = authService.login(
+                    loginRequest.getEmail(), loginRequest.getPassword());
+            response.addCookie(jwtService.generateAccessTokenCookie(tokens.accessToken()));
+            response.addCookie(jwtService.generateRefreshTokenCookie(tokens.refreshToken()));
         } catch (AuthException exception) {
                 redirectAttributes.addFlashAttribute("error", "Неверный email или пароль");
                 redirectAttributes.addFlashAttribute("loginRequest", loginRequest);
