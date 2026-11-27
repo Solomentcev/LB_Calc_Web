@@ -210,7 +210,6 @@
                                             <li th:each="selection : ${als.LC.selectedEquipment}"
                                                 th:text="|${selection.name} — ${selection.quantity} шт.|">Оборудование</li>
                                             <li th:if="${#lists.isEmpty(als.LC.selectedEquipment)}"
-                                                class="text-muted">Отдельное оборудование не требуется</li>                                            <li th:if="${#lists.isEmpty(als.LC.equipmentSelections)}"
                                                 class="text-muted">Отдельное оборудование не требуется</li>
                                         </ul>
                                     </div>
@@ -294,7 +293,6 @@
                                             <li th:each="selection : ${als.LBC.selectedEquipment}"
                                                 th:text="|${selection.name} — ${selection.quantity} шт.|">Оборудование</li>
                                             <li th:if="${#lists.isEmpty(als.LBC.selectedEquipment)}"
-                                                class="text-muted">Отдельное оборудование не требуется</li>                                            <li th:if="${#lists.isEmpty(als.LBC.equipmentSelections)}"
                                                 class="text-muted">Отдельное оборудование не требуется</li>
                                         </ul>
                                     </div>
