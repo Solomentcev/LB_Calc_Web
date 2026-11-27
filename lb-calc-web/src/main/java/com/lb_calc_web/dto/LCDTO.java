@@ -1,6 +1,7 @@
 package com.lb_calc_web.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +27,7 @@ public class LCDTO {
     private FunctionalConfigurationDTO functionalConfiguration;
     /** Выбранные модели с названиями и характеристиками для отображения в форме. */
     private List<EquipmentDTO> selectedEquipment = new ArrayList<>();
-    @JsonIgnore
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private boolean equipmentProvided;
 
     @JsonIgnore
