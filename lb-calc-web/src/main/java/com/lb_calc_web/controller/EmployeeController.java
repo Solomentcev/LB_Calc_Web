@@ -198,8 +198,7 @@ public class EmployeeController {
 
         try {
 
-            EmployeeDTO employee =
-                    employeeService.loadUserById(id);
+            EmployeeDTO employee = EmployeeDtoMapper.toDto(employeeService.loadUserById(id));
 
             authService.changePassword(
                     employee.getId(),
