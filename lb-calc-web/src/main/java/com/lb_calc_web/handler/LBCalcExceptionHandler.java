@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.validation.BindException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
@@ -42,6 +43,20 @@ public class LBCalcExceptionHandler {
     public ModelAndView handleNotFound(NoSuchElementException exception) {
         LOGGER.warn("Запрошенный объект не найден", exception);
         return error(HttpStatus.NOT_FOUND, "Запрашиваемый объект не найден.");
+    }
+
+    /** Возвращает REST-ответ 404 для неизвестного API-маршрута. */
+    @ExceptionHandler(NoResourceFoundException.class)
+    public Object handleUnknownResource(
+            NoResourceFoundException exception,
+            HttpServletRequest request
+    ) {
+        String message = "Запрашиваемый ресурс не найден";
+        if (request.getRequestURI().startsWith("/api/")) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ApiResponse.error(message));
+        }
+        return error(HttpStatus.NOT_FOUND, message + ".");
     }
 
     /** Отображает ошибки входных данных без раскрытия внутренних сообщений исключений. */
