@@ -84,38 +84,6 @@ public final class ALSDtoMapper {
         return dto;
     }
 
-    /** Обновляет в DTO вычисляемые геометрические характеристики ALS. */
-    public static void updateCalculatedFields(ALSDTO target, ALS domain) {
-        Objects.requireNonNull(target, "Целевой ALSDTO не должен быть null");
-        Objects.requireNonNull(domain, "ALS не должна быть null");
-        ALSDTO calculated = toDto(domain);
-        target.setName(calculated.getName());
-        target.setDescription(calculated.getDescription());
-        target.setWidth(calculated.getWidth());
-        target.setCountCells(calculated.getCountCells());
-        target.setDepthCell(calculated.getDepthCell());
-        target.setPositionControlModule(calculated.getPositionControlModule());
-        target.setFunctionalConfiguration(calculated.getFunctionalConfiguration());
-        target.setModuleOrder(calculated.getModuleOrder());
-    }
-
-    /** Находит позицию физического экземпляра LB в порядке модулей ALS. */
-    public static int findPhysicalLbIndex(ALS domain, int lbIndex) {
-        Objects.requireNonNull(domain, "ALS не должна быть null");
-        int current = 0;
-        List<Module> modules = domain.getModules();
-        for (int index = 0; index < modules.size(); index++) {
-            if (modules.get(index) instanceof LB) {
-                if (current == lbIndex) {
-                    return index;
-                }
-                current++;
-            }
-        }
-        throw new IllegalStateException(
-                "Не удалось сопоставить LB DTO с модулем доменной ALS");
-    }
-
     /** Восстанавливает ALS с настройками физической геометрии LC и LBC. */
     public static ALS toDomain(
             ALSDTO dto,
