@@ -333,8 +333,13 @@ public class ProjectController
     @PostMapping("/{projectId}/alss/{alsId}/refresh")
     public String refreshALS(@PathVariable Long projectId, @PathVariable Long alsId,
                              @ModelAttribute("als") ALSDTO als, Model model) {
-        projectService.findALSInProject(projectId, alsId);
+        ALS persistedALS = projectService.findALSInProject(projectId, alsId);
         als.setId(alsId);
+        // Состав управляющего модуля редактируется в отдельной форме.
+        // Не восстанавливаем его состояние из скрытых полей страницы ALS.
+        ALSDTO persisted = ALSDtoMapper.toDto(persistedALS);
+        als.setLC(persisted.getLC());
+        als.setLBC(persisted.getLBC());
         com.lb_calc_web.domain.model.Project preview =
                 projectService.findById(projectId);
         try {
@@ -366,8 +371,13 @@ public class ProjectController
             Model model
     ) {
         try {
-            projectService.findALSInProject(projectId, alsId);
+            ALS persistedALS = projectService.findALSInProject(projectId, alsId);
             als.setId(alsId);
+            // Состав управляющего модуля редактируется в отдельной форме.
+            // Сохраняем актуальную серверную конфигурацию, а не скрытые поля формы ALS.
+            ALSDTO persisted = ALSDtoMapper.toDto(persistedALS);
+            als.setLC(persisted.getLC());
+            als.setLBC(persisted.getLBC());
             ALSFormSupport.synchronizeFunctionalConfiguration(als, equipmentCatalogService);
             ALS replacement = alsService.restoreDomain(als);
             ALS savedALS = projectService.replaceALSandSaveProject(
