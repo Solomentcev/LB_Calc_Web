@@ -149,6 +149,7 @@ public class ProjectRestController {
      * Создать проект.
      */
     @PostMapping
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Проект создан")
     @Operation(
             summary = "Создать проект"
     )
@@ -269,6 +270,7 @@ public class ProjectRestController {
      * Добавить ALS в проект.
      */
     @PostMapping("/{projectId}/als")
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Конфигурация ALS добавлена в проект")
     @Operation(
             summary = "Добавить ALS в проект"
     )
@@ -591,6 +593,7 @@ public class ProjectRestController {
     @PostMapping(
             "/{projectId}/als/{alsId}/lb"
     )
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Модуль LB добавлен в ALS")
     @Operation(
             summary = "Добавить LB в ALS проекта"
     )

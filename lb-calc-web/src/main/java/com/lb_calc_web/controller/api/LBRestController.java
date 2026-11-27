@@ -116,6 +116,7 @@ public class LBRestController {
      * Сохранить LB.
      */
     @PostMapping
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Модуль LB создан")
     @Operation(
             summary = "Сохранить LB",
             description = "Проверяет и сохраняет модуль хранения LB"

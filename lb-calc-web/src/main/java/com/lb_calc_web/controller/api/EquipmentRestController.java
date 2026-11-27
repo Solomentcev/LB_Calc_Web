@@ -52,6 +52,7 @@ public class EquipmentRestController {
 
     /** Создаёт модель оборудования. */
     @PostMapping
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Модель оборудования создана")
     @Operation(summary = "Добавить модель оборудования")
     public ResponseEntity<ApiResponse<EquipmentDTO>> create(@Valid @RequestBody EquipmentDTO dto) {
         Equipment saved = equipmentCatalogService.save(EquipmentDtoMapper.toDomain(dto, null));

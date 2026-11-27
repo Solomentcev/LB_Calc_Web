@@ -82,6 +82,7 @@ public class EmployeeRestController {
     }
 
     /** Создаёт учётную запись сотрудника. */
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Сотрудник создан")
     @Operation(summary = "Создать сотрудника")
     @PostMapping
     public ResponseEntity<ApiResponse<EmployeeDTO>> createEmployee(

@@ -115,6 +115,7 @@ toDto(alsService.createALS())
     }
 
     @PostMapping
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "ALS создана")
     @Operation(
             summary = "Создать ALS"
     )
@@ -270,6 +271,7 @@ toDto(alsService.createALS())
      * Добавить LB в ALS.
      */
     @PostMapping("/{alsId}/lb")
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Модуль LB добавлен")
     @Operation(summary = "Добавить LB в ALS")
     public ResponseEntity<ApiResponse<ALSDTO>> addLB(
             @PathVariable @Positive Long alsId

@@ -79,6 +79,7 @@ public class LBCRestController {
     }
 
     @PostMapping
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Модуль LBC создан")
     @Operation(summary = "Сохранить LBC")
     public ResponseEntity<ApiResponse<LBCDTO>> saveLBC(@RequestBody @Valid LBCDTO dto) {
         LBC domain = LBCDtoMapper.toDomain(

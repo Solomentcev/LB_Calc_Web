@@ -40,6 +40,7 @@ public class AuthRestController {
 
     /** Регистрирует пользователя с ролью по умолчанию. */
 
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Пользователь зарегистрирован")
     @Operation(summary = "Зарегистрировать пользователя", description = "Создаёт учётную запись с ролью по умолчанию.")
     @PostMapping("/registration")
     public ResponseEntity<ApiResponse<EmployeeDTO>> registration(@RequestBody @Valid RegistrationDTO registrationDTO) {

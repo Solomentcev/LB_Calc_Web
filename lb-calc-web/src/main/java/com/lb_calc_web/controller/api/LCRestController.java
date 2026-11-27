@@ -101,6 +101,7 @@ public class LCRestController {
      * Сохранить LC.
      */
     @PostMapping
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Модуль LC создан")
     @Operation(
             summary = "Сохранить LC",
             description = "Проверяет и сохраняет модуль управления LC"
