@@ -11,12 +11,9 @@ import com.lb_calc_web.domain.model.ControlConfiguration;
 
 import com.lb_calc_web.domain.model.FunctionalConfiguration;
 import com.lb_calc_web.domain.model.LBC;
-import com.lb_calc_web.dto.LBCDTO;
 import com.lb_calc_web.entity.LBCEntity;
 import com.lb_calc_web.entity.EquipmentEntity;
-import com.lb_calc_web.mapper.dto.LBCDtoMapper;
 import com.lb_calc_web.mapper.entity.LBCEntityMapper;
-import com.lb_calc_web.mapper.entity.EquipmentEntityMapper;
 import com.lb_calc_web.repository.LBCRepository;
 import com.lb_calc_web.repository.EquipmentRepository;
 import com.lb_calc_web.service.factory.TypeLbFactory;
@@ -171,40 +168,6 @@ public class LBCService {
                 .orElseThrow(() -> new NoSuchElementException(
                         "Комбинированный модуль LBC с id=" + id + " не найден"));
         return toDomain(entity);
-    }
-
-    /** Восстанавливает LBC из DTO, разрешая выбранное оборудование по Long ID. */
-    @Transactional(readOnly = true)
-    public LBC restoreDomain(LBCDTO dto) {
-        ControlConfiguration fallback = dto != null && dto.getId() != null && dto.getId() > 0
-                ? findById(dto.getId()).getControlConfiguration()
-                : null;
-        return restoreDomain(dto, fallback);
-    }
-
-    /** Восстанавливает LBC с сохранением пропущенных параметров текущей конфигурации. */
-    @Transactional(readOnly = true)
-    public LBC restoreDomain(LBCDTO dto, ControlConfiguration fallbackConfiguration) {
-        Objects.requireNonNull(dto, "LBC не должен быть null");
-        try {
-            LBC restored = LBCDtoMapper.toDomain(
-                    dto,
-                    TypeLbFactory.forLBC(environment, dto.getType()),
-                    this::findEquipment,
-                    fallbackConfiguration,
-                    sizeBounds
-            );
-            boolean functionalConfigurationChanged = fallbackConfiguration != null
-                    && !restored.getControlConfiguration().getFunctionalConfiguration().equals(
-                    fallbackConfiguration.getFunctionalConfiguration());
-            if ((!dto.isEquipmentProvided() && dto.getSelectedEquipment().isEmpty())
-                    || functionalConfigurationChanged) {
-                configureFunctionalEquipment(restored);
-            }
-            return restored;
-        } catch (RuntimeException exception) {
-            throw createMappingValidationException("LBC", dto.getId(), exception);
-        }
     }
 
     /** Дополняет комплектацию LBC физическими моделями по функциональным назначениям. */
