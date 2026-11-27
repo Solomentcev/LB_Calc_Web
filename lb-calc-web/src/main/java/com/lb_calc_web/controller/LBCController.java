@@ -1,7 +1,6 @@
 package com.lb_calc_web.controller;
 
 import com.lb_calc_web.domain.model.LBC;
-import com.lb_calc_web.domain.model.ControlConfiguration;
 import com.lb_calc_web.mapper.dto.EquipmentDtoMapper;
 import com.lb_calc_web.service.EquipmentCatalogService;
 import com.lb_calc_web.dto.LBCDTO;
