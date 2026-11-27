@@ -176,7 +176,7 @@ public class LC extends Module implements ControlModule {
      */
     private int calculateWidth() {
         if (findDisplay() == null) {
-            return Math.max(bounds.getLcMinimumWidth(), getWidth());
+            return bounds.getLcMinimumWidth();
         }
         return getRequiredWidth();
     }
