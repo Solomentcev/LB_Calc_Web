@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
@@ -54,7 +55,7 @@ public class EquipmentRestController {
     @Operation(summary = "Добавить модель оборудования")
     public ResponseEntity<ApiResponse<EquipmentDTO>> create(@Valid @RequestBody EquipmentDTO dto) {
         Equipment saved = equipmentCatalogService.save(EquipmentDtoMapper.toDomain(dto, null));
-        return ResponseEntity.ok(ApiResponse.success(
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(
                 "Модель оборудования создана", EquipmentDtoMapper.toDto(saved)));
     }
 
