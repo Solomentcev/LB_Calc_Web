@@ -3,6 +3,7 @@ package com.lb_calc_web.controller.api;
 import com.lb_calc_web.controller.api.response.ApiResponse;
 import com.lb_calc_web.dto.LBDTO;
 import com.lb_calc_web.mapper.dto.LBDtoMapper;
+import com.lb_calc_web.service.factory.TypeLbFactory;
 import com.lb_calc_web.service.LBService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -10,6 +11,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.env.Environment;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -31,9 +33,11 @@ public class LBRestController {
             LoggerFactory.getLogger(LBRestController.class);
 
     private final LBService lbService;
+    private final Environment environment;
 
-    public LBRestController(LBService lbService) {
+    public LBRestController(LBService lbService, Environment environment) {
         this.lbService = lbService;
+        this.environment = environment;
     }
 
     /**
@@ -120,7 +124,7 @@ public class LBRestController {
                 dto != null ? dto.getType() : null
         );
 
-            LBDTO saved = LBDtoMapper.toDto(lbService.saveLB(LBDtoMapper.toDomain(dto)));
+            LBDTO saved = LBDtoMapper.toDto(lbService.saveLB(LBDtoMapper.toDomain(dto, TypeLbFactory.forLB(environment, dto.getType()))));
 
             return ResponseEntity.ok(
                     ApiResponse.success(
