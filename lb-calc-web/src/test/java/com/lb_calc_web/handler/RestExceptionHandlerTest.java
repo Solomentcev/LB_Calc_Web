@@ -35,6 +35,15 @@ class RestExceptionHandlerTest {
     }
 
     @Test
+    void methodNotSupported_shouldReturn405() {
+        var response = handler.handleMethodNotSupported(
+                new org.springframework.web.HttpRequestMethodNotSupportedException("PUT"));
+
+        assertEquals(HttpStatus.METHOD_NOT_ALLOWED, response.getStatusCode());
+        assertEquals("HTTP-метод не поддерживается", response.getBody().message);
+    }
+
+    @Test
     void conflict_shouldReturn409WithoutDatabaseDetails() {
         var response = handler.handleConflict(
                 new DataIntegrityViolationException("SQL и имя таблицы"));
