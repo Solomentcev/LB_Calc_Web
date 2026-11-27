@@ -123,7 +123,7 @@ class LBCServiceTest {
     }
 
     @Test
-    void configureFunctionalEquipment_shouldApplySelectedModelsToLbc() {
+    void prepareFunctionalEquipment_shouldApplySelectedModelsToLbc() {
         LBC domain = TestDataFactory.validLBC(null);
         var functional = domain.getControlConfiguration().getFunctionalConfiguration();
         var display = new com.lb_calc_web.domain.equipment.Equipment(
@@ -137,7 +137,7 @@ class LBCServiceTest {
         }).when(equipmentCatalogService).configureFunctionalEquipment(
                 any(com.lb_calc_web.domain.model.ControlConfiguration.class));
 
-        service.configureFunctionalEquipment(domain);
+        service.prepareFunctionalEquipment(domain, null, false);
 
         assertEquals(Map.of(display, 1), domain.getEquipment());
     }
