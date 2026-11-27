@@ -1035,7 +1035,7 @@ ControlConfiguration fallback = persistedALS.getControlModule().getControlConfig
                             fallback,
                             sizeBounds
                     );
-                    restored = alsService.prepareConfiguration(existing, restored, dto.isEquipmentSelectionProvided());
+                    restored = alsService.prepareConfiguration(existing, restored, als.isEquipmentSelectionProvided());
                     project.getAlsList().set(index, toDtoWithImages(restored));
                 } catch (ValidationSizeException | IllegalArgumentException | NoSuchElementException exception) {
                     // Для некорректной промежуточной формы изображение не формируется.
