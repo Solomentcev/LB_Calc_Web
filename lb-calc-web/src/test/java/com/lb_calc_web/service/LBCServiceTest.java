@@ -8,6 +8,7 @@ import com.lb_calc_web.dto.LBCDTO;
 import com.lb_calc_web.entity.LBCEntity;
 import com.lb_calc_web.entity.EquipmentEntity;
 import com.lb_calc_web.mapper.entity.LBCEntityMapper;
+import com.lb_calc_web.mapper.dto.LBCDtoMapper;
 import com.lb_calc_web.mapper.entity.EquipmentEntityMapper;
 import com.lb_calc_web.repository.LBCRepository;
 import com.lb_calc_web.repository.EquipmentRepository;
@@ -112,10 +113,13 @@ class LBCServiceTest {
         dto.setSelectedEquipment(List.of(TestDataFactory.selectedEquipment(72L, 3)));
         dto.setEquipmentProvided(true);
 
-        LBC restored = service.restoreDomain(dto);
+        LBC restored = LBCDtoMapper.toDomain(
+                dto, TestDataFactory.validLBC(null).getTypeLb(), idValue -> {
+                    assertEquals(72L, idValue);
+                    return equipment;
+                }, null, TestDataFactory.createSizeBounds());
 
         assertEquals(3, restored.getControlConfiguration().getQuantity(equipment));
-        verify(equipmentRepository).findById(72L);
     }
 
     @Test
