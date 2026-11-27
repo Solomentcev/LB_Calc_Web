@@ -180,27 +180,6 @@ public final class ProjectDtoMapper {
     }
 
     /**
-     * Преобразует доменный проект в DTO, сохраняя ID неизменённых ALS.
-     */
-    public static ProjectDTO toDto(
-            Project domain,
-            ProjectDTO source,
-            Function<ALSDTO, ALS> alsMapper
-    ) {
-        Objects.requireNonNull(source, "Исходный ProjectDTO не должен быть null");
-        Objects.requireNonNull(alsMapper, "alsMapper не должен быть null");
-        ProjectDTO dto = toDto(domain, requested ->
-                source.getAlsList() == null ? null : source.getAlsList().stream()
-                        .filter(existing -> existing != null && existing.getId() != null
-                                && Objects.equals(alsMapper.apply(existing), requested))
-                        .map(ALSDTO::getId)
-                        .findFirst()
-                        .orElse(null));
-        dto.setId(source.getId());
-        return dto;
-    }
-
-    /**
      * Преобразует DTO проекта в доменную модель с заданным преобразованием ALS.
      *
      * <p>Application-слой может передать преобразователь, который разрешает
@@ -276,25 +255,6 @@ public final class ProjectDtoMapper {
 
         return domains.stream()
                 .map(ProjectDtoMapper::toDto)
-                .toList();
-    }
-
-    /**
-     * Преобразует список DTO в доменные проекты.
-     *
-     * @param dtos список DTO
-     * @return список доменных проектов
-     */
-    public static List<Project> toDomainList(
-            List<ProjectDTO> dtos,
-            Function<ALSDTO, ALS> alsMapper
-    ) {
-        if (dtos == null) {
-            return List.of();
-        }
-        Objects.requireNonNull(alsMapper, "alsMapper не должен быть null");
-        return dtos.stream()
-                .map(dto -> toDomain(dto, alsMapper))
                 .toList();
     }
 
