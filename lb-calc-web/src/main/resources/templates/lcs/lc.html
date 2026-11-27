@@ -7,11 +7,17 @@
     <nav th:if="${pageContext != 'CATALOG'}" aria-label="breadcrumb">
         <ol class="breadcrumb">
             <li class="breadcrumb-item" th:if="${pageContext == 'PROJECT'}">
+                <a th:href="@{/projects}">Проекты</a>
+            </li>
+            <li class="breadcrumb-item" th:if="${pageContext == 'PROJECT'}">
                 <a th:href="@{/projects/{id}(id=${projectId})}" th:text="${project.name}">Проект</a>
             </li>
             <li class="breadcrumb-item" th:if="${pageContext == 'PROJECT'}">
                 <a th:href="@{/projects/{projectId}/alss/{alsId}(projectId=${projectId},alsId=${alsId})}"
                    th:text="${als.name}">АКХ</a>
+            </li>
+            <li class="breadcrumb-item" th:if="${pageContext == 'ALS_CATALOG'}">
+                <a th:href="@{/alss}">Каталог АКХ</a>
             </li>
             <li class="breadcrumb-item" th:if="${pageContext == 'ALS_CATALOG'}">
                 <a th:href="@{/alss/{id}(id=${als.id})}" th:text="${als.name}">АКХ</a>
