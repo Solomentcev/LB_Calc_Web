@@ -191,7 +191,7 @@ public class ALSController extends BaseCatalogController {
             findLBInALS(als, lbId);
             lb.setId(lbId);
 
-            LB replacement = alsService.restoreLB(lb);
+            LB replacement = LBDtoMapper.toDomain(lb, TypeLbFactory.forLB(environment, lb.getType()));
             ALS saved = alsService.saveALS(alsService.replaceLB(als, lbId, replacement));
             return "redirect:/alss/" + saved.getId();
         } catch (ValidationSizeException e) {
