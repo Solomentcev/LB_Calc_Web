@@ -573,9 +573,38 @@
         /* Компактная компоновка: параметры слева, чертёж справа. */
         .module-editor__layout {
             display: grid;
-            grid-template-columns: minmax(0, 1.15fr) minmax(320px, .85fr);
+            grid-template-columns: minmax(0, 1fr);
             gap: 1.25rem;
             align-items: start;
+        }
+        .module-editor .module-section__header--actions {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: .75rem 1rem;
+        }
+        .module-editor .module-section__header--actions h2 { margin: 0; }
+        .module-editor .module-section__header--actions p { margin-bottom: 0; }
+        .module-editor .module-visual--wide {
+            min-height: 0;
+            padding: 1rem;
+        }
+        .module-editor .module-visual--wide img {
+            width: 100%;
+            max-width: 100%;
+            max-height: none;
+            object-fit: contain;
+        }
+        .module-editor .module-visual--module {
+            margin-top: 1rem;
+            border: 1px solid #edf0f2;
+            border-radius: .4rem;
+        }
+        .module-editor .module-visual--module img {
+            max-width: 100%;
+            max-height: 360px;
+            object-fit: contain;
         }
         .module-editor__parameters,
         .module-editor__preview { min-width: 0; }
