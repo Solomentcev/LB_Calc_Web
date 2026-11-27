@@ -169,7 +169,13 @@ public class LBCController extends BaseCatalogController {
                 fallback,
                 sizeBounds
         );
-        lbcService.configureFunctionalEquipment(domain);
+        boolean selectionOmitted = !dto.isEquipmentProvided() && dto.getSelectedEquipment().isEmpty();
+        boolean functionalChanged = fallback != null
+                && !domain.getControlConfiguration().getFunctionalConfiguration().equals(
+                fallback.getFunctionalConfiguration());
+        if (selectionOmitted || functionalChanged) {
+            lbcService.configureFunctionalEquipment(domain);
+        }
         return domain;
     }
 
