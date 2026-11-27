@@ -492,7 +492,7 @@ public class ModuleSizeValidator {
             Object min,
             Object max
     ) {
-        result.addError(result, field, message, actual, min, max);
+        result.addError(field, message, actual, min, max);
     }
 
     private void logValidationResult(ValidationResult result) {
