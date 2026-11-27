@@ -258,7 +258,7 @@ public class ProjectRestController {
 
             Project domain = ProjectDtoMapper.toDomain(
                     project,
-                    alsService::restoreDomain
+                    this::toDomain
             );
             Project saved = projectService.saveProject(domain);
 
