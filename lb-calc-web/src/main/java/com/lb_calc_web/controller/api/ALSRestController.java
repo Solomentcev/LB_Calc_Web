@@ -5,8 +5,17 @@ import com.lb_calc_web.dto.ALSDTO;
 import com.lb_calc_web.mapper.dto.ALSDtoMapper;
 import com.lb_calc_web.mapper.dto.LBCDtoMapper;
 import com.lb_calc_web.domain.model.ALS;
+import com.lb_calc_web.domain.model.LC;
+import com.lb_calc_web.domain.model.LBC;
+import com.lb_calc_web.domain.model.ControlConfiguration;
+import com.lb_calc_web.domain.model.ControlModule;
+import com.lb_calc_web.mapper.dto.LCDtoMapper;
 import com.lb_calc_web.dto.LBCDTO;
 import com.lb_calc_web.service.ALSService;
+import com.lb_calc_web.service.EquipmentCatalogService;
+import com.lb_calc_web.service.factory.TypeLbFactory;
+import com.lb_calc_web.service.validation.size.SizeBounds;
+import org.springframework.core.env.Environment;
 import com.lb_calc_web.service.image.ALSImageService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -37,11 +46,20 @@ public class ALSRestController {
             );
 
     private final ALSService alsService;
+    private final EquipmentCatalogService equipmentCatalogService;
+    private final SizeBounds sizeBounds;
+    private final Environment environment;
 
     public ALSRestController(
-            ALSService alsService
+            ALSService alsService,
+            EquipmentCatalogService equipmentCatalogService,
+            SizeBounds sizeBounds,
+            Environment environment
     ) {
         this.alsService = alsService;
+        this.equipmentCatalogService = equipmentCatalogService;
+        this.sizeBounds = sizeBounds;
+        this.environment = environment;
     }
 
     @GetMapping
@@ -104,7 +122,7 @@ toDto(alsService.createALS())
 
             dto.setId(0L);
 
-            ALS savedDomain = alsService.saveALS(alsService.restoreDomain(dto));
+            ALS savedDomain = alsService.saveALS(toDomain(dto));
             ALSDTO saved = toDto(savedDomain);
 
             return ResponseEntity.status(
@@ -198,7 +216,7 @@ toDto(alsService.createALS())
             lbc.setId(lbcId);
 
             com.lb_calc_web.domain.model.LBC replacement =
-                    alsService.restoreLBC(lbc, als);
+                    toDomain(lbc, als);
             ALS saved = alsService.saveALS(alsService.replaceLBC(als, replacement));
             com.lb_calc_web.domain.model.LBC savedLBC =
                     (com.lb_calc_web.domain.model.LBC) saved.getControlModule();
@@ -257,6 +275,56 @@ toDto(alsService.createALS())
     /**
      * Преобразует доменную ALS в DTO и формирует изображение для ответа API.
      */
+    /** Преобразует DTO ALS в доменную модель с учётом сохранённой конфигурации. */
+    private ALS toDomain(ALSDTO dto) {
+        ALS existing = dto.getId() != null && dto.getId() > 0
+                ? alsService.findById(dto.getId()) : null;
+        ControlConfiguration fallback = null;
+        if (existing != null) {
+            ControlModule currentControl = existing.getControlModule();
+            if ((dto.getLC() != null && currentControl instanceof LC)
+                    || (dto.getLBC() != null && currentControl instanceof LBC)) {
+                fallback = currentControl.getControlConfiguration();
+                fallback.setFunctionalConfiguration(existing.getFunctionalConfiguration());
+            }
+        }
+        ALS restored = ALSDtoMapper.toDomain(
+                dto,
+                candidate -> TypeLbFactory.forLB(environment, candidate.getType()),
+                candidate -> TypeLbFactory.forLBC(environment, candidate.getType()),
+                equipmentCatalogService::findById,
+                fallback,
+                sizeBounds
+        );
+        boolean equipmentSelectionOmitted = dto.getLC() != null
+                ? !dto.getLC().isEquipmentProvided() && dto.getLC().getSelectedEquipment().isEmpty()
+                : !dto.getLBC().isEquipmentProvided() && dto.getLBC().getSelectedEquipment().isEmpty();
+        boolean functionalConfigurationChanged = fallback != null
+                && !restored.getFunctionalConfiguration().equals(
+                fallback.getFunctionalConfiguration());
+        if (equipmentSelectionOmitted || functionalConfigurationChanged) {
+            ControlConfiguration configuration = restored.getControlModule().getControlConfiguration();
+            equipmentCatalogService.configureFunctionalEquipment(configuration);
+            restored.setControlConfiguration(configuration);
+        }
+        return alsService.preserveExistingModules(existing, restored);
+    }
+
+    /** Преобразует DTO LBC с учётом текущей комплектации управляющего модуля ALS. */
+    private LBC toDomain(LBCDTO dto, ALS als) {
+        ControlConfiguration fallback = als.getControlModule() instanceof LBC
+                ? als.getControlModule().getControlConfiguration() : null;
+        LBC restored = LBCDtoMapper.toDomain(
+                dto,
+                TypeLbFactory.forLBC(environment, dto.getType()),
+                equipmentCatalogService::findById,
+                fallback,
+                sizeBounds
+        );
+        equipmentCatalogService.configureFunctionalEquipment(restored.getControlConfiguration());
+        return restored;
+    }
+
     private ALSDTO toDto(com.lb_calc_web.domain.model.ALS domain) {
         ALSDTO dto = ALSDtoMapper.toDto(domain);
         dto.setStringALSImage(ALSImageService.getStringALSImage(domain));
