@@ -3,6 +3,7 @@ package com.lb_calc_web.mapper.dto;
 import com.lb_calc_web.domain.attributes.PositionControlModule;
 import com.lb_calc_web.domain.attributes.TypeLb;
 import com.lb_calc_web.domain.model.ALS;
+import com.lb_calc_web.domain.model.ModuleGeometryBounds;
 import com.lb_calc_web.domain.model.LB;
 import com.lb_calc_web.domain.model.LBC;
 import com.lb_calc_web.domain.model.LC;
@@ -121,11 +122,7 @@ public final class ALSDtoMapper {
             Function<LBCDTO, TypeLb> lbcTypeResolver,
             Function<Long, com.lb_calc_web.domain.equipment.Equipment> equipmentLookup,
             com.lb_calc_web.domain.model.ControlConfiguration fallbackConfiguration,
-            int minimumWidth, int displaySideClearance, int widthRoundingStep,
-            int displayCenterHeight, int displayTopClearance,
-            int lbcTechnicalCellMinWidth, int lbcTechnicalCellMinHeight,
-            int lbcEquipmentClearance, int lbcDisplayCenterHeight,
-            int lbcStorageCellMinWidth, int storageCellMinHeight
+            ModuleGeometryBounds bounds
     ) {
         if (dto == null) {
             return null;
@@ -144,16 +141,10 @@ public final class ALSDtoMapper {
         List<Module> modules = dto.getModuleOrder() == null
                 ? restoreLegacyOrder(
                         dto, lbTypeResolver, lbcTypeResolver, equipmentLookup, fallbackConfiguration,
-                        minimumWidth, displaySideClearance, widthRoundingStep,
-                        displayCenterHeight, displayTopClearance,
-                        lbcTechnicalCellMinWidth, lbcTechnicalCellMinHeight,
-                        lbcEquipmentClearance, lbcDisplayCenterHeight, lbcStorageCellMinWidth, storageCellMinHeight)
+                        bounds)
                 : restoreExplicitOrder(
                         dto, lbTypeResolver, lbcTypeResolver, equipmentLookup, fallbackConfiguration,
-                        minimumWidth, displaySideClearance, widthRoundingStep,
-                        displayCenterHeight, displayTopClearance,
-                        lbcTechnicalCellMinWidth, lbcTechnicalCellMinHeight,
-                        lbcEquipmentClearance, lbcDisplayCenterHeight, lbcStorageCellMinWidth, storageCellMinHeight);
+                        bounds);
 
         ALS domain = new ALS(
                 dto.getHeight(),
@@ -193,11 +184,7 @@ public final class ALSDtoMapper {
             Function<LBCDTO, TypeLb> lbcTypeResolver,
             Function<Long, com.lb_calc_web.domain.equipment.Equipment> equipmentLookup,
             com.lb_calc_web.domain.model.ControlConfiguration fallbackConfiguration,
-            int minimumWidth, int displaySideClearance, int widthRoundingStep,
-            int displayCenterHeight, int displayTopClearance,
-            int lbcTechnicalCellMinWidth, int lbcTechnicalCellMinHeight,
-            int lbcEquipmentClearance, int lbcDisplayCenterHeight,
-            int lbcStorageCellMinWidth, int storageCellMinHeight
+            ModuleGeometryBounds bounds
     ) {
         List<LBDTO> lbDtos = dto.getLbList() == null ? List.of() : dto.getLbList();
         List<Module> modules = new ArrayList<>();
@@ -210,12 +197,10 @@ public final class ALSDtoMapper {
 
         Module control = dto.getLBC() != null
                 ? LBCDtoMapper.toDomain(dto.getLBC(), lbcTypeResolver.apply(dto.getLBC()), equipmentLookup,
-                        fallbackConfiguration, lbcTechnicalCellMinWidth, lbcTechnicalCellMinHeight,
-                        lbcEquipmentClearance, lbcDisplayCenterHeight, lbcStorageCellMinWidth, storageCellMinHeight)
+                        fallbackConfiguration, bounds)
                 : LCDtoMapper.toDomain(
                         dto.getLC(), equipmentLookup, fallbackConfiguration,
-                        minimumWidth, displaySideClearance, widthRoundingStep,
-                        displayCenterHeight, displayTopClearance);
+                        bounds);
         return insertControlModule(modules, control, dto.getPositionControlModule());
     }
 
@@ -225,11 +210,7 @@ public final class ALSDtoMapper {
             Function<LBCDTO, TypeLb> lbcTypeResolver,
             Function<Long, com.lb_calc_web.domain.equipment.Equipment> equipmentLookup,
             com.lb_calc_web.domain.model.ControlConfiguration fallbackConfiguration,
-            int minimumWidth, int displaySideClearance, int widthRoundingStep,
-            int displayCenterHeight, int displayTopClearance,
-            int lbcTechnicalCellMinWidth, int lbcTechnicalCellMinHeight,
-            int lbcEquipmentClearance, int lbcDisplayCenterHeight,
-            int lbcStorageCellMinWidth, int storageCellMinHeight
+            ModuleGeometryBounds bounds
     ) {
         List<LBDTO> lbDtos = dto.getLbList() == null ? List.of() : dto.getLbList();
         boolean[] usedLbIndexes = new boolean[lbDtos.size()];
@@ -261,8 +242,7 @@ public final class ALSDtoMapper {
                     controlModuleUsed = true;
                     modules.add(LCDtoMapper.toDomain(
                             dto.getLC(), equipmentLookup, fallbackConfiguration,
-                            minimumWidth, displaySideClearance, widthRoundingStep,
-                            displayCenterHeight, displayTopClearance));
+                            bounds));
                 }
                 case "LBC" -> {
                     if (item.getIndex() != 0 || dto.getLBC() == null || controlModuleUsed) {
@@ -271,8 +251,7 @@ public final class ALSDtoMapper {
                     controlModuleUsed = true;
                     modules.add(LBCDtoMapper.toDomain(
                             dto.getLBC(), lbcTypeResolver.apply(dto.getLBC()), equipmentLookup, fallbackConfiguration,
-                            lbcTechnicalCellMinWidth, lbcTechnicalCellMinHeight,
-                            lbcEquipmentClearance, lbcDisplayCenterHeight, lbcStorageCellMinWidth, storageCellMinHeight));
+                            bounds));
                 }
                 default -> throw new IllegalStateException(
                         "Неизвестный тип модуля в moduleOrder: " + item.getType());

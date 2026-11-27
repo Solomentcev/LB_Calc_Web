@@ -5,6 +5,7 @@ import com.lb_calc_web.domain.equipment.Equipment;
 import com.lb_calc_web.domain.model.ControlConfiguration;
 import com.lb_calc_web.domain.model.FunctionalConfiguration;
 import com.lb_calc_web.domain.model.LC;
+import com.lb_calc_web.domain.model.ModuleGeometryBounds;
 import com.lb_calc_web.dto.EquipmentSelectionDTO;
 import com.lb_calc_web.dto.FunctionalConfigurationDTO;
 import com.lb_calc_web.dto.LCDTO;
@@ -61,8 +62,7 @@ ControlConfiguration configuration = domain.getControlConfiguration();
             LCDTO dto,
             Function<Long, Equipment> equipmentLookup,
             ControlConfiguration fallbackConfiguration,
-            int minimumWidth, int displaySideClearance, int widthRoundingStep,
-            int displayCenterHeight, int displayTopClearance
+            ModuleGeometryBounds bounds
     ) {
         if (dto == null) {
             return null;
@@ -112,8 +112,7 @@ ControlConfiguration configuration = domain.getControlConfiguration();
                 Colors.valueOf(dto.getColorBody()),
                 Colors.valueOf(dto.getColorDoor()),
                 configuration,
-                minimumWidth, displaySideClearance, widthRoundingStep,
-                displayCenterHeight, displayTopClearance
+                bounds
         );
         domain.setId(dto.getId() == null || dto.getId() <= 0 ? null : dto.getId());
         return domain;

@@ -100,9 +100,7 @@ public class LCService {
                 Objects.requireNonNull(colorBody, "Цвет корпуса не должен быть null"),
                 requiredColor("lc.color.door.default"),
                 new ControlConfiguration(functional, Map.of()),
-                sizeBounds.getLcMinimumWidth(), sizeBounds.getLcDisplaySideClearance(),
-                sizeBounds.getLcWidthRoundingStep(), sizeBounds.getLcDisplayCenterHeight(),
-                sizeBounds.getLcDisplayTopClearance()
+                sizeBounds
         );
     }
 
@@ -206,9 +204,7 @@ public class LCService {
         try {
             return LCDtoMapper.toDomain(
                     dto, this::findEquipment, fallbackConfiguration,
-                    sizeBounds.getLcMinimumWidth(), sizeBounds.getLcDisplaySideClearance(),
-                    sizeBounds.getLcWidthRoundingStep(), sizeBounds.getLcDisplayCenterHeight(),
-                    sizeBounds.getLcDisplayTopClearance());
+                    sizeBounds);
         } catch (RuntimeException exception) {
             throw createMappingValidationException("LC", dto.getId(), exception);
         }
@@ -253,11 +249,7 @@ public class LCService {
     private LC toDomain(LCEntity entity) {
         return LCEntityMapper.toDomain(
                 entity,
-                sizeBounds.getLcMinimumWidth(),
-                sizeBounds.getLcDisplaySideClearance(),
-                sizeBounds.getLcWidthRoundingStep(),
-                sizeBounds.getLcDisplayCenterHeight(),
-                sizeBounds.getLcDisplayTopClearance()
+                sizeBounds
         );
     }
 

@@ -1,5 +1,6 @@
 package com.lb_calc_web.domain.model;
 
+import com.lb_calc_web.TestDataFactory;
 import com.lb_calc_web.domain.attributes.Colors;
 import com.lb_calc_web.domain.attributes.DirectionDoorOpening;
 import com.lb_calc_web.domain.attributes.TypeLb;

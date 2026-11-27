@@ -3,8 +3,10 @@ package com.lb_calc_web.mapper.entity;
 import com.lb_calc_web.domain.equipment.Equipment;
 import com.lb_calc_web.domain.model.LB;
 import com.lb_calc_web.domain.model.LBC;
+import com.lb_calc_web.domain.model.ModuleGeometryBounds;
 import com.lb_calc_web.domain.model.LC;
 import com.lb_calc_web.domain.model.Module;
+import com.lb_calc_web.domain.model.ModuleGeometryBounds;
 import com.lb_calc_web.entity.EquipmentEntity;
 import com.lb_calc_web.entity.LBEntity;
 import com.lb_calc_web.entity.LBCEntity;
@@ -22,27 +24,20 @@ public final class ModuleEntityMapper {
     }
 
     /** Восстанавливает модуль с настройками геометрии LC и LBC. */
-    public static Module toDomain(ModuleEntity entity, int minimumWidth, int displaySideClearance,
-            int widthRoundingStep, int displayCenterHeight, int displayTopClearance,
-            int lbcTechnicalCellMinWidth, int lbcTechnicalCellMinHeight,
-            int lbcEquipmentClearance, int lbcDisplayCenterHeight,
-            int lbcStorageCellMinWidth, int storageCellMinHeight) {
+    public static Module toDomain(ModuleEntity entity, ModuleGeometryBounds bounds) {
         if (entity == null) {
             return null;
         }
 
         ModuleEntity concreteEntity = (ModuleEntity) Hibernate.unproxy(entity);
         if (concreteEntity instanceof LBCEntity lbcEntity) {
-            return LBCEntityMapper.toDomain(lbcEntity, lbcTechnicalCellMinWidth,
-                    lbcTechnicalCellMinHeight, lbcEquipmentClearance,
-                    lbcDisplayCenterHeight, lbcStorageCellMinWidth, storageCellMinHeight);
+            return LBCEntityMapper.toDomain(lbcEntity, bounds);
         }
         if (concreteEntity instanceof LBEntity lbEntity) {
             return LBEntityMapper.toDomain(lbEntity);
         }
         if (concreteEntity instanceof LCEntity lcEntity) {
-            return LCEntityMapper.toDomain(lcEntity, minimumWidth, displaySideClearance,
-                    widthRoundingStep, displayCenterHeight, displayTopClearance);
+            return LCEntityMapper.toDomain(lcEntity, bounds);
         }
 
         throw new IllegalArgumentException(

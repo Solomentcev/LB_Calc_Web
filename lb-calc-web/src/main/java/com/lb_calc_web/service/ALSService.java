@@ -366,9 +366,7 @@ public class ALSService {
                 current.getColorBody(),
                 current.getColorDoor(),
                 current.getControlConfiguration(),
-                sizeBounds.getLcMinimumWidth(), sizeBounds.getLcDisplaySideClearance(),
-                sizeBounds.getLcWidthRoundingStep(), sizeBounds.getLcDisplayCenterHeight(),
-                sizeBounds.getLcDisplayTopClearance()
+                sizeBounds
         );
 
         als.replaceLBCWithLC(replacement);
@@ -451,15 +449,7 @@ public class ALSService {
                     candidate -> TypeLbFactory.forLBC(environment, candidate.getType()),
                     this::findEquipment,
                     fallback,
-                    sizeBounds.getLcMinimumWidth(), sizeBounds.getLcDisplaySideClearance(),
-                sizeBounds.getLcWidthRoundingStep(), sizeBounds.getLcDisplayCenterHeight(),
-                sizeBounds.getLcDisplayTopClearance(),
-                sizeBounds.getLbcTechnicalCellMinWidth(),
-                sizeBounds.getLbcTechnicalCellMinHeight(),
-                sizeBounds.getLbcEquipmentClearance(),
-                sizeBounds.getLbcDisplayCenterHeight(),
-                sizeBounds.getLbcStorageCellMinWidth(),
-                sizeBounds.getHeightCellMin()
+                    sizeBounds
             );
             if (existingALS == null) {
                 return restored;
@@ -568,34 +558,14 @@ public class ALSService {
     private ALS toDomain(ALSEntity entity) {
         return ALSEntityMapper.toDomain(
                 entity,
-                sizeBounds.getLcMinimumWidth(),
-                sizeBounds.getLcDisplaySideClearance(),
-                sizeBounds.getLcWidthRoundingStep(),
-                sizeBounds.getLcDisplayCenterHeight(),
-                sizeBounds.getLcDisplayTopClearance(),
-                sizeBounds.getLbcTechnicalCellMinWidth(),
-                sizeBounds.getLbcTechnicalCellMinHeight(),
-                sizeBounds.getLbcEquipmentClearance(),
-                sizeBounds.getLbcDisplayCenterHeight(),
-                sizeBounds.getLbcStorageCellMinWidth(),
-                sizeBounds.getHeightCellMin()
+                sizeBounds
         );
     }
 
     private Module toDomain(ModuleEntity entity) {
         return ModuleEntityMapper.toDomain(
                 entity,
-                sizeBounds.getLcMinimumWidth(),
-                sizeBounds.getLcDisplaySideClearance(),
-                sizeBounds.getLcWidthRoundingStep(),
-                sizeBounds.getLcDisplayCenterHeight(),
-                sizeBounds.getLcDisplayTopClearance(),
-                sizeBounds.getLbcTechnicalCellMinWidth(),
-                sizeBounds.getLbcTechnicalCellMinHeight(),
-                sizeBounds.getLbcEquipmentClearance(),
-                sizeBounds.getLbcDisplayCenterHeight(),
-                sizeBounds.getLbcStorageCellMinWidth(),
-                sizeBounds.getHeightCellMin()
+                sizeBounds
         );
     }
 

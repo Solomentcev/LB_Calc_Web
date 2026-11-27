@@ -24,17 +24,8 @@ class ModuleEntityMapperTest {
     private static com.lb_calc_web.domain.model.Module toDomain(ModuleEntity entity) {
         return ModuleEntityMapper.toDomain(
                 entity,
-                TestDataFactory.lcMinimumWidth(),
-                TestDataFactory.lcDisplaySideClearance(),
-                TestDataFactory.lcWidthRoundingStep(),
-                TestDataFactory.lcDisplayCenterHeight(),
-                TestDataFactory.lcDisplayTopClearance(),
-                TestDataFactory.lbcTechnicalCellMinWidth(),
-                TestDataFactory.lbcTechnicalCellMinHeight(),
-                TestDataFactory.lbcEquipmentClearance(),
-                TestDataFactory.lbcDisplayCenterHeight(),
-                TestDataFactory.lbcStorageCellMinWidth(),
-                TestDataFactory.storageCellMinHeight()
+                TestDataFactory.createSizeBounds(),
+                TestDataFactory.createSizeBounds()
         );
     }
 

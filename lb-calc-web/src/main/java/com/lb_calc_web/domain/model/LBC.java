@@ -18,12 +18,7 @@ import java.util.Objects;
  */
 public class LBC extends StorageModule implements ControlModule {
 
-    private final int storageCellMinWidth;
-    private final int technicalCellMinWidth;
-    private final int technicalCellMinHeight;
-    private final int equipmentClearance;
-    private final int targetDisplayCenterHeight;
-    private final int storageCellMinHeight;
+    private final ModuleGeometryBounds bounds;
 
     private ControlConfiguration controlConfiguration;
     private int technicalCellWidth;
@@ -37,22 +32,9 @@ public class LBC extends StorageModule implements ControlModule {
     public LBC(int height, int width, int depth, int upperFrame, int bottomFrame,
                Colors colorBody, Colors colorDoor, TypeLb typeLb, int countCells,
                DirectionDoorOpening directionDoorOpening, int doorThickness,
-               ControlConfiguration controlConfiguration, int technicalCellMinWidth,
-               int technicalCellMinHeight, int equipmentClearance,
-               int targetDisplayCenterHeight, int storageCellMinWidth,
-               int storageCellMinHeight) {
+               ControlConfiguration controlConfiguration, ModuleGeometryBounds bounds) {
         super(doorThickness);
-        if (technicalCellMinWidth <= 0 || technicalCellMinHeight <= 0
-                || equipmentClearance < 0 || targetDisplayCenterHeight < 0
-                || storageCellMinWidth <= 0 || storageCellMinHeight <= 0) {
-            throw new IllegalArgumentException("Параметры геометрии LBC заданы некорректно");
-        }
-        this.storageCellMinWidth = storageCellMinWidth;
-        this.technicalCellMinWidth = technicalCellMinWidth;
-        this.technicalCellMinHeight = technicalCellMinHeight;
-        this.equipmentClearance = equipmentClearance;
-        this.targetDisplayCenterHeight = targetDisplayCenterHeight;
-        this.storageCellMinHeight = storageCellMinHeight;
+        this.bounds = Objects.requireNonNull(bounds, "Ограничения геометрии не должны быть null");
         setHeight(height);
         setWidth(width);
         setDepth(depth);
@@ -112,7 +94,7 @@ public class LBC extends StorageModule implements ControlModule {
 
     /** Минимальная ширина складской ячейки, мм. */
     public int getStorageCellMinWidth() {
-        return storageCellMinWidth;
+        return bounds.getLbcStorageCellMinWidth();
     }
 
     /** Минимальная ширина технической ячейки с учётом дисплея и оборудования. */
@@ -175,9 +157,9 @@ public class LBC extends StorageModule implements ControlModule {
                 .mapToLong(Equipment::getDepth).max().orElse(0);
 
         technicalCellWidth = saturatedInt(Math.max(
-                technicalCellMinWidth,
+                bounds.getLbcTechnicalCellMinWidth(),
                 Math.max(equipmentWidth, display == null ? 0L
-                        : (long) display.getWidth() + 2L * equipmentClearance)));
+                        : (long) display.getWidth() + 2L * bounds.getLbcEquipmentClearance())));
         technicalCellHeight = 0;
         technicalCellDepth = saturatedInt(Math.max(0L, (long) getDepth() - getDoorThickness()));
         technicalCellTop = getUpperFrame();
@@ -186,8 +168,8 @@ public class LBC extends StorageModule implements ControlModule {
         displayTop = -1;
 
         long minimumTechnicalHeight = Math.max(
-                technicalCellMinHeight,
-                display == null ? 0L : (long) display.getHeight() + 2L * equipmentClearance);
+                bounds.getLbcTechnicalCellMinHeight(),
+                display == null ? 0L : (long) display.getHeight() + 2L * bounds.getLbcEquipmentClearance());
         minimumTechnicalHeight = Math.max(minimumTechnicalHeight, equipmentHeight);
 
         int selectedHeight = 0;
@@ -213,7 +195,7 @@ public class LBC extends StorageModule implements ControlModule {
                     long technicalBottom = getBottomFrame()
                             + (long) below * (cellHeight + getTypeLb().getShelfThick());
                     long center = technicalBottom + technicalHeight / 2;
-                    long distance = Math.abs(center - targetDisplayCenterHeight);
+                    long distance = Math.abs(center - bounds.getLbcDisplayCenterHeight());
 
                     if (imbalance < bestImbalance || distance < selectedCenterDistance
                             || (distance == selectedCenterDistance && cellHeight > selectedHeight)) {
@@ -250,7 +232,7 @@ public class LBC extends StorageModule implements ControlModule {
 
         // Ширина LBC должна обеспечивать минимальную ширину технической
         // и складской ячеек независимо от наличия физического дисплея.
-        long requiredCellWidth = Math.max(technicalCellWidth, storageCellMinWidth);
+        long requiredCellWidth = Math.max(technicalCellWidth, bounds.getLbcStorageCellMinWidth());
         long requiredModuleWidth = requiredCellWidth + getTypeLb().getDeltaWidth();
         setWidth(saturatedInt(Math.max(getWidth(), requiredModuleWidth)));
 
@@ -265,7 +247,7 @@ public class LBC extends StorageModule implements ControlModule {
     }
 
     private int boundsMinCellHeight() {
-        return storageCellMinHeight;
+        return bounds.getHeightCellMin();
     }
 
     private int saturatedInt(long value) {
@@ -286,8 +268,7 @@ public class LBC extends StorageModule implements ControlModule {
         LBC copy = new LBC(getHeight(), getWidth(), getDepth(), getUpperFrame(), getBottomFrame(),
                 getColorBody(), getColorDoor(), getTypeLb(), getCountCells(),
                 getDirectionDoorOpening(), getDoorThickness(), controlConfiguration,
-                technicalCellMinWidth, technicalCellMinHeight, equipmentClearance,
-                targetDisplayCenterHeight, storageCellMinWidth, storageCellMinHeight);
+                bounds);
         copy.copyCellNumbersFrom(this);
         return copyTextTo(copyIdentityTo(copy));
     }

@@ -139,11 +139,7 @@ public final class TestDataFactory {
                     throw new IllegalStateException("Оборудование в тестовой конфигурации не загружается");
                 },
                 null,
-                lcMinimumWidth(),
-                lcDisplaySideClearance(),
-                lcWidthRoundingStep(),
-                lcDisplayCenterHeight(),
-                lcDisplayTopClearance()
+                createSizeBounds()
         );
     }
 
@@ -223,12 +219,7 @@ public final class TestDataFactory {
                     throw new IllegalStateException("Оборудование в тестовой конфигурации не загружается");
                 },
                 null,
-                lbcTechnicalCellMinWidth(),
-                lbcTechnicalCellMinHeight(),
-                lbcEquipmentClearance(),
-                lbcDisplayCenterHeight(),
-                lbcStorageCellMinWidth(),
-                storageCellMinHeight()
+                createSizeBounds()
         );
     }
 
@@ -334,17 +325,7 @@ return als;
                     throw new IllegalStateException("Оборудование в тестовой конфигурации не загружается");
                 },
                 null,
-                lcMinimumWidth(),
-                lcDisplaySideClearance(),
-                lcWidthRoundingStep(),
-                lcDisplayCenterHeight(),
-                lcDisplayTopClearance(),
-                lbcTechnicalCellMinWidth(),
-                lbcTechnicalCellMinHeight(),
-                lbcEquipmentClearance(),
-                lbcDisplayCenterHeight(),
-                lbcStorageCellMinWidth(),
-                storageCellMinHeight()
+                createSizeBounds()
         );
     }
 

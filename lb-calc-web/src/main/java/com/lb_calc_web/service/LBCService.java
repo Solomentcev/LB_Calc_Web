@@ -110,12 +110,7 @@ public class LBCService {
                         "lbc.direction.default", DirectionDoorOpening.LEFT.name())),
                 sizeBounds.getDoorThicknessDefault(),
                 new ControlConfiguration(functional, Map.of()),
-                sizeBounds.getLbcTechnicalCellMinWidth(),
-                sizeBounds.getLbcTechnicalCellMinHeight(),
-                sizeBounds.getLbcEquipmentClearance(),
-                sizeBounds.getLbcDisplayCenterHeight(),
-                sizeBounds.getLbcStorageCellMinWidth(),
-                sizeBounds.getHeightCellMin()
+                sizeBounds
         );
     }
 
@@ -190,12 +185,7 @@ public class LBCService {
                     TypeLbFactory.forLBC(environment, dto.getType()),
                     this::findEquipment,
                     fallbackConfiguration,
-                    sizeBounds.getLbcTechnicalCellMinWidth(),
-                    sizeBounds.getLbcTechnicalCellMinHeight(),
-                    sizeBounds.getLbcEquipmentClearance(),
-                    sizeBounds.getLbcDisplayCenterHeight(),
-                    sizeBounds.getLbcStorageCellMinWidth(),
-                    sizeBounds.getHeightCellMin()
+                    sizeBounds
             );
         } catch (RuntimeException exception) {
             throw createMappingValidationException("LBC", dto.getId(), exception);
@@ -244,12 +234,7 @@ public class LBCService {
 
     private LBC toDomain(LBCEntity entity) {
         return LBCEntityMapper.toDomain(entity,
-                sizeBounds.getLbcTechnicalCellMinWidth(),
-                sizeBounds.getLbcTechnicalCellMinHeight(),
-                sizeBounds.getLbcEquipmentClearance(),
-                sizeBounds.getLbcDisplayCenterHeight(),
-                sizeBounds.getLbcStorageCellMinWidth(),
-                sizeBounds.getHeightCellMin());
+                sizeBounds);
     }
 
     private Colors requiredColor(String key) {

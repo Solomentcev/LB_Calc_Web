@@ -2,6 +2,7 @@ package com.lb_calc_web.mapper.entity;
 
 import com.lb_calc_web.domain.model.ALS;
 import com.lb_calc_web.domain.model.Module;
+import com.lb_calc_web.domain.model.ModuleGeometryBounds;
 import com.lb_calc_web.entity.ALSEntity;
 import com.lb_calc_web.entity.ALSModuleEntity;
 import com.lb_calc_web.entity.ModuleEntity;
@@ -18,20 +19,13 @@ public final class ALSEntityMapper {
     }
 
     /** Восстанавливает ALS с настройками геометрии LC и LBC. */
-    public static ALS toDomain(ALSEntity entity, int minimumWidth, int displaySideClearance,
-            int widthRoundingStep, int displayCenterHeight, int displayTopClearance,
-            int lbcTechnicalCellMinWidth, int lbcTechnicalCellMinHeight,
-            int lbcEquipmentClearance, int lbcDisplayCenterHeight,
-            int lbcStorageCellMinWidth, int storageCellMinHeight) {
+    public static ALS toDomain(ALSEntity entity, ModuleGeometryBounds bounds) {
         Objects.requireNonNull(entity, "ALSEntity не должен быть null");
 
         List<Module> modules = entity.getModules().stream()
                 .sorted(Comparator.comparingInt(ALSModuleEntity::getModuleOrder))
                 .map(ALSModuleEntity::getModule)
-                .map(module -> ModuleEntityMapper.toDomain(module, minimumWidth, displaySideClearance,
-                        widthRoundingStep, displayCenterHeight, displayTopClearance,
-                        lbcTechnicalCellMinWidth, lbcTechnicalCellMinHeight,
-                        lbcEquipmentClearance, lbcDisplayCenterHeight, lbcStorageCellMinWidth, storageCellMinHeight))
+                .map(module -> ModuleEntityMapper.toDomain(module, bounds))
                 .toList();
 
         ALS domain = new ALS(

@@ -3,6 +3,7 @@ package com.lb_calc_web.mapper.entity;
 import com.lb_calc_web.domain.equipment.Equipment;
 import com.lb_calc_web.domain.model.ControlConfiguration;
 import com.lb_calc_web.domain.model.LC;
+import com.lb_calc_web.domain.model.ModuleGeometryBounds;
 import com.lb_calc_web.domain.model.Module;
 import com.lb_calc_web.entity.EquipmentQuantityEmbeddable;
 import com.lb_calc_web.entity.EquipmentEntity;
@@ -24,8 +25,7 @@ public final class LCEntityMapper {
     }
 
     /** Восстанавливает LC с настройками геометрии приложения. */
-    public static LC toDomain(LCEntity entity, int minimumWidth, int displaySideClearance, int widthRoundingStep,
-            int displayCenterHeight, int displayTopClearance) {
+    public static LC toDomain(LCEntity entity, ModuleGeometryBounds bounds) {
         if (entity == null) {
             return null;
         }
@@ -56,8 +56,7 @@ public final class LCEntityMapper {
                 Objects.requireNonNull(entity.getColorDoor(),
                         "Цвет дверей LC не должен быть null"),
                 configuration,
-                minimumWidth, displaySideClearance, widthRoundingStep,
-                displayCenterHeight, displayTopClearance
+                bounds
         );
 
         domain = (LC) Module.restoreText(domain, entity.getName(), entity.getDescription());
@@ -115,13 +114,11 @@ public final class LCEntityMapper {
     }
 
     /** Преобразует LCEntity в DTO, сохраняя persistence ID. */
-    public static LCDTO toDto(LCEntity entity, int minimumWidth, int displaySideClearance, int widthRoundingStep,
-            int displayCenterHeight, int displayTopClearance) {
+    public static LCDTO toDto(LCEntity entity, ModuleGeometryBounds bounds) {
         if (entity == null) {
             return null;
         }
-        LCDTO dto = LCDtoMapper.toDto(toDomain(entity, minimumWidth, displaySideClearance, widthRoundingStep,
-                displayCenterHeight, displayTopClearance));
+        LCDTO dto = LCDtoMapper.toDto(toDomain(entity, bounds));
         dto.setId(entity.getId());
         return dto;
     }

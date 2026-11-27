@@ -64,16 +64,12 @@ class ControlModuleEquipmentEntityMapperTest {
         LC source = new LC(1940, 500, 500, 50, 50,
                 com.lb_calc_web.domain.attributes.Colors.Blue,
                 com.lb_calc_web.domain.attributes.Colors.White,
-                new ControlConfiguration(FUNCTIONAL, positions), TestDataFactory.lcMinimumWidth(), TestDataFactory.lcDisplaySideClearance(),
-                TestDataFactory.lcWidthRoundingStep(), TestDataFactory.lcDisplayCenterHeight(),
-                TestDataFactory.lcDisplayTopClearance());
+                new ControlConfiguration(FUNCTIONAL, positions), TestDataFactory.createSizeBounds());
         Map<Long, EquipmentEntity> entities = Map.of(
                 1L, persisted(display), 2L, persisted(rfid), 3L, persisted(barcode));
 
         LCEntity entity = LCEntityMapper.toEntity(source, item -> entities.get(item.getId()));
-        LC restored = LCEntityMapper.toDomain(entity, TestDataFactory.lcMinimumWidth(), TestDataFactory.lcDisplaySideClearance(),
-                TestDataFactory.lcWidthRoundingStep(), TestDataFactory.lcDisplayCenterHeight(),
-                TestDataFactory.lcDisplayTopClearance());
+        LC restored = LCEntityMapper.toDomain(entity, TestDataFactory.createSizeBounds());
 
         assertEquals(source, restored);
         assertEquals(FUNCTIONAL, entity.getFunctionalConfiguration());
@@ -95,24 +91,14 @@ class ControlModuleEquipmentEntityMapperTest {
                 sourceBase.getCountCells(), sourceBase.getDirectionDoorOpening(),
                 sourceBase.getDoorThickness(),
                 new ControlConfiguration(FUNCTIONAL, Map.of(rfid, 2)),
-                TestDataFactory.lbcTechnicalCellMinWidth(),
-                TestDataFactory.lbcTechnicalCellMinHeight(),
-                TestDataFactory.lbcEquipmentClearance(),
-                TestDataFactory.lbcDisplayCenterHeight(),
-                TestDataFactory.lbcStorageCellMinWidth(),
-                TestDataFactory.storageCellMinHeight()
+                TestDataFactory.createSizeBounds()
         );
         EquipmentEntity persisted = persisted(rfid);
 
         LBCEntity entity = LBCEntityMapper.toEntity(source, item -> persisted);
         LBC restored = LBCEntityMapper.toDomain(
                 entity,
-                TestDataFactory.lbcTechnicalCellMinWidth(),
-                TestDataFactory.lbcTechnicalCellMinHeight(),
-                TestDataFactory.lbcEquipmentClearance(),
-                TestDataFactory.lbcDisplayCenterHeight(),
-                TestDataFactory.lbcStorageCellMinWidth(),
-                TestDataFactory.storageCellMinHeight()
+                TestDataFactory.createSizeBounds()
         );
 
         assertEquals(source, restored);

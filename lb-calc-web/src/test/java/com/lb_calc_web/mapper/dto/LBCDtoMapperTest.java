@@ -22,7 +22,7 @@ class LBCDtoMapperTest {
     void toDomain_shouldMapFunctionalAndStructuralConfiguration() {
         LBCDTO dto = TestDataFactory.validLBCDTO(1L);
         LBC domain = LBCDtoMapper.toDomain(dto, TestDataFactoryType.type(dto), id -> { throw new IllegalStateException(); }, null,
-                200, 200, 20, 1300, 200, 85);
+                TestDataFactory.createSizeBounds());
 
         assertNotNull(domain);
         assertEquals(dto.getHeight(), domain.getHeight());
@@ -40,7 +40,7 @@ class LBCDtoMapperTest {
     void roundTrip_shouldPreserveFunctionalConfiguration() {
         LBCDTO source = TestDataFactory.validLBCDTO(1L);
         LBC domain = LBCDtoMapper.toDomain(source, TestDataFactoryType.type(source), id -> { throw new IllegalStateException(); }, null,
-                200, 200, 20, 1300, 200, 85);
+                TestDataFactory.createSizeBounds());
         LBCDTO result = LBCDtoMapper.toDto(domain);
 
         assertEquals(source.getType(), result.getType());

@@ -1,11 +1,12 @@
 package com.lb_calc_web.service.validation.size;
 
+import com.lb_calc_web.domain.model.ModuleGeometryBounds;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /** Конфигурация размерных ограничений и значений по умолчанию модулей. */
 @Component
-public class SizeBounds {
+public class SizeBounds implements ModuleGeometryBounds {
 
     private final int upperFrameMin;
     private final int upperFrameMax;
@@ -139,6 +140,48 @@ public class SizeBounds {
         this.lbcTechnicalCellMinHeight = lbcTechnicalCellMinHeight;
         this.lbcEquipmentClearance = lbcEquipmentClearance;
         this.lbcDisplayCenterHeight = lbcDisplayCenterHeight;
+        validateBounds();
+    }
+
+    /** Проверяет согласованность всех централизованных размерных ограничений. */
+    private void validateBounds() {
+        validateRange("верхняя рама", upperFrameMin, upperFrameMax);
+        validateRange("нижняя рама", bottomFrameMin, bottomFrameMax);
+        validateRange("высота корпуса", heightMin, heightMax);
+        validateRange("глубина корпуса", depthMin, depthMax);
+        validateRange("ширина корпуса", widthMin, widthMax);
+        validateRange("глубина ячейки", depthCellMin, depthCellMax);
+        validateRange("толщина двери", doorThicknessMin, doorThicknessMax);
+        validateRange("добавочная ширина типа", typeDeltaWidthMin, typeDeltaWidthMax);
+        validateRange("толщина полки", typeShelfThickMin, typeShelfThickMax);
+        validateRange("ширина сервисной зоны", typeServiceZoneWidthMin, typeServiceZoneWidthMax);
+
+        if (heightCellMin <= 0 || widthCellMin <= 0 || countCellsMin <= 0
+                || countCellsMax < countCellsMin || lcMinimumWidth <= 0
+                || lcDisplaySideClearance < 0 || lcWidthRoundingStep <= 0
+                || lcDisplayCenterHeight < 0 || lcDisplayTopClearance < 0
+                || lbcStorageCellMinWidth <= 0 || lbcTechnicalCellMinWidth <= 0
+                || lbcTechnicalCellMinHeight <= 0 || lbcEquipmentClearance < 0
+                || lbcDisplayCenterHeight < 0) {
+            throw new IllegalArgumentException("Размерные ограничения содержат недопустимые значения");
+        }
+        validateDefault("высота", heightDefault, heightMin, heightMax);
+        validateDefault("ширина", widthDefault, widthMin, widthMax);
+        validateDefault("глубина", depthDefault, depthMin, depthMax);
+        validateDefault("толщина двери", doorThicknessDefault, doorThicknessMin, doorThicknessMax);
+        validateDefault("количество ячеек", countCellsDefault, countCellsMin, countCellsMax);
+    }
+
+    private static void validateRange(String name, int min, int max) {
+        if (min < 0 || max < min) {
+            throw new IllegalArgumentException("Некорректные границы параметра: " + name);
+        }
+    }
+
+    private static void validateDefault(String name, int value, int min, int max) {
+        if (value < min || value > max) {
+            throw new IllegalArgumentException("Значение по умолчанию вне допустимого диапазона: " + name);
+        }
     }
 
     public int getLcMinimumWidth() {

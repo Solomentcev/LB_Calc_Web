@@ -1,5 +1,6 @@
 package com.lb_calc_web;
 
+import com.lb_calc_web.TestDataFactory;
 import com.lb_calc_web.domain.model.ALS;
 import com.lb_calc_web.domain.model.ControlConfiguration;
 import com.lb_calc_web.domain.attributes.TypeLb;
@@ -754,15 +755,7 @@ class PersistenceIntegrationTest {
     }
 
     private ALS restoreAlsEntity(ALSEntity entity) {
-        return ALSEntityMapper.toDomain(entity, TestDataFactory.lcMinimumWidth(), TestDataFactory.lcDisplaySideClearance(),
-                TestDataFactory.lcWidthRoundingStep(), TestDataFactory.lcDisplayCenterHeight(),
-                TestDataFactory.lcDisplayTopClearance(),
-                TestDataFactory.lbcTechnicalCellMinWidth(),
-                TestDataFactory.lbcTechnicalCellMinHeight(),
-                TestDataFactory.lbcEquipmentClearance(),
-                TestDataFactory.lbcDisplayCenterHeight(),
-                TestDataFactory.lbcStorageCellMinWidth(),
-                TestDataFactory.storageCellMinHeight());
+        return ALSEntityMapper.toDomain(entity, TestDataFactory.createSizeBounds());
     }
 
     private Project restoreProjectEntity(ProjectEntity entity) {
@@ -782,15 +775,7 @@ class PersistenceIntegrationTest {
                         value.getShelfThick(), value.getServiceZoneWidth()),
                 equipmentCatalogService::findById,
                 null,
-                TestDataFactory.lcMinimumWidth(), TestDataFactory.lcDisplaySideClearance(),
-                TestDataFactory.lcWidthRoundingStep(), TestDataFactory.lcDisplayCenterHeight(),
-                TestDataFactory.lcDisplayTopClearance(),
-                TestDataFactory.lbcTechnicalCellMinWidth(),
-                TestDataFactory.lbcTechnicalCellMinHeight(),
-                TestDataFactory.lbcEquipmentClearance(),
-                TestDataFactory.lbcDisplayCenterHeight(),
-                TestDataFactory.lbcStorageCellMinWidth(),
-                TestDataFactory.storageCellMinHeight()
+                TestDataFactory.createSizeBounds()
         );
     }
 

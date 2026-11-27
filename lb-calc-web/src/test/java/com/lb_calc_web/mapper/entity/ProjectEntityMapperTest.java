@@ -71,15 +71,7 @@ class ProjectEntityMapperTest {
 
         Project restored = ProjectEntityMapper.toDomain(
                 entity,
-                entityForAls -> ALSEntityMapper.toDomain(entityForAls, TestDataFactory.lcMinimumWidth(), TestDataFactory.lcDisplaySideClearance(),
-                TestDataFactory.lcWidthRoundingStep(), TestDataFactory.lcDisplayCenterHeight(),
-                TestDataFactory.lcDisplayTopClearance(),
-                TestDataFactory.lbcTechnicalCellMinWidth(),
-                TestDataFactory.lbcTechnicalCellMinHeight(),
-                TestDataFactory.lbcEquipmentClearance(),
-                TestDataFactory.lbcDisplayCenterHeight(),
-                TestDataFactory.lbcStorageCellMinWidth(),
-                TestDataFactory.storageCellMinHeight()),
+                entityForAls -> ALSEntityMapper.toDomain(entityForAls, TestDataFactory.createSizeBounds()),
                 (mappedDomain, mappedEntity) -> {
                     mappedAls.set(mappedDomain);
                     mappedAlsEntity.set(mappedEntity);
@@ -120,15 +112,7 @@ class ProjectEntityMapperTest {
 
         Project restored = ProjectEntityMapper.toDomain(
                 entity,
-                alsEntity -> ALSEntityMapper.toDomain(alsEntity, TestDataFactory.lcMinimumWidth(), TestDataFactory.lcDisplaySideClearance(),
-                TestDataFactory.lcWidthRoundingStep(), TestDataFactory.lcDisplayCenterHeight(),
-                TestDataFactory.lcDisplayTopClearance(),
-                TestDataFactory.lbcTechnicalCellMinWidth(),
-                TestDataFactory.lbcTechnicalCellMinHeight(),
-                TestDataFactory.lbcEquipmentClearance(),
-                TestDataFactory.lbcDisplayCenterHeight(),
-                TestDataFactory.lbcStorageCellMinWidth(),
-                TestDataFactory.storageCellMinHeight()),
+                alsEntity -> ALSEntityMapper.toDomain(alsEntity, TestDataFactory.createSizeBounds()),
                 (mappedDomain, mappedEntity) -> { }
         );
 

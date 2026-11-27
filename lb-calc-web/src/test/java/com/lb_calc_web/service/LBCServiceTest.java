@@ -130,12 +130,7 @@ class LBCServiceTest {
                 source.getBottomFrame(), source.getColorBody(), source.getColorDoor(),
                 source.getTypeLb(), source.getCountCells(), source.getDirectionDoorOpening(),
                 source.getDoorThickness(), source.getControlConfiguration(),
-                TestDataFactory.lbcTechnicalCellMinWidth(),
-                TestDataFactory.lbcTechnicalCellMinHeight(),
-                TestDataFactory.lbcEquipmentClearance(),
-                TestDataFactory.lbcDisplayCenterHeight(),
-                source.getStorageCellMinWidth(),
-                TestDataFactory.storageCellMinHeight());
+                TestDataFactory.createSizeBounds());
 
         assertThrows(ValidationSizeException.class, () -> service.saveLBC(domain));
         verify(repository, never()).save(any());

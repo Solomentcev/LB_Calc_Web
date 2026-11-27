@@ -23,11 +23,7 @@ import java.util.Objects;
  */
 public class LC extends Module implements ControlModule {
 
-    private final int minimumWidth;
-    private final int displaySideClearance;
-    private final int widthRoundingStep;
-    private final int displayCenterHeight;
-    private final int displayTopClearance;
+    private final ModuleGeometryBounds bounds;
 
     /** Конфигурация функций управления LC. */
     private ControlConfiguration controlConfiguration;
@@ -36,17 +32,8 @@ public class LC extends Module implements ControlModule {
     public LC(int height, int width, int depth, int upperFrame, int bottomFrame,
               Colors colorBody, Colors colorDoor,
               ControlConfiguration controlConfiguration,
-              int minimumWidth, int displaySideClearance, int widthRoundingStep,
-              int displayCenterHeight, int displayTopClearance) {
-        if (minimumWidth <= 0 || displaySideClearance < 0 || widthRoundingStep <= 0
-                || displayCenterHeight < 0 || displayTopClearance < 0) {
-            throw new IllegalArgumentException("Параметры геометрии LC содержат недопустимые значения");
-        }
-        this.minimumWidth = minimumWidth;
-        this.displaySideClearance = displaySideClearance;
-        this.widthRoundingStep = widthRoundingStep;
-        this.displayCenterHeight = displayCenterHeight;
-        this.displayTopClearance = displayTopClearance;
+              ModuleGeometryBounds bounds) {
+        this.bounds = Objects.requireNonNull(bounds, "Ограничения геометрии не должны быть null");
         setHeight(height);
         setWidth(width);
         setDepth(depth);
@@ -146,9 +133,9 @@ public class LC extends Module implements ControlModule {
         // Координата задаётся в миллиметрах от верхнего края корпуса.
         // Округляем вниз, чтобы при нечётной высоте дисплея не сместить его центр ниже заданной отметки.
         int centeredTop = (int) Math.floor(
-                getHeight() - displayCenterHeight - displayHeight / 2.0
+                getHeight() - bounds.getLcDisplayCenterHeight() - displayHeight / 2.0
         );
-        return Math.max(centeredTop, getUpperFrame() + displayTopClearance);
+        return Math.max(centeredTop, getUpperFrame() + bounds.getLcDisplayTopClearance());
     }
 
     /** Пересчитывает производные характеристики LC. */
@@ -167,15 +154,15 @@ public class LC extends Module implements ControlModule {
     public int getRequiredWidth() {
         Equipment display = findDisplay();
         if (display == null) {
-            return minimumWidth;
+            return bounds.getLcMinimumWidth();
         }
 
         long requiredWidth = Math.max(
-                minimumWidth,
-                (long) display.getWidth() + 2L * displaySideClearance
+                bounds.getLcMinimumWidth(),
+                (long) display.getWidth() + 2L * bounds.getLcDisplaySideClearance()
         );
-        long roundedWidth = ((requiredWidth + widthRoundingStep - 1)
-                / widthRoundingStep) * widthRoundingStep;
+        long roundedWidth = ((requiredWidth + bounds.getLcWidthRoundingStep() - 1)
+                / bounds.getLcWidthRoundingStep()) * bounds.getLcWidthRoundingStep();
         return Math.toIntExact(roundedWidth);
     }
 
@@ -188,7 +175,7 @@ public class LC extends Module implements ControlModule {
      */
     private int calculateWidth() {
         if (findDisplay() == null) {
-            return Math.max(minimumWidth, getWidth());
+            return Math.max(bounds.getLcMinimumWidth(), getWidth());
         }
         return getRequiredWidth();
     }
@@ -212,8 +199,7 @@ public class LC extends Module implements ControlModule {
                 getHeight(), getWidth(), getDepth(),
                 getUpperFrame(), getBottomFrame(),
                 getColorBody(), getColorDoor(), controlConfiguration,
-                minimumWidth, displaySideClearance, widthRoundingStep,
-                displayCenterHeight, displayTopClearance);
+                bounds);
         return copyTextTo(copyIdentityTo(copy));
     }
 

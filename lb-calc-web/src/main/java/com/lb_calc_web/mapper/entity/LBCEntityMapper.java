@@ -4,6 +4,7 @@ import com.lb_calc_web.domain.attributes.TypeLb;
 import com.lb_calc_web.domain.equipment.Equipment;
 import com.lb_calc_web.domain.model.ControlConfiguration;
 import com.lb_calc_web.domain.model.LBC;
+import com.lb_calc_web.domain.model.ModuleGeometryBounds;
 import com.lb_calc_web.domain.model.Module;
 import com.lb_calc_web.dto.LBCDTO;
 import com.lb_calc_web.entity.EquipmentEntity;
@@ -27,12 +28,7 @@ public final class LBCEntityMapper {
     /** Восстанавливает LBC с актуальными настройками физической геометрии. */
     public static LBC toDomain(
             LBCEntity entity,
-            int technicalCellMinWidth,
-            int technicalCellMinHeight,
-            int equipmentClearance,
-            int displayCenterHeight,
-            int storageCellMinWidth,
-            int storageCellMinHeight
+            ModuleGeometryBounds bounds
     ) {
         if (entity == null) {
             return null;
@@ -75,12 +71,7 @@ public final class LBCEntityMapper {
                         "Направление открытия дверей LBC не должно быть null"),
                 entity.getDoorThickness(),
                 configuration,
-                technicalCellMinWidth,
-                technicalCellMinHeight,
-                equipmentClearance,
-                displayCenterHeight,
-                storageCellMinWidth,
-                storageCellMinHeight
+                bounds
         );
 
         domain = (LBC) Module.restoreText(domain, entity.getName(), entity.getDescription());
@@ -153,19 +144,12 @@ public final class LBCEntityMapper {
     /** Преобразует LBCEntity в DTO с актуальными настройками геометрии. */
     public static LBCDTO toDto(
             LBCEntity entity,
-            int technicalCellMinWidth,
-            int technicalCellMinHeight,
-            int equipmentClearance,
-            int displayCenterHeight,
-            int storageCellMinWidth,
-            int storageCellMinHeight
+            ModuleGeometryBounds bounds
     ) {
         if (entity == null) {
             return null;
         }
-        LBCDTO dto = LBCDtoMapper.toDto(toDomain(entity, technicalCellMinWidth,
-                technicalCellMinHeight, equipmentClearance, displayCenterHeight,
-                storageCellMinWidth, storageCellMinHeight));
+        LBCDTO dto = LBCDtoMapper.toDto(toDomain(entity, bounds));
         dto.setId(entity.getId());
         return dto;
     }

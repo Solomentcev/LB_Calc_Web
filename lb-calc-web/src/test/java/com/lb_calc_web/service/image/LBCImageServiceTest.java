@@ -1,6 +1,7 @@
 
 package com.lb_calc_web.service.image;
 
+import com.lb_calc_web.TestDataFactory;
 import com.lb_calc_web.domain.attributes.Colors;
 import com.lb_calc_web.domain.attributes.DirectionDoorOpening;
 import com.lb_calc_web.domain.model.ControlConfiguration;
@@ -60,7 +61,7 @@ class LBCImageServiceTest {
                         DirectionDoorOpening.LEFT,
                         20,
                         control,
-                        200, 200, 20, 1300, 200, 85
+                        TestDataFactory.createSizeBounds()
                 );
 
         byte[] image = LBCImageService.getBytesArrayLBCImage(lbc);
@@ -116,7 +117,7 @@ class LBCImageServiceTest {
                 Colors.Blue, Colors.White,
                 new TypeLb("TYPE1", 100, 5, 20),
                 10, DirectionDoorOpening.LEFT, 20, control,
-                200, 200, 20, 1300, 200, 85
+                TestDataFactory.createSizeBounds()
         );
 
         BufferedImage image = LBCImageService.createLBCImage(lbc);
@@ -163,7 +164,7 @@ class LBCImageServiceTest {
                 Colors.Blue, Colors.White,
                 new TypeLb("TYPE1", 100, 5, 100),
                 10, direction, 20, control,
-                200, 200, 20, 1300, 200, 85
+                TestDataFactory.createSizeBounds()
         );
     }
 

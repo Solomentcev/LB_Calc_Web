@@ -7,6 +7,7 @@ import com.lb_calc_web.domain.equipment.Equipment;
 import com.lb_calc_web.domain.model.ControlConfiguration;
 import com.lb_calc_web.domain.model.FunctionalConfiguration;
 import com.lb_calc_web.domain.model.LBC;
+import com.lb_calc_web.domain.model.ModuleGeometryBounds;
 import com.lb_calc_web.dto.EquipmentSelectionDTO;
 import com.lb_calc_web.dto.FunctionalConfigurationDTO;
 import com.lb_calc_web.dto.LBCDTO;
@@ -74,12 +75,7 @@ ControlConfiguration configuration = domain.getControlConfiguration();
             TypeLb typeLb,
             Function<Long, Equipment> equipmentLookup,
             ControlConfiguration fallbackConfiguration,
-            int technicalCellMinWidth,
-            int technicalCellMinHeight,
-            int equipmentClearance,
-            int displayCenterHeight,
-            int storageCellMinWidth,
-            int storageCellMinHeight
+            ModuleGeometryBounds bounds
     ) {
         if (dto == null) {
             return null;
@@ -138,12 +134,7 @@ ControlConfiguration configuration = domain.getControlConfiguration();
                 DirectionDoorOpening.valueOf(dto.getDirectionDoorOpening()),
                 dto.getDoorThickness(),
                 configuration,
-                technicalCellMinWidth,
-                technicalCellMinHeight,
-                equipmentClearance,
-                displayCenterHeight,
-                storageCellMinWidth,
-                storageCellMinHeight
+                bounds
         );
         domain.setId(dto.getId() == null || dto.getId() <= 0 ? null : dto.getId());
         return domain;
