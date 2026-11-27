@@ -26,10 +26,10 @@ class LCTest {
     }
 
     @Test
-    void recalculate_shouldPreserveConfiguredWidthWhenDisplayIsNotInstalled() {
+    void recalculate_shouldUseMinimumWidthWhenDisplayIsNotInstalled() {
         LC lc = createLC(1940, 500, Map.of());
 
-        assertEquals(500, lc.getWidth());
+        assertEquals(200, lc.getWidth());
         assertEquals(200, lc.getRequiredWidth());
     }
 
