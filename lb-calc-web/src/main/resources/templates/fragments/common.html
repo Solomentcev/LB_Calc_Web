@@ -697,6 +697,17 @@
             margin: 0 0 .35rem;
             padding: 0;
         }
+        .als-configuration-grid > .module-section .als-color-fields {
+            display: grid;
+            grid-column: span 2;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: .5rem;
+            min-width: 0;
+        }
+        .als-configuration-grid > .module-section .als-color-fields > .module-field {
+            min-width: 0;
+            margin: 0 0 .35rem;
+        }
         .als-configuration-grid > .module-section .module-field label {
             margin-bottom: .2rem;
             font-size: .78rem;
@@ -721,8 +732,12 @@
         }
         @media (max-width: 420px) {
             .als-configuration-grid > .module-section .form-row,
-            .als-configuration-grid .als-functional-configuration .form-row {
+            .als-configuration-grid .als-functional-configuration .form-row,
+            .als-configuration-grid > .module-section .als-color-fields {
                 grid-template-columns: minmax(0, 1fr);
+            }
+            .als-configuration-grid > .module-section .als-color-fields {
+                grid-column: auto;
             }
         }
 
