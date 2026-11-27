@@ -266,7 +266,7 @@ return projectRepository.findAllWithUsers()
                 createdBy,
                 today,
                 currentEmployee,
-                requested.getQuantityALS()
+                resolveProjectConfigurations(requested.getQuantityALS())
         );
         domain.setId(existing == null ? null : existing.getId());
 
@@ -277,6 +277,26 @@ return projectRepository.findAllWithUsers()
                 alsService::restoreDomain,
                 (als, alsEntity) -> { }
         );
+    }
+
+    /**
+     * Не допускает перезаписи общей конфигурации ALS при сохранении проекта.
+     * Если содержимое конфигурации изменилось относительно каталожной записи,
+     * она сохраняется как новая конфигурация с отдельной идентичностью.
+     */
+    private Map<ALS, Integer> resolveProjectConfigurations(Map<ALS, Integer> requested) {
+        Map<ALS, Integer> configurations = new java.util.LinkedHashMap<>();
+        requested.forEach((configuration, quantity) -> {
+            ALS candidate = configuration.copy();
+            if (candidate.getId() != null) {
+                ALS persisted = alsService.findById(candidate.getId());
+                if (!persisted.equals(candidate)) {
+                    candidate.setId(null);
+                }
+            }
+            configurations.put(candidate, quantity);
+        });
+        return configurations;
     }
 
     /** Удаляет проект по идентификатору. */
