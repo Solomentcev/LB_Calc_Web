@@ -450,9 +450,10 @@ public class ALSService {
             ALS existing, LC domain, boolean equipmentSelectionProvided
     ) {
         Objects.requireNonNull(existing, "Исходная ALS не должна быть null");
-        prepareForReplacement(
+        lcService.prepareFunctionalEquipment(
                 domain, existing.getControlModule().getControlConfiguration(),
                 equipmentSelectionProvided);
+        lcService.validateForSave(domain);
     }
 
 
@@ -465,9 +466,10 @@ public class ALSService {
             ALS existing, LBC domain, boolean equipmentSelectionProvided
     ) {
         Objects.requireNonNull(existing, "Исходная ALS не должна быть null");
-        prepareForReplacement(
+        lbcService.prepareFunctionalEquipment(
                 domain, existing.getControlModule().getControlConfiguration(),
                 equipmentSelectionProvided);
+        lbcService.validateForSave(domain);
     }
 
 
