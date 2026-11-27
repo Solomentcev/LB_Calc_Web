@@ -22,8 +22,8 @@ class LCDtoMapperTest {
         Equipment scanner = new Equipment(
                 501L,
                 EquipmentFunctionalType.ACCESS,
-                AccessPurpose.BAR_CODE,
-                EquipmentCategory.BAR_READER,
+                AccessPurpose.RFID,
+                EquipmentCategory.RFID_READER,
                 "Сканер штрихкода",
                 "",
                 0,
@@ -55,8 +55,8 @@ class LCDtoMapperTest {
     void toDomain_shouldPreserveEquipmentWhenSelectionWasNotSubmitted() {
         LC source = TestDataFactory.validLC(null);
         Equipment scanner = new Equipment(
-                502L, EquipmentFunctionalType.ACCESS, AccessPurpose.BAR_CODE,
-                EquipmentCategory.BAR_READER, "Сканер", "", 0, 0, 0);
+                502L, EquipmentFunctionalType.ACCESS, AccessPurpose.RFID,
+                EquipmentCategory.RFID_READER, "Сканер", "", 0, 0, 0);
         ControlConfiguration fallback = new ControlConfiguration(
                 source.getControlConfiguration().getFunctionalConfiguration(), Map.of(scanner, 1));
 
@@ -75,8 +75,8 @@ class LCDtoMapperTest {
     void toDomain_shouldClearEquipmentWhenEmptySelectionWasSubmitted() {
         LC source = TestDataFactory.validLC(null);
         Equipment scanner = new Equipment(
-                503L, EquipmentFunctionalType.ACCESS, AccessPurpose.BAR_CODE,
-                EquipmentCategory.BAR_READER, "Сканер", "", 0, 0, 0);
+                503L, EquipmentFunctionalType.ACCESS, AccessPurpose.RFID,
+                EquipmentCategory.RFID_READER, "Сканер", "", 0, 0, 0);
         ControlConfiguration fallback = new ControlConfiguration(
                 source.getControlConfiguration().getFunctionalConfiguration(), Map.of(scanner, 1));
 

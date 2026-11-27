@@ -147,7 +147,8 @@ class LCServiceTest {
 
         assertTrue(restored.getControlConfiguration().getFunctionalConfiguration()
                 .getAccess().isEmpty());
-        assertEquals(fallback.getEquipment(), restored.getEquipment());
+        assertTrue(restored.getEquipment().isEmpty(),
+                "Комплектация должна очищаться, если функциональное назначение больше не выбрано");
     }
 
     @Test

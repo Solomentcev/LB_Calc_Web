@@ -113,8 +113,8 @@ class PersistenceIntegrationTest {
         Equipment missingEquipment = new Equipment(
                 999999L,
                 EquipmentFunctionalType.ACCESS,
-                AccessPurpose.BAR_CODE,
-                EquipmentCategory.BAR_READER,
+                AccessPurpose.RFID,
+                EquipmentCategory.RFID_READER,
                 "Отсутствующая модель",
                 "",
                 120,
