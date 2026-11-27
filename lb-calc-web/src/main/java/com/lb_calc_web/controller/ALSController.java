@@ -100,7 +100,7 @@ public class ALSController extends BaseCatalogController {
                     fallback,
                     sizeBounds
             );
-            als = toDtoWithImages(alsService.prepareConfiguration(existing, restored));
+            als = toDtoWithImages(alsService.prepareConfiguration(existing, restored, als.isEquipmentSelectionProvided()));
         } catch (ValidationSizeException exception) {
             model.addAttribute("ALSErrors",
                     ValidationErrorFormatter.format(exception.getValidationResult()));
@@ -140,7 +140,7 @@ public class ALSController extends BaseCatalogController {
                     fallback,
                     sizeBounds
             );
-            ALS domain = alsService.prepareConfiguration(existing, restored);
+            ALS domain = alsService.prepareConfiguration(existing, restored, als.isEquipmentSelectionProvided());
             ALS saved = alsService.saveALS(domain);
             return "redirect:/alss/" + saved.getId();
         } catch (ValidationSizeException e) {
