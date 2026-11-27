@@ -152,25 +152,5 @@ public final class LBDtoMapper {
         return result;
     }
 
-    /**
 
-     * DTO -> Domain.
-     */
-    public static List<LB> toDomainList(
-            List<LBDTO> dtos
-    ) {
-        if (dtos == null) {
-            return List.of();
-        }
-
-        List<LB> result = new ArrayList<>(
-                dtos.size()
-        );
-
-        for (LBDTO dto : dtos) {
-            result.add(toDomain(dto));
-        }
-
-        return result;
-    }
 }
