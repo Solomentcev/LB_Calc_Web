@@ -1,6 +1,7 @@
 package com.lb_calc_web.controller;
 
 import com.lb_calc_web.domain.model.LBC;
+import com.lb_calc_web.domain.model.ControlConfiguration;
 import com.lb_calc_web.mapper.dto.EquipmentDtoMapper;
 import com.lb_calc_web.service.EquipmentCatalogService;
 import com.lb_calc_web.dto.LBCDTO;
@@ -11,6 +12,9 @@ import com.lb_calc_web.service.LBCService;
 import com.lb_calc_web.service.ModuleCatalogFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.lb_calc_web.service.factory.TypeLbFactory;
+import com.lb_calc_web.service.validation.size.SizeBounds;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Controller;
 import org.springframework.data.domain.Pageable;
 
@@ -31,10 +35,19 @@ public class LBCController extends BaseCatalogController {
 
     private final LBCService lbcService;
     private final EquipmentCatalogService equipmentCatalogService;
+    private final SizeBounds sizeBounds;
+    private final Environment environment;
 
-    public LBCController(LBCService lbcService, EquipmentCatalogService equipmentCatalogService) {
+    public LBCController(
+            LBCService lbcService,
+            EquipmentCatalogService equipmentCatalogService,
+            SizeBounds sizeBounds,
+            Environment environment
+    ) {
         this.lbcService = lbcService;
         this.equipmentCatalogService = equipmentCatalogService;
+        this.sizeBounds = sizeBounds;
+        this.environment = environment;
     }
 
     /**
@@ -102,7 +115,7 @@ public class LBCController extends BaseCatalogController {
     public String refreshLBC(@ModelAttribute("lbc") LBCDTO lbc, Model model) {
         model.addAttribute("pageContext", "CATALOG");
         try {
-            LBC domain = lbcService.restoreDomain(lbc);
+            LBC domain = toDomain(lbc);
             lbc = toDtoWithImage(domain);
         } catch (ValidationSizeException exception) {
             model.addAttribute("errors", ValidationErrorFormatter.format(exception.getValidationResult()));
@@ -141,6 +154,22 @@ public class LBCController extends BaseCatalogController {
             prepareForm(model, lbc);
             return "lbcs/lbc";
         }
+    }
+
+    /** Восстанавливает доменную модель LBC из данных формы. */
+    private LBC toDomain(LBCDTO dto) {
+        ControlConfiguration fallback = dto.getId() != null && dto.getId() > 0
+                ? lbcService.findById(dto.getId()).getControlConfiguration()
+                : null;
+        LBC domain = LBCDtoMapper.toDomain(
+                dto,
+                TypeLbFactory.forLBC(environment, dto.getType()),
+                equipmentCatalogService::findById,
+                fallback,
+                sizeBounds
+        );
+        lbcService.configureFunctionalEquipment(domain);
+        return domain;
     }
 
     private LBCDTO toDtoWithImage(LBC domain) {
