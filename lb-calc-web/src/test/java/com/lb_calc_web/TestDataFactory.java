@@ -341,7 +341,6 @@ return als;
                 equipmentId -> {
                     throw new IllegalStateException("Оборудование в тестовой конфигурации не загружается");
                 },
-                null,
                 createSizeBounds()
         );
     }
