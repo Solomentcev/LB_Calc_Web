@@ -232,14 +232,6 @@ public class ALSService {
         return domain;
     }
 
-    /** Подбирает и устанавливает физическую комплектацию управляющего модуля ALS. */
-    private void configureFunctionalEquipment(ALS domain) {
-        Objects.requireNonNull(domain, "ALS не должна быть null");
-        ControlConfiguration configuration = domain.getControlModule().getControlConfiguration();
-        equipmentCatalogService.configureFunctionalEquipment(configuration);
-        domain.setControlConfiguration(configuration);
-    }
-
     /** Удаляет сохранённую конфигурацию ALS. */
     @Transactional
     public void deleteALS(Long id) {
@@ -429,16 +421,12 @@ public class ALSService {
             ALS existing, ALS restored, boolean equipmentSelectionProvided
     ) {
         Objects.requireNonNull(restored, "Восстановленная ALS не должна быть null");
-        boolean functionalChanged = existing != null
-                && !existing.getFunctionalConfiguration().equals(restored.getFunctionalConfiguration());
-        if (!equipmentSelectionProvided && existing != null) {
-            ControlConfiguration fallback = existing.getControlModule().getControlConfiguration();
-            restored.setControlConfiguration(new ControlConfiguration(
-                    restored.getFunctionalConfiguration(), fallback.getEquipment()));
-        }
-        if (!equipmentSelectionProvided || functionalChanged) {
-            configureFunctionalEquipment(restored);
-        }
+        ControlConfiguration fallback = existing == null ? null
+                : existing.getControlModule().getControlConfiguration();
+        restored.setControlConfiguration(equipmentCatalogService.prepareFunctionalEquipment(
+                restored.getControlModule().getControlConfiguration(),
+                fallback,
+                equipmentSelectionProvided));
         return preserveExistingModules(existing, restored);
     }
 
