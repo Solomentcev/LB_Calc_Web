@@ -100,7 +100,9 @@ public class ALSController extends BaseCatalogController {
                     fallback,
                     sizeBounds
             );
-            als = toDtoWithImages(alsService.prepareConfiguration(existing, restored, als.isEquipmentSelectionProvided()));
+            restored = alsService.prepareConfiguration(existing, restored, als.isEquipmentSelectionProvided());
+            alsService.validateForSave(restored);
+            als = toDtoWithImages(restored);
         } catch (ValidationSizeException exception) {
             model.addAttribute("ALSErrors",
                     ValidationErrorFormatter.format(exception.getValidationResult()));
