@@ -87,7 +87,10 @@ public class LBCController extends BaseCatalogController {
         logger.debug("Открытие страницы создания LBC");
 
         LBC domain = lbcService.createLBC();
-        prepareForm(model, toDtoWithImage(domain));
+        LBCDTO lbc = toDtoWithImage(domain);
+        model.addAttribute("lbc", lbc);
+        model.addAttribute("equipmentList", equipmentCatalogService.findAll().stream()
+                .map(EquipmentDtoMapper::toDto).toList());
 
         return "lbcs/lbc";
     }
@@ -106,7 +109,10 @@ public class LBCController extends BaseCatalogController {
                 id
         );
 
-        prepareForm(model, toDtoWithImage(lbcService.findById(id)));
+        LBCDTO lbc = toDtoWithImage(lbcService.findById(id));
+        model.addAttribute("lbc", lbc);
+        model.addAttribute("equipmentList", equipmentCatalogService.findAll().stream()
+                .map(EquipmentDtoMapper::toDto).toList());
 
         return "lbcs/lbc";
     }
