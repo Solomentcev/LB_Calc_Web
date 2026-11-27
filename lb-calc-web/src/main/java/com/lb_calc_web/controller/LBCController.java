@@ -23,6 +23,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 
 /** MVC-контроллер каталога и редактирования комбинированных модулей LBC. */
@@ -119,7 +120,7 @@ public class LBCController extends BaseCatalogController {
             lbc = toDtoWithImage(domain);
         } catch (ValidationSizeException exception) {
             model.addAttribute("errors", ValidationErrorFormatter.format(exception.getValidationResult()));
-        } catch (IllegalArgumentException exception) {
+        } catch (IllegalArgumentException | NoSuchElementException exception) {
             model.addAttribute("errors", List.of("Проверьте введённые параметры модуля."));
         }
         prepareForm(model, lbc);
@@ -149,7 +150,7 @@ public class LBCController extends BaseCatalogController {
             prepareForm(model, lbc);
 
             return "lbcs/lbc";
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException | NoSuchElementException e) {
             model.addAttribute("errors", List.of(e.getMessage()));
             prepareForm(model, lbc);
             return "lbcs/lbc";
