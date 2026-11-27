@@ -159,12 +159,19 @@ class ModuleNamingDescriptionTest {
         project.addALS(als);
         project.addALS(als);
 
+        int cellCount = als.getCountCells();
+        int moduleCount = als.getModules().size();
+
         assertEquals(
-                "1. " + als.getName() + " — 2 шт.\n"
-                        + "   6 ячеек в каждой АКХ.\n\n"
-                        + "Всего: 2 АКХ, 12 ячеек.",
+                "№1 — " + als.getName()
+                        + ", " + cellCount + " ячеек"
+                        + ", " + moduleCount + " модуля"
+                        + ", количество: 2 шт.\n"
+                        + "Всего: 2 АКХ, " + (cellCount * 2) + " ячеек, "
+                        + (moduleCount * 2) + " модулей.",
                 project.getDescription()
         );
+        assertTrue(!project.getDescription().contains("\n\n"));
         assertTrue(!project.getDescription().contains(als.getDescription()));
     }
 
