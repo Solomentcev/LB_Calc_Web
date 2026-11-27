@@ -99,7 +99,7 @@ class LBCDomainTest {
     @Test
     void lbcActsAsControlAndStorageModule() {
         FunctionalConfiguration functional = new FunctionalConfiguration(
-                DisplayPurpose.NONE,
+                DisplayPurpose.INCH_10,
                 Set.of(AccessPurpose.PIN),
                 PaymentPurpose.NONE,
                 PrinterPurpose.ABSENT
