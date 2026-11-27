@@ -8,7 +8,7 @@ import com.lb_calc_web.mapper.dto.LBCDtoMapper;
 import com.lb_calc_web.service.LBCService;
 import com.lb_calc_web.service.EquipmentCatalogService;
 import com.lb_calc_web.service.factory.TypeLbFactory;
-import com.lb_calc_web.service.validation.size.SizeBounds;
+import com.lb_calc_web.domain.geometry.SizeBounds;
 import org.springframework.core.env.Environment;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
