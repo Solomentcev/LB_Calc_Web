@@ -1,10 +1,12 @@
 package com.lb_calc_web.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.util.Objects;
 
 /** DTO модуля хранения LB для передачи параметров между веб-слоем и сервисами. */
+@Schema(description = "Конфигурация модуля хранения LB, включая габариты, ячейки, конструктивные параметры и цвета.")
 public class LBDTO {
 
     private Long id;
