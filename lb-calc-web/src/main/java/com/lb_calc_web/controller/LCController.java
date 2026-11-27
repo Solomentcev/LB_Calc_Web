@@ -87,7 +87,11 @@ public class LCController extends BaseCatalogController {
     public String refreshLC(@ModelAttribute("lc") LCDTO lc, Model model) {
         model.addAttribute("pageContext", "CATALOG");
         try {
-            LC domain = toDomain(lc);
+            ControlConfiguration fallback = lc.getId() != null && lc.getId() > 0
+                    ? lcService.findById(lc.getId()).getControlConfiguration() : null;
+            LC domain = LCDtoMapper.toDomain(
+                    lc, equipmentCatalogService::findById, fallback, sizeBounds);
+            lcService.configureFunctionalEquipment(domain);
             lc = toDtoWithImage(domain);
         } catch (ValidationSizeException exception) {
             model.addAttribute("errors", ValidationErrorFormatter.format(exception.getValidationResult()));
@@ -115,7 +119,11 @@ public class LCController extends BaseCatalogController {
         );
 
         try {
-            LC domain = toDomain(lc);
+            ControlConfiguration fallback = lc.getId() != null && lc.getId() > 0
+                    ? lcService.findById(lc.getId()).getControlConfiguration() : null;
+            LC domain = LCDtoMapper.toDomain(
+                    lc, equipmentCatalogService::findById, fallback, sizeBounds);
+            lcService.configureFunctionalEquipment(domain);
             LC savedLC = lcService.saveLC(domain);
 
             return "redirect:/lcs/" + savedLC.getId();
@@ -140,23 +148,6 @@ public class LCController extends BaseCatalogController {
             prepareForm(model, lc);
             return "lcs/lc";
         }
-    }
-
-    /** Восстанавливает доменную модель LC из данных формы. */
-    private LC toDomain(LCDTO dto) {
-        ControlConfiguration fallback = dto.getId() != null && dto.getId() > 0
-                ? lcService.findById(dto.getId()).getControlConfiguration()
-                : null;
-        LC domain = LCDtoMapper.toDomain(
-                dto, equipmentCatalogService::findById, fallback, sizeBounds);
-        boolean selectionOmitted = !dto.isEquipmentProvided() && dto.getSelectedEquipment().isEmpty();
-        boolean functionalChanged = fallback != null
-                && !domain.getControlConfiguration().getFunctionalConfiguration().equals(
-                fallback.getFunctionalConfiguration());
-        if (selectionOmitted || functionalChanged) {
-            lcService.configureFunctionalEquipment(domain);
-        }
-        return domain;
     }
 
     private LCDTO toDtoWithImage(LC domain) {
