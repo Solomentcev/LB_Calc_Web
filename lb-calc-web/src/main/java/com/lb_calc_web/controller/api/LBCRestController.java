@@ -8,6 +8,7 @@ import com.lb_calc_web.service.LBCService;
 import com.lb_calc_web.service.EquipmentCatalogService;
 import com.lb_calc_web.service.factory.TypeLbFactory;
 import com.lb_calc_web.domain.geometry.SizeBounds;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import org.springframework.core.env.Environment;
 import io.swagger.v3.oas.annotations.Operation;
