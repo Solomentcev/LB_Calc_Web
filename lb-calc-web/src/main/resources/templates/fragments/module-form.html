@@ -45,33 +45,36 @@
 <section th:fragment="equipmentSelections" class="module-section">
     <div class="module-section__header">
         <h2>Комплектация оборудования</h2>
-        <p>Для каждого выбранного физического назначения выбрана модель по умолчанию. PIN не требует отдельного оборудования и использует дисплей.</p>
+        <p>Выберите физические модели для назначенных функций и укажите их количество.</p>
     </div>
     <div class="module-section__body">
-        <input type="hidden" name="equipmentSelectionsProvided" value="true">
+        <input type="hidden" name="equipmentProvided" value="true">
         <div id="equipment-selection-list">
             <div class="module-equipment-row equipment-selection-row"
-                 th:each="selection, selectionStat : *{equipmentSelections}">
+                 th:each="selection, selectionStat : *{selectedEquipment}">
                 <div class="module-field">
-                    <label th:for="|equipment-${selectionStat.index}|">Модель оборудования</label>
-                    <select class="form-control" required th:id="|equipment-${selectionStat.index}|"
-                            th:name="|equipmentSelections[${selectionStat.index}].equipmentId|">
+                    <label th:for="|equipment-${selectionStat.index}|"
+                           th:text="|${selection.functionalType} — ${selection.purpose}|">Назначение</label>
+                    <select class="form-control" required
+                            th:id="|equipment-${selectionStat.index}|"
+                            th:field="*{selectedEquipment[__${selectionStat.index}__].id}">
                         <option value="">Выберите модель</option>
-                        <option th:each="item : ${selection.availableModels}" th:value="${item.id}"
-                                th:selected="${item.id == selection.equipmentId}"
+                        <option th:each="item : ${equipmentList}"
+                                th:if="${item.functionalType == selection.functionalType and item.purpose == selection.purpose}"
+                                th:value="${item.id}"
                                 th:text="|${item.name} — ${item.width} × ${item.height} × ${item.depth} мм|"></option>
                     </select>
+                    <small class="module-field-hint" th:text="${selection.name}">Текущая модель</small>
                 </div>
                 <div class="module-field">
                     <label th:for="|quantity-${selectionStat.index}|">Количество</label>
-                    <input class="form-control" type="number" min="1"
+                    <input class="form-control" type="number" min="1" required
                            th:id="|quantity-${selectionStat.index}|"
-                           th:name="|equipmentSelections[${selectionStat.index}].quantity|"
-                           th:value="${selection.quantity}">
+                           th:field="*{selectedEquipment[__${selectionStat.index}__].quantity}">
                 </div>
             </div>
         </div>
-        <small class="module-field-hint">Состав строк зависит от выбранных функциональных назначений. Для назначения без моделей в каталоге сначала добавьте подходящую модель в каталог оборудования.</small>
+        <small class="module-field-hint">Список моделей ограничен тем же функциональным типом и назначением. PIN не требует отдельного физического оборудования.</small>
     </div>
 </section>
 </body>
