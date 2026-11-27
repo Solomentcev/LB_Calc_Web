@@ -13,7 +13,6 @@ import com.lb_calc_web.domain.equipment.PrinterPurpose;
 import com.lb_calc_web.domain.model.ControlConfiguration;
 import com.lb_calc_web.domain.model.FunctionalConfiguration;
 import com.lb_calc_web.domain.model.LBC;
-import com.lb_calc_web.dto.EquipmentSelectionDTO;
 import com.lb_calc_web.dto.LBCDTO;
 import com.lb_calc_web.service.EquipmentCatalogService;
 import com.lb_calc_web.service.LBCService;
@@ -55,10 +54,8 @@ class LBCControllerTest {
         LBC configured = createLbc(Map.of(display, 1));
 
         when(lbcService.createLBC()).thenReturn(initial);
-        when(equipmentCatalogService.prepareSelections(any(), any()))
-                .thenReturn(List.of(new EquipmentSelectionDTO(1L, 1)));
-        when(equipmentCatalogService.findAll()).thenReturn(List.of());
-        when(equipmentCatalogService.findDefaultModelIds()).thenReturn(Set.of(1L));
+        when(equipmentCatalogService.findAll()).thenReturn(List.of(display));
+        when(equipmentCatalogService.findDefaultModels()).thenReturn(Set.of(display));
         when(lbcService.restoreDomain(any(LBCDTO.class))).thenReturn(configured);
 
         LBCController controller = new LBCController(lbcService, equipmentCatalogService);
@@ -78,7 +75,7 @@ class LBCControllerTest {
                 / 10 * 3 + 1;
 
         assertEquals(Color.GRAY.getRGB(), image.getRGB(displayCenterX, displayCenterY));
-        assertEquals(1L, dto.getEquipmentSelections().get(0).getEquipmentId());
+        assertEquals(Map.of(1L, 1), dto.getEquipment());
     }
 
     private LBC createLbc(Map<Equipment, Integer> equipment) {

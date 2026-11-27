@@ -56,6 +56,6 @@ class LBCDtoMapperTest {
                 result.getFunctionalConfiguration().getPayment());
         assertEquals(source.getFunctionalConfiguration().getPrinter(),
                 result.getFunctionalConfiguration().getPrinter());
-        assertTrue(result.getEquipmentSelections().isEmpty());
+        assertTrue(result.getEquipment().isEmpty());
     }
 }

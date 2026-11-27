@@ -8,11 +8,9 @@ import com.lb_calc_web.domain.equipment.EquipmentFunctionalType;
 import com.lb_calc_web.domain.model.ControlConfiguration;
 import java.util.Map;
 import com.lb_calc_web.domain.model.LC;
-import com.lb_calc_web.dto.EquipmentSelectionDTO;
 import com.lb_calc_web.dto.LCDTO;
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -52,7 +50,7 @@ class LCDtoMapperTest {
 
         assertEquals(AccessPurpose.RFID,
                 dto.getFunctionalConfiguration().getAccess().iterator().next());
-        assertEquals(List.of(new EquipmentSelectionDTO(501L, 2)), dto.getEquipmentSelections());
+        assertEquals(Map.of(501L, 2), dto.getEquipment());
     }
     @Test
     void toDomain_shouldPreserveEquipmentWhenSelectionWasNotSubmitted() {
@@ -64,8 +62,8 @@ class LCDtoMapperTest {
                 source.getControlConfiguration().getFunctionalConfiguration(), Map.of(scanner, 1));
 
         LCDTO dto = TestDataFactory.validLCDTO(10L);
-        dto.setEquipmentSelections(null);
-        dto.setEquipmentSelectionsProvided(false);
+        dto.setEquipment(null);
+        dto.setEquipmentProvided(false);
 
         LC restored = LCDtoMapper.toDomain(dto, id -> {
             throw new AssertionError("Загрузчик не должен вызываться");
@@ -85,7 +83,7 @@ class LCDtoMapperTest {
 
         LCDTO dto = TestDataFactory.validLCDTO(11L);
         dto.setEquipmentSelections(null);
-        dto.setEquipmentSelectionsProvided(true);
+        dto.setEquipmentProvided(true);
 
         LC restored = LCDtoMapper.toDomain(dto, id -> {
             throw new AssertionError("Загрузчик не должен вызываться");
