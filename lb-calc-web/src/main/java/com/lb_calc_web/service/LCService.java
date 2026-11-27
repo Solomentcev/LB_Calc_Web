@@ -195,7 +195,9 @@ public class LCService {
     /** Дополняет комплектацию LC физическими моделями по функциональным назначениям. */
     public void configureFunctionalEquipment(LC domain) {
         Objects.requireNonNull(domain, "LC не должен быть null");
-        equipmentCatalogService.configureFunctionalEquipment(domain.getControlConfiguration());
+        ControlConfiguration configuration = domain.getControlConfiguration();
+        equipmentCatalogService.configureFunctionalEquipment(configuration);
+        domain.setControlConfiguration(configuration);
     }
 
     /** Проверяет и сохраняет доменную конфигурацию LC. */
@@ -217,7 +219,10 @@ public class LCService {
         }
 
         findOrCreateLockService.acquire();
-        if (domain.getId() != null && lcRepository.findById(domain.getId()).isEmpty()) {
+        Optional<LCEntity> existing = domain.getId() == null
+                ? Optional.empty()
+                : lcRepository.findById(domain.getId());
+        if (domain.getId() != null && existing.isEmpty()) {
             throw new NoSuchElementException("LC с id=" + domain.getId() + " не найден");
         }
 
@@ -233,8 +238,9 @@ public class LCService {
             return toDomain(duplicate.get());
         }
 
-        LCEntity saved = lcRepository.save(
-                LCEntityMapper.toEntity(domain, this::findEquipmentEntity));
+        LCEntity entity = existing.orElseGet(LCEntity::create);
+        LCEntityMapper.updateEntity(domain, entity, this::findEquipmentEntity);
+        LCEntity saved = lcRepository.save(entity);
         domain.setId(saved.getId());
         logger.info("LC сохранён, id={}", saved.getId());
         return domain;
