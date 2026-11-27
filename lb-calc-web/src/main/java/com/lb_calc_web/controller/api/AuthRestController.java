@@ -11,6 +11,8 @@ import com.lb_calc_web.mapper.dto.EmployeeDtoMapper;
 import jakarta.security.auth.message.AuthException;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 /** REST-контроллер аутентификации, регистрации, обновления токенов и выхода пользователя. */
 @RestController
 @RequestMapping("/api/v1")
+@Tag(name = "Аутентификация", description = "Вход, регистрация, обновление токенов и выход")
 public class AuthRestController {
     private final AuthService authService;
 
@@ -26,6 +29,7 @@ public class AuthRestController {
     }
 
     /** Выполняет вход по учётным данным и возвращает пару JWT-токенов. */
+    @Operation(summary = "Войти в систему", description = "Проверяет учётные данные и возвращает access- и refresh-токены.")
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<JwtResponse>> login(@RequestBody @Valid LoginRequest loginRequest) throws AuthException {
         AuthTokens tokens = authService.login(loginRequest.getEmail(), loginRequest.getPassword());
@@ -36,6 +40,7 @@ public class AuthRestController {
 
     /** Регистрирует пользователя с ролью по умолчанию. */
 
+    @Operation(summary = "Зарегистрировать пользователя", description = "Создаёт учётную запись с ролью по умолчанию.")
     @PostMapping("/registration")
     public ResponseEntity<ApiResponse<EmployeeDTO>> registration(@RequestBody @Valid RegistrationDTO registrationDTO) {
         EmployeeDTO employee = EmployeeDtoMapper.toDto(authService.registration(
@@ -51,6 +56,7 @@ public class AuthRestController {
     }
 
     /** Обновляет пару JWT-токенов по refresh token из заголовка запроса. */
+    @Operation(summary = "Обновить токены", description = "Выдаёт новую пару токенов по обязательному заголовку Refresh-Token.")
     @PostMapping("/refresh")
     public ResponseEntity<ApiResponse<JwtResponse>> refresh(@RequestHeader(value = "Refresh-Token") String refreshToken) {
         if (refreshToken == null || refreshToken.isBlank()) {
@@ -65,6 +71,7 @@ public class AuthRestController {
     }
 
     /** Завершает клиентскую сессию, удаляя access- и refresh-cookie. */
+    @Operation(summary = "Выйти из системы", description = "Очищает клиентские cookie с токенами.")
     @PostMapping("/logout")
     public ResponseEntity<ApiResponse<Void>> logout(HttpServletResponse response) {
         response.addHeader("Set-Cookie", "jwtAccess=; Max-Age=0; Path=/; HttpOnly");
