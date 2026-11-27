@@ -287,7 +287,18 @@ public class EmployeeService implements UserDetailsService {
                 );
     }
 
-    /** Возвращает список сотрудников. */
+    /**
+     * Возвращает профили сотрудников для аутентифицированных пользователей.
+     * Метод не открывает административные операции и не возвращает данные учётных записей.
+     */
+    @Transactional(readOnly = true)
+    public List<Employee> findAllProfiles() {
+        return employeeRepository.findAll().stream()
+                .map(EmployeeEntityMapper::toDomain)
+                .toList();
+    }
+
+    /** Возвращает список сотрудников для административного управления. */
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @Transactional(readOnly = true)
     public List<Employee> findAll() {
