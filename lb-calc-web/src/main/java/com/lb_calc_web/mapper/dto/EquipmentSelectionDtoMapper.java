@@ -8,7 +8,6 @@ import com.lb_calc_web.domain.equipment.PaymentPurpose;
 import com.lb_calc_web.domain.equipment.PrinterPurpose;
 import com.lb_calc_web.domain.model.ControlConfiguration;
 import com.lb_calc_web.domain.model.FunctionalConfiguration;
-import com.lb_calc_web.domain.model.FunctionalConfigurationResolver;
 import com.lb_calc_web.dto.EquipmentDTO;
 import com.lb_calc_web.dto.EquipmentSelectionDTO;
 import com.lb_calc_web.dto.FunctionalConfigurationDTO;
@@ -24,9 +23,6 @@ import java.util.stream.Collectors;
 
 /** Формирует транспортные строки выбора физического оборудования по требованиям доменной конфигурации. */
 public final class EquipmentSelectionDtoMapper {
-
-    private static final FunctionalConfigurationResolver RESOLVER =
-            new FunctionalConfigurationResolver();
 
     private EquipmentSelectionDtoMapper() {
     }
@@ -49,12 +45,12 @@ public final class EquipmentSelectionDtoMapper {
         Objects.requireNonNull(catalog, "Каталог оборудования не должен быть null");
         Objects.requireNonNull(defaultModelIds, "Модели по умолчанию не должны быть null");
 
-        FunctionalConfiguration normalized = RESOLVER.normalize(toDomain(configuration));
+        ControlConfiguration controlConfiguration =
+                new ControlConfiguration(toDomain(configuration), Map.of());
+        FunctionalConfiguration normalized = controlConfiguration.getFunctionalConfiguration();
         if (configuration != null) {
             configuration.setDisplay(normalized.getDisplay());
         }
-        ControlConfiguration controlConfiguration =
-                new ControlConfiguration(normalized, Map.of());
         Map<EquipmentFunctionalType, Set<EquipmentPurpose>> requirements =
                 controlConfiguration.getRequiredEquipment();
 
