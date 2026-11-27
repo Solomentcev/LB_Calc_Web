@@ -78,7 +78,6 @@ public class LCController extends BaseCatalogController {
     public String refreshLC(@ModelAttribute("lc") LCDTO lc, Model model) {
         model.addAttribute("pageContext", "CATALOG");
         try {
-            ModuleEquipmentFormSupport.applySelection(lc);
             LC domain = lcService.restoreDomain(lc);
             lc = toDtoWithImage(domain);
         } catch (ValidationSizeException exception) {
