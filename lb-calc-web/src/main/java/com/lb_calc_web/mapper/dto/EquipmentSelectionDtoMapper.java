@@ -74,7 +74,7 @@ public final class EquipmentSelectionDtoMapper {
         requirements.forEach((type, purposes) -> {
             boolean previousSeparatePaymentSelection =
                     previous.containsKey(new EquipmentKey(type, PaymentPurpose.CARDS))
-                            && previous.containsKey(new EquipmentKey(type, PaymentPurpose.CASH));
+                            || previous.containsKey(new EquipmentKey(type, PaymentPurpose.CASH));
             boolean combinedPaymentAvailable = type == EquipmentFunctionalType.PAYMENT
                     && purposes.contains(PaymentPurpose.CARDS)
                     && purposes.contains(PaymentPurpose.CASH)
