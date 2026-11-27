@@ -1124,7 +1124,10 @@ ControlConfiguration fallback = persistedALS.getControlModule().getControlConfig
                             ? als.getControlModule().getControlConfiguration() : null,
                     sizeBounds
             );
-            alsService.configureFunctionalEquipment(restored);
+            alsService.prepareFunctionalEquipment(
+                    restored,
+                    als.getControlModule().getControlConfiguration(),
+                    dto.isEquipmentProvided());
             return toDtoWithImage(restored);
         } catch (ValidationSizeException | IllegalArgumentException exception) {
             return dto;
