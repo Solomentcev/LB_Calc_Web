@@ -6,6 +6,15 @@ import com.lb_calc_web.domain.equipment.DisplayPurpose;
 import com.lb_calc_web.domain.equipment.PaymentPurpose;
 import com.lb_calc_web.domain.equipment.PrinterPurpose;
 import com.lb_calc_web.domain.model.ControlConfiguration;
+import com.lb_calc_web.domain.equipment.Equipment;
+import com.lb_calc_web.domain.equipment.EquipmentFunctionalType;
+import com.lb_calc_web.domain.equipment.EquipmentPurpose;
+import com.lb_calc_web.domain.model.FunctionalConfigurationResolver;
+import com.lb_calc_web.dto.EquipmentDTO;
+import com.lb_calc_web.dto.EquipmentSelectionDTO;
+import com.lb_calc_web.dto.FunctionalConfigurationDTO;
+import com.lb_calc_web.mapper.dto.EquipmentDtoMapper;
+
 import com.lb_calc_web.domain.model.FunctionalConfiguration;
 import com.lb_calc_web.domain.model.LC;
 import com.lb_calc_web.dto.LCDTO;
@@ -48,6 +57,9 @@ public class LCService {
     private final SizeValidator sizeValidator;
     private final SizeBounds sizeBounds;
     private final EquipmentRepository equipmentRepository;
+    private final EquipmentCatalogService equipmentCatalogService;
+    private final FunctionalConfigurationResolver functionalConfigurationResolver =
+            new FunctionalConfigurationResolver();
 
     public LCService(
             LCRepository lcRepository,
@@ -55,7 +67,8 @@ public class LCService {
             Environment environment,
             SizeValidator sizeValidator,
             EquipmentRepository equipmentRepository,
-            SizeBounds sizeBounds
+            SizeBounds sizeBounds,
+            EquipmentCatalogService equipmentCatalogService
     ) {
         this.lcRepository = Objects.requireNonNull(lcRepository);
         this.findOrCreateLockService = Objects.requireNonNull(findOrCreateLockService);
@@ -63,6 +76,7 @@ public class LCService {
         this.sizeValidator = Objects.requireNonNull(sizeValidator);
         this.sizeBounds = Objects.requireNonNull(sizeBounds);
         this.equipmentRepository = Objects.requireNonNull(equipmentRepository);
+        this.equipmentCatalogService = Objects.requireNonNull(equipmentCatalogService);
     }
 
     /** Создаёт несохранённый LC с параметрами по умолчанию. */
@@ -210,10 +224,115 @@ public class LCService {
         }
     }
 
+    /**
+     * Формирует строки выбора физического оборудования для функциональных назначений модуля.
+     * Подбор моделей выполняется здесь, а не в контроллере или доменной модели.
+     */
+    public List<EquipmentSelectionDTO> prepareEquipmentSelections(
+            FunctionalConfigurationDTO configuration,
+            List<EquipmentSelectionDTO> currentSelections
+    ) {
+        ControlConfiguration controlConfiguration =
+                new ControlConfiguration(toFunctionalConfiguration(configuration), Map.of());
+        Map<EquipmentFunctionalType, java.util.Set<EquipmentPurpose>> requirements =
+                controlConfiguration.getRequiredEquipment();
+
+        List<Equipment> catalog = equipmentCatalogService.findAll();
+        Map<Long, Equipment> equipmentById = catalog.stream()
+                .filter(item -> item.getId() != null)
+                .collect(java.util.stream.Collectors.toMap(Equipment::getId, item -> item));
+        Map<EquipmentKey, EquipmentSelectionDTO> previous = new java.util.LinkedHashMap<>();
+        if (currentSelections != null) {
+            for (EquipmentSelectionDTO selection : currentSelections) {
+                if (selection == null || selection.getEquipmentId() == null) {
+                    continue;
+                }
+                Equipment item = equipmentById.get(selection.getEquipmentId());
+                if (item != null) {
+                    previous.put(new EquipmentKey(item.getFunctionalType(), item.getPurpose()), selection);
+                }
+            }
+        }
+
+        java.util.LinkedHashSet<EquipmentKey> required = new java.util.LinkedHashSet<>();
+        requirements.forEach((type, purposes) -> {
+            boolean combinedPaymentAvailable = type == EquipmentFunctionalType.PAYMENT
+                    && purposes.contains(PaymentPurpose.CARDS)
+                    && purposes.contains(PaymentPurpose.CASH)
+                    && catalog.stream().anyMatch(item ->
+                    item.getFunctionalType() == EquipmentFunctionalType.PAYMENT
+                            && item.getPurpose() == PaymentPurpose.CARDS_AND_CASH);
+            if (combinedPaymentAvailable) {
+                required.add(new EquipmentKey(type, PaymentPurpose.CARDS_AND_CASH));
+            } else {
+                purposes.forEach(purpose -> required.add(new EquipmentKey(type, purpose)));
+            }
+        });
+        previous.forEach((key, selection) -> {
+            Equipment item = equipmentById.get(selection.getEquipmentId());
+            if (item != null && item.getFunctionalType() == EquipmentFunctionalType.SYSTEM) {
+                required.add(key);
+            }
+        });
+
+        java.util.Set<Long> defaults = equipmentCatalogService.findDefaultModelIds();
+        List<EquipmentSelectionDTO> result = new java.util.ArrayList<>();
+        for (EquipmentKey key : required) {
+            List<EquipmentDTO> models = catalog.stream()
+                    .filter(item -> item.getFunctionalType() == key.functionalType())
+                    .filter(item -> functionalConfigurationResolver.supportsRequirement(item, key.purpose()))
+                    .map(EquipmentDtoMapper::toDto)
+                    .toList();
+            EquipmentSelectionDTO old = previous.get(key);
+            Long selectedId = old != null && models.stream()
+                    .anyMatch(model -> Objects.equals(model.getId(), old.getEquipmentId()))
+                    ? old.getEquipmentId()
+                    : models.stream()
+                    .filter(model -> defaults.contains(model.getId()))
+                    .map(EquipmentDTO::getId)
+                    .findFirst()
+                    .orElse(null);
+            if (selectedId == null && models.size() == 1) {
+                selectedId = models.get(0).getId();
+            }
+            EquipmentSelectionDTO row = new EquipmentSelectionDTO(
+                    selectedId, old == null ? 1 : old.getQuantity());
+            row.setAvailableModels(models);
+            result.add(row);
+        }
+        return result;
+    }
+
+    /** Преобразует транспортные функциональные назначения в доменную конфигурацию. */
+    private FunctionalConfiguration toFunctionalConfiguration(FunctionalConfigurationDTO dto) {
+        return new FunctionalConfiguration(
+                dto == null || dto.getDisplay() == null
+                        ? DisplayPurpose.NONE : dto.getDisplay(),
+                dto == null || dto.getAccess() == null ? java.util.Set.of() : dto.getAccess(),
+                dto == null || dto.getPayment() == null
+                        ? PaymentPurpose.NONE : dto.getPayment(),
+                dto == null || dto.getPrinter() == null
+                        ? PrinterPurpose.ABSENT : dto.getPrinter()
+        );
+    }
+
+    /** Ключ физического назначения оборудования. */
+    private record EquipmentKey(
+            EquipmentFunctionalType functionalType,
+            EquipmentPurpose purpose
+    ) {
+    }
+
     /** Проверяет и сохраняет доменную конфигурацию LC. */
     @Transactional
     public LC saveLC(LC domain) {
         Objects.requireNonNull(domain, "LC не должен быть null");
+        try {
+            domain.getControlConfiguration().validateEquipmentRequirements();
+        } catch (IllegalStateException exception) {
+            throw createMappingValidationException("LC", domain.getId(), exception);
+        }
+
         logger.info("Сохранение LC: id={}, name={}", domain.getId(), domain.getName());
 
         ValidationResult validationResult = sizeValidator.validateLC(domain);
