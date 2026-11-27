@@ -93,7 +93,7 @@ public class LBCController extends BaseCatalogController {
                 id
         );
 
-        prepareForm(model, LBCDtoMapper.toDto(lbcService.findById(id)));
+        prepareForm(model, toDtoWithImage(lbcService.findById(id)));
 
         return "lbcs/lbc";
     }
@@ -105,7 +105,6 @@ public class LBCController extends BaseCatalogController {
         try {
             ModuleEquipmentFormSupport.applySelection(lbc);
             LBC domain = lbcService.restoreDomain(lbc);
-            configureEquipment(domain.getControlConfiguration());
             lbc = toDtoWithImage(domain);
         } catch (ValidationSizeException exception) {
             model.addAttribute("errors", ValidationErrorFormatter.format(exception.getValidationResult()));
@@ -128,7 +127,6 @@ public class LBCController extends BaseCatalogController {
         try {
             ModuleEquipmentFormSupport.applySelection(lbc);
             LBC domain = lbcService.restoreDomain(lbc);
-            configureEquipment(domain.getControlConfiguration());
             LBC saved = lbcService.saveLBC(domain);
 
             return "redirect:/lbcs/" + saved.getId();
@@ -154,22 +152,9 @@ public class LBCController extends BaseCatalogController {
         return dto;
     }
 
-    private void configureEquipment(com.lb_calc_web.domain.model.ControlConfiguration configuration) {
-        configuration.configureEquipment(configuration.getFunctionalConfiguration(),
-                equipmentCatalogService.findAll(), equipmentCatalogService.findDefaultModels());
-    }
-
     private void prepareForm(Model model, LBCDTO lbc) {
         model.addAttribute("lbc", lbc);
         var equipmentCatalog = equipmentCatalogService.findAll();
-        // Чертёж строится по уже восстановленной доменной конфигурации.
-        try {
-            lbc.setStringLBCImage(LBCImageService.getStringLBCImage(
-                    lbcService.restoreDomain(lbc)));
-        } catch (ValidationSizeException exception) {
-            lbc.setStringLBCImage(null);
-            model.addAttribute("errors", ValidationErrorFormatter.format(exception.getValidationResult()));
-        }
         model.addAttribute("equipmentList", equipmentCatalog.stream()
                 .map(EquipmentDtoMapper::toDto).toList());
 
