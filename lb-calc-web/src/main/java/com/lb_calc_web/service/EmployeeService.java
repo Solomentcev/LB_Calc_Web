@@ -87,7 +87,7 @@ public class EmployeeService implements UserDetailsService {
                         )
                 );
 
-        return EmployeeEntityMapper.toDto(entity);
+        return EmployeeEntityMapper.toDomain(entity);
     }
 
     /** Возвращает профиль сотрудника по идентификатору. */
