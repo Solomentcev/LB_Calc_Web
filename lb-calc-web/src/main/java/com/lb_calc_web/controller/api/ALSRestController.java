@@ -321,7 +321,13 @@ toDto(alsService.createALS())
                 fallback,
                 sizeBounds
         );
-        equipmentCatalogService.configureFunctionalEquipment(restored.getControlConfiguration());
+        boolean selectionOmitted = !dto.isEquipmentProvided() && dto.getSelectedEquipment().isEmpty();
+        boolean functionalChanged = fallback != null
+                && !restored.getControlConfiguration().getFunctionalConfiguration().equals(
+                fallback.getFunctionalConfiguration());
+        if (selectionOmitted || functionalChanged) {
+            equipmentCatalogService.configureFunctionalEquipment(restored.getControlConfiguration());
+        }
         return restored;
     }
 
