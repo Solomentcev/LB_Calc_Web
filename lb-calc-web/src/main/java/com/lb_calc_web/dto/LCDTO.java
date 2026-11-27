@@ -118,7 +118,7 @@ public class LCDTO {
     }
 
     public List<EquipmentDTO> getSelectedEquipment() {
-        return List.copyOf(selectedEquipment);
+        return selectedEquipment;
     }
 
     public void setSelectedEquipment(List<EquipmentDTO> selectedEquipment) {
