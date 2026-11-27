@@ -2,9 +2,14 @@ package com.lb_calc_web.controller.api;
 
 import com.lb_calc_web.controller.api.response.ApiResponse;
 import com.lb_calc_web.domain.model.LBC;
+import com.lb_calc_web.domain.model.ControlConfiguration;
 import com.lb_calc_web.dto.LBCDTO;
 import com.lb_calc_web.mapper.dto.LBCDtoMapper;
 import com.lb_calc_web.service.LBCService;
+import com.lb_calc_web.service.EquipmentCatalogService;
+import com.lb_calc_web.service.factory.TypeLbFactory;
+import com.lb_calc_web.service.validation.size.SizeBounds;
+import org.springframework.core.env.Environment;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -28,9 +33,35 @@ import java.util.List;
 public class LBCRestController {
 
     private final LBCService lbcService;
+    private final EquipmentCatalogService equipmentCatalogService;
+    private final SizeBounds sizeBounds;
+    private final Environment environment;
 
-    public LBCRestController(LBCService lbcService) {
+    public LBCRestController(
+            LBCService lbcService,
+            EquipmentCatalogService equipmentCatalogService,
+            SizeBounds sizeBounds,
+            Environment environment
+    ) {
         this.lbcService = lbcService;
+        this.equipmentCatalogService = equipmentCatalogService;
+        this.sizeBounds = sizeBounds;
+        this.environment = environment;
+    }
+
+    /** Преобразует DTO LBC в доменную модель с учётом сохранённой комплектации. */
+    private LBC toDomain(LBCDTO dto) {
+        ControlConfiguration fallback = dto.getId() != null && dto.getId() > 0
+                ? lbcService.findById(dto.getId()).getControlConfiguration() : null;
+        LBC restored = LBCDtoMapper.toDomain(
+                dto,
+                TypeLbFactory.forLBC(environment, dto.getType()),
+                equipmentCatalogService::findById,
+                fallback,
+                sizeBounds
+        );
+        lbcService.configureFunctionalEquipment(restored);
+        return restored;
     }
 
     @GetMapping
@@ -62,7 +93,7 @@ public class LBCRestController {
     @PostMapping
     @Operation(summary = "Сохранить LBC")
     public ResponseEntity<?> saveLBC(@RequestBody LBCDTO dto) {
-        LBC domain = lbcService.restoreDomain(dto);
+        LBC domain = toDomain(dto);
         LBCDTO saved = LBCDtoMapper.toDto(lbcService.saveLBC(domain));
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success("LBC успешно сохранён", saved));
