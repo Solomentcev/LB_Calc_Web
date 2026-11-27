@@ -117,7 +117,7 @@ class LBCServiceTest {
                 dto, TestDataFactory.validLBC(null).getTypeLb(), idValue -> {
                     assertEquals(72L, idValue);
                     return equipment;
-                }, null, TestDataFactory.createSizeBounds());
+                }, TestDataFactory.createSizeBounds());
 
         assertEquals(3, restored.getControlConfiguration().getQuantity(equipment));
     }
