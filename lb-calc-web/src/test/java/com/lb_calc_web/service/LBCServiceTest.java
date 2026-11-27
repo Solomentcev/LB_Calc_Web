@@ -65,14 +65,33 @@ class LBCServiceTest {
     }
 
     @Test
-    void createLBC_shouldBuildFunctionalConfigurationWithoutImplicitHardware() {
+    void createLBC_shouldBuildFunctionalConfigurationAndSelectDefaultEquipment() {
+        var display = new com.lb_calc_web.domain.equipment.Equipment(
+                7101L, com.lb_calc_web.domain.equipment.EquipmentFunctionalType.DISPLAY,
+                DisplayPurpose.INCH_10, com.lb_calc_web.domain.equipment.EquipmentCategory.DISPLAY,
+                "Дисплей 10", "", 300, 180, 30);
+        var rfid = new com.lb_calc_web.domain.equipment.Equipment(
+                7102L, com.lb_calc_web.domain.equipment.EquipmentFunctionalType.ACCESS,
+                AccessPurpose.RFID, com.lb_calc_web.domain.equipment.EquipmentCategory.RFID_READER,
+                "RFID", "", 100, 50, 30);
+        doAnswer(invocation -> {
+            var configuration = invocation.<com.lb_calc_web.domain.model.ControlConfiguration>getArgument(0);
+            configuration.configureEquipment(
+                    configuration.getFunctionalConfiguration(),
+                    List.of(display, rfid),
+                    Set.of(display, rfid));
+            return null;
+        }).when(equipmentCatalogService).configureFunctionalEquipment(
+                any(com.lb_calc_web.domain.model.ControlConfiguration.class));
+
         LBC domain = service.createLBC();
         var functional = domain.getControlConfiguration().getFunctionalConfiguration();
 
         assertEquals(DisplayPurpose.INCH_10, functional.getDisplay());
         assertEquals(Set.of(AccessPurpose.RFID), functional.getAccess());
-        assertEquals(0, domain.getEquipment().size());
+        assertEquals(Map.of(display, 1, rfid, 1), domain.getEquipment());
         assertEquals(500, domain.getWidth());
+        verify(equipmentCatalogService).configureFunctionalEquipment(domain.getControlConfiguration());
         assertEquals(3, domain.getCountCells());
     }
 

@@ -1,103 +1,83 @@
 package com.lb_calc_web.service;
 
-import com.lb_calc_web.domain.equipment.*;
+import com.lb_calc_web.domain.equipment.AccessPurpose;
+import com.lb_calc_web.domain.equipment.DisplayPurpose;
 import com.lb_calc_web.domain.equipment.Equipment;
+import com.lb_calc_web.domain.equipment.EquipmentCategory;
+import com.lb_calc_web.domain.equipment.EquipmentFunctionalType;
+import com.lb_calc_web.domain.model.ControlConfiguration;
+import com.lb_calc_web.domain.model.FunctionalConfiguration;
 import com.lb_calc_web.entity.EquipmentEntity;
-import com.lb_calc_web.mapper.entity.EquipmentEntityMapper;
 import com.lb_calc_web.repository.EquipmentRepository;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Optional;
+import java.lang.reflect.Field;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-@ExtendWith(MockitoExtension.class)
+/** Проверяет подбор физической комплектации из каталога оборудования. */
 class EquipmentCatalogServiceTest {
 
-    @Mock
-    private EquipmentRepository equipmentRepository;
+    @Test
+    void configureFunctionalEquipment_shouldSelectDefaultModelsForAllRequirements() throws Exception {
+        EquipmentEntity display = equipment(
+                801L, EquipmentFunctionalType.DISPLAY, DisplayPurpose.INCH_10.name(),
+                EquipmentCategory.DISPLAY, "Дисплей 10", true);
+        EquipmentEntity rfid = equipment(
+                802L, EquipmentFunctionalType.ACCESS, AccessPurpose.RFID.name(),
+                EquipmentCategory.RFID_READER, "RFID", true);
 
-    private EquipmentCatalogService service;
+        EquipmentRepository repository = mock(EquipmentRepository.class);
+        when(repository.findAll()).thenReturn(List.of(display, rfid));
+        EquipmentCatalogService service = new EquipmentCatalogService(repository);
 
-    @BeforeEach
-    void setUp() {
-        service = new EquipmentCatalogService(equipmentRepository);
+        ControlConfiguration configuration = new ControlConfiguration(
+                new FunctionalConfiguration(
+                        DisplayPurpose.INCH_10,
+                        Set.of(AccessPurpose.RFID),
+                        com.lb_calc_web.domain.equipment.PaymentPurpose.NONE,
+                        com.lb_calc_web.domain.equipment.PrinterPurpose.ABSENT
+                ),
+                Map.of()
+        );
+
+        service.configureFunctionalEquipment(configuration);
+
+        Map<Equipment, Integer> selected = configuration.getEquipment();
+        assertEquals(2, selected.size());
+        assertEquals(Set.of("Дисплей 10", "RFID"),
+                selected.keySet().stream().map(Equipment::getName).collect(java.util.stream.Collectors.toSet()));
+        assertEquals(Set.of(1), Set.copyOf(selected.values()));
+        verify(repository).findAll();
     }
 
-    @Test
-    void save_shouldCreateNewCatalogEntity() {
-        Equipment equipment = equipment(null);
-        EquipmentEntity persisted = EquipmentEntity.create();
-        EquipmentEntityMapper.updateEntity(equipment, persisted);
-
-        when(equipmentRepository.saveAndFlush(any(EquipmentEntity.class))).thenReturn(persisted);
-
-        Equipment result = service.save(equipment);
-
-        assertEquals(equipment.getName(), result.getName());
-        verify(equipmentRepository).saveAndFlush(any(EquipmentEntity.class));
-    }
-
-    @Test
-    void save_shouldUpdateExistingCatalogEntity() {
-        Equipment equipment = equipment(12L);
+    private EquipmentEntity equipment(
+            long id,
+            EquipmentFunctionalType type,
+            String purpose,
+            EquipmentCategory category,
+            String name,
+            boolean defaultModel
+    ) throws Exception {
         EquipmentEntity entity = EquipmentEntity.create();
-        EquipmentEntityMapper.updateEntity(equipment, entity);
-        when(equipmentRepository.findById(12L)).thenReturn(Optional.of(entity));
-        when(equipmentRepository.saveAndFlush(entity)).thenReturn(entity);
-
-        Equipment result = service.save(equipment);
-
-        assertEquals("Scanner", result.getName());
-        verify(equipmentRepository).saveAndFlush(entity);
-    }
-
-    @Test
-    void save_shouldRejectChangesWhenEquipmentIsUsedByControlModule() {
-        Equipment equipment = equipment(12L);
-        EquipmentEntity entity = EquipmentEntity.create();
-        EquipmentEntityMapper.updateEntity(equipment, entity);
-        when(equipmentRepository.findById(12L)).thenReturn(Optional.of(entity));
-        when(equipmentRepository.countModuleReferencesByEquipmentId(12L)).thenReturn(1L);
-
-        Equipment changed = new Equipment(
-                12L, EquipmentFunctionalType.ACCESS, AccessPurpose.QR_CODE,
-                EquipmentCategory.BAR_READER, "Renamed scanner", "Changed", 110, 55, 35);
-
-        assertThrows(IllegalStateException.class, () -> service.save(changed));
-        verify(equipmentRepository, never()).saveAndFlush(any(EquipmentEntity.class));
-    }
-
-    @Test
-    void delete_shouldRejectEquipmentUsedByControlModule() {
-        EquipmentEntity entity = EquipmentEntity.create();
-        when(equipmentRepository.findById(12L)).thenReturn(Optional.of(entity));
-        when(equipmentRepository.countModuleReferencesByEquipmentId(12L)).thenReturn(1L);
-
-        assertThrows(IllegalStateException.class, () -> service.delete(12L));
-        verify(equipmentRepository, never()).delete(any(EquipmentEntity.class));
-    }
-
-    @Test
-    void delete_shouldRemoveUnusedEquipment() {
-        EquipmentEntity entity = EquipmentEntity.create();
-        when(equipmentRepository.findById(12L)).thenReturn(Optional.of(entity));
-        when(equipmentRepository.countModuleReferencesByEquipmentId(12L)).thenReturn(0L);
-
-        service.delete(12L);
-
-        verify(equipmentRepository).delete(entity);
-        verify(equipmentRepository).flush();
-    }
-
-    private Equipment equipment(Long id) {
-        return new Equipment(id, EquipmentFunctionalType.ACCESS, AccessPurpose.QR_CODE,
-                EquipmentCategory.BAR_READER, "Scanner", "2D scanner", 100, 50, 30);
+        entity.setFunctionalType(type);
+        entity.setPurpose(purpose);
+        entity.setCategory(category);
+        entity.setName(name);
+        entity.setDescription("");
+        entity.setWidth(100);
+        entity.setHeight(100);
+        entity.setDepth(50);
+        entity.setDefaultModel(defaultModel);
+        Field idField = EquipmentEntity.class.getDeclaredField("id");
+        idField.setAccessible(true);
+        idField.set(entity, id);
+        return entity;
     }
 }

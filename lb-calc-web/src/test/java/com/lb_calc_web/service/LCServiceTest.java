@@ -62,14 +62,30 @@ class LCServiceTest {
     }
 
     @Test
-    void createLC_shouldBuildFunctionalConfigurationWithoutImplicitHardware() {
+    void createLC_shouldBuildFunctionalConfigurationAndSelectDefaultEquipment() {
+        Equipment display = new Equipment(
+                701L, EquipmentFunctionalType.DISPLAY, DisplayPurpose.INCH_10,
+                EquipmentCategory.DISPLAY, "Дисплей 10", "", 300, 180, 30);
+        Equipment rfid = new Equipment(
+                702L, EquipmentFunctionalType.ACCESS, AccessPurpose.RFID,
+                EquipmentCategory.RFID_READER, "RFID", "", 100, 50, 30);
+        doAnswer(invocation -> {
+            ControlConfiguration configuration = invocation.getArgument(0);
+            configuration.configureEquipment(
+                    configuration.getFunctionalConfiguration(),
+                    List.of(display, rfid),
+                    Set.of(display, rfid));
+            return null;
+        }).when(equipmentCatalogService).configureFunctionalEquipment(any(ControlConfiguration.class));
+
         LC domain = service.createLC();
         var functional = domain.getControlConfiguration().getFunctionalConfiguration();
 
         assertEquals(DisplayPurpose.INCH_10, functional.getDisplay());
         assertEquals(Set.of(AccessPurpose.RFID), functional.getAccess());
-        assertEquals(0, domain.getEquipment().size());
+        assertEquals(Map.of(display, 1, rfid, 1), domain.getEquipment());
         assertEquals(500, domain.getWidth());
+        verify(equipmentCatalogService).configureFunctionalEquipment(domain.getControlConfiguration());
     }
 
     @Test
