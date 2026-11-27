@@ -5,6 +5,8 @@ import com.lb_calc_web.dto.CreateEmployeeDTO;
 import com.lb_calc_web.dto.EmployeeDTO;
 import com.lb_calc_web.dto.ProfileDTO;
 import com.lb_calc_web.domain.attributes.Role;
+import com.lb_calc_web.domain.model.Employee;
+import com.lb_calc_web.mapper.dto.EmployeeDtoMapper;
 import com.lb_calc_web.service.AuthService;
 import com.lb_calc_web.service.EmployeeCatalogFilter;
 import com.lb_calc_web.service.EmployeeService;
@@ -56,8 +58,7 @@ public class EmployeeController {
     @GetMapping("/myprofile")
     public String myProfile(Model model) {
 
-        EmployeeDTO employee =
-                employeeService.getCurrentEmployee();
+        EmployeeDTO employee = EmployeeDtoMapper.toDto(employeeService.getCurrentEmployee());
 
         model.addAttribute(
                 "employee",
@@ -259,8 +260,7 @@ public class EmployeeController {
             Model model
     ) {
 
-        ProfileDTO user =
-                employeeService.getProfileById(id);
+        ProfileDTO user = EmployeeDtoMapper.toProfileDto(employeeService.getProfileById(id));
 
         model.addAttribute(
                 "employee",
@@ -307,7 +307,7 @@ public class EmployeeController {
         model.addAttribute("employees", result.getContent());
         model.addAttribute("filters", filter);
         model.addAttribute("employeeStatuses", employeeService.getActiveStatuses(
-                result.getContent().stream().map(ProfileDTO::getId).toList()));
+                result.getContent().stream().map(Employee::getId).toList()));
         CatalogPageSupport.addModelAttributes(model, result, pageable, "/employees",
                 CatalogPageSupport.sortOptions("id", "ID", "firstName", "Имя",
                         "lastName", "Фамилия", "email", "Электронная почта",
@@ -440,8 +440,7 @@ public class EmployeeController {
             Model model
     ) {
 
-        EmployeeDTO user =
-                employeeService.loadUserById(id);
+        EmployeeDTO user = EmployeeDtoMapper.toDto(employeeService.loadUserById(id));
 
         model.addAttribute(
                 "employee",
@@ -500,8 +499,7 @@ public class EmployeeController {
             return "employees/employee";
         }
 
-        EmployeeDTO employee =
-                employeeService.loadUserById(id);
+        Employee employee = employeeService.loadUserById(id);
 
         if (!employee.getEmail().equals(
                 employeeUpd.getEmail()
@@ -521,27 +519,16 @@ public class EmployeeController {
             return "employees/employee";
         }
 
-        employee.setFirstName(
-                employeeUpd.getFirstName()
-        );
-
-        employee.setLastName(
-                employeeUpd.getLastName()
-        );
-
-        employee.setEmail(
+        employee.changePersonalData(
+                employeeUpd.getFirstName(),
+                employeeUpd.getLastName(),
                 employeeUpd.getEmail()
         );
+        employee.changeRole(employeeUpd.getRole());
 
-        employee.setRole(
-                employeeUpd.getRole()
-        );
+        Employee saved = employeeService.save(employee);
 
-        EmployeeDTO saved =
-                employeeService.save(employee);
-
-        return "redirect:/employees/" +
-                saved.getId();
+        return "redirect:/employees/" + saved.getId();
     }
 
     private void validatePasswordConfirmation(
