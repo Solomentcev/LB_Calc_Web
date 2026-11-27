@@ -91,6 +91,6 @@ class ProjectDomainTest {
                 + lbcConfiguration.getModules().size();
         assertTrue(first.getDescription().contains(
                 "Всего: 3 АКХ, 15 ячеек, " + totalModules));
-        assertTrue(!first.getDescription().contains("\\n\\n"));
+        assertTrue(!first.getDescription().contains("\n\n"));
     }
 }
