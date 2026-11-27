@@ -8,6 +8,7 @@
 <main class="container module-editor">
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb mb-0" th:if="${pageContext == 'PROJECT'}">
+            <li class="breadcrumb-item"><a th:href="@{/projects}">Проекты</a></li>
             <li class="breadcrumb-item">
                 <a th:href="@{/projects/{id}(id=${projectId})}"
                    th:text="|${project.name} (ID: ${projectId})|">Проект</a>
