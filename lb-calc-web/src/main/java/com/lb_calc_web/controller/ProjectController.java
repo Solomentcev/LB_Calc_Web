@@ -506,7 +506,7 @@ public class ProjectController
             lc.setId(lcId);
             projectService.findLCInProject(projectId, alsId, lcId);
             ALS sourceALS = projectService.findALSInProject(projectId, alsId);
-            LC replacement = alsService.restoreLC(lc, sourceALS);
+            LC replacement = toDomain(lc, sourceALS);
             ALS savedALS = projectService.saveLCAtProject(
                     projectId,
                     alsId,
@@ -636,7 +636,7 @@ public class ProjectController
             lbc.setId(lbcId);
             projectService.findLBCInProject(projectId, alsId, lbcId);
             ALS sourceALS = projectService.findALSInProject(projectId, alsId);
-            LBC replacement = alsService.restoreLBC(lbc, sourceALS);
+            LBC replacement = toDomain(lbc, sourceALS);
             ALS savedALS = projectService.saveLBCAtProject(
                     projectId,
                     alsId,
@@ -752,7 +752,7 @@ public class ProjectController
         try {
             projectService.findLBInProject(projectId, alsId, lbId);
             lb.setId(lbId);
-            LB replacement = alsService.restoreLB(lb);
+            LB replacement = toDomain(lb);
             ALS savedALS = projectService.saveLBAtProject(
                     projectId,
                     alsId,
@@ -988,7 +988,7 @@ public class ProjectController
             for (int index = 0; index < project.getAlsList().size(); index++) {
                 ALSDTO als = project.getAlsList().get(index);
                 try {
-                    project.getAlsList().set(index, toDtoWithImages(alsService.restoreDomain(als)));
+                    project.getAlsList().set(index, toDtoWithImages(toDomain(als)));
                 } catch (ValidationSizeException | IllegalArgumentException | NoSuchElementException exception) {
                     // Для некорректной промежуточной формы изображение не формируется.
                 }
