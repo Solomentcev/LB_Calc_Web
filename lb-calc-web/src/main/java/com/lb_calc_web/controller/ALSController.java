@@ -97,7 +97,6 @@ public class ALSController extends BaseCatalogController {
                 als.setLBC(persisted.getLBC());
             }
 
-            ALSFormSupport.synchronizeFunctionalConfiguration(als, equipmentCatalogService);
             com.lb_calc_web.domain.model.ALS domain = alsService.restoreDomain(als);
             com.lb_calc_web.domain.model.ALS saved = alsService.saveALS(domain);
             return "redirect:/alss/" + saved.getId();
@@ -295,7 +294,6 @@ public class ALSController extends BaseCatalogController {
             throw new NoSuchElementException("LC с id " + lcId + " не найден в ALS " + alsId);
         lc.setId(lcId);
         try {
-            ALSFormSupport.configure(lc, equipmentCatalogService);
             com.lb_calc_web.domain.model.LC replacement = alsService.restoreLC(lc, source);
             source = alsService.replaceLC(source.copy(), replacement);
             lc = toDtoWithImage(replacement);
@@ -369,7 +367,6 @@ public class ALSController extends BaseCatalogController {
         alsService.findLBCInALS(source, lbcId);
         lbc.setId(lbcId);
         try {
-            ALSFormSupport.configure(lbc, equipmentCatalogService);
             com.lb_calc_web.domain.model.LBC replacement = alsService.restoreLBC(lbc, source);
             source = alsService.replaceLBC(source.copy(), replacement);
             lbc = toDtoWithImage(replacement);
