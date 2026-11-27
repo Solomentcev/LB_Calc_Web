@@ -677,5 +677,145 @@
             }
         }
 
+    
+        /*
+         * Единая компоновка верхней части страниц.
+         * Заголовки, хлебные крошки и панели действий остаются в обычном потоке
+         * документа: фиксированные высоты и sticky-смещения приводили к наложениям.
+         */
+        .container > nav[aria-label="breadcrumb"],
+        .editor-page > nav[aria-label="breadcrumb"],
+        .page-title,
+        .page-actions,
+        form > .mb-3:first-child {
+            position: static !important;
+            top: auto !important;
+            z-index: auto;
+            box-shadow: none;
+        }
+
+        .container > nav[aria-label="breadcrumb"],
+        .editor-page > nav[aria-label="breadcrumb"] {
+            margin-bottom: 1rem;
+            padding: 0;
+            background: transparent;
+        }
+
+        .breadcrumb {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: .2rem .35rem;
+            min-width: 0;
+            margin-bottom: 1rem;
+            overflow-wrap: anywhere;
+        }
+
+        .breadcrumb-item {
+            min-width: 0;
+            max-width: 100%;
+            overflow-wrap: anywhere;
+        }
+
+        .page-title,
+        .module-editor__title,
+        .editor-page form > h1 {
+            min-width: 0;
+            max-width: 100%;
+            overflow-wrap: anywhere;
+            word-break: normal;
+        }
+
+        .page-title {
+            margin: 0 0 1rem;
+            padding: 0;
+            line-height: 1.25;
+        }
+
+        .page-actions {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: .5rem;
+            min-width: 0;
+            margin: 0 0 1.25rem;
+            padding: .75rem 0;
+            border-bottom: 1px solid #dee2e6;
+            background: transparent;
+        }
+
+        .page-actions .btn {
+            flex: 0 0 auto;
+            max-width: 100%;
+            margin: 0;
+            white-space: normal;
+            overflow-wrap: anywhere;
+        }
+
+        .page-actions .text-muted {
+            min-width: 0;
+            overflow-wrap: anywhere;
+        }
+
+        .module-editor__heading {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: .75rem 1rem;
+            min-width: 0;
+        }
+
+        .module-editor__heading > div:first-child {
+            flex: 1 1 18rem;
+            min-width: 0;
+        }
+
+        .module-editor__id {
+            max-width: 100%;
+            overflow-wrap: anywhere;
+        }
+
+        .module-editor .module-section__header,
+        .editor-page .card-header {
+            min-width: 0;
+            overflow-wrap: anywhere;
+        }
+
+        .module-editor .module-section__header h2,
+        .module-editor .module-section__header p {
+            max-width: 100%;
+            overflow-wrap: anywhere;
+        }
+
+        .table thead th {
+            position: sticky;
+            top: 0;
+            z-index: 2;
+        }
+
+        @media (max-width: 767.98px) {
+            .page-actions {
+                gap: .4rem;
+                padding: .6rem 0;
+            }
+
+            .page-actions .btn {
+                flex: 0 1 auto;
+            }
+
+            .module-editor__heading {
+                flex-direction: row;
+            }
+
+            .module-editor__title {
+                font-size: 1.4rem;
+            }
+
+            .breadcrumb {
+                padding: .6rem .75rem;
+            }
+        }
+
     </style>
 </head>
