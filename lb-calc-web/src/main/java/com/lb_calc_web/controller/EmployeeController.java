@@ -379,7 +379,10 @@ public class EmployeeController {
         try {
 
             Employee employee = authService.createEmployee(
-                    EmployeeDtoMapper.toDomain(createEmployeeDTO),
+                    createEmployeeDTO.getFirstName(),
+                    createEmployeeDTO.getLastName(),
+                    createEmployeeDTO.getEmail(),
+                    createEmployeeDTO.getRole(),
                     createEmployeeDTO.getPassword(),
                     createEmployeeDTO.getConfirmPassword()
             );
