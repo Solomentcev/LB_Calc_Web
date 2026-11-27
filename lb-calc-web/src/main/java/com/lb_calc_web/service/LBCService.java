@@ -185,9 +185,8 @@ public class LBCService {
         }
     }
 
-    /** Проверяет и сохраняет доменную конфигурацию LBC. */
-    @Transactional
-    public LBC saveLBC(LBC domain) {
+    /** Проверяет комплектацию и геометрию LBC перед сохранением в каталоге или составе ALS. */
+    public void validateForSave(LBC domain) {
         Objects.requireNonNull(domain, "LBC не должен быть null");
         try {
             domain.getControlConfiguration().validateEquipmentRequirements();
@@ -195,13 +194,18 @@ public class LBCService {
             throw createMappingValidationException("LBC", domain.getId(), exception);
         }
 
-        logger.info("Сохранение LBC: id={}, type={}", domain.getId(), domain.getTypeLb().getType());
-
         ValidationResult validationResult = sizeValidator.validateLBC(domain);
         validationResult.setObjectId(domain.getId());
         if (!validationResult.isValid()) {
             throw new ValidationSizeException(validationResult);
         }
+    }
+
+    /** Проверяет и сохраняет доменную конфигурацию LBC. */
+    @Transactional
+    public LBC saveLBC(LBC domain) {
+        validateForSave(domain);
+        logger.info("Сохранение LBC: id={}, type={}", domain.getId(), domain.getTypeLb().getType());
 
         findOrCreateLockService.acquire();
         Optional<LBCEntity> existing = domain.getId() == null
