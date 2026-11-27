@@ -459,10 +459,13 @@ public class ALSService {
                     && !restored.getFunctionalConfiguration().equals(
                     fallback.getFunctionalConfiguration());
             if (equipmentSelectionOmitted || functionalConfigurationChanged) {
-                if (restored.getControlModule() instanceof LC lc) {
+                ControlModule restoredControl = restored.getControlModule();
+                if (restoredControl instanceof LC lc) {
                     lcService.configureFunctionalEquipment(lc);
-                } else if (restored.getControlModule() instanceof LBC lbc) {
+                    restored.setControlConfiguration(lc.getControlConfiguration());
+                } else if (restoredControl instanceof LBC lbc) {
                     lbcService.configureFunctionalEquipment(lbc);
+                    restored.setControlConfiguration(lbc.getControlConfiguration());
                 }
             }
 
