@@ -19,6 +19,7 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 /** Проверяет подбор физической комплектации из каталога оборудования. */
@@ -55,6 +56,50 @@ class EquipmentCatalogServiceTest {
                 selected.keySet().stream().map(Equipment::getName).collect(java.util.stream.Collectors.toSet()));
         assertEquals(Set.of(1), Set.copyOf(selected.values()));
         verify(repository).findAll();
+    }
+
+    @Test
+    void prepareFunctionalEquipment_shouldRestoreCompatibleFallbackWhenSelectionWasNotProvided() {
+        EquipmentRepository repository = mock(EquipmentRepository.class);
+        when(repository.findAll()).thenReturn(List.of());
+        EquipmentCatalogService service = new EquipmentCatalogService(repository);
+
+        Equipment rfid = new Equipment(
+                803L, EquipmentFunctionalType.ACCESS, AccessPurpose.RFID,
+                EquipmentCategory.RFID_READER, "RFID", "", 100, 50, 30);
+        FunctionalConfiguration functional = new FunctionalConfiguration(
+                DisplayPurpose.INCH_10, Set.of(AccessPurpose.RFID),
+                com.lb_calc_web.domain.equipment.PaymentPurpose.NONE,
+                com.lb_calc_web.domain.equipment.PrinterPurpose.ABSENT);
+        ControlConfiguration fallback = new ControlConfiguration(functional, Map.of(rfid, 2));
+        ControlConfiguration submitted = new ControlConfiguration(functional, Map.of());
+
+        ControlConfiguration result =
+                service.prepareFunctionalEquipment(submitted, fallback, false);
+
+        assertEquals(Map.of(rfid, 2), result.getEquipment());
+        verify(repository).findAll();
+    }
+
+    @Test
+    void prepareFunctionalEquipment_shouldNotReplaceExplicitSelectionWhenFunctionsAreUnchanged() {
+        EquipmentRepository repository = mock(EquipmentRepository.class);
+        EquipmentCatalogService service = new EquipmentCatalogService(repository);
+
+        Equipment rfid = new Equipment(
+                804L, EquipmentFunctionalType.ACCESS, AccessPurpose.RFID,
+                EquipmentCategory.RFID_READER, "RFID", "", 100, 50, 30);
+        FunctionalConfiguration functional = new FunctionalConfiguration(
+                DisplayPurpose.INCH_10, Set.of(AccessPurpose.RFID),
+                com.lb_calc_web.domain.equipment.PaymentPurpose.NONE,
+                com.lb_calc_web.domain.equipment.PrinterPurpose.ABSENT);
+        ControlConfiguration submitted = new ControlConfiguration(functional, Map.of(rfid, 3));
+
+        ControlConfiguration result =
+                service.prepareFunctionalEquipment(submitted, null, true);
+
+        assertEquals(Map.of(rfid, 3), result.getEquipment());
+        verifyNoInteractions(repository);
     }
 
     private EquipmentEntity equipment(
