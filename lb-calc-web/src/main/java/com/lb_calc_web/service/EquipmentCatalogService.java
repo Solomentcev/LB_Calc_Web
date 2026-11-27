@@ -6,6 +6,8 @@ import com.lb_calc_web.domain.equipment.AccessPurpose;
 import com.lb_calc_web.domain.equipment.DisplayPurpose;
 import com.lb_calc_web.domain.equipment.PaymentPurpose;
 import com.lb_calc_web.domain.equipment.PrinterPurpose;
+import com.lb_calc_web.domain.model.FunctionalConfiguration;
+import com.lb_calc_web.domain.model.FunctionalConfigurationResolver;
 import com.lb_calc_web.dto.EquipmentDTO;
 import com.lb_calc_web.dto.EquipmentSelectionDTO;
 import com.lb_calc_web.dto.FunctionalConfigurationDTO;
@@ -35,6 +37,8 @@ public class EquipmentCatalogService {
     private static final Logger logger = LoggerFactory.getLogger(EquipmentCatalogService.class);
 
     private final EquipmentRepository equipmentRepository;
+    private final FunctionalConfigurationResolver functionalConfigurationResolver =
+            new FunctionalConfigurationResolver();
 
     public EquipmentCatalogService(EquipmentRepository equipmentRepository) {
         this.equipmentRepository = Objects.requireNonNull(equipmentRepository);
@@ -147,21 +151,10 @@ public class EquipmentCatalogService {
             Equipment item = byId.get(selection.getEquipmentId());
             if (item != null) previous.put(key(item), selection);
         }
-        if (configuration.getAccess() != null && configuration.getAccess().contains(AccessPurpose.PIN)
-                && configuration.getDisplay() == DisplayPurpose.NONE)
-            configuration.setDisplay(DisplayPurpose.INCH_10);
-
-        java.util.LinkedHashSet<String> required = new java.util.LinkedHashSet<>();
-        if (configuration.getDisplay() != null && configuration.getDisplay() != DisplayPurpose.NONE)
-            required.add("DISPLAY:" + configuration.getDisplay().name());
-        if (configuration.getAccess() != null) configuration.getAccess().stream()
-                .filter(p -> p != AccessPurpose.PIN).sorted()
-                .forEach(p -> required.add("ACCESS:" + p.name()));
-        PaymentPurpose payment = configuration.getPayment();
-        if (payment == PaymentPurpose.CARDS || payment == PaymentPurpose.CARDS_AND_CASH) required.add("PAYMENT:CARDS");
-        if (payment == PaymentPurpose.CASH || payment == PaymentPurpose.CARDS_AND_CASH) required.add("PAYMENT:CASH");
-        if (configuration.getPrinter() != null && configuration.getPrinter() != PrinterPurpose.ABSENT)
-            required.add("PRINTER:" + configuration.getPrinter().name());
+        FunctionalConfiguration normalized = functionalConfigurationResolver.normalize(
+                toDomain(configuration));
+        configuration.setDisplay(normalized.getDisplay());
+        java.util.LinkedHashSet<String> required = requiredKeys(normalized);
         previous.forEach((key, selection) -> {
             Equipment item = byId.get(selection.getEquipmentId());
             if (item != null && item.getFunctionalType() == EquipmentFunctionalType.SYSTEM) required.add(key);
@@ -188,6 +181,26 @@ public class EquipmentCatalogService {
         return result;
     }
 
+    /** Преобразует транспортные функциональные назначения в доменную конфигурацию. */
+    private FunctionalConfiguration toDomain(FunctionalConfigurationDTO dto) {
+        Objects.requireNonNull(dto, "Функциональная конфигурация не должна быть null");
+        return new FunctionalConfiguration(
+                dto.getDisplay() == null ? DisplayPurpose.NONE : dto.getDisplay(),
+                dto.getAccess() == null ? java.util.Set.of() : dto.getAccess(),
+                dto.getPayment() == null ? PaymentPurpose.NONE : dto.getPayment(),
+                dto.getPrinter() == null ? PrinterPurpose.ABSENT : dto.getPrinter()
+        );
+    }
+
+    /** Получает ключи физических назначений из доменного резолвера. */
+    private java.util.LinkedHashSet<String> requiredKeys(FunctionalConfiguration configuration) {
+        java.util.LinkedHashSet<String> result = new java.util.LinkedHashSet<>();
+        functionalConfigurationResolver.resolveRequiredEquipment(configuration)
+                .forEach((type, purposes) -> purposes.forEach(
+                        purpose -> result.add(type.name() + ":" + purpose)));
+        return result;
+    }
+
     /** Формирует ключ функционального назначения модели оборудования. */
     private String key(Equipment item) {
         return item.getFunctionalType().name() + ":" + item.getPurpose().toString();
@@ -201,23 +214,13 @@ public class EquipmentCatalogService {
     public void validateSelections(
             FunctionalConfigurationDTO configuration, List<EquipmentSelectionDTO> selections) {
         Objects.requireNonNull(configuration, "Функциональная конфигурация не должна быть null");
-        if (configuration.getAccess() != null
-                && configuration.getAccess().contains(AccessPurpose.PIN)
-                && configuration.getDisplay() == DisplayPurpose.NONE)
-            configuration.setDisplay(DisplayPurpose.INCH_10);
+        FunctionalConfiguration normalized = functionalConfigurationResolver.normalize(
+                toDomain(configuration));
+        configuration.setDisplay(normalized.getDisplay());
         List<Equipment> catalog = findAll();
         java.util.Map<Long, Equipment> byId = catalog.stream().filter(e -> e.getId() != null)
                 .collect(java.util.stream.Collectors.toMap(Equipment::getId, e -> e));
-        java.util.LinkedHashSet<String> required = new java.util.LinkedHashSet<>();
-        if (configuration.getDisplay() != null && configuration.getDisplay() != DisplayPurpose.NONE)
-            required.add("DISPLAY:" + configuration.getDisplay().name());
-        if (configuration.getAccess() != null) configuration.getAccess().stream()
-                .filter(p -> p != AccessPurpose.PIN).forEach(p -> required.add("ACCESS:" + p.name()));
-        PaymentPurpose payment = configuration.getPayment();
-        if (payment == PaymentPurpose.CARDS || payment == PaymentPurpose.CARDS_AND_CASH) required.add("PAYMENT:CARDS");
-        if (payment == PaymentPurpose.CASH || payment == PaymentPurpose.CARDS_AND_CASH) required.add("PAYMENT:CASH");
-        if (configuration.getPrinter() != null && configuration.getPrinter() != PrinterPurpose.ABSENT)
-            required.add("PRINTER:" + configuration.getPrinter().name());
+        java.util.LinkedHashSet<String> required = requiredKeys(normalized);
 
         java.util.Set<String> received = new java.util.HashSet<>();
         if (selections != null) for (EquipmentSelectionDTO selection : selections) {
