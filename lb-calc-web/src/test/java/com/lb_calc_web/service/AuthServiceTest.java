@@ -243,10 +243,8 @@ class AuthServiceTest {
         DataIntegrityViolationException thrown = org.junit.jupiter.api.Assertions.assertThrows(
                 DataIntegrityViolationException.class,
                 () -> authService.createEmployee(
-                    new Employee("Иван", "Иванов", "user@example.com",
-                            java.time.LocalDate.now(), Role.ROLE_MANAGER),
-                    "secret",
-                    "secret")
+                    "Иван", "Иванов", "user@example.com", Role.ROLE_MANAGER,
+                    "secret", "secret")
         );
 
         org.junit.jupiter.api.Assertions.assertSame(violation, thrown);
