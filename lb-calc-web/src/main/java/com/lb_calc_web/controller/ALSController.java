@@ -356,7 +356,7 @@ public class ALSController extends BaseCatalogController {
         lc.setId(lcId);
         try {
             ControlConfiguration fallback = source.getControlModule() instanceof LC
-                    ? als.getControlModule().getControlConfiguration() : null;
+                    ? source.getControlModule().getControlConfiguration() : null;
             LC replacement = LCDtoMapper.toDomain(
                     lc, equipmentCatalogService::findById, fallback, sizeBounds);
             alsService.configureFunctionalEquipment(replacement);
@@ -445,7 +445,7 @@ public class ALSController extends BaseCatalogController {
         lbc.setId(lbcId);
         try {
             ControlConfiguration fallback = source.getControlModule() instanceof LBC
-                    ? als.getControlModule().getControlConfiguration() : null;
+                    ? source.getControlModule().getControlConfiguration() : null;
             LBC replacement = LBCDtoMapper.toDomain(
                     lbc, TypeLbFactory.forLBC(environment, lbc.getType()),
                     equipmentCatalogService::findById, fallback, sizeBounds);
