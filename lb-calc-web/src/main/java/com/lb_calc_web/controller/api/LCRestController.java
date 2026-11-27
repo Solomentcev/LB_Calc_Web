@@ -54,7 +54,13 @@ public class LCRestController {
                 ? lcService.findById(dto.getId()).getControlConfiguration() : null;
         LC restored = LCDtoMapper.toDomain(
                 dto, equipmentCatalogService::findById, fallback, sizeBounds);
-        lcService.configureFunctionalEquipment(restored);
+        boolean selectionOmitted = !dto.isEquipmentProvided() && dto.getSelectedEquipment().isEmpty();
+        boolean functionalChanged = fallback != null
+                && !restored.getControlConfiguration().getFunctionalConfiguration().equals(
+                fallback.getFunctionalConfiguration());
+        if (selectionOmitted || functionalChanged) {
+            lcService.configureFunctionalEquipment(restored);
+        }
         return restored;
     }
 
