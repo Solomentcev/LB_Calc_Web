@@ -91,7 +91,7 @@ static Image createLBImage(
 
         // Двери
         g2d.setColor(
-                lb.getColorDoor().getColor()
+                new Color(lb.getColorDoor().getRgb())
         );
 
         g2d.fillRoundRect(
@@ -105,7 +105,7 @@ static Image createLBImage(
 
         // Корпус
         g2d.setColor(
-                lb.getColorBody().getColor()
+                new Color(lb.getColorBody().getRgb())
         );
 
         // Верхняя рама
