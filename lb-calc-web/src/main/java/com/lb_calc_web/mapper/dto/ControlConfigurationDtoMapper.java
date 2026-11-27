@@ -76,8 +76,10 @@ public final class ControlConfigurationDtoMapper {
         FunctionalConfiguration functional = toFunctionalDomain(functionalDto, fallback);
         Map<Equipment, Integer> equipment = new LinkedHashMap<>();
 
-        if ((selectedEquipment == null || selectedEquipment.isEmpty())
-                && !equipmentProvided && fallback != null) {
+        boolean noSelectedModels = selectedEquipment == null
+                || selectedEquipment.stream().allMatch(
+                selection -> selection == null || selection.getId() == null);
+        if (noSelectedModels && !equipmentProvided && fallback != null) {
             equipment.putAll(fallback.getEquipment());
         } else if (selectedEquipment != null) {
             toEquipmentIds(selectedEquipment).forEach((equipmentId, quantity) -> {
