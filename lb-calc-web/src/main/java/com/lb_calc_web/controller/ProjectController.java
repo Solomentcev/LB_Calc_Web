@@ -44,6 +44,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 /** MVC-контроллер создания, редактирования, сохранения и экспорта проектов. */
 @Controller
