@@ -631,8 +631,8 @@
             padding: .75rem;
         }
         .module-editor__preview .module-visual img {
-            max-width: 220px;
-            max-height: 300px;
+            max-width: 100%;
+            max-height: none;
             object-fit: contain;
         }
         /* Уплотняем блоки параметров, не уменьшая читаемость подписей и полей. */
@@ -663,7 +663,6 @@
         @media (max-width: 991.98px) {
             .module-editor__layout { grid-template-columns: minmax(0, 1fr); }
             .module-editor__preview { position: static; }
-            .module-editor__preview .module-visual img { max-height: 480px; }
         }
 
         .project-editor {
