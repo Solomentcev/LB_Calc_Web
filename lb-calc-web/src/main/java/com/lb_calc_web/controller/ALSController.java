@@ -200,6 +200,12 @@ public class ALSController extends BaseCatalogController {
             model.addAttribute("als", toDtoWithImages(als));
             model.addAttribute("lb", lb);
             return "lbs/lb";
+        } catch (IllegalArgumentException | NoSuchElementException exception) {
+            model.addAttribute("errors", List.of(exception.getMessage()));
+            ALS als = alsService.findById(alsId);
+            model.addAttribute("als", toDtoWithImages(als));
+            model.addAttribute("lb", lb);
+            return "lbs/lb";
         }
     }
 
@@ -358,6 +364,12 @@ public class ALSController extends BaseCatalogController {
             model.addAttribute("als", toDtoWithImages(als));
             prepareLCForm(model, lc);
             return "lcs/lc";
+        } catch (IllegalArgumentException | IllegalStateException | NoSuchElementException exception) {
+            model.addAttribute("errors", List.of(exception.getMessage()));
+            ALS als = alsService.findById(alsId);
+            model.addAttribute("als", toDtoWithImages(als));
+            prepareLCForm(model, lc);
+            return "lcs/lc";
         }
     }
 
@@ -431,6 +443,11 @@ public class ALSController extends BaseCatalogController {
             return "redirect:/alss/" + saved.getId();
         } catch (ValidationSizeException e) {
             model.addAttribute("errors", ValidationErrorFormatter.format(e.getValidationResult()));
+            model.addAttribute("als", toDtoWithImages(alsService.findById(alsId)));
+            prepareLBCForm(model, lbc);
+            return "lbcs/lbc";
+        } catch (IllegalArgumentException | IllegalStateException | NoSuchElementException exception) {
+            model.addAttribute("errors", List.of(exception.getMessage()));
             model.addAttribute("als", toDtoWithImages(alsService.findById(alsId)));
             prepareLBCForm(model, lbc);
             return "lbcs/lbc";
