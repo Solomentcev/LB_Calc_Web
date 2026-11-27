@@ -7,6 +7,7 @@ import com.lb_calc_web.domain.equipment.Equipment;
 import com.lb_calc_web.domain.attributes.DirectionDoorOpening;
 import com.lb_calc_web.domain.attributes.TypeLb;
 import com.lb_calc_web.domain.model.LBC;
+import com.lb_calc_web.domain.model.ControlConfiguration;
 import com.lb_calc_web.dto.LBCDTO;
 
 import java.util.List;
