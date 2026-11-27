@@ -651,7 +651,8 @@ class PersistenceIntegrationTest {
                     projectId,
                     changedALS.getId(),
                     changedLCDTO.getId(),
-                    LCDtoMapper.toDomain(changedLCDTO, equipmentCatalogService::findById, changedALS.getLC().getControlConfiguration(), TestDataFactory.createSizeBounds())
+                    LCDtoMapper.toDomain(changedLCDTO, equipmentCatalogService::findById, changedALS.getLC().getControlConfiguration(), TestDataFactory.createSizeBounds()),
+                    changedLCDTO.isEquipmentProvided()
             );
             var selectedLCEquipment = LCDtoMapper.toDto(changedWithLC.getLC()).getSelectedEquipment();
             assertEquals(1, selectedLCEquipment.size());
@@ -666,7 +667,8 @@ class PersistenceIntegrationTest {
                     projectId,
                     independentAlsId,
                     changedLBCDTO.getId(),
-                    LBCDtoMapper.toDomain(changedLBCDTO, new TypeLb(changedLBCDTO.getType(), changedLBCDTO.getDeltaWidth(), changedLBCDTO.getShelfThick(), changedLBCDTO.getServiceZoneWidth()), equipmentCatalogService::findById, independentConfiguration.getLBC().getControlConfiguration(), TestDataFactory.createSizeBounds())
+                    LBCDtoMapper.toDomain(changedLBCDTO, new TypeLb(changedLBCDTO.getType(), changedLBCDTO.getDeltaWidth(), changedLBCDTO.getShelfThick(), changedLBCDTO.getServiceZoneWidth()), equipmentCatalogService::findById, independentConfiguration.getLBC().getControlConfiguration(), TestDataFactory.createSizeBounds()),
+                    changedLBCDTO.isEquipmentProvided()
             );
             assertEquals(
                     Set.of(AccessPurpose.BAR_CODE),
