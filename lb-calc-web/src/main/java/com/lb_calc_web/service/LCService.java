@@ -239,8 +239,13 @@ public class LCService {
             return toDomain(duplicate.get());
         }
 
-        LCEntity entity = existing.orElseGet(LCEntity::create);
-        LCEntityMapper.updateEntity(domain, entity, this::findEquipmentEntity);
+        LCEntity entity;
+        if (existing.isPresent()) {
+            entity = existing.get();
+            LCEntityMapper.updateEntity(domain, entity, this::findEquipmentEntity);
+        } else {
+            entity = LCEntityMapper.toEntity(domain, this::findEquipmentEntity);
+        }
         LCEntity saved = lcRepository.save(entity);
         domain.setId(saved.getId());
         logger.info("LC сохранён, id={}", saved.getId());
