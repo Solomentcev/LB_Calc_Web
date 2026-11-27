@@ -54,6 +54,7 @@ public class ALSService {
     private final Environment environment;
     private final SizeValidator sizeValidator;
     private final EquipmentRepository equipmentRepository;
+    private final EquipmentCatalogService equipmentCatalogService;
     private final SizeBounds sizeBounds;
 
     public ALSService(
@@ -67,6 +68,7 @@ public class ALSService {
             Environment environment,
             SizeValidator sizeValidator,
             EquipmentRepository equipmentRepository,
+            EquipmentCatalogService equipmentCatalogService,
             SizeBounds sizeBounds
     ) {
         this.alsRepository = Objects.requireNonNull(alsRepository);
@@ -79,6 +81,7 @@ public class ALSService {
         this.environment = Objects.requireNonNull(environment);
         this.sizeValidator = Objects.requireNonNull(sizeValidator);
         this.equipmentRepository = Objects.requireNonNull(equipmentRepository);
+        this.equipmentCatalogService = Objects.requireNonNull(equipmentCatalogService);
         this.sizeBounds = Objects.requireNonNull(sizeBounds);
     }
 
@@ -199,6 +202,13 @@ public class ALSService {
         validate(domain);
         findOrCreateLockService.acquire();
 
+        Optional<ALSEntity> existing = domain.getId() == null
+                ? Optional.empty()
+                : alsRepository.findById(domain.getId());
+        if (domain.getId() != null && existing.isEmpty()) {
+            throw new NoSuchElementException("ALS с id=" + domain.getId() + " не найдена");
+        }
+
         Optional<ALSEntity> duplicate = findDuplicate(domain);
         if (duplicate.isPresent()) {
             domain.setId(duplicate.get().getId());
@@ -206,10 +216,31 @@ public class ALSService {
             return domain;
         }
 
-        ALSEntity saved = alsRepository.save(createEntity(domain));
+        List<ModuleEntity> cache = new ArrayList<>();
+        ALSEntity entity = existing.orElseGet(ALSEntity::new);
+        ALSEntityMapper.updateEntity(domain, entity, module -> resolveModule(module, cache));
+        ALSEntity saved = alsRepository.save(entity);
         domain.setId(saved.getId());
         logger.info("АКХ сохранена: id={}", saved.getId());
         return domain;
+    }
+
+    /** Подбирает и устанавливает физическую комплектацию управляющего модуля ALS. */
+    public void configureFunctionalEquipment(ALS domain) {
+        Objects.requireNonNull(domain, "ALS не должна быть null");
+        ControlConfiguration configuration = domain.getControlModule().getControlConfiguration();
+        equipmentCatalogService.configureFunctionalEquipment(configuration);
+        domain.setControlConfiguration(configuration);
+    }
+
+    /** Подбирает оборудование для LC, входящего в ALS. */
+    public void configureFunctionalEquipment(LC domain) {
+        lcService.configureFunctionalEquipment(domain);
+    }
+
+    /** Подбирает оборудование для LBC, входящего в ALS. */
+    public void configureFunctionalEquipment(LBC domain) {
+        lbcService.configureFunctionalEquipment(domain);
     }
 
     /** Удаляет сохранённую конфигурацию ALS. */
@@ -449,16 +480,9 @@ public class ALSService {
                         domain.getHeight(), domain.getDepth(), domain.getUpperFrame(),
                         domain.getBottomFrame(), domain.getColorBody(), domain.getColorDoor())
                 .stream()
+                .filter(entity -> !Objects.equals(entity.getId(), domain.getId()))
                 .filter(entity -> domain.equals(toDomain(entity)))
                 .findFirst();
-    }
-
-    private ALSEntity createEntity(ALS domain) {
-        List<ModuleEntity> cache = new ArrayList<>();
-        return ALSEntityMapper.toEntity(
-                domain,
-                module -> resolveModule(module, cache)
-        );
     }
 
     private ModuleEntity resolveModule(Module domain, List<ModuleEntity> cache) {
