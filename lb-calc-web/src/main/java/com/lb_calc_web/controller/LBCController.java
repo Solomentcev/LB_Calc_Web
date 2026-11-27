@@ -72,7 +72,9 @@ public class LBCController extends BaseCatalogController {
         model.addAttribute("pageContext", "CATALOG");
         logger.debug("Открытие страницы создания LBC");
 
-        prepareForm(model, LBCDtoMapper.toDto(lbcService.createLBC()));
+        LBC domain = lbcService.restoreDomain(LBCDtoMapper.toDto(lbcService.createLBC()));
+        configureEquipment(domain.getControlConfiguration());
+        prepareForm(model, toDtoWithImage(domain));
 
         return "lbcs/lbc";
     }

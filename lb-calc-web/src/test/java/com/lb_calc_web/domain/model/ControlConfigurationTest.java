@@ -290,7 +290,7 @@ class ControlConfigurationTest {
     void configureEquipment_shouldPreserveSelectionAndFillMissingRequirementsFromDefaults() {
         Equipment selectedRfid = new Equipment(
                 61L, EquipmentFunctionalType.ACCESS, AccessPurpose.RFID,
-                EquipmentCategory.BAR_READER, "Выбранный RFID", "", 0, 0, 0);
+                EquipmentCategory.RFID_READER, "Выбранный RFID", "", 0, 0, 0);
         Equipment defaultDisplay = new Equipment(
                 62L, EquipmentFunctionalType.DISPLAY, DisplayPurpose.INCH_10,
                 EquipmentCategory.DISPLAY, "Дисплей по умолчанию", "", 0, 0, 0);
