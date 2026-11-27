@@ -453,8 +453,8 @@ public class ALSService {
             );
 
             boolean equipmentSelectionOmitted = dto.getLC() != null
-                    ? !dto.getLC().isEquipmentProvided()
-                    : !dto.getLBC().isEquipmentProvided();
+                    ? !dto.getLC().isEquipmentProvided() && dto.getLC().getSelectedEquipment().isEmpty()
+                    : !dto.getLBC().isEquipmentProvided() && dto.getLBC().getSelectedEquipment().isEmpty();
             boolean functionalConfigurationChanged = fallback != null
                     && !restored.getFunctionalConfiguration().equals(
                     fallback.getFunctionalConfiguration());
