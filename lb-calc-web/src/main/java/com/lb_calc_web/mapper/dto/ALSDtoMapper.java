@@ -90,7 +90,6 @@ public final class ALSDtoMapper {
             Function<LBDTO, TypeLb> lbTypeResolver,
             Function<LBCDTO, TypeLb> lbcTypeResolver,
             Function<Long, com.lb_calc_web.domain.equipment.Equipment> equipmentLookup,
-            com.lb_calc_web.domain.model.ControlConfiguration fallbackConfiguration,
             SizeBounds bounds
     ) {
         if (dto == null) {
@@ -109,10 +108,10 @@ public final class ALSDtoMapper {
 
         List<Module> modules = dto.getModuleOrder() == null
                 ? restoreLegacyOrder(
-                        dto, lbTypeResolver, lbcTypeResolver, equipmentLookup, fallbackConfiguration,
+                        dto, lbTypeResolver, lbcTypeResolver, equipmentLookup,
                         bounds)
                 : restoreExplicitOrder(
-                        dto, lbTypeResolver, lbcTypeResolver, equipmentLookup, fallbackConfiguration,
+                        dto, lbTypeResolver, lbcTypeResolver, equipmentLookup,
                         bounds);
 
         ALS domain = new ALS(
@@ -152,7 +151,6 @@ public final class ALSDtoMapper {
             Function<LBDTO, TypeLb> lbTypeResolver,
             Function<LBCDTO, TypeLb> lbcTypeResolver,
             Function<Long, com.lb_calc_web.domain.equipment.Equipment> equipmentLookup,
-            com.lb_calc_web.domain.model.ControlConfiguration fallbackConfiguration,
             SizeBounds bounds
     ) {
         List<LBDTO> lbDtos = dto.getLbList() == null ? List.of() : dto.getLbList();
@@ -165,10 +163,9 @@ public final class ALSDtoMapper {
         }
 
         Module control = dto.getLBC() != null
-                ? LBCDtoMapper.toDomain(dto.getLBC(), lbcTypeResolver.apply(dto.getLBC()), equipmentLookup,
-                        fallbackConfiguration, bounds)
+                ? LBCDtoMapper.toDomain(dto.getLBC(), lbcTypeResolver.apply(dto.getLBC()), equipmentLookup, bounds)
                 : LCDtoMapper.toDomain(
-                        dto.getLC(), equipmentLookup, fallbackConfiguration,
+                        dto.getLC(), equipmentLookup,
                         bounds);
         return insertControlModule(modules, control, dto.getPositionControlModule());
     }
@@ -178,7 +175,6 @@ public final class ALSDtoMapper {
             Function<LBDTO, TypeLb> lbTypeResolver,
             Function<LBCDTO, TypeLb> lbcTypeResolver,
             Function<Long, com.lb_calc_web.domain.equipment.Equipment> equipmentLookup,
-            com.lb_calc_web.domain.model.ControlConfiguration fallbackConfiguration,
             SizeBounds bounds
     ) {
         List<LBDTO> lbDtos = dto.getLbList() == null ? List.of() : dto.getLbList();
@@ -210,7 +206,7 @@ public final class ALSDtoMapper {
                     }
                     controlModuleUsed = true;
                     modules.add(LCDtoMapper.toDomain(
-                            dto.getLC(), equipmentLookup, fallbackConfiguration,
+                            dto.getLC(), equipmentLookup,
                             bounds));
                 }
                 case "LBC" -> {
@@ -219,7 +215,7 @@ public final class ALSDtoMapper {
                     }
                     controlModuleUsed = true;
                     modules.add(LBCDtoMapper.toDomain(
-                            dto.getLBC(), lbcTypeResolver.apply(dto.getLBC()), equipmentLookup, fallbackConfiguration,
+                            dto.getLBC(), lbcTypeResolver.apply(dto.getLBC()), equipmentLookup,
                             bounds));
                 }
                 default -> throw new IllegalStateException(
