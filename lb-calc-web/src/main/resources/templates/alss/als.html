@@ -127,19 +127,21 @@
                                 <input id="als-bottom-frame" class="form-control" type="number"
                                        min="0" th:field="*{bottomFrame}">
                             </div>
-                            <div class="col-md-3 module-field">
-                                <label for="als-body-color">Цвет корпуса</label>
-                                <select id="als-body-color" class="form-control" th:field="*{colorBody}">
-                                    <option th:each="color : ${colorsList}"
-                                            th:value="${color}" th:text="${color}"></option>
-                                </select>
-                            </div>
-                            <div class="col-md-3 module-field">
-                                <label for="als-door-color">Цвет дверей</label>
-                                <select id="als-door-color" class="form-control" th:field="*{colorDoor}">
-                                    <option th:each="color : ${colorsList}"
-                                            th:value="${color}" th:text="${color}"></option>
-                                </select>
+                            <div class="als-color-fields">
+                                <div class="module-field">
+                                    <label for="als-body-color">Цвет корпуса</label>
+                                    <select id="als-body-color" class="form-control" th:field="*{colorBody}">
+                                        <option th:each="color : ${colorsList}"
+                                                th:value="${color}" th:text="${color}"></option>
+                                    </select>
+                                </div>
+                                <div class="module-field">
+                                    <label for="als-door-color">Цвет дверей</label>
+                                    <select id="als-door-color" class="form-control" th:field="*{colorDoor}">
+                                        <option th:each="color : ${colorsList}"
+                                                th:value="${color}" th:text="${color}"></option>
+                                    </select>
+                                </div>
                             </div>
                         </div>
                     </div>
