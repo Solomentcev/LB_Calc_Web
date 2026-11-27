@@ -20,6 +20,42 @@ class ControlConfigurationTest {
     }
 
     @Test
+    void resolver_shouldConvertFunctionalConfigurationToPhysicalEquipmentRequirements() {
+        FunctionalConfigurationResolver resolver = new FunctionalConfigurationResolver();
+        FunctionalConfiguration configuration = functionalConfiguration(
+                DisplayPurpose.NONE,
+                Set.of(AccessPurpose.PIN, AccessPurpose.RFID, AccessPurpose.QR_CODE),
+                PaymentPurpose.CARDS_AND_CASH,
+                PrinterPurpose.PRESENT
+        );
+
+        Map<EquipmentFunctionalType, Set<EquipmentPurpose>> requirements =
+                resolver.resolveRequiredEquipment(configuration);
+
+        assertEquals(Set.of(DisplayPurpose.INCH_10),
+                requirements.get(EquipmentFunctionalType.DISPLAY));
+        assertEquals(Set.of(AccessPurpose.RFID, AccessPurpose.QR_CODE),
+                requirements.get(EquipmentFunctionalType.ACCESS));
+        assertEquals(Set.of(PaymentPurpose.CARDS, PaymentPurpose.CASH),
+                requirements.get(EquipmentFunctionalType.PAYMENT));
+        assertEquals(Set.of(PrinterPurpose.PRESENT),
+                requirements.get(EquipmentFunctionalType.PRINTER));
+        assertFalse(requirements.get(EquipmentFunctionalType.ACCESS).contains(AccessPurpose.PIN));
+    }
+
+    @Test
+    void resolver_shouldNotRequireDisplayWhenPinIsNotSelected() {
+        FunctionalConfigurationResolver resolver = new FunctionalConfigurationResolver();
+        FunctionalConfiguration configuration = functionalConfiguration(
+                DisplayPurpose.NONE, Set.of(AccessPurpose.RFID),
+                PaymentPurpose.NONE, PrinterPurpose.ABSENT
+        );
+
+        assertFalse(resolver.resolveRequiredEquipment(configuration)
+                .containsKey(EquipmentFunctionalType.DISPLAY));
+    }
+
+    @Test
     void shouldKeepFunctionalPurposesIndependentFromInstalledEquipment() {
         FunctionalConfiguration functional = functionalConfiguration(
                 DisplayPurpose.INCH_10,
