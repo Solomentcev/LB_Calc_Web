@@ -450,7 +450,8 @@ return projectRepository.findAllWithUsers()
             Long projectId,
             Long alsId,
             Long lcId,
-            LC replacement
+            LC replacement,
+            boolean equipmentSelectionProvided
     ) {
         Objects.requireNonNull(
                 replacement,
@@ -467,7 +468,9 @@ return projectRepository.findAllWithUsers()
         }
 
         replacement.setId(lcId);
-        alsService.configureFunctionalEquipment(replacement);
+        alsService.prepareFunctionalEquipment(
+                replacement, original.getControlModule().getControlConfiguration(),
+                equipmentSelectionProvided);
         ALS updated = alsService.replaceLC(original.copy(), replacement);
         replaceProjectConfiguration(domain, original, updated);
 
@@ -483,7 +486,8 @@ return projectRepository.findAllWithUsers()
             Long projectId,
             Long alsId,
             Long lbcId,
-            LBC replacement
+            LBC replacement,
+            boolean equipmentSelectionProvided
     ) {
         Objects.requireNonNull(
                 replacement,
@@ -500,7 +504,9 @@ return projectRepository.findAllWithUsers()
         }
 
         replacement.setId(lbcId);
-        alsService.configureFunctionalEquipment(replacement);
+        alsService.prepareFunctionalEquipment(
+                replacement, original.getControlModule().getControlConfiguration(),
+                equipmentSelectionProvided);
         ALS updated = alsService.replaceLBC(original.copy(), replacement);
         replaceProjectConfiguration(domain, original, updated);
 
