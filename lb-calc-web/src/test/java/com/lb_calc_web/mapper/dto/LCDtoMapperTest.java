@@ -49,10 +49,15 @@ class LCDtoMapperTest {
 
         assertEquals(AccessPurpose.RFID,
                 dto.getFunctionalConfiguration().getAccess().iterator().next());
-        assertEquals(1, dto.getSelectedEquipment().size());
-        assertEquals(501L, dto.getSelectedEquipment().get(0).getId());
-        assertEquals("Сканер штрихкода", dto.getSelectedEquipment().get(0).getName());
-        assertEquals(2, dto.getSelectedEquipment().get(0).getQuantity());
+        assertEquals(2, dto.getSelectedEquipment().size());
+        var selectedScanner = dto.getSelectedEquipment().stream()
+                .filter(item -> item.getId() != null)
+                .findFirst().orElseThrow();
+        assertEquals(501L, selectedScanner.getId());
+        assertEquals("Сканер штрихкода", selectedScanner.getName());
+        assertEquals(2, selectedScanner.getQuantity());
+        assertTrue(dto.getSelectedEquipment().stream().anyMatch(item -> item.getId() == null
+                && item.getName().equals("Модель не выбрана")));
     }
     @Test
     void toDomain_shouldPreserveEquipmentWhenSelectionWasNotSubmitted() {
