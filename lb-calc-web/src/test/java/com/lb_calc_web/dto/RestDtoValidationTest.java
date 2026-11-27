@@ -56,4 +56,23 @@ class RestDtoValidationTest {
                 .anyMatch(error -> error.getPropertyPath().toString()
                         .equals("lc.selectedEquipment[0].width")));
     }
+    @Test
+    void project_shouldValidateNestedAlsControlModuleEquipment() {
+        EquipmentDTO equipment = new EquipmentDTO();
+        equipment.setWidth(-1);
+
+        LCDTO lc = new LCDTO();
+        lc.setSelectedEquipment(List.of(equipment));
+
+        ALSDTO als = new ALSDTO();
+        als.setLC(lc);
+
+        ProjectDTO project = new ProjectDTO();
+        project.setAlsList(List.of(als));
+
+        assertTrue(validator.validate(project).stream()
+                .anyMatch(error -> error.getPropertyPath().toString()
+                        .equals("alsList[0].lc.selectedEquipment[0].width")));
+    }
+
 }
