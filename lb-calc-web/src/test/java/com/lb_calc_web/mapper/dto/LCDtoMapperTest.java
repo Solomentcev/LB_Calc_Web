@@ -81,7 +81,7 @@ class LCDtoMapperTest {
                 source.getControlConfiguration().getFunctionalConfiguration(), Map.of(scanner, 1));
 
         LCDTO dto = TestDataFactory.validLCDTO(11L);
-        dto.setEquipmentSelections(null);
+        dto.setEquipment(Map.of());
         dto.setEquipmentProvided(true);
 
         LC restored = LCDtoMapper.toDomain(dto, id -> {
