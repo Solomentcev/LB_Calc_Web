@@ -240,7 +240,7 @@ environment = new MockEnvironment()
         dto.setCreatedAt(java.time.LocalDate.of(2026, 9, 18));
         dto.setUpdatedAt(java.time.LocalDate.of(2026, 9, 18));
         com.lb_calc_web.domain.model.Project project =
-                ProjectDtoMapper.toDomain(dto, alsService::restoreDomain);
+                ProjectDtoMapper.toDomain(dto, TestDataFactory::restoreALS);
 
         assertThrows(
                 AccessDeniedException.class,
