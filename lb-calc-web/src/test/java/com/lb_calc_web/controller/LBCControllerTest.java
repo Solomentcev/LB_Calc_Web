@@ -53,10 +53,9 @@ class LBCControllerTest {
         );
         LBC configured = createLbc(Map.of(display, 1));
 
-        when(lbcService.createLBC()).thenReturn(initial);
+        when(lbcService.createLBC()).thenReturn(configured);
         when(equipmentCatalogService.findAll()).thenReturn(List.of(display));
         when(equipmentCatalogService.findDefaultModels()).thenReturn(Set.of(display));
-        when(lbcService.restoreDomain(any(LBCDTO.class))).thenReturn(configured);
 
         LBCController controller = new LBCController(lbcService, equipmentCatalogService);
         ExtendedModelMap model = new ExtendedModelMap();
