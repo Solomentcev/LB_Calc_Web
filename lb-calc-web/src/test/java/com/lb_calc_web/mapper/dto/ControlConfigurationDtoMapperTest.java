@@ -58,41 +58,6 @@ class ControlConfigurationDtoMapperTest {
     }
 
     @Test
-    void toDomain_shouldRestoreFallbackWhenSelectionWasNotProvided() {
-        var display = new com.lb_calc_web.domain.equipment.Equipment(
-                17L,
-                EquipmentFunctionalType.DISPLAY,
-                DisplayPurpose.INCH_17,
-                com.lb_calc_web.domain.equipment.EquipmentCategory.DISPLAY,
-                "Дисплей 17",
-                "",
-                400,
-                250,
-                30
-        );
-        FunctionalConfiguration functional = new FunctionalConfiguration(
-                DisplayPurpose.INCH_17, Set.of(), PaymentPurpose.NONE, PrinterPurpose.ABSENT);
-        ControlConfiguration fallback = new ControlConfiguration(functional, Map.of(display, 1));
-        EquipmentDTO placeholder = new EquipmentDTO();
-        placeholder.setFunctionalType(EquipmentFunctionalType.DISPLAY);
-        placeholder.setPurpose("INCH_17");
-        placeholder.setName("Модель не выбрана");
-        placeholder.setQuantity(1);
-
-        ControlConfiguration result = ControlConfigurationDtoMapper.toDomain(
-                ControlConfigurationDtoMapper.toFunctionalDto(functional),
-                List.of(placeholder),
-                false,
-                fallback,
-                ignored -> {
-                    throw new AssertionError("Для восстановления fallback каталог вызываться не должен");
-                }
-        );
-
-        assertEquals(Map.of(display, 1), result.getEquipment());
-    }
-
-    @Test
     void toDomain_shouldIgnorePlaceholderRowsWithoutSelectedModelId() {
         FunctionalConfiguration functional = new FunctionalConfiguration(
                 DisplayPurpose.INCH_17, Set.of(), PaymentPurpose.NONE, PrinterPurpose.ABSENT);
@@ -106,7 +71,6 @@ class ControlConfigurationDtoMapperTest {
                 ControlConfigurationDtoMapper.toFunctionalDto(functional),
                 List.of(placeholder),
                 true,
-                null,
                 ignored -> {
                     throw new AssertionError("Для пустого выбора каталог вызываться не должен");
                 }
