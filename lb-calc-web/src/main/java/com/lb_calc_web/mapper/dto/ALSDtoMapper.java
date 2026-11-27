@@ -1,9 +1,10 @@
 package com.lb_calc_web.mapper.dto;
 
+import com.lb_calc_web.service.validation.size.SizeBounds;
+
 import com.lb_calc_web.domain.attributes.PositionControlModule;
 import com.lb_calc_web.domain.attributes.TypeLb;
 import com.lb_calc_web.domain.model.ALS;
-import com.lb_calc_web.domain.model.ModuleGeometryBounds;
 import com.lb_calc_web.domain.model.LB;
 import com.lb_calc_web.domain.model.LBC;
 import com.lb_calc_web.domain.model.LC;
@@ -122,7 +123,7 @@ public final class ALSDtoMapper {
             Function<LBCDTO, TypeLb> lbcTypeResolver,
             Function<Long, com.lb_calc_web.domain.equipment.Equipment> equipmentLookup,
             com.lb_calc_web.domain.model.ControlConfiguration fallbackConfiguration,
-            ModuleGeometryBounds bounds
+            SizeBounds bounds
     ) {
         if (dto == null) {
             return null;
@@ -184,7 +185,7 @@ public final class ALSDtoMapper {
             Function<LBCDTO, TypeLb> lbcTypeResolver,
             Function<Long, com.lb_calc_web.domain.equipment.Equipment> equipmentLookup,
             com.lb_calc_web.domain.model.ControlConfiguration fallbackConfiguration,
-            ModuleGeometryBounds bounds
+            SizeBounds bounds
     ) {
         List<LBDTO> lbDtos = dto.getLbList() == null ? List.of() : dto.getLbList();
         List<Module> modules = new ArrayList<>();
@@ -210,7 +211,7 @@ public final class ALSDtoMapper {
             Function<LBCDTO, TypeLb> lbcTypeResolver,
             Function<Long, com.lb_calc_web.domain.equipment.Equipment> equipmentLookup,
             com.lb_calc_web.domain.model.ControlConfiguration fallbackConfiguration,
-            ModuleGeometryBounds bounds
+            SizeBounds bounds
     ) {
         List<LBDTO> lbDtos = dto.getLbList() == null ? List.of() : dto.getLbList();
         boolean[] usedLbIndexes = new boolean[lbDtos.size()];

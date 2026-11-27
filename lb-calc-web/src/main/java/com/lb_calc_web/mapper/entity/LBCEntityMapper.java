@@ -1,10 +1,11 @@
 package com.lb_calc_web.mapper.entity;
 
+import com.lb_calc_web.service.validation.size.SizeBounds;
+
 import com.lb_calc_web.domain.attributes.TypeLb;
 import com.lb_calc_web.domain.equipment.Equipment;
 import com.lb_calc_web.domain.model.ControlConfiguration;
 import com.lb_calc_web.domain.model.LBC;
-import com.lb_calc_web.domain.model.ModuleGeometryBounds;
 import com.lb_calc_web.domain.model.Module;
 import com.lb_calc_web.dto.LBCDTO;
 import com.lb_calc_web.entity.EquipmentEntity;
@@ -28,7 +29,7 @@ public final class LBCEntityMapper {
     /** Восстанавливает LBC с актуальными настройками физической геометрии. */
     public static LBC toDomain(
             LBCEntity entity,
-            ModuleGeometryBounds bounds
+            SizeBounds bounds
     ) {
         if (entity == null) {
             return null;
@@ -144,7 +145,7 @@ public final class LBCEntityMapper {
     /** Преобразует LBCEntity в DTO с актуальными настройками геометрии. */
     public static LBCDTO toDto(
             LBCEntity entity,
-            ModuleGeometryBounds bounds
+            SizeBounds bounds
     ) {
         if (entity == null) {
             return null;

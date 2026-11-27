@@ -1,5 +1,7 @@
 package com.lb_calc_web.mapper.dto;
 
+import com.lb_calc_web.service.validation.size.SizeBounds;
+
 import com.lb_calc_web.domain.attributes.Colors;
 import com.lb_calc_web.domain.attributes.DirectionDoorOpening;
 import com.lb_calc_web.domain.attributes.TypeLb;
@@ -7,7 +9,6 @@ import com.lb_calc_web.domain.equipment.Equipment;
 import com.lb_calc_web.domain.model.ControlConfiguration;
 import com.lb_calc_web.domain.model.FunctionalConfiguration;
 import com.lb_calc_web.domain.model.LBC;
-import com.lb_calc_web.domain.model.ModuleGeometryBounds;
 import com.lb_calc_web.dto.EquipmentSelectionDTO;
 import com.lb_calc_web.dto.FunctionalConfigurationDTO;
 import com.lb_calc_web.dto.LBCDTO;
@@ -75,7 +76,7 @@ ControlConfiguration configuration = domain.getControlConfiguration();
             TypeLb typeLb,
             Function<Long, Equipment> equipmentLookup,
             ControlConfiguration fallbackConfiguration,
-            ModuleGeometryBounds bounds
+            SizeBounds bounds
     ) {
         if (dto == null) {
             return null;

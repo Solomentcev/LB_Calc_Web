@@ -1,12 +1,11 @@
 package com.lb_calc_web.service.validation.size;
 
-import com.lb_calc_web.domain.model.ModuleGeometryBounds;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /** Конфигурация размерных ограничений и значений по умолчанию модулей. */
 @Component
-public class SizeBounds implements ModuleGeometryBounds {
+public class SizeBounds {
 
     private final int upperFrameMin;
     private final int upperFrameMax;

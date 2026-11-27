@@ -1,12 +1,12 @@
 package com.lb_calc_web.mapper.entity;
 
+import com.lb_calc_web.service.validation.size.SizeBounds;
+
 import com.lb_calc_web.domain.equipment.Equipment;
 import com.lb_calc_web.domain.model.LB;
 import com.lb_calc_web.domain.model.LBC;
-import com.lb_calc_web.domain.model.ModuleGeometryBounds;
 import com.lb_calc_web.domain.model.LC;
 import com.lb_calc_web.domain.model.Module;
-import com.lb_calc_web.domain.model.ModuleGeometryBounds;
 import com.lb_calc_web.entity.EquipmentEntity;
 import com.lb_calc_web.entity.LBEntity;
 import com.lb_calc_web.entity.LBCEntity;
@@ -24,7 +24,7 @@ public final class ModuleEntityMapper {
     }
 
     /** Восстанавливает модуль с настройками геометрии LC и LBC. */
-    public static Module toDomain(ModuleEntity entity, ModuleGeometryBounds bounds) {
+    public static Module toDomain(ModuleEntity entity, SizeBounds bounds) {
         if (entity == null) {
             return null;
         }

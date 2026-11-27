@@ -1,8 +1,9 @@
 package com.lb_calc_web.mapper.entity;
 
+import com.lb_calc_web.service.validation.size.SizeBounds;
+
 import com.lb_calc_web.domain.model.ALS;
 import com.lb_calc_web.domain.model.Module;
-import com.lb_calc_web.domain.model.ModuleGeometryBounds;
 import com.lb_calc_web.entity.ALSEntity;
 import com.lb_calc_web.entity.ALSModuleEntity;
 import com.lb_calc_web.entity.ModuleEntity;
@@ -19,7 +20,7 @@ public final class ALSEntityMapper {
     }
 
     /** Восстанавливает ALS с настройками геометрии LC и LBC. */
-    public static ALS toDomain(ALSEntity entity, ModuleGeometryBounds bounds) {
+    public static ALS toDomain(ALSEntity entity, SizeBounds bounds) {
         Objects.requireNonNull(entity, "ALSEntity не должен быть null");
 
         List<Module> modules = entity.getModules().stream()
