@@ -154,14 +154,6 @@ public class EquipmentCatalogService {
                 .collect(java.util.stream.Collectors.toUnmodifiableSet());
     }
 
-    /** Возвращает доменные модели оборудования, отмеченные в каталоге как используемые по умолчанию. */
-    @Transactional(readOnly = true)
-    public Set<Equipment> findDefaultModels() {
-        return equipmentRepository.findAllByDefaultModelTrue().stream()
-                .map(EquipmentEntityMapper::toDomain)
-                .collect(Collectors.toUnmodifiableSet());
-    }
-
     /** Находит модель оборудования по идентификатору. */
     @Transactional(readOnly = true)
     public Equipment findById(Long id) {
