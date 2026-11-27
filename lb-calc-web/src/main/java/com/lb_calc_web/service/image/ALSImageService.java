@@ -17,7 +17,10 @@ import java.io.IOException;
 import java.util.Base64;
 
 /** Генерирует графическое представление конфигурации ALS. */
-public class ALSImageService {
+public final class ALSImageService {
+
+    private ALSImageService() {
+    }
 
     static Image createALSImage(ALS als) {
         BufferedImage image = new BufferedImage(
