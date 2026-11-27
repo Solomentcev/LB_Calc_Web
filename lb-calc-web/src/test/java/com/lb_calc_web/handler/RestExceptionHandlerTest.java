@@ -1,8 +1,11 @@
 package com.lb_calc_web.handler;
 
+import jakarta.validation.ConstraintViolationException;
 import org.junit.jupiter.api.Test;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
+
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -20,6 +23,15 @@ class RestExceptionHandlerTest {
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         assertEquals("Запрашиваемый объект не найден", response.getBody().message);
         assertFalse(response.getBody().message.contains("Внутренний идентификатор"));
+    }
+
+    @Test
+    void constraintViolation_shouldReturn400() {
+        var response = handler.handleBadRequest(
+                new ConstraintViolationException("Некорректный параметр", Set.of()));
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals("Некорректный запрос", response.getBody().message);
     }
 
     @Test
