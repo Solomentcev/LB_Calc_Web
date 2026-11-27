@@ -152,6 +152,21 @@
                 </div>
                 </div>
 
+                <section class="module-section module-section--als-preview">
+                    <div class="module-section__header">
+                        <h2>Визуализация АКХ</h2>
+                        <p>Общий чертёж текущей конфигурации и взаимного расположения модулей.</p>
+                    </div>
+                    <div class="module-visual module-visual--wide" th:if="${als.stringALSImage != null}">
+                        <img th:src="|data:image/png;base64,${als.stringALSImage}|"
+                             alt="Общий чертёж автоматической камеры хранения">
+                    </div>
+                    <div class="module-section__body text-muted"
+                         th:if="${als.stringALSImage == null}">
+                        Чертёж пока недоступен.
+                    </div>
+                </section>
+
                 <section th:if="${als.LC != null}" class="module-section">
                     <div class="module-section__header">
                         <h2 th:text="|${als.LC.name} (ID: ${als.LC.id})|">Модуль управления LC</h2>
@@ -386,22 +401,6 @@
                     </div>
                 </section>
             </div>
-            <aside class="module-editor__preview">
-                <section class="module-section module-section--als-preview">
-                    <div class="module-section__header">
-                        <h2>Визуализация АКХ</h2>
-                        <p>Общий чертёж текущей конфигурации и взаимного расположения модулей.</p>
-                    </div>
-                    <div class="module-visual module-visual--wide" th:if="${als.stringALSImage != null}">
-                        <img th:src="|data:image/png;base64,${als.stringALSImage}|"
-                             alt="Общий чертёж автоматической камеры хранения">
-                    </div>
-                    <div class="module-section__body text-muted"
-                         th:if="${als.stringALSImage == null}">
-                        Чертёж пока недоступен.
-                    </div>
-                </section>
-            </aside>
         </div>
     </div>
     </div>
