@@ -3,6 +3,8 @@ package com.lb_calc_web.dto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import jakarta.validation.Valid;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -30,12 +32,14 @@ public class ALSDTO {
     /**
      * Обычный модуль управления.
      */
+    @Valid
     private LCDTO lc;
 
     /**
      * Комбинированный модуль.
      * LBC одновременно является storage- и control-модулем.
      */
+    @Valid
     private LBCDTO lbc;
 
     /** Функциональные возможности ALS, синхронизированные с управляющим модулем. */
@@ -57,6 +61,7 @@ public class ALSDTO {
      * <p>LBC хранится отдельно в DTO, но на уровне Domain
      * он также входит в storage-модули ALS.</p>
      */
+    @Valid
     private List<LBDTO> lbList = new ArrayList<>();
 
     /**
@@ -65,6 +70,7 @@ public class ALSDTO {
      * <p>Если поле отсутствует во входном DTO, порядок восстанавливается
      * по прежнему контракту из lbList и positionControlModule.</p>
      */
+    @Valid
     private List<ALSModuleOrderDTO> moduleOrder;
 
     @JsonIgnore
