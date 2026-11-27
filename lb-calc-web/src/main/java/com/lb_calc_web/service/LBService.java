@@ -43,10 +43,10 @@ public class LBService {
             SizeValidator sizeValidator,
             SizeBounds sizeBounds
     ) {
-        this.lbRepository = lbRepository;
-        this.findOrCreateLockService = findOrCreateLockService;
-        this.environment = environment;
-        this.sizeValidator = sizeValidator;
+        this.lbRepository = Objects.requireNonNull(lbRepository);
+        this.findOrCreateLockService = Objects.requireNonNull(findOrCreateLockService);
+        this.environment = Objects.requireNonNull(environment);
+        this.sizeValidator = Objects.requireNonNull(sizeValidator);
         this.sizeBounds = Objects.requireNonNull(sizeBounds);
     }
 
@@ -57,8 +57,8 @@ public class LBService {
                 sizeBounds.getDepthDefault(),
                 sizeBounds.getUpperFrameDefault(),
                 sizeBounds.getBottomFrameDefault(),
-                Colors.Blue,
-                Colors.White
+                requiredColor("lb.color.body.default"),
+                requiredColor("lb.color.door.default")
         );
     }
 
@@ -201,6 +201,10 @@ public class LBService {
         domain.setId(saved.getId());
         logger.info("LB сохранён, id={}", saved.getId());
         return LBEntityMapper.toDomain(saved);
+    }
+
+    private Colors requiredColor(String key) {
+        return Colors.valueOf(environment.getRequiredProperty(key));
     }
 
     private int requiredInt(String key) {
