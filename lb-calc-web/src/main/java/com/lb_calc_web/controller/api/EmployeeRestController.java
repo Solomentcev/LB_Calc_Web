@@ -81,7 +81,10 @@ public class EmployeeRestController {
     ) {
 
             EmployeeDTO employee = EmployeeDtoMapper.toDto(authService.createEmployee(
-                    EmployeeDtoMapper.toDomain(createEmployeeDTO),
+                    createEmployeeDTO.getFirstName(),
+                    createEmployeeDTO.getLastName(),
+                    createEmployeeDTO.getEmail(),
+                    createEmployeeDTO.getRole(),
                     createEmployeeDTO.getPassword(),
                     createEmployeeDTO.getConfirmPassword()
             ));
