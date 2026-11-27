@@ -14,6 +14,7 @@ import com.lb_calc_web.service.ALSService;
 import com.lb_calc_web.service.EquipmentCatalogService;
 import com.lb_calc_web.service.factory.TypeLbFactory;
 import com.lb_calc_web.domain.geometry.SizeBounds;
+import jakarta.validation.constraints.Positive;
 import org.springframework.core.env.Environment;
 import com.lb_calc_web.service.image.ALSImageService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -24,12 +25,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 /** REST-контроллер управления конфигурациями ALS и вложенными модулями. */
 @RestController
+@Validated
 @RequestMapping("/api/v1/alss")
 @PreAuthorize("isAuthenticated()")
 @Tag(
@@ -85,7 +88,7 @@ public class ALSRestController {
     )
     /** Возвращает конфигурацию ALS по идентификатору. */
     public ResponseEntity<?> getALSById(
-            @PathVariable Long id
+            @PathVariable @Positive Long id
     ) {
 
             ALSDTO als = toDto(alsService.findById(id));
@@ -116,7 +119,7 @@ toDto(alsService.createALS())
     )
     /** Создаёт конфигурацию ALS из переданных данных. */
     public ResponseEntity<?> createALS(
-            @RequestBody ALSDTO dto
+            @RequestBody @Valid ALSDTO dto
     ) {
 
             dto.setId(0L);
@@ -149,8 +152,8 @@ toDto(alsService.createALS())
     )
     /** Обновляет сохранённую конфигурацию ALS. */
     public ResponseEntity<?> updateALS(
-            @PathVariable Long id,
-            @RequestBody ALSDTO dto
+            @PathVariable @Positive Long id,
+            @RequestBody @Valid ALSDTO dto
     ) {
 
             dto.setId(id);
@@ -179,7 +182,7 @@ toDto(alsService.createALS())
     )
     /** Удаляет конфигурацию ALS по идентификатору. */
     public ResponseEntity<?> deleteALS(
-            @PathVariable Long id
+            @PathVariable @Positive Long id
     ) {
 
             alsService.deleteALS(id);
@@ -198,8 +201,8 @@ toDto(alsService.createALS())
     @GetMapping("/{alsId}/lbc/{lbcId}")
     @Operation(summary = "Получить LBC ALS")
     public ResponseEntity<?> getLBC(
-            @PathVariable Long alsId,
-            @PathVariable Long lbcId
+            @PathVariable @Positive Long alsId,
+            @PathVariable @Positive Long lbcId
     ) {
 
             ALS als = alsService.findById(alsId);
@@ -217,9 +220,9 @@ toDto(alsService.createALS())
     @PutMapping("/{alsId}/lbc/{lbcId}")
     @Operation(summary = "Обновить LBC ALS")
     public ResponseEntity<?> updateLBC(
-            @PathVariable Long alsId,
-            @PathVariable Long lbcId,
-            @RequestBody LBCDTO lbc
+            @PathVariable @Positive Long alsId,
+            @PathVariable @Positive Long lbcId,
+            @RequestBody @Valid LBCDTO lbc
     ) {
 
             ALS als = alsService.findById(alsId);
@@ -254,7 +257,7 @@ toDto(alsService.createALS())
     @PostMapping("/{alsId}/replace-lbc")
     @Operation(summary = "Заменить управляющий модуль ALS на новый LBC")
     public ResponseEntity<?> replaceWithNewLBC(
-            @PathVariable Long alsId
+            @PathVariable @Positive Long alsId
     ) {
 
             ALS saved = alsService.replaceWithNewLBCandSaveALS(alsId);
@@ -268,7 +271,7 @@ toDto(alsService.createALS())
     @PostMapping("/{alsId}/lb")
     @Operation(summary = "Добавить LB в ALS")
     public ResponseEntity<?> addLB(
-            @PathVariable Long alsId
+            @PathVariable @Positive Long alsId
     ) {
 
             ALSDTO saved = toDto(alsService.addNewLBandSaveALS(alsId));
@@ -283,8 +286,8 @@ toDto(alsService.createALS())
     @DeleteMapping("/{alsId}/lb/{lbId}")
     @Operation(summary = "Удалить LB из ALS")
     public ResponseEntity<?> deleteLB(
-            @PathVariable Long alsId,
-            @PathVariable Long lbId
+            @PathVariable @Positive Long alsId,
+            @PathVariable @Positive Long lbId
     ) {
 
             ALS saved = alsService.deleteLBandSaveALS(alsId, lbId);
