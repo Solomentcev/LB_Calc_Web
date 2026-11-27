@@ -583,7 +583,8 @@ ControlConfiguration fallback = persistedALS.getControlModule().getControlConfig
                     projectId,
                     alsId,
                     lcId,
-                    replacement
+                    replacement,
+                    lc.isEquipmentProvided()
             );
 
             return "redirect:/projects/"
@@ -736,7 +737,8 @@ ControlConfiguration fallback = persistedALS.getControlModule().getControlConfig
                     projectId,
                     alsId,
                     lbcId,
-                    replacement
+                    replacement,
+                    lbc.isEquipmentProvided()
             );
 
             return "redirect:/projects/"
