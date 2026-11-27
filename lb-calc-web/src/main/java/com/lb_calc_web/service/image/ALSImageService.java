@@ -12,7 +12,6 @@ import java.awt.geom.AffineTransform;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.util.Base64;
 
@@ -60,19 +59,6 @@ public final class ALSImageService {
     }
 
     /** Создаёт PNG-файл изображения ALS. */
-    public static File getFileALSImage(ALS als) {
-        BufferedImage image = (BufferedImage) createALSImage(als);
-        File file = new File("src/main/resources/static/alss/als" + als.getId() + ".png");
-        try {
-            file.createNewFile();
-            ImageIO.write(image, "png", file);
-        } catch (IOException exception) {
-            throw new RuntimeException("Не удалось создать файл изображения ALS", exception);
-        }
-        return file;
-    }
-
-    /** Возвращает PNG-изображение ALS в виде массива байтов. */
     public static byte[] getBytesArrayALSImage(ALS als) {
         BufferedImage image = (BufferedImage) createALSImage(als);
         ByteArrayOutputStream output = new ByteArrayOutputStream();
