@@ -399,7 +399,7 @@ ControlConfiguration fallback = persistedALS.getControlModule().getControlConfig
                     fallback,
                     sizeBounds
             );
-            ALS replacement = alsService.prepareConfiguration(persistedALS, restored);
+            ALS replacement = alsService.prepareConfiguration(persistedALS, restored, als.isEquipmentSelectionProvided());
             preview = projectService.previewALSReplacement(projectId, alsId, replacement);
             als = ALSDtoMapper.toDto(replacement);
         } catch (ValidationSizeException exception) {
@@ -443,7 +443,7 @@ ControlConfiguration fallback = persistedALS.getControlModule().getControlConfig
                     fallback,
                     sizeBounds
             );
-            ALS replacement = alsService.prepareConfiguration(persistedALS, restored);
+            ALS replacement = alsService.prepareConfiguration(persistedALS, restored, als.isEquipmentSelectionProvided());
             ALS savedALS = projectService.replaceALSandSaveProject(
                     projectId,
                     alsId,
