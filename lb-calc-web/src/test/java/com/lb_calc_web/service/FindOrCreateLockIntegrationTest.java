@@ -136,8 +136,8 @@ class FindOrCreateLockIntegrationTest {
         secondDto.setColorBody("Red");
         secondDto.setColorDoor("Green");
 
-        LB firstLB = LBDtoMapper.toDomain(firstDto);
-        LB secondLB = LBDtoMapper.toDomain(secondDto);
+        LB firstLB = TestDataFactory.restoreLB(firstDto);
+        LB secondLB = TestDataFactory.restoreLB(secondDto);
 
         CountDownLatch firstLocked = new CountDownLatch(1);
         CountDownLatch secondSnapshotReady = new CountDownLatch(1);
@@ -182,11 +182,7 @@ class FindOrCreateLockIntegrationTest {
     /** Подбирает физические модели каталога для функциональных требований модуля. */
     private void configureEquipment(com.lb_calc_web.domain.model.ControlModule module) {
         var configuration = module.getControlConfiguration();
-        configuration.configureEquipment(
-                configuration.getFunctionalConfiguration(),
-                equipmentCatalogService.findAll(),
-                equipmentCatalogService.findDefaultModels()
-        );
+        equipmentCatalogService.configureFunctionalEquipment(configuration);
         module.setControlConfiguration(configuration);
     }
 
