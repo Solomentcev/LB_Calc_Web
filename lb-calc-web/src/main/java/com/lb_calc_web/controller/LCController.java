@@ -55,7 +55,9 @@ public class LCController extends BaseCatalogController {
         LCDTO lc = toDtoWithImage(domain);
         lc.setId(0L);
 
-        prepareForm(model, lc);
+        model.addAttribute("lc", lc);
+        model.addAttribute("equipmentList", equipmentCatalogService.findAll().stream()
+                .map(EquipmentDtoMapper::toDto).toList());
 
         return "lcs/lc";
     }
@@ -156,10 +158,4 @@ public class LCController extends BaseCatalogController {
         return dto;
     }
 
-    private void prepareForm(Model model, LCDTO lc) {
-        model.addAttribute("lc", lc);
-        var equipmentCatalog = equipmentCatalogService.findAll();
-        model.addAttribute("equipmentList", equipmentCatalog.stream()
-                .map(EquipmentDtoMapper::toDto).toList());
-    }
 }
