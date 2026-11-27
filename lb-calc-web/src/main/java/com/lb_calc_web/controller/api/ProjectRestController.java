@@ -222,7 +222,7 @@ public class ProjectRestController {
                                 fallback,
                                 sizeBounds
                         );
-                        return alsService.prepareConfiguration(existing, restored);
+                        return alsService.prepareConfiguration(existing, restored, dto.isEquipmentSelectionProvided());
                     }
             );
             Project saved = projectService.saveProject(domain);
@@ -324,7 +324,7 @@ public class ProjectRestController {
                     fallback,
                     sizeBounds
             );
-            ALS replacement = alsService.prepareConfiguration(existing, restored);
+            ALS replacement = alsService.prepareConfiguration(existing, restored, dto.isEquipmentSelectionProvided());
             ALS saved = projectService.replaceALSandSaveProject(
                     projectId,
                     alsId,
