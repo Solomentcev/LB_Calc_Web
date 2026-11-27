@@ -170,16 +170,6 @@ public class AuthService {
         return new AuthTokens(accessToken, newRefreshToken);
     }
 
-    /** Проверяет, зарегистрирован ли сотрудник с указанным адресом электронной почты. */
-    public boolean existsByEmail(
-            @NotBlank
-            @Size(max = 50)
-            @Email
-            String email
-    ) {
-        return employeeService.existsByEmail(email);
-    }
-
     /**
      * Регистрирует пользователя с ролью менеджера по умолчанию.
      */
