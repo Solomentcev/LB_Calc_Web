@@ -73,11 +73,11 @@ public final class LCImageService {
             int bottomFrame = toPixels(lc.getBottomFrame());
 
             // Лицевая поверхность дверцы.
-            graphics.setColor(lc.getColorDoor().getColor());
+            graphics.setColor(new Color(lc.getColorDoor().getRgb()));
             graphics.fillRoundRect(x, 0, width, height, 1, 1);
 
             // Верхняя и нижняя рамы корпуса.
-            graphics.setColor(lc.getColorBody().getColor());
+            graphics.setColor(new Color(lc.getColorBody().getRgb()));
             graphics.fillRoundRect(x, 0, width, upperFrame, 1, 1);
             graphics.fillRoundRect(
                     x,
