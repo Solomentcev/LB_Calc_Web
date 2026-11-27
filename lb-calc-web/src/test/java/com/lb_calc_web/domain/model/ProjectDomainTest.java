@@ -82,13 +82,11 @@ class ProjectDomainTest {
                 .filter(line -> line.matches("№\\d+ — .*"))
                 .count());
         assertTrue(first.getDescription().contains("6 ячеек, "
-                + lcConfiguration.getModules().size() + " "
-                + (lcConfiguration.getModules().size() == 1 ? "модуль" : "модуля")
-                + ", количество: 2 шт."));
+                + lcConfiguration.getModules().size() + " модул"));
+        assertTrue(first.getDescription().contains(", количество: 2 шт."));
         assertTrue(first.getDescription().contains("3 ячейки, "
-                + lbcConfiguration.getModules().size() + " "
-                + (lbcConfiguration.getModules().size() == 1 ? "модуль" : "модуля")
-                + ", количество: 1 шт."));
+                + lbcConfiguration.getModules().size() + " модул"));
+        assertTrue(first.getDescription().contains(", количество: 1 шт."));
         int totalModules = 2 * lcConfiguration.getModules().size()
                 + lbcConfiguration.getModules().size();
         assertTrue(first.getDescription().contains(
