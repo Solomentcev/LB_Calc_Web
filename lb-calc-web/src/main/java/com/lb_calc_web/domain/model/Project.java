@@ -494,9 +494,7 @@ public class Project {
 
         builder.append("Всего: ")
                 .append(totalQuantity)
-                .append(" ")
-                .append(formatQuantityWord(totalQuantity, "АКХ", "АКХ", "АКХ"))
-                .append(", ")
+                .append(" АКХ, ")
                 .append(formatCellCount(totalCells))
                 .append(", ")
                 .append(formatModuleCount(totalModules))
