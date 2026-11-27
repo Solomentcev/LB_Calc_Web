@@ -367,9 +367,9 @@ class PersistenceIntegrationTest {
                         .getQuantity()
         );
         assertEquals(Set.of(AccessPurpose.RFID, AccessPurpose.BAR_CODE),
-                restoredLBC.getFunctionalConfiguration().getAccess());
+                restoredLBC.getAccessPurposes());
         assertEquals(PaymentPurpose.NONE,
-                restoredLBC.getFunctionalConfiguration().getPayment());
+                restoredLBC.getPaymentPurpose());
     }
 
     @Test
