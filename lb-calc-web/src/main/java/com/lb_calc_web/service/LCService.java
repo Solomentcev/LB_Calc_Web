@@ -207,9 +207,8 @@ public class LCService {
         }
     }
 
-    /** Проверяет и сохраняет доменную конфигурацию LC. */
-    @Transactional
-    public LC saveLC(LC domain) {
+    /** Проверяет комплектацию и геометрию LC перед сохранением в каталоге или составе ALS. */
+    public void validateForSave(LC domain) {
         Objects.requireNonNull(domain, "LC не должен быть null");
         try {
             domain.getControlConfiguration().validateEquipmentRequirements();
@@ -217,13 +216,18 @@ public class LCService {
             throw createMappingValidationException("LC", domain.getId(), exception);
         }
 
-        logger.info("Сохранение LC: id={}, name={}", domain.getId(), domain.getName());
-
         ValidationResult validationResult = sizeValidator.validateLC(domain);
         validationResult.setObjectId(domain.getId());
         if (!validationResult.isValid()) {
             throw new ValidationSizeException(validationResult);
         }
+    }
+
+    /** Проверяет и сохраняет доменную конфигурацию LC. */
+    @Transactional
+    public LC saveLC(LC domain) {
+        validateForSave(domain);
+        logger.info("Сохранение LC: id={}, name={}", domain.getId(), domain.getName());
 
         findOrCreateLockService.acquire();
         Optional<LCEntity> existing = domain.getId() == null
