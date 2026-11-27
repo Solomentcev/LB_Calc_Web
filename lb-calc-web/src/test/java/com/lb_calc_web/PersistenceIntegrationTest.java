@@ -547,8 +547,8 @@ class PersistenceIntegrationTest {
 
         try {
             Employee employee = EmployeeEntityMapper.toDomain(employeeEntity);
-            ALS repeatedALS = alsService.restoreDomain(TestDataFactory.validALSDTO(null));
-            ALS independentALS = alsService.restoreDomain(TestDataFactory.validLBCALSDTO(null));
+            ALS repeatedALS = restoreAlsDto(TestDataFactory.validALSDTO(null));
+            ALS independentALS = restoreAlsDto(TestDataFactory.validLBCALSDTO(null));
 
             Project requested = new Project(
                     "ProjectService replacement",
@@ -623,7 +623,7 @@ class PersistenceIntegrationTest {
                     projectId,
                     changedALS.getId(),
                     changedLB.getId(),
-                    alsService.restoreLB(changedLBDTO)
+                    LBDtoMapper.toDomain(changedLBDTO, new TypeLb(changedLBDTO.getType(), changedLBDTO.getDeltaWidth(), changedLBDTO.getShelfThick(), changedLBDTO.getServiceZoneWidth()))
             );
 
             Long removedLBId = changedALS.getStorageModules().stream()
@@ -651,7 +651,7 @@ class PersistenceIntegrationTest {
                     projectId,
                     changedALS.getId(),
                     changedLCDTO.getId(),
-                    alsService.restoreLC(changedLCDTO, changedALS)
+                    LCDtoMapper.toDomain(changedLCDTO, equipmentCatalogService::findById, changedALS.getLC().getControlConfiguration(), TestDataFactory.createSizeBounds())
             );
             var selectedLCEquipment = LCDtoMapper.toDto(changedWithLC.getLC()).getSelectedEquipment();
             assertEquals(1, selectedLCEquipment.size());
@@ -666,7 +666,7 @@ class PersistenceIntegrationTest {
                     projectId,
                     independentAlsId,
                     changedLBCDTO.getId(),
-                    alsService.restoreLBC(changedLBCDTO, independentConfiguration)
+                    LBCDtoMapper.toDomain(changedLBCDTO, new TypeLb(changedLBCDTO.getType(), changedLBCDTO.getDeltaWidth(), changedLBCDTO.getShelfThick(), changedLBCDTO.getServiceZoneWidth()), equipmentCatalogService::findById, independentConfiguration.getLBC().getControlConfiguration(), TestDataFactory.createSizeBounds())
             );
             assertEquals(
                     Set.of(AccessPurpose.BAR_CODE),
