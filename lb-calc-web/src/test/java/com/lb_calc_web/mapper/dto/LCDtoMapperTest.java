@@ -50,6 +50,10 @@ class LCDtoMapperTest {
         assertEquals(AccessPurpose.RFID,
                 dto.getFunctionalConfiguration().getAccess().iterator().next());
         assertEquals(Map.of(501L, 2), dto.getEquipment());
+        assertEquals(1, dto.getSelectedEquipment().size());
+        assertEquals(501L, dto.getSelectedEquipment().get(0).getId());
+        assertEquals("Сканер штрихкода", dto.getSelectedEquipment().get(0).getName());
+        assertEquals(2, dto.getSelectedEquipment().get(0).getQuantity());
     }
     @Test
     void toDomain_shouldPreserveEquipmentWhenSelectionWasNotSubmitted() {
