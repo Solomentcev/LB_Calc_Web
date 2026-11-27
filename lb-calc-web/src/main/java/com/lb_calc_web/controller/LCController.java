@@ -106,7 +106,6 @@ public class LCController extends BaseCatalogController {
         );
 
         try {
-            ModuleEquipmentFormSupport.applySelection(lc);
             LC domain = lcService.restoreDomain(lc);
             LC savedLC = lcService.saveLC(domain);
 
