@@ -52,6 +52,8 @@
         <div id="equipment-selection-list">
             <div class="module-equipment-row equipment-selection-row"
                  th:each="selection, selectionStat : *{selectedEquipment}">
+                <input type="hidden" th:field="*{selectedEquipment[__${selectionStat.index}__].functionalType}">
+                <input type="hidden" th:field="*{selectedEquipment[__${selectionStat.index}__].purpose}">
                 <div class="module-field">
                     <label th:for="|equipment-${selectionStat.index}|"
                            th:text="|${selection.functionalType} — ${selection.purpose}|">Назначение</label>
