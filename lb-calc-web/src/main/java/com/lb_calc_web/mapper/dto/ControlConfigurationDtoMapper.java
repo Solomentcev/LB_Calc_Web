@@ -4,8 +4,12 @@ import com.lb_calc_web.domain.equipment.Equipment;
 import com.lb_calc_web.domain.model.ControlConfiguration;
 import com.lb_calc_web.domain.model.FunctionalConfiguration;
 import com.lb_calc_web.dto.FunctionalConfigurationDTO;
+import com.lb_calc_web.dto.EquipmentDTO;
+import com.lb_calc_web.mapper.dto.EquipmentDtoMapper;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -26,6 +30,21 @@ public final class ControlConfigurationDtoMapper {
         dto.setPayment(configuration.getPayment());
         dto.setPrinter(configuration.getPrinter());
         return dto;
+    }
+
+    /**
+     * Преобразует выбранные физические модели в представление с названиями,
+     * характеристиками и количеством для отображения комплектации.
+     */
+    public static List<EquipmentDTO> toEquipmentDetails(ControlConfiguration configuration) {
+        Objects.requireNonNull(configuration, "Конфигурация управляющего модуля не должна быть null");
+        List<EquipmentDTO> result = new ArrayList<>();
+        configuration.getEquipment().forEach((model, quantity) -> {
+            EquipmentDTO dto = EquipmentDtoMapper.toDto(model);
+            dto.setQuantity(quantity);
+            result.add(dto);
+        });
+        return List.copyOf(result);
     }
 
     /** Преобразует физическую комплектацию домена в карту идентификаторов и количеств. */
