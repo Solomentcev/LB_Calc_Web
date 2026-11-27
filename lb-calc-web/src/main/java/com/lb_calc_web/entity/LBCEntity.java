@@ -4,7 +4,6 @@ import com.lb_calc_web.domain.equipment.AccessPurpose;
 import com.lb_calc_web.domain.equipment.DisplayPurpose;
 import com.lb_calc_web.domain.equipment.PaymentPurpose;
 import com.lb_calc_web.domain.equipment.PrinterPurpose;
-import com.lb_calc_web.domain.model.FunctionalConfiguration;
 import jakarta.persistence.*;
 import org.hibernate.annotations.BatchSize;
 
@@ -92,18 +91,41 @@ public class LBCEntity extends StorageModuleEntity {
         return accessSort;
     }
 
-    public FunctionalConfiguration getFunctionalConfiguration() {
-        return new FunctionalConfiguration(
-                displayPurpose, accessPurposes, paymentPurpose, printerPurpose);
+    public DisplayPurpose getDisplayPurpose() {
+        return displayPurpose;
     }
 
-    public void setFunctionalConfiguration(FunctionalConfiguration configuration) {
-        Objects.requireNonNull(configuration, "Функциональная конфигурация LBC не должна быть null");
-        displayPurpose = configuration.getDisplay();
-        accessPurposes.clear();
-        accessPurposes.addAll(configuration.getAccess());
-        paymentPurpose = configuration.getPayment();
-        printerPurpose = configuration.getPrinter();
+    public void setDisplayPurpose(DisplayPurpose displayPurpose) {
+        this.displayPurpose = Objects.requireNonNull(displayPurpose,
+                "Назначение дисплея не должно быть null");
+    }
+
+    public Set<AccessPurpose> getAccessPurposes() {
+        return Set.copyOf(accessPurposes);
+    }
+
+    public void setAccessPurposes(Set<AccessPurpose> accessPurposes) {
+        Objects.requireNonNull(accessPurposes, "Назначения доступа не должны быть null");
+        this.accessPurposes.clear();
+        this.accessPurposes.addAll(accessPurposes);
+    }
+
+    public PaymentPurpose getPaymentPurpose() {
+        return paymentPurpose;
+    }
+
+    public void setPaymentPurpose(PaymentPurpose paymentPurpose) {
+        this.paymentPurpose = Objects.requireNonNull(paymentPurpose,
+                "Назначение оплаты не должно быть null");
+    }
+
+    public PrinterPurpose getPrinterPurpose() {
+        return printerPurpose;
+    }
+
+    public void setPrinterPurpose(PrinterPurpose printerPurpose) {
+        this.printerPurpose = Objects.requireNonNull(printerPurpose,
+                "Назначение принтера не должно быть null");
     }
 
     @Override
@@ -111,7 +133,10 @@ public class LBCEntity extends StorageModuleEntity {
         return "LBCEntity{" +
                 "id=" + getId() +
                 ", name='" + getName() + '\'' +
-                ", functionalConfiguration=" + getFunctionalConfiguration() +
+                ", displayPurpose=" + displayPurpose +
+                ", accessPurposes=" + accessPurposes +
+                ", paymentPurpose=" + paymentPurpose +
+                ", printerPurpose=" + printerPurpose +
                 ", equipment=" + equipment +
                 '}';
     }
