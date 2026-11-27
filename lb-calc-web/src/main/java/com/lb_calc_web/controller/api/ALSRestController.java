@@ -148,7 +148,7 @@ toDto(alsService.createALS())
 
             dto.setId(id);
 
-            ALS savedDomain = alsService.saveALS(alsService.restoreDomain(dto));
+            ALS savedDomain = alsService.saveALS(toDomain(dto));
             ALSDTO saved = toDto(savedDomain);
 
             return ResponseEntity.ok(
