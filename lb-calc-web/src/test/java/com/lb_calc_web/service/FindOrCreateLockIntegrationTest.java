@@ -52,6 +52,9 @@ class FindOrCreateLockIntegrationTest {
     @Autowired
     private LBCService lbcService;
 
+    @Autowired
+    private EquipmentCatalogService equipmentCatalogService;
+
     @Test
     void acquire_shouldSerializeConcurrentTransactions() throws Exception {
         TransactionTemplate transactionTemplate =
@@ -106,8 +109,13 @@ class FindOrCreateLockIntegrationTest {
         ALS lbcAls = alsService.saveALS(
                 alsService.restoreDomain(TestDataFactory.validLBCALSDTO(0L))
         );
-        LC lc = lcService.saveLC(TestDataFactory.validLC(0L));
-        LBC lbc = lbcService.saveLBC(TestDataFactory.validLBC(0L));
+        LC lcDomain = TestDataFactory.validLC(0L);
+        configureEquipment(lcDomain);
+        LC lc = lcService.saveLC(lcDomain);
+
+        LBC lbcDomain = TestDataFactory.validLBC(0L);
+        configureEquipment(lbcDomain);
+        LBC lbc = lbcService.saveLBC(lbcDomain);
 
         assertNotNull(als);
         assertNotNull(lbcAls);
@@ -169,6 +177,17 @@ class FindOrCreateLockIntegrationTest {
             secondSnapshotReady.countDown();
             executor.shutdownNow();
         }
+    }
+
+    /** Подбирает физические модели каталога для функциональных требований модуля. */
+    private void configureEquipment(com.lb_calc_web.domain.model.ControlModule module) {
+        var configuration = module.getControlConfiguration();
+        configuration.configureEquipment(
+                configuration.getFunctionalConfiguration(),
+                equipmentCatalogService.findAll(),
+                equipmentCatalogService.findDefaultModels()
+        );
+        module.setControlConfiguration(configuration);
     }
 
     private void await(CountDownLatch latch) {
