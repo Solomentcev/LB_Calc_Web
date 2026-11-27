@@ -8,11 +8,9 @@ import com.lb_calc_web.domain.model.ControlConfiguration;
 import com.lb_calc_web.domain.model.FunctionalConfiguration;
 import com.lb_calc_web.domain.model.LBC;
 import com.lb_calc_web.domain.model.Module;
-import com.lb_calc_web.dto.LBCDTO;
 import com.lb_calc_web.entity.EquipmentEntity;
 import com.lb_calc_web.entity.EquipmentQuantityEmbeddable;
 import com.lb_calc_web.entity.LBCEntity;
-import com.lb_calc_web.mapper.dto.LBCDtoMapper;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -149,16 +147,5 @@ public final class LBCEntityMapper {
         entity.setEquipment(equipment);
     }
 
-    /** Преобразует LBCEntity в DTO с актуальными настройками геометрии. */
-    public static LBCDTO toDto(
-            LBCEntity entity,
-            SizeBounds bounds
-    ) {
-        if (entity == null) {
-            return null;
-        }
-        LBCDTO dto = LBCDtoMapper.toDto(toDomain(entity, bounds));
-        dto.setId(entity.getId());
-        return dto;
-    }
+
 }
