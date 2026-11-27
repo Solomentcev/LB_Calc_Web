@@ -38,8 +38,7 @@ public final class LCDtoMapper {
         ControlConfiguration configuration = domain.getControlConfiguration();
         dto.setFunctionalConfiguration(ControlConfigurationDtoMapper.toFunctionalDto(
                 configuration.getFunctionalConfiguration()));
-        dto.setEquipment(ControlConfigurationDtoMapper.toEquipmentIds(configuration));
-        dto.setSelectedEquipment(ControlConfigurationDtoMapper.toEquipmentDetails(configuration));
+                dto.setSelectedEquipment(ControlConfigurationDtoMapper.toEquipmentDetails(configuration));
         return dto;
     }
 
@@ -57,7 +56,7 @@ public final class LCDtoMapper {
 
         ControlConfiguration configuration = ControlConfigurationDtoMapper.toDomain(
                 dto.getFunctionalConfiguration(),
-                dto.getEquipment(),
+                dto.getSelectedEquipment(),
                 dto.isEquipmentProvided(),
                 fallbackConfiguration,
                 equipmentLookup
