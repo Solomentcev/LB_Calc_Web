@@ -190,7 +190,7 @@ class ALSServiceTest {
         ALS existing = service.findById(15L);
         var dto = com.lb_calc_web.mapper.dto.ALSDtoMapper.toDto(existing);
         ALS restored = service.prepareConfiguration(existing,
-                restoreAlsDto(dto, existing.getControlModule().getControlConfiguration()), false);
+                restoreAlsDto(dto), false);
 
         assertEquals("Сохранённое название АКХ", restored.getName());
         assertEquals("Сохранённое описание АКХ", restored.getDescription());
