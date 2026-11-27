@@ -102,7 +102,6 @@ public class LBCController extends BaseCatalogController {
     public String refreshLBC(@ModelAttribute("lbc") LBCDTO lbc, Model model) {
         model.addAttribute("pageContext", "CATALOG");
         try {
-            ModuleEquipmentFormSupport.applySelection(lbc);
             LBC domain = lbcService.restoreDomain(lbc);
             lbc = toDtoWithImage(domain);
         } catch (ValidationSizeException exception) {
