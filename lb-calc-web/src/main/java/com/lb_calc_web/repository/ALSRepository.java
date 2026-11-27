@@ -3,8 +3,6 @@ package com.lb_calc_web.repository;
 import com.lb_calc_web.domain.attributes.Colors;
 import com.lb_calc_web.entity.ALSEntity;
 import jakarta.persistence.LockModeType;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Lock;
@@ -16,6 +14,7 @@ import java.util.List;
 /** Репозиторий доступа к сохранённым конфигурациям автоматизированных камер хранения. */
 public interface ALSRepository extends JpaRepository<ALSEntity, Long>, JpaSpecificationExecutor<ALSEntity> {
 
+    /** Находит ALS-кандидаты с совпадающими базовыми габаритами и цветами под блокирующей блокировкой. */
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("""
             select entity
@@ -27,7 +26,6 @@ public interface ALSRepository extends JpaRepository<ALSEntity, Long>, JpaSpecif
               and entity.colorBody = :colorBody
               and entity.colorDoor = :colorDoor
             """)
-    /** Находит ALS-кандидаты с совпадающими базовыми габаритами и цветами под блокирующей блокировкой. */
     List<ALSEntity> findCandidates(
             @Param("height") int height,
             @Param("depth") int depth,
