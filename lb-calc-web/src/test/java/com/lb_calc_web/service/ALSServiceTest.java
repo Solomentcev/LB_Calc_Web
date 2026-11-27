@@ -191,7 +191,8 @@ class ALSServiceTest {
                 com.lb_calc_web.domain.equipment.DisplayPurpose.INCH_19
         );
 
-        ALS restored = service.restoreDomain(dto);
+        ALS restored = service.preserveExistingModules(existing,
+                restoreAlsDto(dto, existing.getControlModule().getControlConfiguration()));
 
         assertEquals("Сохранённое название модуля", restored.getStorageModules().get(0).getName());
         assertEquals("Сохранённое описание модуля", restored.getStorageModules().get(0).getDescription());
