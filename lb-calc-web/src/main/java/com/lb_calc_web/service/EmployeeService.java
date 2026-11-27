@@ -4,6 +4,7 @@ import com.lb_calc_web.dto.EmployeeDTO;
 import com.lb_calc_web.dto.ProfileDTO;
 import com.lb_calc_web.entity.EmployeeEntity;
 import com.lb_calc_web.mapper.entity.EmployeeEntityMapper;
+import com.lb_calc_web.mapper.dto.EmployeeDtoMapper;
 import com.lb_calc_web.repository.EmployeeRepository;
 import com.lb_calc_web.security.EmployeePrincipal;
 import org.slf4j.Logger;
@@ -83,7 +84,7 @@ public class EmployeeService implements UserDetailsService {
                         )
                 );
 
-        return EmployeeEntityMapper.toDto(entity);
+        return EmployeeDtoMapper.toDto(EmployeeEntityMapper.toDomain(entity));
     }
 
     /** Возвращает DTO сотрудника по числовому идентификатору. */
@@ -125,7 +126,7 @@ public class EmployeeService implements UserDetailsService {
                         )
                 );
 
-        return EmployeeEntityMapper.toProfileDto(entity);
+        return EmployeeDtoMapper.toProfileDto(EmployeeEntityMapper.toDomain(entity));
     }
 
     /**
@@ -155,12 +156,12 @@ public class EmployeeService implements UserDetailsService {
                         )
                 );
 
-        EmployeeEntityMapper.updateEntity(employeeDTO, entity);
+        EmployeeEntityMapper.updateEntity(EmployeeDtoMapper.toDomain(employeeDTO), entity);
 
         EmployeeEntity saved =
                 employeeRepository.save(entity);
 
-        return EmployeeEntityMapper.toDto(saved);
+        return EmployeeDtoMapper.toDto(EmployeeEntityMapper.toDomain(saved));
     }
 
     /**
@@ -270,7 +271,7 @@ public class EmployeeService implements UserDetailsService {
                 .orElse((root, query, builder) -> builder.conjunction());
 
         return employeeRepository.findAll(specification, pageable)
-                .map(EmployeeEntityMapper::toProfileDto);
+                .map(entity -> EmployeeDtoMapper.toProfileDto(EmployeeEntityMapper.toDomain(entity)));
     }
 
     private void addTextFilter(
@@ -320,7 +321,7 @@ public class EmployeeService implements UserDetailsService {
         );
 
         return entities.stream()
-                .map(EmployeeEntityMapper::toDto)
+                .map(entity -> EmployeeDtoMapper.toDto(EmployeeEntityMapper.toDomain(entity)))
                 .toList();
     }
 
@@ -352,7 +353,7 @@ public class EmployeeService implements UserDetailsService {
      */
     @Transactional(readOnly = true)
     public EmployeeDTO getCurrentEmployee() {
-        return EmployeeEntityMapper.toDto(getCurrentEmployeeEntity());
+        return EmployeeDtoMapper.toDto(EmployeeEntityMapper.toDomain(getCurrentEmployeeEntity()));
     }
 
     /**
