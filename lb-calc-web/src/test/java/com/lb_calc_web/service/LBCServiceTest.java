@@ -4,7 +4,6 @@ import com.lb_calc_web.TestDataFactory;
 import com.lb_calc_web.domain.equipment.AccessPurpose;
 import com.lb_calc_web.domain.equipment.DisplayPurpose;
 import com.lb_calc_web.domain.model.LBC;
-import com.lb_calc_web.dto.EquipmentSelectionDTO;
 import com.lb_calc_web.dto.LBCDTO;
 import com.lb_calc_web.entity.LBCEntity;
 import com.lb_calc_web.entity.EquipmentEntity;
@@ -87,7 +86,7 @@ class LBCServiceTest {
         id.set(equipmentEntity, 72L);
         when(equipmentRepository.findById(72L)).thenReturn(Optional.of(equipmentEntity));
         LBCDTO dto = TestDataFactory.validLBCDTO(null);
-        dto.setEquipmentSelections(List.of(new EquipmentSelectionDTO(72L, 3)));
+        dto.setEquipment(Map.of(72L, 3));
 
         LBC restored = service.restoreDomain(dto);
 

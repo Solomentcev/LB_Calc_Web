@@ -8,7 +8,6 @@ import com.lb_calc_web.domain.equipment.EquipmentCategory;
 import com.lb_calc_web.domain.equipment.EquipmentFunctionalType;
 import com.lb_calc_web.domain.model.ControlConfiguration;
 import com.lb_calc_web.domain.model.LC;
-import com.lb_calc_web.dto.EquipmentSelectionDTO;
 import com.lb_calc_web.dto.LCDTO;
 import com.lb_calc_web.entity.EquipmentEntity;
 import com.lb_calc_web.entity.LCEntity;
@@ -81,7 +80,7 @@ class LCServiceTest {
         id.set(equipmentEntity, 71L);
         when(equipmentRepository.findById(71L)).thenReturn(Optional.of(equipmentEntity));
         LCDTO dto = TestDataFactory.validLCDTO(null);
-        dto.setEquipmentSelections(List.of(new EquipmentSelectionDTO(71L, 2)));
+        dto.setEquipment(Map.of(71L, 2));
 
         LC restored = service.restoreDomain(dto);
 
@@ -100,7 +99,7 @@ class LCServiceTest {
         );
         LCDTO dto = TestDataFactory.validLCDTO(17L);
         dto.setFunctionalConfiguration(null);
-        dto.setEquipmentSelections(null);
+        dto.setEquipment(null);
 
         LC restored = service.restoreDomain(dto, fallback);
 
@@ -123,7 +122,7 @@ class LCServiceTest {
         functional.setPayment(com.lb_calc_web.domain.equipment.PaymentPurpose.NONE);
         functional.setPrinter(com.lb_calc_web.domain.equipment.PrinterPurpose.ABSENT);
         dto.setFunctionalConfiguration(functional);
-        dto.setEquipmentSelections(null);
+        dto.setEquipment(null);
 
         LC restored = service.restoreDomain(dto, fallback);
 
@@ -143,7 +142,7 @@ class LCServiceTest {
         );
         LCDTO dto = TestDataFactory.validLCDTO(19L);
         dto.setFunctionalConfiguration(new com.lb_calc_web.dto.FunctionalConfigurationDTO());
-        dto.setEquipmentSelections(null);
+        dto.setEquipment(null);
 
         LC restored = service.restoreDomain(dto, fallback);
 
@@ -162,7 +161,7 @@ class LCServiceTest {
                 Map.of(equipment, 1)
         );
         LCDTO dto = TestDataFactory.validLCDTO(18L);
-        dto.setEquipmentSelections(List.of());
+        dto.setEquipment(Map.of());
 
         LC restored = service.restoreDomain(dto, fallback);
 
