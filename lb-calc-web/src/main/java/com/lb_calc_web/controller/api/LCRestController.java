@@ -13,14 +13,17 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import jakarta.validation.constraints.Positive;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 /** REST-контроллер операций с управляющими модулями LC. */
 @RestController
+@Validated
 @RequestMapping("/api/v1/lcs")
 @PreAuthorize("isAuthenticated()")
 @Tag(
@@ -71,7 +74,7 @@ public class LCRestController {
     )
     public ResponseEntity<?> getLCById(
             @Parameter(description = "Идентификатор LC", example = "1")
-            @PathVariable Long id
+            @PathVariable @Positive Long id
     ) {
         logger.debug("GET /api/v1/lcs/{}", id);
         LCDTO lc = LCDtoMapper.toDto(lcService.findById(id));
@@ -100,7 +103,7 @@ public class LCRestController {
             summary = "Сохранить LC",
             description = "Проверяет и сохраняет модуль управления LC"
     )
-    public ResponseEntity<?> saveLC(@RequestBody LCDTO dto) {
+    public ResponseEntity<?> saveLC(@RequestBody @Valid LCDTO dto) {
         logger.debug(
                 "POST /api/v1/lcs: display={}",
                 dto != null && dto.getFunctionalConfiguration() != null
