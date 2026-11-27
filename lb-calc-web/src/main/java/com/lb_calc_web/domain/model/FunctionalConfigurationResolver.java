@@ -115,6 +115,58 @@ public final class FunctionalConfigurationResolver {
         return Collections.unmodifiableMap(result);
     }
 
+    /**
+     * Оставляет оборудование, совместимое с функциональной конфигурацией.
+     * Системное оборудование не относится к функциональным назначениям и сохраняется отдельно.
+     */
+    public Map<Equipment, Integer> retainRequiredEquipment(
+            FunctionalConfiguration configuration,
+            Map<Equipment, Integer> equipment
+    ) {
+        Map<EquipmentFunctionalType, Set<EquipmentPurpose>> requirements =
+                resolveRequiredEquipment(configuration);
+        Map<Equipment, Integer> retained = new LinkedHashMap<>();
+        equipment.forEach((model, quantity) -> {
+            if (model.getFunctionalType() == EquipmentFunctionalType.SYSTEM
+                    || requirements.getOrDefault(model.getFunctionalType(), Set.of()).stream()
+                    .anyMatch(purpose -> supportsRequirement(model, purpose))) {
+                retained.put(model, quantity);
+            }
+        });
+        return Collections.unmodifiableMap(retained);
+    }
+
+    /** Возвращает назначения, для которых в выбранной комплектации нет подходящей модели. */
+    public Map<EquipmentFunctionalType, Set<EquipmentPurpose>> findMissingRequirements(
+            FunctionalConfiguration configuration,
+            Map<Equipment, Integer> equipment
+    ) {
+        Map<EquipmentFunctionalType, Set<EquipmentPurpose>> missing = new LinkedHashMap<>();
+        resolveRequiredEquipment(configuration).forEach((type, purposes) -> {
+            Set<EquipmentPurpose> absent = purposes.stream()
+                    .filter(required -> equipment.keySet().stream()
+                            .noneMatch(model -> model.getFunctionalType() == type
+                                    && supportsRequirement(model, required)))
+                    .collect(Collectors.toCollection(LinkedHashSet::new));
+            if (!absent.isEmpty()) {
+                missing.put(type, Collections.unmodifiableSet(absent));
+            }
+        });
+        return Collections.unmodifiableMap(missing);
+    }
+
+    /**
+     * Проверяет, покрывает ли физическая модель указанное функциональное требование.
+     * Комбинированная платёжная модель закрывает требования и для карт, и для наличных.
+     */
+    public boolean supportsRequirement(Equipment model, EquipmentPurpose requiredPurpose) {
+        if (model.getFunctionalType() == EquipmentFunctionalType.PAYMENT
+                && model.getPurpose() == PaymentPurpose.CARDS_AND_CASH) {
+            return requiredPurpose == PaymentPurpose.CARDS || requiredPurpose == PaymentPurpose.CASH;
+        }
+        return model.getPurpose().equals(requiredPurpose);
+    }
+
     /** Добавляет требование к физическому оборудованию. */
     private void addRequirement(
             Map<EquipmentFunctionalType, Set<EquipmentPurpose>> requirements,
