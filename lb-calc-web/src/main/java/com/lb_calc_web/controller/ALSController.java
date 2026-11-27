@@ -87,17 +87,11 @@ public class ALSController extends BaseCatalogController {
                 als.setLC(persisted.getLC());
                 als.setLBC(persisted.getLBC());
             }
-            ControlConfiguration fallback = existing == null ? null
-                    : existing.getControlModule().getControlConfiguration();
-            if (fallback != null) {
-                fallback.setFunctionalConfiguration(existing.getFunctionalConfiguration());
-            }
             ALS restored = ALSDtoMapper.toDomain(
                     als,
                     candidate -> TypeLbFactory.forLB(environment, candidate.getType()),
                     candidate -> TypeLbFactory.forLBC(environment, candidate.getType()),
                     equipmentCatalogService::findById,
-                    fallback,
                     sizeBounds
             );
             restored = alsService.prepareConfiguration(existing, restored, als.isEquipmentSelectionProvided());
@@ -325,10 +319,8 @@ public class ALSController extends BaseCatalogController {
             }
             lc.setId(lcId);
 
-            ControlConfiguration fallback = als.getControlModule() instanceof LC
-                    ? als.getControlModule().getControlConfiguration() : null;
             LC replacement = LCDtoMapper.toDomain(
-                    lc, equipmentCatalogService::findById, fallback, sizeBounds);
+                    lc, equipmentCatalogService::findById, sizeBounds);
             com.lb_calc_web.domain.model.ALS saved =
                     alsService.replaceLCandSaveALS(als, replacement, lc.isEquipmentProvided());
             return "redirect:/alss/" + saved.getId();
@@ -363,11 +355,9 @@ public class ALSController extends BaseCatalogController {
             throw new NoSuchElementException("LC с id " + lcId + " не найден в ALS " + alsId);
         lc.setId(lcId);
         try {
-            ControlConfiguration fallback = source.getControlModule() instanceof LC
-                    ? source.getControlModule().getControlConfiguration() : null;
             LC replacement = LCDtoMapper.toDomain(
-                    lc, equipmentCatalogService::findById, fallback, sizeBounds);
-            alsService.prepareForReplacement(replacement, fallback, lc.isEquipmentProvided());
+                    lc, equipmentCatalogService::findById, sizeBounds);
+            alsService.prepareForReplacement(source, replacement, lc.isEquipmentProvided());
             source = alsService.replaceLC(source.copy(), replacement);
             lc = toDtoWithImage(replacement);
         } catch (ValidationSizeException exception) {
@@ -419,11 +409,9 @@ public class ALSController extends BaseCatalogController {
             com.lb_calc_web.domain.model.ALS als = alsService.findById(alsId);
             lbc.setId(lbcId);
 
-            ControlConfiguration fallback = als.getControlModule() instanceof LBC
-                    ? als.getControlModule().getControlConfiguration() : null;
             LBC replacement = LBCDtoMapper.toDomain(
                     lbc, TypeLbFactory.forLBC(environment, lbc.getType()),
-                    equipmentCatalogService::findById, fallback, sizeBounds);
+                    equipmentCatalogService::findById, sizeBounds);
             com.lb_calc_web.domain.model.ALS saved =
                     alsService.replaceLBCandSaveALS(als, replacement, lbc.isEquipmentProvided());
             return "redirect:/alss/" + saved.getId();
@@ -455,12 +443,10 @@ public class ALSController extends BaseCatalogController {
         alsService.findLBCInALS(source, lbcId);
         lbc.setId(lbcId);
         try {
-            ControlConfiguration fallback = source.getControlModule() instanceof LBC
-                    ? source.getControlModule().getControlConfiguration() : null;
             LBC replacement = LBCDtoMapper.toDomain(
                     lbc, TypeLbFactory.forLBC(environment, lbc.getType()),
-                    equipmentCatalogService::findById, fallback, sizeBounds);
-            alsService.prepareForReplacement(replacement, fallback, lbc.isEquipmentProvided());
+                    equipmentCatalogService::findById, sizeBounds);
+            alsService.prepareForReplacement(source, replacement, lbc.isEquipmentProvided());
             source = alsService.replaceLBC(source.copy(), replacement);
             lbc = toDtoWithImage(replacement);
         } catch (ValidationSizeException exception) {
