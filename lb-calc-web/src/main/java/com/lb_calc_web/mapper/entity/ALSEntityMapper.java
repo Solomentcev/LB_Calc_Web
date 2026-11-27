@@ -42,7 +42,12 @@ public final class ALSEntityMapper {
 
         // Функциональная конфигурация ALS хранится отдельно и синхронизируется
         // с функциональными назначениями единственного управляющего модуля.
-        domain.setFunctionalConfiguration(entity.getFunctionalConfiguration());
+        domain.setFunctionalConfiguration(new FunctionalConfiguration(
+                entity.getDisplayPurpose(),
+                entity.getAccessPurposes(),
+                entity.getPaymentPurpose(),
+                entity.getPrinterPurpose()
+        ));
 
         domain.setId(entity.getId());
         return ALS.restoreText(
