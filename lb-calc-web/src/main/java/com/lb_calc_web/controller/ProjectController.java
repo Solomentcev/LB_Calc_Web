@@ -169,7 +169,7 @@ public class ProjectController
         populateProjectComposition(project, id);
         try {
             com.lb_calc_web.domain.model.Project domain =
-                    ProjectDtoMapper.toDomain(project, alsService::restoreDomain);
+                    ProjectDtoMapper.toDomain(project, this::toDomain);
             project = ProjectDtoMapper.toDto(projectService.previewProject(domain));
         } catch (ValidationSizeException exception) {
             model.addAttribute("projectErrors",
@@ -199,7 +199,7 @@ public class ProjectController
             com.lb_calc_web.domain.model.Project domain =
                     com.lb_calc_web.mapper.dto.ProjectDtoMapper.toDomain(
                             project,
-                            alsService::restoreDomain
+                            this::toDomain
                     );
             com.lb_calc_web.domain.model.Project saved =
                     projectService.saveProject(domain);
@@ -388,7 +388,7 @@ public class ProjectController
             ALSDTO persisted = ALSDtoMapper.toDto(persistedALS);
             als.setLC(persisted.getLC());
             als.setLBC(persisted.getLBC());
-            ALS replacement = toDomain(als);
+            ALS replacement = toDomain(als, persistedALS);
             ALS savedALS = projectService.replaceALSandSaveProject(
                     projectId,
                     alsId,
