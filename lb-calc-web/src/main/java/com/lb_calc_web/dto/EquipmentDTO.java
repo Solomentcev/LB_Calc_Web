@@ -38,6 +38,9 @@ public class EquipmentDTO {
     @Min(value = 0, message = "Глубина не может быть отрицательной")
     private int depth;
 
+    /** Количество выбранных экземпляров; заполняется только в представлении комплектации. */
+    private Integer quantity;
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public EquipmentFunctionalType getFunctionalType() { return functionalType; }
@@ -56,4 +59,6 @@ public class EquipmentDTO {
     public void setHeight(int height) { this.height = height; }
     public int getDepth() { return depth; }
     public void setDepth(int depth) { this.depth = depth; }
+    public Integer getQuantity() { return quantity; }
+    public void setQuantity(Integer quantity) { this.quantity = quantity; }
 }
