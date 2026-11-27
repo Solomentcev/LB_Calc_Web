@@ -10,7 +10,6 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.util.Base64;
 
@@ -156,19 +155,6 @@ public final class LBCImageService {
     }
 
     /** Создаёт PNG-файл изображения LBC. */
-    public static File getFileLBCImage(LBC lbc) {
-        BufferedImage image = createLBCImage(lbc);
-        File file = new File("src/main/resources/static/lbcs/lbc" + lbc.getId() + ".png");
-        try {
-            file.createNewFile();
-            ImageIO.write(image, "png", file);
-        } catch (IOException exception) {
-            throw new IllegalStateException("Не удалось создать изображение LBC", exception);
-        }
-        return file;
-    }
-
-    /** Возвращает PNG-изображение LBC в виде массива байтов. */
     public static byte[] getBytesArrayLBCImage(LBC lbc) {
         BufferedImage image = createLBCImage(lbc);
         ByteArrayOutputStream output = new ByteArrayOutputStream();
