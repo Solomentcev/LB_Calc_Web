@@ -135,7 +135,7 @@ public class EmployeeController {
 
         } catch (IllegalArgumentException exception) {
             model.addAttribute(
-                    "errorMessage",
+                    "error",
                     "Проверьте введённый пароль."
             );
             return "change_password";
@@ -216,7 +216,7 @@ public class EmployeeController {
 
         } catch (IllegalArgumentException exception) {
             model.addAttribute(
-                    "errorMessage",
+                    "error",
                     "Проверьте введённый пароль."
             );
             return "change_passwordEmployee";
