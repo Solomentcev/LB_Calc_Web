@@ -467,6 +467,7 @@ return projectRepository.findAllWithUsers()
         }
 
         replacement.setId(lcId);
+        alsService.configureFunctionalEquipment(replacement);
         ALS updated = alsService.replaceLC(original.copy(), replacement);
         replaceProjectConfiguration(domain, original, updated);
 
@@ -499,6 +500,7 @@ return projectRepository.findAllWithUsers()
         }
 
         replacement.setId(lbcId);
+        alsService.configureFunctionalEquipment(replacement);
         ALS updated = alsService.replaceLBC(original.copy(), replacement);
         replaceProjectConfiguration(domain, original, updated);
 
