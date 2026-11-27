@@ -38,14 +38,14 @@
             </div>
         </div>
 
-        <section class="card mb-4">
-            <div class="card-header">
-                <h1 class="h4 mb-0"
+        <section class="card mb-3">
+            <div class="card-header py-2">
+                <h1 class="h5 mb-0"
                     th:text="${project.id != null and project.id > 0 ? project.name : 'Новый проект'}">
                     Проект
                 </h1>
             </div>
-            <div class="card-body">
+            <div class="card-body py-2">
                 <div class="form-row">
                     <div class="col-md-2 form-group">
                         <label for="project-id">ID</label>
@@ -72,7 +72,7 @@
                     </small>
                 </div>
 
-                <div class="form-row project-editor__metadata">
+                <div class="form-row project-editor__metadata mb-0">
                     <div class="col-md-3 form-group">
                         <label>Создал</label>
                         <input type="text" class="form-control"
@@ -118,70 +118,52 @@
             В проекте пока нет конфигураций АКХ.
         </div>
 
-        <article th:each="als, item : ${project.alsList}" class="card project-als-card mb-3">
-            <div class="card-header d-flex flex-wrap align-items-center justify-content-between">
-                <div>
-                    <div class="text-muted small" th:text="|Конфигурация №${item.count}|">Конфигурация</div>
-                    <div class="d-flex flex-wrap align-items-baseline">
-                        <h3 class="h5 mb-0 mr-2" th:text="${als.name}">Название АКХ</h3>
-                        <span class="text-muted small" th:text="|ID: ${als.id}|">ID АКХ</span>
-                    </div>
+        <article th:each="als, item : ${project.alsList}" class="card project-als-card mb-2">
+            <div class="card-header py-2 d-flex flex-wrap align-items-center justify-content-between">
+                <div class="d-flex flex-wrap align-items-baseline">
+                    <strong class="mr-2" th:text="|№${item.count}|">№1</strong>
+                    <h3 class="h6 mb-0 mr-2" th:text="${als.name}">Название АКХ</h3>
+                    <span class="text-muted small" th:text="|ID: ${als.id}|">ID АКХ</span>
                 </div>
-                <span class="badge badge-secondary project-als-card__quantity"
-                      th:text="|Экземпляров: ${project.quantityALS.get(als)}|">Экземпляров</span>
+                <span class="text-muted small project-als-card__quantity"
+                      th:text="|Количество: ${project.quantityALS.get(als)} шт.|">Количество</span>
             </div>
 
-            <div class="card-body">
+            <div class="card-body py-2">
                 <div class="row">
-                    <div class="col-lg-4 project-als-card__preview"
+                    <div class="col-lg-3 project-als-card__preview"
                          th:if="${als.stringALSImage != null}">
                         <img class="img-thumbnail"
                              th:src="|data:image/png;base64,${als.stringALSImage}|"
                              alt="Чертёж АКХ">
                     </div>
 
-                    <div th:class="${als.stringALSImage != null ? 'col-lg-8' : 'col-12'}">
-                        <p class="mb-3" th:text="${als.description}">Описание АКХ</p>
-
-                        <div class="row project-als-card__metrics">
-                            <div class="col-sm-4">
-                                <span class="text-muted small">Габариты, В × Ш × Г</span>
-                                <strong th:text="|${als.height} × ${als.width} × ${als.depth} мм|">Габариты</strong>
-                            </div>
-                            <div class="col-sm-4">
-                                <span class="text-muted small">Количество ячеек</span>
-                                <strong th:text="${als.countCells}">0</strong>
-                            </div>
-                            <div class="col-sm-4">
-                                <span class="text-muted small">Положение модуля управления</span>
-                                <strong th:text="${als.positionControlModule}">Положение</strong>
-                            </div>
+                    <div th:class="${als.stringALSImage != null ? 'col-lg-9' : 'col-12'}">
+                        <div class="d-flex flex-wrap align-items-center small mb-2">
+                            <span class="mr-3" th:text="|${als.countCells} ячеек|">Ячейки</span>
+                            <span class="mr-3"
+                                  th:text="|${#lists.size(als.lbList) + (als.LC != null or als.LBC != null ? 1 : 0)} модулей|">Модули</span>
+                            <span class="mr-3" th:text="|${als.height} × ${als.width} × ${als.depth} мм|">Габариты</span>
+                            <span th:text="|Модуль управления: ${als.positionControlModule}|">Положение</span>
                         </div>
 
-                        <div class="project-als-card__modules mt-3">
-                            <div th:if="${als.LC != null}" class="project-module-summary">
-                                <div class="font-weight-bold">Модуль управления</div>
-                                <div th:text="${als.LC.description}">Описание LC</div>
-                                <div class="text-muted small mt-1">
-                                    <span th:text="${als.LC.functionalConfiguration.display}"></span>
-                                    <span th:text="${als.LC.functionalConfiguration.access}"></span>
-                                    <span th:text="${als.LC.functionalConfiguration.payment}"></span>
-                                    <span th:text="${als.LC.functionalConfiguration.printer}"></span>
-                                </div>
+                        <div class="project-als-card__modules">
+                            <div th:if="${als.LC != null}"
+                                 class="project-module-summary d-flex flex-wrap align-items-baseline border-top py-1">
+                                <strong class="mr-2">Модуль управления (LC)</strong>
+                                <span th:text="${als.LC.description}">Описание LC</span>
                             </div>
 
-                            <div th:if="${als.LBC != null}" class="project-module-summary">
-                                <div class="font-weight-bold">Комбинированный модуль</div>
-                                <div th:text="${als.LBC.description}">Описание LBC</div>
+                            <div th:if="${als.LBC != null}"
+                                 class="project-module-summary d-flex flex-wrap align-items-baseline border-top py-1">
+                                <strong class="mr-2">Комбинированный модуль (LBC)</strong>
+                                <span th:text="${als.LBC.description}">Описание LBC</span>
                             </div>
 
-                            <div th:if="${!#lists.isEmpty(als.lbList)}" class="project-module-summary">
-                                <div class="font-weight-bold mb-2">Модули хранения</div>
-                                <div th:each="lb, lbItem : ${als.lbList}"
-                                     class="d-flex flex-wrap justify-content-between border-top py-2">
-                                    <span th:text="|LB ${lbItem.count}: ${lb.name}|">LB</span>
-                                    <span class="text-muted small" th:text="${lb.description}">Описание LB</span>
-                                </div>
+                            <div th:each="lb, lbItem : ${als.lbList}"
+                                 class="project-module-summary d-flex flex-wrap align-items-baseline border-top py-1">
+                                <strong class="mr-2" th:text="|Модуль хранения (LB ${lbItem.count})|">Модуль хранения</strong>
+                                <span th:text="${lb.description}">Описание LB</span>
                             </div>
                         </div>
 
