@@ -13,7 +13,7 @@
                 <a th:href="@{/projects/{projectId}/alss/{alsId}(projectId=${projectId},alsId=${alsId})}"
                    th:text="${als.name}">АКХ</a>
             </li>
-            <li class="breadcrumb-item" th:if="${pageContext != 'CATALOG'}">
+            <li class="breadcrumb-item" th:if="${pageContext == 'ALS_CATALOG'}">
                 <a th:href="@{/alss/{id}(id=${als.id})}" th:text="${als.name}">АКХ</a>
             </li>
             <li class="breadcrumb-item active" aria-current="page">Модуль управления</li>
@@ -45,7 +45,7 @@
         <div class="page-actions">
             <button type="submit" class="btn btn-primary">Сохранить модуль</button>
             <a th:if="${pageContext == 'CATALOG'}" th:href="@{/lcs}" class="btn btn-outline-secondary">К списку модулей</a>
-            <a th:if="${pageContext != 'CATALOG'}" th:href="@{/alss/{id}(id=${als.id})}"
+            <a th:if="${pageContext == 'ALS_CATALOG'}" th:href="@{/alss/{id}(id=${als.id})}"
                class="btn btn-outline-secondary">Вернуться к ALS</a>
             <a th:if="${pageContext == 'PROJECT'}"
                th:href="@{/projects/{projectId}/alss/{alsId}(projectId=${projectId},alsId=${alsId})}"
