@@ -143,6 +143,32 @@ class LBCServiceTest {
     }
 
     @Test
+    void prepareFunctionalEquipment_shouldPreserveExplicitEmptySelectionWhenFunctionsAreUnchanged() {
+        LBC domain = TestDataFactory.validLBC(null);
+        var fallback = domain.getControlConfiguration();
+
+        service.prepareFunctionalEquipment(domain, fallback, true);
+
+        verify(equipmentCatalogService, never()).configureFunctionalEquipment(any());
+    }
+
+    @Test
+    void prepareFunctionalEquipment_shouldResolveEquipmentWhenFunctionsChange() {
+        LBC domain = TestDataFactory.validLBC(null);
+        var fallback = domain.getControlConfiguration();
+        var updated = domain.getControlConfiguration();
+        var current = updated.getFunctionalConfiguration();
+        updated.setFunctionalConfiguration(new com.lb_calc_web.domain.model.FunctionalConfiguration(
+                DisplayPurpose.INCH_17, current.getAccess(), current.getPayment(), current.getPrinter()));
+        domain.setControlConfiguration(updated);
+
+        service.prepareFunctionalEquipment(domain, fallback, true);
+
+        verify(equipmentCatalogService).configureFunctionalEquipment(any());
+    }
+
+
+    @Test
     void findById_shouldReturnMappedDomain() {
         LBCEntity entity = spy(LBCEntityMapper.toEntity(
                 TestDataFactory.validLBC(null), equipment -> null));
