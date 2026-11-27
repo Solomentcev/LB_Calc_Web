@@ -119,7 +119,7 @@ public class EmployeeController {
 
         try {
 
-            EmployeeDTO employee = EmployeeDtoMapper.toDto(employeeService.getCurrentEmployee());
+            Employee employee = employeeService.getCurrentEmployee();
 
             authService.changePassword(
                     employee.getId(),
@@ -198,10 +198,8 @@ public class EmployeeController {
 
         try {
 
-            EmployeeDTO employee = EmployeeDtoMapper.toDto(employeeService.loadUserById(id));
-
             authService.changePassword(
-                    employee.getId(),
+                    (long) id,
                     changePasswordDTO.getPassword()
             );
 
@@ -210,8 +208,7 @@ public class EmployeeController {
                     "Пароль успешно заменен"
             );
 
-            return "redirect:/employees/" +
-                    employee.getId();
+            return "redirect:/employees/" + id;
 
         } catch (IllegalArgumentException exception) {
             model.addAttribute(
