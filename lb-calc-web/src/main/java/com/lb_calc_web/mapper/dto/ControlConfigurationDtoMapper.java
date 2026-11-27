@@ -61,8 +61,8 @@ public final class ControlConfigurationDtoMapper {
     }
 
     /**
-     * Восстанавливает доменную конфигурацию, разрешая ID оборудования в актуальные модели.
-     * Если поле комплектации не было отправлено, используется сохранённая комплектация.
+     * Восстанавливает доменную конфигурацию, разрешая ID выбранного оборудования
+     * в актуальные модели. Сохранённая комплектация восстанавливается сервисом.
      */
     public static ControlConfiguration toDomain(
             FunctionalConfigurationDTO functionalDto,
@@ -74,10 +74,7 @@ public final class ControlConfigurationDtoMapper {
         FunctionalConfiguration functional = toFunctionalDomain(functionalDto);
         Map<Equipment, Integer> equipment = new LinkedHashMap<>();
 
-        boolean noSelectedModels = selectedEquipment == null
-                || selectedEquipment.stream().allMatch(
-                selection -> selection == null || selection.getId() == null);
-        if (selectedEquipment != null && (equipmentProvided || !noSelectedModels)) {
+        if (equipmentProvided && selectedEquipment != null) {
             toEquipmentIds(selectedEquipment).forEach((equipmentId, quantity) -> {
                 if (equipmentId == null || equipmentId <= 0) {
                     throw new IllegalArgumentException(
