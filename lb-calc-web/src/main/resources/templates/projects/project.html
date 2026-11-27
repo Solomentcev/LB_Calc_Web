@@ -115,7 +115,7 @@
         </div>
 
         <div th:if="${#lists.isEmpty(project.alsList)}" class="alert alert-info">
-            В проекте пока нет конфигураций АКХ.
+            В проекте пока нет АКХ.
         </div>
 
         <article th:each="alsEntry, item : ${project.quantityALS}" class="card project-als-card mb-2">
@@ -140,9 +140,9 @@
 
                     <div th:class="${alsEntry.key.stringALSImage != null ? 'col-lg-9' : 'col-12'}">
                         <div class="d-flex flex-wrap align-items-center small mb-2">
-                            <span class="mr-3" th:text="|${alsEntry.key.countCells} ячеек|">Ячейки</span>
+                            <span class="mr-3" th:text="|Количество ячеек: ${alsEntry.key.countCells}|">Ячейки</span>
                             <span class="mr-3"
-                                  th:text="|${#lists.size(alsEntry.key.lbList) + (alsEntry.key.LC != null or alsEntry.key.LBC != null ? 1 : 0)} модулей|">Модули</span>
+                                  th:text="|Всего модулей: ${#lists.size(alsEntry.key.lbList) + (alsEntry.key.LC != null or alsEntry.key.LBC != null ? 1 : 0)}|">Модули</span>
                             <span class="mr-3" th:text="|${alsEntry.key.height} × ${alsEntry.key.width} × ${alsEntry.key.depth} мм|">Габариты</span>
                             <span th:text="|Модуль управления: ${alsEntry.key.positionControlModule}|">Положение</span>
                         </div>
