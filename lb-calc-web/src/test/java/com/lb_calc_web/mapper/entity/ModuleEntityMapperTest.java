@@ -24,7 +24,6 @@ class ModuleEntityMapperTest {
     private static com.lb_calc_web.domain.model.Module toDomain(ModuleEntity entity) {
         return ModuleEntityMapper.toDomain(
                 entity,
-                TestDataFactory.createSizeBounds(),
                 TestDataFactory.createSizeBounds()
         );
     }

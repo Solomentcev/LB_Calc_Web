@@ -30,7 +30,7 @@ class LBCDomainTest {
                 Colors.Blue, Colors.White, new TypeLb("TYPE1", 100, 5, 40),
                 10, DirectionDoorOpening.LEFT, 20,
                 new ControlConfiguration(functional, Map.of()),
-                200, 200, 20, 1300, 200, 85);
+                TestDataFactory.createSizeBounds());
 
         assertEquals(200, module.getTechnicalCellWidth());
         assertEquals(200, module.getTechnicalCellHeight());
@@ -48,7 +48,7 @@ class LBCDomainTest {
                 Colors.Blue, Colors.White, new TypeLb("TYPE1", 100, 5, 40),
                 10, DirectionDoorOpening.LEFT, 20,
                 new ControlConfiguration(functional, Map.of(display, 1)),
-                200, 200, 20, 1300, 200, 85);
+                TestDataFactory.createSizeBounds());
 
         assertEquals(340, module.getTechnicalCellWidth());
         assertEquals(220, module.getTechnicalCellHeight());
@@ -66,7 +66,7 @@ class LBCDomainTest {
                 Colors.Blue, Colors.White, new TypeLb("TYPE3", 160, 5, 40),
                 10, DirectionDoorOpening.LEFT, 20,
                 new ControlConfiguration(functional, Map.of(display, 1)),
-                200, 200, 20, 1300, 200, 85);
+                TestDataFactory.createSizeBounds());
 
         assertEquals(340, module.getTechnicalCellWidth());
         assertEquals(500, module.getWidth());
@@ -89,7 +89,7 @@ class LBCDomainTest {
                     Colors.Blue, Colors.White, new TypeLb(type, deltaWidth, 5, 40),
                     10, DirectionDoorOpening.LEFT, 20,
                     new ControlConfiguration(functional, Map.of()),
-                200, 200, 20, 1300, 200, 85);
+                TestDataFactory.createSizeBounds());
 
             assertEquals(200, module.getCellWidth(), type);
             assertEquals(200 + deltaWidth, module.getWidth(), type);
@@ -119,7 +119,7 @@ class LBCDomainTest {
                 DirectionDoorOpening.LEFT,
                 20,
                 control,
-                200, 200, 20, 1300, 200, 85
+                TestDataFactory.createSizeBounds()
         );
 
         ALS als = new ALS(
