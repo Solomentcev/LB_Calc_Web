@@ -469,9 +469,7 @@ return projectRepository.findAllWithUsers()
         }
 
         replacement.setId(lcId);
-        alsService.prepareForReplacement(
-                replacement, original.getControlModule().getControlConfiguration(),
-                equipmentSelectionProvided);
+        alsService.prepareForReplacement(original, replacement, equipmentSelectionProvided);
         ALS updated = alsService.replaceLC(original.copy(), replacement);
         replaceProjectConfiguration(domain, original, updated);
 
@@ -505,9 +503,7 @@ return projectRepository.findAllWithUsers()
         }
 
         replacement.setId(lbcId);
-        alsService.prepareForReplacement(
-                replacement, original.getControlModule().getControlConfiguration(),
-                equipmentSelectionProvided);
+        alsService.prepareForReplacement(original, replacement, equipmentSelectionProvided);
         ALS updated = alsService.replaceLBC(original.copy(), replacement);
         replaceProjectConfiguration(domain, original, updated);
 
