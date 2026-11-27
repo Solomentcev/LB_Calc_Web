@@ -47,63 +47,22 @@ public class JwtAuthentificationFilter
             FilterChain filterChain
     ) throws ServletException, IOException {
 
-        try {
-
-            if (SecurityContextHolder
-                    .getContext()
-                    .getAuthentication() != null) {
-
-                filterChain.doFilter(
-                        request,
-                        response
-                );
-
-                return;
+        if (SecurityContextHolder.getContext().getAuthentication() == null) {
+            String accessToken = getAccessToken(request);
+            if (accessToken != null && !accessToken.isBlank()) {
+                try {
+                    processAccessOrRefresh(accessToken, request, response);
+                } catch (JwtException | org.springframework.security.core.userdetails.UsernameNotFoundException exception) {
+                    logger.debug("JWT отклонён: тип ошибки={}",
+                            exception.getClass().getSimpleName());
+                    clearAuthentication(response);
+                }
             }
-
-            String accessToken =
-                    getAccessToken(request);
-
-            if (accessToken == null
-                    || accessToken.isBlank()) {
-
-                filterChain.doFilter(
-                        request,
-                        response
-                );
-
-                return;
-            }
-
-            processAccessOrRefresh(
-                    accessToken,
-                    request,
-                    response
-            );
-
-        } catch (JwtException e) {
-
-            logger.debug(
-                    "JWT отклонён: тип ошибки={}",
-                    e.getClass().getSimpleName()
-            );
-
-            clearAuthentication(response);
-
-        } catch (Exception e) {
-
-            logger.error(
-                    "[JWT-FILTER] Unexpected error",
-                    e
-            );
-
-            clearAuthentication(response);
         }
 
-        filterChain.doFilter(
-                request,
-                response
-        );
+        // Цепочка вызывается ровно один раз. Ошибки следующих фильтров и контроллеров
+        // не должны маскироваться под ошибку JWT или приводить к повторному выполнению запроса.
+        filterChain.doFilter(request, response);
     }
 
     /** Проверяет access token и при необходимости инициирует обновление по refresh token. */

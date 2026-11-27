@@ -7,6 +7,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.impl.DefaultClaims;
 import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -430,5 +431,20 @@ class JwtAuthentificationFilterTest {
         );
 
         verify(chain).doFilter(request, response);
+    }
+    @Test
+    void downstreamFailure_shouldNotBeSwallowedOrExecuteChainTwice() throws Exception {
+        MockHttpServletRequest request =
+                new MockHttpServletRequest("GET", "/api/v1/lbcs");
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        ServletException failure = new ServletException("Ошибка нижележащего компонента");
+        doThrow(failure).when(chain).doFilter(request, response);
+
+        ServletException actual = assertThrows(
+                ServletException.class,
+                () -> filter.doFilter(request, response, chain)
+        );
+        assertSame(failure, actual);
+        verify(chain, times(1)).doFilter(request, response);
     }
 }

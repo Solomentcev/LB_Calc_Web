@@ -6,9 +6,16 @@
 <div th:replace="~{header :: header}"></div>
 <main class="container page-content">
   <h1 class="page-title">Произошла ошибка</h1>
-  <p   class="alert alert-danger"
-      th:text="${error}"></p>
-
+  <p class="alert alert-danger" role="alert" th:text="${error}">
+    Произошла непредвиденная ошибка. Повторите попытку позже.
+  </p>
+  <p th:if="${status != null}" class="text-muted">
+    Код ошибки: <span th:text="${status}">500</span>
+  </p>
+  <ul th:if="${errors != null and !#lists.isEmpty(errors)}" class="alert alert-warning">
+    <li th:each="message : ${errors}" th:text="${message}">Описание ошибки</li>
+  </ul>
+  <a class="btn btn-secondary" href="/">На главную</a>
 </main>
 <div th:replace="~{footer :: footer}"></div>
 </body>
