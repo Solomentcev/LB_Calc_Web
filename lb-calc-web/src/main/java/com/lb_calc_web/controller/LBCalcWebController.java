@@ -1,33 +1,30 @@
 package com.lb_calc_web.controller;
 
-import com.lb_calc_web.service.ALSService;
-import com.lb_calc_web.mapper.dto.ALSDtoMapper;
-import com.lb_calc_web.service.LBService;
-import com.lb_calc_web.service.ModuleCatalogFilter;
 import com.lb_calc_web.domain.attributes.Colors;
-import com.lb_calc_web.domain.attributes.PositionControlModule;
 import com.lb_calc_web.domain.attributes.DirectionDoorOpening;
+import com.lb_calc_web.domain.attributes.PositionControlModule;
 import com.lb_calc_web.domain.equipment.AccessPurpose;
 import com.lb_calc_web.domain.equipment.DisplayPurpose;
 import com.lb_calc_web.domain.equipment.PaymentPurpose;
 import com.lb_calc_web.domain.equipment.PrinterPurpose;
+import com.lb_calc_web.mapper.dto.ALSDtoMapper;
+import com.lb_calc_web.mapper.dto.LBDtoMapper;
+import com.lb_calc_web.mapper.dto.LCDtoMapper;
+import com.lb_calc_web.service.ALSService;
+import com.lb_calc_web.service.LBService;
 import com.lb_calc_web.service.LCService;
 import com.lb_calc_web.service.LCCatalogFilter;
-import com.lb_calc_web.domain.attributes.Colors;
-import com.lb_calc_web.domain.equipment.AccessPurpose;
-import com.lb_calc_web.domain.equipment.DisplayPurpose;
-import com.lb_calc_web.domain.equipment.PaymentPurpose;
-import com.lb_calc_web.domain.equipment.PrinterPurpose;
-import org.springframework.stereotype.Controller;
+import com.lb_calc_web.service.ModuleCatalogFilter;
 import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ModelAttribute;
 
-import java.util.Set;
 import java.util.List;
+import java.util.Set;
 
 /** MVC-контроллер главной страницы и каталогов модулей и автоматизированных камер хранения. */
 @Controller
@@ -115,7 +112,7 @@ public class LBCalcWebController {
                 id, name, heightMin, heightMax, widthMin, widthMax, depthMin, depthMax,
                 displayPurpose, accessPurpose, paymentPurpose, printerPurpose, colorBody, colorDoor);
         var result = lcService.findPage(filter, pageable).map(
-                com.lb_calc_web.mapper.dto.LCDtoMapper::toDto);
+                LCDtoMapper::toDto);
         model.addAttribute("lcs", result.getContent());
         model.addAttribute("page", result);
         model.addAttribute("filters", filter);
@@ -147,7 +144,7 @@ public class LBCalcWebController {
                 "depth", "upperFrame", "bottomFrame", "directionDoorOpening", "colorBody", "colorDoor");
         Pageable pageable = CatalogPageSupport.pageable(page, size, sort, direction, "id", allowedSorts);
         var result = lbService.findPage(filter, pageable).map(
-                com.lb_calc_web.mapper.dto.LBDtoMapper::toDto);
+                LBDtoMapper::toDto);
         model.addAttribute("lbs", result.getContent());
         model.addAttribute("page", result);
         model.addAttribute("filters", filter);
