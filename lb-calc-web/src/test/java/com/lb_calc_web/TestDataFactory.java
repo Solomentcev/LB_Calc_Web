@@ -3,6 +3,7 @@ package com.lb_calc_web;
 import com.lb_calc_web.domain.attributes.Colors;
 import com.lb_calc_web.domain.attributes.DirectionDoorOpening;
 import com.lb_calc_web.domain.attributes.TypeLb;
+import com.lb_calc_web.domain.attributes.TypeLb;
 import com.lb_calc_web.domain.equipment.AccessPurpose;
 import com.lb_calc_web.domain.equipment.DisplayPurpose;
 import com.lb_calc_web.domain.equipment.PaymentPurpose;
@@ -180,8 +181,18 @@ public final class TestDataFactory {
     }
 
     public static LB validLB(Long id) {
-        return com.lb_calc_web.mapper.dto.LBDtoMapper
-                .toDomain(validLBDTO(id));
+        return restoreLB(validLBDTO(id));
+    }
+
+    /** Восстанавливает LB для теста с типом, заданным в тестовом DTO. */
+    public static LB restoreLB(LBDTO dto) {
+        TypeLb typeLb = new TypeLb(
+                dto.getType(),
+                dto.getDeltaWidth(),
+                dto.getShelfThick(),
+                dto.getServiceZoneWidth()
+        );
+        return com.lb_calc_web.mapper.dto.LBDtoMapper.toDomain(dto, typeLb);
     }
 
     public static LBCDTO validLBCDTO(Long id) {
