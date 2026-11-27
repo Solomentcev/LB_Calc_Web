@@ -174,7 +174,7 @@ class ControlConfigurationTest {
         FunctionalConfiguration afterAdd = configuration.getFunctionalConfiguration();
 
         assertEquals(DisplayPurpose.CUSTOM, afterAdd.getDisplay());
-        assertEquals(Set.of(AccessPurpose.BAR_CODE), afterAdd.getAccess());
+        assertEquals(Set.of(AccessPurpose.PIN, AccessPurpose.BAR_CODE), afterAdd.getAccess());
         assertEquals(PaymentPurpose.CARDS, afterAdd.getPayment());
         assertEquals(PrinterPurpose.OTHER, afterAdd.getPrinter());
 
@@ -183,7 +183,7 @@ class ControlConfigurationTest {
         FunctionalConfiguration afterRemove = configuration.getFunctionalConfiguration();
 
         assertEquals(DisplayPurpose.CUSTOM, afterRemove.getDisplay());
-        assertTrue(afterRemove.getAccess().isEmpty());
+        assertEquals(Set.of(AccessPurpose.PIN), afterRemove.getAccess());
         assertEquals(PaymentPurpose.NONE, afterRemove.getPayment());
         assertEquals(PrinterPurpose.OTHER, afterRemove.getPrinter());
     }
