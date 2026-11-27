@@ -197,7 +197,7 @@ public class ALSService {
     @Transactional
     public ALS saveALS(ALS domain) {
         Objects.requireNonNull(domain, "ALS не должен быть null");
-        validate(domain);
+        validateForSave(domain);
         findOrCreateLockService.acquire();
 
         Optional<ALSEntity> existing = domain.getId() == null
@@ -599,7 +599,8 @@ public class ALSService {
                         "Модель оборудования с id=" + id + " не найдена"));
     }
 
-    private void validate(ALS domain) {
+    /** Проверяет геометрию ALS и всех вложенных модулей перед сохранением или предварительным просмотром. */
+    public void validateForSave(ALS domain) {
         var errors = sizeValidator.deepValidateALS(domain).stream()
                 .filter(result -> !result.isValid())
                 .flatMap(result -> result.getErrors().stream())
