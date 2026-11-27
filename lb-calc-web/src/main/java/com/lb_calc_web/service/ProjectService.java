@@ -121,7 +121,7 @@ public class ProjectService {
                 .orElse((root, query, builder) -> builder.conjunction());
 
         return projectRepository.findAll(specification, pageable)
-                .map(entity -> ProjectEntityMapper.toDomain(entity, alsService::restoreDomain, (als, alsEntity) -> { }));
+                .map(entity -> ProjectEntityMapper.toDomain(entity, alsService::restoreDomain));
     }
 
     private void addTextFilter(
@@ -167,8 +167,7 @@ return projectRepository.findAllWithUsers()
                 .stream()
                 .map(entity -> ProjectEntityMapper.toDomain(
                         entity,
-                        alsService::restoreDomain,
-                        (als, alsEntity) -> { }
+                        alsService::restoreDomain
                 ))
                 .toList();
     }
@@ -184,8 +183,7 @@ return projectRepository.findAllWithUsers()
 
         return ProjectEntityMapper.toDomain(
                         entity,
-                        alsService::restoreDomain,
-                        (als, alsEntity) -> { }
+                        alsService::restoreDomain
                 );
     }
 
@@ -688,8 +686,7 @@ return projectRepository.findAllWithUsers()
         ProjectEntity entity = loadExistingProject(projectId);
         return ProjectEntityMapper.toDomain(
                         entity,
-                        alsService::restoreDomain,
-                        (als, alsEntity) -> { }
+                        alsService::restoreDomain
                 );
     }
 
