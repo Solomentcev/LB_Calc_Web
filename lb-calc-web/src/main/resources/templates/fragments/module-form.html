@@ -62,7 +62,7 @@
                             th:field="*{selectedEquipment[__${selectionStat.index}__].id}">
                         <option value="">Выберите модель</option>
                         <option th:each="item : ${equipmentList}"
-                                th:if="${item.functionalType == selection.functionalType and item.purpose == selection.purpose}"
+                                th:if="${item.functionalType == selection.functionalType and (item.purpose == selection.purpose or (selection.functionalType.name() == 'PAYMENT' and item.purpose == 'CARDS_AND_CASH'))}"
                                 th:value="${item.id}"
                                 th:text="|${item.name} — ${item.width} × ${item.height} × ${item.depth} мм|"></option>
                     </select>
