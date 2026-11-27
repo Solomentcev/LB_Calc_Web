@@ -9,10 +9,6 @@ import com.lb_calc_web.domain.model.LB;
 import com.lb_calc_web.domain.model.LBC;
 import com.lb_calc_web.domain.model.LC;
 import com.lb_calc_web.domain.model.Module;
-import com.lb_calc_web.dto.ALSDTO;
-import com.lb_calc_web.dto.LBCDTO;
-import com.lb_calc_web.dto.LBDTO;
-import com.lb_calc_web.dto.LCDTO;
 import com.lb_calc_web.entity.ALSEntity;
 import com.lb_calc_web.entity.EquipmentEntity;
 import com.lb_calc_web.entity.ALSModuleEntity;
@@ -20,16 +16,12 @@ import com.lb_calc_web.entity.LBEntity;
 import com.lb_calc_web.entity.LBCEntity;
 import com.lb_calc_web.entity.LCEntity;
 import com.lb_calc_web.entity.ModuleEntity;
-import com.lb_calc_web.mapper.dto.ALSDtoMapper;
-import com.lb_calc_web.mapper.dto.LBDtoMapper;
 import com.lb_calc_web.mapper.entity.ALSEntityMapper;
 import com.lb_calc_web.mapper.entity.ModuleEntityMapper;
-import com.lb_calc_web.mapper.entity.EquipmentEntityMapper;
 import com.lb_calc_web.repository.ALSRepository;
 import com.lb_calc_web.repository.EquipmentRepository;
 import com.lb_calc_web.repository.ModuleEntityRepository;
 import com.lb_calc_web.repository.ProjectALSRepository;
-import com.lb_calc_web.service.factory.TypeLbFactory;
 import com.lb_calc_web.service.validation.ValidationSizeException;
 import com.lb_calc_web.service.validation.size.SizeValidator;
 import com.lb_calc_web.service.validation.size.SizeBounds;
@@ -261,13 +253,6 @@ public class ALSService {
         throw new NoSuchElementException("LB с id " + lbId + " не найден в ALS " + als.getId());
     }
 
-    /** Восстанавливает доменную модель LB из DTO. */
-    @Transactional(readOnly = true)
-    public LB restoreLB(LBDTO dto) {
-        Objects.requireNonNull(dto, "LB не должен быть null");
-        return LBDtoMapper.toDomain(dto, TypeLbFactory.forLB(environment, dto.getType()));
-    }
-
     /** Заменяет только выбранный экземпляр LB в конфигурации ALS. */
     @Transactional(readOnly = true)
     public ALS replaceLB(ALS als, Long lbId, LB replacement) {
@@ -293,26 +278,6 @@ public class ALSService {
             throw new NoSuchElementException("LBC с id " + lbcId + " не найден в ALS " + als.getId());
         }
         return lbc;
-    }
-
-    /** Восстанавливает управляющий модуль LC с учётом текущей конфигурации ALS. */
-    @Transactional(readOnly = true)
-    public LC restoreLC(LCDTO dto, ALS als) {
-        Objects.requireNonNull(als, "ALS не должен быть null");
-        ControlModule control = als.getControlModule();
-        ControlConfiguration fallback = control instanceof LC
-                ? control.getControlConfiguration() : null;
-        return lcService.restoreDomain(dto, fallback);
-    }
-
-    /** Восстанавливает комбинированный модуль LBC с учётом текущей конфигурации ALS. */
-    @Transactional(readOnly = true)
-    public LBC restoreLBC(LBCDTO dto, ALS als) {
-        Objects.requireNonNull(als, "ALS не должен быть null");
-        ControlModule control = als.getControlModule();
-        ControlConfiguration fallback = control instanceof LBC
-                ? control.getControlConfiguration() : null;
-        return lbcService.restoreDomain(dto, fallback);
     }
 
     /** Заменяет управляющий модуль LC и синхронизирует функциональные назначения ALS. */
@@ -425,102 +390,58 @@ public class ALSService {
         return saveALS(replaceWithNewLBC(findById(alsId)));
     }
 
-    /** Восстанавливает доменную ALS из DTO, разрешая оборудование по Long ID. */
+    /**
+     * Сохраняет идентичность и пользовательские тексты неизменённых модулей
+     * при обновлении агрегата из представленной конфигурации.
+     */
     @Transactional(readOnly = true)
-    public ALS restoreDomain(ALSDTO dto) {
-        Objects.requireNonNull(dto, "ALS не должен быть null");
-        try {
-            ALS existingALS = dto.getId() != null && dto.getId() > 0
-                    ? findById(dto.getId())
-                    : null;
-            ControlConfiguration fallback = null;
-            if (existingALS != null) {
-                ControlModule existingControl = existingALS.getControlModule();
-                if ((dto.getLC() != null && existingControl instanceof LC)
-                        || (dto.getLBC() != null && existingControl instanceof LBC)) {
-                    fallback = existingControl.getControlConfiguration();
-                    fallback.setFunctionalConfiguration(existingALS.getFunctionalConfiguration());
-                }
-            }
-
-            ALS restored = ALSDtoMapper.toDomain(
-                    dto,
-                    candidate -> TypeLbFactory.forLB(environment, candidate.getType()),
-                    candidate -> TypeLbFactory.forLBC(environment, candidate.getType()),
-                    this::findEquipment,
-                    fallback,
-                    sizeBounds
-            );
-
-            boolean equipmentSelectionOmitted = dto.getLC() != null
-                    ? !dto.getLC().isEquipmentProvided() && dto.getLC().getSelectedEquipment().isEmpty()
-                    : !dto.getLBC().isEquipmentProvided() && dto.getLBC().getSelectedEquipment().isEmpty();
-            boolean functionalConfigurationChanged = fallback != null
-                    && !restored.getFunctionalConfiguration().equals(
-                    fallback.getFunctionalConfiguration());
-            if (equipmentSelectionOmitted || functionalConfigurationChanged) {
-                ControlModule restoredControl = restored.getControlModule();
-                if (restoredControl instanceof LC lc) {
-                    lcService.configureFunctionalEquipment(lc);
-                    restored.setControlConfiguration(lc.getControlConfiguration());
-                } else if (restoredControl instanceof LBC lbc) {
-                    lbcService.configureFunctionalEquipment(lbc);
-                    restored.setControlConfiguration(lbc.getControlConfiguration());
-                }
-            }
-
-            if (existingALS == null) {
-                return restored;
-            }
-
-            List<Module> previousModules = existingALS.getModules();
-            List<Module> restoredModules = restored.getModules();
-            List<Module> mergedModules = new ArrayList<>(restoredModules.size());
-            boolean[] matchedPreviousModules = new boolean[previousModules.size()];
-            for (Module currentModule : restoredModules) {
-                int previousIndex = -1;
-                if (currentModule.getId() != null) {
-                    for (int index = 0; index < previousModules.size(); index++) {
-                        if (!matchedPreviousModules[index]
-                                && Objects.equals(previousModules.get(index).getId(), currentModule.getId())) {
-                            previousIndex = index;
-                            break;
-                        }
-                    }
-                }
-                if (previousIndex < 0) {
-                    for (int index = 0; index < previousModules.size(); index++) {
-                        if (!matchedPreviousModules[index]
-                                && previousModules.get(index).equals(currentModule)) {
-                            previousIndex = index;
-                            break;
-                        }
-                    }
-                }
-
-                if (previousIndex >= 0) {
-                    matchedPreviousModules[previousIndex] = true;
-                    Module previousModule = previousModules.get(previousIndex);
-                    mergedModules.add(previousModule.equals(currentModule)
-                            ? previousModule
-                            : currentModule);
-                } else {
-                    mergedModules.add(currentModule);
-                }
-            }
-
-            boolean unchangedConfiguration = existingALS.equals(restored);
-            return ALS.restoreText(
-                    restored,
-                    unchangedConfiguration ? existingALS.getName() : restored.getName(),
-                    unchangedConfiguration ? existingALS.getDescription() : restored.getDescription(),
-                    mergedModules
-            );
-        } catch (IllegalStateException exception) {
-            throw createValidationException(dto, "structure", exception);
-        } catch (IllegalArgumentException | NullPointerException exception) {
-            throw createValidationException(dto, "domainModel", exception);
+    public ALS preserveExistingModules(ALS existingALS, ALS restored) {
+        Objects.requireNonNull(restored, "Восстановленная ALS не должна быть null");
+        if (existingALS == null) {
+            return restored;
         }
+
+        List<Module> previousModules = existingALS.getModules();
+        List<Module> restoredModules = restored.getModules();
+        List<Module> mergedModules = new ArrayList<>(restoredModules.size());
+        boolean[] matchedPreviousModules = new boolean[previousModules.size()];
+        for (Module currentModule : restoredModules) {
+            int previousIndex = -1;
+            if (currentModule.getId() != null) {
+                for (int index = 0; index < previousModules.size(); index++) {
+                    if (!matchedPreviousModules[index]
+                            && Objects.equals(previousModules.get(index).getId(), currentModule.getId())) {
+                        previousIndex = index;
+                        break;
+                    }
+                }
+            }
+            if (previousIndex < 0) {
+                for (int index = 0; index < previousModules.size(); index++) {
+                    if (!matchedPreviousModules[index]
+                            && previousModules.get(index).equals(currentModule)) {
+                        previousIndex = index;
+                        break;
+                    }
+                }
+            }
+
+            if (previousIndex >= 0) {
+                matchedPreviousModules[previousIndex] = true;
+                Module previousModule = previousModules.get(previousIndex);
+                mergedModules.add(previousModule.equals(currentModule) ? previousModule : currentModule);
+            } else {
+                mergedModules.add(currentModule);
+            }
+        }
+
+        boolean unchangedConfiguration = existingALS.equals(restored);
+        return ALS.restoreText(
+                restored,
+                unchangedConfiguration ? existingALS.getName() : restored.getName(),
+                unchangedConfiguration ? existingALS.getDescription() : restored.getDescription(),
+                mergedModules
+        );
     }
 
     private Optional<ALSEntity> findDuplicate(ALS domain) {
