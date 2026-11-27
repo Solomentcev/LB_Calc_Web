@@ -159,6 +159,21 @@
                     </div>
                 </section>
 
+                <section class="module-section module-section--als-preview">
+                    <div class="module-section__header">
+                        <h2>Визуализация АКХ</h2>
+                        <p>Общий чертёж текущей конфигурации и взаимного расположения модулей.</p>
+                    </div>
+                    <div class="module-visual module-visual--wide" th:if="${als.stringALSImage != null}">
+                        <img th:src="|data:image/png;base64,${als.stringALSImage}|"
+                             alt="Общий чертёж автоматической камеры хранения">
+                    </div>
+                    <div class="module-section__body text-muted"
+                         th:if="${als.stringALSImage == null}">
+                        Чертёж пока недоступен.
+                    </div>
+                </section>
+
                 <div th:replace="~{fragments/module-form :: functionalConfiguration}"></div>
 
                 <section th:if="${als.LC != null}" class="module-section">
@@ -206,6 +221,10 @@
                                         class="text-muted">Отдельное оборудование не требуется</li>
                                 </ul>
                             </div>
+                        </div>
+                        <div class="module-visual module-visual--module" th:if="${als.LC.stringLCImage != null}">
+                            <img th:src="|data:image/png;base64,${als.LC.stringLCImage}|"
+                                 alt="Чертёж модуля управления LC">
                         </div>
                         <a th:href="@{${pageContext == 'PROJECT'
                                      ? '/projects/' + projectId + '/alss/' + alsId + '/lcs/' + als.LC.id
@@ -272,6 +291,10 @@
                                 </ul>
                             </div>
                         </div>
+                        <div class="module-visual module-visual--module" th:if="${als.LBC.stringLBCImage != null}">
+                            <img th:src="|data:image/png;base64,${als.LBC.stringLBCImage}|"
+                                 alt="Чертёж совмещённого модуля LBC">
+                        </div>
                         <a th:href="@{${pageContext == 'PROJECT'
                                      ? '/projects/' + projectId + '/alss/' + alsId + '/lbcs/' + als.LBC.id
                                      : '/alss/' + als.id + '/lbcs/' + als.LBC.id}}"
@@ -280,9 +303,15 @@
                 </section>
 
                 <section class="module-section">
-                    <div class="module-section__header">
-                        <h2>Модули хранения LB</h2>
-                        <p>Состав и параметры модулей хранения в текущей конфигурации АКХ.</p>
+                    <div class="module-section__header module-section__header--actions">
+                        <div>
+                            <h2>Модули хранения LB</h2>
+                            <p>Состав и параметры модулей хранения в текущей конфигурации АКХ.</p>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-sm"
+                                th:formaction="@{${pageContext == 'PROJECT'
+                                                ? '/projects/' + projectId + '/alss/' + alsId + '/addLB'
+                                                : '/alss/' + als.id + '/addLB'}}">Добавить LB</button>
                     </div>
                     <div class="module-section__body">
                         <div th:each="lb, lbStat : ${als.lbList}"
@@ -323,6 +352,10 @@
                                 <div class="col-sm-3"><span class="text-muted small">Ячеек</span><strong th:text="${lb.countCells}"></strong></div>
                             </div>
 
+                            <div class="module-visual module-visual--module" th:if="${lb.stringLBImage != null}">
+                                <img th:src="|data:image/png;base64,${lb.stringLBImage}|"
+                                     th:alt="|Чертёж модуля хранения ${lb.name}|">
+                            </div>
                             <div class="d-flex flex-wrap align-items-center mt-3">
                                 <a th:href="@{${pageContext == 'PROJECT'
                                              ? '/projects/' + projectId + '/alss/' + alsId + '/lbs/' + lb.id
@@ -340,57 +373,12 @@
                         <div th:if="${#lists.isEmpty(als.lbList)}" class="text-muted py-2">
                             Модули хранения LB отсутствуют.
                         </div>
-
-                        <button type="submit" class="btn btn-primary btn-sm mt-3"
-                                th:formaction="@{${pageContext == 'PROJECT'
-                                                ? '/projects/' + projectId + '/alss/' + alsId + '/addLB'
-                                                : '/alss/' + als.id + '/addLB'}}">
-                            Добавить LB
-                        </button>
+ 
                     </div>
                 </section>
             </div>
 
-            <aside class="module-editor__preview">
-                <section class="module-section">
-                    <div class="module-section__header">
-                        <h2>Визуализация АКХ</h2>
-                        <p>Чертёж текущей конфигурации.</p>
-                    </div>
-                    <div class="module-visual" th:if="${als.stringALSImage != null}">
-                        <img th:src="|data:image/png;base64,${als.stringALSImage}|"
-                             alt="Чертёж автоматической камеры хранения">
-                    </div>
-                    <div class="module-section__body text-muted"
-                         th:if="${als.stringALSImage == null}">
-                        Чертёж пока недоступен.
-                    </div>
-                </section>
 
-                <section class="module-section" th:if="${als.LC != null and als.LC.stringLCImage != null}">
-                    <div class="module-section__header"><h2>Чертёж LC</h2></div>
-                    <div class="module-visual">
-                        <img th:src="|data:image/png;base64,${als.LC.stringLCImage}|" alt="Чертёж LC">
-                    </div>
-                </section>
-                <section class="module-section" th:if="${als.LBC != null and als.LBC.stringLBCImage != null}">
-                    <div class="module-section__header"><h2>Чертёж LBC</h2></div>
-                    <div class="module-visual">
-                        <img th:src="|data:image/png;base64,${als.LBC.stringLBCImage}|" alt="Чертёж LBC">
-                    </div>
-                </section>
-                <section class="module-section"
-                         th:each="lb : ${als.lbList}"
-                         th:if="${lb.stringLBImage != null}">
-                    <div class="module-section__header">
-                        <h2 th:text="${'Чертёж ' + lb.name}">Чертёж LB</h2>
-                    </div>
-                    <div class="module-visual">
-                        <img th:src="|data:image/png;base64,${lb.stringLBImage}|"
-                             alt="Чертёж модуля хранения">
-                    </div>
-                </section>
-            </aside>
         </div>
     </form>
 </main>
