@@ -203,10 +203,10 @@ class ControlConfigurationTest {
     void shouldRejectSeveralModelsForOneFunctionalRequirement() {
         Equipment first = new Equipment(
                 51L, EquipmentFunctionalType.ACCESS, AccessPurpose.RFID,
-                EquipmentCategory.RFID_READER, "Считыватель 1", "", 0, 0, 0);
+                EquipmentCategory.BAR_READER, "Считыватель 1", "", 0, 0, 0);
         Equipment second = new Equipment(
                 52L, EquipmentFunctionalType.ACCESS, AccessPurpose.RFID,
-                EquipmentCategory.RFID_READER, "Считыватель 2", "", 0, 0, 0);
+                EquipmentCategory.BAR_READER, "Считыватель 2", "", 0, 0, 0);
         ControlConfiguration configuration = new ControlConfiguration(
                 functionalConfiguration(
                         DisplayPurpose.NONE, Set.of(AccessPurpose.RFID),
