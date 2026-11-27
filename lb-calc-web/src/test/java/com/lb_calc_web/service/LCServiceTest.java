@@ -142,7 +142,6 @@ class LCServiceTest {
         functional.setPayment(com.lb_calc_web.domain.equipment.PaymentPurpose.NONE);
         functional.setPrinter(com.lb_calc_web.domain.equipment.PrinterPurpose.ABSENT);
         dto.setFunctionalConfiguration(functional);
-        dto.setEquipment(null);
 
         LC restored = service.restoreDomain(dto, fallback);
 
