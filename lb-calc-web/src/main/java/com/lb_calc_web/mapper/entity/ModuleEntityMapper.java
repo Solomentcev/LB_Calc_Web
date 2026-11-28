@@ -34,7 +34,7 @@ public final class ModuleEntityMapper {
             return LBCEntityMapper.toDomain(lbcEntity, bounds);
         }
         if (concreteEntity instanceof LBEntity lbEntity) {
-            return LBEntityMapper.toDomain(lbEntity);
+            return LBEntityMapper.toDomain(lbEntity, bounds);
         }
         if (concreteEntity instanceof LCEntity lcEntity) {
             return LCEntityMapper.toDomain(lcEntity, bounds);
