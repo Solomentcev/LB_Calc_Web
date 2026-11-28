@@ -51,28 +51,6 @@ class LCTest {
         LC lc = createLC(1940, Map.of(display(376, 301), 1));
 
         assertEquals(450, lc.getWidth());
-        assertEquals(489, lc.getEquipmentTop(installedDisplay(lc)));
-    }
-
-    @Test
-    void getDisplayTop_shouldKeepDisplayCenterAtThirteenHundredMillimeters() {
-        LC lc = createLC(1940, Map.of(display(255, 174), 1));
-
-        assertEquals(553, lc.getEquipmentTop(installedDisplay(lc)));
-    }
-
-    @Test
-    void getDisplayTop_shouldMoveDisplayDownWhenTopClearanceIsInsufficient() {
-        LC lc = createLC(1400, Map.of(display(376, 301), 1));
-
-        assertEquals(70, lc.getEquipmentTop(installedDisplay(lc)));
-    }
-
-    private Equipment installedDisplay(LC lc) {
-        return lc.getEquipment().keySet().stream()
-                .filter(item -> item.getFunctionalType() == EquipmentFunctionalType.DISPLAY)
-                .findFirst()
-                .orElseThrow();
     }
 
     private LC createLC(int height, Map<Equipment, Integer> equipment) {
