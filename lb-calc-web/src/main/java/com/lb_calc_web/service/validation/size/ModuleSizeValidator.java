@@ -290,7 +290,7 @@ public class ModuleSizeValidator {
         } else {
             validateLBCellCount(
                     result, height, upperFrame, bottomFrame,
-                    module.getCountCells(), typeLb
+                    module.getCountCells(), module.getShelfThickness()
             );
             validateStorageCellDimensions(
                     result, height, depth, upperFrame, bottomFrame,
@@ -310,7 +310,7 @@ public class ModuleSizeValidator {
             int upperFrame,
             int bottomFrame,
             int countCells,
-            TypeLb typeLb
+            int shelfThickness
     ) {
         long usableHeight = (long) height - upperFrame - bottomFrame;
         if (usableHeight <= 0) {
@@ -340,7 +340,9 @@ public class ModuleSizeValidator {
             int width,
             int doorThickness,
             int countCells,
-            TypeLb typeLb
+            int shelfThickness,
+            int deltaWidth,
+            int serviceZoneWidth
     ) {
         if (countCells > 0) {
             long usableHeight = (long) height - upperFrame - bottomFrame
