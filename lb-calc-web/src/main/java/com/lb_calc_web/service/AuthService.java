@@ -243,7 +243,7 @@ public class AuthService {
     /** Сохраняет сотрудника с зашифрованным паролем и публикует событие создания. */
     private Employee persistEmployee(Employee domain, String password, UserEventType eventType) {
         if (employeeRepository.existsByEmail(domain.getEmail())) {
-            throw new IllegalArgumentException("Пользователь с таким email уже существует");
+            throw new IllegalStateException("Пользователь с таким email уже существует");
         }
 
         EmployeeEntity entity = EmployeeEntityMapper.toEntity(domain);
@@ -261,12 +261,12 @@ public class AuthService {
         return result;
     }
 
-    private IllegalArgumentException toEmailConflict(DataIntegrityViolationException exception) {
+    private IllegalStateException toEmailConflict(DataIntegrityViolationException exception) {
         Throwable cause = exception;
         while (cause != null) {
             if (cause instanceof ConstraintViolationException violation
                     && "uk_employee_email".equalsIgnoreCase(violation.getConstraintName())) {
-                return new IllegalArgumentException("Email уже используется", exception);
+                return new IllegalStateException("Email уже используется", exception);
             }
             cause = cause.getCause();
         }

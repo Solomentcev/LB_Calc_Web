@@ -199,7 +199,7 @@ public class EmployeeRestController {
                     employeeUpd.getEmail()
             )) {
 
-                throw new IllegalArgumentException(
+                throw new IllegalStateException(
                         "Пользователь с таким email уже существует"
                 );
             }

@@ -178,8 +178,8 @@ class AuthServiceTest {
                 "user-events"
         );
 
-        IllegalArgumentException exception = org.junit.jupiter.api.Assertions.assertThrows(
-                IllegalArgumentException.class,
+        IllegalStateException exception = org.junit.jupiter.api.Assertions.assertThrows(
+                IllegalStateException.class,
                 () -> authService.registration(
                     "Иван", "Иванов", "user@example.com", "secret", "secret")
         );
