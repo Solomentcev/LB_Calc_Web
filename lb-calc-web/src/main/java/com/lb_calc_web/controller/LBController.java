@@ -1,6 +1,7 @@
 package com.lb_calc_web.controller;
 
 import com.lb_calc_web.domain.attributes.TypeLb;
+import com.lb_calc_web.service.validation.size.SizeBounds;
 import com.lb_calc_web.domain.attributes.Colors;
 import com.lb_calc_web.domain.attributes.DirectionDoorOpening;
 import com.lb_calc_web.domain.model.LB;
@@ -27,6 +28,7 @@ public class LBController {
             LoggerFactory.getLogger(LBController.class);
 
     private final LBService lbService;
+    private final SizeBounds sizeBounds;
 
     private final List<Colors> colorsList =
             Arrays.asList(Colors.values());
@@ -34,10 +36,9 @@ public class LBController {
     private final List<DirectionDoorOpening> directionDoorOpeningList =
             Arrays.asList(DirectionDoorOpening.values());
 
-    public LBController(
-            LBService lbService
-    ) {
+    public LBController(LBService lbService, SizeBounds sizeBounds) {
         this.lbService = lbService;
+        this.sizeBounds = sizeBounds;
     }
 
     /**
@@ -85,7 +86,7 @@ public class LBController {
     public String refreshLB(@ModelAttribute("lb") LBDTO lb, Model model) {
         model.addAttribute("pageContext", "CATALOG");
         try {
-            lb = toDtoWithImage(LBDtoMapper.toDomain(lb, TypeLb.valueOf(lb.getType())));
+            lb = toDtoWithImage(LBDtoMapper.toDomain(lb, TypeLb.valueOf(lb.getType()), sizeBounds));
         } catch (IllegalArgumentException exception) {
             model.addAttribute("errors", List.of("Проверьте введённые параметры модуля."));
         }
