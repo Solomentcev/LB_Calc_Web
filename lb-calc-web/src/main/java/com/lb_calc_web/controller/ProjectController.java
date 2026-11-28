@@ -782,7 +782,7 @@ public class ProjectController
         ALS updatedALS = sourceALS;
         try {
             LB replacement = LBDtoMapper.toDomain(
-                    lb, TypeLb.valueOf(lb.getType()));
+                    lb, TypeLb.valueOf(lb.getType()), sizeBounds);
             ALS candidateALS = alsService.replaceLB(sourceALS.copy(), lbId, replacement);
             preview = projectService.previewALSReplacement(projectId, alsId, candidateALS);
             updatedALS = candidateALS;
@@ -818,7 +818,7 @@ public class ProjectController
             projectService.findLBInProject(projectId, alsId, lbId);
             lb.setId(lbId);
             LB replacement = LBDtoMapper.toDomain(
-                    lb, TypeLb.valueOf(lb.getType()));
+                    lb, TypeLb.valueOf(lb.getType()), sizeBounds);
             ALS savedALS = projectService.saveLBAtProject(
                     projectId,
                     alsId,
@@ -1043,7 +1043,7 @@ public class ProjectController
     private LBDTO addLBImage(LBDTO dto) {
         try {
             return toDtoWithImage(LBDtoMapper.toDomain(
-                    dto, TypeLb.valueOf(dto.getType())));
+                    dto, TypeLb.valueOf(dto.getType()), sizeBounds));
         } catch (ValidationSizeException | IllegalArgumentException | IllegalStateException
                  | NoSuchElementException exception) {
             return dto;
