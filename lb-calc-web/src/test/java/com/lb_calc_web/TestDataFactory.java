@@ -148,7 +148,7 @@ public final class TestDataFactory {
 
     /** Восстанавливает LB для теста с типом, заданным в тестовом DTO. */
     public static LB restoreLB(LBDTO dto) {
-        return com.lb_calc_web.mapper.dto.LBDtoMapper.toDomain(dto, TypeLb.valueOf(dto.getType()));
+        return com.lb_calc_web.mapper.dto.LBDtoMapper.toDomain(dto, TypeLb.valueOf(dto.getType()), createSizeBounds());
     }
 
     public static LBCDTO validLBCDTO(Long id) {
