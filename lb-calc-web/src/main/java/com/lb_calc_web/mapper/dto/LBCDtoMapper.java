@@ -30,9 +30,6 @@ public final class LBCDtoMapper {
         dto.setName(domain.getName());
         dto.setDescription(domain.getDescription());
         dto.setType(domain.getTypeLb().getType());
-        dto.setDeltaWidth(domain.getTypeLb().getDeltaWidth());
-        dto.setShelfThick(domain.getTypeLb().getShelfThick());
-        dto.setServiceZoneWidth(domain.getTypeLb().getServiceZoneWidth());
         dto.setHeight(domain.getHeight());
         dto.setWidth(domain.getWidth());
         dto.setDepth(domain.getDepth());

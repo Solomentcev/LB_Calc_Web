@@ -1,9 +1,9 @@
 package com.lb_calc_web.controller.api;
 
+import com.lb_calc_web.domain.attributes.TypeLb;
 import com.lb_calc_web.controller.api.response.ApiResponse;
 import com.lb_calc_web.dto.LBDTO;
 import com.lb_calc_web.mapper.dto.LBDtoMapper;
-import com.lb_calc_web.service.factory.TypeLbFactory;
 import com.lb_calc_web.service.validation.size.SizeBounds;
 import com.lb_calc_web.service.LBService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -202,7 +202,7 @@ public class LBRestController {
                 dto != null ? dto.getType() : null
         );
 
-            LBDTO saved = LBDtoMapper.toDto(lbService.saveLB(LBDtoMapper.toDomain(dto, TypeLbFactory.forLB(sizeBounds, dto.getType()))));
+            LBDTO saved = LBDtoMapper.toDto(lbService.saveLB(LBDtoMapper.toDomain(dto, TypeLb.valueOf(dto.getType()))));
 
             return ResponseEntity.status(HttpStatus.CREATED).body(
                     ApiResponse.success(

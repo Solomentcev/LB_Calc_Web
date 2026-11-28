@@ -45,12 +45,8 @@ public final class LBCEntityMapper {
                         LinkedHashMap::new
                 ));
 
-        TypeLb typeLb = new TypeLb(
-                entity.getType(),
-                entity.getDeltaWidth(),
-                entity.getShelfThick(),
-                entity.getServiceZoneWidth()
-        );
+        TypeLb typeLb = Objects.requireNonNull(entity.getType(),
+                "Конструктивный тип LBC не должен быть null");
         ControlConfiguration configuration = new ControlConfiguration(
                 new FunctionalConfiguration(
                         entity.getDisplayPurpose(), entity.getAccessPurposes(),
@@ -118,11 +114,7 @@ public final class LBCEntityMapper {
         entity.setColorBody(domain.getColorBody());
         entity.setColorDoor(domain.getColorDoor());
 
-        TypeLb typeLb = domain.getTypeLb();
-        entity.setType(typeLb.getType());
-        entity.setDeltaWidth(typeLb.getDeltaWidth());
-        entity.setShelfThick(typeLb.getShelfThick());
-        entity.setServiceZoneWidth(typeLb.getServiceZoneWidth());
+        entity.setType(domain.getTypeLb());
 
         entity.setDoorThickness(domain.getDoorThickness());
         entity.setDirectionDoorOpening(domain.getDirectionDoorOpening());

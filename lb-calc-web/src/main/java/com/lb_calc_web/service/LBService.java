@@ -9,7 +9,6 @@ import com.lb_calc_web.entity.LBEntity;
 import com.lb_calc_web.service.validation.ValidationSizeException;
 import com.lb_calc_web.mapper.entity.LBEntityMapper;
 import com.lb_calc_web.repository.LBRepository;
-import com.lb_calc_web.service.factory.TypeLbFactory;
 import com.lb_calc_web.service.validation.size.SizeValidator;
 import com.lb_calc_web.service.validation.size.SizeBounds;
 import org.slf4j.Logger;
@@ -67,8 +66,7 @@ public class LBService {
             Colors colorBody,
             Colors colorDoor
     ) {
-        String type = sizeBounds.getDefaultLbTypeName();
-        TypeLb typeLb = TypeLbFactory.forLB(sizeBounds, type);
+        TypeLb typeLb = TypeLb.TYPE1;
         return new LB(
                 height,
                 sizeBounds.getWidthDefault(),
@@ -168,8 +166,7 @@ public class LBService {
         Optional<LBEntity> duplicate = lbRepository.findCandidates(
                         domain.getHeight(), domain.getWidth(), domain.getDepth(),
                         domain.getUpperFrame(), domain.getBottomFrame(),
-                        typeLb.getType(), typeLb.getDeltaWidth(), typeLb.getShelfThick(),
-                        typeLb.getServiceZoneWidth(), domain.getDoorThickness(),
+                        typeLb, domain.getDoorThickness(),
                         domain.getDirectionDoorOpening(), domain.getCountCells(),
                         domain.getColorBody(), domain.getColorDoor()
                 ).stream()

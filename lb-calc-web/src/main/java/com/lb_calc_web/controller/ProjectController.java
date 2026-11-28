@@ -1,5 +1,6 @@
 package com.lb_calc_web.controller;
 
+import com.lb_calc_web.domain.attributes.TypeLb;
 import com.lb_calc_web.dto.ALSDTO;
 import com.lb_calc_web.mapper.dto.EquipmentDtoMapper;
 import com.lb_calc_web.service.EquipmentCatalogService;
@@ -19,7 +20,6 @@ import com.lb_calc_web.dto.LCDTO;
 import com.lb_calc_web.dto.ProjectDTO;
 import com.lb_calc_web.service.validation.ValidationSizeException;
 import com.lb_calc_web.service.validation.size.SizeBounds;
-import com.lb_calc_web.service.factory.TypeLbFactory;
 import com.lb_calc_web.service.ProjectService;
 import com.lb_calc_web.service.ProjectCatalogFilter;
 import com.lb_calc_web.service.ALSService;
@@ -170,8 +170,8 @@ public class ProjectController
                                 ? alsService.findById(dto.getId()) : null;
                         ALS restored = ALSDtoMapper.toDomain(
                                 dto,
-                                candidate -> TypeLbFactory.forLB(sizeBounds, candidate.getType()),
-                                candidate -> TypeLbFactory.forLBC(sizeBounds, candidate.getType()),
+                                candidate -> TypeLb.valueOf(candidate.getType()),
+                                candidate -> TypeLb.valueOf(candidate.getType()),
                                 equipmentCatalogService::findById,
                                 sizeBounds
                         );
@@ -213,8 +213,8 @@ public class ProjectController
                                 ? alsService.findById(dto.getId()) : null;
                         ALS restored = ALSDtoMapper.toDomain(
                                 dto,
-                                candidate -> TypeLbFactory.forLB(sizeBounds, candidate.getType()),
-                                candidate -> TypeLbFactory.forLBC(sizeBounds, candidate.getType()),
+                                candidate -> TypeLb.valueOf(candidate.getType()),
+                                candidate -> TypeLb.valueOf(candidate.getType()),
                                 equipmentCatalogService::findById,
                                 sizeBounds
                         );
@@ -376,8 +376,8 @@ public class ProjectController
         try {
             ALS restored = ALSDtoMapper.toDomain(
                     als,
-                    candidate -> TypeLbFactory.forLB(sizeBounds, candidate.getType()),
-                    candidate -> TypeLbFactory.forLBC(sizeBounds, candidate.getType()),
+                    candidate -> TypeLb.valueOf(candidate.getType()),
+                    candidate -> TypeLb.valueOf(candidate.getType()),
                     equipmentCatalogService::findById,
                     sizeBounds
             );
@@ -417,8 +417,8 @@ public class ProjectController
             als.setLBC(persisted.getLBC());
             ALS restored = ALSDtoMapper.toDomain(
                     als,
-                    candidate -> TypeLbFactory.forLB(sizeBounds, candidate.getType()),
-                    candidate -> TypeLbFactory.forLBC(sizeBounds, candidate.getType()),
+                    candidate -> TypeLb.valueOf(candidate.getType()),
+                    candidate -> TypeLb.valueOf(candidate.getType()),
                     equipmentCatalogService::findById,
                     sizeBounds
             );
@@ -652,7 +652,7 @@ public class ProjectController
         LBCDTO lbcForm = lbc;
         try {
             com.lb_calc_web.domain.model.LBC replacement = LBCDtoMapper.toDomain(
-                    lbc, TypeLbFactory.forLBC(sizeBounds, lbc.getType()),
+                    lbc, TypeLb.valueOf(lbc.getType()),
                     equipmentCatalogService::findById,
                     sizeBounds);
             alsService.prepareForReplacement(sourceALS, replacement, lbc.isEquipmentProvided());
@@ -694,7 +694,7 @@ public class ProjectController
             lbc.setId(lbcId);
             projectService.findLBCInProject(projectId, alsId, lbcId);
             replacement = LBCDtoMapper.toDomain(
-                    lbc, TypeLbFactory.forLBC(sizeBounds, lbc.getType()),
+                    lbc, TypeLb.valueOf(lbc.getType()),
                     equipmentCatalogService::findById,
                     sizeBounds);
             ALS savedALS = projectService.saveLBCAtProject(
@@ -782,7 +782,7 @@ public class ProjectController
         ALS updatedALS = sourceALS;
         try {
             LB replacement = LBDtoMapper.toDomain(
-                    lb, TypeLbFactory.forLB(sizeBounds, lb.getType()));
+                    lb, TypeLb.valueOf(lb.getType()));
             ALS candidateALS = alsService.replaceLB(sourceALS.copy(), lbId, replacement);
             preview = projectService.previewALSReplacement(projectId, alsId, candidateALS);
             updatedALS = candidateALS;
@@ -818,7 +818,7 @@ public class ProjectController
             projectService.findLBInProject(projectId, alsId, lbId);
             lb.setId(lbId);
             LB replacement = LBDtoMapper.toDomain(
-                    lb, TypeLbFactory.forLB(sizeBounds, lb.getType()));
+                    lb, TypeLb.valueOf(lb.getType()));
             ALS savedALS = projectService.saveLBAtProject(
                     projectId,
                     alsId,
@@ -989,8 +989,8 @@ public class ProjectController
                             ? alsService.findById(als.getId()) : null;
                     ALS restored = ALSDtoMapper.toDomain(
                             als,
-                            candidate -> TypeLbFactory.forLB(sizeBounds, candidate.getType()),
-                            candidate -> TypeLbFactory.forLBC(sizeBounds, candidate.getType()),
+                            candidate -> TypeLb.valueOf(candidate.getType()),
+                            candidate -> TypeLb.valueOf(candidate.getType()),
                             equipmentCatalogService::findById,
                             sizeBounds
                     );
@@ -1012,8 +1012,8 @@ public class ProjectController
                     ? alsService.findById(dto.getId()) : null;
             ALS restored = ALSDtoMapper.toDomain(
                     dto,
-                    candidate -> TypeLbFactory.forLB(sizeBounds, candidate.getType()),
-                    candidate -> TypeLbFactory.forLBC(sizeBounds, candidate.getType()),
+                    candidate -> TypeLb.valueOf(candidate.getType()),
+                    candidate -> TypeLb.valueOf(candidate.getType()),
                     equipmentCatalogService::findById,
                     sizeBounds
             );
@@ -1043,7 +1043,7 @@ public class ProjectController
     private LBDTO addLBImage(LBDTO dto) {
         try {
             return toDtoWithImage(LBDtoMapper.toDomain(
-                    dto, TypeLbFactory.forLB(sizeBounds, dto.getType())));
+                    dto, TypeLb.valueOf(dto.getType())));
         } catch (ValidationSizeException | IllegalArgumentException | IllegalStateException
                  | NoSuchElementException exception) {
             return dto;

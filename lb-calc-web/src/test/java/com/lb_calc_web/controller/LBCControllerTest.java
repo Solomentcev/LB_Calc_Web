@@ -86,7 +86,7 @@ class LBCControllerTest {
         return new LBC(
                 1940, 500, 600, 100, 100,
                 Colors.Blue, Colors.White,
-                new TypeLb("TYPE1", 100, 5, 20),
+                TypeLb.TYPE1,
                 10, DirectionDoorOpening.LEFT, 20,
                 new ControlConfiguration(functional, equipment),
                 TestDataFactory.createSizeBounds()

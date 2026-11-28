@@ -34,12 +34,6 @@ public interface SizeBounds {
     int getDepthMax();
     int getDoorThicknessMin();
     int getDoorThicknessMax();
-    int getTypeDeltaWidthMin();
-    int getTypeDeltaWidthMax();
-    int getTypeShelfThickMin();
-    int getTypeShelfThickMax();
-    int getTypeServiceZoneWidthMin();
-    int getTypeServiceZoneWidthMax();
 
     int getHeightDefault();
     int getWidthDefault();

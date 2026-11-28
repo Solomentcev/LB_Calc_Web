@@ -16,7 +16,6 @@ import com.lb_calc_web.entity.EquipmentEntity;
 import com.lb_calc_web.mapper.entity.LBCEntityMapper;
 import com.lb_calc_web.repository.LBCRepository;
 import com.lb_calc_web.repository.EquipmentRepository;
-import com.lb_calc_web.service.factory.TypeLbFactory;
 import com.lb_calc_web.service.validation.ValidationResult;
 import com.lb_calc_web.service.validation.ValidationSizeException;
 import com.lb_calc_web.service.validation.size.SizeValidator;
@@ -84,8 +83,7 @@ public class LBCService {
             Colors colorBody,
             Colors colorDoor
     ) {
-        TypeLb typeLb = TypeLbFactory.forLBC(
-                sizeBounds, sizeBounds.getDefaultLbcTypeName());
+        TypeLb typeLb = TypeLb.TYPE1;
         FunctionalConfiguration functional = sizeBounds.getLbcDefaultFunctionalConfiguration();
 
         ControlConfiguration controlConfiguration = new ControlConfiguration(functional, Map.of());
@@ -212,8 +210,7 @@ public class LBCService {
                         domain.getHeight(), domain.getWidth(), domain.getDepth(),
                         domain.getUpperFrame(), domain.getBottomFrame(),
                         domain.getColorBody(), domain.getColorDoor(),
-                        typeLb.getType(), typeLb.getDeltaWidth(), typeLb.getShelfThick(),
-                        typeLb.getServiceZoneWidth(), domain.getDoorThickness(),
+                        typeLb, domain.getDoorThickness(),
                         domain.getDirectionDoorOpening(), domain.getCountCells())
                 .stream()
                 .filter(entity -> !Objects.equals(entity.getId(), domain.getId()))

@@ -31,12 +31,8 @@ public final class LBEntityMapper {
             return null;
         }
 
-        TypeLb typeLb = new TypeLb(
-                entity.getType(),
-                entity.getDeltaWidth(),
-                entity.getShelfThick(),
-                entity.getServiceZoneWidth()
-        );
+        TypeLb typeLb = Objects.requireNonNull(entity.getType(),
+                "Конструктивный тип LB не должен быть null");
 
         LB domain = new LB(
                 entity.getHeight(),

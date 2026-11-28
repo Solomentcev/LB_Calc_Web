@@ -51,12 +51,7 @@ class LBCImageServiceTest {
                         100,
                         Colors.Blue,
                         Colors.White,
-                        new TypeLb(
-                                "TYPE1",
-                                100,
-                                5,
-                                20
-                        ),
+                        TypeLb.TYPE1,
                         10,
                         DirectionDoorOpening.LEFT,
                         20,
@@ -115,7 +110,7 @@ class LBCImageServiceTest {
         LBC lbc = new LBC(
                 1940, 500, 600, 100, 100,
                 Colors.Blue, Colors.White,
-                new TypeLb("TYPE1", 100, 5, 20),
+                TypeLb.TYPE1,
                 10, DirectionDoorOpening.LEFT, 20, control,
                 TestDataFactory.createSizeBounds()
         );
@@ -139,8 +134,8 @@ class LBCImageServiceTest {
 
         // Берём точки внутри зон, вдали от скруглённых границ и сглаживания.
         int y = 15 * 3 + 1;
-        int leftSideX = 5 * 3 + 1;
-        int rightSideX = 45 * 3 + 1;
+        int leftSideX = 2 * 3 + 1;
+        int rightSideX = 48 * 3 + 1;
 
         assertEquals(new Color(Colors.White.getRgb()).getRGB(), leftImage.getRGB(leftSideX, y));
         assertEquals(new java.awt.Color(Colors.Blue.getRgb()).getRGB(), leftImage.getRGB(rightSideX, y));
@@ -162,7 +157,7 @@ class LBCImageServiceTest {
         return new LBC(
                 1940, 500, 600, 100, 100,
                 Colors.Blue, Colors.White,
-                new TypeLb("TYPE1", 100, 5, 100),
+                TypeLb.TYPE1,
                 10, direction, 20, control,
                 TestDataFactory.createSizeBounds()
         );

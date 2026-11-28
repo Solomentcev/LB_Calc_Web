@@ -41,12 +41,7 @@ public final class TestDataFactory {
     }
 
     private static TypeLb type1() {
-        return new TypeLb(
-                "TYPE1",
-                100,
-                5,
-                40
-        );
+        return TypeLb.TYPE1;
     }
 
     public static SizeBounds createSizeBounds() {
@@ -135,9 +130,6 @@ public final class TestDataFactory {
         lb.setCountCells(3);
         TypeLb type = type1();
         lb.setType(type.getType());
-        lb.setShelfThick(type.getShelfThick());
-        lb.setDeltaWidth(type.getDeltaWidth());
-        lb.setServiceZoneWidth(type.getServiceZoneWidth());
 
         lb.setDoorThickness(20);
         lb.setDirectionDoorOpening(
@@ -156,13 +148,7 @@ public final class TestDataFactory {
 
     /** Восстанавливает LB для теста с типом, заданным в тестовом DTO. */
     public static LB restoreLB(LBDTO dto) {
-        TypeLb typeLb = new TypeLb(
-                dto.getType(),
-                dto.getDeltaWidth(),
-                dto.getShelfThick(),
-                dto.getServiceZoneWidth()
-        );
-        return com.lb_calc_web.mapper.dto.LBDtoMapper.toDomain(dto, typeLb);
+        return com.lb_calc_web.mapper.dto.LBDtoMapper.toDomain(dto, TypeLb.valueOf(dto.getType()));
     }
 
     public static LBCDTO validLBCDTO(Long id) {
@@ -178,9 +164,6 @@ public final class TestDataFactory {
         lbc.setCountCells(3);
         TypeLb type = type1();
         lbc.setType(type.getType());
-        lbc.setShelfThick(type.getShelfThick());
-        lbc.setDeltaWidth(type.getDeltaWidth());
-        lbc.setServiceZoneWidth(type.getServiceZoneWidth());
 
         lbc.setDoorThickness(20);
         lbc.setDirectionDoorOpening(
@@ -305,10 +288,8 @@ return als;
     public static ALS restoreALS(ALSDTO dto) {
         return ALSDtoMapper.toDomain(
                 dto,
-                value -> new TypeLb(value.getType(), value.getDeltaWidth(),
-                        value.getShelfThick(), value.getServiceZoneWidth()),
-                value -> new TypeLb(value.getType(), value.getDeltaWidth(),
-                        value.getShelfThick(), value.getServiceZoneWidth()),
+                value -> TypeLb.valueOf(value.getType()),
+                value -> TypeLb.valueOf(value.getType()),
                 equipmentId -> {
                     throw new IllegalStateException("Оборудование в тестовой конфигурации не загружается");
                 },

@@ -1,6 +1,7 @@
 package com.lb_calc_web.service;
 
 import com.lb_calc_web.TestDataFactory;
+import com.lb_calc_web.domain.attributes.TypeLb;
 import com.lb_calc_web.domain.model.LB;
 import com.lb_calc_web.dto.LBDTO;
 import com.lb_calc_web.service.validation.ValidationResult;
@@ -60,8 +61,7 @@ class LBServiceTest {
         doReturn(7L).when(existingWithId).getId();
         when(lbRepository.findCandidates(
                 anyInt(), anyInt(), anyInt(), anyInt(), anyInt(),
-                anyString(), anyInt(), anyInt(), anyInt(), anyInt(),
-                any(), anyInt(), any(), any()
+                any(TypeLb.class), anyInt(), any(), anyInt(), any(), any()
         )).thenReturn(List.of(existingWithId));
 
         LB result = lbService.saveLB(domain);
@@ -83,8 +83,7 @@ class LBServiceTest {
         when(lbRepository.findById(7L)).thenReturn(Optional.of(existing));
         when(lbRepository.findCandidates(
                 anyInt(), anyInt(), anyInt(), anyInt(), anyInt(),
-                anyString(), anyInt(), anyInt(), anyInt(), anyInt(),
-                any(), anyInt(), any(), any()
+                any(TypeLb.class), anyInt(), any(), anyInt(), any(), any()
         )).thenReturn(List.of(existing));
         when(lbRepository.save(any(LBEntity.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
@@ -103,8 +102,7 @@ class LBServiceTest {
         doReturn(9L).when(saved).getId();
         when(lbRepository.findCandidates(
                 anyInt(), anyInt(), anyInt(), anyInt(), anyInt(),
-                anyString(), anyInt(), anyInt(), anyInt(), anyInt(),
-                any(), anyInt(), any(), any()
+                any(TypeLb.class), anyInt(), any(), anyInt(), any(), any()
         )).thenReturn(List.of());
         when(lbRepository.save(any(LBEntity.class))).thenReturn(saved);
 

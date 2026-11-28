@@ -245,10 +245,8 @@ class ALSServiceTest {
     private ALS restoreAlsDto(ALSDTO dto) {
         return ALSDtoMapper.toDomain(
                 dto,
-                value -> new TypeLb(value.getType(), value.getDeltaWidth(),
-                        value.getShelfThick(), value.getServiceZoneWidth()),
-                value -> new TypeLb(value.getType(), value.getDeltaWidth(),
-                        value.getShelfThick(), value.getServiceZoneWidth()),
+                value -> TypeLb.valueOf(value.getType()),
+                value -> TypeLb.valueOf(value.getType()),
                 equipmentId -> {
                     throw new IllegalStateException(
                             "Оборудование в этом тесте не должно загружаться");

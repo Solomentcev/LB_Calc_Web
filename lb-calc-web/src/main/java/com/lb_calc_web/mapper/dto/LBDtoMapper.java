@@ -39,9 +39,6 @@ public final class LBDtoMapper {
 
         TypeLb typeLb = domain.getTypeLb();
         dto.setType(typeLb.getType());
-        dto.setShelfThick(typeLb.getShelfThick());
-        dto.setDeltaWidth(typeLb.getDeltaWidth());
-        dto.setServiceZoneWidth(typeLb.getServiceZoneWidth());
         dto.setDoorThickness(domain.getDoorThickness());
         return dto;
     }

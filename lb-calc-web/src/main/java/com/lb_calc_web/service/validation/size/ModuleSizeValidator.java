@@ -260,7 +260,6 @@ public class ModuleSizeValidator {
             return result;
         }
 
-        validateType(result, typeLb, objectType);
 
         boolean lbcModule = module instanceof LBC;
         long storageWidthMin = (long) bounds.getWidthCellMin()
@@ -370,30 +369,6 @@ public class ModuleSizeValidator {
         validateRange(result, "widthCell", widthCell,
                 bounds.getWidthCellMin(), widthCellMax,
                 "Ширина ячейки");
-    }
-
-    private void validateType(
-            ValidationResult result,
-            TypeLb typeLb,
-            String moduleType
-    ) {
-        validateRange(result, "deltaWidth", typeLb.getDeltaWidth(),
-                bounds.getTypeDeltaWidthMin(),
-                bounds.getTypeDeltaWidthMax(), "Добавочная ширина");
-        validateRange(result, "shelfThick", typeLb.getShelfThick(),
-                bounds.getTypeShelfThickMin(),
-                bounds.getTypeShelfThickMax(), "Толщина полки");
-        validateRange(result, "serviceZoneWidth",
-                typeLb.getServiceZoneWidth(),
-                bounds.getTypeServiceZoneWidthMin(),
-                bounds.getTypeServiceZoneWidthMax(),
-                "Ширина сервисной зоны");
-
-        if (typeLb.getType().isBlank()) {
-            addError(result, "type",
-                    "Тип модуля " + moduleType + " не указан",
-                    null, null, null);
-        }
     }
 
     private long requiredLBCControlWidth(LBC lbc) {

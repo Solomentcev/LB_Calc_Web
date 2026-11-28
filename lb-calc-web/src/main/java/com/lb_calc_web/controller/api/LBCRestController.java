@@ -1,12 +1,12 @@
 package com.lb_calc_web.controller.api;
 
+import com.lb_calc_web.domain.attributes.TypeLb;
 import com.lb_calc_web.controller.api.response.ApiResponse;
 import com.lb_calc_web.domain.model.LBC;
 import com.lb_calc_web.dto.LBCDTO;
 import com.lb_calc_web.mapper.dto.LBCDtoMapper;
 import com.lb_calc_web.service.LBCService;
 import com.lb_calc_web.service.EquipmentCatalogService;
-import com.lb_calc_web.service.factory.TypeLbFactory;
 import com.lb_calc_web.service.validation.size.SizeBounds;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
@@ -152,7 +152,7 @@ public class LBCRestController {
     public ResponseEntity<ApiResponse<LBCDTO>> saveLBC(@RequestBody @Valid LBCDTO dto) {
         LBC domain = LBCDtoMapper.toDomain(
                 dto,
-                TypeLbFactory.forLBC(sizeBounds, dto.getType()),
+                TypeLb.valueOf(dto.getType()),
                 equipmentCatalogService::findById, sizeBounds
         );
         lbcService.prepareFunctionalEquipment(domain, dto.isEquipmentProvided());

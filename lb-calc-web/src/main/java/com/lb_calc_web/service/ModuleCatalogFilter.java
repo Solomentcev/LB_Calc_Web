@@ -3,6 +3,7 @@ package com.lb_calc_web.service;
 import com.lb_calc_web.domain.attributes.Colors;
 import com.lb_calc_web.domain.attributes.DirectionDoorOpening;
 import com.lb_calc_web.domain.attributes.PositionControlModule;
+import com.lb_calc_web.domain.attributes.TypeLb;
 import com.lb_calc_web.domain.equipment.AccessPurpose;
 import com.lb_calc_web.domain.equipment.DisplayPurpose;
 import com.lb_calc_web.domain.equipment.PaymentPurpose;
@@ -12,7 +13,7 @@ import com.lb_calc_web.domain.equipment.PrinterPurpose;
 public record ModuleCatalogFilter(
         Long id,
         String name,
-        String type,
+        TypeLb type,
         Integer heightMin,
         Integer heightMax,
         Integer widthMin,

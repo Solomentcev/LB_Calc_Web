@@ -1,6 +1,7 @@
 package com.lb_calc_web.service;
 
 import com.lb_calc_web.TestDataFactory;
+import com.lb_calc_web.domain.attributes.TypeLb;
 import com.lb_calc_web.domain.equipment.AccessPurpose;
 import com.lb_calc_web.domain.equipment.DisplayPurpose;
 import com.lb_calc_web.domain.equipment.Equipment;
@@ -234,8 +235,7 @@ class LBCServiceTest {
         LBCEntity saved = spy(LBCEntityMapper.toEntity(domain, equipmentModel -> equipmentRepository.findById(equipmentModel.getId()).orElseThrow()));
         doReturn(100L).when(saved).getId();
         when(repository.findCandidates(anyInt(), anyInt(), anyInt(), anyInt(), anyInt(),
-                any(), any(), anyString(), anyInt(), anyInt(), anyInt(), anyInt(),
-                any(), anyInt())).thenReturn(List.of());
+                any(), any(), any(TypeLb.class), anyInt(), any(), anyInt())).thenReturn(List.of());
         when(repository.save(any(LBCEntity.class))).thenReturn(saved);
 
         LBC result = service.saveLBC(domain);

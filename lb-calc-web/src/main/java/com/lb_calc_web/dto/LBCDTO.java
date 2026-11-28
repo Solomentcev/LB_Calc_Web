@@ -33,12 +33,6 @@ public class LBCDTO {
     @Schema(description = "Высота нижней рамы, мм.")
     private int bottomFrame;
 
-    @Schema(description = "Толщина полки, мм.")
-    private int shelfThick;
-    @Schema(description = "Поправка ширины модуля, мм.")
-    private int deltaWidth;
-    @Schema(description = "Ширина сервисной зоны, мм.")
-    private int serviceZoneWidth;
     @Schema(description = "Толщина двери, мм.")
     private int doorThickness;
 
@@ -140,30 +134,6 @@ public class LBCDTO {
 
     public void setBottomFrame(int bottomFrame) {
         this.bottomFrame = bottomFrame;
-    }
-
-    public int getShelfThick() {
-        return shelfThick;
-    }
-
-    public void setShelfThick(int shelfThick) {
-        this.shelfThick = shelfThick;
-    }
-
-    public int getDeltaWidth() {
-        return deltaWidth;
-    }
-
-    public void setDeltaWidth(int deltaWidth) {
-        this.deltaWidth = deltaWidth;
-    }
-
-    public int getServiceZoneWidth() {
-        return serviceZoneWidth;
-    }
-
-    public void setServiceZoneWidth(int serviceZoneWidth) {
-        this.serviceZoneWidth = serviceZoneWidth;
     }
 
     public int getDoorThickness() {
@@ -269,22 +239,23 @@ public class LBCDTO {
         if (!(object instanceof LBCDTO other)) return false;
         return height == other.height && width == other.width && depth == other.depth
                 && upperFrame == other.upperFrame && bottomFrame == other.bottomFrame
-                && shelfThick == other.shelfThick && deltaWidth == other.deltaWidth
-                && serviceZoneWidth == other.serviceZoneWidth && doorThickness == other.doorThickness
-                && countCells == other.countCells && Double.compare(heightCell, other.heightCell) == 0
+                && doorThickness == other.doorThickness && countCells == other.countCells
+                && Double.compare(heightCell, other.heightCell) == 0
                 && widthCell == other.widthCell && depthCell == other.depthCell
                 && Objects.equals(type, other.type)
                 && Objects.equals(directionDoorOpening, other.directionDoorOpening)
-                && Objects.equals(colorDoor, other.colorDoor) && Objects.equals(colorBody, other.colorBody)
+                && Objects.equals(colorDoor, other.colorDoor)
+                && Objects.equals(colorBody, other.colorBody)
                 && Objects.equals(functionalConfiguration, other.functionalConfiguration);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(type, height, width, depth, upperFrame, bottomFrame, shelfThick,
-                deltaWidth, serviceZoneWidth, doorThickness, countCells, heightCell,
-                widthCell, depthCell, directionDoorOpening, colorDoor, colorBody,
-                functionalConfiguration);
+        return Objects.hash(
+                type, height, width, depth, upperFrame, bottomFrame,
+                doorThickness, countCells, heightCell, widthCell, depthCell,
+                directionDoorOpening, colorDoor, colorBody, functionalConfiguration
+        );
     }
 
     @Override

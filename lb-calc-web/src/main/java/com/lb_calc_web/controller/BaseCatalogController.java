@@ -1,5 +1,6 @@
 package com.lb_calc_web.controller;
 
+import com.lb_calc_web.domain.attributes.TypeLb;
 import com.lb_calc_web.domain.attributes.Colors;
 import com.lb_calc_web.domain.attributes.DirectionDoorOpening;
 import com.lb_calc_web.domain.attributes.PositionControlModule;
@@ -7,7 +8,6 @@ import com.lb_calc_web.domain.equipment.AccessPurpose;
 import com.lb_calc_web.domain.equipment.DisplayPurpose;
 import com.lb_calc_web.domain.equipment.PaymentPurpose;
 import com.lb_calc_web.domain.equipment.PrinterPurpose;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.ModelAttribute;
 
 import java.util.Arrays;
@@ -19,9 +19,6 @@ public abstract class BaseCatalogController {
     protected final List<Colors> colorsList = Arrays.asList(Colors.values());
     protected final List<PositionControlModule> positionControlModuleList =
             Arrays.asList(PositionControlModule.values());
-
-    @Value("${lb.types}")
-    private String lbTypes;
 
     protected final List<DirectionDoorOpening> directionDoorOpeningList =
             Arrays.asList(DirectionDoorOpening.values());
@@ -80,14 +77,8 @@ public abstract class BaseCatalogController {
         return directionDoorOpeningList;
     }
 
-    /** Разбирает настройку lb.types и возвращает список непустых типов. */
+    /** Возвращает все поддерживаемые конструктивные типы модулей хранения. */
     private List<String> getTypeLbList() {
-        if (lbTypes == null || lbTypes.isBlank()) {
-            return List.of();
-        }
-        return Arrays.stream(lbTypes.split(","))
-                .map(String::trim)
-                .filter(type -> !type.isBlank())
-                .toList();
+        return Arrays.stream(TypeLb.values()).map(Enum::name).toList();
     }
 }

@@ -27,7 +27,7 @@ class LBCDomainTest {
         FunctionalConfiguration functional = new FunctionalConfiguration(
                 DisplayPurpose.INCH_10, Set.of(), PaymentPurpose.NONE, PrinterPurpose.ABSENT);
         LBC module = new LBC(1940, 500, 600, 100, 100,
-                Colors.Blue, Colors.White, new TypeLb("TYPE1", 100, 5, 40),
+                Colors.Blue, Colors.White, TypeLb.TYPE1,
                 10, DirectionDoorOpening.LEFT, 20,
                 new ControlConfiguration(functional, Map.of()),
                 TestDataFactory.createSizeBounds());
@@ -45,7 +45,7 @@ class LBCDomainTest {
         FunctionalConfiguration functional = new FunctionalConfiguration(
                 DisplayPurpose.INCH_10, Set.of(), PaymentPurpose.NONE, PrinterPurpose.ABSENT);
         LBC module = new LBC(1940, 500, 600, 100, 100,
-                Colors.Blue, Colors.White, new TypeLb("TYPE1", 100, 5, 40),
+                Colors.Blue, Colors.White, TypeLb.TYPE1,
                 10, DirectionDoorOpening.LEFT, 20,
                 new ControlConfiguration(functional, Map.of(display, 1)),
                 TestDataFactory.createSizeBounds());
@@ -63,7 +63,7 @@ class LBCDomainTest {
         FunctionalConfiguration functional = new FunctionalConfiguration(
                 DisplayPurpose.INCH_10, Set.of(), PaymentPurpose.NONE, PrinterPurpose.ABSENT);
         LBC module = new LBC(1940, 200, 600, 100, 100,
-                Colors.Blue, Colors.White, new TypeLb("TYPE3", 160, 5, 40),
+                Colors.Blue, Colors.White, TypeLb.TYPE3,
                 10, DirectionDoorOpening.LEFT, 20,
                 new ControlConfiguration(functional, Map.of(display, 1)),
                 TestDataFactory.createSizeBounds());
@@ -77,23 +77,16 @@ class LBCDomainTest {
     void storageCellWidthForLbcIsAtLeastTwoHundredForEveryType() {
         FunctionalConfiguration functional = new FunctionalConfiguration(
                 DisplayPurpose.NONE, Set.of(), PaymentPurpose.NONE, PrinterPurpose.ABSENT);
-        Map<String, Integer> typeDeltas = Map.of(
-                "TYPE1", 100,
-                "TYPE2", 100,
-                "TYPE3", 160,
-                "TYPE4", 60
-        );
-
-        typeDeltas.forEach((type, deltaWidth) -> {
+        for (TypeLb type : TypeLb.values()) {
             LBC module = new LBC(1940, 200, 600, 100, 100,
-                    Colors.Blue, Colors.White, new TypeLb(type, deltaWidth, 5, 40),
+                    Colors.Blue, Colors.White, type,
                     10, DirectionDoorOpening.LEFT, 20,
                     new ControlConfiguration(functional, Map.of()),
-                TestDataFactory.createSizeBounds());
+                    TestDataFactory.createSizeBounds());
 
-            assertEquals(200, module.getCellWidth(), type);
-            assertEquals(200 + deltaWidth, module.getWidth(), type);
-        });
+            assertEquals(200, module.getCellWidth(), type.name());
+            assertEquals(200 + type.getDeltaWidth(), module.getWidth(), type.name());
+        }
     }
 
     @Test
@@ -114,7 +107,7 @@ class LBCDomainTest {
                 100,
                 Colors.Blue,
                 Colors.White,
-                new TypeLb("TYPE1", 100, 5, 20),
+                TypeLb.TYPE1,
                 10,
                 DirectionDoorOpening.LEFT,
                 20,

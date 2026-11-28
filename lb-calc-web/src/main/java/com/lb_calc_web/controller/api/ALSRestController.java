@@ -1,5 +1,6 @@
 package com.lb_calc_web.controller.api;
 
+import com.lb_calc_web.domain.attributes.TypeLb;
 import com.lb_calc_web.controller.api.response.ApiResponse;
 import com.lb_calc_web.dto.ALSDTO;
 import com.lb_calc_web.mapper.dto.ALSDtoMapper;
@@ -12,7 +13,6 @@ import com.lb_calc_web.mapper.dto.LCDtoMapper;
 import com.lb_calc_web.dto.LBCDTO;
 import com.lb_calc_web.service.ALSService;
 import com.lb_calc_web.service.EquipmentCatalogService;
-import com.lb_calc_web.service.factory.TypeLbFactory;
 import com.lb_calc_web.service.validation.size.SizeBounds;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
@@ -196,8 +196,8 @@ toDto(alsService.createALS())
 
             ALS restored = ALSDtoMapper.toDomain(
                     dto,
-                    candidate -> TypeLbFactory.forLB(sizeBounds, candidate.getType()),
-                    candidate -> TypeLbFactory.forLBC(sizeBounds, candidate.getType()),
+                    candidate -> TypeLb.valueOf(candidate.getType()),
+                    candidate -> TypeLb.valueOf(candidate.getType()),
                     equipmentCatalogService::findById,
                     sizeBounds
             );
@@ -231,8 +231,8 @@ toDto(alsService.createALS())
             ALS existing = alsService.findById(id);
             ALS restored = ALSDtoMapper.toDomain(
                     dto,
-                    candidate -> TypeLbFactory.forLB(sizeBounds, candidate.getType()),
-                    candidate -> TypeLbFactory.forLBC(sizeBounds, candidate.getType()),
+                    candidate -> TypeLb.valueOf(candidate.getType()),
+                    candidate -> TypeLb.valueOf(candidate.getType()),
                     equipmentCatalogService::findById,
                     sizeBounds
             );
@@ -306,7 +306,7 @@ toDto(alsService.createALS())
 
             LBC replacement = LBCDtoMapper.toDomain(
                     lbc,
-                    TypeLbFactory.forLBC(sizeBounds, lbc.getType()),
+                    TypeLb.valueOf(lbc.getType()),
                     equipmentCatalogService::findById,
                     sizeBounds
             );

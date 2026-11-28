@@ -26,9 +26,6 @@ public interface LBRepository extends JpaRepository<LBEntity, Long>, JpaSpecific
               and entity.upperFrame = :upperFrame
               and entity.bottomFrame = :bottomFrame
               and entity.type = :type
-              and entity.deltaWidth = :deltaWidth
-              and entity.shelfThick = :shelfThick
-              and entity.serviceZoneWidth = :serviceZoneWidth
               and entity.doorThickness = :doorThickness
               and entity.directionDoorOpening = :directionDoorOpening
               and entity.countCells = :countCells
@@ -41,10 +38,7 @@ public interface LBRepository extends JpaRepository<LBEntity, Long>, JpaSpecific
             @Param("depth") int depth,
             @Param("upperFrame") int upperFrame,
             @Param("bottomFrame") int bottomFrame,
-            @Param("type") String type,
-            @Param("deltaWidth") int deltaWidth,
-            @Param("shelfThick") int shelfThick,
-            @Param("serviceZoneWidth") int serviceZoneWidth,
+            @Param("type") com.lb_calc_web.domain.attributes.TypeLb type,
             @Param("doorThickness") int doorThickness,
             @Param("directionDoorOpening") DirectionDoorOpening directionDoorOpening,
             @Param("countCells") int countCells,

@@ -623,7 +623,7 @@ class PersistenceIntegrationTest {
                     projectId,
                     changedALS.getId(),
                     changedLB.getId(),
-                    LBDtoMapper.toDomain(changedLBDTO, new TypeLb(changedLBDTO.getType(), changedLBDTO.getDeltaWidth(), changedLBDTO.getShelfThick(), changedLBDTO.getServiceZoneWidth()))
+                    LBDtoMapper.toDomain(changedLBDTO, TypeLb.valueOf(changedLBDTO.getType()))
             );
 
             Long removedLBId = changedALS.getStorageModules().stream()
@@ -672,7 +672,7 @@ class PersistenceIntegrationTest {
                     projectId,
                     independentAlsId,
                     changedLBCDTO.getId(),
-                    LBCDtoMapper.toDomain(changedLBCDTO, new TypeLb(changedLBCDTO.getType(), changedLBCDTO.getDeltaWidth(), changedLBCDTO.getShelfThick(), changedLBCDTO.getServiceZoneWidth()), equipmentCatalogService::findById, TestDataFactory.createSizeBounds()),
+                    LBCDtoMapper.toDomain(changedLBCDTO, TypeLb.valueOf(changedLBCDTO.getType()), equipmentCatalogService::findById, TestDataFactory.createSizeBounds()),
                     changedLBCDTO.isEquipmentProvided()
             );
             assertEquals(
@@ -775,10 +775,8 @@ class PersistenceIntegrationTest {
     private ALS restoreAlsDto(ALSDTO dto) {
         return ALSDtoMapper.toDomain(
                 dto,
-                value -> new TypeLb(value.getType(), value.getDeltaWidth(),
-                        value.getShelfThick(), value.getServiceZoneWidth()),
-                value -> new TypeLb(value.getType(), value.getDeltaWidth(),
-                        value.getShelfThick(), value.getServiceZoneWidth()),
+                value -> TypeLb.valueOf(value.getType()),
+                value -> TypeLb.valueOf(value.getType()),
                 equipmentCatalogService::findById,
                 TestDataFactory.createSizeBounds()
         );

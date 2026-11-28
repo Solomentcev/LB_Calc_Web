@@ -5,7 +5,6 @@ import org.springframework.stereotype.Component;
 import com.lb_calc_web.domain.attributes.Colors;
 import com.lb_calc_web.domain.attributes.DirectionDoorOpening;
 import com.lb_calc_web.domain.attributes.PositionControlModule;
-import com.lb_calc_web.domain.attributes.TypeLb;
 import com.lb_calc_web.domain.equipment.AccessPurpose;
 import com.lb_calc_web.domain.equipment.DisplayPurpose;
 import com.lb_calc_web.domain.equipment.PaymentPurpose;
@@ -13,7 +12,6 @@ import com.lb_calc_web.domain.equipment.PrinterPurpose;
 import com.lb_calc_web.domain.model.FunctionalConfiguration;
 import java.util.Arrays;
 import java.util.EnumSet;
-import java.util.List;
 import java.util.Set;
 
 /** Конфигурация размерных ограничений и значений по умолчанию модулей. */
@@ -40,12 +38,6 @@ public class SizeBounds implements com.lb_calc_web.domain.geometry.SizeBounds {
     private final int depthMax;
     private final int doorThicknessMin;
     private final int doorThicknessMax;
-    private final int typeDeltaWidthMin;
-    private final int typeDeltaWidthMax;
-    private final int typeShelfThickMin;
-    private final int typeShelfThickMax;
-    private final int typeServiceZoneWidthMin;
-    private final int typeServiceZoneWidthMax;
     private final int heightDefault;
     private final int widthDefault;
     private final int depthDefault;
@@ -63,36 +55,6 @@ public class SizeBounds implements com.lb_calc_web.domain.geometry.SizeBounds {
     private final int lbcTechnicalCellMinHeight;
     private final int lbcEquipmentClearance;
     private final int lbcDisplayCenterHeight;
-
-    @Value("${lb.types}") private String lbTypes;
-    @Value("${lb.type.default}") private String defaultLbTypeName;
-    @Value("${lbc.type.default}") private String defaultLbcTypeName;
-
-    @Value("${lb.type.TYPE1.delta-width}") private int lbType1DeltaWidth;
-    @Value("${lb.type.TYPE1.shelf-thick}") private int lbType1ShelfThick;
-    @Value("${lb.type.TYPE1.service-zone-width}") private int lbType1ServiceZoneWidth;
-    @Value("${lb.type.TYPE2.delta-width}") private int lbType2DeltaWidth;
-    @Value("${lb.type.TYPE2.shelf-thick}") private int lbType2ShelfThick;
-    @Value("${lb.type.TYPE2.service-zone-width}") private int lbType2ServiceZoneWidth;
-    @Value("${lb.type.TYPE3.delta-width}") private int lbType3DeltaWidth;
-    @Value("${lb.type.TYPE3.shelf-thick}") private int lbType3ShelfThick;
-    @Value("${lb.type.TYPE3.service-zone-width}") private int lbType3ServiceZoneWidth;
-    @Value("${lb.type.TYPE4.delta-width}") private int lbType4DeltaWidth;
-    @Value("${lb.type.TYPE4.shelf-thick}") private int lbType4ShelfThick;
-    @Value("${lb.type.TYPE4.service-zone-width}") private int lbType4ServiceZoneWidth;
-
-    @Value("${lbc.type.TYPE1.delta-width:${lb.type.TYPE1.delta-width}}") private int lbcType1DeltaWidth;
-    @Value("${lbc.type.TYPE1.shelf-thick:${lb.type.TYPE1.shelf-thick}}") private int lbcType1ShelfThick;
-    @Value("${lbc.type.TYPE1.service-zone-width:${lb.type.TYPE1.service-zone-width}}") private int lbcType1ServiceZoneWidth;
-    @Value("${lbc.type.TYPE2.delta-width:${lb.type.TYPE2.delta-width}}") private int lbcType2DeltaWidth;
-    @Value("${lbc.type.TYPE2.shelf-thick:${lb.type.TYPE2.shelf-thick}}") private int lbcType2ShelfThick;
-    @Value("${lbc.type.TYPE2.service-zone-width:${lb.type.TYPE2.service-zone-width}}") private int lbcType2ServiceZoneWidth;
-    @Value("${lbc.type.TYPE3.delta-width:${lb.type.TYPE3.delta-width}}") private int lbcType3DeltaWidth;
-    @Value("${lbc.type.TYPE3.shelf-thick:${lb.type.TYPE3.shelf-thick}}") private int lbcType3ShelfThick;
-    @Value("${lbc.type.TYPE3.service-zone-width:${lb.type.TYPE3.service-zone-width}}") private int lbcType3ServiceZoneWidth;
-    @Value("${lbc.type.TYPE4.delta-width:${lb.type.TYPE4.delta-width}}") private int lbcType4DeltaWidth;
-    @Value("${lbc.type.TYPE4.shelf-thick:${lb.type.TYPE4.shelf-thick}}") private int lbcType4ShelfThick;
-    @Value("${lbc.type.TYPE4.service-zone-width:${lb.type.TYPE4.service-zone-width}}") private int lbcType4ServiceZoneWidth;
 
     @Value("${lb.color.body.default}") private String lbDefaultBodyColor;
     @Value("${lb.color.door.default}") private String lbDefaultDoorColor;
@@ -136,12 +98,6 @@ public class SizeBounds implements com.lb_calc_web.domain.geometry.SizeBounds {
             @Value("${size.depth.max}") int depthMax,
             @Value("${size.door.thickness.min}") int doorThicknessMin,
             @Value("${size.door.thickness.max}") int doorThicknessMax,
-            @Value("${size.type.delta-width.min}") int typeDeltaWidthMin,
-            @Value("${size.type.delta-width.max}") int typeDeltaWidthMax,
-            @Value("${size.type.shelf-thick.min}") int typeShelfThickMin,
-            @Value("${size.type.shelf-thick.max}") int typeShelfThickMax,
-            @Value("${size.type.service-zone-width.min}") int typeServiceZoneWidthMin,
-            @Value("${size.type.service-zone-width.max}") int typeServiceZoneWidthMax,
             @Value("${size.height.default}") int heightDefault,
             @Value("${size.width.default}") int widthDefault,
             @Value("${size.depth.default}") int depthDefault,
@@ -180,12 +136,6 @@ public class SizeBounds implements com.lb_calc_web.domain.geometry.SizeBounds {
         this.depthMax = depthMax;
         this.doorThicknessMin = doorThicknessMin;
         this.doorThicknessMax = doorThicknessMax;
-        this.typeDeltaWidthMin = typeDeltaWidthMin;
-        this.typeDeltaWidthMax = typeDeltaWidthMax;
-        this.typeShelfThickMin = typeShelfThickMin;
-        this.typeShelfThickMax = typeShelfThickMax;
-        this.typeServiceZoneWidthMin = typeServiceZoneWidthMin;
-        this.typeServiceZoneWidthMax = typeServiceZoneWidthMax;
         this.heightDefault = heightDefault;
         this.widthDefault = widthDefault;
         this.depthDefault = depthDefault;
@@ -215,9 +165,6 @@ public class SizeBounds implements com.lb_calc_web.domain.geometry.SizeBounds {
         validateRange("ширина корпуса", widthMin, widthMax);
         validateRange("глубина ячейки", depthCellMin, depthCellMax);
         validateRange("толщина двери", doorThicknessMin, doorThicknessMax);
-        validateRange("добавочная ширина типа", typeDeltaWidthMin, typeDeltaWidthMax);
-        validateRange("толщина полки", typeShelfThickMin, typeShelfThickMax);
-        validateRange("ширина сервисной зоны", typeServiceZoneWidthMin, typeServiceZoneWidthMax);
 
         if (upperFrameMin <= 0 || bottomFrameMin <= 0
                 || heightMin <= 0 || widthMin <= 0 || depthMin <= 0
@@ -364,30 +311,6 @@ public class SizeBounds implements com.lb_calc_web.domain.geometry.SizeBounds {
         return doorThicknessMax;
     }
 
-    public int getTypeDeltaWidthMin() {
-        return typeDeltaWidthMin;
-    }
-
-    public int getTypeDeltaWidthMax() {
-        return typeDeltaWidthMax;
-    }
-
-    public int getTypeShelfThickMin() {
-        return typeShelfThickMin;
-    }
-
-    public int getTypeShelfThickMax() {
-        return typeShelfThickMax;
-    }
-
-    public int getTypeServiceZoneWidthMin() {
-        return typeServiceZoneWidthMin;
-    }
-
-    public int getTypeServiceZoneWidthMax() {
-        return typeServiceZoneWidthMax;
-    }
-
     /** Возвращает значение по умолчанию: heightDefault. */
     public int getHeightDefault() {
         return heightDefault;
@@ -424,42 +347,6 @@ public class SizeBounds implements com.lb_calc_web.domain.geometry.SizeBounds {
     }
 
 
-
-    /** Возвращает список поддерживаемых типов LB. */
-    public List<String> getLbTypes() {
-        return Arrays.stream(lbTypes.split(","))
-                .map(String::trim).filter(value -> !value.isBlank()).toList();
-    }
-
-    public String getDefaultLbTypeName() { return defaultLbTypeName; }
-    public String getDefaultLbcTypeName() { return defaultLbcTypeName; }
-
-    public TypeLb getLbType(String name) {
-        return switch (requireTypeName(name)) {
-            case "TYPE1" -> new TypeLb(name, lbType1DeltaWidth, lbType1ShelfThick, lbType1ServiceZoneWidth);
-            case "TYPE2" -> new TypeLb(name, lbType2DeltaWidth, lbType2ShelfThick, lbType2ServiceZoneWidth);
-            case "TYPE3" -> new TypeLb(name, lbType3DeltaWidth, lbType3ShelfThick, lbType3ServiceZoneWidth);
-            case "TYPE4" -> new TypeLb(name, lbType4DeltaWidth, lbType4ShelfThick, lbType4ServiceZoneWidth);
-            default -> throw new IllegalArgumentException("Неизвестный тип LB: " + name);
-        };
-    }
-
-    public TypeLb getLbcType(String name) {
-        return switch (requireTypeName(name)) {
-            case "TYPE1" -> new TypeLb(name, lbcType1DeltaWidth, lbcType1ShelfThick, lbcType1ServiceZoneWidth);
-            case "TYPE2" -> new TypeLb(name, lbcType2DeltaWidth, lbcType2ShelfThick, lbcType2ServiceZoneWidth);
-            case "TYPE3" -> new TypeLb(name, lbcType3DeltaWidth, lbcType3ShelfThick, lbcType3ServiceZoneWidth);
-            case "TYPE4" -> new TypeLb(name, lbcType4DeltaWidth, lbcType4ShelfThick, lbcType4ServiceZoneWidth);
-            default -> throw new IllegalArgumentException("Неизвестный тип LBC: " + name);
-        };
-    }
-
-    private static String requireTypeName(String name) {
-        if (name == null || name.isBlank()) {
-            throw new IllegalArgumentException("Тип модуля не указан");
-        }
-        return name;
-    }
 
     public Colors getLbDefaultBodyColor() { return enumValue(lbDefaultBodyColor, Colors.class); }
     public Colors getLbDefaultDoorColor() { return enumValue(lbDefaultDoorColor, Colors.class); }

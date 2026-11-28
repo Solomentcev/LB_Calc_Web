@@ -27,12 +27,6 @@ public class LBDTO {
     @Schema(description = "Высота нижней рамы, мм.")
     private int bottomFrame;
 
-    @Schema(description = "Толщина полки, мм.")
-    private int shelfThick;
-    @Schema(description = "Поправка ширины модуля, мм.")
-    private int deltaWidth;
-    @Schema(description = "Ширина сервисной зоны, мм.")
-    private int serviceZoneWidth;
     @Schema(description = "Толщина двери, мм.")
     private int doorThickness;
 
@@ -128,30 +122,6 @@ public class LBDTO {
         this.bottomFrame = bottomFrame;
     }
 
-    public int getShelfThick() {
-        return shelfThick;
-    }
-
-    public void setShelfThick(int shelfThick) {
-        this.shelfThick = shelfThick;
-    }
-
-    public int getDeltaWidth() {
-        return deltaWidth;
-    }
-
-    public void setDeltaWidth(int deltaWidth) {
-        this.deltaWidth = deltaWidth;
-    }
-
-    public int getServiceZoneWidth() {
-        return serviceZoneWidth;
-    }
-
-    public void setServiceZoneWidth(int serviceZoneWidth) {
-        this.serviceZoneWidth = serviceZoneWidth;
-    }
-
     public int getDoorThickness() {
         return doorThickness;
     }
@@ -241,9 +211,6 @@ public class LBDTO {
                 && depth == lbdto.depth
                 && upperFrame == lbdto.upperFrame
                 && bottomFrame == lbdto.bottomFrame
-                && shelfThick == lbdto.shelfThick
-                && deltaWidth == lbdto.deltaWidth
-                && serviceZoneWidth == lbdto.serviceZoneWidth
                 && doorThickness == lbdto.doorThickness
                 && countCells == lbdto.countCells
                 && Double.compare(heightCell, lbdto.heightCell) == 0
@@ -264,9 +231,6 @@ public class LBDTO {
                 depth,
                 upperFrame,
                 bottomFrame,
-                shelfThick,
-                deltaWidth,
-                serviceZoneWidth,
                 doorThickness,
                 countCells,
                 heightCell,
@@ -290,9 +254,6 @@ public class LBDTO {
                 ", depth=" + depth +
                 ", upperFrame=" + upperFrame +
                 ", bottomFrame=" + bottomFrame +
-                ", shelfThick=" + shelfThick +
-                ", deltaWidth=" + deltaWidth +
-                ", serviceZoneWidth=" + serviceZoneWidth +
                 ", doorThickness=" + doorThickness +
                 ", countCells=" + countCells +
                 ", heightCell=" + heightCell +

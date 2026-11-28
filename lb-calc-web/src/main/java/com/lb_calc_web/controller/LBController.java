@@ -1,12 +1,11 @@
 package com.lb_calc_web.controller;
 
+import com.lb_calc_web.domain.attributes.TypeLb;
 import com.lb_calc_web.domain.attributes.Colors;
 import com.lb_calc_web.domain.attributes.DirectionDoorOpening;
 import com.lb_calc_web.domain.model.LB;
 import com.lb_calc_web.dto.LBDTO;
 import com.lb_calc_web.mapper.dto.LBDtoMapper;
-import com.lb_calc_web.service.factory.TypeLbFactory;
-import com.lb_calc_web.service.validation.size.SizeBounds;
 import com.lb_calc_web.service.validation.ValidationSizeException;
 import com.lb_calc_web.service.LBService;
 import com.lb_calc_web.service.image.LBImageService;
@@ -28,7 +27,6 @@ public class LBController {
             LoggerFactory.getLogger(LBController.class);
 
     private final LBService lbService;
-    private final SizeBounds sizeBounds;
 
     private final List<Colors> colorsList =
             Arrays.asList(Colors.values());
@@ -37,11 +35,9 @@ public class LBController {
             Arrays.asList(DirectionDoorOpening.values());
 
     public LBController(
-            LBService lbService,
-            SizeBounds sizeBounds
+            LBService lbService
     ) {
         this.lbService = lbService;
-        this.sizeBounds = sizeBounds;
     }
 
     /**
@@ -89,7 +85,7 @@ public class LBController {
     public String refreshLB(@ModelAttribute("lb") LBDTO lb, Model model) {
         model.addAttribute("pageContext", "CATALOG");
         try {
-            lb = toDtoWithImage(LBDtoMapper.toDomain(lb, TypeLbFactory.forLB(sizeBounds, lb.getType())));
+            lb = toDtoWithImage(LBDtoMapper.toDomain(lb, TypeLb.valueOf(lb.getType())));
         } catch (IllegalArgumentException exception) {
             model.addAttribute("errors", List.of("Проверьте введённые параметры модуля."));
         }
@@ -116,7 +112,7 @@ public class LBController {
         try {
 
             LBDTO savedLB =
-                    LBDtoMapper.toDto(lbService.saveLB(LBDtoMapper.toDomain(lb, TypeLbFactory.forLB(sizeBounds, lb.getType()))));
+                    LBDtoMapper.toDto(lbService.saveLB(LBDtoMapper.toDomain(lb, TypeLb.valueOf(lb.getType()))));
 
             return "redirect:/lbs/" + savedLB.getId();
 
@@ -150,13 +146,12 @@ public class LBController {
     /**
      * Список доступных типов LB.
      *
-     * <p>Типы не являются Java enum.
-     * Они задаются в size-bounds.properties.</p>
+     * <p>Допустимые типы определяются перечислением TypeLb.</p>
      */
     @ModelAttribute("typeLbList")
     public List<String> typeLbList() {
 
-        return sizeBounds.getLbTypes();
+        return Arrays.stream(TypeLb.values()).map(Enum::name).toList();
     }
 
     /**

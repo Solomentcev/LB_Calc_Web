@@ -1,7 +1,10 @@
 package com.lb_calc_web.entity;
 
 import com.lb_calc_web.domain.attributes.DirectionDoorOpening;
+import com.lb_calc_web.domain.attributes.TypeLb;
 import jakarta.persistence.Column;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.MappedSuperclass;
@@ -27,32 +30,9 @@ public abstract class StorageModuleEntity extends ModuleEntity {
      *
      * <p>Соответствует {@code TypeLb.type} в domain.</p>
      */
-    @Column(name = "type", nullable = false)
-    private String type;
-
-    /**
-     * Добавочная ширина конструкции модуля, мм.
-     *
-     * <p>Соответствует {@code TypeLb.deltaWidth} в domain.</p>
-     */
-    @Column(name = "delta_width", nullable = false)
-    private int deltaWidth;
-
-    /**
-     * Толщина полки между ячейками, мм.
-     *
-     * <p>Соответствует {@code TypeLb.shelfThick} в domain.</p>
-     */
-    @Column(name = "shelf_thick", nullable = false)
-    private int shelfThick;
-
-    /**
-     * Ширина сервисной зоны, мм.
-     *
-     * <p>Соответствует {@code TypeLb.serviceZoneWidth} в domain.</p>
-     */
-    @Column(name = "service_zone_width", nullable = false)
-    private int serviceZoneWidth;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "type", nullable = false, length = 20)
+    private TypeLb type;
 
     /**
      * Толщина дверцы, мм.
@@ -97,40 +77,12 @@ public abstract class StorageModuleEntity extends ModuleEntity {
     protected StorageModuleEntity() {
     }
 
-    public String getType() {
+    public TypeLb getType() {
         return type;
     }
 
-    public void setType(String type) {
-        Objects.requireNonNull(type, "Тип модуля не должен быть null");
-        if (type.isBlank()) {
-            throw new IllegalArgumentException("Тип модуля не должен быть пустым");
-        }
-        this.type = type;
-    }
-
-    public int getDeltaWidth() {
-        return deltaWidth;
-    }
-
-    public void setDeltaWidth(int deltaWidth) {
-        this.deltaWidth = deltaWidth;
-    }
-
-    public int getShelfThick() {
-        return shelfThick;
-    }
-
-    public void setShelfThick(int shelfThick) {
-        this.shelfThick = shelfThick;
-    }
-
-    public int getServiceZoneWidth() {
-        return serviceZoneWidth;
-    }
-
-    public void setServiceZoneWidth(int serviceZoneWidth) {
-        this.serviceZoneWidth = serviceZoneWidth;
+    public void setType(TypeLb type) {
+        this.type = Objects.requireNonNull(type, "Тип модуля не должен быть null");
     }
 
     public int getDoorThickness() {
@@ -196,10 +148,7 @@ public abstract class StorageModuleEntity extends ModuleEntity {
         return "StorageModuleEntity{" +
                 "id=" + getId() +
                 ", name='" + getName() + '\'' +
-                ", type='" + type + '\'' +
-                ", deltaWidth=" + deltaWidth +
-                ", shelfThick=" + shelfThick +
-                ", serviceZoneWidth=" + serviceZoneWidth +
+                ", type=" + type +
                 ", doorThickness=" + doorThickness +
                 ", directionDoorOpening=" + directionDoorOpening +
                 ", countCells=" + countCells +

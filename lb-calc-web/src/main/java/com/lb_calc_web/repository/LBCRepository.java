@@ -28,9 +28,6 @@ public interface LBCRepository extends JpaRepository<LBCEntity, Long>, JpaSpecif
               and entity.colorBody = :colorBody
               and entity.colorDoor = :colorDoor
               and entity.type = :type
-              and entity.deltaWidth = :deltaWidth
-              and entity.shelfThick = :shelfThick
-              and entity.serviceZoneWidth = :serviceZoneWidth
               and entity.doorThickness = :doorThickness
               and entity.directionDoorOpening = :directionDoorOpening
               and entity.countCells = :countCells
@@ -43,10 +40,7 @@ public interface LBCRepository extends JpaRepository<LBCEntity, Long>, JpaSpecif
             @Param("bottomFrame") int bottomFrame,
             @Param("colorBody") Colors colorBody,
             @Param("colorDoor") Colors colorDoor,
-            @Param("type") String type,
-            @Param("deltaWidth") int deltaWidth,
-            @Param("shelfThick") int shelfThick,
-            @Param("serviceZoneWidth") int serviceZoneWidth,
+            @Param("type") com.lb_calc_web.domain.attributes.TypeLb type,
             @Param("doorThickness") int doorThickness,
             @Param("directionDoorOpening") DirectionDoorOpening directionDoorOpening,
             @Param("countCells") int countCells

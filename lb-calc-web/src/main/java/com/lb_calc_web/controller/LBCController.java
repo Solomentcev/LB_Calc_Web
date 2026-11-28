@@ -1,5 +1,6 @@
 package com.lb_calc_web.controller;
 
+import com.lb_calc_web.domain.attributes.TypeLb;
 import com.lb_calc_web.domain.model.LBC;
 import com.lb_calc_web.mapper.dto.EquipmentDtoMapper;
 import com.lb_calc_web.service.EquipmentCatalogService;
@@ -11,7 +12,6 @@ import com.lb_calc_web.service.LBCService;
 import com.lb_calc_web.service.ModuleCatalogFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.lb_calc_web.service.factory.TypeLbFactory;
 import com.lb_calc_web.service.validation.size.SizeBounds;
 import org.springframework.stereotype.Controller;
 import org.springframework.data.domain.Pageable;
@@ -118,7 +118,7 @@ public class LBCController extends BaseCatalogController {
         model.addAttribute("pageContext", "CATALOG");
         try {
             LBC domain = LBCDtoMapper.toDomain(
-                    lbc, TypeLbFactory.forLBC(sizeBounds, lbc.getType()),
+                    lbc, TypeLb.valueOf(lbc.getType()),
                     equipmentCatalogService::findById, sizeBounds);
             lbcService.prepareFunctionalEquipment(domain, lbc.isEquipmentProvided());
             lbcService.validateForSave(domain);
@@ -145,7 +145,7 @@ public class LBCController extends BaseCatalogController {
         model.addAttribute("pageContext", "CATALOG");
         try {
             LBC domain = LBCDtoMapper.toDomain(
-                    lbc, TypeLbFactory.forLBC(sizeBounds, lbc.getType()),
+                    lbc, TypeLb.valueOf(lbc.getType()),
                     equipmentCatalogService::findById, sizeBounds);
             lbcService.prepareFunctionalEquipment(domain, lbc.isEquipmentProvided());
             LBC saved = lbcService.saveLBC(domain);

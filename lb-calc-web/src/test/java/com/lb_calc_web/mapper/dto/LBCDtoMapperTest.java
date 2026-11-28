@@ -14,7 +14,7 @@ class LBCDtoMapperTest {
 
     private static final class TestDataFactoryType {
         private static TypeLb type(LBCDTO dto) {
-            return new TypeLb(dto.getType(), dto.getDeltaWidth(), dto.getShelfThick(), dto.getServiceZoneWidth());
+            return TypeLb.valueOf(dto.getType());
         }
     }
 

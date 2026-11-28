@@ -1,5 +1,6 @@
 package com.lb_calc_web.controller;
 
+import com.lb_calc_web.domain.attributes.TypeLb;
 import com.lb_calc_web.dto.ALSDTO;
 import com.lb_calc_web.dto.LBCDTO;
 import com.lb_calc_web.dto.LCDTO;
@@ -21,7 +22,6 @@ import com.lb_calc_web.service.image.LCImageService;
 import com.lb_calc_web.service.image.LBImageService;
 import com.lb_calc_web.service.validation.ValidationSizeException;
 import com.lb_calc_web.service.validation.size.SizeBounds;
-import com.lb_calc_web.service.factory.TypeLbFactory;
 import com.lb_calc_web.service.ALSService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -84,8 +84,8 @@ public class ALSController extends BaseCatalogController {
             }
             ALS restored = ALSDtoMapper.toDomain(
                     als,
-                    candidate -> TypeLbFactory.forLB(sizeBounds, candidate.getType()),
-                    candidate -> TypeLbFactory.forLBC(sizeBounds, candidate.getType()),
+                    candidate -> TypeLb.valueOf(candidate.getType()),
+                    candidate -> TypeLb.valueOf(candidate.getType()),
                     equipmentCatalogService::findById,
                     sizeBounds
             );
@@ -120,8 +120,8 @@ public class ALSController extends BaseCatalogController {
 
             ALS restored = ALSDtoMapper.toDomain(
                     als,
-                    candidate -> TypeLbFactory.forLB(sizeBounds, candidate.getType()),
-                    candidate -> TypeLbFactory.forLBC(sizeBounds, candidate.getType()),
+                    candidate -> TypeLb.valueOf(candidate.getType()),
+                    candidate -> TypeLb.valueOf(candidate.getType()),
                     equipmentCatalogService::findById,
                     sizeBounds
             );
@@ -175,7 +175,7 @@ public class ALSController extends BaseCatalogController {
         findLBInALS(als, lbId);
         lb.setId(lbId);
         try {
-            LB replacement = LBDtoMapper.toDomain(lb, TypeLbFactory.forLB(sizeBounds, lb.getType()));
+            LB replacement = LBDtoMapper.toDomain(lb, TypeLb.valueOf(lb.getType()));
             als = alsService.replaceLB(als.copy(), lbId, replacement);
             lb = toDtoWithImage(replacement);
         } catch (IllegalArgumentException exception) {
@@ -202,7 +202,7 @@ public class ALSController extends BaseCatalogController {
             findLBInALS(als, lbId);
             lb.setId(lbId);
 
-            LB replacement = LBDtoMapper.toDomain(lb, TypeLbFactory.forLB(sizeBounds, lb.getType()));
+            LB replacement = LBDtoMapper.toDomain(lb, TypeLb.valueOf(lb.getType()));
             ALS saved = alsService.saveALS(alsService.replaceLB(als, lbId, replacement));
             return "redirect:/alss/" + saved.getId();
         } catch (ValidationSizeException e) {
@@ -394,7 +394,7 @@ public class ALSController extends BaseCatalogController {
             lbc.setId(lbcId);
 
             LBC replacement = LBCDtoMapper.toDomain(
-                    lbc, TypeLbFactory.forLBC(sizeBounds, lbc.getType()),
+                    lbc, TypeLb.valueOf(lbc.getType()),
                     equipmentCatalogService::findById, sizeBounds);
             com.lb_calc_web.domain.model.ALS saved =
                     alsService.replaceLBCandSaveALS(als, replacement, lbc.isEquipmentProvided());
@@ -426,7 +426,7 @@ public class ALSController extends BaseCatalogController {
         lbc.setId(lbcId);
         try {
             LBC replacement = LBCDtoMapper.toDomain(
-                    lbc, TypeLbFactory.forLBC(sizeBounds, lbc.getType()),
+                    lbc, TypeLb.valueOf(lbc.getType()),
                     equipmentCatalogService::findById, sizeBounds);
             alsService.prepareForReplacement(source, replacement, lbc.isEquipmentProvided());
             source = alsService.replaceLBC(source.copy(), replacement);

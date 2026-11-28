@@ -1,5 +1,6 @@
 package com.lb_calc_web.controller.api;
 
+import com.lb_calc_web.domain.attributes.TypeLb;
 import com.lb_calc_web.controller.api.response.ApiResponse;
 import com.lb_calc_web.dto.ALSDTO;
 import com.lb_calc_web.dto.LBCDTO;
@@ -19,7 +20,6 @@ import com.lb_calc_web.mapper.dto.LBCDtoMapper;
 import com.lb_calc_web.mapper.dto.LBDtoMapper;
 import com.lb_calc_web.service.ALSService;
 import com.lb_calc_web.service.EquipmentCatalogService;
-import com.lb_calc_web.service.factory.TypeLbFactory;
 import com.lb_calc_web.service.validation.size.SizeBounds;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
@@ -237,8 +237,8 @@ public class ProjectRestController {
                                 ? alsService.findById(dto.getId()) : null;
                         ALS restored = ALSDtoMapper.toDomain(
                                 dto,
-                                candidate -> TypeLbFactory.forLB(sizeBounds, candidate.getType()),
-                                candidate -> TypeLbFactory.forLBC(sizeBounds, candidate.getType()),
+                                candidate -> TypeLb.valueOf(candidate.getType()),
+                                candidate -> TypeLb.valueOf(candidate.getType()),
                                 equipmentCatalogService::findById,
                                 sizeBounds
                         );
@@ -277,8 +277,8 @@ public class ProjectRestController {
                                 ? alsService.findById(dto.getId()) : null;
                         ALS restored = ALSDtoMapper.toDomain(
                                 dto,
-                                candidate -> TypeLbFactory.forLB(sizeBounds, candidate.getType()),
-                                candidate -> TypeLbFactory.forLBC(sizeBounds, candidate.getType()),
+                                candidate -> TypeLb.valueOf(candidate.getType()),
+                                candidate -> TypeLb.valueOf(candidate.getType()),
                                 equipmentCatalogService::findById,
                                 sizeBounds
                         );
@@ -377,8 +377,8 @@ public class ProjectRestController {
             ALS existing = projectService.findALSInProject(projectId, alsId);
             ALS restored = ALSDtoMapper.toDomain(
                     als,
-                    candidate -> TypeLbFactory.forLB(sizeBounds, candidate.getType()),
-                    candidate -> TypeLbFactory.forLBC(sizeBounds, candidate.getType()),
+                    candidate -> TypeLb.valueOf(candidate.getType()),
+                    candidate -> TypeLb.valueOf(candidate.getType()),
                     equipmentCatalogService::findById,
                     sizeBounds
             );
@@ -559,7 +559,7 @@ public class ProjectRestController {
             lbc.setId(lbcId);
             LBC replacement = LBCDtoMapper.toDomain(
                     lbc,
-                    TypeLbFactory.forLBC(sizeBounds, lbc.getType()),
+                    TypeLb.valueOf(lbc.getType()),
                     equipmentCatalogService::findById, sizeBounds);
             ALS savedALS = projectService.saveLBCAtProject(
                     projectId,
@@ -637,7 +637,7 @@ public class ProjectRestController {
             }
 
             LB replacement = LBDtoMapper.toDomain(
-                    lb, TypeLbFactory.forLB(sizeBounds, lb.getType()));
+                    lb, TypeLb.valueOf(lb.getType()));
             ALS savedALS = projectService.saveLBAtProject(
                     projectId,
                     alsId,
