@@ -124,15 +124,7 @@ public final class LBEntityMapper {
         entity.setColorBody(domain.getColorBody());
         entity.setColorDoor(domain.getColorDoor());
 
-        /*
-         * TypeLb хранится в Entity как набор простых полей.
-         */
-        TypeLb typeLb = domain.getTypeLb();
-
-        entity.setType(typeLb.getType());
-        entity.setDeltaWidth(typeLb.getDeltaWidth());
-        entity.setShelfThick(typeLb.getShelfThick());
-        entity.setServiceZoneWidth(typeLb.getServiceZoneWidth());
+        entity.setType(domain.getTypeLb());
 
         /*
          * Параметры конкретного storage-модуля.
