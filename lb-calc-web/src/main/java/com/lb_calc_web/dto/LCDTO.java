@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,15 +20,20 @@ public class LCDTO {
     private String description;
 
     @Schema(description = "Высота модуля LC, мм.")
+    @Positive(message = "height должен быть больше нуля")
     private int height;
     @Schema(description = "Ширина модуля LC, мм.")
+    @Positive(message = "width должен быть больше нуля")
     private int width;
     @Schema(description = "Глубина модуля LC, мм.")
+    @Positive(message = "depth должен быть больше нуля")
     private int depth;
 
     @Schema(description = "Высота верхней рамы, мм.")
+    @Positive(message = "upperFrame должен быть больше нуля")
     private int upperFrame;
     @Schema(description = "Высота нижней рамы, мм.")
+    @Positive(message = "bottomFrame должен быть больше нуля")
     private int bottomFrame;
 
     private String colorBody;
