@@ -24,13 +24,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class LCImageServiceTest {
 
     @Test
-    void drawLC_shouldUseDomainDisplayPositionAndCenterDisplayHorizontally() {
+    void drawLC_shouldCalculateDisplayPositionAndCenterDisplayHorizontally() {
         LC lc = createLC(1400, display(376, 301));
         BufferedImage image = new BufferedImage(46, 141, BufferedImage.TYPE_INT_ARGB);
 
-        LCImageService.drawLC(image, lc, 0);
+        LCImageService.drawLC(image, lc, 0, TestDataFactory.createSizeBounds());
 
-        // При высоте 1400 мм дисплей сдвинут вниз до зазора 20 мм от верхней рамы.
+        // При высоте 1400 мм дисплей сдвинут вниз с учётом верхнего зазора.
         assertEquals(Color.GRAY.getRGB(), image.getRGB(23, 22));
         assertEquals(new java.awt.Color(lc.getColorBody().getRgb()).getRGB(), image.getRGB(23, 2));
         assertEquals(new java.awt.Color(lc.getColorDoor().getRgb()).getRGB(), image.getRGB(23, 6));
