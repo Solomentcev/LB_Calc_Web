@@ -340,7 +340,8 @@ class SizeValidatorTest {
                 source.getTypeLb(),
                 countCells,
                 DirectionDoorOpening.LEFT,
-                doorThickness
+                doorThickness,
+                TestDataFactory.createSizeBounds()
         );
     }
 
