@@ -1026,13 +1026,13 @@ public class ProjectController
 
     private ALSDTO toDtoWithImages(ALS domain) {
         ALSDTO dto = ALSDtoMapper.toDto(domain);
-        dto.setStringALSImage(ALSImageService.getStringALSImage(domain));
+        dto.setStringALSImage(ALSImageService.getStringALSImage(domain, sizeBounds));
         int lbIndex = 0;
         for (com.lb_calc_web.domain.model.Module module : domain.getModules()) {
             if (module instanceof LB lb) {
                 dto.getLbList().get(lbIndex++).setStringLBImage(LBImageService.getStringLBImage(lb));
             } else if (module instanceof LC lc) {
-                dto.getLC().setStringLCImage(LCImageService.getStringLCImage(lc));
+                dto.getLC().setStringLCImage(LCImageService.getStringLCImage(lc, sizeBounds));
             } else if (module instanceof LBC lbc) {
                 dto.getLBC().setStringLBCImage(LBCImageService.getStringLBCImage(lbc));
             }
@@ -1052,7 +1052,7 @@ public class ProjectController
 
     private LCDTO toDtoWithImage(LC domain) {
         LCDTO dto = LCDtoMapper.toDto(domain);
-        dto.setStringLCImage(LCImageService.getStringLCImage(domain));
+        dto.setStringLCImage(LCImageService.getStringLCImage(domain, sizeBounds));
         return dto;
     }
 
