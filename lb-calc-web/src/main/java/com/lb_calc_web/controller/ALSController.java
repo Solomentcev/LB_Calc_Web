@@ -175,7 +175,7 @@ public class ALSController extends BaseCatalogController {
         findLBInALS(als, lbId);
         lb.setId(lbId);
         try {
-            LB replacement = LBDtoMapper.toDomain(lb, TypeLb.valueOf(lb.getType()));
+            LB replacement = LBDtoMapper.toDomain(lb, TypeLb.valueOf(lb.getType()), sizeBounds);
             als = alsService.replaceLB(als.copy(), lbId, replacement);
             lb = toDtoWithImage(replacement);
         } catch (IllegalArgumentException exception) {
@@ -202,7 +202,7 @@ public class ALSController extends BaseCatalogController {
             findLBInALS(als, lbId);
             lb.setId(lbId);
 
-            LB replacement = LBDtoMapper.toDomain(lb, TypeLb.valueOf(lb.getType()));
+            LB replacement = LBDtoMapper.toDomain(lb, TypeLb.valueOf(lb.getType()), sizeBounds);
             ALS saved = alsService.saveALS(alsService.replaceLB(als, lbId, replacement));
             return "redirect:/alss/" + saved.getId();
         } catch (ValidationSizeException e) {
