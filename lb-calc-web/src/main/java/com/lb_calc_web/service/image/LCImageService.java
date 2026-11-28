@@ -121,7 +121,7 @@ public final class LCImageService {
         }
 
         int displayX = x + toPixels((lc.getWidth() - display.getWidth()) / 2);
-        int displayY = toPixels(lc.getDisplayTop());
+        int displayY = toPixels(lc.getEquipmentTop(display));
 
         graphics.setColor(Color.GRAY);
         graphics.fillRoundRect(
