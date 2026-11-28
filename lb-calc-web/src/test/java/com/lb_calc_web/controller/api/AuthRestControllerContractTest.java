@@ -2,6 +2,8 @@ package com.lb_calc_web.controller.api;
 
 import com.lb_calc_web.handler.RestExceptionHandler;
 import com.lb_calc_web.service.AuthService;
+import com.lb_calc_web.service.EmployeeService;
+import com.lb_calc_web.security.jwt.JwtService;
 import io.jsonwebtoken.JwtException;
 import jakarta.security.auth.message.AuthException;
 import org.junit.jupiter.api.Test;
@@ -29,6 +31,12 @@ class AuthRestControllerContractTest {
 
     @MockitoBean
     private AuthService authService;
+
+    @MockitoBean
+    private JwtService jwtService;
+
+    @MockitoBean
+    private EmployeeService employeeService;
 
     @Test
     void login_shouldRejectInvalidRequestBody() throws Exception {
