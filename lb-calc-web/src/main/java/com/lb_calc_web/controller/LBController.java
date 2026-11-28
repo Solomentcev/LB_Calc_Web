@@ -113,7 +113,7 @@ public class LBController {
         try {
 
             LBDTO savedLB =
-                    LBDtoMapper.toDto(lbService.saveLB(LBDtoMapper.toDomain(lb, TypeLb.valueOf(lb.getType()))));
+                    LBDtoMapper.toDto(lbService.saveLB(LBDtoMapper.toDomain(lb, TypeLb.valueOf(lb.getType()), sizeBounds)));
 
             return "redirect:/lbs/" + savedLB.getId();
 
