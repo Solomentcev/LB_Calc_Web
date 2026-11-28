@@ -1,6 +1,6 @@
 package com.lb_calc_web.mapper.dto;
 
-import com.lb_calc_web.domain.geometry.SizeBounds;
+import com.lb_calc_web.service.validation.size.SizeBounds;
 
 import com.lb_calc_web.domain.attributes.PositionControlModule;
 import com.lb_calc_web.domain.attributes.TypeLb;

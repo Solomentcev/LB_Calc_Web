@@ -1,7 +1,7 @@
 package com.lb_calc_web.mapper.dto;
 
 import com.lb_calc_web.domain.attributes.Colors;
-import com.lb_calc_web.domain.geometry.SizeBounds;
+import com.lb_calc_web.service.validation.size.SizeBounds;
 import com.lb_calc_web.domain.equipment.Equipment;
 import com.lb_calc_web.domain.model.LC;
 import com.lb_calc_web.domain.model.ControlConfiguration;

@@ -6,7 +6,7 @@ import com.lb_calc_web.dto.LCDTO;
 import com.lb_calc_web.mapper.dto.LCDtoMapper;
 import com.lb_calc_web.service.LCService;
 import com.lb_calc_web.service.EquipmentCatalogService;
-import com.lb_calc_web.domain.geometry.SizeBounds;
+import com.lb_calc_web.service.validation.size.SizeBounds;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;

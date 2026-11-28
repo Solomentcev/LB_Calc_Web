@@ -10,7 +10,7 @@ import com.lb_calc_web.service.LCService;
 import com.lb_calc_web.service.image.LCImageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.lb_calc_web.domain.geometry.SizeBounds;
+import com.lb_calc_web.service.validation.size.SizeBounds;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
