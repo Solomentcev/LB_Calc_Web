@@ -197,7 +197,7 @@ public class ModuleSizeValidator {
                 module.getUpperFrame(),
                 module.getBottomFrame(),
                 module.getCountCells(),
-                typeLb
+                module.getShelfThickness()
         );
     }
 
@@ -263,19 +263,19 @@ public class ModuleSizeValidator {
 
         boolean lbcModule = module instanceof LBC;
         long storageWidthMin = (long) bounds.getWidthCellMin()
-                + deltaWidth
-                + (lbcModule ? 0 : serviceZoneWidth);
+                + module.getTypeDeltaWidth()
+                + (lbcModule ? 0 : module.getServiceZoneWidth());
         long requiredWidth = Math.max((long) bounds.getWidthMin(), storageWidthMin);
 
         if (module instanceof LBC lbc) {
             requiredWidth = Math.max(
                     requiredWidth,
                     (long) bounds.getLbcStorageCellMinWidth()
-                            + deltaWidth
+                            + module.getTypeDeltaWidth()
             );
             requiredWidth = Math.max(
                     requiredWidth,
-                    requiredLBCControlWidth(lbc) + deltaWidth
+                    requiredLBCControlWidth(lbc) + lbc.getTypeDeltaWidth()
             );
         }
 
