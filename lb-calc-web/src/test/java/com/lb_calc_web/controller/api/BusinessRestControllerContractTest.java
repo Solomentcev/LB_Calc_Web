@@ -1,6 +1,7 @@
 package com.lb_calc_web.controller.api;
 
 import com.lb_calc_web.handler.RestExceptionHandler;
+import com.lb_calc_web.security.jwt.JwtService;
 import com.lb_calc_web.service.ALSService;
 import com.lb_calc_web.service.EquipmentCatalogService;
 import com.lb_calc_web.service.LBService;
@@ -53,6 +54,8 @@ class BusinessRestControllerContractTest {
     private ProjectExcelExportService projectExcelExportService;
     @MockitoBean
     private SizeBounds sizeBounds;
+    @MockitoBean
+    private JwtService jwtService;
 
     @Test
     void als_shouldReturn400ForInvalidGeometry() throws Exception {
