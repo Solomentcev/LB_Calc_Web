@@ -27,6 +27,78 @@ import java.util.List;
 @RequestMapping("/api/v1/employees")
 @PreAuthorize("hasAuthority('ROLE_ADMIN')")
 @Tag(name = "Сотрудники", description = "Управление учётными записями и профилями сотрудников")
+@io.swagger.v3.oas.annotations.responses.ApiResponse(
+        responseCode = "400",
+        description = "Некорректный запрос или ошибка валидации",
+        content = @io.swagger.v3.oas.annotations.media.Content(
+                schema = @io.swagger.v3.oas.annotations.media.Schema(
+                        implementation = com.lb_calc_web.controller.api.response.ApiResponse.class
+                )
+        )
+)
+@io.swagger.v3.oas.annotations.responses.ApiResponse(
+        responseCode = "401",
+        description = "Требуется аутентификация",
+        content = @io.swagger.v3.oas.annotations.media.Content(
+                schema = @io.swagger.v3.oas.annotations.media.Schema(
+                        implementation = com.lb_calc_web.controller.api.response.ApiResponse.class
+                )
+        )
+)
+@io.swagger.v3.oas.annotations.responses.ApiResponse(
+        responseCode = "403",
+        description = "Недостаточно прав для выполнения операции",
+        content = @io.swagger.v3.oas.annotations.media.Content(
+                schema = @io.swagger.v3.oas.annotations.media.Schema(
+                        implementation = com.lb_calc_web.controller.api.response.ApiResponse.class
+                )
+        )
+)
+@io.swagger.v3.oas.annotations.responses.ApiResponse(
+        responseCode = "404",
+        description = "Запрашиваемый ресурс не найден",
+        content = @io.swagger.v3.oas.annotations.media.Content(
+                schema = @io.swagger.v3.oas.annotations.media.Schema(
+                        implementation = com.lb_calc_web.controller.api.response.ApiResponse.class
+                )
+        )
+)
+@io.swagger.v3.oas.annotations.responses.ApiResponse(
+        responseCode = "405",
+        description = "HTTP-метод не поддерживается",
+        content = @io.swagger.v3.oas.annotations.media.Content(
+                schema = @io.swagger.v3.oas.annotations.media.Schema(
+                        implementation = com.lb_calc_web.controller.api.response.ApiResponse.class
+                )
+        )
+)
+@io.swagger.v3.oas.annotations.responses.ApiResponse(
+        responseCode = "409",
+        description = "Конфликт текущего состояния данных",
+        content = @io.swagger.v3.oas.annotations.media.Content(
+                schema = @io.swagger.v3.oas.annotations.media.Schema(
+                        implementation = com.lb_calc_web.controller.api.response.ApiResponse.class
+                )
+        )
+)
+@io.swagger.v3.oas.annotations.responses.ApiResponse(
+        responseCode = "415",
+        description = "Формат содержимого запроса не поддерживается",
+        content = @io.swagger.v3.oas.annotations.media.Content(
+                schema = @io.swagger.v3.oas.annotations.media.Schema(
+                        implementation = com.lb_calc_web.controller.api.response.ApiResponse.class
+                )
+        )
+)
+@io.swagger.v3.oas.annotations.responses.ApiResponse(
+        responseCode = "500",
+        description = "Внутренняя ошибка сервера",
+        content = @io.swagger.v3.oas.annotations.media.Content(
+                schema = @io.swagger.v3.oas.annotations.media.Schema(
+                        implementation = com.lb_calc_web.controller.api.response.ApiResponse.class
+                )
+        )
+)
 public class EmployeeRestController {
 
     private final EmployeeService employeeService;

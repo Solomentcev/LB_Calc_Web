@@ -21,6 +21,69 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/v1")
 @Tag(name = "Аутентификация", description = "Вход, регистрация, обновление токенов и выход")
+@io.swagger.v3.oas.annotations.responses.ApiResponse(
+        responseCode = "400",
+        description = "Некорректный запрос",
+        content = @io.swagger.v3.oas.annotations.media.Content(
+                schema = @io.swagger.v3.oas.annotations.media.Schema(
+                        implementation = com.lb_calc_web.controller.api.response.ApiResponse.class
+                )
+        )
+)
+@io.swagger.v3.oas.annotations.responses.ApiResponse(
+        responseCode = "401",
+        description = "Ошибка аутентификации или недействительный токен",
+        content = @io.swagger.v3.oas.annotations.media.Content(
+                schema = @io.swagger.v3.oas.annotations.media.Schema(
+                        implementation = com.lb_calc_web.controller.api.response.ApiResponse.class
+                )
+        )
+)
+@io.swagger.v3.oas.annotations.responses.ApiResponse(
+        responseCode = "404",
+        description = "Запрашиваемый ресурс не найден",
+        content = @io.swagger.v3.oas.annotations.media.Content(
+                schema = @io.swagger.v3.oas.annotations.media.Schema(
+                        implementation = com.lb_calc_web.controller.api.response.ApiResponse.class
+                )
+        )
+)
+@io.swagger.v3.oas.annotations.responses.ApiResponse(
+        responseCode = "405",
+        description = "HTTP-метод не поддерживается",
+        content = @io.swagger.v3.oas.annotations.media.Content(
+                schema = @io.swagger.v3.oas.annotations.media.Schema(
+                        implementation = com.lb_calc_web.controller.api.response.ApiResponse.class
+                )
+        )
+)
+@io.swagger.v3.oas.annotations.responses.ApiResponse(
+        responseCode = "409",
+        description = "Конфликт текущего состояния данных",
+        content = @io.swagger.v3.oas.annotations.media.Content(
+                schema = @io.swagger.v3.oas.annotations.media.Schema(
+                        implementation = com.lb_calc_web.controller.api.response.ApiResponse.class
+                )
+        )
+)
+@io.swagger.v3.oas.annotations.responses.ApiResponse(
+        responseCode = "415",
+        description = "Формат содержимого запроса не поддерживается",
+        content = @io.swagger.v3.oas.annotations.media.Content(
+                schema = @io.swagger.v3.oas.annotations.media.Schema(
+                        implementation = com.lb_calc_web.controller.api.response.ApiResponse.class
+                )
+        )
+)
+@io.swagger.v3.oas.annotations.responses.ApiResponse(
+        responseCode = "500",
+        description = "Внутренняя ошибка сервера",
+        content = @io.swagger.v3.oas.annotations.media.Content(
+                schema = @io.swagger.v3.oas.annotations.media.Schema(
+                        implementation = com.lb_calc_web.controller.api.response.ApiResponse.class
+                )
+        )
+)
 public class AuthRestController {
     private final AuthService authService;
 
