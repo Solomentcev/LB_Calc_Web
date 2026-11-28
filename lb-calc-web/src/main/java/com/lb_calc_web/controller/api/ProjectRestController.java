@@ -637,7 +637,7 @@ public class ProjectRestController {
             }
 
             LB replacement = LBDtoMapper.toDomain(
-                    lb, TypeLb.valueOf(lb.getType()));
+                    lb, TypeLb.valueOf(lb.getType()), sizeBounds);
             ALS savedALS = projectService.saveLBAtProject(
                     projectId,
                     alsId,
