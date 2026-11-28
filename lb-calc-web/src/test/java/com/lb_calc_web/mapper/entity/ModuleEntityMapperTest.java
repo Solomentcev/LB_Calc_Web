@@ -107,7 +107,8 @@ class ModuleEntityMapperTest {
     void storageEntity_shouldRejectInvalidRequiredFields() {
         LBEntity entity = new LBEntity();
         assertThrows(NullPointerException.class, () -> entity.setType(null));
-        assertThrows(IllegalArgumentException.class, () -> entity.setType(" "));
+        entity.setType(com.lb_calc_web.domain.attributes.TypeLb.TYPE1);
+        assertEquals(com.lb_calc_web.domain.attributes.TypeLb.TYPE1, entity.getType());
         assertThrows(NullPointerException.class, () -> entity.setDirectionDoorOpening(null));
         assertThrows(IllegalArgumentException.class, () -> entity.setCountCells(21));
         assertThrows(IllegalArgumentException.class, () -> entity.setCountCells(-1));
