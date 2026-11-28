@@ -123,7 +123,7 @@ public class LBService {
                         LBEntity::getId,
                         Comparator.nullsLast(Comparator.naturalOrder())
                 ))
-                .map(LBEntityMapper::toDomain)
+                .map(entity -> LBEntityMapper.toDomain(entity, sizeBounds))
                 .toList();
     }
 
