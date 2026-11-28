@@ -3,6 +3,7 @@ package com.lb_calc_web.service.validation.size;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import com.lb_calc_web.domain.attributes.Colors;
+import com.lb_calc_web.domain.attributes.TypeLb;
 import com.lb_calc_web.domain.attributes.DirectionDoorOpening;
 import com.lb_calc_web.domain.attributes.PositionControlModule;
 import com.lb_calc_web.domain.equipment.AccessPurpose;
@@ -55,6 +56,18 @@ public class SizeBounds {
     private final int lbcTechnicalCellMinHeight;
     private final int lbcEquipmentClearance;
     private final int lbcDisplayCenterHeight;
+    private final int type1DeltaWidth;
+    private final int type1ShelfThickness;
+    private final int type1ServiceZoneWidth;
+    private final int type2DeltaWidth;
+    private final int type2ShelfThickness;
+    private final int type2ServiceZoneWidth;
+    private final int type3DeltaWidth;
+    private final int type3ShelfThickness;
+    private final int type3ServiceZoneWidth;
+    private final int type4DeltaWidth;
+    private final int type4ShelfThickness;
+    private final int type4ServiceZoneWidth;
 
     @Value("${lb.color.body.default}") private String lbDefaultBodyColor;
     @Value("${lb.color.door.default}") private String lbDefaultDoorColor;
@@ -114,7 +127,19 @@ public class SizeBounds {
             @Value("${lbc.geometry.technical-cell.width.min}") int lbcTechnicalCellMinWidth,
             @Value("${lbc.geometry.technical-cell.height.min}") int lbcTechnicalCellMinHeight,
             @Value("${lbc.geometry.equipment.clearance}") int lbcEquipmentClearance,
-            @Value("${lbc.geometry.display.center-height}") int lbcDisplayCenterHeight
+            @Value("${lbc.geometry.display.center-height}") int lbcDisplayCenterHeight,
+            @Value("${lb.type.TYPE1.delta-width}") int type1DeltaWidth,
+            @Value("${lb.type.TYPE1.shelf-thickness}") int type1ShelfThickness,
+            @Value("${lb.type.TYPE1.service-zone-width}") int type1ServiceZoneWidth,
+            @Value("${lb.type.TYPE2.delta-width}") int type2DeltaWidth,
+            @Value("${lb.type.TYPE2.shelf-thickness}") int type2ShelfThickness,
+            @Value("${lb.type.TYPE2.service-zone-width}") int type2ServiceZoneWidth,
+            @Value("${lb.type.TYPE3.delta-width}") int type3DeltaWidth,
+            @Value("${lb.type.TYPE3.shelf-thickness}") int type3ShelfThickness,
+            @Value("${lb.type.TYPE3.service-zone-width}") int type3ServiceZoneWidth,
+            @Value("${lb.type.TYPE4.delta-width}") int type4DeltaWidth,
+            @Value("${lb.type.TYPE4.shelf-thickness}") int type4ShelfThickness,
+            @Value("${lb.type.TYPE4.service-zone-width}") int type4ServiceZoneWidth
     ) {
         this.upperFrameMin = upperFrameMin;
         this.upperFrameMax = upperFrameMax;
@@ -153,6 +178,18 @@ public class SizeBounds {
         this.lbcTechnicalCellMinHeight = lbcTechnicalCellMinHeight;
         this.lbcEquipmentClearance = lbcEquipmentClearance;
         this.lbcDisplayCenterHeight = lbcDisplayCenterHeight;
+        this.type1DeltaWidth = type1DeltaWidth;
+        this.type1ShelfThickness = type1ShelfThickness;
+        this.type1ServiceZoneWidth = type1ServiceZoneWidth;
+        this.type2DeltaWidth = type2DeltaWidth;
+        this.type2ShelfThickness = type2ShelfThickness;
+        this.type2ServiceZoneWidth = type2ServiceZoneWidth;
+        this.type3DeltaWidth = type3DeltaWidth;
+        this.type3ShelfThickness = type3ShelfThickness;
+        this.type3ServiceZoneWidth = type3ServiceZoneWidth;
+        this.type4DeltaWidth = type4DeltaWidth;
+        this.type4ShelfThickness = type4ShelfThickness;
+        this.type4ServiceZoneWidth = type4ServiceZoneWidth;
         validateBounds();
     }
 
@@ -177,7 +214,11 @@ public class SizeBounds {
                 || lcDisplayCenterHeight <= 0 || lcDisplayTopClearance < 0
                 || lbcStorageCellMinWidth <= 0 || lbcTechnicalCellMinWidth <= 0
                 || lbcTechnicalCellMinHeight <= 0 || lbcEquipmentClearance < 0
-                || lbcDisplayCenterHeight <= 0) {
+                || lbcDisplayCenterHeight <= 0
+                || type1DeltaWidth < 0 || type1ShelfThickness < 0 || type1ServiceZoneWidth < 0
+                || type2DeltaWidth < 0 || type2ShelfThickness < 0 || type2ServiceZoneWidth < 0
+                || type3DeltaWidth < 0 || type3ShelfThickness < 0 || type3ServiceZoneWidth < 0
+                || type4DeltaWidth < 0 || type4ShelfThickness < 0 || type4ServiceZoneWidth < 0) {
             throw new IllegalArgumentException("Размерные ограничения содержат недопустимые значения");
         }
         validateDefault("высота", heightDefault, heightMin, heightMax);
@@ -199,6 +240,37 @@ public class SizeBounds {
         if (value < min || value > max) {
             throw new IllegalArgumentException("Значение по умолчанию вне допустимого диапазона: " + name);
         }
+    }
+
+
+    /** Возвращает добавочную ширину корпуса для конструктивного типа LB/LBC, мм. */
+    public int getTypeDeltaWidth(TypeLb type) {
+        return switch (type) {
+            case TYPE1 -> type1DeltaWidth;
+            case TYPE2 -> type2DeltaWidth;
+            case TYPE3 -> type3DeltaWidth;
+            case TYPE4 -> type4DeltaWidth;
+        };
+    }
+
+    /** Возвращает толщину полки для конструктивного типа LB/LBC, мм. */
+    public int getTypeShelfThickness(TypeLb type) {
+        return switch (type) {
+            case TYPE1 -> type1ShelfThickness;
+            case TYPE2 -> type2ShelfThickness;
+            case TYPE3 -> type3ShelfThickness;
+            case TYPE4 -> type4ShelfThickness;
+        };
+    }
+
+    /** Возвращает ширину сервисной зоны для конструктивного типа LB/LBC, мм. */
+    public int getTypeServiceZoneWidth(TypeLb type) {
+        return switch (type) {
+            case TYPE1 -> type1ServiceZoneWidth;
+            case TYPE2 -> type2ServiceZoneWidth;
+            case TYPE3 -> type3ServiceZoneWidth;
+            case TYPE4 -> type4ServiceZoneWidth;
+        };
     }
 
     public int getLcMinimumWidth() {
