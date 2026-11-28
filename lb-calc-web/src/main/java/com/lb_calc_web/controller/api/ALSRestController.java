@@ -369,7 +369,7 @@ toDto(alsService.createALS())
     /** Преобразует доменную ALS в DTO и формирует изображение для ответа API. */
     private ALSDTO toDto(com.lb_calc_web.domain.model.ALS domain) {
         ALSDTO dto = ALSDtoMapper.toDto(domain);
-        dto.setStringALSImage(ALSImageService.getStringALSImage(domain));
+        dto.setStringALSImage(ALSImageService.getStringALSImage(domain, sizeBounds));
         return dto;
     }
 
