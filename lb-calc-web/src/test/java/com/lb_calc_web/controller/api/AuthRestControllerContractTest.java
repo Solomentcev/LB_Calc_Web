@@ -81,6 +81,33 @@ class AuthRestControllerContractTest {
     }
 
     @Test
+    void refresh_shouldReturn400WhenHeaderIsBlank() throws Exception {
+        mockMvc.perform(post("/api/v1/refresh")
+                        .header("Refresh-Token", " "))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value("error"))
+                .andExpect(jsonPath("$.message").value("Некорректный запрос"));
+    }
+
+    @Test
+    void registration_shouldReturn400WhenPasswordsDoNotMatch() throws Exception {
+        mockMvc.perform(post("/api/v1/registration")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "firstName": "Иван",
+                                  "lastName": "Иванов",
+                                  "email": "user@example.com",
+                                  "password": "secret123",
+                                  "confirmPassword": "different123"
+                                }
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value("error"))
+                .andExpect(jsonPath("$.message").value("Некорректный запрос"));
+    }
+
+    @Test
     void refresh_shouldReturn401ForInvalidToken() throws Exception {
         when(authService.refresh("invalid-token"))
                 .thenThrow(new JwtException("Подробности проверки токена"));
