@@ -5,6 +5,7 @@ import com.lb_calc_web.domain.attributes.DirectionDoorOpening;
 import com.lb_calc_web.domain.attributes.TypeLb;
 import com.lb_calc_web.domain.model.LB;
 import com.lb_calc_web.dto.LBDTO;
+import com.lb_calc_web.service.validation.size.SizeBounds;
 
 import java.util.Objects;
 
@@ -47,7 +48,7 @@ public final class LBDtoMapper {
      * Преобразует DTO в доменную модель с конструктивным типом,
      * разрешённым application-слоем.
      */
-    public static LB toDomain(LBDTO dto, TypeLb typeLb) {
+    public static LB toDomain(LBDTO dto, TypeLb typeLb, SizeBounds bounds) {
         if (dto == null) {
             return null;
         }
@@ -69,7 +70,8 @@ public final class LBDtoMapper {
                 typeLb,
                 dto.getCountCells(),
                 DirectionDoorOpening.valueOf(dto.getDirectionDoorOpening()),
-                dto.getDoorThickness()
+                dto.getDoorThickness(),
+                bounds
         );
         domain.setId(dto.getId() == null || dto.getId() <= 0 ? null : dto.getId());
         return domain;
