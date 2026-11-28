@@ -24,7 +24,7 @@ import com.lb_calc_web.repository.ModuleEntityRepository;
 import com.lb_calc_web.repository.ProjectALSRepository;
 import com.lb_calc_web.service.validation.ValidationSizeException;
 import com.lb_calc_web.service.validation.size.SizeValidator;
-import com.lb_calc_web.domain.geometry.SizeBounds;
+import com.lb_calc_web.service.validation.size.SizeBounds;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;

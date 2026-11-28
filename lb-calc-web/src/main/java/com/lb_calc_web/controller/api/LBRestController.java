@@ -4,6 +4,7 @@ import com.lb_calc_web.controller.api.response.ApiResponse;
 import com.lb_calc_web.dto.LBDTO;
 import com.lb_calc_web.mapper.dto.LBDtoMapper;
 import com.lb_calc_web.service.factory.TypeLbFactory;
+import com.lb_calc_web.service.validation.size.SizeBounds;
 import com.lb_calc_web.service.LBService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
