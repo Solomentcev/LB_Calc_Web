@@ -263,19 +263,19 @@ public class ModuleSizeValidator {
 
         boolean lbcModule = module instanceof LBC;
         long storageWidthMin = (long) bounds.getWidthCellMin()
-                + typeLb.getDeltaWidth()
-                + (lbcModule ? 0 : typeLb.getServiceZoneWidth());
+                + deltaWidth
+                + (lbcModule ? 0 : serviceZoneWidth);
         long requiredWidth = Math.max((long) bounds.getWidthMin(), storageWidthMin);
 
         if (module instanceof LBC lbc) {
             requiredWidth = Math.max(
                     requiredWidth,
                     (long) bounds.getLbcStorageCellMinWidth()
-                            + typeLb.getDeltaWidth()
+                            + deltaWidth
             );
             requiredWidth = Math.max(
                     requiredWidth,
-                    requiredLBCControlWidth(lbc) + typeLb.getDeltaWidth()
+                    requiredLBCControlWidth(lbc) + deltaWidth
             );
         }
 
@@ -295,7 +295,8 @@ public class ModuleSizeValidator {
             validateStorageCellDimensions(
                     result, height, depth, upperFrame, bottomFrame,
                     module.getWidth(), module.getDoorThickness(),
-                    module.getCountCells(), typeLb
+                    module.getCountCells(), module.getShelfThickness(),
+                    module.getTypeDeltaWidth(), module.getServiceZoneWidth()
             );
         }
 
@@ -317,12 +318,12 @@ public class ModuleSizeValidator {
         }
 
         long denominator = (long) bounds.getHeightCellMin()
-                + typeLb.getShelfThick();
+                + shelfThickness;
         if (denominator <= 0) {
             return;
         }
 
-        long calculatedMax = (usableHeight + typeLb.getShelfThick())
+        long calculatedMax = (usableHeight + shelfThickness)
                 / denominator;
         int max = (int) Math.min(calculatedMax, bounds.getCountCellsMax());
 
@@ -343,7 +344,7 @@ public class ModuleSizeValidator {
     ) {
         if (countCells > 0) {
             long usableHeight = (long) height - upperFrame - bottomFrame
-                    - (long) (countCells - 1) * typeLb.getShelfThick();
+                    - (long) (countCells - 1) * shelfThickness;
             double heightCell = (double) usableHeight / countCells;
 
             if (heightCell < bounds.getHeightCellMin()) {
@@ -360,11 +361,11 @@ public class ModuleSizeValidator {
                 "Глубина ячейки");
 
         long widthCell = (long) width
-                - typeLb.getDeltaWidth()
-                - typeLb.getServiceZoneWidth();
+                - deltaWidth
+                - serviceZoneWidth;
         long widthCellMax = (long) bounds.getWidthMax()
-                - typeLb.getDeltaWidth()
-                - typeLb.getServiceZoneWidth();
+                - deltaWidth
+                - serviceZoneWidth;
 
         validateRange(result, "widthCell", widthCell,
                 bounds.getWidthCellMin(), widthCellMax,
@@ -392,7 +393,7 @@ public class ModuleSizeValidator {
         long usableHeight = (long) height - upperFrame - bottomFrame;
         long requiredHeight = (long) lbc.getTechnicalCellHeight()
                 + (long) count * (bounds.getHeightCellMin()
-                + lbc.getTypeLb().getShelfThick());
+                + lbc.getShelfThickness());
         if (usableHeight < requiredHeight) {
             addError(result, "heightConsistency",
                     "Высоты корпуса недостаточно для технической и складских ячеек",
@@ -407,10 +408,10 @@ public class ModuleSizeValidator {
         validateRange(result, "technicalCellWidth", lbc.getTechnicalCellWidth(),
                 bounds.getLbcTechnicalCellMinWidth(), bounds.getWidthMax(), "Ширина технической ячейки");
 
-        long cellWidth = (long) lbc.getWidth() - lbc.getTypeLb().getDeltaWidth();
+        long cellWidth = (long) lbc.getWidth() - lbc.getTypeDeltaWidth();
         validateRange(result, "widthCell", cellWidth,
                 bounds.getLbcStorageCellMinWidth(),
-                (long) bounds.getWidthMax() - lbc.getTypeLb().getDeltaWidth(),
+                (long) bounds.getWidthMax() - lbc.getTypeDeltaWidth(),
                 "Ширина складской ячейки");
 
         long cellDepth = (long) depth - lbc.getDoorThickness();
