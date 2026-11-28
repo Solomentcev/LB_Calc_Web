@@ -116,25 +116,24 @@ public class LC extends Module implements ControlModule {
     }
 
     /**
-     * Рассчитывает положение верхнего края дисплея относительно верхнего края LC.
+     * Возвращает вертикальную координату установленного оборудования LC.
      *
-     * <p>Положение дисплея рассчитывается по геометрическим параметрам,
-     * загруженным из конфигурации приложения.</p>
+     * <p>Координата рассчитывается доменной моделью с учётом физических
+     * габаритов оборудования и ограничений корпуса. Image-сервис не
+     * дублирует правила размещения.</p>
      *
-     * @return координата верхнего края дисплея от верхнего края LC, мм;
-     *         {@code 0}, если дисплей не установлен
+     * @param equipment установленное оборудование
+     * @return координата верхнего края оборудования от верхнего края LC, мм;
+     *         {@code 0}, если оборудование не установлено или не имеет высоты
      */
-    public int getDisplayTop() {
-        Equipment display = findDisplay();
-        int displayHeight = display == null ? 0 : display.getHeight();
-        if (displayHeight <= 0) {
+    public int getEquipmentTop(Equipment equipment) {
+        Objects.requireNonNull(equipment, "Оборудование не должно быть null");
+        if (!getEquipment().containsKey(equipment) || equipment.getHeight() <= 0) {
             return 0;
         }
 
-        // Координата задаётся в миллиметрах от верхнего края корпуса.
-        // Округляем вниз, чтобы при нечётной высоте дисплея не сместить его центр ниже заданной отметки.
         int centeredTop = (int) Math.floor(
-                getHeight() - bounds.getLcDisplayCenterHeight() - displayHeight / 2.0
+                getHeight() - bounds.getLcDisplayCenterHeight() - equipment.getHeight() / 2.0
         );
         return Math.max(centeredTop, getUpperFrame() + bounds.getLcDisplayTopClearance());
     }
