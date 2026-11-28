@@ -2,6 +2,7 @@ package com.lb_calc_web.domain.model;
 
 import com.lb_calc_web.domain.attributes.Colors;
 import com.lb_calc_web.domain.attributes.DirectionDoorOpening;
+import com.lb_calc_web.service.validation.size.SizeBounds;
 import com.lb_calc_web.domain.attributes.TypeLb;
 
 import java.util.Objects;
@@ -47,9 +48,10 @@ public class LB extends StorageModule {
             TypeLb typeLb,
             int countCells,
             DirectionDoorOpening directionDoorOpening,
-            int doorThickness
+            int doorThickness,
+            SizeBounds bounds
     ) {
-        super(doorThickness);
+        super(doorThickness, bounds);
 
         setHeight(height);
         setWidth(width);
@@ -105,7 +107,8 @@ public class LB extends StorageModule {
                 getTypeLb(),
                 getCountCells(),
                 getDirectionDoorOpening(),
-                getDoorThickness()
+                getDoorThickness(),
+                getBounds()
         );
         copy.copyCellNumbersFrom(this);
         return copyTextTo(copyIdentityTo(copy));
