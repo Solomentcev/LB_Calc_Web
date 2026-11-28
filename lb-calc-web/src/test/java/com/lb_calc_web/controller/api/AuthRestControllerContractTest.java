@@ -92,6 +92,10 @@ class AuthRestControllerContractTest {
 
     @Test
     void registration_shouldReturn400WhenPasswordsDoNotMatch() throws Exception {
+        when(authService.registration(
+                "Иван", "Иванов", "user@example.com", "pass-one", "pass-two"))
+                .thenThrow(new IllegalArgumentException("Пароли не совпадают"));
+
         mockMvc.perform(post("/api/v1/registration")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -99,8 +103,8 @@ class AuthRestControllerContractTest {
                                   "firstName": "Иван",
                                   "lastName": "Иванов",
                                   "email": "user@example.com",
-                                  "password": "secret123",
-                                  "confirmPassword": "different123"
+                                  "password": "pass-one",
+                                  "confirmPassword": "pass-two"
                                 }
                                 """))
                 .andExpect(status().isBadRequest())
