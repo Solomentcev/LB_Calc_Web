@@ -233,7 +233,7 @@ public class LBC extends StorageModule implements ControlModule {
         setWidth(saturatedInt(Math.max(getWidth(), requiredModuleWidth)));
 
         int cellWidth = saturatedInt((long) getWidth() - getTypeDeltaWidth());
-        int cellDepth = saturatedInt((long) getDepth() - getDoorThickness(), getBounds());
+        int cellDepth = saturatedInt((long) getDepth() - getDoorThickness());
         setCellDimensions(selectedHeight, cellWidth, cellDepth);
 
         if (display != null) {
@@ -264,7 +264,7 @@ public class LBC extends StorageModule implements ControlModule {
         LBC copy = new LBC(getHeight(), getWidth(), getDepth(), getUpperFrame(), getBottomFrame(),
                 getColorBody(), getColorDoor(), getTypeLb(), getCountCells(),
                 getDirectionDoorOpening(), getDoorThickness(), controlConfiguration,
-                bounds);
+                getBounds());
         copy.copyCellNumbersFrom(this);
         return copyTextTo(copyIdentityTo(copy));
     }
