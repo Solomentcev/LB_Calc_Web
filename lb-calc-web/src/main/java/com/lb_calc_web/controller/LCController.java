@@ -158,7 +158,7 @@ public class LCController extends BaseCatalogController {
 
     private LCDTO toDtoWithImage(LC domain) {
         LCDTO dto = LCDtoMapper.toDto(domain);
-        dto.setStringLCImage(LCImageService.getStringLCImage(domain));
+        dto.setStringLCImage(LCImageService.getStringLCImage(domain, sizeBounds));
         return dto;
     }
 
