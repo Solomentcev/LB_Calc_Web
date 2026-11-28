@@ -2,6 +2,7 @@ package com.lb_calc_web.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.validation.constraints.Positive;
 
 import java.util.Objects;
 
