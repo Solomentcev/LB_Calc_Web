@@ -91,7 +91,8 @@ public class LBService {
                 new java.util.ArrayList<>();
         specifications.add(com.lb_calc_web.repository.specification.CatalogSpecifications.id(filter.id()));
         specifications.add(com.lb_calc_web.repository.specification.CatalogSpecifications.containsIgnoreCase("name", filter.name()));
-        specifications.add(com.lb_calc_web.repository.specification.CatalogSpecifications.equal("type", filter.type()));
+        specifications.add(com.lb_calc_web.repository.specification.CatalogSpecifications.equal("type", filter.type() == null || filter.type().isBlank()
+                ? null : TypeLb.valueOf(filter.type())));
         specifications.add(com.lb_calc_web.repository.specification.CatalogSpecifications.integerRange(
                 "height", filter.heightMin(), filter.heightMax()));
         specifications.add(com.lb_calc_web.repository.specification.CatalogSpecifications.integerRange(
