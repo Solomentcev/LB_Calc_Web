@@ -1,7 +1,7 @@
 package com.lb_calc_web.service.factory;
 
 import com.lb_calc_web.domain.attributes.TypeLb;
-import org.springframework.core.env.Environment;
+import com.lb_calc_web.service.validation.size.SizeBounds;
 
 import java.util.Objects;
 
@@ -21,71 +21,27 @@ public final class TypeLbFactory {
     /**
      * Создаёт конструктивный тип LB из настроек приложения.
      *
-     * @param environment источник конфигурационных параметров
+     * @param sizeBounds централизованные настройки приложения
      * @param typeName имя выбранного типа
      * @return конфигурация конструктивного типа
      */
-    public static TypeLb forLB(Environment environment, String typeName) {
-        Objects.requireNonNull(environment, "Environment не должен быть null");
-        String prefix = typePrefix("lb", typeName);
-        return create(environment, typeName, prefix, null);
+    public static TypeLb forLB(SizeBounds sizeBounds, String typeName) {
+        Objects.requireNonNull(sizeBounds, "SizeBounds не должен быть null");
+        return sizeBounds.getLbType(typeName);
     }
 
     /**
      * Создаёт конструктивный тип LBC. Для параметров, не заданных
      * отдельно для LBC, используются настройки соответствующего типа LB.
      *
-     * @param environment источник конфигурационных параметров
+     * @param sizeBounds централизованные настройки приложения
      * @param typeName имя выбранного типа
      * @return конфигурация конструктивного типа
      */
-    public static TypeLb forLBC(Environment environment, String typeName) {
-        Objects.requireNonNull(environment, "Environment не должен быть null");
-        String prefix = typePrefix("lbc", typeName);
-        String fallbackPrefix = typePrefix("lb", typeName);
-        return create(environment, typeName, prefix, fallbackPrefix);
+    public static TypeLb forLBC(SizeBounds sizeBounds, String typeName) {
+        Objects.requireNonNull(sizeBounds, "SizeBounds не должен быть null");
+        return sizeBounds.getLbcType(typeName);
     }
 
-    /** Собирает конструктивный тип из разрешённых значений конфигурации. */
-    private static TypeLb create(
-            Environment environment,
-            String typeName,
-            String prefix,
-            String fallbackPrefix
-    ) {
-        return new TypeLb(
-                typeName,
-                requiredInt(environment, prefix, fallbackPrefix, "delta-width"),
-                requiredInt(environment, prefix, fallbackPrefix, "shelf-thick"),
-                requiredInt(environment, prefix, fallbackPrefix, "service-zone-width")
-        );
-    }
 
-    /** Формирует префикс ключей настроек для выбранного семейства модулей. */
-    private static String typePrefix(String module, String typeName) {
-        if (typeName == null || typeName.isBlank()) {
-            throw new IllegalArgumentException("Тип модуля не указан");
-        }
-        return module + ".type." + typeName;
-    }
-
-    /** Читает обязательный целочисленный параметр конструктивного типа. */
-    private static int requiredInt(
-            Environment environment,
-            String prefix,
-            String fallbackPrefix,
-            String property
-    ) {
-        String key = prefix + "." + property;
-        if (environment.containsProperty(key)) {
-            return environment.getRequiredProperty(key, Integer.class);
-        }
-
-        if (fallbackPrefix != null) {
-            String fallbackKey = fallbackPrefix + "." + property;
-            return environment.getRequiredProperty(fallbackKey, Integer.class);
-        }
-
-        return environment.getRequiredProperty(key, Integer.class);
-    }
 }

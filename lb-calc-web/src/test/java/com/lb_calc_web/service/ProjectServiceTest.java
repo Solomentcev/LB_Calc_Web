@@ -20,7 +20,6 @@ import com.lb_calc_web.repository.EmployeeRepository;
 import com.lb_calc_web.repository.ProjectRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.mock.env.MockEnvironment;
 
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -35,7 +34,6 @@ class ProjectServiceTest {
     private EmployeeRepository employeeRepository;
     private ALSService alsService;
     private EmployeeService employeeService;
-    private MockEnvironment environment;
     private ProjectService projectService;
 
     @BeforeEach
@@ -45,12 +43,6 @@ class ProjectServiceTest {
         employeeRepository = mock(EmployeeRepository.class);
         alsService = mock(ALSService.class);
         employeeService = mock(EmployeeService.class);
-environment = new MockEnvironment()
-                .withProperty("project.company.default", "TEST_COMPANY")
-                .withProperty("lb.type.TYPE1.delta-width", "100")
-                .withProperty("lb.type.TYPE1.shelf-thick", "5")
-                .withProperty("lb.type.TYPE1.service-zone-width", "40");
-
         projectService =
                 new ProjectService(
                         projectRepository,
@@ -58,8 +50,8 @@ environment = new MockEnvironment()
                         employeeRepository,
                         alsService,
                         employeeService,
-                        environment,
-                        TestDataFactory.createSizeValidator()
+                        TestDataFactory.createSizeValidator(),
+                        TestDataFactory.createSizeBounds(java.util.Map.of("project.company.default", "TEST_COMPANY"))
                 );
     }
 

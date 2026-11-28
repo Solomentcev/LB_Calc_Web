@@ -23,7 +23,6 @@ import com.lb_calc_web.service.validation.size.SizeValidator;
 import com.lb_calc_web.domain.geometry.SizeBounds;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,7 +42,6 @@ public class LBCService {
 
     private final FindOrCreateLockService findOrCreateLockService;
     private final LBCRepository lbcRepository;
-    private final Environment environment;
     private final SizeValidator sizeValidator;
     private final EquipmentRepository equipmentRepository;
     private final SizeBounds sizeBounds;
@@ -52,7 +50,6 @@ public class LBCService {
     public LBCService(
             LBCRepository lbcRepository,
             FindOrCreateLockService findOrCreateLockService,
-            Environment environment,
             SizeValidator sizeValidator,
             EquipmentRepository equipmentRepository,
             SizeBounds sizeBounds,
@@ -60,7 +57,6 @@ public class LBCService {
     ) {
         this.lbcRepository = Objects.requireNonNull(lbcRepository);
         this.findOrCreateLockService = Objects.requireNonNull(findOrCreateLockService);
-        this.environment = Objects.requireNonNull(environment);
         this.sizeValidator = Objects.requireNonNull(sizeValidator);
         this.equipmentRepository = Objects.requireNonNull(equipmentRepository);
         this.sizeBounds = Objects.requireNonNull(sizeBounds);
@@ -74,8 +70,8 @@ public class LBCService {
                 sizeBounds.getDepthDefault(),
                 sizeBounds.getUpperFrameDefault(),
                 sizeBounds.getBottomFrameDefault(),
-                requiredColor("lbc.color.body.default"),
-                requiredColor("lbc.color.door.default")
+                sizeBounds.getLbcDefaultBodyColor(),
+                sizeBounds.getLbcDefaultDoorColor()
         );
     }
 
@@ -89,13 +85,8 @@ public class LBCService {
             Colors colorDoor
     ) {
         TypeLb typeLb = TypeLbFactory.forLBC(
-                environment, environment.getRequiredProperty("lbc.type.default"));
-        FunctionalConfiguration functional = new FunctionalConfiguration(
-                enumProperty("lbc.display-purpose.default", DisplayPurpose.class, DisplayPurpose.INCH_10),
-                enumSetProperty("lbc.access-purposes.default", AccessPurpose.class),
-                enumProperty("lbc.payment-purpose.default", PaymentPurpose.class, PaymentPurpose.NONE),
-                enumProperty("lbc.printer-purpose.default", PrinterPurpose.class, PrinterPurpose.ABSENT)
-        );
+                sizeBounds, sizeBounds.getDefaultLbcTypeName());
+        FunctionalConfiguration functional = sizeBounds.getLbcDefaultFunctionalConfiguration();
 
         ControlConfiguration controlConfiguration = new ControlConfiguration(functional, Map.of());
         equipmentCatalogService.configureFunctionalEquipment(controlConfiguration);
@@ -110,8 +101,7 @@ public class LBCService {
                 Objects.requireNonNull(colorDoor, "Цвет дверей не должен быть null"),
                 typeLb,
                 sizeBounds.getCountCellsDefault(),
-                DirectionDoorOpening.valueOf(environment.getProperty(
-                        "lbc.direction.default", DirectionDoorOpening.LEFT.name())),
+                sizeBounds.getLbcDefaultDoorDirection(),
                 sizeBounds.getDoorThicknessDefault(),
                 controlConfiguration,
                 sizeBounds
@@ -250,26 +240,6 @@ public class LBCService {
     private LBC toDomain(LBCEntity entity) {
         return LBCEntityMapper.toDomain(entity,
                 sizeBounds);
-    }
-
-    private Colors requiredColor(String key) {
-        return Colors.valueOf(environment.getRequiredProperty(key));
-    }
-
-    private <E extends Enum<E>> E enumProperty(String key, Class<E> type, E defaultValue) {
-        String value = environment.getProperty(key);
-        return value == null || value.isBlank() ? defaultValue : Enum.valueOf(type, value);
-    }
-
-    private <E extends Enum<E>> java.util.Set<E> enumSetProperty(String key, Class<E> type) {
-        String value = environment.getProperty(key, "");
-        EnumSet<E> result = EnumSet.noneOf(type);
-        for (String item : value.split(",")) {
-            if (!item.isBlank()) {
-                result.add(Enum.valueOf(type, item.trim()));
-            }
-        }
-        return result;
     }
 
     private EquipmentEntity findEquipmentEntity(

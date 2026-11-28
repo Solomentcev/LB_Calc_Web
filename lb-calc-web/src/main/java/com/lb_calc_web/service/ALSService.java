@@ -27,7 +27,6 @@ import com.lb_calc_web.service.validation.size.SizeValidator;
 import com.lb_calc_web.domain.geometry.SizeBounds;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -52,7 +51,6 @@ public class ALSService {
     private final LBService lbService;
     private final LCService lcService;
     private final LBCService lbcService;
-    private final Environment environment;
     private final SizeValidator sizeValidator;
     private final EquipmentRepository equipmentRepository;
     private final EquipmentCatalogService equipmentCatalogService;
@@ -66,7 +64,6 @@ public class ALSService {
             LCService lcService,
             LBCService lbcService,
             FindOrCreateLockService findOrCreateLockService,
-            Environment environment,
             SizeValidator sizeValidator,
             EquipmentRepository equipmentRepository,
             EquipmentCatalogService equipmentCatalogService,
@@ -79,7 +76,6 @@ public class ALSService {
         this.lcService = Objects.requireNonNull(lcService);
         this.lbcService = Objects.requireNonNull(lbcService);
         this.findOrCreateLockService = Objects.requireNonNull(findOrCreateLockService);
-        this.environment = Objects.requireNonNull(environment);
         this.sizeValidator = Objects.requireNonNull(sizeValidator);
         this.equipmentRepository = Objects.requireNonNull(equipmentRepository);
         this.equipmentCatalogService = Objects.requireNonNull(equipmentCatalogService);
@@ -165,14 +161,13 @@ public class ALSService {
         int depth = sizeBounds.getDepthDefault();
         int upperFrame = sizeBounds.getUpperFrameDefault();
         int bottomFrame = sizeBounds.getBottomFrameDefault();
-        Colors colorBody = Colors.valueOf(getRequired("als.color.body.default"));
-        Colors colorDoor = Colors.valueOf(getRequired("als.color.door.default"));
+        Colors colorBody = sizeBounds.getAlsDefaultBodyColor();
+        Colors colorDoor = sizeBounds.getAlsDefaultDoorColor();
 
         LC lc = lcService.createLC(height, depth, upperFrame, bottomFrame, colorBody);
         LB lb = lbService.createLB(height, depth, upperFrame, bottomFrame, colorBody, colorDoor);
 
-        String configuredPosition = getRequired("als.position.control-module.default");
-        PositionControlModule position = PositionControlModule.valueOf(configuredPosition);
+        PositionControlModule position = sizeBounds.getAlsDefaultControlPosition();
 
         List<Module> modules = new ArrayList<>();
         switch (position) {
@@ -599,11 +594,5 @@ public class ALSService {
         }
     }
 
-    private String getRequired(String key) {
-        return environment.getRequiredProperty(key);
-    }
 
-    private int requiredInt(String key) {
-        return environment.getRequiredProperty(key, Integer.class);
-    }
 }

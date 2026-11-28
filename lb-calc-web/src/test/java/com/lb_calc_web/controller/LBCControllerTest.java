@@ -18,7 +18,6 @@ import com.lb_calc_web.service.EquipmentCatalogService;
 import com.lb_calc_web.service.LBCService;
 import org.junit.jupiter.api.Test;
 import org.springframework.ui.ExtendedModelMap;
-import org.springframework.mock.env.MockEnvironment;
 
 import javax.imageio.ImageIO;
 import java.awt.Color;
@@ -56,7 +55,7 @@ class LBCControllerTest {
         when(equipmentCatalogService.findAll()).thenReturn(List.of(display));
 
         LBCController controller = new LBCController(lbcService, equipmentCatalogService,
-                TestDataFactory.createSizeBounds(), new MockEnvironment());
+                TestDataFactory.createSizeBounds());
         ExtendedModelMap model = new ExtendedModelMap();
 
         controller.createLBC(model);

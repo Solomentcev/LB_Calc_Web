@@ -7,10 +7,9 @@ import com.lb_calc_web.mapper.dto.LBCDtoMapper;
 import com.lb_calc_web.service.LBCService;
 import com.lb_calc_web.service.EquipmentCatalogService;
 import com.lb_calc_web.service.factory.TypeLbFactory;
-import com.lb_calc_web.domain.geometry.SizeBounds;
+import com.lb_calc_web.service.validation.size.SizeBounds;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
-import org.springframework.core.env.Environment;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -110,18 +109,15 @@ public class LBCRestController {
     private final LBCService lbcService;
     private final EquipmentCatalogService equipmentCatalogService;
     private final SizeBounds sizeBounds;
-    private final Environment environment;
 
     public LBCRestController(
             LBCService lbcService,
             EquipmentCatalogService equipmentCatalogService,
-            SizeBounds sizeBounds,
-            Environment environment
+            SizeBounds sizeBounds
     ) {
         this.lbcService = lbcService;
         this.equipmentCatalogService = equipmentCatalogService;
         this.sizeBounds = sizeBounds;
-        this.environment = environment;
     }
 
     @GetMapping
@@ -156,7 +152,7 @@ public class LBCRestController {
     public ResponseEntity<ApiResponse<LBCDTO>> saveLBC(@RequestBody @Valid LBCDTO dto) {
         LBC domain = LBCDtoMapper.toDomain(
                 dto,
-                TypeLbFactory.forLBC(environment, dto.getType()),
+                TypeLbFactory.forLBC(sizeBounds, dto.getType()),
                 equipmentCatalogService::findById, sizeBounds
         );
         lbcService.prepareFunctionalEquipment(domain, dto.isEquipmentProvided());

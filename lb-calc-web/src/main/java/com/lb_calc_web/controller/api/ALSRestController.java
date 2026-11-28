@@ -13,10 +13,9 @@ import com.lb_calc_web.dto.LBCDTO;
 import com.lb_calc_web.service.ALSService;
 import com.lb_calc_web.service.EquipmentCatalogService;
 import com.lb_calc_web.service.factory.TypeLbFactory;
-import com.lb_calc_web.domain.geometry.SizeBounds;
+import com.lb_calc_web.service.validation.size.SizeBounds;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
-import org.springframework.core.env.Environment;
 import com.lb_calc_web.service.image.ALSImageService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -123,18 +122,15 @@ public class ALSRestController {
     private final ALSService alsService;
     private final EquipmentCatalogService equipmentCatalogService;
     private final SizeBounds sizeBounds;
-    private final Environment environment;
 
     public ALSRestController(
             ALSService alsService,
             EquipmentCatalogService equipmentCatalogService,
-            SizeBounds sizeBounds,
-            Environment environment
+            SizeBounds sizeBounds
     ) {
         this.alsService = alsService;
         this.equipmentCatalogService = equipmentCatalogService;
         this.sizeBounds = sizeBounds;
-        this.environment = environment;
     }
 
     @GetMapping
@@ -200,8 +196,8 @@ toDto(alsService.createALS())
 
             ALS restored = ALSDtoMapper.toDomain(
                     dto,
-                    candidate -> TypeLbFactory.forLB(environment, candidate.getType()),
-                    candidate -> TypeLbFactory.forLBC(environment, candidate.getType()),
+                    candidate -> TypeLbFactory.forLB(sizeBounds, candidate.getType()),
+                    candidate -> TypeLbFactory.forLBC(sizeBounds, candidate.getType()),
                     equipmentCatalogService::findById,
                     sizeBounds
             );
@@ -235,8 +231,8 @@ toDto(alsService.createALS())
             ALS existing = alsService.findById(id);
             ALS restored = ALSDtoMapper.toDomain(
                     dto,
-                    candidate -> TypeLbFactory.forLB(environment, candidate.getType()),
-                    candidate -> TypeLbFactory.forLBC(environment, candidate.getType()),
+                    candidate -> TypeLbFactory.forLB(sizeBounds, candidate.getType()),
+                    candidate -> TypeLbFactory.forLBC(sizeBounds, candidate.getType()),
                     equipmentCatalogService::findById,
                     sizeBounds
             );
@@ -310,7 +306,7 @@ toDto(alsService.createALS())
 
             LBC replacement = LBCDtoMapper.toDomain(
                     lbc,
-                    TypeLbFactory.forLBC(environment, lbc.getType()),
+                    TypeLbFactory.forLBC(sizeBounds, lbc.getType()),
                     equipmentCatalogService::findById,
                     sizeBounds
             );

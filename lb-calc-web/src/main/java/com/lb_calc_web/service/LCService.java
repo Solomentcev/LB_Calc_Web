@@ -20,7 +20,6 @@ import com.lb_calc_web.service.validation.size.SizeValidator;
 import com.lb_calc_web.domain.geometry.SizeBounds;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.env.Environment;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,7 +41,6 @@ public class LCService {
 
     private final FindOrCreateLockService findOrCreateLockService;
     private final LCRepository lcRepository;
-    private final Environment environment;
     private final SizeValidator sizeValidator;
     private final SizeBounds sizeBounds;
     private final EquipmentRepository equipmentRepository;
@@ -51,7 +49,6 @@ public class LCService {
     public LCService(
             LCRepository lcRepository,
             FindOrCreateLockService findOrCreateLockService,
-            Environment environment,
             SizeValidator sizeValidator,
             EquipmentRepository equipmentRepository,
             SizeBounds sizeBounds,
@@ -59,7 +56,6 @@ public class LCService {
     ) {
         this.lcRepository = Objects.requireNonNull(lcRepository);
         this.findOrCreateLockService = Objects.requireNonNull(findOrCreateLockService);
-        this.environment = Objects.requireNonNull(environment);
         this.sizeValidator = Objects.requireNonNull(sizeValidator);
         this.sizeBounds = Objects.requireNonNull(sizeBounds);
         this.equipmentRepository = Objects.requireNonNull(equipmentRepository);
@@ -73,7 +69,7 @@ public class LCService {
                 sizeBounds.getDepthDefault(),
                 sizeBounds.getUpperFrameDefault(),
                 sizeBounds.getBottomFrameDefault(),
-                requiredColor("lc.color.body.default")
+                sizeBounds.getLcDefaultBodyColor()
         );
     }
 
@@ -85,12 +81,7 @@ public class LCService {
             int bottomFrame,
             Colors colorBody
     ) {
-        FunctionalConfiguration functional = new FunctionalConfiguration(
-                enumProperty("lc.display-purpose.default", DisplayPurpose.class, DisplayPurpose.INCH_10),
-                enumSetProperty("lc.access-purposes.default", AccessPurpose.class),
-                enumProperty("lc.payment-purpose.default", PaymentPurpose.class, PaymentPurpose.NONE),
-                enumProperty("lc.printer-purpose.default", PrinterPurpose.class, PrinterPurpose.ABSENT)
-        );
+        FunctionalConfiguration functional = sizeBounds.getLcDefaultFunctionalConfiguration();
 
         ControlConfiguration controlConfiguration = new ControlConfiguration(functional, Map.of());
         equipmentCatalogService.configureFunctionalEquipment(controlConfiguration);
@@ -102,7 +93,7 @@ public class LCService {
                 upperFrame,
                 bottomFrame,
                 Objects.requireNonNull(colorBody, "Цвет корпуса не должен быть null"),
-                requiredColor("lc.color.door.default"),
+                sizeBounds.getLcDefaultDoorColor(),
                 controlConfiguration,
                 sizeBounds
         );
@@ -270,26 +261,6 @@ public class LCService {
                 entity,
                 sizeBounds
         );
-    }
-
-    private Colors requiredColor(String key) {
-        return Colors.valueOf(environment.getRequiredProperty(key));
-    }
-
-    private <E extends Enum<E>> E enumProperty(String key, Class<E> type, E defaultValue) {
-        String value = environment.getProperty(key);
-        return value == null || value.isBlank() ? defaultValue : Enum.valueOf(type, value);
-    }
-
-    private <E extends Enum<E>> java.util.Set<E> enumSetProperty(String key, Class<E> type) {
-        String value = environment.getProperty(key, "");
-        EnumSet<E> result = EnumSet.noneOf(type);
-        for (String item : value.split(",")) {
-            if (!item.isBlank()) {
-                result.add(Enum.valueOf(type, item.trim()));
-            }
-        }
-        return result;
     }
 
     private EquipmentEntity findEquipmentEntity(

@@ -3,7 +3,6 @@ package com.lb_calc_web;
 import com.lb_calc_web.domain.attributes.Colors;
 import com.lb_calc_web.domain.attributes.DirectionDoorOpening;
 import com.lb_calc_web.domain.attributes.TypeLb;
-import com.lb_calc_web.domain.attributes.TypeLb;
 import com.lb_calc_web.domain.equipment.AccessPurpose;
 import com.lb_calc_web.domain.equipment.DisplayPurpose;
 import com.lb_calc_web.domain.equipment.PaymentPurpose;
@@ -32,6 +31,8 @@ import java.util.List;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
+import java.util.Map;
+import org.springframework.mock.env.MockEnvironment;
 
 public final class TestDataFactory {
 
@@ -48,7 +49,15 @@ public final class TestDataFactory {
     }
 
     public static SizeBounds createSizeBounds() {
+        return createSizeBounds(Map.of());
+    }
+
+    public static SizeBounds createSizeBounds(Map<String, String> overrides) {
         Properties properties = loadSizeProperties();
+        MockEnvironment environment = new MockEnvironment();
+        properties.stringPropertyNames().forEach(key ->
+                environment.setProperty(key, properties.getProperty(key)));
+        overrides.forEach(environment::setProperty);
         return new SizeBounds(
                 intProperty(properties, "size.frame.upper.min"),
                 intProperty(properties, "size.frame.upper.max"),
@@ -92,7 +101,8 @@ public final class TestDataFactory {
                 intProperty(properties, "lbc.geometry.technical-cell.width.min"),
                 intProperty(properties, "lbc.geometry.technical-cell.height.min"),
                 intProperty(properties, "lbc.geometry.equipment.clearance"),
-                intProperty(properties, "lbc.geometry.display.center-height")
+                intProperty(properties, "lbc.geometry.display.center-height"),
+                environment
         );
     }
 

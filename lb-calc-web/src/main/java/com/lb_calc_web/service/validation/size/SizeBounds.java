@@ -2,6 +2,20 @@ package com.lb_calc_web.service.validation.size;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.core.env.Environment;
+import com.lb_calc_web.domain.attributes.Colors;
+import com.lb_calc_web.domain.attributes.DirectionDoorOpening;
+import com.lb_calc_web.domain.attributes.PositionControlModule;
+import com.lb_calc_web.domain.attributes.TypeLb;
+import com.lb_calc_web.domain.equipment.AccessPurpose;
+import com.lb_calc_web.domain.equipment.DisplayPurpose;
+import com.lb_calc_web.domain.equipment.PaymentPurpose;
+import com.lb_calc_web.domain.equipment.PrinterPurpose;
+import com.lb_calc_web.domain.model.FunctionalConfiguration;
+import java.util.Arrays;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Set;
 
 /** Конфигурация размерных ограничений и значений по умолчанию модулей. */
 @Component
@@ -50,6 +64,7 @@ public class SizeBounds implements com.lb_calc_web.domain.geometry.SizeBounds {
     private final int lbcTechnicalCellMinHeight;
     private final int lbcEquipmentClearance;
     private final int lbcDisplayCenterHeight;
+    private final Environment environment;
 
     public SizeBounds(
             @Value("${size.frame.upper.min}") int upperFrameMin,
@@ -94,7 +109,8 @@ public class SizeBounds implements com.lb_calc_web.domain.geometry.SizeBounds {
             @Value("${lbc.geometry.technical-cell.width.min}") int lbcTechnicalCellMinWidth,
             @Value("${lbc.geometry.technical-cell.height.min}") int lbcTechnicalCellMinHeight,
             @Value("${lbc.geometry.equipment.clearance}") int lbcEquipmentClearance,
-            @Value("${lbc.geometry.display.center-height}") int lbcDisplayCenterHeight
+            @Value("${lbc.geometry.display.center-height}") int lbcDisplayCenterHeight,
+            Environment environment
     ) {
         this.upperFrameMin = upperFrameMin;
         this.upperFrameMax = upperFrameMax;
@@ -139,6 +155,7 @@ public class SizeBounds implements com.lb_calc_web.domain.geometry.SizeBounds {
         this.lbcTechnicalCellMinHeight = lbcTechnicalCellMinHeight;
         this.lbcEquipmentClearance = lbcEquipmentClearance;
         this.lbcDisplayCenterHeight = lbcDisplayCenterHeight;
+        this.environment = java.util.Objects.requireNonNull(environment);
         validateBounds();
     }
 
@@ -360,4 +377,66 @@ public class SizeBounds implements com.lb_calc_web.domain.geometry.SizeBounds {
     }
 
 
+    /** Возвращает список поддерживаемых типов LB. */
+    public List<String> getLbTypes() {
+        return Arrays.stream(environment.getRequiredProperty("lb.types").split(","))
+                .map(String::trim).filter(value -> !value.isBlank()).toList();
+    }
+    public String getDefaultLbTypeName() { return environment.getRequiredProperty("lb.type.default"); }
+    public String getDefaultLbcTypeName() { return environment.getRequiredProperty("lbc.type.default"); }
+    public TypeLb getLbType(String name) { return createType(name, "lb.type." + requireTypeName(name), null); }
+    public TypeLb getLbcType(String name) {
+        String type = requireTypeName(name);
+        return createType(type, "lbc.type." + type, "lb.type." + type);
+    }
+    private TypeLb createType(String name, String prefix, String fallback) {
+        return new TypeLb(name, requiredTypeInt(prefix, fallback, "delta-width"),
+                requiredTypeInt(prefix, fallback, "shelf-thick"),
+                requiredTypeInt(prefix, fallback, "service-zone-width"));
+    }
+    private int requiredTypeInt(String prefix, String fallback, String suffix) {
+        String key = prefix + "." + suffix;
+        if (environment.containsProperty(key)) return environment.getRequiredProperty(key, Integer.class);
+        if (fallback != null) return environment.getRequiredProperty(fallback + "." + suffix, Integer.class);
+        return environment.getRequiredProperty(key, Integer.class);
+    }
+    private static String requireTypeName(String name) {
+        if (name == null || name.isBlank()) throw new IllegalArgumentException("Тип модуля не указан");
+        return name;
+    }
+    public Colors getLbDefaultBodyColor() { return enumRequired("lb.color.body.default", Colors.class); }
+    public Colors getLbDefaultDoorColor() { return enumRequired("lb.color.door.default", Colors.class); }
+    public DirectionDoorOpening getLbDefaultDoorDirection() { return enumOrDefault("lb.direction.default", DirectionDoorOpening.class, DirectionDoorOpening.LEFT); }
+    public Colors getLcDefaultBodyColor() { return enumRequired("lc.color.body.default", Colors.class); }
+    public Colors getLcDefaultDoorColor() { return enumRequired("lc.color.door.default", Colors.class); }
+    public FunctionalConfiguration getLcDefaultFunctionalConfiguration() { return defaultFunctionalConfiguration("lc"); }
+    public Colors getLbcDefaultBodyColor() { return enumRequired("lbc.color.body.default", Colors.class); }
+    public Colors getLbcDefaultDoorColor() { return enumRequired("lbc.color.door.default", Colors.class); }
+    public DirectionDoorOpening getLbcDefaultDoorDirection() { return enumOrDefault("lbc.direction.default", DirectionDoorOpening.class, DirectionDoorOpening.LEFT); }
+    public FunctionalConfiguration getLbcDefaultFunctionalConfiguration() { return defaultFunctionalConfiguration("lbc"); }
+    public Colors getAlsDefaultBodyColor() { return enumRequired("als.color.body.default", Colors.class); }
+    public Colors getAlsDefaultDoorColor() { return enumRequired("als.color.door.default", Colors.class); }
+    public PositionControlModule getAlsDefaultControlPosition() { return enumRequired("als.position.control-module.default", PositionControlModule.class); }
+    public String getProjectDefaultCompany() { return environment.getProperty("project.company.default", "Заказчик"); }
+    private FunctionalConfiguration defaultFunctionalConfiguration(String prefix) {
+        return new FunctionalConfiguration(
+                enumOrDefault(prefix + ".display-purpose.default", DisplayPurpose.class, DisplayPurpose.INCH_10),
+                enumSet(prefix + ".access-purposes.default", AccessPurpose.class),
+                enumOrDefault(prefix + ".payment-purpose.default", PaymentPurpose.class, PaymentPurpose.NONE),
+                enumOrDefault(prefix + ".printer-purpose.default", PrinterPurpose.class, PrinterPurpose.ABSENT));
+    }
+    private <E extends Enum<E>> E enumRequired(String key, Class<E> type) {
+        return Enum.valueOf(type, environment.getRequiredProperty(key));
+    }
+    private <E extends Enum<E>> E enumOrDefault(String key, Class<E> type, E fallback) {
+        String value = environment.getProperty(key);
+        return value == null || value.isBlank() ? fallback : Enum.valueOf(type, value);
+    }
+    private <E extends Enum<E>> Set<E> enumSet(String key, Class<E> type) {
+        EnumSet<E> values = EnumSet.noneOf(type);
+        for (String value : environment.getProperty(key, "").split(",")) {
+            if (!value.isBlank()) values.add(Enum.valueOf(type, value.trim()));
+        }
+        return values;
+    }
 }

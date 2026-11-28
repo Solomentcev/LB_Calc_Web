@@ -14,7 +14,6 @@ import com.lb_calc_web.service.validation.size.SizeValidator;
 import com.lb_calc_web.domain.geometry.SizeBounds;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,20 +31,17 @@ public class LBService {
 
     private final FindOrCreateLockService findOrCreateLockService;
     private final LBRepository lbRepository;
-    private final Environment environment;
     private final SizeValidator sizeValidator;
     private final SizeBounds sizeBounds;
 
     public LBService(
             LBRepository lbRepository,
             FindOrCreateLockService findOrCreateLockService,
-            Environment environment,
             SizeValidator sizeValidator,
             SizeBounds sizeBounds
     ) {
         this.lbRepository = Objects.requireNonNull(lbRepository);
         this.findOrCreateLockService = Objects.requireNonNull(findOrCreateLockService);
-        this.environment = Objects.requireNonNull(environment);
         this.sizeValidator = Objects.requireNonNull(sizeValidator);
         this.sizeBounds = Objects.requireNonNull(sizeBounds);
     }
@@ -57,8 +53,8 @@ public class LBService {
                 sizeBounds.getDepthDefault(),
                 sizeBounds.getUpperFrameDefault(),
                 sizeBounds.getBottomFrameDefault(),
-                requiredColor("lb.color.body.default"),
-                requiredColor("lb.color.door.default")
+                sizeBounds.getLbDefaultBodyColor(),
+                sizeBounds.getLbDefaultDoorColor()
         );
     }
 
@@ -71,8 +67,8 @@ public class LBService {
             Colors colorBody,
             Colors colorDoor
     ) {
-        String type = environment.getRequiredProperty("lb.type.default");
-        TypeLb typeLb = TypeLbFactory.forLB(environment, type);
+        String type = sizeBounds.getDefaultLbTypeName();
+        TypeLb typeLb = TypeLbFactory.forLB(sizeBounds, type);
         return new LB(
                 height,
                 sizeBounds.getWidthDefault(),
@@ -83,10 +79,7 @@ public class LBService {
                 colorDoor,
                 typeLb,
                 sizeBounds.getCountCellsDefault(),
-                DirectionDoorOpening.valueOf(environment.getProperty(
-                        "lb.direction.default",
-                        DirectionDoorOpening.LEFT.name()
-                )),
+                sizeBounds.getLbDefaultDoorDirection(),
                 sizeBounds.getDoorThicknessDefault()
         );
     }
@@ -203,8 +196,5 @@ public class LBService {
         return LBEntityMapper.toDomain(saved);
     }
 
-    private Colors requiredColor(String key) {
-        return Colors.valueOf(environment.getRequiredProperty(key));
-    }
 
 }

@@ -11,7 +11,6 @@ import com.lb_calc_web.mapper.entity.LBEntityMapper;
 import com.lb_calc_web.repository.LBRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.mock.env.MockEnvironment;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -24,34 +23,17 @@ class LBServiceTest {
 
     private FindOrCreateLockService findOrCreateLockService;
     private LBRepository lbRepository;
-    private MockEnvironment environment;
     private LBService lbService;
 
     @BeforeEach
     void setUp() {
         lbRepository = mock(LBRepository.class);
         findOrCreateLockService = mock(FindOrCreateLockService.class);
-        environment = new MockEnvironment()
-                .withProperty("size.height.default", "1940")
-                .withProperty("size.width.default", "500")
-                .withProperty("size.depth.default", "500")
-                .withProperty("size.frame.upper.default", "50")
-                .withProperty("size.frame.bottom.default", "50")
-                .withProperty("size.count.cells.default", "3")
-                .withProperty("size.door.thickness.default", "20")
-                .withProperty("lb.type.default", "TYPE1")
-                .withProperty("lb.color.body.default", "Blue")
-                .withProperty("lb.color.door.default", "White")
-                .withProperty("lb.direction.default", "RIGHT")
-                .withProperty("lb.type.TYPE1.delta-width", "100")
-                .withProperty("lb.type.TYPE1.shelf-thick", "5")
-                .withProperty("lb.type.TYPE1.service-zone-width", "40");
         lbService = new LBService(
                 lbRepository,
                 findOrCreateLockService,
-                environment,
                 TestDataFactory.createSizeValidator(),
-                TestDataFactory.createSizeBounds()
+                TestDataFactory.createSizeBounds(java.util.Map.of("lb.direction.default", "RIGHT"))
         );
     }
 

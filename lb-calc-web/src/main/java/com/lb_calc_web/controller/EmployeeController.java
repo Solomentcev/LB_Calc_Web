@@ -238,7 +238,8 @@ public class EmployeeController {
                 Set.of("id", "firstName", "lastName", "email", "registrationDate"));
         EmployeeCatalogFilter filter = new EmployeeCatalogFilter(
                 id, firstName, lastName, email, null, null, registrationDateFrom, registrationDateTo);
-        var result = employeeService.findProfilesPage(filter, pageable);
+        var result = employeeService.findProfilesPage(filter, pageable)
+                .map(EmployeeDtoMapper::toProfileDto);
         model.addAttribute("employees", result.getContent());
         model.addAttribute("filters", filter);
         CatalogPageSupport.addModelAttributes(model, result, pageable, "/profiles",
@@ -298,11 +299,12 @@ public class EmployeeController {
         EmployeeCatalogFilter filter = new EmployeeCatalogFilter(
                 id, firstName, lastName, email, role, active,
                 registrationDateFrom, registrationDateTo);
-        var result = employeeService.findProfilesPage(filter, pageable);
+        var domainPage = employeeService.findProfilesPage(filter, pageable);
+        var result = domainPage.map(EmployeeDtoMapper::toDto);
         model.addAttribute("employees", result.getContent());
         model.addAttribute("filters", filter);
         model.addAttribute("employeeStatuses", employeeService.getActiveStatuses(
-                result.getContent().stream().map(Employee::getId).toList()));
+                domainPage.getContent().stream().map(Employee::getId).toList()));
         CatalogPageSupport.addModelAttributes(model, result, pageable, "/employees",
                 CatalogPageSupport.sortOptions("id", "ID", "firstName", "Имя",
                         "lastName", "Фамилия", "email", "Электронная почта",

@@ -19,7 +19,6 @@ import com.lb_calc_web.repository.EquipmentRepository;
 import com.lb_calc_web.service.validation.ValidationSizeException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.mock.env.MockEnvironment;
 
 import java.lang.reflect.Field;
 import java.util.List;
@@ -36,7 +35,6 @@ class LCServiceTest {
     private LCRepository repository;
     private EquipmentRepository equipmentRepository;
     private EquipmentCatalogService equipmentCatalogService;
-    private MockEnvironment environment;
     private LCService service;
 
     @BeforeEach
@@ -62,19 +60,8 @@ class LCServiceTest {
             return configuration;
         }).when(equipmentCatalogService).prepareFunctionalEquipment(
                 any(ControlConfiguration.class), nullable(ControlConfiguration.class), anyBoolean());
-        environment = new MockEnvironment()
-                .withProperty("size.height.default", "1940")
-                .withProperty("size.width.default", "500")
-                .withProperty("size.depth.default", "500")
-                .withProperty("size.frame.upper.default", "50")
-                .withProperty("size.frame.bottom.default", "50")
-                .withProperty("lc.payment.default", "NONE")
-                .withProperty("lc.printer.default", "false")
-                .withProperty("lc.access-purposes.default", "RFID")
-                .withProperty("lc.color.body.default", "Blue")
-                .withProperty("lc.color.door.default", "White");
         service = new LCService(
-                repository, lockService, environment,
+                repository, lockService,
                 TestDataFactory.createSizeValidator(), equipmentRepository, TestDataFactory.createSizeBounds(),
                 equipmentCatalogService);
     }

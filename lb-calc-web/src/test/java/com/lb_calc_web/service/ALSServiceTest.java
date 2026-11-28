@@ -15,7 +15,6 @@ import com.lb_calc_web.repository.ModuleEntityRepository;
 import com.lb_calc_web.repository.ProjectALSRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.mock.env.MockEnvironment;
 
 import java.util.List;
 import java.util.Optional;
@@ -65,23 +64,10 @@ class ALSServiceTest {
         }).when(equipmentCatalogService).prepareFunctionalEquipment(
                 any(ControlConfiguration.class), nullable(ControlConfiguration.class), anyBoolean());
 
-        MockEnvironment environment = new MockEnvironment()
-                .withProperty("size.height.default", "1940")
-                .withProperty("size.depth.default", "500")
-                .withProperty("size.frame.upper.default", "50")
-                .withProperty("size.frame.bottom.default", "50")
-                .withProperty("als.color.body.default", "Blue")
-                .withProperty("als.color.door.default", "White")
-                .withProperty("als.position.control-module.default", "LEFT")
-                .withProperty("als.position.control-module.default", "LEFT")
-                .withProperty("lb.type.TYPE1.delta-width", "100")
-                .withProperty("lb.type.TYPE1.shelf-thick", "5")
-                .withProperty("lb.type.TYPE1.service-zone-width", "40");
-
         service = new ALSService(
                 alsRepository, projectALSRepository, moduleRepository,
                 lbService, lcService, lbcService, lockService,
-                environment, TestDataFactory.createSizeValidator(), equipmentRepository,
+                TestDataFactory.createSizeValidator(), equipmentRepository,
                 equipmentCatalogService, TestDataFactory.createSizeBounds());
     }
 

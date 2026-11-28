@@ -18,7 +18,6 @@ import com.lb_calc_web.repository.EquipmentRepository;
 import com.lb_calc_web.service.validation.ValidationSizeException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.mock.env.MockEnvironment;
 
 import java.lang.reflect.Field;
 import java.util.List;
@@ -35,7 +34,6 @@ class LBCServiceTest {
     private LBCRepository repository;
     private EquipmentRepository equipmentRepository;
     private EquipmentCatalogService equipmentCatalogService;
-    private MockEnvironment environment;
     private LBCService service;
 
     @BeforeEach
@@ -61,26 +59,8 @@ class LBCServiceTest {
             return configuration;
         }).when(equipmentCatalogService).prepareFunctionalEquipment(
                 any(ControlConfiguration.class), nullable(ControlConfiguration.class), anyBoolean());
-        environment = new MockEnvironment()
-                .withProperty("size.height.default", "1940")
-                .withProperty("size.width.default", "500")
-                .withProperty("size.depth.default", "500")
-                .withProperty("size.frame.upper.default", "50")
-                .withProperty("size.frame.bottom.default", "50")
-                .withProperty("size.count.cells.default", "3")
-                .withProperty("size.door.thickness.default", "20")
-                .withProperty("lbc.type.default", "TYPE1")
-                .withProperty("lbc.payment.default", "NONE")
-                .withProperty("lbc.printer.default", "false")
-                .withProperty("lbc.access-purposes.default", "RFID")
-                .withProperty("lbc.color.body.default", "Blue")
-                .withProperty("lbc.color.door.default", "White")
-                .withProperty("lbc.direction.default", "LEFT")
-                .withProperty("lb.type.TYPE1.delta-width", "100")
-                .withProperty("lb.type.TYPE1.shelf-thick", "5")
-                .withProperty("lb.type.TYPE1.service-zone-width", "40");
         service = new LBCService(
-                repository, lockService, environment,
+                repository, lockService,
                 TestDataFactory.createSizeValidator(), equipmentRepository, TestDataFactory.createSizeBounds(),
                 equipmentCatalogService);
     }

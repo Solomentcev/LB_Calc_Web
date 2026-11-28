@@ -13,7 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
-import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -110,11 +109,11 @@ public class LBRestController {
             LoggerFactory.getLogger(LBRestController.class);
 
     private final LBService lbService;
-    private final Environment environment;
+    private final SizeBounds sizeBounds;
 
-    public LBRestController(LBService lbService, Environment environment) {
+    public LBRestController(LBService lbService, SizeBounds sizeBounds) {
         this.lbService = lbService;
-        this.environment = environment;
+        this.sizeBounds = sizeBounds;
     }
 
     /**
@@ -202,7 +201,7 @@ public class LBRestController {
                 dto != null ? dto.getType() : null
         );
 
-            LBDTO saved = LBDtoMapper.toDto(lbService.saveLB(LBDtoMapper.toDomain(dto, TypeLbFactory.forLB(environment, dto.getType()))));
+            LBDTO saved = LBDtoMapper.toDto(lbService.saveLB(LBDtoMapper.toDomain(dto, TypeLbFactory.forLB(sizeBounds, dto.getType()))));
 
             return ResponseEntity.status(HttpStatus.CREATED).body(
                     ApiResponse.success(

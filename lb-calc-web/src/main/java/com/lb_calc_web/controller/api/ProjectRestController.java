@@ -20,10 +20,9 @@ import com.lb_calc_web.mapper.dto.LBDtoMapper;
 import com.lb_calc_web.service.ALSService;
 import com.lb_calc_web.service.EquipmentCatalogService;
 import com.lb_calc_web.service.factory.TypeLbFactory;
-import com.lb_calc_web.domain.geometry.SizeBounds;
+import com.lb_calc_web.service.validation.size.SizeBounds;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
-import org.springframework.core.env.Environment;
 import com.lb_calc_web.service.export.ProjectExcelExportService;
 import com.lb_calc_web.service.ProjectService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -138,22 +137,19 @@ public class ProjectRestController {
     private final ProjectExcelExportService projectExcelExportService;
     private final EquipmentCatalogService equipmentCatalogService;
     private final SizeBounds sizeBounds;
-    private final Environment environment;
 
     public ProjectRestController(
             ProjectService projectService,
             ALSService alsService,
             ProjectExcelExportService projectExcelExportService,
             EquipmentCatalogService equipmentCatalogService,
-            SizeBounds sizeBounds,
-            Environment environment
+            SizeBounds sizeBounds
     ) {
         this.projectService = projectService;
         this.alsService = alsService;
         this.projectExcelExportService = projectExcelExportService;
         this.equipmentCatalogService = equipmentCatalogService;
         this.sizeBounds = sizeBounds;
-        this.environment = environment;
     }
 
     /**
@@ -241,8 +237,8 @@ public class ProjectRestController {
                                 ? alsService.findById(dto.getId()) : null;
                         ALS restored = ALSDtoMapper.toDomain(
                                 dto,
-                                candidate -> TypeLbFactory.forLB(environment, candidate.getType()),
-                                candidate -> TypeLbFactory.forLBC(environment, candidate.getType()),
+                                candidate -> TypeLbFactory.forLB(sizeBounds, candidate.getType()),
+                                candidate -> TypeLbFactory.forLBC(sizeBounds, candidate.getType()),
                                 equipmentCatalogService::findById,
                                 sizeBounds
                         );
@@ -281,8 +277,8 @@ public class ProjectRestController {
                                 ? alsService.findById(dto.getId()) : null;
                         ALS restored = ALSDtoMapper.toDomain(
                                 dto,
-                                candidate -> TypeLbFactory.forLB(environment, candidate.getType()),
-                                candidate -> TypeLbFactory.forLBC(environment, candidate.getType()),
+                                candidate -> TypeLbFactory.forLB(sizeBounds, candidate.getType()),
+                                candidate -> TypeLbFactory.forLBC(sizeBounds, candidate.getType()),
                                 equipmentCatalogService::findById,
                                 sizeBounds
                         );
@@ -381,8 +377,8 @@ public class ProjectRestController {
             ALS existing = projectService.findALSInProject(projectId, alsId);
             ALS restored = ALSDtoMapper.toDomain(
                     als,
-                    candidate -> TypeLbFactory.forLB(environment, candidate.getType()),
-                    candidate -> TypeLbFactory.forLBC(environment, candidate.getType()),
+                    candidate -> TypeLbFactory.forLB(sizeBounds, candidate.getType()),
+                    candidate -> TypeLbFactory.forLBC(sizeBounds, candidate.getType()),
                     equipmentCatalogService::findById,
                     sizeBounds
             );
@@ -563,7 +559,7 @@ public class ProjectRestController {
             lbc.setId(lbcId);
             LBC replacement = LBCDtoMapper.toDomain(
                     lbc,
-                    TypeLbFactory.forLBC(environment, lbc.getType()),
+                    TypeLbFactory.forLBC(sizeBounds, lbc.getType()),
                     equipmentCatalogService::findById, sizeBounds);
             ALS savedALS = projectService.saveLBCAtProject(
                     projectId,
@@ -641,7 +637,7 @@ public class ProjectRestController {
             }
 
             LB replacement = LBDtoMapper.toDomain(
-                    lb, TypeLbFactory.forLB(environment, lb.getType()));
+                    lb, TypeLbFactory.forLB(sizeBounds, lb.getType()));
             ALS savedALS = projectService.saveLBAtProject(
                     projectId,
                     alsId,

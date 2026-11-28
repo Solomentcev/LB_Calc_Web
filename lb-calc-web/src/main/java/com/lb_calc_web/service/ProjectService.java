@@ -18,9 +18,9 @@ import com.lb_calc_web.repository.ALSRepository;
 import com.lb_calc_web.repository.EmployeeRepository;
 import com.lb_calc_web.repository.ProjectRepository;
 import com.lb_calc_web.service.validation.size.SizeValidator;
+import com.lb_calc_web.service.validation.size.SizeBounds;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.env.Environment;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -45,15 +45,14 @@ public class ProjectService {
     private static final Logger logger =
             LoggerFactory.getLogger(ProjectService.class);
 
-    private static final String DEFAULT_COMPANY = "Заказчик";
 
     private final ProjectRepository projectRepository;
     private final ALSRepository alsRepository;
     private final EmployeeRepository employeeRepository;
     private final ALSService alsService;
     private final EmployeeService employeeService;
-    private final Environment environment;
     private final SizeValidator sizeValidator;
+    private final SizeBounds sizeBounds;
 
     public ProjectService(
             ProjectRepository projectRepository,
@@ -61,16 +60,16 @@ public class ProjectService {
             EmployeeRepository employeeRepository,
             ALSService alsService,
             EmployeeService employeeService,
-            Environment environment,
-            SizeValidator sizeValidator
+            SizeValidator sizeValidator,
+            SizeBounds sizeBounds
     ) {
         this.projectRepository = projectRepository;
         this.alsRepository = alsRepository;
         this.employeeRepository = employeeRepository;
         this.alsService = alsService;
         this.employeeService = employeeService;
-        this.environment = environment;
         this.sizeValidator = sizeValidator;
+        this.sizeBounds = sizeBounds;
     }
 
     /**
@@ -975,10 +974,7 @@ return projectRepository.findAllWithUsers()
      * @return название компании по умолчанию
      */
     private String getDefaultCompany() {
-        String configured = environment.getProperty(
-                "project.company.default",
-                DEFAULT_COMPANY
-        );
+        String configured = sizeBounds.getProjectDefaultCompany();
 
         if (configured.contains("Ð")
                 || configured.contains("Ñ")
@@ -988,7 +984,7 @@ return projectRepository.findAllWithUsers()
                     "Настройка project.company.default содержит некорректно декодированный текст; "
                             + "используется значение по умолчанию"
             );
-            return DEFAULT_COMPANY;
+            return "Заказчик";
         }
 
         return configured;

@@ -12,8 +12,7 @@ import com.lb_calc_web.service.ModuleCatalogFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.lb_calc_web.service.factory.TypeLbFactory;
-import com.lb_calc_web.domain.geometry.SizeBounds;
-import org.springframework.core.env.Environment;
+import com.lb_calc_web.service.validation.size.SizeBounds;
 import org.springframework.stereotype.Controller;
 import org.springframework.data.domain.Pageable;
 
@@ -36,18 +35,15 @@ public class LBCController extends BaseCatalogController {
     private final LBCService lbcService;
     private final EquipmentCatalogService equipmentCatalogService;
     private final SizeBounds sizeBounds;
-    private final Environment environment;
 
     public LBCController(
             LBCService lbcService,
             EquipmentCatalogService equipmentCatalogService,
-            SizeBounds sizeBounds,
-            Environment environment
+            SizeBounds sizeBounds
     ) {
         this.lbcService = lbcService;
         this.equipmentCatalogService = equipmentCatalogService;
         this.sizeBounds = sizeBounds;
-        this.environment = environment;
     }
 
     /**
@@ -122,7 +118,7 @@ public class LBCController extends BaseCatalogController {
         model.addAttribute("pageContext", "CATALOG");
         try {
             LBC domain = LBCDtoMapper.toDomain(
-                    lbc, TypeLbFactory.forLBC(environment, lbc.getType()),
+                    lbc, TypeLbFactory.forLBC(sizeBounds, lbc.getType()),
                     equipmentCatalogService::findById, sizeBounds);
             lbcService.prepareFunctionalEquipment(domain, lbc.isEquipmentProvided());
             lbcService.validateForSave(domain);
@@ -149,7 +145,7 @@ public class LBCController extends BaseCatalogController {
         model.addAttribute("pageContext", "CATALOG");
         try {
             LBC domain = LBCDtoMapper.toDomain(
-                    lbc, TypeLbFactory.forLBC(environment, lbc.getType()),
+                    lbc, TypeLbFactory.forLBC(sizeBounds, lbc.getType()),
                     equipmentCatalogService::findById, sizeBounds);
             lbcService.prepareFunctionalEquipment(domain, lbc.isEquipmentProvided());
             LBC saved = lbcService.saveLBC(domain);
