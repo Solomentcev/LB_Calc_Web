@@ -83,10 +83,10 @@ static Image createLBImage(
         );
 
         int serviceZoneWidth =
-                lb.getTypeLb().getServiceZoneWidth();
+                lb.getServiceZoneWidth();
 
         int shelfThickness =
-                lb.getTypeLb().getShelfThick();
+                lb.getShelfThickness();
 
         boolean directionLeft =
                 DirectionDoorOpening.LEFT == lb.getDirectionDoorOpening();
