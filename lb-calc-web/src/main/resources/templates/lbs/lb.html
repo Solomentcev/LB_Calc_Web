@@ -33,8 +33,6 @@
           th:object="${lb}" method="post">
         <input type="hidden" th:field="*{name}">
         <input type="hidden" th:field="*{description}">
-        <input type="hidden" th:field="*{deltaWidth}">
-        <input type="hidden" th:field="*{serviceZoneWidth}">
 
         <button type="submit" hidden formnovalidate data-form-refresh
                 th:formaction="${pageContext == 'CATALOG'} ? @{/lbs/refresh} :
@@ -120,10 +118,6 @@
                         <label for="lb-depth">Глубина корпуса, мм</label>
                         <input id="lb-depth" class="form-control" type="number" th:field="*{depth}"
                                th:readonly="${pageContext != 'CATALOG'}">
-                    </div>
-                    <div class="col-sm-6 col-lg-3 module-field">
-                        <label for="lb-shelf-thick">Толщина полки, мм</label>
-                        <input id="lb-shelf-thick" class="form-control" th:field="*{shelfThick}" readonly>
                     </div>
                     <div class="col-sm-6 col-lg-3 module-field">
                         <label for="lb-upper-frame">Верхняя рама, мм</label>
