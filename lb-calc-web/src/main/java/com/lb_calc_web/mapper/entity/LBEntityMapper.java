@@ -3,6 +3,7 @@ package com.lb_calc_web.mapper.entity;
 import com.lb_calc_web.domain.attributes.Colors;
 import com.lb_calc_web.domain.attributes.DirectionDoorOpening;
 import com.lb_calc_web.domain.attributes.TypeLb;
+import com.lb_calc_web.service.validation.size.SizeBounds;
 import com.lb_calc_web.domain.model.LB;
 import com.lb_calc_web.domain.model.Module;
 import com.lb_calc_web.entity.LBEntity;
@@ -26,7 +27,7 @@ public final class LBEntityMapper {
      * <p>Геометрия ячеек пересчитывается доменной моделью, а наименование и описание
      * переносятся из persistence-сущности.</p>
      */
-    public static LB toDomain(LBEntity entity) {
+    public static LB toDomain(LBEntity entity, SizeBounds bounds) {
         if (entity == null) {
             return null;
         }
@@ -54,7 +55,8 @@ public final class LBEntityMapper {
                         entity.getDirectionDoorOpening(),
                         "Направление открытия дверей LB не должно быть null"
                 ),
-                entity.getDoorThickness()
+                entity.getDoorThickness(),
+                bounds
         );
 
         domain = (LB) Module.restoreText(domain, entity.getName(), entity.getDescription());
