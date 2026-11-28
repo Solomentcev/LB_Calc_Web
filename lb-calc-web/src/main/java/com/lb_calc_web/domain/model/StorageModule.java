@@ -2,6 +2,7 @@ package com.lb_calc_web.domain.model;
 
 import com.lb_calc_web.domain.attributes.DirectionDoorOpening;
 import com.lb_calc_web.domain.attributes.TypeLb;
+import com.lb_calc_web.service.validation.size.SizeBounds;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -54,6 +55,8 @@ public abstract class StorageModule extends Module {
      */
     private final int doorThickness;
 
+    private final SizeBounds bounds;
+
     /**
      * Направление открытия дверей storage-модуля.
      */
@@ -70,8 +73,29 @@ public abstract class StorageModule extends Module {
      * @param doorThickness толщина дверцы, используемая
      *                      при расчёте глубины ячейки, мм
      */
-    protected StorageModule(int doorThickness) {
+    protected StorageModule(int doorThickness, SizeBounds bounds) {
         this.doorThickness = doorThickness;
+        this.bounds = Objects.requireNonNull(bounds, "Ограничения геометрии не должны быть null");
+    }
+
+    /** Возвращает конфигурацию геометрических параметров модуля. */
+    protected final SizeBounds getBounds() {
+        return bounds;
+    }
+
+    /** Возвращает добавочную ширину корпуса для выбранного типа. */
+    public final int getTypeDeltaWidth() {
+        return bounds.getTypeDeltaWidth(typeLb);
+    }
+
+    /** Возвращает толщину полки для выбранного типа. */
+    public final int getShelfThickness() {
+        return bounds.getTypeShelfThickness(typeLb);
+    }
+
+    /** Возвращает ширину сервисной зоны для выбранного типа. */
+    public final int getServiceZoneWidth() {
+        return bounds.getTypeServiceZoneWidth(typeLb);
     }
 
     /**
@@ -330,8 +354,8 @@ public abstract class StorageModule extends Module {
 
         int cellWidth = toIntSaturated(
                 (long) getWidth()
-                        - typeLb.getDeltaWidth()
-                        - typeLb.getServiceZoneWidth()
+                        - getTypeDeltaWidth()
+                        - getServiceZoneWidth()
         );
 
         int cellDepth = toIntSaturated(
@@ -343,7 +367,7 @@ public abstract class StorageModule extends Module {
                 : (long) getHeight()
                         - getUpperFrame()
                         - getBottomFrame()
-                        - (long) (countCells - 1) * typeLb.getShelfThick();
+                        - (long) (countCells - 1) * getShelfThickness();
 
         int cellHeight = countCells == 0
                 ? 0
