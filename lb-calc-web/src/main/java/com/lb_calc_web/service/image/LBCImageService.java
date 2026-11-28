@@ -59,8 +59,8 @@ public final class LBCImageService {
         int height = mm(lbc.getHeight());
         int upperFrame = mm(lbc.getUpperFrame());
         int bottomFrame = mm(lbc.getBottomFrame());
-        int shelf = Math.max(1, mm(lbc.getTypeLb().getShelfThick()));
-        int serviceZoneWidth = mm(lbc.getTypeLb().getServiceZoneWidth());
+        int shelf = Math.max(1, mm(lbc.getShelfThickness()));
+        int serviceZoneWidth = mm(lbc.getServiceZoneWidth());
         boolean directionLeft = lbc.getDirectionDoorOpening() == DirectionDoorOpening.LEFT;
 
         int serviceZoneX = directionLeft
