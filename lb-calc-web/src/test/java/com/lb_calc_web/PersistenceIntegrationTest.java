@@ -623,7 +623,8 @@ class PersistenceIntegrationTest {
                     projectId,
                     changedALS.getId(),
                     changedLB.getId(),
-                    LBDtoMapper.toDomain(changedLBDTO, TypeLb.valueOf(changedLBDTO.getType()))
+                    LBDtoMapper.toDomain(changedLBDTO, TypeLb.valueOf(changedLBDTO.getType()),
+                            TestDataFactory.createSizeBounds())
             );
 
             Long removedLBId = changedALS.getStorageModules().stream()
