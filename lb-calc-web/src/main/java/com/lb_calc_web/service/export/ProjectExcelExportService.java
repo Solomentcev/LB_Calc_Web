@@ -477,7 +477,7 @@ public class ProjectExcelExportService {
 
     // ================= IMAGE =================
 
-    private static int addImage(
+    private int addImage(
             Sheet sheet,
             Workbook wb,
             XSSFDrawing drawing,
