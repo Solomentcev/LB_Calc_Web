@@ -17,6 +17,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -117,6 +118,14 @@ class AuthRestControllerContractTest {
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.status").value("error"))
                 .andExpect(jsonPath("$.message").value("Недействительный или просроченный токен"));
+    }
+
+    @Test
+    void logout_shouldClearTokenCookies() throws Exception {
+        mockMvc.perform(post("/api/v1/logout"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("success"))
+                .andExpect(header().exists("Set-Cookie"));
     }
 
     @Test
