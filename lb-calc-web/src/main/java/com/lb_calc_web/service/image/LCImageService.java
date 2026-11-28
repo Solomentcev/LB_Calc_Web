@@ -3,6 +3,7 @@ package com.lb_calc_web.service.image;
 import com.lb_calc_web.domain.equipment.Equipment;
 import com.lb_calc_web.domain.equipment.EquipmentFunctionalType;
 import com.lb_calc_web.domain.model.LC;
+import com.lb_calc_web.service.validation.size.SizeBounds;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -23,14 +24,14 @@ public final class LCImageService {
     }
 
     /** Создаёт масштабированное изображение LC. */
-    static Image createLCImage(LC lc) {
+    static Image createLCImage(LC lc, SizeBounds bounds) {
         BufferedImage image = new BufferedImage(
                 toPixels(lc.getWidth()) + 1,
                 toPixels(lc.getHeight()) + 1,
                 BufferedImage.TYPE_INT_ARGB
         );
 
-        drawLC(image, lc, 0);
+        drawLC(image, lc, 0, bounds);
 
         AffineTransform transform = new AffineTransform();
         transform.scale(IMAGE_SCALE, IMAGE_SCALE);
@@ -54,7 +55,7 @@ public final class LCImageService {
      * выражены в миллиметрах. Сервис отвечает только за перевод
      * физических размеров в пиксели и графическое представление.</p>
      */
-    static void drawLC(Image image, LC lc, int x) {
+    static void drawLC(Image image, LC lc, int x, SizeBounds bounds) {
         Graphics2D graphics = (Graphics2D) image.getGraphics();
         try {
             graphics.setRenderingHint(
@@ -98,7 +99,7 @@ public final class LCImageService {
                     1
             );
 
-            drawDisplay(graphics, lc, x);
+            drawDisplay(graphics, lc, x, bounds);
 
             // Внешний контур корпуса.
             graphics.drawRoundRect(x, 0, width, height, 1, 1);
@@ -108,7 +109,7 @@ public final class LCImageService {
     }
 
     /** Размещает дисплей по рассчитанной доменом физической координате. */
-    private static void drawDisplay(Graphics2D graphics, LC lc, int x) {
+    private static void drawDisplay(Graphics2D graphics, LC lc, int x, SizeBounds bounds) {
         Equipment display = findDisplay(lc);
         if (display == null || display.getWidth() <= 0 || display.getHeight() <= 0) {
             return;
@@ -121,7 +122,14 @@ public final class LCImageService {
         }
 
         int displayX = x + toPixels((lc.getWidth() - display.getWidth()) / 2);
-        int displayY = toPixels(lc.getEquipmentTop(display));
+        int centeredTop = (int) Math.floor(
+                lc.getHeight() - bounds.getLcDisplayCenterHeight() - display.getHeight() / 2.0
+        );
+        int displayTop = Math.max(
+                centeredTop,
+                lc.getUpperFrame() + bounds.getLcDisplayTopClearance()
+        );
+        int displayY = toPixels(displayTop);
 
         graphics.setColor(Color.GRAY);
         graphics.fillRoundRect(
@@ -146,8 +154,8 @@ public final class LCImageService {
     }
 
     /** Создаёт PNG-файл изображения управляющего модуля LC. */
-    public static byte[] getBytesArrayLCImage(LC lc) {
-        BufferedImage image = (BufferedImage) createLCImage(lc);
+    public static byte[] getBytesArrayLCImage(LC lc, SizeBounds bounds) {
+        BufferedImage image = (BufferedImage) createLCImage(lc, bounds);
         ByteArrayOutputStream output = new ByteArrayOutputStream();
 
         try {
@@ -162,7 +170,7 @@ public final class LCImageService {
     }
 
     /** Возвращает изображение LC в кодировке Base64. */
-    public static String getStringLCImage(LC lc) {
-        return Base64.getEncoder().encodeToString(getBytesArrayLCImage(lc));
+    public static String getStringLCImage(LC lc, SizeBounds bounds) {
+        return Base64.getEncoder().encodeToString(getBytesArrayLCImage(lc, bounds));
     }
 }
