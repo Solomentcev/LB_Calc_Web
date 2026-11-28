@@ -150,7 +150,8 @@ public class ProjectExcelExportService {
                         entry.getValue(),
                         index++,
                         s,
-                        r
+                        r,
+                        sizeBounds
                 );
             }
 
@@ -187,7 +188,8 @@ public class ProjectExcelExportService {
             Integer qty,
             int index,
             Styles s,
-            int r
+            int r,
+            SizeBounds sizeBounds
     ) {
 
         r = alsHeader(
@@ -219,6 +221,7 @@ public class ProjectExcelExportService {
                 wb,
                 drawing,
                 domainAls,
+                sizeBounds,
                 r++,
                 1,
                 8
@@ -477,11 +480,12 @@ public class ProjectExcelExportService {
 
     // ================= IMAGE =================
 
-    private int addImage(
+    private static int addImage(
             Sheet sheet,
             Workbook wb,
             XSSFDrawing drawing,
             ALS als,
+            SizeBounds sizeBounds,
             int row,
             int col1,
             int col2
