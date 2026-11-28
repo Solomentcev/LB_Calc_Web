@@ -4,6 +4,7 @@ import com.lb_calc_web.handler.RestExceptionHandler;
 import com.lb_calc_web.security.jwt.JwtService;
 import com.lb_calc_web.service.ALSService;
 import com.lb_calc_web.service.EquipmentCatalogService;
+import com.lb_calc_web.service.EmployeeService;
 import com.lb_calc_web.service.LBService;
 import com.lb_calc_web.service.LBCService;
 import com.lb_calc_web.service.LCService;
@@ -42,6 +43,8 @@ class BusinessRestControllerContractTest {
     private ALSService alsService;
     @MockitoBean
     private EquipmentCatalogService equipmentCatalogService;
+    @MockitoBean
+    private EmployeeService employeeService;
     @MockitoBean
     private LBService lbService;
     @MockitoBean
