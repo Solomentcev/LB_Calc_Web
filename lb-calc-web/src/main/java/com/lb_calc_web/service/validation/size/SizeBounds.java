@@ -16,7 +16,7 @@ import java.util.Set;
 
 /** Конфигурация размерных ограничений и значений по умолчанию модулей. */
 @Component
-public class SizeBounds implements com.lb_calc_web.domain.geometry.SizeBounds {
+public class SizeBounds {
 
     private final int upperFrameMin;
     private final int upperFrameMax;
