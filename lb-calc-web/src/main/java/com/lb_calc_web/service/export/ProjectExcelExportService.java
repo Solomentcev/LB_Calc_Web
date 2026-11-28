@@ -8,6 +8,7 @@ import com.lb_calc_web.dto.LBCDTO;
 import com.lb_calc_web.dto.LBDTO;
 import com.lb_calc_web.dto.ProjectDTO;
 import com.lb_calc_web.service.image.ALSImageService;
+import com.lb_calc_web.service.validation.size.SizeBounds;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.*;
@@ -23,6 +24,12 @@ import java.util.Map;
 /** Формирует Excel-представление проекта и его конфигурации. */
 @Service
 public class ProjectExcelExportService {
+
+    private final SizeBounds sizeBounds;
+
+    public ProjectExcelExportService(SizeBounds sizeBounds) {
+        this.sizeBounds = sizeBounds;
+    }
 
     private static final Logger logger =
             LoggerFactory.getLogger(ProjectExcelExportService.class);
@@ -481,7 +488,7 @@ public class ProjectExcelExportService {
     ) {
 
         byte[] img =
-                ALSImageService.getBytesArrayALSImage(als);
+                ALSImageService.getBytesArrayALSImage(als, sizeBounds);
 
         int id =
                 wb.addPicture(
