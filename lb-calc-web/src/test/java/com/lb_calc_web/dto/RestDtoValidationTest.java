@@ -75,4 +75,51 @@ class RestDtoValidationTest {
                         .equals("alsList[0].lc.selectedEquipment[0].width")));
     }
 
+    @Test
+    void als_shouldRejectNonPositiveGeometry() {
+        ALSDTO dto = new ALSDTO();
+        dto.setHeight(0);
+        assertInvalid(dto, "height");
+    }
+
+    @Test
+    void lc_shouldRejectNonPositiveGeometry() {
+        LCDTO dto = new LCDTO();
+        dto.setWidth(-1);
+        assertInvalid(dto, "width");
+    }
+
+    @Test
+    void lb_shouldRejectNonPositiveGeometry() {
+        LBDTO dto = new LBDTO();
+        dto.setDoorThickness(0);
+        assertInvalid(dto, "doorThickness");
+    }
+
+    @Test
+    void lbc_shouldRejectNonPositiveGeometry() {
+        LBCDTO dto = new LBCDTO();
+        dto.setCountCells(0);
+        assertInvalid(dto, "countCells");
+    }
+
+    @Test
+    void project_shouldCascadeGeometryValidationToStorageModules() {
+        LBDTO lb = new LBDTO();
+        lb.setWidth(0);
+        ALSDTO als = new ALSDTO();
+        als.setLbList(List.of(lb));
+        ProjectDTO project = new ProjectDTO();
+        project.setAlsList(List.of(als));
+
+        assertTrue(validator.validate(project).stream()
+                .anyMatch(error -> error.getPropertyPath().toString()
+                        .equals("alsList[0].lbList[0].width")));
+    }
+
+    private static void assertInvalid(Object dto, String property) {
+        assertTrue(validator.validate(dto).stream()
+                .anyMatch(error -> error.getPropertyPath().toString().equals(property)));
+    }
+
 }
