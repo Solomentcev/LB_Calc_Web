@@ -156,7 +156,7 @@ public final class ALSDtoMapper {
             if (lbDto == null) {
                 throw new IllegalStateException("Список LB содержит пустой элемент");
             }
-            modules.add(LBDtoMapper.toDomain(lbDto, lbTypeResolver.apply(lbDto)));
+            modules.add(LBDtoMapper.toDomain(lbDto, lbTypeResolver.apply(lbDto), bounds));
         }
 
         Module control = dto.getLBC() != null
@@ -195,7 +195,7 @@ public final class ALSDtoMapper {
                         throw new IllegalStateException("Список LB содержит пустой элемент");
                     }
                     usedLbIndexes[index] = true;
-                    modules.add(LBDtoMapper.toDomain(lbDto, lbTypeResolver.apply(lbDto)));
+                    modules.add(LBDtoMapper.toDomain(lbDto, lbTypeResolver.apply(lbDto), bounds));
                 }
                 case "LC" -> {
                     if (item.getIndex() != 0 || dto.getLC() == null || controlModuleUsed) {
