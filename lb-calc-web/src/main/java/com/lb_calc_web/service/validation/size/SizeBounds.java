@@ -2,7 +2,6 @@ package com.lb_calc_web.service.validation.size;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.core.env.Environment;
 import com.lb_calc_web.domain.attributes.Colors;
 import com.lb_calc_web.domain.attributes.DirectionDoorOpening;
 import com.lb_calc_web.domain.attributes.PositionControlModule;
@@ -64,7 +63,57 @@ public class SizeBounds implements com.lb_calc_web.domain.geometry.SizeBounds {
     private final int lbcTechnicalCellMinHeight;
     private final int lbcEquipmentClearance;
     private final int lbcDisplayCenterHeight;
-    private final Environment environment;
+
+    @Value("${lb.types}") private String lbTypes;
+    @Value("${lb.type.default}") private String defaultLbTypeName;
+    @Value("${lbc.type.default}") private String defaultLbcTypeName;
+
+    @Value("${lb.type.TYPE1.delta-width}") private int lbType1DeltaWidth;
+    @Value("${lb.type.TYPE1.shelf-thick}") private int lbType1ShelfThick;
+    @Value("${lb.type.TYPE1.service-zone-width}") private int lbType1ServiceZoneWidth;
+    @Value("${lb.type.TYPE2.delta-width}") private int lbType2DeltaWidth;
+    @Value("${lb.type.TYPE2.shelf-thick}") private int lbType2ShelfThick;
+    @Value("${lb.type.TYPE2.service-zone-width}") private int lbType2ServiceZoneWidth;
+    @Value("${lb.type.TYPE3.delta-width}") private int lbType3DeltaWidth;
+    @Value("${lb.type.TYPE3.shelf-thick}") private int lbType3ShelfThick;
+    @Value("${lb.type.TYPE3.service-zone-width}") private int lbType3ServiceZoneWidth;
+    @Value("${lb.type.TYPE4.delta-width}") private int lbType4DeltaWidth;
+    @Value("${lb.type.TYPE4.shelf-thick}") private int lbType4ShelfThick;
+    @Value("${lb.type.TYPE4.service-zone-width}") private int lbType4ServiceZoneWidth;
+
+    @Value("${lbc.type.TYPE1.delta-width:${lb.type.TYPE1.delta-width}}") private int lbcType1DeltaWidth;
+    @Value("${lbc.type.TYPE1.shelf-thick:${lb.type.TYPE1.shelf-thick}}") private int lbcType1ShelfThick;
+    @Value("${lbc.type.TYPE1.service-zone-width:${lb.type.TYPE1.service-zone-width}}") private int lbcType1ServiceZoneWidth;
+    @Value("${lbc.type.TYPE2.delta-width:${lb.type.TYPE2.delta-width}}") private int lbcType2DeltaWidth;
+    @Value("${lbc.type.TYPE2.shelf-thick:${lb.type.TYPE2.shelf-thick}}") private int lbcType2ShelfThick;
+    @Value("${lbc.type.TYPE2.service-zone-width:${lb.type.TYPE2.service-zone-width}}") private int lbcType2ServiceZoneWidth;
+    @Value("${lbc.type.TYPE3.delta-width:${lb.type.TYPE3.delta-width}}") private int lbcType3DeltaWidth;
+    @Value("${lbc.type.TYPE3.shelf-thick:${lb.type.TYPE3.shelf-thick}}") private int lbcType3ShelfThick;
+    @Value("${lbc.type.TYPE3.service-zone-width:${lb.type.TYPE3.service-zone-width}}") private int lbcType3ServiceZoneWidth;
+    @Value("${lbc.type.TYPE4.delta-width:${lb.type.TYPE4.delta-width}}") private int lbcType4DeltaWidth;
+    @Value("${lbc.type.TYPE4.shelf-thick:${lb.type.TYPE4.shelf-thick}}") private int lbcType4ShelfThick;
+    @Value("${lbc.type.TYPE4.service-zone-width:${lb.type.TYPE4.service-zone-width}}") private int lbcType4ServiceZoneWidth;
+
+    @Value("${lb.color.body.default}") private String lbDefaultBodyColor;
+    @Value("${lb.color.door.default}") private String lbDefaultDoorColor;
+    @Value("${lb.direction.default:LEFT}") private String lbDefaultDoorDirection;
+    @Value("${lc.color.body.default}") private String lcDefaultBodyColor;
+    @Value("${lc.color.door.default}") private String lcDefaultDoorColor;
+    @Value("${lc.display-purpose.default:INCH_10}") private String lcDefaultDisplay;
+    @Value("${lc.access-purposes.default:}") private String lcDefaultAccess;
+    @Value("${lc.payment-purpose.default:NONE}") private String lcDefaultPayment;
+    @Value("${lc.printer-purpose.default:ABSENT}") private String lcDefaultPrinter;
+    @Value("${lbc.color.body.default}") private String lbcDefaultBodyColor;
+    @Value("${lbc.color.door.default}") private String lbcDefaultDoorColor;
+    @Value("${lbc.direction.default:LEFT}") private String lbcDefaultDoorDirection;
+    @Value("${lbc.display-purpose.default:INCH_10}") private String lbcDefaultDisplay;
+    @Value("${lbc.access-purposes.default:}") private String lbcDefaultAccess;
+    @Value("${lbc.payment-purpose.default:NONE}") private String lbcDefaultPayment;
+    @Value("${lbc.printer-purpose.default:ABSENT}") private String lbcDefaultPrinter;
+    @Value("${als.color.body.default}") private String alsDefaultBodyColor;
+    @Value("${als.color.door.default}") private String alsDefaultDoorColor;
+    @Value("${als.position.control-module.default}") private String alsDefaultControlPosition;
+    @Value("${project.company.default:Заказчик}") private String projectDefaultCompany;
 
     public SizeBounds(
             @Value("${size.frame.upper.min}") int upperFrameMin,
@@ -109,8 +158,7 @@ public class SizeBounds implements com.lb_calc_web.domain.geometry.SizeBounds {
             @Value("${lbc.geometry.technical-cell.width.min}") int lbcTechnicalCellMinWidth,
             @Value("${lbc.geometry.technical-cell.height.min}") int lbcTechnicalCellMinHeight,
             @Value("${lbc.geometry.equipment.clearance}") int lbcEquipmentClearance,
-            @Value("${lbc.geometry.display.center-height}") int lbcDisplayCenterHeight,
-            Environment environment
+            @Value("${lbc.geometry.display.center-height}") int lbcDisplayCenterHeight
     ) {
         this.upperFrameMin = upperFrameMin;
         this.upperFrameMax = upperFrameMax;
@@ -155,7 +203,6 @@ public class SizeBounds implements com.lb_calc_web.domain.geometry.SizeBounds {
         this.lbcTechnicalCellMinHeight = lbcTechnicalCellMinHeight;
         this.lbcEquipmentClearance = lbcEquipmentClearance;
         this.lbcDisplayCenterHeight = lbcDisplayCenterHeight;
-        this.environment = java.util.Objects.requireNonNull(environment);
         validateBounds();
     }
 
@@ -377,66 +424,89 @@ public class SizeBounds implements com.lb_calc_web.domain.geometry.SizeBounds {
     }
 
 
+
     /** Возвращает список поддерживаемых типов LB. */
     public List<String> getLbTypes() {
-        return Arrays.stream(environment.getRequiredProperty("lb.types").split(","))
+        return Arrays.stream(lbTypes.split(","))
                 .map(String::trim).filter(value -> !value.isBlank()).toList();
     }
-    public String getDefaultLbTypeName() { return environment.getRequiredProperty("lb.type.default"); }
-    public String getDefaultLbcTypeName() { return environment.getRequiredProperty("lbc.type.default"); }
-    public TypeLb getLbType(String name) { return createType(name, "lb.type." + requireTypeName(name), null); }
+
+    public String getDefaultLbTypeName() { return defaultLbTypeName; }
+    public String getDefaultLbcTypeName() { return defaultLbcTypeName; }
+
+    public TypeLb getLbType(String name) {
+        return switch (requireTypeName(name)) {
+            case "TYPE1" -> new TypeLb(name, lbType1DeltaWidth, lbType1ShelfThick, lbType1ServiceZoneWidth);
+            case "TYPE2" -> new TypeLb(name, lbType2DeltaWidth, lbType2ShelfThick, lbType2ServiceZoneWidth);
+            case "TYPE3" -> new TypeLb(name, lbType3DeltaWidth, lbType3ShelfThick, lbType3ServiceZoneWidth);
+            case "TYPE4" -> new TypeLb(name, lbType4DeltaWidth, lbType4ShelfThick, lbType4ServiceZoneWidth);
+            default -> throw new IllegalArgumentException("Неизвестный тип LB: " + name);
+        };
+    }
+
     public TypeLb getLbcType(String name) {
-        String type = requireTypeName(name);
-        return createType(type, "lbc.type." + type, "lb.type." + type);
+        return switch (requireTypeName(name)) {
+            case "TYPE1" -> new TypeLb(name, lbcType1DeltaWidth, lbcType1ShelfThick, lbcType1ServiceZoneWidth);
+            case "TYPE2" -> new TypeLb(name, lbcType2DeltaWidth, lbcType2ShelfThick, lbcType2ServiceZoneWidth);
+            case "TYPE3" -> new TypeLb(name, lbcType3DeltaWidth, lbcType3ShelfThick, lbcType3ServiceZoneWidth);
+            case "TYPE4" -> new TypeLb(name, lbcType4DeltaWidth, lbcType4ShelfThick, lbcType4ServiceZoneWidth);
+            default -> throw new IllegalArgumentException("Неизвестный тип LBC: " + name);
+        };
     }
-    private TypeLb createType(String name, String prefix, String fallback) {
-        return new TypeLb(name, requiredTypeInt(prefix, fallback, "delta-width"),
-                requiredTypeInt(prefix, fallback, "shelf-thick"),
-                requiredTypeInt(prefix, fallback, "service-zone-width"));
-    }
-    private int requiredTypeInt(String prefix, String fallback, String suffix) {
-        String key = prefix + "." + suffix;
-        if (environment.containsProperty(key)) return environment.getRequiredProperty(key, Integer.class);
-        if (fallback != null) return environment.getRequiredProperty(fallback + "." + suffix, Integer.class);
-        return environment.getRequiredProperty(key, Integer.class);
-    }
+
     private static String requireTypeName(String name) {
-        if (name == null || name.isBlank()) throw new IllegalArgumentException("Тип модуля не указан");
+        if (name == null || name.isBlank()) {
+            throw new IllegalArgumentException("Тип модуля не указан");
+        }
         return name;
     }
-    public Colors getLbDefaultBodyColor() { return enumRequired("lb.color.body.default", Colors.class); }
-    public Colors getLbDefaultDoorColor() { return enumRequired("lb.color.door.default", Colors.class); }
-    public DirectionDoorOpening getLbDefaultDoorDirection() { return enumOrDefault("lb.direction.default", DirectionDoorOpening.class, DirectionDoorOpening.LEFT); }
-    public Colors getLcDefaultBodyColor() { return enumRequired("lc.color.body.default", Colors.class); }
-    public Colors getLcDefaultDoorColor() { return enumRequired("lc.color.door.default", Colors.class); }
-    public FunctionalConfiguration getLcDefaultFunctionalConfiguration() { return defaultFunctionalConfiguration("lc"); }
-    public Colors getLbcDefaultBodyColor() { return enumRequired("lbc.color.body.default", Colors.class); }
-    public Colors getLbcDefaultDoorColor() { return enumRequired("lbc.color.door.default", Colors.class); }
-    public DirectionDoorOpening getLbcDefaultDoorDirection() { return enumOrDefault("lbc.direction.default", DirectionDoorOpening.class, DirectionDoorOpening.LEFT); }
-    public FunctionalConfiguration getLbcDefaultFunctionalConfiguration() { return defaultFunctionalConfiguration("lbc"); }
-    public Colors getAlsDefaultBodyColor() { return enumRequired("als.color.body.default", Colors.class); }
-    public Colors getAlsDefaultDoorColor() { return enumRequired("als.color.door.default", Colors.class); }
-    public PositionControlModule getAlsDefaultControlPosition() { return enumRequired("als.position.control-module.default", PositionControlModule.class); }
-    public String getProjectDefaultCompany() { return environment.getProperty("project.company.default", "Заказчик"); }
-    private FunctionalConfiguration defaultFunctionalConfiguration(String prefix) {
+
+    public Colors getLbDefaultBodyColor() { return enumValue(lbDefaultBodyColor, Colors.class); }
+    public Colors getLbDefaultDoorColor() { return enumValue(lbDefaultDoorColor, Colors.class); }
+    public DirectionDoorOpening getLbDefaultDoorDirection() {
+        return enumValue(lbDefaultDoorDirection, DirectionDoorOpening.class);
+    }
+    public Colors getLcDefaultBodyColor() { return enumValue(lcDefaultBodyColor, Colors.class); }
+    public Colors getLcDefaultDoorColor() { return enumValue(lcDefaultDoorColor, Colors.class); }
+    public FunctionalConfiguration getLcDefaultFunctionalConfiguration() {
+        return defaultFunctionalConfiguration(lcDefaultDisplay, lcDefaultAccess, lcDefaultPayment, lcDefaultPrinter);
+    }
+    public Colors getLbcDefaultBodyColor() { return enumValue(lbcDefaultBodyColor, Colors.class); }
+    public Colors getLbcDefaultDoorColor() { return enumValue(lbcDefaultDoorColor, Colors.class); }
+    public DirectionDoorOpening getLbcDefaultDoorDirection() {
+        return enumValue(lbcDefaultDoorDirection, DirectionDoorOpening.class);
+    }
+    public FunctionalConfiguration getLbcDefaultFunctionalConfiguration() {
+        return defaultFunctionalConfiguration(lbcDefaultDisplay, lbcDefaultAccess, lbcDefaultPayment, lbcDefaultPrinter);
+    }
+    public Colors getAlsDefaultBodyColor() { return enumValue(alsDefaultBodyColor, Colors.class); }
+    public Colors getAlsDefaultDoorColor() { return enumValue(alsDefaultDoorColor, Colors.class); }
+    public PositionControlModule getAlsDefaultControlPosition() {
+        return enumValue(alsDefaultControlPosition, PositionControlModule.class);
+    }
+    public String getProjectDefaultCompany() { return projectDefaultCompany; }
+
+    private static FunctionalConfiguration defaultFunctionalConfiguration(
+            String display, String access, String payment, String printer) {
         return new FunctionalConfiguration(
-                enumOrDefault(prefix + ".display-purpose.default", DisplayPurpose.class, DisplayPurpose.INCH_10),
-                enumSet(prefix + ".access-purposes.default", AccessPurpose.class),
-                enumOrDefault(prefix + ".payment-purpose.default", PaymentPurpose.class, PaymentPurpose.NONE),
-                enumOrDefault(prefix + ".printer-purpose.default", PrinterPurpose.class, PrinterPurpose.ABSENT));
+                enumValue(display, DisplayPurpose.class),
+                enumSet(access, AccessPurpose.class),
+                enumValue(payment, PaymentPurpose.class),
+                enumValue(printer, PrinterPurpose.class));
     }
-    private <E extends Enum<E>> E enumRequired(String key, Class<E> type) {
-        return Enum.valueOf(type, environment.getRequiredProperty(key));
+
+    private static <E extends Enum<E>> E enumValue(String value, Class<E> type) {
+        return Enum.valueOf(type, value.trim());
     }
-    private <E extends Enum<E>> E enumOrDefault(String key, Class<E> type, E fallback) {
-        String value = environment.getProperty(key);
-        return value == null || value.isBlank() ? fallback : Enum.valueOf(type, value);
+
+    private static <E extends Enum<E>> Set<E> enumSet(String values, Class<E> type) {
+        EnumSet<E> result = EnumSet.noneOf(type);
+        Arrays.stream(values.split(","))
+                .map(String::trim)
+                .filter(value -> !value.isBlank())
+                .map(value -> enumValue(value, type))
+                .forEach(result::add);
+        return result;
     }
-    private <E extends Enum<E>> Set<E> enumSet(String key, Class<E> type) {
-        EnumSet<E> values = EnumSet.noneOf(type);
-        for (String value : environment.getProperty(key, "").split(",")) {
-            if (!value.isBlank()) values.add(Enum.valueOf(type, value.trim()));
-        }
-        return values;
-    }
+
 }

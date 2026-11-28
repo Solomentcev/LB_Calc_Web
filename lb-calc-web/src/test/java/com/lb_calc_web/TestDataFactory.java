@@ -32,7 +32,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 import java.util.Map;
-import org.springframework.mock.env.MockEnvironment;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.core.env.PropertiesPropertySource;
 
 public final class TestDataFactory {
 
@@ -54,57 +55,17 @@ public final class TestDataFactory {
 
     public static SizeBounds createSizeBounds(Map<String, String> overrides) {
         Properties properties = loadSizeProperties();
-        MockEnvironment environment = new MockEnvironment();
-        properties.stringPropertyNames().forEach(key ->
-                environment.setProperty(key, properties.getProperty(key)));
-        overrides.forEach(environment::setProperty);
-        return new SizeBounds(
-                intProperty(properties, "size.frame.upper.min"),
-                intProperty(properties, "size.frame.upper.max"),
-                intProperty(properties, "size.frame.bottom.min"),
-                intProperty(properties, "size.frame.bottom.max"),
-                intProperty(properties, "size.height.cell.min"),
-                intProperty(properties, "size.height.max"),
-                intProperty(properties, "size.height.min"),
-                intProperty(properties, "size.height.lc.min"),
-                intProperty(properties, "size.height.lc.panel.min"),
-                intProperty(properties, "size.count.cells.min"),
-                intProperty(properties, "size.count.cells.max"),
-                intProperty(properties, "size.width.cell.min"),
-                intProperty(properties, "size.width.min"),
-                intProperty(properties, "size.width.max"),
-                intProperty(properties, "size.depth.cell.min"),
-                intProperty(properties, "size.depth.cell.max"),
-                intProperty(properties, "size.depth.min"),
-                intProperty(properties, "size.depth.max"),
-                intProperty(properties, "size.door.thickness.min"),
-                intProperty(properties, "size.door.thickness.max"),
-                intProperty(properties, "size.type.delta-width.min"),
-                intProperty(properties, "size.type.delta-width.max"),
-                intProperty(properties, "size.type.shelf-thick.min"),
-                intProperty(properties, "size.type.shelf-thick.max"),
-                intProperty(properties, "size.type.service-zone-width.min"),
-                intProperty(properties, "size.type.service-zone-width.max"),
-                intProperty(properties, "size.height.default"),
-                intProperty(properties, "size.width.default"),
-                intProperty(properties, "size.depth.default"),
-                intProperty(properties, "size.frame.upper.default"),
-                intProperty(properties, "size.frame.bottom.default"),
-                intProperty(properties, "size.count.cells.default"),
-                intProperty(properties, "size.door.thickness.default"),
-                intProperty(properties, "lc.geometry.width.min"),
-                intProperty(properties, "lc.geometry.display.side-clearance"),
-                intProperty(properties, "lc.geometry.width.rounding-step"),
-                intProperty(properties, "lc.geometry.display.center-height"),
-                intProperty(properties, "lc.geometry.display.top-clearance"),
-                intProperty(properties, "lbc.geometry.storage-cell.width.min"),
-                intProperty(properties, "lbc.geometry.technical-cell.width.min"),
-                intProperty(properties, "lbc.geometry.technical-cell.height.min"),
-                intProperty(properties, "lbc.geometry.equipment.clearance"),
-                intProperty(properties, "lbc.geometry.display.center-height"),
-                environment
-        );
+        overrides.forEach(properties::setProperty);
+        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+        context.getEnvironment().getPropertySources()
+                .addFirst(new PropertiesPropertySource("testSizeBounds", properties));
+        context.registerBean(SizeBounds.class);
+        context.refresh();
+        SizeBounds sizeBounds = context.getBean(SizeBounds.class);
+        context.close();
+        return sizeBounds;
     }
+
 
     public static SizeValidator createSizeValidator() {
         SizeBounds bounds = createSizeBounds();
