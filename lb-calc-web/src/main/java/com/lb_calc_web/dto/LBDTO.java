@@ -16,20 +16,27 @@ public class LBDTO {
     private String type;
 
     @Schema(description = "Высота модуля LB, мм.")
+    @Positive(message = "height должен быть больше нуля")
     private int height;
     @Schema(description = "Ширина модуля LB, мм.")
+    @Positive(message = "width должен быть больше нуля")
     private int width;
     @Schema(description = "Глубина модуля LB, мм.")
+    @Positive(message = "depth должен быть больше нуля")
     private int depth;
 
     @Schema(description = "Высота верхней рамы, мм.")
+    @Positive(message = "upperFrame должен быть больше нуля")
     private int upperFrame;
     @Schema(description = "Высота нижней рамы, мм.")
+    @Positive(message = "bottomFrame должен быть больше нуля")
     private int bottomFrame;
 
     @Schema(description = "Толщина двери, мм.")
+    @Positive(message = "doorThickness должен быть больше нуля")
     private int doorThickness;
 
+    @Positive(message = "countCells должен быть больше нуля")
     private int countCells;
 
     @Schema(description = "Высота ячейки хранения, мм.")
