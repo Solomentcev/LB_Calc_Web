@@ -78,7 +78,8 @@ public class LBService {
                 typeLb,
                 sizeBounds.getCountCellsDefault(),
                 sizeBounds.getLbDefaultDoorDirection(),
-                sizeBounds.getDoorThicknessDefault()
+                sizeBounds.getDoorThicknessDefault(),
+                sizeBounds
         );
     }
 
@@ -110,7 +111,7 @@ public class LBService {
         specifications.add(com.lb_calc_web.repository.specification.CatalogSpecifications.equal("colorBody", filter.colorBody()));
         specifications.add(com.lb_calc_web.repository.specification.CatalogSpecifications.equal("colorDoor", filter.colorDoor()));
         var specification = com.lb_calc_web.repository.specification.CatalogSpecifications.all(specifications);
-        return lbRepository.findAll(specification, pageable).map(LBEntityMapper::toDomain);
+        return lbRepository.findAll(specification, pageable).map(entity -> LBEntityMapper.toDomain(entity, sizeBounds));
     }
 
     /** Возвращает все сохранённые модули хранения LB. */
@@ -135,7 +136,7 @@ public class LBService {
         }
         LBEntity entity = lbRepository.findById(id).orElseThrow(() ->
                 new NoSuchElementException("Модуль хранения LB с id=" + id + " не найден"));
-        return LBEntityMapper.toDomain(entity);
+        return LBEntityMapper.toDomain(entity, sizeBounds);
     }
 
     /**
@@ -172,13 +173,13 @@ public class LBService {
                         domain.getColorBody(), domain.getColorDoor()
                 ).stream()
                 .filter(entity -> !Objects.equals(entity.getId(), domain.getId()))
-                .filter(entity -> LBEntityMapper.toDomain(entity).equals(domain))
+                .filter(entity -> LBEntityMapper.toDomain(entity, sizeBounds).equals(domain))
                 .findFirst();
 
         if (duplicate.isPresent()) {
             domain.setId(duplicate.get().getId());
             logger.info("Аналогичный LB уже существует, id={}", domain.getId());
-            return LBEntityMapper.toDomain(duplicate.get());
+            return LBEntityMapper.toDomain(duplicate.get(), sizeBounds);
         }
 
         LBEntity entity;
@@ -191,7 +192,7 @@ public class LBService {
         LBEntity saved = lbRepository.save(entity);
         domain.setId(saved.getId());
         logger.info("LB сохранён, id={}", saved.getId());
-        return LBEntityMapper.toDomain(saved);
+        return LBEntityMapper.toDomain(saved, sizeBounds);
     }
 
 
