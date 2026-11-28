@@ -85,7 +85,7 @@ class LBCDomainTest {
                     TestDataFactory.createSizeBounds());
 
             assertEquals(200, module.getCellWidth(), type.name());
-            assertEquals(200 + type.getDeltaWidth(), module.getWidth(), type.name());
+            assertEquals(200 + TestDataFactory.createSizeBounds().getTypeDeltaWidth(type), module.getWidth(), type.name());
         }
     }
 
