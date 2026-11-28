@@ -4,10 +4,5 @@ package com.lb_calc_web.domain.equipment;
 public enum PrinterPurpose implements EquipmentPurpose {
     PRESENT,
     ABSENT,
-    OTHER;
-
-    @Override
-    public EquipmentFunctionalType getFunctionalType() {
-        return EquipmentFunctionalType.PRINTER;
-    }
+    OTHER
 }

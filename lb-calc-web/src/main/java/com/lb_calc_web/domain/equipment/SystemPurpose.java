@@ -5,10 +5,5 @@ public enum SystemPurpose implements EquipmentPurpose {
     COMPUTER,
     LOCK_CONTROL,
     POWER_SUPPLY,
-    BACKUP_POWER;
-
-    @Override
-    public EquipmentFunctionalType getFunctionalType() {
-        return EquipmentFunctionalType.SYSTEM;
-    }
+    BACKUP_POWER
 }

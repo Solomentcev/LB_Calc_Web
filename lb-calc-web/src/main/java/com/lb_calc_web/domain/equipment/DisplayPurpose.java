@@ -6,10 +6,5 @@ public enum DisplayPurpose implements EquipmentPurpose {
     INCH_10,
     INCH_17,
     INCH_19,
-    CUSTOM;
-
-    @Override
-    public EquipmentFunctionalType getFunctionalType() {
-        return EquipmentFunctionalType.DISPLAY;
-    }
+    CUSTOM
 }

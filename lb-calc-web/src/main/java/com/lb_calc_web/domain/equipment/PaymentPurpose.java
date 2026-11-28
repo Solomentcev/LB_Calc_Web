@@ -5,10 +5,5 @@ public enum PaymentPurpose implements EquipmentPurpose {
     NONE,
     CARDS,
     CASH,
-    CARDS_AND_CASH;
-
-    @Override
-    public EquipmentFunctionalType getFunctionalType() {
-        return EquipmentFunctionalType.PAYMENT;
-    }
+    CARDS_AND_CASH
 }

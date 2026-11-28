@@ -20,9 +20,7 @@ public enum EquipmentFunctionalType {
 
     /** Проверяет, относится ли назначение к этой функциональной области. */
     public boolean supports(EquipmentPurpose purpose) {
-        return purpose != null
-                && purpose.getFunctionalType() == this
-                && purposeType.isInstance(purpose);
+        return purpose != null && purposeType.isInstance(purpose);
     }
 
     /** Восстанавливает типизированное назначение по его сохранённому имени. */
