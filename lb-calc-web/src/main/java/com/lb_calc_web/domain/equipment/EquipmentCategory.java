@@ -1,22 +1,46 @@
 package com.lb_calc_web.domain.equipment;
 
+import java.util.Set;
+
 /** Физическая категория модели оборудования. */
 public enum EquipmentCategory {
-    DISPLAY(EquipmentFunctionalType.DISPLAY),
-    BAR_READER(EquipmentFunctionalType.ACCESS),
-    RFID_READER(EquipmentFunctionalType.ACCESS),
-    PAYMENT_TERMINAL(EquipmentFunctionalType.PAYMENT),
-    CASH_ACCEPTOR(EquipmentFunctionalType.PAYMENT),
-    PRINTER(EquipmentFunctionalType.PRINTER),
-    COMPUTER(EquipmentFunctionalType.SYSTEM),
-    LOCK_CONTROL(EquipmentFunctionalType.SYSTEM),
-    POWER_SUPPLY(EquipmentFunctionalType.SYSTEM),
-    BACKUP_POWER(EquipmentFunctionalType.SYSTEM);
+    DISPLAY(EquipmentFunctionalType.DISPLAY,
+            DisplayPurpose.INCH_10,
+            DisplayPurpose.INCH_17,
+            DisplayPurpose.INCH_19,
+            DisplayPurpose.CUSTOM),
+    BAR_READER(EquipmentFunctionalType.ACCESS,
+            AccessPurpose.BAR_CODE,
+            AccessPurpose.QR_CODE),
+    RFID_READER(EquipmentFunctionalType.ACCESS,
+            AccessPurpose.RFID),
+    PAYMENT_TERMINAL(EquipmentFunctionalType.PAYMENT,
+            PaymentPurpose.CARDS,
+            PaymentPurpose.CARDS_AND_CASH),
+    CASH_ACCEPTOR(EquipmentFunctionalType.PAYMENT,
+            PaymentPurpose.CASH,
+            PaymentPurpose.CARDS_AND_CASH),
+    PRINTER(EquipmentFunctionalType.PRINTER,
+            PrinterPurpose.PRESENT,
+            PrinterPurpose.OTHER),
+    COMPUTER(EquipmentFunctionalType.SYSTEM,
+            SystemPurpose.COMPUTER),
+    LOCK_CONTROL(EquipmentFunctionalType.SYSTEM,
+            SystemPurpose.LOCK_CONTROL),
+    POWER_SUPPLY(EquipmentFunctionalType.SYSTEM,
+            SystemPurpose.POWER_SUPPLY),
+    BACKUP_POWER(EquipmentFunctionalType.SYSTEM,
+            SystemPurpose.BACKUP_POWER);
 
     private final EquipmentFunctionalType functionalType;
+    private final Set<EquipmentPurpose> supportedPurposes;
 
-    EquipmentCategory(EquipmentFunctionalType functionalType) {
+    EquipmentCategory(
+            EquipmentFunctionalType functionalType,
+            EquipmentPurpose... supportedPurposes
+    ) {
         this.functionalType = functionalType;
+        this.supportedPurposes = Set.of(supportedPurposes);
     }
 
     public EquipmentFunctionalType getFunctionalType() {
@@ -25,27 +49,6 @@ public enum EquipmentCategory {
 
     /** Проверяет допустимость назначения для физической категории. */
     public boolean supports(EquipmentPurpose purpose) {
-        if (purpose == null || !functionalType.supports(purpose)) {
-            return false;
-        }
-        return switch (this) {
-            case DISPLAY -> purpose == DisplayPurpose.INCH_10
-                    || purpose == DisplayPurpose.INCH_17
-                    || purpose == DisplayPurpose.INCH_19
-                    || purpose == DisplayPurpose.CUSTOM;
-            case BAR_READER -> purpose == AccessPurpose.BAR_CODE
-                    || purpose == AccessPurpose.QR_CODE;
-            case RFID_READER -> purpose == AccessPurpose.RFID;
-            case PAYMENT_TERMINAL -> purpose == PaymentPurpose.CARDS
-                    || purpose == PaymentPurpose.CARDS_AND_CASH;
-            case CASH_ACCEPTOR -> purpose == PaymentPurpose.CASH
-                    || purpose == PaymentPurpose.CARDS_AND_CASH;
-            case PRINTER -> purpose == PrinterPurpose.PRESENT
-                    || purpose == PrinterPurpose.OTHER;
-            case COMPUTER -> purpose == SystemPurpose.COMPUTER;
-            case LOCK_CONTROL -> purpose == SystemPurpose.LOCK_CONTROL;
-            case POWER_SUPPLY -> purpose == SystemPurpose.POWER_SUPPLY;
-            case BACKUP_POWER -> purpose == SystemPurpose.BACKUP_POWER;
-        };
+        return functionalType.supports(purpose) && supportedPurposes.contains(purpose);
     }
 }

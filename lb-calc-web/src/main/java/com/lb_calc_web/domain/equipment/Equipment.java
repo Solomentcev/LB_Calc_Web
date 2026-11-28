@@ -11,7 +11,6 @@ import java.util.Objects;
 public final class Equipment {
 
     private final Long id;
-    private final EquipmentFunctionalType functionalType;
     private final EquipmentPurpose purpose;
     private final EquipmentCategory category;
     private final String name;
@@ -32,16 +31,14 @@ public final class Equipment {
             int height,
             int depth
     ) {
-        this.functionalType = Objects.requireNonNull(
-                functionalType, "Функциональный тип оборудования не должен быть null");
+        Objects.requireNonNull(functionalType,
+                "Функциональный тип оборудования не должен быть null");
         this.purpose = Objects.requireNonNull(
                 purpose, "Назначение оборудования не должно быть null");
         this.category = Objects.requireNonNull(
                 category, "Категория оборудования не должна быть null");
 
-        if (!functionalType.supports(purpose)
-                || category.getFunctionalType() != functionalType
-                || !category.supports(purpose)) {
+        if (category.getFunctionalType() != functionalType || !category.supports(purpose)) {
             throw new IllegalArgumentException(
                     "Функциональный тип, назначение и категория оборудования не согласованы");
         }
@@ -61,7 +58,7 @@ public final class Equipment {
     }
 
     public Long getId() { return id; }
-    public EquipmentFunctionalType getFunctionalType() { return functionalType; }
+    public EquipmentFunctionalType getFunctionalType() { return category.getFunctionalType(); }
     public EquipmentPurpose getPurpose() { return purpose; }
     public EquipmentCategory getCategory() { return category; }
     public String getName() { return name; }
@@ -89,7 +86,7 @@ public final class Equipment {
     @Override
     public String toString() {
         return "Equipment{id=" + id
-                + ", functionalType=" + functionalType
+                + ", functionalType=" + getFunctionalType()
                 + ", purpose=" + purpose
                 + ", category=" + category
                 + ", name='" + name + "'}";

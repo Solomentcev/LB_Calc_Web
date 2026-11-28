@@ -100,10 +100,23 @@ class EquipmentTest {
     }
 
     @Test
-    void functionalType_shouldExposeItsPurposeEnum() {
+    void functionalType_shouldExposeAndParseItsPurposeEnum() {
         assertEquals(SystemPurpose.class, EquipmentFunctionalType.SYSTEM.getPurposeType());
         assertTrue(EquipmentFunctionalType.SYSTEM.supports(SystemPurpose.BACKUP_POWER));
         assertFalse(EquipmentFunctionalType.ACCESS.supports(SystemPurpose.LOCK_CONTROL));
+        assertEquals(SystemPurpose.BACKUP_POWER,
+                EquipmentFunctionalType.SYSTEM.parsePurpose("BACKUP_POWER"));
+        assertThrows(IllegalArgumentException.class,
+                () -> EquipmentFunctionalType.ACCESS.parsePurpose("BACKUP_POWER"));
+    }
+
+    @Test
+    void category_shouldDeclareAllowedPurposesWithoutSwitch() {
+        assertTrue(EquipmentCategory.BAR_READER.supports(AccessPurpose.BAR_CODE));
+        assertTrue(EquipmentCategory.BAR_READER.supports(AccessPurpose.QR_CODE));
+        assertFalse(EquipmentCategory.BAR_READER.supports(AccessPurpose.RFID));
+        assertTrue(EquipmentCategory.PAYMENT_TERMINAL.supports(PaymentPurpose.CARDS_AND_CASH));
+        assertFalse(EquipmentCategory.PAYMENT_TERMINAL.supports(PaymentPurpose.CASH));
     }
 
     @Test

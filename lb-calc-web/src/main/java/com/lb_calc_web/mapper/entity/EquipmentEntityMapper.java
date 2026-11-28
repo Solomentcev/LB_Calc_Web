@@ -1,6 +1,8 @@
 package com.lb_calc_web.mapper.entity;
 
-import com.lb_calc_web.domain.equipment.*;
+import com.lb_calc_web.domain.equipment.Equipment;
+import com.lb_calc_web.domain.equipment.EquipmentFunctionalType;
+import com.lb_calc_web.domain.equipment.EquipmentPurpose;
 import com.lb_calc_web.entity.EquipmentEntity;
 
 import java.util.Objects;
@@ -15,12 +17,21 @@ public final class EquipmentEntityMapper {
     public static Equipment toDomain(EquipmentEntity entity) {
         if (entity == null) return null;
 
-        EquipmentPurpose purpose = resolvePurpose(
-                entity.getFunctionalType(), entity.getPurpose());
-
-        Equipment domain = new Equipment(
-                entity.getId(),
+        EquipmentFunctionalType functionalType = Objects.requireNonNull(
                 entity.getFunctionalType(),
+                "Функциональный тип оборудования в БД не должен быть null");
+        EquipmentPurpose purpose;
+        try {
+            purpose = functionalType.parsePurpose(entity.getPurpose());
+        } catch (IllegalArgumentException exception) {
+            throw new IllegalStateException(
+                    "Некорректное назначение оборудования в БД: " + entity.getPurpose(),
+                    exception);
+        }
+
+        return new Equipment(
+                entity.getId(),
+                functionalType,
                 purpose,
                 entity.getCategory(),
                 entity.getName(),
@@ -29,7 +40,6 @@ public final class EquipmentEntityMapper {
                 entity.getHeight(),
                 entity.getDepth()
         );
-        return domain;
     }
 
     /** Создаёт JPA-сущность оборудования из доменной модели. */
@@ -54,31 +64,5 @@ public final class EquipmentEntityMapper {
         entity.setWidth(domain.getWidth());
         entity.setHeight(domain.getHeight());
         entity.setDepth(domain.getDepth());
-    }
-
-    private static EquipmentPurpose resolvePurpose(
-            EquipmentFunctionalType functionalType,
-            String purpose
-    ) {
-        Objects.requireNonNull(functionalType, "Функциональный тип оборудования не должен быть null");
-        if (purpose == null || purpose.isBlank()) {
-            throw new IllegalStateException("Назначение оборудования в БД не должно быть пустым");
-        }
-
-        try {
-            return switch (functionalType) {
-                case DISPLAY -> DisplayPurpose.valueOf(purpose);
-                case ACCESS -> AccessPurpose.valueOf(purpose);
-                case PAYMENT -> PaymentPurpose.valueOf(purpose);
-                case PRINTER -> PrinterPurpose.valueOf(purpose);
-                case SYSTEM -> SystemPurpose.valueOf(purpose);
-            };
-        } catch (IllegalArgumentException exception) {
-            throw new IllegalStateException(
-                    "Назначение " + purpose + " не поддерживается функциональным типом "
-                            + functionalType,
-                    exception
-            );
-        }
     }
 }
