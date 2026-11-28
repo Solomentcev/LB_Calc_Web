@@ -12,12 +12,19 @@ import java.util.List;
 @Schema(description = "Унифицированный формат REST-ответа. Поле data содержит полезную нагрузку, errors — список ошибок валидации.")
 public class ApiResponse<T> {
 
+    @Schema(description = "Результат обработки запроса.", allowableValues = {"success", "error"}, example = "success")
     public String status;
+
+    @Schema(description = "Полезная нагрузка успешного ответа.")
     public T data;
 
+    @Schema(description = "Краткое описание результата или ошибки.")
     public String message;
+
+    @Schema(description = "Список ошибок валидации входных данных.")
     public List<String> errors;
 
+    @Schema(description = "Дата формирования ответа.", type = "string", format = "date", example = "2026-11-28")
     public LocalDate timestamp;
 
     private ApiResponse() {}

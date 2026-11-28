@@ -17,9 +17,13 @@ import java.util.stream.Collectors;
 @Schema(description = "Функциональные назначения управляющего модуля: дисплей, доступ, оплата и печать.")
 public class FunctionalConfigurationDTO {
 
+    @Schema(description = "Функциональное назначение дисплея.")
     private DisplayPurpose display;
+    @Schema(description = "Поддерживаемые функции контроля доступа.")
     private Set<AccessPurpose> access;
+    @Schema(description = "Функциональное назначение оплаты.")
     private PaymentPurpose payment;
+    @Schema(description = "Функциональное назначение печати.")
     private PrinterPurpose printer;
 
     public DisplayPurpose getDisplay() { return display; }

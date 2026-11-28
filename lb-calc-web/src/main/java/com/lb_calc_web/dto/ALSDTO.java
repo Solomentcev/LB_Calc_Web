@@ -18,13 +18,19 @@ public class ALSDTO {
     private String name;
     private String description;
 
+    @Schema(description = "Высота ALS, мм.")
     private int height;
+    @Schema(description = "Глубина ALS, мм.")
     private int depth;
+    @Schema(description = "Ширина ALS, мм.")
     private int width;
 
+    @Schema(description = "Высота верхней рамы, мм.")
     private int upperFrame;
+    @Schema(description = "Высота нижней рамы, мм.")
     private int bottomFrame;
 
+    @Schema(description = "Глубина ячейки хранения, мм.")
     private int depthCell;
     private int countCells;
 

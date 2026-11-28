@@ -32,15 +32,19 @@ public class EquipmentDTO {
     private String description = "";
 
     @Min(value = 0, message = "Ширина не может быть отрицательной")
+    @Schema(description = "Ширина оборудования, мм.")
     private int width;
 
     @Min(value = 0, message = "Высота не может быть отрицательной")
+    @Schema(description = "Высота оборудования, мм.")
     private int height;
 
     @Min(value = 0, message = "Глубина не может быть отрицательной")
+    @Schema(description = "Глубина оборудования, мм.")
     private int depth;
 
     /** Количество выбранных экземпляров; заполняется только в представлении комплектации. */
+    @Schema(description = "Количество экземпляров оборудования в выбранной комплектации.")
     private Integer quantity;
 
     public Long getId() { return id; }

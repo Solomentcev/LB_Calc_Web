@@ -18,11 +18,16 @@ public class LCDTO {
     private String name;
     private String description;
 
+    @Schema(description = "Высота модуля LC, мм.")
     private int height;
+    @Schema(description = "Ширина модуля LC, мм.")
     private int width;
+    @Schema(description = "Глубина модуля LC, мм.")
     private int depth;
 
+    @Schema(description = "Высота верхней рамы, мм.")
     private int upperFrame;
+    @Schema(description = "Высота нижней рамы, мм.")
     private int bottomFrame;
 
     private String colorBody;

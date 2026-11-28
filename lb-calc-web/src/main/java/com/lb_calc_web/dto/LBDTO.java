@@ -15,22 +15,34 @@ public class LBDTO {
 
     private String type;
 
+    @Schema(description = "Высота модуля LB, мм.")
     private int height;
+    @Schema(description = "Ширина модуля LB, мм.")
     private int width;
+    @Schema(description = "Глубина модуля LB, мм.")
     private int depth;
 
+    @Schema(description = "Высота верхней рамы, мм.")
     private int upperFrame;
+    @Schema(description = "Высота нижней рамы, мм.")
     private int bottomFrame;
 
+    @Schema(description = "Толщина полки, мм.")
     private int shelfThick;
+    @Schema(description = "Поправка ширины модуля, мм.")
     private int deltaWidth;
+    @Schema(description = "Ширина сервисной зоны, мм.")
     private int serviceZoneWidth;
+    @Schema(description = "Толщина двери, мм.")
     private int doorThickness;
 
     private int countCells;
 
+    @Schema(description = "Высота ячейки хранения, мм.")
     private double heightCell;
+    @Schema(description = "Ширина ячейки хранения, мм.")
     private int widthCell;
+    @Schema(description = "Глубина ячейки хранения, мм.")
     private int depthCell;
 
     private String directionDoorOpening;
