@@ -1,5 +1,7 @@
 package com.lb_calc_web.controller.api;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.lb_calc_web.controller.api.response.ApiResponse;
 import com.lb_calc_web.handler.RestExceptionHandler;
 import com.lb_calc_web.security.jwt.JwtService;
 import com.lb_calc_web.service.EquipmentCatalogService;
@@ -12,15 +14,15 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
@@ -59,14 +61,18 @@ class EquipmentRestControllerSecurityTest {
     @Test
     void catalog_shouldRequireAuthentication() throws Exception {
         mockMvc.perform(get("/api/v1/equipment"))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.status").value("error"))
+                .andExpect(jsonPath("$.message").value("Требуется аутентификация"));
     }
 
     @Test
     @WithMockUser(authorities = "ROLE_USER")
     void catalog_shouldBeForbiddenForRegularUser() throws Exception {
         mockMvc.perform(get("/api/v1/equipment"))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.status").value("error"))
+                .andExpect(jsonPath("$.message").value("Недостаточно прав для выполнения операции"));
     }
 
     @Test
@@ -138,12 +144,31 @@ class EquipmentRestControllerSecurityTest {
     static class MethodSecurityConfiguration {
 
         @Bean
-        SecurityFilterChain testSecurityFilterChain(HttpSecurity http) throws Exception {
+        SecurityFilterChain testSecurityFilterChain(
+                HttpSecurity http,
+                ObjectMapper objectMapper
+        ) throws Exception {
             return http.csrf(AbstractHttpConfigurer::disable)
                     .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
-                    .exceptionHandling(exception -> exception.authenticationEntryPoint(
-                            new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
+                    .exceptionHandling(exception -> exception
+                            .authenticationEntryPoint((request, response, ex) ->
+                                    writeApiError(response, objectMapper, 401,
+                                            "Требуется аутентификация"))
+                            .accessDeniedHandler((request, response, ex) ->
+                                    writeApiError(response, objectMapper, 403,
+                                            "Недостаточно прав для выполнения операции")))
                     .build();
+        }
+
+        private void writeApiError(
+                jakarta.servlet.http.HttpServletResponse response,
+                ObjectMapper objectMapper,
+                int status,
+                String message
+        ) throws IOException {
+            response.setStatus(status);
+            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+            objectMapper.writeValue(response.getOutputStream(), ApiResponse.error(message));
         }
     }
 }
